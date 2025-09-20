@@ -51,7 +51,12 @@ let auth = null;
 let db = null;
 let analytics = null;
 
-if (missingEnvVars.length === 0) {
+// Only initialize if we have real Firebase credentials (not placeholders)
+const hasValidCredentials = missingEnvVars.length === 0 && 
+  config.apiKey !== "demo-api-key" && 
+  config.projectId !== "demo-project";
+
+if (hasValidCredentials) {
   // Initialize Firebase with real config
   app = initializeApp(config);
   auth = getAuth(app);
@@ -66,7 +71,7 @@ if (missingEnvVars.length === 0) {
     });
   }
 } else {
-  console.warn('Firebase not initialized due to missing environment variables');
+  console.warn('Firebase not initialized due to missing or placeholder environment variables');
   console.warn('Authentication and database features will not work until Firebase is properly configured');
 }
 

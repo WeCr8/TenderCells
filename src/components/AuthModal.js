@@ -86,12 +86,6 @@ export class AuthModal {
     // Close modal events
     closeBtn.addEventListener('click', () => this.close());
     overlay.addEventListener('click', () => this.close());
-    
-    // Form switching
-    document.getElementById('switchToSignup').addEventListener('click', (e) => {
-      e.preventDefault();
-      this.switchMode('signup');
-    });
 
     // Add more switcher links dynamically
     this.updateSwitcher();
@@ -129,19 +123,45 @@ export class AuthModal {
     switch(this.mode) {
       case 'signin':
         html = `
-          <p>Don't have an account? <a href="#" onclick="authModal.switchMode('signup')">Sign up</a></p>
-          <p><a href="#" onclick="authModal.switchMode('reset')">Forgot password?</a></p>
+          <p>Don't have an account? <a href="#" id="switcherSignupLink">Sign up</a></p>
+          <p><a href="#" id="switcherResetLink">Forgot password?</a></p>
         `;
         break;
       case 'signup':
-        html = `<p>Already have an account? <a href="#" onclick="authModal.switchMode('signin')">Sign in</a></p>`;
+        html = `<p>Already have an account? <a href="#" id="switcherSigninLink">Sign in</a></p>`;
         break;
       case 'reset':
-        html = `<p>Remember your password? <a href="#" onclick="authModal.switchMode('signin')">Sign in</a></p>`;
+        html = `<p>Remember your password? <a href="#" id="switcherSigninLink">Sign in</a></p>`;
         break;
     }
     
     switcher.innerHTML = html;
+    
+    // Add event listeners to the new links
+    const signupLink = document.getElementById('switcherSignupLink');
+    const signinLink = document.getElementById('switcherSigninLink');
+    const resetLink = document.getElementById('switcherResetLink');
+    
+    if (signupLink) {
+      signupLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.switchMode('signup');
+      });
+    }
+    
+    if (signinLink) {
+      signinLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.switchMode('signin');
+      });
+    }
+    
+    if (resetLink) {
+      resetLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.switchMode('reset');
+      });
+    }
   }
 
   open(mode = 'signin') {

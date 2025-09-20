@@ -45,22 +45,30 @@ const developmentConfig = {
 // Use actual config if available, otherwise use development config
 const config = missingEnvVars.length === 0 ? firebaseConfig : developmentConfig;
 
-// Initialize Firebase
-const app = initializeApp(config);
-
-// Initialize Firebase services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-
-// Initialize analytics only if supported and measurement ID is provided
+// Initialize Firebase only if we have valid configuration
+let app = null;
+let auth = null;
+let db = null;
 let analytics = null;
-if (import.meta.env.VITE_FIREBASE_MEASUREMENT_ID) {
-  isSupported().then((supported) => {
-    if (supported) {
-      analytics = getAnalytics(app);
-    }
-  });
+
+if (missingEnvVars.length === 0) {
+  // Initialize Firebase with real config
+  app = initializeApp(config);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  
+  // Initialize analytics only if supported and measurement ID is provided
+  if (import.meta.env.VITE_FIREBASE_MEASUREMENT_ID) {
+    isSupported().then((supported) => {
+      if (supported) {
+        analytics = getAnalytics(app);
+      }
+    });
+  }
+} else {
+  console.warn('Firebase not initialized due to missing environment variables');
+  console.warn('Authentication and database features will not work until Firebase is properly configured');
 }
 
-export { analytics };
+export { auth, db, analytics };
 export default app;

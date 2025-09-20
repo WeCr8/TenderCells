@@ -28,11 +28,25 @@ const missingEnvVars = requiredEnvVars.filter(varName => !import.meta.env[varNam
 
 if (missingEnvVars.length > 0) {
   console.error('Missing required Firebase environment variables:', missingEnvVars);
-  console.error('Please check your .env file and ensure all Firebase credentials are set.');
+  console.warn('Please check your .env file and ensure all Firebase credentials are set.');
+  console.warn('Using placeholder configuration for development. Some features may not work.');
 }
 
+// Use placeholder config if environment variables are missing
+const developmentConfig = {
+  apiKey: "demo-api-key",
+  authDomain: "demo-project.firebaseapp.com",
+  projectId: "demo-project",
+  storageBucket: "demo-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "demo-app-id"
+};
+
+// Use actual config if available, otherwise use development config
+const config = missingEnvVars.length === 0 ? firebaseConfig : developmentConfig;
+
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(config);
 
 // Initialize Firebase services
 export const auth = getAuth(app);

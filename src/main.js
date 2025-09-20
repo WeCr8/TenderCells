@@ -132,6 +132,10 @@ document.querySelector('#app').innerHTML = `
         </div>
 
         <div class="nav-item">
+          <a href="#services" class="nav-link">Local Services</a>
+        </div>
+
+        <div class="nav-item">
           <a href="#store" class="nav-link">Store</a>
         </div>
 

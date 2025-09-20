@@ -23,6 +23,7 @@ import { createBlogPostPage, initializeBlogPostPage } from './pages/blog-post.js
 import { createAnimalHealthPage, initializeAnimalHealthPage } from './pages/animal-health.js';
 import { createAccountPage, initializeAccountPage } from './pages/account.js';
 import { createAssetsPage, initializeAssetsPage } from './pages/assets.js';
+import { createServicesPage, initializeServicesPage } from './pages/services.js';
 
 class Router {
   constructor() {
@@ -47,6 +48,7 @@ class Router {
       'goat-guardian': this.renderGoatGuardian,
       'duck-dock': this.renderDuckDock,
       'animal-health': this.renderAnimalHealth,
+      'services': this.renderServices,
       'account': this.renderAccount,
       'assets': this.renderAssets
     };
@@ -256,6 +258,14 @@ class Router {
     
     // Initialize animal health functionality
     setTimeout(() => initializeAnimalHealthPage(), 100);
+  }
+
+  renderServices() {
+    this.hideMainContent();
+    this.showPageContent(createServicesPage());
+    
+    // Initialize services functionality
+    setTimeout(() => initializeServicesPage(), 100);
   }
 
   renderAccount() {

@@ -93,9 +93,6 @@ export function createCattleCarePage() {
                 <button class="btn btn-secondary btn-large" onclick="scrollToHealthGuides()">
                   Health Guides
                 </button>
-                <button class="btn btn-outline btn-large" onclick="navigateTo('services?category=veterinary')">
-                  🏥 Find Local Vets
-                </button>
               </div>
             </div>
             <div class="app-hero-image">
@@ -365,15 +362,6 @@ export function createCattleCarePage() {
       </section>
     </div>
   `;
-}
-
-// Page Initialization
-export function initializeCattleCarePage() {
-  // Track page view
-  trackEvent('page_view', 'cattle_care', 'visited');
-  
-  // Initialize any interactive features
-  console.log('Cattle Care page initialized');
 }
 
 // Interactive Functions

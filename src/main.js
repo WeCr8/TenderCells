@@ -7,7 +7,7 @@ import { createTechnologySection, initializeTechnologySection } from './componen
 import { createOpenSourceSection, initializeOpenSourceSection } from './components/OpenSourceSection.js';
 import { createStatsSection, initializeStatsSection } from './components/StatsSection.js';
 import { createNewsletterWidget, initializeNewsletterWidget } from './components/NewsletterWidget.js';
-import { createFooter } from './components/footer.js';
+import { createFooter } from '../components/footer.js';
 import { analytics, trackEvent, trackFormSubmit, trackEngagement, trackNewsletter } from './utils/analytics.js';
 import { signIn, signUp, logOut, onAuthStateChange, resetPassword } from './firebase/auth.js';
 import { AuthModal } from './components/AuthModal.js';

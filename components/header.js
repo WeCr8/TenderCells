@@ -57,45 +57,56 @@ export function createHeader() {
           </div>
         </div>
 
+        <!-- Skip to main content link for keyboard users -->
+        <a href="#main-content" class="skip-nav">Skip to main content</a>
+        
         <!-- Navigation -->
-        <nav class="main-nav">
+        <nav class="main-nav" aria-label="Main navigation">
           <div class="nav-item dropdown">
-            <button class="nav-link">Shop <span class="dropdown-arrow">▼</span></button>
-            <div class="dropdown-menu">
-              <a href="#" class="dropdown-item">Chicken Tender</a>
-              <a href="#" class="dropdown-item">Genesis XL</a>
-              <a href="#" class="dropdown-item">Accessories</a>
-              <a href="#" class="dropdown-item">Parts</a>
+            <button class="nav-link" aria-expanded="false" aria-haspopup="true">
+              Shop <span class="dropdown-arrow" aria-hidden="true">▼</span>
+            </button>
+            <div class="dropdown-menu" role="menu">
+              <a href="#" class="dropdown-item" role="menuitem">Chicken Tender</a>
+              <a href="#" class="dropdown-item" role="menuitem">Genesis XL</a>
+              <a href="#" class="dropdown-item" role="menuitem">Accessories</a>
+              <a href="#" class="dropdown-item" role="menuitem">Parts</a>
             </div>
           </div>
 
           <div class="nav-item dropdown">
-            <button class="nav-link">Tender Cells in Education <span class="dropdown-arrow">▼</span></button>
-            <div class="dropdown-menu">
-              <a href="#" class="dropdown-item">Curriculum</a>
-              <a href="#" class="dropdown-item">Case Studies</a>
-              <a href="#" class="dropdown-item">Teacher Resources</a>
-              <a href="#" class="dropdown-item">Student Projects</a>
+            <button class="nav-link" aria-expanded="false" aria-haspopup="true">
+              Tender Cells in Education <span class="dropdown-arrow" aria-hidden="true">▼</span>
+            </button>
+            <div class="dropdown-menu" role="menu">
+              <a href="#" class="dropdown-item" role="menuitem">Curriculum</a>
+              <a href="#" class="dropdown-item" role="menuitem">Case Studies</a>
+              <a href="#" class="dropdown-item" role="menuitem">Teacher Resources</a>
+              <a href="#" class="dropdown-item" role="menuitem">Student Projects</a>
             </div>
           </div>
 
           <div class="nav-item dropdown">
-            <button class="nav-link">Applications <span class="dropdown-arrow">▼</span></button>
-            <div class="dropdown-menu">
-              <a href="#" class="dropdown-item">Chicken Tender</a>
-              <a href="#" class="dropdown-item">Cattle Care (Soon)</a>
-              <a href="#" class="dropdown-item">Pig Pal (Soon)</a>
-              <a href="#" class="dropdown-item">Goat Guardian (Soon)</a>
+            <button class="nav-link" aria-expanded="false" aria-haspopup="true">
+              Applications <span class="dropdown-arrow" aria-hidden="true">▼</span>
+            </button>
+            <div class="dropdown-menu" role="menu">
+              <a href="#" class="dropdown-item" role="menuitem">Chicken Tender</a>
+              <a href="#" class="dropdown-item" role="menuitem" aria-disabled="true">Cattle Care (Soon)</a>
+              <a href="#" class="dropdown-item" role="menuitem" aria-disabled="true">Pig Pal (Soon)</a>
+              <a href="#" class="dropdown-item" role="menuitem" aria-disabled="true">Goat Guardian (Soon)</a>
             </div>
           </div>
 
           <div class="nav-item dropdown">
-            <button class="nav-link">Learn More <span class="dropdown-arrow">▼</span></button>
-            <div class="dropdown-menu">
-              <a href="#" class="dropdown-item">How It Works</a>
-              <a href="#" class="dropdown-item">Technology</a>
-              <a href="#" class="dropdown-item">Success Stories</a>
-              <a href="#" class="dropdown-item">FAQ</a>
+            <button class="nav-link" aria-expanded="false" aria-haspopup="true">
+              Learn More <span class="dropdown-arrow" aria-hidden="true">▼</span>
+            </button>
+            <div class="dropdown-menu" role="menu">
+              <a href="#" class="dropdown-item" role="menuitem">How It Works</a>
+              <a href="#" class="dropdown-item" role="menuitem">Technology</a>
+              <a href="#" class="dropdown-item" role="menuitem">Success Stories</a>
+              <a href="#" class="dropdown-item" role="menuitem">FAQ</a>
             </div>
           </div>
 
@@ -112,22 +123,26 @@ export function createHeader() {
           </div>
 
           <div class="nav-item dropdown">
-            <button class="nav-link">Follow <span class="dropdown-arrow">▼</span></button>
-            <div class="dropdown-menu">
-              <a href="#" class="dropdown-item">Twitter</a>
-              <a href="#" class="dropdown-item">Instagram</a>
-              <a href="#" class="dropdown-item">YouTube</a>
-              <a href="#" class="dropdown-item">GitHub</a>
+            <button class="nav-link" aria-expanded="false" aria-haspopup="true">
+              Follow <span class="dropdown-arrow" aria-hidden="true">▼</span>
+            </button>
+            <div class="dropdown-menu" role="menu">
+              <a href="#" class="dropdown-item" role="menuitem">Twitter</a>
+              <a href="#" class="dropdown-item" role="menuitem">Instagram</a>
+              <a href="#" class="dropdown-item" role="menuitem">YouTube</a>
+              <a href="#" class="dropdown-item" role="menuitem">GitHub</a>
             </div>
           </div>
 
           <div class="nav-item dropdown">
-            <button class="nav-link">Contact <span class="dropdown-arrow">▼</span></button>
-            <div class="dropdown-menu">
-              <a href="#" class="dropdown-item">Support</a>
-              <a href="#" class="dropdown-item">Sales</a>
-              <a href="#" class="dropdown-item">Press</a>
-              <a href="#" class="dropdown-item">Partnerships</a>
+            <button class="nav-link" aria-expanded="false" aria-haspopup="true">
+              Contact <span class="dropdown-arrow" aria-hidden="true">▼</span>
+            </button>
+            <div class="dropdown-menu" role="menu">
+              <a href="#" class="dropdown-item" role="menuitem">Support</a>
+              <a href="#" class="dropdown-item" role="menuitem">Sales</a>
+              <a href="#" class="dropdown-item" role="menuitem">Press</a>
+              <a href="#" class="dropdown-item" role="menuitem">Partnerships</a>
             </div>
           </div>
         </nav>

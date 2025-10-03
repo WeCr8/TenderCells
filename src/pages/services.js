@@ -14,6 +14,7 @@ import {
   getServicesByCategory 
 } from '../store/services.js';
 import { trackEvent } from '../utils/analytics.js';
+import serviceSearch from '../components/ServiceSearch.js';
 
 export function createServicesPage() {
   const featuredServices = getFeaturedServices();
@@ -46,6 +47,13 @@ export function createServicesPage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- Enhanced Search Section -->
+      <section class="services-search-section">
+        <div class="container">
+          <div id="service-search-container"></div>
         </div>
       </section>
 
@@ -316,6 +324,55 @@ window.loadMoreServices = function() {
   // TODO: Implement pagination for large service lists
   trackEvent('service_interaction', 'load_more', 'clicked');
 };
+
+// Initialize the services page functionality
+export function initServicesPage() {
+  // Initialize the enhanced search functionality
+  serviceSearch.init('service-search-container');
+  
+  // Add event listeners for category filtering
+  setupCategoryFilters();
+  
+  // Initialize map search functionality
+  initializeMapSearch();
+}
+
+// Setup category filter functionality
+function setupCategoryFilters() {
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.category-card')) {
+      const categoryCard = e.target.closest('.category-card');
+      const category = categoryCard.dataset.category;
+      
+      // Update search with selected category
+      if (category) {
+        const serviceTypeSelect = document.getElementById('service-type');
+        if (serviceTypeSelect) {
+          serviceTypeSelect.value = category;
+          serviceSearch.updateFilters();
+          serviceSearch.performSearch();
+        }
+      }
+    }
+  });
+}
+
+// Initialize map search functionality
+function initializeMapSearch() {
+  // This will be called after the page is rendered
+  setTimeout(() => {
+    const mapWidget = document.querySelector('.map-search-widget');
+    if (mapWidget) {
+      mapWidget.addEventListener('click', () => {
+        // Focus on map search
+        const mapSection = document.querySelector('.map-section');
+        if (mapSection) {
+          mapSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
+  }, 1000);
+}
 
 window.learnMoreAboutAffiliate = function() {
   // Create a modal or navigate to affiliate info page

@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "tender-cells"
-  }
-} 
+  },
+  "targets": {
+    "tender-cells": {
+      "hosting": {
+        "main": [
+          "default"
+        ],
+        "chicken-tender": [
+          "chicken-tender-619sdla"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

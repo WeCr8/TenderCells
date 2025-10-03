@@ -1,6 +1,13 @@
 // Animal Health Data Store
 // Comprehensive data for animal health management
 
+// Utility function to filter animals by category
+export const getAnimalsByCategory = (category) => {
+  return animalHealthData.animals.filter(animal => 
+    animal.categories.some(cat => cat.type === category)
+  );
+};
+
 export const animalHealthData = {
   animals: [
     {

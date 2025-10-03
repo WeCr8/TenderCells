@@ -23,7 +23,7 @@ import { createBlogPostPage, initializeBlogPostPage } from './pages/blog-post.js
 import { createAnimalHealthPage, initializeAnimalHealthPage } from './pages/animal-health.js';
 import { createAccountPage, initializeAccountPage } from './pages/account.js';
 import { createAssetsPage, initializeAssetsPage } from './pages/assets.js';
-import { createServicesPage, initializeServicesPage } from './pages/services.js';
+import { createServicesPage, initServicesPage } from './pages/services.js';
 
 class Router {
   constructor() {
@@ -265,7 +265,7 @@ class Router {
     this.showPageContent(createServicesPage());
     
     // Initialize services functionality
-    setTimeout(() => initializeServicesPage(), 100);
+    setTimeout(() => initServicesPage(), 100);
   }
 
   renderAccount() {

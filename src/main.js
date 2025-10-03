@@ -1,15 +1,5 @@
 import './style.css'
-import { analytics, trackEvent, trackFormSubmit, trackEngagement, trackNewsletter } from './utils/analytics.js';
-import { signIn, signUp, logOut, onAuthStateChange, resetPassword } from './firebase/auth.js';
-import { AuthModal } from './components/AuthModal.js';
-import { cartModal } from './components/CartModal.js';
-import { cart } from './store/cart.js';
-import './router.js';
-
-// Initialize authentication modal
-let authModal;
-let currentUser = null;
-
+// Simple homepage content
 document.querySelector('#app').innerHTML = `
   <!-- Notification Banner -->
   <div class="notification-banner">
@@ -50,27 +40,13 @@ document.querySelector('#app').innerHTML = `
 
         <!-- User Actions -->
         <div class="user-actions">
-          <button class="login-btn" id="loginBtn">
+          <button class="login-btn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
             Login
           </button>
-          <div class="user-profile" id="userProfile" style="display: none;">
-            <div class="user-avatar" id="userAvatar"></div>
-            <div class="user-dropdown" id="userDropdown">
-              <div class="user-dropdown-header">
-                <div class="user-name" id="userName"></div>
-                <div class="user-email" id="userEmail"></div>
-              </div>
-              <a href="#account" class="user-dropdown-item">My Account</a>
-              <a href="#account" class="user-dropdown-item">Profile</a>
-              <a href="#account" class="user-dropdown-item">Settings</a>
-              <a href="#" class="user-dropdown-item">My Applications</a>
-              <button class="user-dropdown-item logout" id="logoutBtn">Sign Out</button>
-            </div>
-          </div>
           <button class="cart-btn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="9" cy="21" r="1"></circle>
@@ -96,24 +72,20 @@ document.querySelector('#app').innerHTML = `
         <div class="nav-item dropdown">
           <button class="nav-link">Tender Cells in Education <span class="dropdown-arrow">▼</span></button>
           <div class="dropdown-menu">
-            <a href="#education" class="dropdown-item">Overview</a>
-            <a href="#education/programs" class="dropdown-item">Educational Programs</a>
-            <a href="#education/curriculum" class="dropdown-item">Curriculum Framework</a>
-            <a href="#education/resources" class="dropdown-item">Teacher Resources</a>
-            <a href="#education/projects" class="dropdown-item">Student Projects</a>
-            <a href="#education/pricing" class="dropdown-item">Educational Pricing</a>
-            <a href="#education/contact" class="dropdown-item">Contact & Support</a>
+            <a href="#" class="dropdown-item">Curriculum</a>
+            <a href="#" class="dropdown-item">Case Studies</a>
+            <a href="#" class="dropdown-item">Teacher Resources</a>
+            <a href="#" class="dropdown-item">Student Projects</a>
           </div>
         </div>
 
         <div class="nav-item dropdown">
           <button class="nav-link">Applications <span class="dropdown-arrow">▼</span></button>
           <div class="dropdown-menu">
-            <a href="#chicken-tender" class="dropdown-item">Chicken Tender</a>
-            <a href="#cattle-care" class="dropdown-item">Cattle Care (Soon)</a>
-            <a href="#pig-pal" class="dropdown-item">Pig Pal (Soon)</a>
-            <a href="#goat-guardian" class="dropdown-item">Goat Guardian (Soon)</a>
-            <a href="#duck-dock" class="dropdown-item">Duck Dock (Soon)</a>
+            <a href="#" class="dropdown-item">Chicken Tender</a>
+            <a href="#" class="dropdown-item">Cattle Care (Soon)</a>
+            <a href="#" class="dropdown-item">Pig Pal (Soon)</a>
+            <a href="#" class="dropdown-item">Goat Guardian (Soon)</a>
           </div>
         </div>
 
@@ -128,23 +100,15 @@ document.querySelector('#app').innerHTML = `
         </div>
 
         <div class="nav-item">
-          <a href="#animal-health" class="nav-link">Animal Health</a>
+          <a href="#" class="nav-link">Open Source</a>
         </div>
 
         <div class="nav-item">
-          <a href="#services" class="nav-link">Local Services</a>
+          <a href="#" class="nav-link">Blog</a>
         </div>
 
         <div class="nav-item">
-          <a href="#store" class="nav-link">Store</a>
-        </div>
-
-        <div class="nav-item">
-          <a href="#open-source" class="nav-link">Open Source</a>
-        </div>
-
-        <div class="nav-item">
-          <a href="#blog" class="nav-link">Blog</a>
+          <a href="#" class="nav-link">Signup for our Newsletter</a>
         </div>
 
         <div class="nav-item dropdown">
@@ -160,12 +124,10 @@ document.querySelector('#app').innerHTML = `
         <div class="nav-item dropdown">
           <button class="nav-link">Contact <span class="dropdown-arrow">▼</span></button>
           <div class="dropdown-menu">
-            <a href="#contact" class="dropdown-item">Contact Us</a>
-            <a href="#support" class="dropdown-item">Support</a>
-            <a href="#assets" class="dropdown-item">Marketing Assets</a>
-            <a href="#contact" class="dropdown-item">Sales</a>
-            <a href="#contact" class="dropdown-item">Press</a>
-            <a href="#contact" class="dropdown-item">Partnerships</a>
+            <a href="#" class="dropdown-item">Support</a>
+            <a href="#" class="dropdown-item">Sales</a>
+            <a href="#" class="dropdown-item">Press</a>
+            <a href="#" class="dropdown-item">Partnerships</a>
           </div>
         </div>
       </nav>
@@ -213,14 +175,13 @@ document.querySelector('#app').innerHTML = `
           <div class="product-info">
             <h2 class="product-title">Explore our models</h2>
             <p class="product-description">
-              Chicken Tender is our flagship smart coop system for homesteaders and 
-              enthusiasts featuring our most advanced technology, 
-              features, and options. Coming 95% pre-assembled in the 
-              box, Chicken Tender can be installed on an existing coop in 
-              an afternoon. It is suitable for backyard coops, 
-              research facilities, and homesteads.
+              Chicken Tender is our flagship smart coop system currently in build and beta testing phase. 
+              Designed specifically for homesteaders and chicken enthusiasts, this system will feature our 
+              most advanced technology and come 95% pre-assembled for easy installation.
+
+              Join our beta testing program to be among the first to experience smart farming technology.
             </p>
-            <button class="btn btn-product-order">ORDER CHICKEN TENDER v1.0.0</button>
+            <button class="btn btn-product-order">JOIN BETA PROGRAM</button>
           </div>
         </div>
       </div>
@@ -404,19 +365,7 @@ document.querySelector('#app').innerHTML = `
     </section>
   </main>
 
-  <!-- Floating Newsletter Signup -->
-  <div class="floating-newsletter" id="floatingNewsletter">
-    <div class="newsletter-content">
-      <button class="newsletter-close" id="closeNewsletter">×</button>
-      <h3>Want to learn more about Tender Cells?</h3>
-      <p>Subscribe to our email newsletter to get occasional updates and promos!</p>
-      <form class="newsletter-form">
-        <input type="email" placeholder="Email" class="newsletter-input" required>
-        <button type="submit" class="newsletter-submit">SUBSCRIBE</button>
-      </form>
-    </div>
-  </div>
-
+  <!-- Footer -->
   <footer class="footer">
     <div class="container">
       <div class="footer-content">
@@ -467,14 +416,8 @@ document.querySelector('#app').innerHTML = `
   </footer>
 `
 
-// Add interactive functionality
+// Basic dropdown functionality
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize authentication
-  initializeAuth();
-  
-  // Initialize cart functionality
-  initializeCart();
-  
   // Dropdown functionality
   const dropdowns = document.querySelectorAll('.dropdown');
   dropdowns.forEach(dropdown => {
@@ -493,286 +436,4 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
-
-  // Floating newsletter functionality
-  const floatingNewsletter = document.getElementById('floatingNewsletter');
-  const closeNewsletter = document.getElementById('closeNewsletter');
-  
-  // Show newsletter after 5 seconds
-  setTimeout(() => {
-    floatingNewsletter.classList.add('show');
-  }, 5000);
-  
-  closeNewsletter.addEventListener('click', () => {
-    floatingNewsletter.classList.remove('show');
-  });
-
-  // Newsletter form submission
-  const newsletterForm = document.querySelector('.newsletter-form');
-  newsletterForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = e.target.querySelector('input[type="email"]').value;
-    
-    // Track newsletter signup
-    trackNewsletter(email, 'floating_newsletter');
-    
-    alert(`Thank you for subscribing with ${email}!`);
-    floatingNewsletter.classList.remove('show');
-  });
-
-  // Smooth scroll for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }
-    });
-  });
-
-  // Add scroll-triggered animations
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-      }
-    });
-  }, observerOptions);
-
-  // Observe cards for animation
-  document.querySelectorAll('.tech-card, .app-card, .stat-card').forEach(card => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(30px)';
-    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    observer.observe(card);
-  });
-
-  // Add hover effects to buttons
-  document.querySelectorAll('.btn').forEach(btn => {
-    btn.addEventListener('mouseenter', function() {
-      this.style.transform = 'translateY(-2px)';
-      
-      // Track button hover engagement
-      trackEngagement('hover', 'button', this.textContent.trim());
-    });
-    
-    btn.addEventListener('mouseleave', function() {
-      this.style.transform = 'translateY(0)';
-    });
-  });
-  
-  // Track scroll depth
-  let maxScrollDepth = 0;
-  window.addEventListener('scroll', () => {
-    const scrollDepth = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
-    if (scrollDepth > maxScrollDepth) {
-      maxScrollDepth = scrollDepth;
-      
-      // Track scroll milestones
-      if (scrollDepth >= 25 && scrollDepth < 50) {
-        trackEvent('scroll_depth', { depth: '25%' });
-      } else if (scrollDepth >= 50 && scrollDepth < 75) {
-        trackEvent('scroll_depth', { depth: '50%' });
-      } else if (scrollDepth >= 75 && scrollDepth < 90) {
-        trackEvent('scroll_depth', { depth: '75%' });
-      } else if (scrollDepth >= 90) {
-        trackEvent('scroll_depth', { depth: '90%' });
-      }
-    }
-  });
-  
-  // Track time on page
-  const startTime = Date.now();
-  window.addEventListener('beforeunload', () => {
-    const timeOnPage = Math.round((Date.now() - startTime) / 1000);
-    trackEvent('time_on_page', { 
-      duration: timeOnPage,
-      page_path: window.location.pathname 
-    });
-  });
 });
-
-// Cart Functions
-function initializeCart() {
-  // Cart button click
-  document.querySelector('.cart-btn').addEventListener('click', () => {
-    cartModal.open();
-  });
-  
-  // Order buttons
-  document.querySelectorAll('.btn-order').forEach(btn => {
-    btn.addEventListener('click', () => {
-      window.location.hash = 'store';
-    });
-  });
-  
-  // Update cart badge on page load
-  const itemCount = cart.getItemCount();
-  if (itemCount > 0) {
-    cartModal.updateCartBadge(itemCount);
-  }
-}
-
-// Authentication Functions
-function initializeAuth() {
-  // Initialize auth modal
-  authModal = new AuthModal();
-  
-  // Set up auth state listener
-  onAuthStateChange((user) => {
-    currentUser = user;
-    updateAuthUI(user);
-  });
-  
-  // Login button click
-  document.getElementById('loginBtn').addEventListener('click', () => {
-    authModal.open('signin');
-  });
-  
-  // User profile dropdown
-  const userProfile = document.getElementById('userProfile');
-  const userAvatar = document.getElementById('userAvatar');
-  const userDropdown = document.getElementById('userDropdown');
-  
-  userAvatar.addEventListener('click', (e) => {
-    e.stopPropagation();
-    userProfile.classList.toggle('active');
-  });
-  
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!userProfile.contains(e.target)) {
-      userProfile.classList.remove('active');
-    }
-  });
-  
-  // Logout button
-  document.getElementById('logoutBtn').addEventListener('click', async (e) => {
-    e.preventDefault();
-    const result = await logOut();
-    if (result.success) {
-      userProfile.classList.remove('active');
-    }
-  });
-  
-  // Set up form handlers
-  setupAuthForms();
-}
-
-function updateAuthUI(user) {
-  const loginBtn = document.getElementById('loginBtn');
-  const userProfile = document.getElementById('userProfile');
-  const userAvatar = document.getElementById('userAvatar');
-  const userName = document.getElementById('userName');
-  const userEmail = document.getElementById('userEmail');
-  
-  if (user) {
-    // User is signed in
-    loginBtn.style.display = 'none';
-    userProfile.style.display = 'block';
-    
-    // Set user info
-    const displayName = user.displayName || user.email.split('@')[0];
-    const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    
-    userAvatar.textContent = initials;
-    userName.textContent = displayName;
-    userEmail.textContent = user.email;
-  } else {
-    // User is signed out
-    loginBtn.style.display = 'flex';
-    userProfile.style.display = 'none';
-  }
-}
-
-function setupAuthForms() {
-  // Sign in form
-  document.getElementById('signinForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('signinEmail').value;
-    const password = document.getElementById('signinPassword').value;
-    const errorEl = document.getElementById('signinError');
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Signing In...';
-    errorEl.textContent = '';
-    
-    const result = await signIn(email, password);
-    
-    if (result.success) {
-      authModal.close();
-    } else {
-      errorEl.textContent = result.error;
-    }
-    
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Sign In';
-  });
-  
-  // Sign up form
-  document.getElementById('signupForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('signupName').value;
-    const email = document.getElementById('signupEmail').value;
-    const password = document.getElementById('signupPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    const errorEl = document.getElementById('signupError');
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    
-    if (password !== confirmPassword) {
-      errorEl.textContent = 'Passwords do not match';
-      return;
-    }
-    
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Creating Account...';
-    errorEl.textContent = '';
-    
-    const result = await signUp(email, password, name);
-    
-    if (result.success) {
-      authModal.close();
-    } else {
-      errorEl.textContent = result.error;
-    }
-    
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Create Account';
-  });
-  
-  // Reset password form
-  document.getElementById('resetForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('resetEmail').value;
-    const errorEl = document.getElementById('resetError');
-    const successEl = document.getElementById('resetSuccess');
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending...';
-    errorEl.textContent = '';
-    successEl.textContent = '';
-    
-    const result = await resetPassword(email);
-    
-    if (result.success) {
-      successEl.textContent = 'Password reset email sent! Check your inbox.';
-    } else {
-      errorEl.textContent = result.error;
-    }
-    
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Send Reset Link';
-  });
-}

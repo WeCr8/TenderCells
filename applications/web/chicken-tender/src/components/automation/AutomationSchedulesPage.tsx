@@ -26,7 +26,7 @@ export default function AutomationSchedulesPage() {
     if (action === 'add-schedule') {
       // This would open the add schedule modal
       // For now, we'll just clear the URL parameter
-      navigate('/automation/schedules', { replace: true });
+      navigate('/app/automation/schedules', { replace: true });
     }
   }, [location, navigate]);
 

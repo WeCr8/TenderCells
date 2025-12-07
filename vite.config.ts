@@ -15,8 +15,8 @@ export default defineConfig({
   },
   server: {
     fs: {
-      // Allow serving files from the applications directory
-      allow: ['applications/web/chicken-tender']
+      // Allow serving files from both root and applications directory
+      allow: ['.', 'applications/web/chicken-tender']
     }
   }
 })

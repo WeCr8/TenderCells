@@ -10,9 +10,13 @@ import {
   Bell,
   Edit,
   Save,
-  Camera
+  Camera,
+  Package
 } from 'lucide-react';
 import { Button } from '../components/ui/Button/Button';
+import ProductRegistrationModal from '../components/products/ProductRegistrationModal';
+import { useProducts } from '../hooks/useProducts';
+import ProductCard from '../components/products/ProductCard';
 
 interface UserProfile {
   id: string;
@@ -42,9 +46,11 @@ interface NotificationPreferences {
 }
 
 export default function AccountPage() {
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications' | 'products'>('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const { products, loading: productsLoading, registerProduct, refetch: refetchProducts } = useProducts();
 
   const [profile, setProfile] = useState<UserProfile>({
     id: '1',
@@ -83,7 +89,8 @@ export default function AccountPage() {
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'security', label: 'Security', icon: Shield },
-    { id: 'notifications', label: 'Notifications', icon: Bell }
+    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'products', label: 'Products', icon: Package }
   ];
 
   const renderProfileTab = () => (
@@ -387,7 +394,7 @@ export default function AccountPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -449,7 +456,71 @@ export default function AccountPage() {
         {activeTab === 'profile' && renderProfileTab()}
         {activeTab === 'security' && renderSecurityTab()}
         {activeTab === 'notifications' && renderNotificationsTab()}
+        {activeTab === 'products' && renderProductsTab()}
       </div>
+
+      {/* Product Registration Modal */}
+      <ProductRegistrationModal
+        isOpen={isRegistrationModalOpen}
+        onClose={() => setIsRegistrationModalOpen(false)}
+        onRegister={async (data) => {
+          await registerProduct(data);
+          await refetchProducts();
+        }}
+      />
     </div>
   );
+
+  function renderProductsTab() {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">Registered Products</h3>
+            <p className="text-sm text-gray-600">Manage your hardware units and automation devices</p>
+          </div>
+          <Button
+            variant="primary"
+            onClick={() => setIsRegistrationModalOpen(true)}
+          >
+            Register Product
+          </Button>
+        </div>
+
+        {/* Products List */}
+        {productsLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-farm-600"></div>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-12">
+            <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No products registered</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Get started by registering your first product
+            </p>
+            <Button
+              variant="primary"
+              onClick={() => setIsRegistrationModalOpen(true)}
+            >
+              Register Product
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onUpdate={async () => {
+                  await refetchProducts();
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 }

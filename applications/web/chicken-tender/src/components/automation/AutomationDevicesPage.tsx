@@ -49,7 +49,7 @@ export default function AutomationDevicesPage() {
   };
 
   return (
-    <>
+    <div className="p-4 sm:p-6 md:p-8">
       {/* Custom header with add button */}
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -82,6 +82,6 @@ export default function AutomationDevicesPage() {
         onUpdateSettings={handleUpdateSettings}
         onUpdateFirmware={handleUpdateFirmware}
       />
-    </>
+    </div>
   );
 }

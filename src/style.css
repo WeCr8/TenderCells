@@ -345,8 +345,7 @@ button, .btn, a[role="button"] {
   box-shadow: 0 2px 8px rgba(45, 62, 31, 0.1);
   position: sticky;
   top: 0;
-  z-index: 1000;
-  z-index: 1000;
+  z-index: 9999;
 }
 
 .header-content {
@@ -501,11 +500,11 @@ button, .btn, a[role="button"] {
   gap: 0;
   padding: 12px 0;
   border-top: 1px solid var(--gray-200);
-  overflow-x: auto;
+  overflow-x: visible;
   scrollbar-width: none;
   -ms-overflow-style: none;
   position: relative;
-  z-index: 100; /* Ensure navigation is above other content */
+  z-index: auto; /* Don't create stacking context to allow dropdowns to overlay */
 }
 
 .main-nav::-webkit-scrollbar {
@@ -515,11 +514,14 @@ button, .btn, a[role="button"] {
 .nav-item {
   position: relative;
   flex-shrink: 0;
+  z-index: 1;
 }
 
 /* Ensure dropdown menus are properly positioned */
-.nav-item.has-dropdown {
+.nav-item.has-dropdown,
+.nav-item.dropdown {
   position: relative;
+  z-index: 99999;
 }
 
 .nav-link {
@@ -583,7 +585,7 @@ button, .btn, a[role="button"] {
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 1000; /* Ensure dropdowns are above other content */
+  z-index: 99999; /* Ensure dropdowns are above all other content */
   min-width: 200px;
   background: var(--white);
   border: 1px solid var(--gray-200);
@@ -640,7 +642,7 @@ button, .btn, a[role="button"] {
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.2s ease;
-  z-index: 1000;
+  z-index: 99999;
   padding: 8px 0;
 }
 

@@ -115,8 +115,14 @@ export default function AddEntityModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`bg-white rounded-xl shadow-lg max-w-md w-full ${className}`}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 md:p-4">
+      {/* Full-screen on mobile, centered modal on tablet/desktop - matching unified_ui.py pattern */}
+      <div className={`bg-white rounded-xl shadow-lg max-w-md w-full md:max-w-md md:rounded-xl md:shadow-lg ${
+        className
+      } ${
+        // Mobile: full-screen with rounded top corners only
+        'fixed inset-x-0 bottom-0 top-auto rounded-t-xl md:relative md:inset-auto md:rounded-xl'
+      }`}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
@@ -131,8 +137,9 @@ export default function AddEntityModal({
           />
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
+        {/* Form - Responsive padding matching unified_ui.py breakpoints */}
+        {/* Mobile: 16px padding, Tablet/Desktop: 24px padding */}
+        <form onSubmit={handleSubmit} className="p-4 md:p-6">
           <div className="space-y-4">
             {/* Global form error */}
             {errors._form && (
@@ -243,12 +250,14 @@ export default function AddEntityModal({
             ))}
           </div>
 
-          {/* Actions */}
+          {/* Actions - Responsive button sizes matching unified_ui.py */}
+          {/* Mobile: 48px min height, Desktop: 40px min height */}
           <div className="mt-6 flex items-center justify-end space-x-3">
             <Button
               variant="outline"
               onClick={onClose}
               disabled={isSubmitting}
+              className="min-h-[44px] md:min-h-[40px]"
             >
               Cancel
             </Button>
@@ -256,6 +265,7 @@ export default function AddEntityModal({
               variant="primary"
               type="submit"
               loading={isSubmitting}
+              className="min-h-[44px] md:min-h-[40px] min-w-[88px] md:min-w-[64px]"
             >
               {submitLabel}
             </Button>

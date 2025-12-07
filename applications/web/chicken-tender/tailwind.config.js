@@ -2,8 +2,27 @@
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
+    screens: {
+      'xs': '0px',
+      'sm': '600px',
+      'md': '900px',
+      'lg': '1200px',
+      'xl': '1600px',
+    },
     extend: {
       colors: {
+        primary: {
+          50: '#f3f1f5',
+          100: '#e8e4eb',
+          200: '#d1c9d7',
+          300: '#baaec3',
+          400: '#a393af',
+          500: '#8c789b',
+          600: '#6750A4', // Unified main color from unified_ui.py
+          700: '#4a3d75',
+          800: '#3a2f5a',
+          900: '#2a213f',
+        },
         farm: {
           50: '#fefdf6',
           100: '#fefaec',

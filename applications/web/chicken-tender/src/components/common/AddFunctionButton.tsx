@@ -25,55 +25,55 @@ export default function AddFunctionButton({ className = '' }: AddFunctionButtonP
       id: 'add-chicken',
       label: 'Add Chicken',
       icon: <Egg className="w-4 h-4" />,
-      onClick: () => navigate('/flock?action=add-chicken')
+      onClick: () => navigate('/app/flock?action=add-chicken')
     },
     {
       id: 'add-health-record',
       label: 'Add Health Record',
       icon: <Stethoscope className="w-4 h-4" />,
-      onClick: () => navigate('/flock/health?action=add-record')
+      onClick: () => navigate('/app/flock/health?action=add-record')
     },
     {
       id: 'add-production-record',
       label: 'Add Production Record',
       icon: <Egg className="w-4 h-4" />,
-      onClick: () => navigate('/flock/production?action=add-record')
+      onClick: () => navigate('/app/flock/production?action=add-record')
     },
     {
       id: 'add-rule',
       label: 'Add Automation Rule',
       icon: <Zap className="w-4 h-4" />,
-      onClick: () => navigate('/automation?action=add-rule')
+      onClick: () => navigate('/app/automation?action=add-rule')
     },
     {
       id: 'add-schedule',
       label: 'Add Schedule',
       icon: <Calendar className="w-4 h-4" />,
-      onClick: () => navigate('/automation/schedules?action=add-schedule')
+      onClick: () => navigate('/app/automation/schedules?action=add-schedule')
     },
     {
       id: 'add-device',
       label: 'Add Device',
       icon: <Cpu className="w-4 h-4" />,
-      onClick: () => navigate('/automation/devices?action=add-device')
+      onClick: () => navigate('/app/automation/devices?action=add-device')
     },
     {
       id: 'create-report',
       label: 'Create Report',
       icon: <FileText className="w-4 h-4" />,
-      onClick: () => navigate('/analytics/reports?action=create-report')
+      onClick: () => navigate('/app/analytics/reports?action=create-report')
     },
     {
       id: 'add-goal',
       label: 'Add Production Goal',
       icon: <Target className="w-4 h-4" />,
-      onClick: () => navigate('/flock/production?action=add-goal')
+      onClick: () => navigate('/app/flock/production?action=add-goal')
     },
     {
       id: 'view-all-functions',
       label: 'View All Functions',
       icon: <Zap className="w-4 h-4" />,
-      onClick: () => navigate('/macros')
+      onClick: () => navigate('/app/macros')
     }
   ];
 

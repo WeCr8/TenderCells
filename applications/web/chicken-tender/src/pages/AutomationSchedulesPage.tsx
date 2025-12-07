@@ -40,28 +40,30 @@ export default function AutomationSchedulesPage() {
   };
 
   return (
-    <SchedulesDashboard
-      schedules={schedules}
-      stats={stats || {
-        totalSchedules: 0,
-        activeSchedules: 0,
-        pausedSchedules: 0,
-        completedSchedules: 0,
-        errorSchedules: 0,
-        executionsToday: 0,
-        executionsThisWeek: 0,
-        successRate: 0,
-        upcomingExecutions: [],
-        lastUpdated: new Date().toISOString()
-      }}
-      executions={executions}
-      loading={loading}
-      onAddSchedule={handleAddSchedule}
-      onRefresh={refreshAll}
-      onToggleSchedule={handleToggleSchedule}
-      onExecuteSchedule={handleExecuteSchedule}
-      onEditSchedule={handleEditSchedule}
-      onViewSchedule={handleViewSchedule}
-    />
+    <div className="p-4 sm:p-6 md:p-8">
+      <SchedulesDashboard
+        schedules={schedules}
+        stats={stats || {
+          totalSchedules: 0,
+          activeSchedules: 0,
+          pausedSchedules: 0,
+          completedSchedules: 0,
+          errorSchedules: 0,
+          executionsToday: 0,
+          executionsThisWeek: 0,
+          successRate: 0,
+          upcomingExecutions: [],
+          lastUpdated: new Date().toISOString()
+        }}
+        executions={executions}
+        loading={loading}
+        onAddSchedule={handleAddSchedule}
+        onRefresh={refreshAll}
+        onToggleSchedule={handleToggleSchedule}
+        onExecuteSchedule={handleExecuteSchedule}
+        onEditSchedule={handleEditSchedule}
+        onViewSchedule={handleViewSchedule}
+      />
+    </div>
   );
 }

@@ -1,50 +1,98 @@
-import React from 'react';
-import { Bird, Settings, Bell, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Play, Battery, Power } from 'lucide-react';
 
-export default function Header() {
+interface HeaderProps {
+  title?: string;
+  status?: string;
+  time?: string;
+  batteryLevel?: number;
+}
+
+export default function Header({ 
+  title = "CHICKEN TENDERS", 
+  status = "Idle",
+  time,
+  batteryLevel = 100,
+}: HeaderProps) {
+  const [currentTime, setCurrentTime] = useState(
+    time || new Date().toLocaleTimeString("en-US", { 
+      hour: "numeric", 
+      minute: "2-digit",
+      hour12: true 
+    })
+  );
+
+  // Update time every minute
+  useEffect(() => {
+    if (!time) {
+      const interval = setInterval(() => {
+        setCurrentTime(new Date().toLocaleTimeString("en-US", { 
+          hour: "numeric", 
+          minute: "2-digit",
+          hour12: true 
+        }));
+      }, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [time]);
+
+  const handleEstop = (type: 'soft' | 'hard') => {
+    // E-STOP functionality
+    if (type === 'hard') {
+      // Hard E-STOP - immediate shutdown
+      if (window.confirm('HARD E-STOP: This will immediately stop all operations. Continue?')) {
+        console.log('HARD E-STOP activated');
+        // TODO: Implement hard E-STOP logic
+        alert('HARD E-STOP ACTIVATED - All systems stopped');
+      }
+    } else {
+      // Soft E-STOP - graceful shutdown
+      if (window.confirm('SOFT E-STOP: This will gracefully stop all operations. Continue?')) {
+        console.log('SOFT E-STOP activated');
+        // TODO: Implement soft E-STOP logic
+        alert('SOFT E-STOP ACTIVATED - Operations stopping gracefully');
+      }
+    }
+  };
+
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <div className="flex items-center space-x-3">
-              <div className="bg-farm-500 p-2 rounded-lg">
-                <Bird className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Chicken Tender</h1>
-                <p className="text-xs text-gray-500">Smart Farm Assistant</p>
-              </div>
+    <header className="bg-primary-700 text-white border-b border-primary-600">
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 md:h-16">
+          {/* Left: Title - Matching unified_ui.py TopNavBar */}
+          <div className="text-sm sm:text-base md:text-lg font-semibold tracking-wide">
+            TENDER CELLS | {title}
+          </div>
+
+          {/* Center: Status, Time, Battery - Hidden on mobile */}
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded text-xs">
+              <Play className="w-3 h-3" />
+              <span>{status}</span>
+            </div>
+            <div className="text-xs">{currentTime}</div>
+            <div className="flex items-center gap-1">
+              <Battery className="w-4 h-4" />
+              <span className="text-xs">{batteryLevel}%</span>
             </div>
           </div>
-          
-          <nav className="hidden md:flex space-x-8">
-            <a href="#" className="text-gray-900 hover:text-farm-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-              Dashboard
-            </a>
-            <a href="#" className="text-gray-500 hover:text-farm-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-              Flock
-            </a>
-            <a href="#" className="text-gray-500 hover:text-farm-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-              Automation
-            </a>
-            <a href="#" className="text-gray-500 hover:text-farm-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-              Analytics
-            </a>
-          </nav>
 
-          <div className="flex items-center space-x-4">
-            <button className="relative p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-              <Bell className="h-5 w-5" />
-              <div className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-xs text-white font-medium">3</span>
-              </div>
+          {/* Right: E-STOP Buttons - Matching image */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => handleEstop('soft')}
+              className="bg-red-600 border border-red-500 text-white hover:bg-red-700 px-3 py-1.5 rounded text-xs sm:text-sm font-bold min-w-[70px] sm:min-w-[80px] transition-colors active:bg-red-800"
+              aria-label="Soft E-STOP"
+            >
+              E-STOP
             </button>
-            <button className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-              <Settings className="h-5 w-5" />
-            </button>
-            <button className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-              <User className="h-5 w-5" />
+            <button 
+              onClick={() => handleEstop('hard')}
+              className="bg-red-600 text-white hover:bg-red-700 px-3 py-1.5 rounded text-xs sm:text-sm font-bold min-w-[70px] sm:min-w-[80px] transition-colors active:bg-red-800 flex items-center justify-center gap-1"
+              aria-label="Hard E-STOP"
+            >
+              <Power className="w-3 h-3" />
+              <span>E-STOP</span>
             </button>
           </div>
         </div>

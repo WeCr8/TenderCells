@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  ChevronRight,
   Cpu,
   Plus
 } from 'lucide-react';
@@ -23,47 +24,68 @@ import UserProfileMenu from '../auth/UserProfileMenu';
 import { useAuthContext } from '../auth/AuthContext';
 import type { NavigationItem, NotificationItem, UserProfile, NavigationState } from '../../types/navigation';
 
-const navigationItems: NavigationItem[] = [
+// Navigation items matching unified_ui.py and image design
+// These will be made product-aware in the component
+const getNavigationItems = (product: string = 'chicken-tender'): NavigationItem[] => [
   {
     name: 'Dashboard',
-    href: '/',
+    href: '/app',
     icon: Home,
   },
   {
-    name: 'Flock',
-    href: '/flock',
-    icon: Users,
-    children: [
-      { name: 'Overview', href: '/flock', icon: Users },
-      { name: 'Health Records', href: '/flock/health', icon: Users },
-      { name: 'Production', href: '/flock/production', icon: Users },
-    ]
+    name: 'Coop Settings',
+    href: '/app/settings',
+    icon: Settings,
   },
   {
-    name: 'Automation',
-    href: '/automation',
+    name: 'Doors & Latches',
+    href: '/app/automation/devices',
+    icon: Settings,
+  },
+  {
+    name: 'Motors & Rails',
+    href: '/app/automation/devices',
     icon: Zap,
-    children: [
-      { name: 'Rules', href: '/automation', icon: Zap },
-      { name: 'Schedules', href: '/automation/schedules', icon: Zap },
-      { name: 'Devices', href: '/automation/devices', icon: Zap },
-      { name: 'CNC Control', href: '/automation/cnc', icon: Cpu },
-    ]
   },
   {
-    name: 'Analytics',
-    href: '/analytics',
+    name: 'Robot Arm',
+    href: '/app/automation/cnc',
+    icon: Cpu,
+  },
+  {
+    name: 'Sensors',
+    href: '/app/automation/devices',
+    icon: Settings,
+  },
+  {
+    name: 'Feeding & Water',
+    href: '/app/automation',
+    icon: Users,
+  },
+  {
+    name: 'Waste Cleaning',
+    href: '/app/automation',
+    icon: Settings,
+  },
+  {
+    name: 'Egg Map',
+    href: '/app/analytics',
     icon: BarChart3,
-    children: [
-      { name: 'Overview', href: '/analytics', icon: BarChart3 },
-      { name: 'Reports', href: '/analytics/reports', icon: BarChart3 },
-      { name: 'Insights', href: '/analytics/insights', icon: BarChart3 },
-    ]
   },
   {
-    name: 'Functions',
-    href: '/macros',
-    icon: Plus,
+    name: 'Schedules',
+    href: '/app/automation/schedules',
+    icon: Settings,
+  },
+  {
+    name: 'Custom Settings',
+    href: '/app/settings',
+    icon: Settings,
+  },
+  {
+    name: 'Account',
+    href: '/app/account',
+    icon: User,
   },
 ];
 
@@ -119,6 +141,21 @@ export default function EnhancedNavigation() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Get current product from URL or default to chicken-tender
+  // Products: chicken-tender, roaming-roost, duck-dock, goat-guardian, bunny-burrow, etc.
+  const getCurrentProduct = () => {
+    const path = location.pathname;
+    // Check if we're on a product-specific route
+    if (path.includes('/products/')) {
+      const match = path.match(/\/products\/([^/]+)/);
+      return match ? match[1] : 'chicken-tender';
+    }
+    // Default to chicken-tender for /app routes
+    return 'chicken-tender';
+  };
+  
+  const currentProduct = getCurrentProduct();
 
   // Update current user when auth user changes
   useEffect(() => {
@@ -213,10 +250,28 @@ export default function EnhancedNavigation() {
   };
 
   const isActiveRoute = (href: string) => {
+    if (href === '/app' || href === '/app/') {
+      return location.pathname === '/app' || location.pathname === '/app/';
+    }
     if (href === '/') {
       return location.pathname === '/';
     }
-    return location.pathname.startsWith(href);
+    // For routes that share the same base path, check for exact match or query params
+    // This ensures "Sensors", "Doors & Latches", etc. work correctly
+    const currentPath = location.pathname;
+    const currentSearch = location.search;
+    
+    // Exact match
+    if (currentPath === href) {
+      return true;
+    }
+    
+    // Check if it's a parent route (e.g., /app/automation matches /app/automation/schedules)
+    if (currentPath.startsWith(href + '/')) {
+      return true;
+    }
+    
+    return false;
   };
 
   const isChildActive = (children: NavigationItem[]) => {
@@ -281,26 +336,36 @@ export default function EnhancedNavigation() {
       );
     }
 
+    // Matching unified_ui.py SideMenuItem with arrow indicator
+    // Ensure NavLink works correctly for all routes
     return (
       <NavLink
         key={item.href}
         to={item.href}
-        onClick={() => isMobile && setIsMobileMenuOpen(false)}
-        className={({ isActive }) =>
-          `flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-            isActive
-              ? 'bg-farm-100 text-farm-900 border border-farm-200'
-              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-          }`
-        }
+        onClick={() => {
+          // Close mobile menu if needed
+          if (isMobile) {
+            setIsMobileMenuOpen(false);
+          }
+          closeAllMenus();
+          // NavLink will handle navigation automatically
+        }}
+        end={item.href === '/app'} // Use exact match for dashboard
+        className={({ isActive: navIsActive }) => {
+          // Use NavLink's isActive for styling
+          const active = navIsActive || isActive;
+          return `flex items-center justify-between px-3 py-2 rounded-md text-sm min-h-[44px] transition-colors cursor-pointer ${
+            active
+              ? 'bg-primary-100 text-primary-900 font-medium'
+              : 'text-gray-700 hover:bg-gray-100'
+          }`;
+        }}
       >
-        <item.icon className={`h-5 w-5 ${isActive ? 'text-farm-600' : 'text-gray-500'}`} />
-        <span>{item.name}</span>
-        {item.badge && (
-          <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center">
-            {item.badge}
-          </span>
-        )}
+        <div className="flex items-center space-x-3">
+          <item.icon className={`h-5 w-5 ${isActive ? 'text-primary-600' : 'text-gray-500'}`} />
+          <span>{item.name}</span>
+        </div>
+        <ChevronRight className="w-4 h-4 opacity-50" />
       </NavLink>
     );
   };
@@ -321,8 +386,9 @@ export default function EnhancedNavigation() {
 
   return (
     <>
-      {/* Desktop Navigation */}
-      <nav className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:border-gray-200 lg:bg-white lg:pt-5 lg:pb-4">
+      {/* Desktop Navigation - Responsive widths matching unified_ui.py */}
+      {/* md (900px): 200px, lg (1200px): 240px, xl (1600px): 260px */}
+      <nav className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:border-r md:border-gray-200 md:bg-white md:pt-5 md:pb-4 md:w-[200px] lg:w-[240px] xl:w-[260px] md:z-10">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 px-6 mb-8">
           <div className="flex items-center space-x-3">
@@ -336,10 +402,10 @@ export default function EnhancedNavigation() {
           </div>
         </div>
 
-        {/* Navigation Items */}
-        <div className="flex-1 flex flex-col overflow-y-auto px-6">
-          <nav className="space-y-2">
-            {navigationItems.map((item) => renderNavigationItem(item))}
+        {/* Navigation Items - Matching unified_ui.py SideMenu */}
+        <div className="flex-1 flex flex-col overflow-y-auto px-2">
+          <nav className="space-y-1">
+            {getNavigationItems(currentProduct).map((item) => renderNavigationItem(item))}
           </nav>
         </div>
 
@@ -453,7 +519,7 @@ export default function EnhancedNavigation() {
                 {/* Mobile Navigation Items */}
                 <div className="flex-1 overflow-y-auto p-4">
                   <nav className="space-y-2">
-                    {navigationItems.map((item) => renderNavigationItem(item, true))}
+                    {getNavigationItems(currentProduct).map((item) => renderNavigationItem(item, true))}
                   </nav>
                 </div>
 

@@ -1,0 +1,24 @@
+<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- Oval background -->
+  <ellipse cx="100" cy="100" rx="90" ry="95" fill="none" stroke="#1B7E35" stroke-width="8"/>
+
+  <!-- House icon -->
+  <path d="M 100 40 L 140 75 L 140 130 L 60 130 L 60 75 Z" fill="#1B7E35"/>
+  <rect x="85" y="90" width="30" height="40" fill="#F0EDE4"/>
+
+  <!-- WiFi signal -->
+  <path d="M 100 20 Q 110 25 115 35" fill="none" stroke="#1B7E35" stroke-width="3"/>
+  <path d="M 100 15 Q 120 20 130 40" fill="none" stroke="#1B7E35" stroke-width="3"/>
+
+  <!-- Fields/crops -->
+  <path d="M 50 140 Q 60 150 70 140 Q 80 150 90 140" fill="none" stroke="#1B7E35" stroke-width="3"/>
+  <path d="M 110 140 Q 120 150 130 140 Q 140 150 150 140" fill="none" stroke="#1B7E35" stroke-width="3"/>
+
+  <!-- Text -->
+  <text x="100" y="190" font-size="24" font-weight="bold" text-anchor="middle" fill="#0D2B1E">
+    TENDER CELLS
+  </text>
+  <text x="100" y="220" font-size="14" text-anchor="middle" fill="#1B7E35" letter-spacing="2">
+    SMART FARMING
+  </text>
+</svg>

@@ -1,7 +1,12 @@
+import { useEffect } from "react";
 import Header from "../components/Header";
 import "./LandingPage.css";
+import { trackPageView, trackButtonClick } from "../utils/analytics";
 
 export default function LandingPage() {
+  useEffect(() => {
+    trackPageView("/");
+  }, []);
   return (
     <>
       <Header />
@@ -10,7 +15,13 @@ export default function LandingPage() {
           <div className="hero-content">
             <h1>Tender Cells</h1>
             <p>AI-Powered Automated Animal Care</p>
-            <button type="button" className="cta-button">Get Started</button>
+            <button
+              type="button"
+              className="cta-button"
+              onClick={() => trackButtonClick("get-started-hero")}
+            >
+              Get Started
+            </button>
           </div>
         </section>
 

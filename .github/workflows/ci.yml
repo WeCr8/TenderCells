@@ -99,3 +99,27 @@ jobs:
       - name: Scan for hardcoded WiFi passwords
         run: |
           ! grep -rn 'password\s*=\s*"[a-zA-Z0-9]\{6,\}' firmware/ --include='*.cpp'
+
+  deploy:
+    needs: [tendercells-ui, app, functions, firmware, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Build website
+        run: |
+          cd applications/tendercells_ui/test_output/website
+          npm ci
+          npm run build
+
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENDER_CELLS }}
+          channelId: live
+          projectId: tender-cells

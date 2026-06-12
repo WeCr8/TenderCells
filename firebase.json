@@ -6,7 +6,7 @@
   "hosting": [
     {
       "target": "main",
-      "public": "dist",
+      "public": "applications/tendercells_ui/test_output/website/dist",
       "ignore": [
         "firebase.json",
         "**/.*",

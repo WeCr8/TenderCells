@@ -25,11 +25,6 @@ nav h1 {
 nav h1 a {
   text-decoration: none;
   color: inherit;
-  transition: color 0.2s;
-}
-
-nav h1 a:hover {
-  color: #0066cc;
 }
 
 nav div {
@@ -46,17 +41,11 @@ nav a {
   font-size: 0.95rem;
   padding: 0.5rem 0.25rem;
   white-space: nowrap;
-  transition: all 0.2s;
-  cursor: pointer;
 }
 
 nav a:hover {
   color: #0052a3;
   text-decoration: underline;
-}
-
-nav a:active {
-  color: #003d7a;
 }
 
 @media (max-width: 768px) {

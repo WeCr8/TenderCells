@@ -9,6 +9,29 @@
 
 ---
 
+## Open Source Launch
+
+TenderCells is being built as an open-source operating system for home farming automation and animal care. Builders should be able to self-host the software, inspect the firmware direction, document their own hardware, simulate property layouts, and register custom products without being locked into black-box devices.
+
+Start here:
+
+- [Contributing guide](CONTRIBUTING.md)
+- [Open source launch plan](docs/OPEN_SOURCE_LAUNCH.md)
+- [Product documentation standard](docs/PRODUCT_DOCUMENTATION_STANDARD.md)
+- [Product documentation index](docs/products/README.md)
+- [Marketing kit](docs/marketing/OPEN_SOURCE_MARKETING_KIT.md)
+- [NVIDIA robotics simulation guide](applications/tendercells_ui/test_output/tendercells-ui/docs/nvidia-robotics-simulation.md)
+
+Current contributor tracks:
+
+- Software: dashboard, product registry, mobile/tablet UX, Firebase auth, telemetry, CRUD, and simulation views.
+- Firmware: ESP32/ESP32-S3 controllers, MQTT contracts, sensors, actuators, watchdog, and E-STOP behavior.
+- Hardware: BOMs, wiring, CAD/STL, 3D printed modules, coop doors, waterers, feeders, monitors, and rail tools.
+- Simulation: browser Three.js layouts, Isaac Sim workflows, property obstacles, terrain capture, and hardware-in-loop planning.
+- Community: beta builders, FFA/4H/maker education, deployment photos, case studies, and build videos.
+
+---
+
 ## Project Structure
 
 ```text

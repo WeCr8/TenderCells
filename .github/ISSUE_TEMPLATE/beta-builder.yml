@@ -1,0 +1,60 @@
+name: Beta Builder Application
+description: Apply to test TenderCells software, hardware docs, kits, or simulations.
+title: "[Beta Builder]: "
+labels: ["beta-builder", "community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping test TenderCells. Please do not include private addresses, phone numbers, or secrets in this public issue.
+  - type: input
+    id: product
+    attributes:
+      label: Product or build
+      description: Which product do you want to test?
+      placeholder: Chicken TenderCell, Roaming Roost, WatchTower AI, custom feeder, etc.
+    validations:
+      required: true
+  - type: dropdown
+    id: test_type
+    attributes:
+      label: Test type
+      options:
+        - Software only
+        - Simulation only
+        - Documentation build-through
+        - Garage hardware test
+        - Field hardware test
+        - School/FFA/4H program
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Describe the yard, coop, enclosure, animals, climate, and network constraints.
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Available hardware
+      description: List boards, sensors, motors, cameras, 3D printer, CAD tools, or simulation hardware you can use.
+    validations:
+      required: false
+  - type: textarea
+    id: goals
+    attributes:
+      label: Testing goals
+      description: What would make this test successful?
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety agreement
+      options:
+        - label: I will test moving hardware in simulation or supervised garage mode before field use.
+          required: true
+        - label: I understand E-STOP, manual override, and animal safety validation are required before automation.
+          required: true

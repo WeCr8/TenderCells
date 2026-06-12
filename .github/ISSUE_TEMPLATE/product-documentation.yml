@@ -1,0 +1,33 @@
+name: Product Documentation Task
+description: Track BOM, wiring, firmware, assembly, troubleshooting, API/MQTT, and safety docs for a product.
+title: "[Docs]: "
+labels: ["documentation", "product-docs"]
+body:
+  - type: input
+    id: product
+    attributes:
+      label: Product
+      placeholder: Chicken TenderCell, Roaming Roost, WatchTower AI, custom build
+    validations:
+      required: true
+  - type: checkboxes
+    id: docs
+    attributes:
+      label: Documentation checklist
+      options:
+        - label: BOM
+        - label: Wiring diagram or pinout
+        - label: CAD/STL/source model files
+        - label: Firmware setup
+        - label: Assembly instructions
+        - label: Troubleshooting guide
+        - label: API/MQTT documentation
+        - label: Safety validation notes
+        - label: Simulation notes
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: What is missing, blocked, or ready for review?
+    validations:
+      required: true

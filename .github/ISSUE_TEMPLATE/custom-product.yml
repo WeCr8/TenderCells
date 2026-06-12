@@ -1,0 +1,40 @@
+name: Custom Product Proposal
+description: Propose a community-built TenderCells product or module.
+title: "[Custom Product]: "
+labels: ["custom-product", "community"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Product name
+      placeholder: Solar waterer, smart brooder, gate latch, rail tool module
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem solved
+      description: What animal care or property automation job does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware concept
+      description: List likely sensors, actuators, controller, power, enclosure, and printed parts.
+    validations:
+      required: true
+  - type: textarea
+    id: software
+    attributes:
+      label: Software and simulation needs
+      description: Include registry fields, MQTT topics, app UI needs, and simulation needs.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety notes
+      description: Identify hazards, E-STOP/manual override needs, and validation steps.
+    validations:
+      required: true

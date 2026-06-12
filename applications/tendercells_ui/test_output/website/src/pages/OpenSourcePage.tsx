@@ -1,136 +1,162 @@
 import PageLayout from "../components/PageLayout";
 
+const roadmap = [
+  {
+    phase: "Phase 1",
+    title: "Foundation",
+    items: ["Dashboard", "WatchTower AI", "Chicken TenderCell MVP", "First garage hardware tests"],
+  },
+  {
+    phase: "Phase 2",
+    title: "Property + Fleet",
+    items: ["Roaming Roost", "Property mapping", "Fleet registry", "Custom product schemas"],
+  },
+  {
+    phase: "Phase 3",
+    title: "More Animal Systems",
+    items: ["Pigeon Palace", "Duck Dock", "Goat Guardian", "Bunny Burrow"],
+  },
+  {
+    phase: "Phase 4",
+    title: "TenderCells OS",
+    items: ["Self-hosted platform", "Kit ecosystem", "Isaac Sim workflows", "Community modules"],
+  },
+];
+
+const documentationNeeds = [
+  "BOM with preferred and substitute parts",
+  "Wiring diagram or pinout",
+  "CAD/STL/source model files",
+  "Firmware setup and flashing steps",
+  "Assembly instructions",
+  "Troubleshooting guide",
+  "API and MQTT topic documentation",
+  "Safety validation before moving hardware is enabled",
+];
+
+const contributionAreas = [
+  { title: "Software", desc: "React/Firebase dashboard, product registry, CRUD workflows, mobile/tablet UX, telemetry, and simulation views." },
+  { title: "Firmware", desc: "ESP32 and ESP32-S3 controller code, MQTT contracts, sensor drivers, watchdogs, E-STOP behavior, and field-test reports." },
+  { title: "Hardware", desc: "BOMs, wiring diagrams, printed parts, enclosures, mounting brackets, rail modules, feeders, waterers, and door systems." },
+  { title: "Simulation", desc: "Browser Three.js layouts, Isaac Sim instructions, robot/product models, property obstacles, terrain capture, and safety validation." },
+  { title: "Education", desc: "Build guides for schools, FFA, 4H, maker spaces, homesteading groups, and first-time electronics builders." },
+  { title: "Marketing", desc: "Build videos, community posts, case studies, deployment photos, and open-source launch coordination." },
+];
+
 export default function OpenSourcePage() {
   return (
     <PageLayout>
       <div className="page-hero dark">
-        <h1>Open Source</h1>
-        <p>Every line of code. Every schematic. Every 3D model. Yours.</p>
+        <h1>Open Source TenderCells OS</h1>
+        <p>Build it yourself, improve it, repair it, simulate it, or buy a kit when you want the faster path.</p>
       </div>
 
       <div className="prose">
         <p>
-          Tender Cells is open source from the circuit board to the cloud function.
-          We believe farmers should own their tools completely — no vendor lock-in,
-          no black-box firmware, no mandatory subscriptions to make the hardware work.
+          TenderCells is becoming an open-source platform for home farming automation and animal care.
+          The goal is practical ownership: open software, open firmware direction, hardware documentation,
+          product registration, property simulation, and community custom builds without black-box lock-in.
         </p>
         <p>
-          The full codebase lives on GitHub under the MIT license. Fork it, modify it,
-          build your own version, or contribute back. We review PRs weekly.
+          We are starting with Chicken TenderCell, WatchTower AI, Roaming Roost, and a registry for custom
+          products so builders can connect their own devices, document their own hardware, and test safely.
         </p>
       </div>
+
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
-        <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer" className="btn-primary">⭐ GitHub: WeCr8/TenderCells</a>
+        <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer" className="btn-primary">GitHub Repository</a>
+        <a href="https://github.com/WeCr8/TenderCells/issues/new/choose" target="_blank" rel="noopener noreferrer" className="btn-outline">Join Beta Builders</a>
+        <a href="/app/products" className="btn-outline">Open Product Registry</a>
       </div>
 
-      <h2 className="section-title" id="firmware">Firmware Source</h2>
-      <div className="prose">
-        <p>
-          Written in C++ for ESP32 and ESP32-S3 using the Arduino framework via PlatformIO.
-          Each firmware target has its own directory with <code>platformio.ini</code>,
-          full state machine implementation, and Unity test suite.
-        </p>
-      </div>
-      <table className="info-table">
-        <thead>
-          <tr><th>Target</th><th>MCU</th><th>Key Features</th></tr>
-        </thead>
-        <tbody>
-          {[
-            ["Chicken Tender Coop Controller", "ESP32-WROOM-32", "State machine, MQTT pub/sub, DHT22, MQ-137, load cells, servo control, watchdog"],
-            ["WatchTower AI Camera Node",      "ESP32-S3-EYE",   "TFLite Micro inference, 3-camera capture, LoRa SX1276, solar MPPT, deep sleep"],
-            ["Roaming Roost Drive Controller", "ESP32-WROOM-32", "Mecanum drive, GPS boundary, return-to-dock, obstacle avoidance"],
-            ["Arm Coordinator (Jetson Nano)",  "Jetson Nano",    "9DOF motion planning, URScript/custom stepper, XYZ gantry, sequential/parallel routines"],
-          ].map(([t, m, f]) => (
-            <tr key={t}><td><strong>{t}</strong></td><td><code>{m}</code></td><td>{f}</td></tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="prose">
-        <p><strong>Build from source:</strong></p>
-        <pre style={{ background: "#1e1e1e", color: "#d4d4d4", padding: "1rem", borderRadius: "6px", fontSize: "0.82rem", overflowX: "auto" }}>
-{`git clone https://github.com/WeCr8/TenderCells
-cd firmware/chicken-tender
-pip install platformio
-pio run          # build
-pio run -t upload  # flash via USB`}
-        </pre>
-      </div>
-
-      <h2 className="section-title" id="app">Mobile App Source</h2>
-      <div className="prose">
-        <p>
-          React Native (Expo) + TypeScript. Runs on iOS and Android from a single codebase.
-          State management via Zustand. Backend: Firebase Auth + Firestore + Realtime DB.
-          Real-time control: MQTT via local broker.
-        </p>
-        <pre style={{ background: "#1e1e1e", color: "#d4d4d4", padding: "1rem", borderRadius: "6px", fontSize: "0.82rem", overflowX: "auto" }}>
-{`cd app
-npm install
-npx expo start    # run in Expo Go
-npx expo build    # production build`}
-        </pre>
-      </div>
-
-      <h2 className="section-title" id="schematics">Hardware Schematics</h2>
-      <div className="prose">
-        <p>
-          KiCad schematic files for all custom PCBs. Gerber files for ordering from JLCPCB,
-          PCBWay, or any fab. BOM with LCSC part numbers for low-cost sourcing.
-        </p>
-        <ul>
-          <li>Coop Controller PCB — ESP32 + relay board + sensor headers + terminal blocks</li>
-          <li>WatchTower AI PCB — ESP32-S3 + SX1276 LoRa + MPPT charger + battery management</li>
-          <li>Drive Controller PCB — ESP32 + dual H-bridge + encoder inputs + GPS header</li>
-        </ul>
-      </div>
-
-      <h2 className="section-title" id="stl">3D Print Files (STL)</h2>
+      <h2 className="section-title">What We Are Building</h2>
       <div className="card-grid">
-        {[
-          { title: "Coop Controller Enclosure", desc: "IP54-rated enclosure for main ESP32 PCB, relay board, and terminal blocks. Print in PETG or ASA for moisture resistance." },
-          { title: "Arm Ceiling Mount Bracket", desc: "Steel-backed bracket for mounting 6DOF arm base to ceiling ridge beam. Designed for 1/8\" steel insert, PETG printed shell." },
-          { title: "Egg Gripper Fingers", desc: "Soft gripper fingers (2× per gripper) for egg collection. Print in TPU 95A. Foam-tipped design prevents shell damage." },
-          { title: "Scraper Tool Handle", desc: "Cleaning end effector handle. Spring-loaded floor contact. PETG, standard M5 bolt pattern for tool changer interface." },
-          { title: "WatchTower Dome Cradles", desc: "3× camera cradles at 120° spacing for 180mm acrylic dome. Print in ASA for UV resistance." },
-          { title: "Cable Strain Reliefs", desc: "Parametric strain relief for all cable gland sizes. Print in PETG. Sourced from OpenSCAD script for custom sizes." },
-        ].map((c) => (
-          <div key={c.title} className="card">
-            <h3>{c.title}</h3>
-            <p>{c.desc}</p>
-            <span className="tag">STL on GitHub</span>
+        {contributionAreas.map((area) => (
+          <div key={area.title} className="card">
+            <h3>{area.title}</h3>
+            <p>{area.desc}</p>
           </div>
         ))}
       </div>
 
-      <h2 className="section-title" id="contribute">How to Contribute</h2>
-      <div className="prose">
-        <p>We welcome contributions in all areas:</p>
-        <ul>
-          <li><strong>Firmware:</strong> Bug fixes, new sensor drivers, state machine improvements</li>
-          <li><strong>App:</strong> UI improvements, new screens, accessibility fixes, localization</li>
-          <li><strong>Hardware:</strong> New end effectors, enclosure designs, PCB revisions</li>
-          <li><strong>Documentation:</strong> Guides, translations, video tutorials</li>
-          <li><strong>Testing:</strong> Automated tests, beta hardware testing, field reports</li>
-        </ul>
-        <p>See <code>CONTRIBUTING.md</code> on GitHub for coding standards, PR checklist, and review process.</p>
-      </div>
-      <div className="cta-bar" style={{ marginBottom: "2rem" }}>
-        <a href="https://github.com/WeCr8/TenderCells/issues" target="_blank" rel="noopener noreferrer" className="btn-primary">View Open Issues</a>
-        <a href="https://github.com/WeCr8/TenderCells/discussions" target="_blank" rel="noopener noreferrer" className="btn-outline">Join Discussions</a>
+      <h2 className="section-title">Roadmap</h2>
+      <div className="card-grid">
+        {roadmap.map((phase) => (
+          <div key={phase.phase} className="card">
+            <span className="tag">{phase.phase}</span>
+            <h3>{phase.title}</h3>
+            <ul>
+              {phase.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
-      <h2 className="section-title" id="license">License</h2>
+      <h2 className="section-title" id="standards">Product Documentation Standard</h2>
       <div className="prose">
         <p>
-          All Tender Cells software, firmware, and hardware designs are released under the
-          <strong> MIT License</strong>. You can use, copy, modify, merge, publish, distribute,
-          sublicense, and/or sell copies freely. Attribution required (keep the copyright notice).
+          Every product, kit, module, or community custom build should be documented well enough for
+          another builder to assemble, flash, test, repair, and simulate it without direct support.
         </p>
+      </div>
+      <div className="card-grid">
+        {documentationNeeds.map((need) => (
+          <div key={need} className="card compact-card">
+            <h3>{need}</h3>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="section-title" id="beta">Beta Builder Program</h2>
+      <div className="prose">
         <p>
-          The WeCr8 Solutions and Tender Cells™ brand names, logos, and product names are
-          trademarks of WeCr8 Solutions and may not be used without permission.
+          We are looking for early builders who can test software-only flows, simulation-only flows,
+          documentation build-throughs, garage hardware tests, field hardware tests, and school programs.
         </p>
+      </div>
+      <table className="info-table">
+        <thead>
+          <tr><th>Track</th><th>Useful For</th><th>First Output</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Software only</td><td>Product registry, CRUD, mobile UI, auth, telemetry</td><td>Bug reports and screenshots</td></tr>
+          <tr><td>Simulation only</td><td>Property layout, obstacles, robots, Isaac Sim workflows</td><td>Scene notes and setup gaps</td></tr>
+          <tr><td>Documentation build-through</td><td>Builders without complete kits</td><td>Missing steps and photos</td></tr>
+          <tr><td>Garage hardware test</td><td>Motors, sensors, doors, waterers, feeders, controllers</td><td>Safety checklist and wiring notes</td></tr>
+          <tr><td>Field hardware test</td><td>Animal-safe beta deployments</td><td>Reliability and care observations</td></tr>
+        </tbody>
+      </table>
+
+      <h2 className="section-title" id="license">Free, Paid, and Repairable</h2>
+      <div className="card-grid">
+        <div className="card">
+          <h3>Free and Open</h3>
+          <p>Self-hosted dashboard, open-source firmware direction, product schemas, build docs, and simulation instructions.</p>
+        </div>
+        <div className="card">
+          <h3>Paid When Helpful</h3>
+          <p>Hardware kits, complete systems, cloud hosting, AI analytics, consulting, and custom integrations.</p>
+        </div>
+        <div className="card">
+          <h3>No Black Box</h3>
+          <p>The paid path should save time without blocking people from self-hosting, repairing, remixing, or learning.</p>
+        </div>
+      </div>
+
+      <h2 className="section-title" id="contribute">How to Contribute</h2>
+      <div className="prose">
+        <ul>
+          <li>Open a beta-builder issue if you want to test a product, kit, or simulation workflow.</li>
+          <li>Open a product documentation issue if a BOM, wiring diagram, firmware guide, or safety note is missing.</li>
+          <li>Open a custom product proposal for feeders, waterers, doors, rail tools, monitors, or 3D printed modules.</li>
+          <li>Share build photos, deployment notes, and fixes so the next builder has an easier path.</li>
+        </ul>
+      </div>
+      <div className="cta-bar">
+        <a href="https://github.com/WeCr8/TenderCells/issues/new/choose" target="_blank" rel="noopener noreferrer" className="btn-primary">Start Contributing</a>
+        <a href="https://github.com/WeCr8/TenderCells/discussions" target="_blank" rel="noopener noreferrer" className="btn-outline">Join Discussions</a>
       </div>
     </PageLayout>
   );

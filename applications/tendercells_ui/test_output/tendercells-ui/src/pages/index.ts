@@ -12,6 +12,7 @@ export { default as PigeonPalaceDashboard } from './PigeonPalaceDashboard';
 export { default as SettingsPage } from './SettingsPage';
 export { default as AccountPage } from './AccountPage';
 export { default as ProductsPage } from './ProductsPage';
+export { default as PropertyLayoutBuilder } from './PropertyLayoutBuilder';
 
 
 

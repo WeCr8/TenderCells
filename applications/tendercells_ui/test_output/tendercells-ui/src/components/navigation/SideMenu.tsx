@@ -16,6 +16,7 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import TuneIcon from "@mui/icons-material/Tune";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DevicesIcon from "@mui/icons-material/Devices";
+import GridOnIcon from "@mui/icons-material/GridOn";
 
 type SideMenuProps = {
   activeSection?: string;
@@ -33,6 +34,7 @@ const ITEMS = [
   { id: "eggs", label: "Egg Map", icon: <EggIcon />, path: "/chicken-tender" },
   { id: "schedules", label: "Schedules", icon: <ScheduleIcon />, path: "/schedules" },
   { id: "products", label: "Products", icon: <DevicesIcon />, path: "/products" },
+  { id: "layout", label: "Property Layout", icon: <GridOnIcon />, path: "/layout" },
   { id: "custom", label: "Custom Settings", icon: <TuneIcon />, path: "/settings" },
   { id: "account", label: "Account", icon: <AccountCircleIcon />, path: "/account" },
 ];
@@ -43,7 +45,7 @@ export default function SideMenu({ activeSection, product = "chicken-tender" }: 
 
   // Update paths based on current product
   const getPath = (item: typeof ITEMS[0]) => {
-    if (item.id === "schedules" || item.id === "products" || item.id === "custom" || item.id === "account") {
+    if (item.id === "schedules" || item.id === "products" || item.id === "layout" || item.id === "custom" || item.id === "account") {
       return item.path;
     }
     return `/${product}`;

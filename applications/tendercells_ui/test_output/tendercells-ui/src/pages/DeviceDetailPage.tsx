@@ -17,11 +17,13 @@ import TelemetryPanel from '../components/telemetry/TelemetryPanel';
 import QuickActions from '../components/toolbar/QuickActions';
 import CameraGrid from '../components/camera/CameraGrid';
 import BehaviorAnalytics from '../components/camera/BehaviorAnalytics';
+import RobotControlPanel from '../components/robot/RobotControlPanel';
 import EditIcon from '@mui/icons-material/Edit';
 import StorageIcon from '@mui/icons-material/Storage';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -80,6 +82,7 @@ export default function DeviceDetailPage({
           <Tab label="Telemetry" icon={<TimelineIcon />} iconPosition="start" />
           <Tab label="Cameras" icon={<VideocamIcon />} iconPosition="start" />
           <Tab label="Health" icon={<FavoriteBorderIcon />} iconPosition="start" />
+          <Tab label="Robot" icon={<SmartToyIcon />} iconPosition="start" />
           <Tab label="Controls" />
           <Tab label="History" />
         </Tabs>
@@ -165,8 +168,13 @@ export default function DeviceDetailPage({
         <BehaviorAnalytics />
       </TabPanel>
 
-      {/* Controls Tab */}
+      {/* Robot Tab */}
       <TabPanel value={activeTab} index={4}>
+        <RobotControlPanel deviceId={deviceId} />
+      </TabPanel>
+
+      {/* Controls Tab */}
+      <TabPanel value={activeTab} index={5}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ color: '#C8B882' }}>
             Hardware Controls
@@ -176,7 +184,7 @@ export default function DeviceDetailPage({
       </TabPanel>
 
       {/* History Tab */}
-      <TabPanel value={activeTab} index={5}>
+      <TabPanel value={activeTab} index={6}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ color: '#C8B882' }}>
             Event History

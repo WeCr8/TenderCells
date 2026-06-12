@@ -126,7 +126,78 @@ const theme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          backgroundColor: "#001F16", // Forest Green for sidebar
+          backgroundColor: "#001F16",
+        },
+      },
+    },
+    // Dropdown menus render in a portal — must set colors explicitly
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#0D2B1E",
+          border: "1px solid #2A5C3B",
+        },
+        list: {
+          padding: "4px",
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          color: "#E4E7E5",
+          borderRadius: "6px",
+          marginBottom: "2px",
+          "& .MuiSvgIcon-root": {
+            color: "#6BBF59",
+          },
+          "&:hover": {
+            backgroundColor: "#1A3D2B",
+          },
+          "&.Mui-selected": {
+            backgroundColor: "#1A3D2B",
+            color: "#C8B882",
+            "& .MuiSvgIcon-root": { color: "#C8B882" },
+          },
+          "&.Mui-selected:hover": {
+            backgroundColor: "#2A5C3B",
+          },
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        icon: {
+          color: "#6BBF59",
+        },
+        select: {
+          color: "#E4E7E5",
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: "#8A7D55",
+          "&.Mui-focused": {
+            color: "#C8B882",
+          },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        notchedOutline: {
+          borderColor: "#2A5C3B",
+        },
+        root: {
+          color: "#E4E7E5",
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#4A7C59",
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#6BBF59",
+          },
         },
       },
     },

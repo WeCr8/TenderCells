@@ -40,13 +40,17 @@ import {
   VisibilityOff as VisibilityOffIcon,
 } from '@mui/icons-material';
 import {
+  ALL_SHAPES,
   HARDWARE_TYPES,
   ITEM_COLORS,
+  OBSTACLE_DEFAULT_SHAPES,
   OBSTACLE_TYPES,
   PRODUCT_DIMENSIONS,
+  SHAPE_LABELS,
   loadPropertyLayout,
   savePropertyLayout,
   type HardwareType,
+  type ItemShape,
   type ObstacleType,
   type PropertyConfig,
   type PropertyItem,
@@ -146,12 +150,13 @@ export default function PropertyLayoutBuilder() {
 
   const openAddDialog = (kind: PropertyItemKind) => {
     const type: HardwareType | ObstacleType = kind === 'hardware' ? 'chicken-tender' : 'tree';
-    const dims = kind === 'hardware' ? PRODUCT_DIMENSIONS['chicken-tender'] : { width: 8, depth: 8 };
+    const dims = kind === 'hardware' ? PRODUCT_DIMENSIONS['chicken-tender'] : { width: 8, depth: 8, shape: 'circle' as ItemShape };
     setEditingItem({
       id: `item-${Date.now()}`,
       kind,
       name: kind === 'hardware' ? 'Chicken Tender' : 'New Obstacle',
       type,
+      shape: dims.shape,
       x: 5,
       y: 5,
       width: dims.width,
@@ -240,35 +245,71 @@ export default function PropertyLayoutBuilder() {
     const y = item.y * scaleY;
     const w = item.width * scaleX;
     const h = item.depth * scaleY;
+    const cx = x + w / 2;
+    const cy = y + h / 2;
     const color = ITEM_COLORS[item.type] || '#A5B1A9';
     const selected = selectedItemId === item.id;
     const isDragging = draggingItemId === item.id;
     const selStroke = isDragging ? '#FFD700' : selected ? '#6BBF59' : 'rgba(13,43,30,0.7)';
     const selWidth = selected || isDragging ? 3 : 1.5;
-    const opacity = isDragging ? 0.6 : 0.92;
-    // Use SVG filter attribute (not CSS inline style) to avoid linter warning
+    const opacity = isDragging ? 0.6 : (item.type === 'no-go-zone' ? 0.32 : 0.92);
+    const dash = item.type === 'no-go-zone' ? '8 5' : undefined;
     const filterRef = isDragging ? 'url(#plb-glow-drag)' : selected ? 'url(#plb-glow-sel)' : 'url(#plb-shadow)';
 
-    if (item.type === 'tree' || item.type === 'rock') {
+    // Effective shape: item.shape takes precedence, then type-based default
+    const shape: ItemShape = item.shape ?? (
+      (item.type === 'tree' || item.type === 'rock') ? 'circle' :
+      (item.type === 'pond' || item.type === 'garden') ? 'rounded' :
+      'rect'
+    );
+
+    const sharedAttrs = { fill: color, opacity, stroke: selStroke, strokeWidth: selWidth, strokeDasharray: dash };
+
+    if (shape === 'circle') {
       return (
         <g filter={filterRef}>
-          <ellipse cx={x + w / 2} cy={y + h / 2} rx={w / 2} ry={h / 2} fill={color} opacity={opacity} stroke={selStroke} strokeWidth={selWidth} />
+          <ellipse cx={cx} cy={cy} rx={w / 2} ry={h / 2} {...sharedAttrs} />
         </g>
       );
     }
 
-    if (item.type === 'pond' || item.type === 'garden' || item.type === 'no-go-zone') {
+    if (shape === 'rounded') {
       return (
         <g filter={filterRef}>
-          <rect x={x} y={y} width={w} height={h} rx={14} fill={color} opacity={item.type === 'no-go-zone' ? 0.32 : opacity} stroke={selStroke} strokeWidth={selWidth} strokeDasharray={item.type === 'no-go-zone' ? '8 5' : undefined} />
+          <rect x={x} y={y} width={w} height={h} rx={Math.min(w, h) * 0.3} {...sharedAttrs} />
         </g>
       );
     }
 
+    if (shape === 'hexagon') {
+      // Flat-top hexagon path scaled to bounding box
+      const r = Math.min(w, h) / 2;
+      const pts = Array.from({ length: 6 }, (_, i) => {
+        const a = (Math.PI / 180) * (60 * i - 30);
+        return `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`;
+      }).join(' ');
+      return (
+        <g filter={filterRef}>
+          <polygon points={pts} {...sharedAttrs} />
+          {selected && <rect x={x + 2} y={y + 2} width={w - 4} height={6} rx={4} fill="rgba(255,255,255,0.12)" />}
+        </g>
+      );
+    }
+
+    if (shape === 'diamond') {
+      const pts = `${cx},${y} ${x + w},${cy} ${cx},${y + h} ${x},${cy}`;
+      return (
+        <g filter={filterRef}>
+          <polygon points={pts} {...sharedAttrs} />
+        </g>
+      );
+    }
+
+    // Default: rect with subtle shadow
     return (
       <g filter={filterRef}>
         <rect x={x + 2} y={y + 3} width={w} height={h} rx={6} fill="rgba(0,0,0,0.3)" />
-        <rect x={x} y={y} width={w} height={h} rx={6} fill={color} opacity={opacity} stroke={selStroke} strokeWidth={selWidth} />
+        <rect x={x} y={y} width={w} height={h} rx={6} {...sharedAttrs} />
         {selected && <rect x={x + 2} y={y + 2} width={w - 4} height={6} rx={4} fill="rgba(255,255,255,0.12)" />}
       </g>
     );
@@ -751,7 +792,7 @@ export default function PropertyLayoutBuilder() {
 
                 {/* Coordinate readout */}
                 <Box sx={{ bgcolor: '#061510', border: '1px solid #1A3D2B', borderRadius: 1, p: 1, mb: 1.5, fontFamily: 'monospace' }}>
-                  <Stack direction="row" spacing={2}>
+                  <Stack direction="row" spacing={2} flexWrap="wrap">
                     <Box>
                       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.65rem' }}>X (ft)</Typography>
                       <Typography variant="body2" sx={{ color: '#C8B882', fontFamily: 'monospace', fontWeight: 700 }}>{selectedItem.x}</Typography>
@@ -763,6 +804,10 @@ export default function PropertyLayoutBuilder() {
                     <Box>
                       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.65rem' }}>Size</Typography>
                       <Typography variant="body2" sx={{ color: '#A5B1A9', fontFamily: 'monospace' }}>{selectedItem.width}×{selectedItem.depth} ft</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.65rem' }}>Shape</Typography>
+                      <Typography variant="body2" sx={{ color: '#6BBF59', fontFamily: 'monospace' }}>{SHAPE_LABELS[selectedItem.shape ?? 'rect']}</Typography>
                     </Box>
                   </Stack>
                 </Box>
@@ -927,8 +972,8 @@ export default function PropertyLayoutBuilder() {
                   onChange={(event) => {
                     const nextKind = event.target.value as PropertyItemKind;
                     const nextType: HardwareType | ObstacleType = nextKind === 'hardware' ? 'chicken-tender' : 'tree';
-                    const dims = nextKind === 'hardware' ? PRODUCT_DIMENSIONS['chicken-tender'] : { width: 8, depth: 8 };
-                    setEditingItem({ ...editingItem, kind: nextKind, type: nextType, width: dims.width, depth: dims.depth });
+                    const dims = nextKind === 'hardware' ? PRODUCT_DIMENSIONS['chicken-tender'] : { width: 8, depth: 8, shape: 'circle' as ItemShape };
+                    setEditingItem({ ...editingItem, kind: nextKind, type: nextType, shape: dims.shape, width: dims.width, depth: dims.depth });
                   }}
                   fullWidth
                 >
@@ -941,11 +986,13 @@ export default function PropertyLayoutBuilder() {
                   select label="Type" value={editingItem.type}
                   onChange={(event) => {
                     const nextType = event.target.value as HardwareType | ObstacleType;
-                    const dims = editingItem.kind === 'hardware' && nextType in PRODUCT_DIMENSIONS
+                    const hwDims = editingItem.kind === 'hardware' && nextType in PRODUCT_DIMENSIONS
                       ? PRODUCT_DIMENSIONS[nextType as HardwareType]
-                      : { width: editingItem.width, depth: editingItem.depth };
+                      : null;
+                    const obShape = OBSTACLE_DEFAULT_SHAPES[nextType as ObstacleType];
+                    const dims = hwDims ?? { width: editingItem.width, depth: editingItem.depth, shape: obShape ?? editingItem.shape };
                     const defaultName = TYPE_LABELS[nextType] || nextType;
-                    setEditingItem({ ...editingItem, type: nextType, width: dims.width, depth: dims.depth, name: defaultName });
+                    setEditingItem({ ...editingItem, type: nextType, shape: dims.shape ?? editingItem.shape, width: dims.width, depth: dims.depth, name: defaultName });
                   }}
                   fullWidth
                 >
@@ -959,6 +1006,35 @@ export default function PropertyLayoutBuilder() {
                   ))}
                 </TextField>
               </Grid>
+
+              {/* Shape selector */}
+              <Grid item xs={12}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75 }}>
+                  Shape
+                </Typography>
+                <Stack direction="row" spacing={0.75} flexWrap="wrap">
+                  {ALL_SHAPES.map((s) => {
+                    const active = (editingItem.shape ?? 'rect') === s;
+                    return (
+                      <Chip
+                        key={s}
+                        label={SHAPE_LABELS[s]}
+                        size="small"
+                        clickable
+                        onClick={() => setEditingItem({ ...editingItem, shape: s })}
+                        sx={{
+                          fontSize: '0.7rem',
+                          bgcolor: active ? '#4A7C59' : '#1A3D2B',
+                          color: active ? '#F0EDE4' : '#A5B1A9',
+                          border: active ? '1px solid #6BBF59' : '1px solid transparent',
+                          '&:hover': { bgcolor: '#2A5C3B' },
+                        }}
+                      />
+                    );
+                  })}
+                </Stack>
+              </Grid>
+
               <Grid item xs={12}>
                 <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
                   <Typography variant="caption" color="text.secondary">

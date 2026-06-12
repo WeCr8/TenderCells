@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import SplashScreen from "./components/SplashScreen";
 import MainLayout from "./components/layout/MainLayout";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ChickenTenderDashboard, RoamingRoostDashboard, DuckDockDashboard, GoatGuardianDashboard, BunnyBurrowDashboard, TurkeyTowerDashboard, PredatorMonitorDashboard, RailSystemModulesDashboard, TenderCellsCloudDashboard, PigeonPalaceDashboard, SettingsPage, AccountPage, ProductsPage, PropertyLayoutBuilder, ProductSpecsPage, DeviceDetailPage } from "./pages";
 
 function AppContent() {
@@ -61,11 +62,23 @@ function AppContent() {
   );
 }
 
+// Protected route wrapper
+function ProtectedRoute({ element }: { element: React.ReactNode }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) return <SplashScreen />;
+  if (!isAuthenticated) return <Navigate to="/account" replace />;
+
+  return element;
+}
+
 function App() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <AppContent />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <AppContent />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

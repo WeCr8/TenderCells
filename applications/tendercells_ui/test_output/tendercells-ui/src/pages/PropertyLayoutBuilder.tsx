@@ -363,6 +363,36 @@ export default function PropertyLayoutBuilder() {
       );
     }
 
+    if (shape === 'octagon') {
+      // Stop-sign octagon (flat edges top/bottom/left/right).
+      // Outer ring represents wheel channel; inner ring shows living space.
+      const r = Math.min(w, h) / 2;
+      const pts = Array.from({ length: 8 }, (_, i) => {
+        const a = (Math.PI / 180) * (45 * i + 22.5);
+        return `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`;
+      }).join(' ');
+      // Inner ring shows ~4 ft inner diameter (wheel channel is outer 3-4")
+      const rInner = r * 0.82; // ~4 ft inner / ~5 ft outer ≈ 0.80
+      const innerPts = Array.from({ length: 8 }, (_, i) => {
+        const a = (Math.PI / 180) * (45 * i + 22.5);
+        return `${cx + rInner * Math.cos(a)},${cy + rInner * Math.sin(a)}`;
+      }).join(' ');
+      return (
+        <g filter={filterRef}>
+          {/* Outer wheel channel ring */}
+          <polygon points={pts} fill={color} opacity={opacity * 0.45} stroke={selStroke} strokeWidth={selWidth} strokeDasharray={dash} />
+          {/* Inner living space */}
+          <polygon points={innerPts} fill={color} opacity={opacity} stroke="rgba(0,0,0,0.25)" strokeWidth={1} />
+          {/* Drive channel label when selected */}
+          {selected && (
+            <text x={cx} y={cy + rInner + (r - rInner) / 2} textAnchor="middle" fontSize={Math.max(7, r * 0.18)} fill="rgba(255,255,255,0.55)">
+              wheel channel
+            </text>
+          )}
+        </g>
+      );
+    }
+
     if (shape === 'diamond') {
       const pts = `${cx},${y} ${x + w},${cy} ${cx},${y + h} ${x},${cy}`;
       return (

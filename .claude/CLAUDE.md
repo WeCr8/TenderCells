@@ -26,14 +26,14 @@ and real-time monitoring dashboard.
 | Arm Controller | Jetson Nano (9DOF: XYZ gantry + 6DOF arm) |
 | Gantry Motors | NEMA23HS30-2804S stepper × 3 (X/Y/Z linear) |
 | Stepper Drivers | DM542T × 3 (32-bit microstepping) |
-| Drive System | Mecanum wheels, DC motors (Roaming Roost) |
+| Drive System | DC motors + wheels in perimeter channel ring (Roaming Roost) |
 | Sensors | DHT22, MQ-137, load cells, reed switches |
 
 **Product Ecosystem:**
 | Product | Footprint | Description |
 |---|---|---|
 | Chicken Tender™ | 4×4×5 ft | Automated coop — arm, cleaning, feeding, egg map |
-| Roaming Roost™ | 3×3×5 ft | Mobile geodesic dome on mecanum wheels |
+| Roaming Roost™ | ~5 ft OD octagon | Mobile igloo-dome; 4 ft inner octagon + 3-4" perimeter wheel channel; wheels ride inside channel ring |
 | Duck Dock™ | 4×4×6 ft | Duck platform with pond management |
 | Bunny Burrow™ | 3×3×5 ft | Rabbit automation — feeding, temp, housing |
 | Goat Guardian™ | 6×6×8 ft | Large enclosure automation |
@@ -1505,13 +1505,29 @@ PRIORITY 2 — Electronics enclosures:
       Camera cradles at 120° spacing, central plate, wire channels
 
 PRIORITY 3 — Roaming Roost drive system:
-  □ TC-RR-WHEEL-BRACKET-R1
-      Mecanum wheel mount for base ring
-      4× positions, 90° spacing, motor mount + encoder mount
+  NOTE: Drive architecture updated — NOT mecanum wheels.
+  Wheels ride INSIDE a 3-4"+ perimeter channel around the octagonal base.
+  Channel acts as both wheel race and structural support for igloo dome.
+  Inner living space: 4 ft inner diameter octagon.
+  Outer footprint: ~5 ft OD (inner + channel width each side).
 
   □ TC-RR-BASE-RING-R1
-      Full base ring weldment/assembly
-      Attaches dome frame, carries wheel brackets, weatherproofed
+      Octagonal channel ring (8-sided stop-sign shape)
+      Inner flat-to-flat: 4 ft. Outer flat-to-flat: ~4.67 ft.
+      Channel depth: 3-4"+ to contain drive wheels + support structure
+      Material: welded steel tube or aluminum extrusion
+      Attaches igloo dome frame at top; wheels ride inside channel floor
+
+  □ TC-RR-WHEEL-ASSY-R1
+      Drive wheel assemblies riding inside perimeter channel
+      Mount points: one per octagon flat (8× possible, 4× minimum)
+      Each: DC motor + encoder + wheel + bracket — all internal to channel
+      No external protrusions — wheels hidden inside ring structure
+
+  □ TC-RR-DOME-FRAME-R1
+      Igloo-style dome frame mounting to top of channel ring
+      Spans the 4 ft inner octagon opening
+      Structural: supports dome skin + any top-mounted sensors/cameras
 ```
 
 ---
@@ -1712,8 +1728,10 @@ PRODUCT
                                    not built; no egg gripper yet
   WatchTower AI      🟡 Designed   Electronics BOM done; dome CAD
                                    done; firmware not started
-  Roaming Roost      🔴 Concept    Mecanum drive untested on grass;
-                                   return-to-dock behavior undefined
+  Roaming Roost      🔴 Concept    Drive arch: wheels-in-octagonal-channel
+                                   ring (NOT mecanum); 4 ft inner dia,
+                                   ~5 ft OD, igloo dome on top; channel
+                                   CAD + motor selection TBD
   Duck Dock          🔴 Concept    No CAD, no firmware
   Bunny Burrow       🔴 Concept    No CAD, no firmware
   Goat Guardian      🔴 Concept    No CAD, no firmware

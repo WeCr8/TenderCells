@@ -1,26 +1,41 @@
 // ChickenTenderDashboard.tsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Viewport3D from "../components/viewport/Viewport3D";
 import TelemetryPanel from "../components/telemetry/TelemetryPanel";
 import BottomToolbar from "../components/toolbar/BottomToolbar";
+import QuickActions from "../components/toolbar/QuickActions";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
 import AgricultureIcon from "@mui/icons-material/Agriculture";
-import DoorFrontIcon from "@mui/icons-material/DoorFront";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
-import EggIcon from "@mui/icons-material/Egg";
+import Alert from "@mui/material/Alert";
 
 export default function ChickenTenderDashboard() {
+  const [deviceId, setDeviceId] = useState("ct_001"); // Default device ID
+  const [apiStatus, setApiStatus] = useState<"ok" | "error" | "loading">("loading");
+
+  useEffect(() => {
+    // Check API health on mount
+    fetch("http://localhost:4000/health")
+      .then((res) => setApiStatus(res.ok ? "ok" : "error"))
+      .catch(() => setApiStatus("error"));
+  }, []);
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <AgricultureIcon sx={{ fontSize: 40, mr: 2, color: '#6BBF59' }} />
         <Typography variant="h4" sx={{ color: '#E4E7E5' }}>Chicken Tender Dashboard</Typography>
       </Box>
+
+      {apiStatus === "error" && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          API server unavailable. Ensure express-api running on :4000
+        </Alert>
+      )}
+
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
@@ -32,22 +47,27 @@ export default function ChickenTenderDashboard() {
           <BottomToolbar />
         </Grid>
         <Grid item xs={12} md={4}>
-          <TelemetryPanel />
+          <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Device Configuration
+            </Typography>
+            <TextField
+              label="Device ID"
+              value={deviceId}
+              onChange={(e) => setDeviceId(e.target.value)}
+              fullWidth
+              size="small"
+              helperText="MQTT device ID (tc/{deviceId}/...)"
+            />
+          </Paper>
+
+          <TelemetryPanel deviceId={deviceId} />
+
           <Paper elevation={2} sx={{ p: 2, mt: 2 }}>
             <Typography variant="h6" gutterBottom>
               Quick Actions
             </Typography>
-            <Stack spacing={2} sx={{ mt: 2 }}>
-              <Button variant="outlined" startIcon={<DoorFrontIcon />} fullWidth>
-                Control Doors
-              </Button>
-              <Button variant="outlined" startIcon={<RestaurantIcon />} fullWidth>
-                Feeding Schedule
-              </Button>
-              <Button variant="outlined" startIcon={<EggIcon />} fullWidth>
-                Egg Collection
-              </Button>
-            </Stack>
+            <QuickActions deviceId={deviceId} />
           </Paper>
         </Grid>
       </Grid>

@@ -16,4 +16,12 @@ export { default as PropertyLayoutBuilder } from './PropertyLayoutBuilder';
 export { default as ProductSpecsPage } from './ProductSpecsPage';
 export { default as DeviceDetailPage } from './DeviceDetailPage';
 export { default as SchedulesPage } from './SchedulesPage';
-
+export { default as DashboardPage } from './DashboardPage';
+export { default as DiagnosticsPage } from './DiagnosticsPage';
+export { default as AnalyticsPage } from './AnalyticsPage';
+export { default as BirdManagementPage } from './BirdManagementPage';
+export { default as BirdEditPage } from './BirdEditPage';
+export { default as TenderAIPage } from './TenderAIPage';
+export { default as SetupWizardPage } from './SetupWizardPage';
+export { default as ChickenEyeDashboardPage } from './ChickenEyeDashboardPage';
+export { default as ChickenEyeBirdPage } from './ChickenEyeBirdPage';

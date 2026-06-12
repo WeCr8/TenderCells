@@ -24,6 +24,13 @@ import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import WaterIcon from "@mui/icons-material/Water";
 import TrainIcon from "@mui/icons-material/Train";
 import SecurityIcon from "@mui/icons-material/Security";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import BugReportIcon from "@mui/icons-material/BugReport";
+import PetsIcon from "@mui/icons-material/Pets";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 type SideMenuProps = {
   activeSection?: string;
@@ -110,10 +117,17 @@ const PRODUCT_ITEMS: Record<string, MenuItem[]> = {
 };
 
 const SHARED_ITEMS: MenuItem[] = [
+  { id: "dashboard", label: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
+  { id: "analytics", label: "Analytics", icon: <TrendingUpIcon />, path: "/analytics" },
+  { id: "diagnostics", label: "Diagnostics", icon: <BugReportIcon />, path: "/diagnostics" },
+  { id: "birds", label: "Flock Roster", icon: <PetsIcon />, path: "/birds" },
+  { id: "chicken-eye", label: "ChickenEye™ AI", icon: <VisibilityIcon />, path: "/chicken-eye" },
+  { id: "ai", label: "TenderAI Chat", icon: <SmartToyIcon />, path: "/ai" },
   { id: "schedules", label: "Schedules", icon: <ScheduleIcon />, path: "/schedules" },
   { id: "products", label: "Products", icon: <DevicesIcon />, path: "/products" },
   { id: "specs", label: "Product Specs", icon: <DescriptionIcon />, path: "/specs" },
   { id: "layout", label: "Property Layout", icon: <GridOnIcon />, path: "/layout" },
+  { id: "setup", label: "Add Device", icon: <AddCircleOutlineIcon />, path: "/setup" },
   { id: "custom", label: "Custom Settings", icon: <TuneIcon />, path: "/settings" },
   { id: "account", label: "Account", icon: <AccountCircleIcon />, path: "/account" },
 ];

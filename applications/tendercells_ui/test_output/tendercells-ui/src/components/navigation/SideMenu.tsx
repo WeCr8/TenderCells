@@ -16,7 +16,7 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import TuneIcon from "@mui/icons-material/Tune";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DevicesIcon from "@mui/icons-material/Devices";
-import GridOnIcon from "@mui/material/GridOnIcon";
+import GridOnIcon from "@mui/icons-material/GridOn";
 import DescriptionIcon from "@mui/icons-material/Description";
 
 type SideMenuProps = {

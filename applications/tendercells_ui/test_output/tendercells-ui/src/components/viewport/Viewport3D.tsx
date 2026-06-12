@@ -56,7 +56,7 @@ const FAMILY_TO_ITEM_TYPE: Record<string, string> = {
 
 const DEFAULT_SIZE_BY_TYPE: Record<string, { width: number; depth: number }> = {
   'chicken-tender': { width: 4, depth: 4 },
-  'roaming-roost': { width: 3, depth: 3 },
+  'roaming-roost': { width: 5, depth: 5 },
   'duck-dock': { width: 4, depth: 4 },
   'goat-guardian': { width: 6, depth: 6 },
   'bunny-burrow': { width: 3, depth: 3 },
@@ -110,28 +110,63 @@ const createHardwareMesh = (
     }
 
     case 'roaming-roost': {
+      // Architecture: 4 ft inner octagon + 3-4" perimeter wheel channel = ~5 ft OD
+      // Wheels ride inside channel ring; igloo dome mounts on top of inner octagon
       const g = new THREE.Group();
-      const baseR = Math.min(W, D) * 0.42;
-      const base = new THREE.Mesh(
-        new THREE.CylinderGeometry(baseR * 0.95, baseR, 0.22, 6),
-        new THREE.MeshStandardMaterial({ color: 0x4a7c59, roughness: 0.7 })
+      const outerR = Math.min(W, D) / 2;       // 5 ft OD → 2.5 ft radius
+      const innerR = outerR * 0.82;             // ~4 ft inner diameter → 2.05 ft radius
+      const channelW = outerR - innerR;         // ~0.45 ft channel width
+      const channelH = 0.5;                     // channel wall height (ft)
+      const segLen = 2 * outerR * Math.sin(Math.PI / 8); // length of each octagon wall segment
+      const midR = (outerR + innerR) / 2;       // center of channel ring
+
+      // Flat octagonal ground base (full OD)
+      const basePlatform = new THREE.Mesh(
+        new THREE.CylinderGeometry(outerR, outerR, 0.08, 8),
+        new THREE.MeshStandardMaterial({ color: 0x4a3520, roughness: 0.85 })
       );
-      base.position.set(x, 0.11, z);
-      g.add(base);
+      basePlatform.position.set(x, 0.04, z);
+      g.add(basePlatform);
+
+      // 8-sided perimeter channel ring walls + wheel per segment
+      const channelMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.9 });
+      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.85 });
+      for (let i = 0; i < 8; i++) {
+        const angle = (Math.PI / 4) * i + Math.PI / 8;
+        // Channel wall segment
+        const seg = new THREE.Mesh(new THREE.BoxGeometry(segLen, channelH, channelW), channelMat);
+        seg.position.set(x + midR * Math.cos(angle), channelH / 2 + 0.08, z + midR * Math.sin(angle));
+        seg.rotation.y = -angle;
+        seg.castShadow = true;
+        g.add(seg);
+        // Drive wheel inside channel
+        const wheel = new THREE.Mesh(
+          new THREE.CylinderGeometry(channelH * 0.36, channelH * 0.36, channelW * 0.5, 10),
+          wheelMat
+        );
+        wheel.position.set(x + midR * Math.cos(angle), channelH * 0.32, z + midR * Math.sin(angle));
+        wheel.rotation.y = -angle;
+        wheel.rotation.z = Math.PI / 2;
+        g.add(wheel);
+      }
+
+      // Igloo dome over inner 4 ft circle
       const dome = new THREE.Mesh(
-        new THREE.SphereGeometry(baseR * 0.9, 10, 8, 0, Math.PI * 2, 0, Math.PI * 0.6),
-        new THREE.MeshStandardMaterial({ color: mat.color, roughness: 0.55, transparent: true, opacity: 0.88 })
+        new THREE.SphereGeometry(innerR * 0.94, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.62),
+        new THREE.MeshStandardMaterial({ color: mat.color, roughness: 0.5, transparent: true, opacity: 0.88 })
       );
-      dome.position.set(x, 0.22, z);
+      dome.position.set(x, channelH + 0.08, z);
       dome.castShadow = true;
       g.add(dome);
-      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-      [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(([wx, wz]) => {
-        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.11, 12), wheelMat);
-        wheel.position.set(x + wx * W * 0.3, 0.11, z + wz * D * 0.3);
-        wheel.rotation.x = Math.PI / 2;
-        g.add(wheel);
-      });
+
+      // Door opening on one face
+      const door = new THREE.Mesh(
+        new THREE.BoxGeometry(0.5, 0.7, 0.06),
+        new THREE.MeshStandardMaterial({ color: 0x1a3d2b })
+      );
+      door.position.set(x, channelH + 0.43, z + innerR * 0.88);
+      g.add(door);
+
       return g;
     }
 

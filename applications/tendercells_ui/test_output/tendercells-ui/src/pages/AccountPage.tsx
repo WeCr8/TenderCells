@@ -7,7 +7,7 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import { Package } from '@mui/icons-material';
+import { Devices } from '@mui/icons-material';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/products/ProductCard';
 import ProductRegistrationModal from '../components/products/ProductRegistrationModal';
@@ -53,7 +53,7 @@ export default function AccountPage() {
         <Tabs value={activeTab} onChange={handleTabChange}>
           <Tab label="Profile" />
           <Tab label="Security" />
-          <Tab label="Products" icon={<Package />} iconPosition="start" />
+          <Tab label="Products" icon={<Devices/>} iconPosition="start" />
         </Tabs>
       </Box>
 
@@ -104,7 +104,7 @@ export default function AccountPage() {
           </Box>
         ) : products.length === 0 ? (
           <Box sx={{ textAlign: 'center', p: 4 }}>
-            <Package sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Devicessx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
             <Typography variant="h6" gutterBottom>
               No products registered
             </Typography>

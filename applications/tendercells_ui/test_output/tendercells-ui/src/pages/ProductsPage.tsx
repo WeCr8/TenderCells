@@ -12,7 +12,7 @@ import {
   CircularProgress,
   Paper,
 } from '@mui/material';
-import { Add as AddIcon, Package as PackageIcon } from '@mui/icons-material';
+import { Add as AddIcon, Devices as DevicesIcon } from '@mui/icons-material';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/products/ProductCard';
 import ProductRegistrationModal from '../components/products/ProductRegistrationModal';
@@ -148,7 +148,7 @@ export default function ProductsPage() {
         </Box>
       ) : filteredProducts.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <PackageIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+          <DevicesIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
           <Typography variant="h6" gutterBottom>
             {products.length === 0 ? 'No products registered' : 'No products match your filters'}
           </Typography>

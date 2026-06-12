@@ -104,7 +104,7 @@ export default function AccountPage() {
           </Box>
         ) : products.length === 0 ? (
           <Box sx={{ textAlign: 'center', p: 4 }}>
-            <Devicessx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Devices sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
             <Typography variant="h6" gutterBottom>
               No products registered
             </Typography>

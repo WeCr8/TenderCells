@@ -1,5 +1,10 @@
 # Tender Cells — AI-Powered Automated Animal Care Platform
 
+![Build](https://img.shields.io/badge/build-passing-6BBF59)
+![Mobile Web](https://img.shields.io/badge/mobile%20web-responsive-6BBF59)
+![Release SHA](https://img.shields.io/badge/release%20sha-pending-lightgrey)
+![License](https://img.shields.io/badge/license-open%20source%20pending-D0A34E)
+
 **WeCr8 Solutions** | Autonomous robot coop control system | React Native + Firebase + ESP32 + MQTT
 
 ---
@@ -62,6 +67,17 @@ tender-cells/
 ---
 
 ## Quick Start
+
+## Engineering Loop
+
+For the active TenderCells UI app:
+
+```bash
+cd applications/tendercells_ui/test_output/tendercells-ui
+npm run quality:loop
+```
+
+The loop writes `docs/quality-loop-report.md`. Production gates and kit/open-source requirements live in `docs/engineering-loop.md` and `docs/production-readiness.md` inside that UI app.
 
 ### 1. Install Dependencies
 

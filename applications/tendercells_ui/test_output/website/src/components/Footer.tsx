@@ -1,8 +1,9 @@
-// Footer.tsx
-import React from "react";
+import "./Footer.css";
 
 export default function Footer() {
   return (
-    <div>Footer</div>
+    <footer>
+      <p>&copy; 2026 WeCr8 Solutions. All rights reserved.</p>
+    </footer>
   );
 }

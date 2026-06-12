@@ -7,8 +7,8 @@
   "theme_color": "#6750A4",
   "icons": [
     {
-      "src": "assets/logo.png",
-      "sizes": "192x192",
+      "src": "assets/images/tender_cells_logo.png",
+      "sizes": "1024x1024",
       "type": "image/png"
     }
   ]

@@ -1,24 +1,20 @@
-<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
-  <!-- Oval background -->
-  <ellipse cx="100" cy="100" rx="90" ry="95" fill="none" stroke="#1B7E35" stroke-width="8"/>
-
-  <!-- House icon -->
-  <path d="M 100 40 L 140 75 L 140 130 L 60 130 L 60 75 Z" fill="#1B7E35"/>
-  <rect x="85" y="90" width="30" height="40" fill="#F0EDE4"/>
-
-  <!-- WiFi signal -->
-  <path d="M 100 20 Q 110 25 115 35" fill="none" stroke="#1B7E35" stroke-width="3"/>
-  <path d="M 100 15 Q 120 20 130 40" fill="none" stroke="#1B7E35" stroke-width="3"/>
-
-  <!-- Fields/crops -->
-  <path d="M 50 140 Q 60 150 70 140 Q 80 150 90 140" fill="none" stroke="#1B7E35" stroke-width="3"/>
-  <path d="M 110 140 Q 120 150 130 140 Q 140 150 150 140" fill="none" stroke="#1B7E35" stroke-width="3"/>
-
-  <!-- Text -->
-  <text x="100" y="190" font-size="24" font-weight="bold" text-anchor="middle" fill="#0D2B1E">
-    TENDER CELLS
-  </text>
-  <text x="100" y="220" font-size="14" text-anchor="middle" fill="#1B7E35" letter-spacing="2">
-    SMART FARMING
-  </text>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Tender Cells Smart Farming logo</title>
+  <desc id="desc">Rounded green farm and wireless signal mark with Tender Cells wordmark.</desc>
+  <rect width="1024" height="1024" fill="#F7F4EE"/>
+  <g fill="none" stroke="#147C38" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M350 403V340C350 248 420 181 512 181C604 181 674 248 674 340V403" stroke-width="22"/>
+    <path d="M350 403C405 404 460 415 512 437C564 415 619 404 674 403" stroke-width="22"/>
+    <path d="M350 463C425 465 485 489 536 538" stroke-width="22"/>
+    <path d="M383 522C427 532 463 550 494 580" stroke-width="22"/>
+    <path d="M674 463C619 465 571 479 529 507" stroke-width="22"/>
+    <path d="M641 522C604 530 572 543 545 563" stroke-width="22"/>
+    <path d="M358 352V470C358 543 421 590 512 590C603 590 666 543 666 470V352" stroke-width="22"/>
+    <path d="M446 248C485 224 539 224 578 248" stroke-width="22"/>
+    <path d="M477 295C498 282 526 282 547 295" stroke-width="22"/>
+  </g>
+  <path d="M444 363L512 316L580 363V450L512 486L444 450V363Z" fill="#147C38"/>
+  <path d="M494 392H530V458L512 470L494 458V392Z" fill="#F7F4EE"/>
+  <text x="512" y="735" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="96" font-weight="700" fill="#061D2E">Tender Cells</text>
+  <text x="512" y="825" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="700" letter-spacing="16" fill="#061D2E">SMART FARMING</text>
 </svg>

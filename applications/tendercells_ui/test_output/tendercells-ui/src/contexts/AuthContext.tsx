@@ -3,7 +3,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   User,
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
@@ -14,8 +16,10 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  clearError: () => void;
   isAuthenticated: boolean;
 }
 
@@ -42,6 +46,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
+      setError(message);
+      throw err;
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      setError(null);
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithPopup(auth, provider);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Google login failed';
       setError(message);
       throw err;
     }
@@ -74,8 +91,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     error,
     login,
+    loginWithGoogle,
     register,
     logout,
+    clearError: () => setError(null),
     isAuthenticated: !!user,
   };
 

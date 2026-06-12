@@ -1,4 +1,4 @@
-import { resetPassword, signIn, signUp } from '../firebase/auth.js';
+import { resetPassword, signIn, signInWithGoogle, signUp } from '../firebase/auth.js';
 import { lockBodyScroll, unlockBodyScroll } from '../utils/scrollLock.js';
 
 // Authentication Modal Component
@@ -32,6 +32,13 @@ export class AuthModal {
                 <input type="password" id="signinPassword" required>
               </div>
               <button type="submit" class="auth-btn auth-btn-primary">Sign In</button>
+              <div class="auth-divider">
+                <span>or</span>
+              </div>
+              <button type="button" id="signinGoogleButton" class="google-signin-btn">
+                <span class="google-signin-icon" aria-hidden="true">G</span>
+                <span class="google-signin-label">Continue with Google</span>
+              </button>
               <div class="auth-error" id="signinError"></div>
             </form>
 
@@ -54,6 +61,13 @@ export class AuthModal {
                 <input type="password" id="confirmPassword" required minlength="6">
               </div>
               <button type="submit" class="auth-btn auth-btn-primary">Create Account</button>
+              <div class="auth-divider">
+                <span>or</span>
+              </div>
+              <button type="button" id="signupGoogleButton" class="google-signin-btn">
+                <span class="google-signin-icon" aria-hidden="true">G</span>
+                <span class="google-signin-label">Continue with Google</span>
+              </button>
               <div class="auth-error" id="signupError"></div>
             </form>
 
@@ -89,6 +103,8 @@ export class AuthModal {
     const signInForm = document.getElementById('signinForm');
     const signUpForm = document.getElementById('signupForm');
     const resetForm = document.getElementById('resetForm');
+    const signInGoogleButton = document.getElementById('signinGoogleButton');
+    const signUpGoogleButton = document.getElementById('signupGoogleButton');
     
     // Close modal events
     closeBtn.addEventListener('click', () => this.close());
@@ -96,6 +112,8 @@ export class AuthModal {
     signInForm.addEventListener('submit', (event) => this.handleSignIn(event));
     signUpForm.addEventListener('submit', (event) => this.handleSignUp(event));
     resetForm.addEventListener('submit', (event) => this.handleReset(event));
+    signInGoogleButton.addEventListener('click', () => this.handleGoogleSignIn('signinError'));
+    signUpGoogleButton.addEventListener('click', () => this.handleGoogleSignIn('signupError'));
 
     // Add more switcher links dynamically
     this.updateSwitcher();
@@ -125,6 +143,16 @@ export class AuthModal {
       submitButton.dataset.defaultLabel = submitButton.dataset.defaultLabel || submitButton.textContent;
       submitButton.textContent = pending ? 'Please wait...' : submitButton.dataset.defaultLabel;
     }
+  }
+
+  setGooglePending(pending) {
+    document.querySelectorAll('.google-signin-btn').forEach((button) => {
+      const label = button.querySelector('.google-signin-label');
+      button.disabled = pending;
+      if (label) {
+        label.textContent = pending ? 'Please wait...' : 'Continue with Google';
+      }
+    });
   }
 
   showMessage(elementId, message) {
@@ -179,6 +207,26 @@ export class AuthModal {
 
     if (!result.success) {
       this.showMessage('signupError', result.error || 'Unable to create your account right now.');
+      return;
+    }
+
+    if (this.onAuthSuccess) {
+      this.onAuthSuccess(result.user);
+    }
+
+    this.close();
+  }
+
+  async handleGoogleSignIn(errorElementId) {
+    this.clearMessages();
+    this.setGooglePending(true);
+
+    const result = await signInWithGoogle();
+
+    this.setGooglePending(false);
+
+    if (!result.success) {
+      this.showMessage(errorElementId, result.error || 'Unable to continue with Google right now.');
       return;
     }
 

@@ -1,8 +1,35 @@
 // main.tsx
-import React from "react";
+import React, { Component, ReactNode } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import CssBaseline from "@mui/material/CssBaseline";
+import createTheme from "@mui/material/styles/createTheme";
+import ThemeProvider from "@mui/material/styles/ThemeProvider";
+
+class StartupErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state: { error: Error | null } = { error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("TenderCells startup error", error);
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ minHeight: "100vh", padding: 24, background: "#001B14", color: "#E4E7E5" }}>
+          <h1 style={{ marginTop: 0 }}>TenderCells could not start</h1>
+          <pre style={{ whiteSpace: "pre-wrap", color: "#EF5350" }}>{this.state.error.message}</pre>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const theme = createTheme({
   palette: {
@@ -49,6 +76,33 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        '*': {
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#4A7C59 #001B14',
+        },
+        '*::-webkit-scrollbar': {
+          width: '10px',
+          height: '10px',
+        },
+        '*::-webkit-scrollbar-track': {
+          backgroundColor: '#001B14',
+          borderRadius: '999px',
+        },
+        '*::-webkit-scrollbar-thumb': {
+          backgroundColor: '#4A7C59',
+          border: '2px solid #001B14',
+          borderRadius: '999px',
+        },
+        '*::-webkit-scrollbar-thumb:hover': {
+          backgroundColor: '#6BBF59',
+        },
+        '*::-webkit-scrollbar-corner': {
+          backgroundColor: '#001B14',
+        },
+      },
+    },
     MuiAppBar: {
       styleOverrides: {
         root: {
@@ -76,9 +130,11 @@ const theme = createTheme({
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
+    <StartupErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>
+    </StartupErrorBoundary>
   </React.StrictMode>
 );

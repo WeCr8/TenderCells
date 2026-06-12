@@ -1,5 +1,5 @@
 // CameraFeedViewer.tsx - Live camera feed display
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Paper,
@@ -9,7 +9,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { CameraAlt as CameraIcon, SignalCellularAlt as SignalIcon } from '@mui/icons-material';
-import { CameraFeed, CAMERA_LOCATIONS } from '../../types/camera';
+import { CameraFeed } from '../../types/camera';
 
 interface CameraFeedViewerProps {
   camera: CameraFeed;

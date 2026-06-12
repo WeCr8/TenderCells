@@ -9,14 +9,16 @@ import {
   Alert,
   Card,
   CardContent,
+  Divider,
   Stack,
   Chip,
 } from '@mui/material';
-import { Devices, Logout as LogoutIcon } from '@mui/icons-material';
+import { Devices, Google as GoogleIcon, Logout as LogoutIcon } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/products/ProductCard';
 import ProductRegistrationModal from '../components/products/ProductRegistrationModal';
+import { ProductsService } from '../services/productsService';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -40,14 +42,15 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function AccountPage() {
-  const { user, isAuthenticated, login, register, logout, error, loading } = useAuth();
-  const { products, loading: productsLoading, refetch, registerProduct } = useProducts();
+  const { user, isAuthenticated, login, loginWithGoogle, register, logout, error, loading, clearError } = useAuth();
+  const { products, loading: productsLoading, refetch, registerProduct, seedFirstGarageCoop, resetFirstGarageCoop } = useProducts();
   const [activeTab, setActiveTab] = useState(0);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -60,6 +63,7 @@ export default function AccountPage() {
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmittingAuth(true);
     try {
       if (authMode === 'login') {
         await login(email, password);
@@ -71,6 +75,19 @@ export default function AccountPage() {
     } catch (err) {
       // Error displayed in alert
       console.error('Auth error:', err);
+    } finally {
+      setIsSubmittingAuth(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsSubmittingAuth(true);
+    try {
+      await loginWithGoogle();
+    } catch (err) {
+      console.error('Google auth error:', err);
+    } finally {
+      setIsSubmittingAuth(false);
     }
   };
 
@@ -93,12 +110,32 @@ export default function AccountPage() {
             <Typography variant="h5" gutterBottom sx={{ color: '#C8B882' }}>
               {authMode === 'login' ? 'Login' : 'Register'}
             </Typography>
+            <Typography variant="body2" sx={{ mb: 2, color: '#A5B1A9' }}>
+              Continue with Google or use email and password.
+            </Typography>
 
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
               </Alert>
             )}
+
+            <Button
+              fullWidth
+              variant="outlined"
+              startIcon={<GoogleIcon />}
+              onClick={handleGoogleLogin}
+              disabled={loading || isSubmittingAuth}
+              sx={{ mb: 2, borderColor: '#C8B882', color: '#C8B882' }}
+            >
+              Continue with Google
+            </Button>
+
+            <Divider sx={{ my: 2, borderColor: '#4A7C59' }}>
+              <Typography variant="caption" sx={{ color: '#8A7D55' }}>
+                Email
+              </Typography>
+            </Divider>
 
             <form onSubmit={handleAuthSubmit}>
               <TextField
@@ -124,7 +161,7 @@ export default function AccountPage() {
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, bgcolor: '#4A7C59' }}
-                disabled={loading}
+                disabled={loading || isSubmittingAuth}
               >
                 {authMode === 'login' ? 'Login' : 'Register'}
               </Button>
@@ -136,7 +173,7 @@ export default function AccountPage() {
                 size="small"
                 onClick={() => {
                   setAuthMode(authMode === 'login' ? 'register' : 'login');
-                  setError(null);
+                  clearError();
                   setEmail('');
                   setPassword('');
                 }}
@@ -221,7 +258,7 @@ export default function AccountPage() {
       </TabPanel>
 
       <TabPanel value={activeTab} index={2}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'stretch', md: 'center' }, gap: 2, mb: 3, flexDirection: { xs: 'column', md: 'row' } }}>
           <Box>
             <Typography variant="h5" gutterBottom sx={{ color: '#C8B882' }}>
               Registered Devices
@@ -230,14 +267,39 @@ export default function AccountPage() {
               Manage your hardware units and automation devices (Chicken Tender, WatchTower AI, etc.)
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            onClick={() => setIsRegistrationModalOpen(true)}
-            sx={{ bgcolor: '#4A7C59' }}
-          >
-            Register Device
-          </Button>
+          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+            <Button
+              variant="outlined"
+              onClick={async () => {
+                await seedFirstGarageCoop();
+                await refetch();
+              }}
+            >
+              Register Garage Coop
+            </Button>
+            <Button
+              variant="outlined"
+              color="warning"
+              onClick={async () => {
+                await resetFirstGarageCoop();
+                await refetch();
+              }}
+            >
+              Reset Garage Coop
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setIsRegistrationModalOpen(true)}
+              sx={{ bgcolor: '#4A7C59' }}
+            >
+              Register Device
+            </Button>
+          </Stack>
         </Box>
+
+        <Alert severity="info" sx={{ mb: 2 }}>
+          First garage coop target: {ProductsService.FIRST_COOP_SERIAL} / {ProductsService.FIRST_COOP_DEVICE_ID} for {ProductsService.GARAGE_OWNER_EMAIL}.
+        </Alert>
 
         {productsLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>

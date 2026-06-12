@@ -1,9 +1,10 @@
 // error-tracking.ts
-import * as Sentry from '@sentry/react';
-import { Integrations } from '@sentry/tracing';
+export const initErrorTracking = () => {
+  const dsn = import.meta.env.VITE_SENTRY_DSN;
 
-Sentry.init({
-  dsn: 'your-sentry-dsn',
-  integrations: [new Integrations.BrowserTracing()],
-  tracesSampleRate: 1.0,
-});
+  if (!dsn) {
+    return;
+  }
+
+  console.info("Sentry DSN configured, but Sentry packages are not installed in this build.");
+};

@@ -155,6 +155,22 @@ export function useProducts() {
     }
   }, []);
 
+  const seedFirstGarageCoop = useCallback(async (): Promise<Product> => {
+    setError(null);
+    const product = ProductsService.seedFirstGarageCoop();
+    await fetchProducts();
+    await fetchStats();
+    return product;
+  }, [fetchProducts, fetchStats]);
+
+  const resetFirstGarageCoop = useCallback(async (): Promise<Product> => {
+    setError(null);
+    const product = ProductsService.resetFirstGarageCoop();
+    await fetchProducts();
+    await fetchStats();
+    return product;
+  }, [fetchProducts, fetchStats]);
+
   useEffect(() => {
     fetchProducts();
     fetchStats();
@@ -172,6 +188,8 @@ export function useProducts() {
     connectProduct,
     disconnectProduct,
     linkDeviceToProduct,
+    seedFirstGarageCoop,
+    resetFirstGarageCoop,
   };
 }
 

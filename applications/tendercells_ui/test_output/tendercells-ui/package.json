@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "check": "npm run quality:loop",
+    "fallow": "npx --yes fallow@2.94.0 --summary",
     "lint": "eslint .",
+    "quality:loop": "node scripts/quality-loop.mjs",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",

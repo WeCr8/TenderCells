@@ -1,5 +1,4 @@
 // RoamingRoostDashboard.tsx
-import React from "react";
 import Grid from "@mui/material/Grid";
 import Viewport3D from "../components/viewport/Viewport3D";
 import TelemetryPanel from "../components/telemetry/TelemetryPanel";
@@ -13,8 +12,13 @@ import AgricultureIcon from "@mui/icons-material/Agriculture";
 import ExploreIcon from "@mui/icons-material/Explore";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MapIcon from "@mui/icons-material/Map";
+import { useLocation } from "react-router-dom";
+import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
 
 export default function RoamingRoostDashboard() {
+  const location = useLocation();
+  const section = new URLSearchParams(location.search).get("section") || "mobile-coop";
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -29,6 +33,7 @@ export default function RoamingRoostDashboard() {
             </Typography>
             <Viewport3D />
           </Paper>
+          <ProductSectionPanel product="roaming-roost" section={section} />
           <BottomToolbar />
         </Grid>
         <Grid item xs={12} md={4}>

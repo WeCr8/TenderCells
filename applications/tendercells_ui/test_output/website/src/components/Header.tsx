@@ -1,8 +1,18 @@
-// Header.tsx
-import React from "react";
+import { Link } from "react-router-dom";
+import "./Header.css";
 
 export default function Header() {
   return (
-    <div>Header</div>
+    <header>
+      <nav>
+        <h1><Link to="/">Tender Cells</Link></h1>
+        <div>
+          <Link to="/">Home</Link>
+          <a href="#products">Products</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </nav>
+    </header>
   );
 }

@@ -15,6 +15,10 @@ import SecurityIcon from "@mui/icons-material/Security";
 import TrainIcon from "@mui/icons-material/Train";
 import CloudIcon from "@mui/icons-material/Cloud";
 import StopIcon from "@mui/icons-material/Stop";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 // Product icons mapping - using AgricultureIcon for poultry products
 const PRODUCT_ICONS: Record<string, React.ReactNode> = {
@@ -37,23 +41,71 @@ type TopNavBarProps = {
 };
 
 export default function TopNavBar({ title, product, onProductChange }: TopNavBarProps) {
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const handleAuthAction = async () => {
+    if (!isAuthenticated) {
+      navigate('/account');
+      return;
+    }
+
+    await logout();
+  };
+
   return (
-    <AppBar position="static" color="primary" enableColorOnDark>
-      <Toolbar>
-        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+    <AppBar position="static" elevation={0} sx={{ bgcolor: '#001F16', color: '#E4E7E5', borderBottom: '1px solid #1F5C3B' }}>
+      <Toolbar
+        sx={{
+          gap: 1,
+          flexWrap: { xs: 'wrap', lg: 'nowrap' },
+          alignItems: 'center',
+          minHeight: { xs: 64, sm: 68 },
+          px: { xs: 1, sm: 2 },
+          py: { xs: 1, lg: 0.75 },
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, minWidth: { xs: '100%', sm: 260 }, maxWidth: '100%' }}>
+          <Box
+            component="img"
+            src="/assets/images/tender-cells-logo.svg"
+            alt="Tender Cells"
+            sx={{ width: { xs: 32, sm: 36 }, height: { xs: 32, sm: 36 }, objectFit: 'contain', mr: 1, borderRadius: 1, flexShrink: 0 }}
+          />
           {PRODUCT_ICONS[product] && (
-            <Box sx={{ mr: 1, display: 'flex', alignItems: 'center', color: '#6BBF59' }}>
+            <Box sx={{ mr: 1, display: 'flex', alignItems: 'center', color: '#8DD47A' }}>
               {PRODUCT_ICONS[product]}
             </Box>
           )}
-          <Typography variant="h6">
+          <Typography
+            variant="h6"
+            sx={{
+              color: '#E4E7E5',
+              fontWeight: 700,
+              letterSpacing: 0,
+              textShadow: '0 1px 2px rgba(0,0,0,0.45)',
+              fontSize: { xs: '0.95rem', sm: '1.1rem', md: '1.25rem' },
+              minWidth: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             TENDER CELLS {title ? `| ${title}` : "| DASHBOARD"}
           </Typography>
         </Box>
         <Select
           value={product}
           onChange={(e) => onProductChange(e.target.value)}
-          sx={{ mr: 1, minWidth: 200 }}
+          sx={{
+            mr: { xs: 0, sm: 1 },
+            minWidth: { xs: 0, sm: 220 },
+            flex: { xs: '1 1 100%', sm: '1 1 260px', lg: '0 0 220px' },
+            color: '#E4E7E5',
+            '.MuiOutlinedInput-notchedOutline': { borderColor: '#1F5C3B' },
+            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#6BBF59' },
+            '.MuiSvgIcon-root': { color: '#E4E7E5' },
+          }}
         >
           <MenuItem value="chicken-tender">
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -118,10 +170,36 @@ export default function TopNavBar({ title, product, onProductChange }: TopNavBar
         </Select>
         <Button
           variant="outlined"
+          size="small"
+          startIcon={isAuthenticated ? <LogoutIcon /> : <AccountCircleIcon />}
+          onClick={handleAuthAction}
+          sx={{
+            mr: { xs: 0, sm: 1 },
+            color: '#E4E7E5',
+            borderColor: '#6BBF59',
+            minHeight: 40,
+            maxWidth: { xs: '100%', sm: 240 },
+            flex: { xs: '1 1 100%', sm: '1 1 180px', lg: '0 1 auto' },
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            textTransform: 'none',
+          }}
+        >
+          {isAuthenticated ? user?.email || 'Logout' : 'Sign In'}
+        </Button>
+        <Button
+          variant="outlined"
           color="error"
           size="small"
           startIcon={<StopIcon />}
-          sx={{ mr: 1 }}
+          sx={{
+            minHeight: 40,
+            minWidth: 0,
+            mr: { xs: 0, md: 1 },
+            flex: { xs: '1 1 calc(50% - 8px)', sm: '0 0 auto' },
+            '& .MuiButton-startIcon': { mr: { xs: 0.5, sm: 1 } },
+          }}
         >
           E-STOP
         </Button>
@@ -130,6 +208,12 @@ export default function TopNavBar({ title, product, onProductChange }: TopNavBar
           color="error"
           size="small"
           startIcon={<StopIcon />}
+          sx={{
+            minHeight: 40,
+            minWidth: 0,
+            flex: { xs: '1 1 calc(50% - 8px)', sm: '0 0 auto' },
+            '& .MuiButton-startIcon': { mr: { xs: 0.5, sm: 1 } },
+          }}
         >
           E-STOP
         </Button>

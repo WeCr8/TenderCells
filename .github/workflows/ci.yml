@@ -7,6 +7,25 @@ on:
     branches: [main, develop]
 
 jobs:
+  tendercells-ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: applications/tendercells_ui/test_output/tendercells-ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: applications/tendercells_ui/test_output/tendercells-ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Quality loop
+        run: npm run quality:loop
+
   app:
     runs-on: ubuntu-latest
     steps:

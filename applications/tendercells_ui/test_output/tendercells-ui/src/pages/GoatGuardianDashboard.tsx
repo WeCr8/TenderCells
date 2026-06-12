@@ -1,5 +1,4 @@
 // GoatGuardianDashboard.tsx
-import React from "react";
 import Grid from "@mui/material/Grid";
 import Viewport3D from "../components/viewport/Viewport3D";
 import TelemetryPanel from "../components/telemetry/TelemetryPanel";
@@ -13,8 +12,13 @@ import PetsIcon from "@mui/icons-material/Pets";
 import FenceIcon from "@mui/icons-material/Fence";
 import SecurityIcon from "@mui/icons-material/Security";
 import GrassIcon from "@mui/icons-material/Grass";
+import { useLocation } from "react-router-dom";
+import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
 
 export default function GoatGuardianDashboard() {
+  const location = useLocation();
+  const section = new URLSearchParams(location.search).get("section") || "shelter";
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -29,6 +33,7 @@ export default function GoatGuardianDashboard() {
             </Typography>
             <Viewport3D />
           </Paper>
+          <ProductSectionPanel product="goat-guardian" section={section} />
           <BottomToolbar />
         </Grid>
         <Grid item xs={12} md={4}>

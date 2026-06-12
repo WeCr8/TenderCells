@@ -1,5 +1,4 @@
 // DuckDockDashboard.tsx
-import React from "react";
 import Grid from "@mui/material/Grid";
 import Viewport3D from "../components/viewport/Viewport3D";
 import TelemetryPanel from "../components/telemetry/TelemetryPanel";
@@ -12,8 +11,13 @@ import Stack from "@mui/material/Stack";
 import WaterIcon from "@mui/icons-material/Water";
 import PoolIcon from "@mui/icons-material/Pool";
 import WavesIcon from "@mui/icons-material/Waves";
+import { useLocation } from "react-router-dom";
+import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
 
 export default function DuckDockDashboard() {
+  const location = useLocation();
+  const section = new URLSearchParams(location.search).get("section") || "dock";
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -28,6 +32,7 @@ export default function DuckDockDashboard() {
             </Typography>
             <Viewport3D />
           </Paper>
+          <ProductSectionPanel product="duck-dock" section={section} />
           <BottomToolbar />
         </Grid>
         <Grid item xs={12} md={4}>

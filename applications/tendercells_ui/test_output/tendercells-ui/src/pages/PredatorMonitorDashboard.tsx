@@ -1,11 +1,15 @@
 // PredatorMonitorDashboard.tsx - WatchTower AI predator detection system
-import React from "react";
 import WatchTowerMonitor from "../components/watchtower/WatchTowerMonitor";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import SecurityIcon from "@mui/icons-material/Security";
+import { useLocation } from "react-router-dom";
+import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
 
 export default function PredatorMonitorDashboard() {
+  const location = useLocation();
+  const section = new URLSearchParams(location.search).get("section") || "watchtower";
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -13,6 +17,7 @@ export default function PredatorMonitorDashboard() {
         <Typography variant="h4" sx={{ color: '#E4E7E5' }}>WatchTower AI™ Predator Monitor</Typography>
       </Box>
       <WatchTowerMonitor battery={85} solarCharge={65} connected={true} lastSeen="2 minutes ago" />
+      <ProductSectionPanel product="predator-monitor" section={section} />
     </Box>
   );
 }

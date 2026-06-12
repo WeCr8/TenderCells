@@ -68,7 +68,8 @@ export const useCoopModel = (defaultSize: keyof typeof COOP_PRESETS = '4x4x6') =
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        const model = JSON.parse(saved);
+        const savedModel = JSON.parse(saved) as CoopModelConfig;
+        const model = savedModel.isCustom ? savedModel : COOP_PRESETS[savedModel.size] || COOP_PRESETS[defaultSize];
         setState(prev => ({ ...prev, current: model }));
         if (model.modelUrl) {
           loadModel(model.modelUrl);

@@ -91,7 +91,7 @@ export default function WatchTowerMonitor({
 
               {/* LED indicator */}
               <circle cx="100" cy="130" r="4" fill={connected ? '#4AFF00' : '#FF4A4A'} />
-              <circle cx="100" cy="130" r="4" fill={connected ? '#4AFF00' : '#FF4A4A'} opacity="0.3" r="8" />
+              <circle cx="100" cy="130" r="8" fill={connected ? '#4AFF00' : '#FF4A4A'} opacity="0.3" />
             </svg>
 
             {/* Status indicator */}

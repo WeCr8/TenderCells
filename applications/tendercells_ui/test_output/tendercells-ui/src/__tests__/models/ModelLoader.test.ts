@@ -1,4 +1,5 @@
 // ModelLoader.test.ts - Unit tests for Three.js model loading
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ModelLoader } from '../../models/loaders/ModelLoader';
 
 describe('ModelLoader', () => {
@@ -45,7 +46,7 @@ describe('ModelLoader', () => {
 
     it('should track loading progress', async () => {
       const mockUrl = '/models/coops/presets/coop-4x4x6.glb';
-      const progressSpy = jest.fn();
+      const progressSpy = vi.fn();
       // loader.onProgress = progressSpy;
       // await loader.loadModel(mockUrl);
       // expect(progressSpy).toHaveBeenCalled();

@@ -1,5 +1,5 @@
 // CameraGrid.tsx - Multi-camera view layout
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Grid,
@@ -37,7 +37,6 @@ export default function CameraGrid({
   cameras,
   onAddCamera,
   onRemoveCamera,
-  onUpdateCamera,
 }: CameraGridProps) {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [editingCamera, setEditingCamera] = useState<CameraFeed | null>(null);

@@ -1,11 +1,12 @@
 // service-worker.ts
 self.addEventListener('install', (event) => {
-  event.waitUntil(
+  const installEvent = event as Event & { waitUntil: (promise: Promise<unknown>) => void };
+  installEvent.waitUntil(
     caches.open('tendercells-cache').then((cache) => {
       return cache.addAll([
         '/',
         '/index.html',
-        '/assets/logo.png',
+        '/assets/images/tender_cells_logo.png',
         '/assets/main.css',
         '/assets/main.js'
       ]);
@@ -14,9 +15,13 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+  const fetchEvent = event as Event & {
+    request: Request;
+    respondWith: (response: Promise<Response>) => void;
+  };
+  fetchEvent.respondWith(
+    caches.match(fetchEvent.request).then((response) => {
+      return response || fetch(fetchEvent.request);
     })
   );
 });

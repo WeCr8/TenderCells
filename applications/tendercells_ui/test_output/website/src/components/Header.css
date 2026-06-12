@@ -1,0 +1,39 @@
+header {
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+nav h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav h1 a {
+  text-decoration: none;
+  color: inherit;
+}
+
+nav div {
+  display: flex;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+nav a {
+  text-decoration: none;
+  color: #0066cc;
+  font-weight: 500;
+}
+
+nav a:hover {
+  color: #0052a3;
+}

@@ -1,5 +1,5 @@
-// PropertyLayoutBuilder.tsx - Yard layout grid UI
-import React, { useState } from 'react';
+// PropertyLayoutBuilder.tsx - Yard/property CRUD and simulation layout editor
+import { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Paper,
@@ -12,151 +12,372 @@ import {
   DialogContent,
   DialogActions,
   Stack,
+  MenuItem,
+  Chip,
+  Divider,
+  IconButton,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Grass as GrassIcon,
+  PlayArrow as PlayArrowIcon,
+} from '@mui/icons-material';
 
-interface GridCell {
+type PropertyItemKind = 'hardware' | 'obstacle';
+type HardwareType = 'chicken-tender' | 'roaming-roost' | 'duck-dock' | 'watchtower' | 'rail-module' | 'sensor';
+type ObstacleType = 'tree' | 'fence' | 'pond' | 'rock' | 'building' | 'garden' | 'no-go-zone';
+type LayoutMode = 'edit' | 'simulation';
+
+interface PropertyConfig {
+  name: string;
+  widthFt: number;
+  depthFt: number;
+  gridStepFt: number;
+}
+
+interface PropertyItem {
   id: string;
+  kind: PropertyItemKind;
+  name: string;
+  type: HardwareType | ObstacleType;
   x: number;
   y: number;
   width: number;
-  height: number;
-  type: 'coop' | 'roost' | 'water' | 'empty';
-  name: string;
+  depth: number;
 }
 
-const COLORS: Record<string, string> = {
-  coop: '#D4A574',
-  roost: '#8B6F47',
-  water: '#4A90E2',
-  empty: '#3d7d3d',
+const STORAGE_KEY = 'tendercells_property_layout_v2';
+
+const HARDWARE_TYPES: HardwareType[] = ['chicken-tender', 'roaming-roost', 'duck-dock', 'watchtower', 'rail-module', 'sensor'];
+const OBSTACLE_TYPES: ObstacleType[] = ['tree', 'fence', 'pond', 'rock', 'building', 'garden', 'no-go-zone'];
+
+const ITEM_COLORS: Record<string, string> = {
+  'chicken-tender': '#D4A574',
+  'roaming-roost': '#C8B882',
+  'duck-dock': '#4A90E2',
+  watchtower: '#8DD47A',
+  'rail-module': '#A5B1A9',
+  sensor: '#D0A34E',
+  tree: '#2F7D32',
+  fence: '#8B6F47',
+  pond: '#3F8FD2',
+  rock: '#777D82',
+  building: '#6A5D4D',
+  garden: '#4A7C59',
+  'no-go-zone': '#C62828',
 };
 
+const DEFAULT_PROPERTY: PropertyConfig = {
+  name: 'Home Yard',
+  widthFt: 120,
+  depthFt: 90,
+  gridStepFt: 10,
+};
+
+const DEFAULT_ITEMS: PropertyItem[] = [
+  { id: 'item-chicken-tender', kind: 'hardware', name: 'Chicken Tender', type: 'chicken-tender', x: 15, y: 14, width: 14, depth: 12 },
+  { id: 'item-roaming-roost', kind: 'hardware', name: 'Roaming Roost', type: 'roaming-roost', x: 62, y: 46, width: 12, depth: 10 },
+  { id: 'item-tree', kind: 'obstacle', name: 'Oak Tree', type: 'tree', x: 42, y: 18, width: 12, depth: 12 },
+  { id: 'item-pond', kind: 'obstacle', name: 'Pond', type: 'pond', x: 84, y: 20, width: 20, depth: 14 },
+  { id: 'item-fence', kind: 'obstacle', name: 'Fence Line', type: 'fence', x: 8, y: 72, width: 92, depth: 4 },
+];
+
+const loadLayout = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
+    const parsed = JSON.parse(saved) as { property: PropertyConfig; items: PropertyItem[] };
+    return {
+      property: parsed.property || DEFAULT_PROPERTY,
+      items: Array.isArray(parsed.items) ? parsed.items : DEFAULT_ITEMS,
+    };
+  } catch {
+    return { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
+  }
+};
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
 export default function PropertyLayoutBuilder() {
-  const [cells, setCells] = useState<GridCell[]>([
-    { id: '1', x: 0, y: 0, width: 4, height: 4, type: 'coop', name: 'Chicken Tender' },
-  ]);
-  const [gridSize] = useState(20); // 20x20 grid cells
-  const [cellSize] = useState(30); // pixels per cell
-  const [selectedCell, setSelectedCell] = useState<GridCell | null>(null);
+  const initial = useMemo(loadLayout, []);
+  const [property, setProperty] = useState<PropertyConfig>(initial.property);
+  const [items, setItems] = useState<PropertyItem[]>(initial.items);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(initial.items[0]?.id || null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editName, setEditName] = useState('');
+  const [editingItem, setEditingItem] = useState<PropertyItem | null>(null);
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>('edit');
+  const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
 
-  const handleAddCell = () => {
-    setSelectedCell({
-      id: String(Date.now()),
-      x: 0,
-      y: 0,
-      width: 3,
-      height: 3,
-      type: 'coop',
-      name: 'New Device',
+  const selectedItem = items.find((item) => item.id === selectedItemId) || null;
+  const mapWidth = 900;
+  const mapHeight = Math.max(420, Math.round((property.depthFt / property.widthFt) * mapWidth));
+  const scaleX = mapWidth / property.widthFt;
+  const scaleY = mapHeight / property.depthFt;
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ property, items }));
+  }, [property, items]);
+
+  const updateProperty = (updates: Partial<PropertyConfig>) => {
+    const nextProperty = {
+      ...property,
+      ...updates,
+      widthFt: Math.max(20, updates.widthFt ?? property.widthFt),
+      depthFt: Math.max(20, updates.depthFt ?? property.depthFt),
+      gridStepFt: Math.max(1, updates.gridStepFt ?? property.gridStepFt),
+    };
+    setProperty(nextProperty);
+    setItems((current) =>
+      current.map((item) => ({
+        ...item,
+        x: clamp(item.x, 0, Math.max(0, nextProperty.widthFt - item.width)),
+        y: clamp(item.y, 0, Math.max(0, nextProperty.depthFt - item.depth)),
+      }))
+    );
+  };
+
+  const openAddDialog = (kind: PropertyItemKind) => {
+    const type = kind === 'hardware' ? 'roaming-roost' : 'tree';
+    setEditingItem({
+      id: `item-${Date.now()}`,
+      kind,
+      name: kind === 'hardware' ? 'New Hardware' : 'New Obstacle',
+      type,
+      x: 5,
+      y: 5,
+      width: kind === 'hardware' ? 10 : 8,
+      depth: kind === 'hardware' ? 8 : 8,
     });
-    setEditName('New Device');
     setDialogOpen(true);
   };
 
-  const handleSaveCell = () => {
-    if (!selectedCell) return;
-    const updated = { ...selectedCell, name: editName };
-    if (cells.find(c => c.id === selectedCell.id)) {
-      setCells(cells.map(c => (c.id === selectedCell.id ? updated : c)));
-    } else {
-      setCells([...cells, updated]);
-    }
+  const openEditDialog = (item: PropertyItem) => {
+    setEditingItem(item);
+    setDialogOpen(true);
+  };
+
+  const saveItem = () => {
+    if (!editingItem) return;
+    const cleanItem = {
+      ...editingItem,
+      name: editingItem.name.trim() || 'Unnamed',
+      x: clamp(editingItem.x, 0, Math.max(0, property.widthFt - editingItem.width)),
+      y: clamp(editingItem.y, 0, Math.max(0, property.depthFt - editingItem.depth)),
+      width: Math.max(1, editingItem.width),
+      depth: Math.max(1, editingItem.depth),
+    };
+
+    setItems((current) => {
+      const exists = current.some((item) => item.id === cleanItem.id);
+      return exists ? current.map((item) => (item.id === cleanItem.id ? cleanItem : item)) : [...current, cleanItem];
+    });
+    setSelectedItemId(cleanItem.id);
+    setEditingItem(null);
     setDialogOpen(false);
-    setSelectedCell(null);
   };
 
-  const handleDeleteCell = (id: string) => {
-    setCells(cells.filter(c => c.id !== id));
+  const deleteItem = (itemId: string) => {
+    setItems((current) => current.filter((item) => item.id !== itemId));
+    if (selectedItemId === itemId) {
+      setSelectedItemId(null);
+    }
   };
 
-  const handleCellClick = (cell: GridCell) => {
-    setSelectedCell(cell);
-    setEditName(cell.name);
-    setDialogOpen(true);
+  const moveItem = (itemId: string, x: number, y: number) => {
+    setItems((current) =>
+      current.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              x: clamp(Math.round(x), 0, Math.max(0, property.widthFt - item.width)),
+              y: clamp(Math.round(y), 0, Math.max(0, property.depthFt - item.depth)),
+            }
+          : item
+      )
+    );
   };
+
+  const getPointerPosition = (event: React.PointerEvent<SVGSVGElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * property.widthFt,
+      y: ((event.clientY - rect.top) / rect.height) * property.depthFt,
+    };
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (!draggingItemId) return;
+    const item = items.find((candidate) => candidate.id === draggingItemId);
+    if (!item) return;
+    const pointer = getPointerPosition(event);
+    moveItem(draggingItemId, pointer.x - item.width / 2, pointer.y - item.depth / 2);
+  };
+
+  const renderItemShape = (item: PropertyItem) => {
+    const x = item.x * scaleX;
+    const y = item.y * scaleY;
+    const width = item.width * scaleX;
+    const height = item.depth * scaleY;
+    const color = ITEM_COLORS[item.type] || '#A5B1A9';
+    const selected = selectedItemId === item.id;
+
+    if (item.type === 'tree' || item.type === 'rock') {
+      return (
+        <ellipse
+          cx={x + width / 2}
+          cy={y + height / 2}
+          rx={width / 2}
+          ry={height / 2}
+          fill={color}
+          opacity={0.88}
+          stroke={selected ? '#FFD700' : '#0D2B1E'}
+          strokeWidth={selected ? 3 : 1}
+        />
+      );
+    }
+
+    if (item.type === 'pond' || item.type === 'garden' || item.type === 'no-go-zone') {
+      return (
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          rx={14}
+          fill={color}
+          opacity={item.type === 'no-go-zone' ? 0.38 : 0.82}
+          stroke={selected ? '#FFD700' : '#0D2B1E'}
+          strokeWidth={selected ? 3 : 1}
+          strokeDasharray={item.type === 'no-go-zone' ? '8 5' : undefined}
+        />
+      );
+    }
+
+    return (
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        rx={6}
+        fill={color}
+        opacity={0.88}
+        stroke={selected ? '#FFD700' : '#0D2B1E'}
+        strokeWidth={selected ? 3 : 1}
+      />
+    );
+  };
+
+  const routePoints = items
+    .filter((item) => item.kind === 'hardware' && item.type !== 'watchtower')
+    .map((item) => `${(item.x + item.width / 2) * scaleX},${(item.y + item.depth / 2) * scaleY}`)
+    .join(' ');
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Property Layout
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Design your property layout by placing coops, roosts, and other structures on the grid
-        </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleAddCell}>
-          Add Device
-        </Button>
-      </Box>
-
-      <Grid container spacing={3}>
-        {/* Grid View */}
-        <Grid item xs={12} md={8}>
-          <Paper
-            sx={{
-              p: 2,
-              background: '#1B542B',
-              position: 'relative',
-              width: '100%',
-              height: gridSize * cellSize + 40,
-            }}
+    <Box sx={{ p: { xs: 1, sm: 1.5, md: 3 } }}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        justifyContent="space-between"
+        spacing={2}
+        alignItems={{ xs: 'stretch', md: 'flex-start' }}
+        sx={{ mb: 3 }}
+      >
+        <Box>
+          <Typography variant="h4" gutterBottom sx={{ color: '#E4E7E5' }}>
+            Property Layout
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Build the yard map used by product placement, Roaming Roost route simulation, and obstacle avoidance.
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+          <ToggleButtonGroup
+            size="small"
+            exclusive
+            value={layoutMode}
+            onChange={(_, value) => value && setLayoutMode(value)}
           >
+            <ToggleButton value="edit">Edit</ToggleButton>
+            <ToggleButton value="simulation">Simulation</ToggleButton>
+          </ToggleButtonGroup>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => openAddDialog('hardware')}>
+            Add Hardware
+          </Button>
+          <Button variant="outlined" startIcon={<GrassIcon />} onClick={() => openAddDialog('obstacle')}>
+            Add Obstacle
+          </Button>
+        </Stack>
+      </Stack>
+
+      <Grid container spacing={2}>
+        <Grid item xs={12} lg={8}>
+          <Paper sx={{ p: { xs: 1, sm: 2 }, background: '#1B542B', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <svg
-              width={gridSize * cellSize}
-              height={gridSize * cellSize}
-              style={{ border: '1px solid #555' }}
+              viewBox={`0 0 ${mapWidth} ${mapHeight}`}
+              width="100%"
+              height={mapHeight}
+              role="img"
+              aria-label={`${property.name} property layout`}
+              style={{ minWidth: 640, maxHeight: '70dvh', border: '1px solid #1F5C3B', touchAction: 'none', background: '#123D25' }}
+              onPointerMove={handlePointerMove}
+              onPointerUp={() => setDraggingItemId(null)}
+              onPointerLeave={() => setDraggingItemId(null)}
             >
-              {/* Grid lines */}
-              {Array.from({ length: gridSize + 1 }).map((_, i) => (
-                <g key={`lines-${i}`}>
-                  <line
-                    x1={i * cellSize}
-                    y1={0}
-                    x2={i * cellSize}
-                    y2={gridSize * cellSize}
-                    stroke="#333"
-                    strokeWidth={1}
-                  />
-                  <line
-                    x1={0}
-                    y1={i * cellSize}
-                    x2={gridSize * cellSize}
-                    y2={i * cellSize}
-                    stroke="#333"
-                    strokeWidth={1}
-                  />
-                </g>
+              {Array.from({ length: Math.floor(property.widthFt / property.gridStepFt) + 1 }).map((_, i) => (
+                <line
+                  key={`v-${i}`}
+                  x1={i * property.gridStepFt * scaleX}
+                  y1={0}
+                  x2={i * property.gridStepFt * scaleX}
+                  y2={mapHeight}
+                  stroke="#1F5C3B"
+                  strokeWidth={1}
+                />
+              ))}
+              {Array.from({ length: Math.floor(property.depthFt / property.gridStepFt) + 1 }).map((_, i) => (
+                <line
+                  key={`h-${i}`}
+                  x1={0}
+                  y1={i * property.gridStepFt * scaleY}
+                  x2={mapWidth}
+                  y2={i * property.gridStepFt * scaleY}
+                  stroke="#1F5C3B"
+                  strokeWidth={1}
+                />
               ))}
 
-              {/* Placed cells */}
-              {cells.map(cell => (
+              {layoutMode === 'simulation' && routePoints && (
+                <polyline points={routePoints} fill="none" stroke="#8DD47A" strokeWidth={5} strokeDasharray="12 8" />
+              )}
+
+              {items.map((item) => (
                 <g
-                  key={cell.id}
-                  onClick={() => handleCellClick(cell)}
-                  style={{ cursor: 'pointer' }}
+                  key={item.id}
+                  onPointerDown={(event) => {
+                    event.preventDefault();
+                    setSelectedItemId(item.id);
+                    setDraggingItemId(item.id);
+                  }}
+                  onDoubleClick={() => openEditDialog(item)}
+                  style={{ cursor: layoutMode === 'edit' ? 'grab' : 'pointer' }}
                 >
-                  <rect
-                    x={cell.x * cellSize}
-                    y={cell.y * cellSize}
-                    width={cell.width * cellSize}
-                    height={cell.height * cellSize}
-                    fill={COLORS[cell.type]}
-                    stroke={selectedCell?.id === cell.id ? '#FFD700' : '#333'}
-                    strokeWidth={selectedCell?.id === cell.id ? 3 : 1}
-                    opacity={0.8}
-                  />
+                  {renderItemShape(item)}
                   <text
-                    x={cell.x * cellSize + (cell.width * cellSize) / 2}
-                    y={cell.y * cellSize + (cell.height * cellSize) / 2}
+                    x={(item.x + item.width / 2) * scaleX}
+                    y={(item.y + item.depth / 2) * scaleY}
                     textAnchor="middle"
-                    dy="0.3em"
-                    fill="#fff"
-                    fontSize={12}
+                    dominantBaseline="middle"
+                    fill="#F0EDE4"
+                    fontSize={13}
+                    fontWeight={700}
+                    pointerEvents="none"
                   >
-                    {cell.name}
+                    {item.name}
                   </text>
                 </g>
               ))}
@@ -164,111 +385,197 @@ export default function PropertyLayoutBuilder() {
           </Paper>
         </Grid>
 
-        {/* Device List */}
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Placed Devices
-            </Typography>
-            <Stack spacing={1}>
-              {cells.map(cell => (
-                <Box
-                  key={cell.id}
-                  sx={{
-                    p: 1,
-                    bgcolor: COLORS[cell.type],
-                    borderRadius: 1,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    '&:hover': { opacity: 0.9 },
-                  }}
-                  onClick={() => handleCellClick(cell)}
-                >
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                      {cell.name}
-                    </Typography>
-                    <Typography variant="caption">
-                      Position: ({cell.x}, {cell.y}) | Size: {cell.width}×{cell.height}
-                    </Typography>
-                  </Box>
-                  <Button
-                    size="small"
-                    variant="text"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteCell(cell.id);
+        <Grid item xs={12} lg={4}>
+          <Stack spacing={2}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Property
+              </Typography>
+              <TextField
+                label="Property Name"
+                value={property.name}
+                onChange={(event) => updateProperty({ name: event.target.value })}
+                fullWidth
+                sx={{ mb: 1.5 }}
+              />
+              <Grid container spacing={1.5}>
+                <Grid item xs={4}>
+                  <TextField
+                    label="Width ft"
+                    type="number"
+                    value={property.widthFt}
+                    onChange={(event) => updateProperty({ widthFt: parseInt(event.target.value, 10) || 20 })}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    label="Depth ft"
+                    type="number"
+                    value={property.depthFt}
+                    onChange={(event) => updateProperty({ depthFt: parseInt(event.target.value, 10) || 20 })}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    label="Grid ft"
+                    type="number"
+                    value={property.gridStepFt}
+                    onChange={(event) => updateProperty({ gridStepFt: parseInt(event.target.value, 10) || 1 })}
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Items
+              </Typography>
+              <Stack spacing={1}>
+                {items.map((item) => (
+                  <Box
+                    key={item.id}
+                    sx={{
+                      p: 1.25,
+                      borderRadius: 1,
+                      bgcolor: selectedItemId === item.id ? '#0D2B1E' : '#002017',
+                      border: selectedItemId === item.id ? '1px solid #6BBF59' : '1px solid transparent',
                     }}
+                    onClick={() => setSelectedItemId(item.id)}
                   >
-                    <DeleteIcon />
+                    <Stack direction="row" justifyContent="space-between" spacing={1}>
+                      <Box>
+                        <Typography variant="body2" sx={{ color: '#E4E7E5', fontWeight: 700 }}>
+                          {item.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {item.kind} / {item.type} / ({item.x}, {item.y}) / {item.width}x{item.depth} ft
+                        </Typography>
+                      </Box>
+                      <Stack direction="row" spacing={0.5}>
+                        <Tooltip title="Edit item">
+                          <IconButton size="small" onClick={() => openEditDialog(item)}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete item">
+                          <IconButton size="small" color="error" onClick={() => deleteItem(item.id)}>
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </Stack>
+                  </Box>
+                ))}
+              </Stack>
+            </Paper>
+
+            {selectedItem && (
+              <Paper sx={{ p: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                  <Typography variant="h6">Selected</Typography>
+                  <Chip label={selectedItem.kind} size="small" />
+                </Stack>
+                <Typography variant="body2" sx={{ color: '#E4E7E5', mb: 1 }}>
+                  {selectedItem.name}
+                </Typography>
+                <Divider sx={{ my: 1 }} />
+                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                  <Button size="small" variant="outlined" onClick={() => moveItem(selectedItem.id, selectedItem.x, selectedItem.y - property.gridStepFt)}>
+                    Up
                   </Button>
-                </Box>
-              ))}
-            </Stack>
-          </Paper>
+                  <Button size="small" variant="outlined" onClick={() => moveItem(selectedItem.id, selectedItem.x, selectedItem.y + property.gridStepFt)}>
+                    Down
+                  </Button>
+                  <Button size="small" variant="outlined" onClick={() => moveItem(selectedItem.id, selectedItem.x - property.gridStepFt, selectedItem.y)}>
+                    Left
+                  </Button>
+                  <Button size="small" variant="outlined" onClick={() => moveItem(selectedItem.id, selectedItem.x + property.gridStepFt, selectedItem.y)}>
+                    Right
+                  </Button>
+                  {layoutMode === 'simulation' && selectedItem.type === 'roaming-roost' && (
+                    <Button size="small" variant="contained" startIcon={<PlayArrowIcon />}>
+                      Simulate Route
+                    </Button>
+                  )}
+                </Stack>
+              </Paper>
+            )}
+          </Stack>
         </Grid>
       </Grid>
 
-      {/* Edit Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{selectedCell?.id ? 'Edit Device' : 'Add Device'}</DialogTitle>
+        <DialogTitle>{items.some((item) => item.id === editingItem?.id) ? 'Edit Item' : 'Add Item'}</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
-          <TextField
-            label="Device Name"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          {selectedCell && (
-            <>
-              <TextField
-                label="Position X"
-                type="number"
-                value={selectedCell.x}
-                onChange={(e) =>
-                  setSelectedCell({ ...selectedCell, x: parseInt(e.target.value) || 0 })
-                }
-                fullWidth
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                label="Position Y"
-                type="number"
-                value={selectedCell.y}
-                onChange={(e) =>
-                  setSelectedCell({ ...selectedCell, y: parseInt(e.target.value) || 0 })
-                }
-                fullWidth
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                label="Width (cells)"
-                type="number"
-                value={selectedCell.width}
-                onChange={(e) =>
-                  setSelectedCell({ ...selectedCell, width: parseInt(e.target.value) || 1 })
-                }
-                fullWidth
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                label="Height (cells)"
-                type="number"
-                value={selectedCell.height}
-                onChange={(e) =>
-                  setSelectedCell({ ...selectedCell, height: parseInt(e.target.value) || 1 })
-                }
-                fullWidth
-              />
-            </>
+          {editingItem && (
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Name"
+                  value={editingItem.name}
+                  onChange={(event) => setEditingItem({ ...editingItem, name: event.target.value })}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  select
+                  label="Kind"
+                  value={editingItem.kind}
+                  onChange={(event) => {
+                    const nextKind = event.target.value as PropertyItemKind;
+                    setEditingItem({
+                      ...editingItem,
+                      kind: nextKind,
+                      type: nextKind === 'hardware' ? 'roaming-roost' : 'tree',
+                    });
+                  }}
+                  fullWidth
+                >
+                  <MenuItem value="hardware">Hardware/Product</MenuItem>
+                  <MenuItem value="obstacle">Obstacle</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  select
+                  label="Type"
+                  value={editingItem.type}
+                  onChange={(event) => setEditingItem({ ...editingItem, type: event.target.value as HardwareType | ObstacleType })}
+                  fullWidth
+                >
+                  {(editingItem.kind === 'hardware' ? HARDWARE_TYPES : OBSTACLE_TYPES).map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              {(['x', 'y', 'width', 'depth'] as const).map((field) => (
+                <Grid item xs={6} sm={3} key={field}>
+                  <TextField
+                    label={field === 'x' ? 'X ft' : field === 'y' ? 'Y ft' : `${field} ft`}
+                    type="number"
+                    value={editingItem[field]}
+                    onChange={(event) =>
+                      setEditingItem({
+                        ...editingItem,
+                        [field]: parseInt(event.target.value, 10) || 0,
+                      })
+                    }
+                    fullWidth
+                  />
+                </Grid>
+              ))}
+            </Grid>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveCell} variant="contained">
+          <Button onClick={saveItem} variant="contained">
             Save
           </Button>
         </DialogActions>

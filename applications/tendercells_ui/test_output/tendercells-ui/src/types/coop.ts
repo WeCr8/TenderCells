@@ -15,6 +15,7 @@ export interface CoopModelConfig {
   dimensions: CoopDimensions;
   modelUrl?: string; // URL to custom 3D model (GLB/GLTF)
   thumbnailUrl?: string;
+  placeholderColor?: string;
   isCustom: boolean;
   uploadedAt?: string;
   scale?: { x: number; y: number; z: number };
@@ -28,7 +29,7 @@ export const COOP_PRESETS: Record<string, CoopModelConfig> = {
     name: "Small Coop (3x3x5)",
     size: "3x3x5",
     dimensions: { width: 3, depth: 3, height: 5 },
-    modelUrl: "/models/coops/presets/coop-3x3x5.glb",
+    placeholderColor: "#6BBF59",
     isCustom: false,
   },
   "4x4x6": {
@@ -36,7 +37,7 @@ export const COOP_PRESETS: Record<string, CoopModelConfig> = {
     name: "Medium Coop (4x4x6)",
     size: "4x4x6",
     dimensions: { width: 4, depth: 4, height: 6 },
-    modelUrl: "/models/coops/presets/coop-4x4x6.glb",
+    placeholderColor: "#5AAE72",
     isCustom: false,
   },
   "6x6x8": {
@@ -44,7 +45,7 @@ export const COOP_PRESETS: Record<string, CoopModelConfig> = {
     name: "Large Coop (6x6x8)",
     size: "6x6x8",
     dimensions: { width: 6, depth: 6, height: 8 },
-    modelUrl: "/models/coops/presets/coop-6x6x8.glb",
+    placeholderColor: "#4E9C84",
     isCustom: false,
   },
 };

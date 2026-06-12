@@ -13,14 +13,17 @@ import TrainIcon from "@mui/icons-material/Train";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
 import BuildIcon from "@mui/icons-material/Build";
+import { useLocation } from "react-router-dom";
+import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
+import { ProductDetailsPanel, ProductHero } from "../components/products/ProductOverview";
 
 export default function RailSystemModulesDashboard() {
+  const location = useLocation();
+  const section = new URLSearchParams(location.search).get("section") || "rails";
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <TrainIcon sx={{ fontSize: 40, mr: 2, color: '#6BBF59' }} />
-        <Typography variant="h4" sx={{ color: '#E4E7E5' }}>Rail System Modules Dashboard</Typography>
-      </Box>
+      <ProductHero product="rail-system-modules" />
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
@@ -29,9 +32,11 @@ export default function RailSystemModulesDashboard() {
             </Typography>
             <Viewport3D />
           </Paper>
+          <ProductSectionPanel product="rail-system-modules" section={section} />
           <BottomToolbar />
         </Grid>
         <Grid item xs={12} md={4}>
+          <ProductDetailsPanel product="rail-system-modules" />
           <TelemetryPanel />
           <Paper elevation={2} sx={{ p: 2, mt: 2 }}>
             <Typography variant="h6" gutterBottom>

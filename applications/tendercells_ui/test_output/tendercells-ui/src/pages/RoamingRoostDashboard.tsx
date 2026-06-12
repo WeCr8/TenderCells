@@ -14,6 +14,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MapIcon from "@mui/icons-material/Map";
 import { useLocation } from "react-router-dom";
 import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
+import { ProductDetailsPanel, ProductHero } from "../components/products/ProductOverview";
 
 export default function RoamingRoostDashboard() {
   const location = useLocation();
@@ -21,10 +22,7 @@ export default function RoamingRoostDashboard() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <AgricultureIcon sx={{ fontSize: 40, mr: 2, color: '#6BBF59' }} />
-        <Typography variant="h4" sx={{ color: '#E4E7E5' }}>Roaming Roost Dashboard</Typography>
-      </Box>
+      <ProductHero product="roaming-roost" />
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
@@ -37,6 +35,7 @@ export default function RoamingRoostDashboard() {
           <BottomToolbar />
         </Grid>
         <Grid item xs={12} md={4}>
+          <ProductDetailsPanel product="roaming-roost" />
           <TelemetryPanel />
           <Paper elevation={2} sx={{ p: 2, mt: 2 }}>
             <Typography variant="h6" gutterBottom>

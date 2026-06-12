@@ -21,6 +21,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import Alert from "@mui/material/Alert";
 import { useLocation } from "react-router-dom";
 import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
+import { ProductDetailsPanel, ProductHero } from "../components/products/ProductOverview";
 import type { CameraFeed } from "../types/camera";
 
 const DEFAULT_CAMERAS: CameraFeed[] = [
@@ -80,6 +81,7 @@ export default function ChickenTenderDashboard() {
 
   return (
     <Box>
+      <ProductHero product="chicken-tender" />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: { xs: 2, md: 3 }, minWidth: 0 }}>
         <AgricultureIcon sx={{ fontSize: { xs: 30, sm: 40 }, color: '#6BBF59', flexShrink: 0 }} />
         <Typography variant="h4" sx={{ color: '#E4E7E5', fontSize: { xs: '1.65rem', sm: '2.125rem' }, lineHeight: 1.15 }}>
@@ -174,6 +176,7 @@ export default function ChickenTenderDashboard() {
           <BottomToolbar />
         </Grid>
         <Grid item xs={12} lg={4}>
+          <ProductDetailsPanel product="chicken-tender" />
           <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
             <Typography variant="h6" gutterBottom>
               Device Configuration

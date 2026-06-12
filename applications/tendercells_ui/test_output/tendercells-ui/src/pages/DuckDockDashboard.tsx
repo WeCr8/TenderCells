@@ -13,6 +13,7 @@ import PoolIcon from "@mui/icons-material/Pool";
 import WavesIcon from "@mui/icons-material/Waves";
 import { useLocation } from "react-router-dom";
 import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
+import { ProductDetailsPanel, ProductHero } from "../components/products/ProductOverview";
 
 export default function DuckDockDashboard() {
   const location = useLocation();
@@ -20,10 +21,7 @@ export default function DuckDockDashboard() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <WaterIcon sx={{ fontSize: 40, mr: 2, color: '#6BBF59' }} />
-        <Typography variant="h4" sx={{ color: '#E4E7E5' }}>Duck Dock Dashboard</Typography>
-      </Box>
+      <ProductHero product="duck-dock" />
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
@@ -36,6 +34,7 @@ export default function DuckDockDashboard() {
           <BottomToolbar />
         </Grid>
         <Grid item xs={12} md={4}>
+          <ProductDetailsPanel product="duck-dock" />
           <TelemetryPanel />
           <Paper elevation={2} sx={{ p: 2, mt: 2 }}>
             <Typography variant="h6" gutterBottom>

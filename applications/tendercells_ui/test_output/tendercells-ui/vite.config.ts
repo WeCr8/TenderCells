@@ -39,6 +39,7 @@ const muiBoxOptimizerPatch = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: process.env.VITE_APP_BASE_PATH || '/',
   plugins: [muiBoxCreateThemePatch(), react()],
   envDir: path.resolve(__dirname, '../../../..'),
   resolve: {

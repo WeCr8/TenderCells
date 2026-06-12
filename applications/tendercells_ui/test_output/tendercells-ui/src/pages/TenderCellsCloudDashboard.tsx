@@ -11,10 +11,17 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
 import StorageIcon from "@mui/icons-material/Storage";
 import DevicesIcon from "@mui/icons-material/Devices";
+import { useLocation } from "react-router-dom";
+import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
+import { ProductDetailsPanel, ProductHero } from "../components/products/ProductOverview";
 
 export default function TenderCellsCloudDashboard() {
+  const location = useLocation();
+  const section = new URLSearchParams(location.search).get("section") || "overview";
+
   return (
     <Box>
+      <ProductHero product="tender-cells-cloud" />
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <CloudIcon sx={{ fontSize: 40, mr: 2, color: '#6BBF59' }} />
         <Typography variant="h4" sx={{ color: '#E4E7E5' }}>TenderCells Cloud Dashboard</Typography>
@@ -65,6 +72,10 @@ export default function TenderCellsCloudDashboard() {
           </Paper>
         </Grid>
       </Grid>
+      <Box sx={{ mt: 3 }}>
+        <ProductDetailsPanel product="tender-cells-cloud" />
+        <ProductSectionPanel product="tender-cells-cloud" section={section} />
+      </Box>
     </Box>
   );
 }

@@ -23,7 +23,9 @@ and real-time monitoring dashboard.
 | Edge AI / Vision | ESP32-S3, TensorFlow Lite Micro |
 | Predator Monitor | ESP32-CAM × 3, LoRa SX1276, 18650 + 5W solar |
 | Coop Controller | ESP32 (main MCU) |
-| Robot Arm | 6DOF arm, separate MCU (TBD) |
+| Arm Controller | Jetson Nano (9DOF: XYZ gantry + 6DOF arm) |
+| Gantry Motors | NEMA23HS30-2804S stepper × 3 (X/Y/Z linear) |
+| Stepper Drivers | DM542T × 3 (32-bit microstepping) |
 | Drive System | Mecanum wheels, DC motors (Roaming Roost) |
 | Sensors | DHT22, MQ-137, load cells, reed switches |
 
@@ -38,6 +40,83 @@ and real-time monitoring dashboard.
 | Turkey Tower™ | 4×4×6 ft | Turkey-specific enclosure |
 | Pigeon Palace™ | 4×4×6 ft | Smart pigeon housing |
 | WatchTower AI™ | 3×3×5 ft | Solar predator monitor — ESP32 + LoRa + 3-cam dome |
+
+---
+
+## 1.5 Chicken Tender™ Kinematic System (9DOF)
+
+### Architecture: XYZ Gantry + 6DOF Arm on Platform
+
+```
+Coop Interior (4×4×5 ft = 1220×1220×1500 mm)
+
+                  Z (up)
+                  |
+    ___4ft___     |___5ft___
+   |         |   |         |
+4ft|  XYZ    |   | Z-axis  |
+   |Gantry   |   | spans   |
+   |_________|___|_________|
+       ↓         ↓
+    X-axis    6DOF Arm
+    Y-axis    mounted at
+               Z position
+```
+
+### Base Motion — XYZ Gantry (3DOF)
+| Axis | Range | Motor | Driver | Speed |
+|------|-------|-------|--------|-------|
+| X | 1220mm (full width) | NEMA23HS30-2804S | DM542T | 100 mm/sec |
+| Y | 1220mm (full depth) | NEMA23HS30-2804S | DM542T | 100 mm/sec |
+| Z | 1500mm (full height) | NEMA23HS30-2804S | DM542T | 100 mm/sec |
+
+- Leadscrew pitch: 1mm (1 step = 1mm travel)
+- Payload: 10kg (arm + gripper + accessories)
+- Controller: Jetson Nano GPIO (3 pulse/direction/enable pins)
+
+### Arm Motion — 6DOF (6DOF)
+| DOF | Type | Motion |
+|-----|------|--------|
+| 1 | Revolute | Base rotation (360°) |
+| 2-5 | Revolute | Joint 2-5 (arm reach) |
+| 6 | Revolute | Wrist rotation (360°) |
+
+- Arm mountpoint: Z-axis carriage top
+- Reach from mount: 500mm radius
+- Speed: 30-180 deg/sec (depends on arm type)
+- Selectable arm types: UR3e (URScript), Custom stepper, Simulator
+
+### Combined Workspace (9DOF)
+- **Horizontal coverage**: Entire 4×4 ft coop floor via XYZ gantry
+- **Vertical coverage**: Full 5 ft height via Z-axis
+- **Reach envelope**: 500mm radius from any gantry XY position
+- **Total workspace**: 100% coop interior coverage
+
+### Motion Types
+```
+Sequential: Gantry moves to position → Arm performs task
+  Example: Move to nest box (gantry) → Collect egg (arm)
+
+Parallel: Gantry + arm move simultaneously
+  Example: Sweep floor (parallel X motion + scraper down)
+
+Nested: Sequential motions within loop
+  Example: [Move to grid 1 (seq), Collect, Move to grid 2, Collect, ...]
+```
+
+### MQTT Topics (9DOF Commands)
+```
+tc/{deviceId}/cmd/gantry      # XYZ motion only
+tc/{deviceId}/cmd/arm         # 6DOF motion only
+tc/{deviceId}/cmd/motion      # Coordinated 9DOF (sequential/parallel)
+tc/{deviceId}/state/gantry    # Position [X, Y, Z] feedback
+tc/{deviceId}/state/arm       # Joint angles [J1-J6] feedback
+```
+
+### Predefined Routines
+- `egg_collection_routine()` — move to nest → lower gripper → grip → retract → move to basket → release
+- `cleaning_sweep_routine()` — parallel XY motion with scraper down (Z-axis stationary)
+- Custom: MQTT command orchestrates any sequential/parallel combination
 
 ---
 

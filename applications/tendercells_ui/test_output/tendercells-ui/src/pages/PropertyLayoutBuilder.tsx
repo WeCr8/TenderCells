@@ -57,7 +57,22 @@ import {
   type PropertyItemKind,
 } from '../components/property/propertyLayoutStore';
 import Viewport3D from '../components/viewport/Viewport3D';
+import { useProducts } from '../hooks/useProducts';
 import './PropertyLayoutBuilder.css';
+
+// ProductFamily values that map directly to HardwareType keys in PRODUCT_DIMENSIONS
+const FAMILY_TO_HW_TYPE: Partial<Record<string, HardwareType>> = {
+  'chicken-tender': 'chicken-tender',
+  'roaming-roost':  'roaming-roost',
+  'duck-dock':      'duck-dock',
+  'goat-guardian':  'goat-guardian',
+  'bunny-burrow':   'bunny-burrow',
+  'turkey-tower':   'turkey-tower',
+  'pigeon-palace':  'pigeon-palace',
+  'predator-monitor': 'watchtower',
+  'rail-system':    'rail-module',
+  'sensor-pod':     'sensor',
+};
 
 type LayoutMode = 'edit' | 'simulation';
 
@@ -97,6 +112,58 @@ export default function PropertyLayoutBuilder() {
   const [dragSnapPos, setDragSnapPos] = useState<{ x: number; y: number; width: number; depth: number } | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
   const [showRoamingLayer, setShowRoamingLayer] = useState(false);
+
+  const { products } = useProducts();
+
+  // Sync layout items to registered Firestore products.
+  // Uses enclosure_width_ft / enclosure_depth_ft from the product record when
+  // available, otherwise falls back to PRODUCT_DIMENSIONS spec values.
+  // Runs once per products fetch — does not overwrite user-moved positions.
+  useEffect(() => {
+    if (!products || products.length === 0) return;
+    setItems(prev => {
+      let next = [...prev];
+      const usedIds = new Set<string>();
+
+      for (const product of products) {
+        const family = product.metadata?.product_family as string | undefined;
+        const hwType = family ? FAMILY_TO_HW_TYPE[family] : undefined;
+        if (!hwType || !(hwType in PRODUCT_DIMENSIONS)) continue;
+
+        const spec = PRODUCT_DIMENSIONS[hwType];
+        const w = product.metadata?.enclosure_width_ft ?? spec.width;
+        const d = product.metadata?.enclosure_depth_ft ?? spec.depth;
+
+        // Find an existing item of same hardware type not already claimed
+        const existingIdx = next.findIndex(
+          it => it.kind === 'hardware' && it.type === hwType && !usedIds.has(it.id)
+        );
+
+        if (existingIdx >= 0) {
+          usedIds.add(next[existingIdx].id);
+          // Update dims + shape; keep user's x/y position
+          next[existingIdx] = { ...next[existingIdx], width: w, depth: d, shape: spec.shape };
+        } else {
+          // Add a new item for this registered product (no existing slot)
+          const newId = `item-${product.id}`;
+          usedIds.add(newId);
+          next.push({
+            id: newId,
+            kind: 'hardware',
+            name: product.product_name,
+            type: hwType,
+            shape: spec.shape,
+            x: 5,
+            y: 5,
+            width: w,
+            depth: d,
+          });
+        }
+      }
+      return next;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products]);
 
   const selectedItem = items.find((item) => item.id === selectedItemId) || null;
   const mapWidth = 900;

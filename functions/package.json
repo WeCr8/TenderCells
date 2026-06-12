@@ -2,7 +2,6 @@
   "name": "tender-cells-functions",
   "description": "Firebase Cloud Functions for Tender Cells",
   "version": "0.1.0",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "serve": "firebase emulators:start --only functions",

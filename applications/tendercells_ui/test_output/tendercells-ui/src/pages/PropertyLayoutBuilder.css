@@ -1,0 +1,19 @@
+.plb-canvas {
+  min-width: 480px;
+  max-height: 72dvh;
+  touch-action: none;
+  display: block;
+  background: #0d2b1e;
+}
+
+.plb-item-grab {
+  cursor: grab;
+}
+
+.plb-item-grabbing {
+  cursor: grabbing;
+}
+
+.plb-item-pointer {
+  cursor: pointer;
+}

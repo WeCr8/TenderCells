@@ -1,6 +1,7 @@
 // RoamingRoostDashboard.tsx
 import React from "react";
+import DashboardLayout from "../components/layout/DashboardLayout";
 
 export default function RoamingRoostDashboard() {
-  return <div>RoamingRoost Dashboard</div>;
+  return <DashboardLayout productName="Roaming Roost" />;
 }

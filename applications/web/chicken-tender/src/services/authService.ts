@@ -77,6 +77,9 @@ class AuthService {
   }
 
   // Sign in with OAuth provider
+  // Note: Cross-Origin-Opener-Policy (COOP) warnings may appear in the console when using OAuth.
+  // These warnings are from Supabase's internal OAuth implementation checking window.closed/close
+  // and are harmless - they don't affect functionality. The OAuth flow uses redirects, not popups.
   async signInWithProvider(provider: 'google' | 'github' | 'discord'): Promise<{ error: AuthError | null }> {
     try {
       const { error } = await supabase.auth.signInWithOAuth({

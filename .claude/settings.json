@@ -1,0 +1,109 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "c:\\Users\\zach\\Documents\\Projects\\TenderCells"]
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"param([string]$TOOL, [string]$FILE); if ($TOOL -match 'Write|Edit') { if ($FILE -match '\\.(ts|tsx|cpp|h)$') { Write-Host \\\"→ Pre-check: scanning for hardcoded secrets...\\\"; if (Select-String -Path $FILE -Pattern \\\"(password|api_key|secret|AIza)\\\" -Quiet) { Write-Host \\\"❌ BLOCKED: Hardcoded credential detected. Use environment config.\\\"; exit 1 } } } exit 0\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"param([string]$TOOL, [string]$FILE); if ($TOOL -match 'Write|Edit') { if ($FILE -match 'app.*\\\\.tsx?$') { Write-Host \\\"→ TypeScript check on $FILE\\\"; cd c:\\Users\\zach\\Documents\\Projects\\TenderCells; npx tsc --noEmit --silent 2>&1 | Select-Object -First 5 } } exit 0\""
+          }
+        ]
+      }
+    ]
+  },
+  "agents": {
+    "firmware-engineer": {
+      "model": "ollama:deepseek-coder-v2",
+      "baseUrl": "http://localhost:11434/v1",
+      "systemPrompt": "You are an embedded firmware engineer specializing in ESP32/Arduino for the Tender Cells automated animal care system. Follow CLAUDE.md firmware skill rules: watchdog init, non-blocking WiFi reconnect, E-STOP subscriber, state machine pattern (BOOT→CONNECTING→IDLE→RUNNING→ERROR→ESTOP). No delay() > 50ms in loop(). After writing, run: cd firmware/<target> && pio run. Report binary size and warnings."
+    },
+    "app-builder": {
+      "model": "ollama:deepseek-coder-v2",
+      "baseUrl": "http://localhost:11434/v1",
+      "systemPrompt": "You are a React Native engineer for the Tender Cells app. Rules: colors use tokens (#0D2B1E bg, #C8B882 gold), every screen has StatusHeader, every hardware action through ConfirmModal, Firebase listeners have cleanup, TypeScript strict. Read existing code first. After writing: tsc --noEmit passes, no ESLint errors."
+    },
+    "code-reviewer": {
+      "model": "ollama:deepseek-coder-v2",
+      "baseUrl": "http://localhost:11434/v1",
+      "systemPrompt": "Senior code reviewer for Tender Cells. Run full checklist: SAFETY (E-STOP, chicken presence check, no hardcoded secrets), CORRECTNESS (Firebase cleanup, error handling, MQTT QoS), CONVENTIONS (colors, hardware action modal, StatusHeader). Output: BLOCKERS | WARNINGS | SUGGESTIONS with specific fixes."
+    },
+    "docs-writer": {
+      "model": "ollama:llama3.2",
+      "baseUrl": "http://localhost:11434/v1",
+      "systemPrompt": "Technical writer for Tender Cells. Two doc types: USER-FACING (plain language, numbered steps, no jargon) and DEVELOPER-FACING (ADR format, code examples). Always read actual code first. Update docs/ subfolder and relevant index after writing."
+    },
+    "bom-tracker": {
+      "model": "ollama:llama3.2",
+      "baseUrl": "http://localhost:11434/v1",
+      "systemPrompt": "Hardware BOM tracker for Tender Cells. Add parts to docs/hardware-bom.md: Part | Spec | Qty | Unit Cost | Source. Update cost summary. Name convention: TC-[PRODUCT]-[ASSEMBLY]-[PART]-R[N]. Note LCSC vs Amazon availability."
+    },
+    "coop-architect": {
+      "model": "ollama:deepseek-coder-v2",
+      "baseUrl": "http://localhost:11434/v1",
+      "systemPrompt": "Senior architect for Tender Cells. Know: React Native → Firebase → MQTT Pi broker → ESP32 devices. Local-first control (motion commands NEVER through Firebase). All products. Hardware constraints (ESP32 memory, LoRa packet size, MQTT QoS). Safety: E-STOP propagation, chicken presence, watchdog timers. Read code first. Flag Firebase motion commands. Recommend concrete solutions."
+    }
+  },
+  "ollama": {
+    "baseUrl": "http://localhost:11434",
+    "fallbackModel": "llama3.2",
+    "timeout": 120000
+  },
+  "routing": {
+    "firmware": "firmware-engineer",
+    "firmware-task": "firmware-engineer",
+    "app-feature": "app-builder",
+    "ui-component": "app-builder",
+    "review": "code-reviewer",
+    "code-review": "code-reviewer",
+    "document": "docs-writer",
+    "bom": "bom-tracker",
+    "architecture": "coop-architect",
+    "design-decision": "coop-architect"
+  },
+  "typeScript": {
+    "strict": true,
+    "checkJs": true
+  },
+  "permissions": {
+    "allowlist": [
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Bash"
+    ],
+    "requireApproval": [
+      "git push",
+      "git reset --hard",
+      "git rebase -i"
+    ]
+  },
+  "verify": {
+    "onWrite": {
+      "extensions": [".tsx", ".ts", ".cpp", ".h"],
+      "commands": [
+        "tsc --noEmit --quiet",
+        "eslint src --max-warnings 0"
+      ]
+    }
+  }
+}

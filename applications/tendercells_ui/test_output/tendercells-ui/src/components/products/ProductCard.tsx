@@ -179,17 +179,30 @@ export default function ProductCard({ product, onUpdate }: ProductCardProps) {
             )}
           </Box>
         </CardContent>
-        <CardActions>
-          {product.connection_status !== 'online' && (
-            <Button
-              variant="contained"
-              size="small"
-              fullWidth
-              onClick={() => setIsConnectionWizardOpen(true)}
-            >
-              {product.status === 'setup_required' ? 'Setup' : 'Connect'}
-            </Button>
-          )}
+        <CardActions sx={{ gap: 1, flexWrap: 'wrap' }}>
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={product.connection_status === 'online' ? <Wifi /> : <WifiOff />}
+            onClick={() => setIsConnectionWizardOpen(true)}
+            fullWidth
+            sx={{
+              bgcolor: product.connection_status === 'online' ? 'success.main' : 'primary.main',
+              '&:hover': {
+                bgcolor: product.connection_status === 'online' ? 'success.dark' : 'primary.dark',
+              },
+            }}
+          >
+            {product.connection_status === 'online' ? 'Reconnect' : product.status === 'setup_required' ? 'Setup Device' : 'Connect Device'}
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<Settings />}
+            onClick={handleMenuOpen}
+          >
+            Settings
+          </Button>
         </CardActions>
       </Card>
 

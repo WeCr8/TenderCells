@@ -1,4 +1,10 @@
 import './style.css'
+import { router } from './router.js'
+import { AuthModal } from './components/AuthModal.js'
+import { cartModal } from './components/CartModal.js'
+import { getCurrentUser, logOut, onAuthStateChange } from './firebase/auth.js'
+import { resetBodyScroll } from './utils/scrollLock.js'
+
 // Simple homepage content
 document.querySelector('#app').innerHTML = `
   <!-- Notification Banner -->
@@ -13,7 +19,7 @@ document.querySelector('#app').innerHTML = `
     <div class="container">
       <div class="header-content">
         <!-- Logo -->
-        <a href="#" class="logo">
+        <a href="#" class="logo" data-nav-home>
           <div class="logo-icon">🐣</div>
           <span class="logo-text">Tender Cells</span>
         </a>
@@ -40,14 +46,26 @@ document.querySelector('#app').innerHTML = `
 
         <!-- User Actions -->
         <div class="user-actions">
-          <button class="login-btn">
+          <button class="login-btn" id="loginBtn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
             Login
           </button>
-          <button class="cart-btn">
+          <div class="user-profile" id="userProfile" style="display: none;">
+            <button class="user-avatar" id="userAvatar" type="button" aria-label="Open account menu" title="Account"></button>
+            <div class="user-dropdown" id="userDropdown">
+              <div class="user-dropdown-header">
+                <div class="user-name" id="userName"></div>
+                <div class="user-email" id="userEmail"></div>
+              </div>
+              <a href="#account" class="user-dropdown-item">My Account</a>
+              <a href="#tender-cells-application" class="user-dropdown-item">My Applications</a>
+              <button class="user-dropdown-item logout" id="logoutBtn" type="button">Sign Out</button>
+            </div>
+          </div>
+          <button class="cart-btn" id="cartBtn" type="button" aria-label="Open shopping cart" title="Cart">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="9" cy="21" r="1"></circle>
               <circle cx="20" cy="21" r="1"></circle>
@@ -60,42 +78,68 @@ document.querySelector('#app').innerHTML = `
       <!-- Navigation -->
       <nav class="main-nav">
         <div class="nav-item dropdown">
+          <button class="nav-link">Products <span class="dropdown-arrow">▼</span></button>
+          <div class="dropdown-menu">
+            <a href="#all-products" class="dropdown-item">All Products</a>
+            <div class="dropdown-divider"></div>
+            <a href="#chicken-tender" class="dropdown-item">Chicken Tender</a>
+            <a href="#pigeon-palace" class="dropdown-item">Pigeon Palace</a>
+            <a href="#turkey-tower" class="dropdown-item">Turkey Tower</a>
+            <a href="#bunny-burrow" class="dropdown-item">Bunny Burrow</a>
+            <a href="#roaming-roost" class="dropdown-item">Roaming Roost</a>
+            <div class="dropdown-divider"></div>
+            <a href="#cattle-care" class="dropdown-item">Cattle Care</a>
+            <a href="#goat-guardian" class="dropdown-item">Goat Guardian</a>
+            <a href="#pig-pal" class="dropdown-item">Pig Pal</a>
+            <div class="dropdown-divider"></div>
+            <a href="#duck-dock" class="dropdown-item">Duck Dock</a>
+            <div class="dropdown-divider"></div>
+            <a href="#predator-monitoring" class="dropdown-item">Predator Monitoring</a>
+          </div>
+        </div>
+
+        <div class="nav-item dropdown">
           <button class="nav-link">Shop <span class="dropdown-arrow">▼</span></button>
           <div class="dropdown-menu">
-            <a href="#" class="dropdown-item">Chicken Tender</a>
-            <a href="#" class="dropdown-item">Genesis XL</a>
-            <a href="#" class="dropdown-item">Accessories</a>
-            <a href="#" class="dropdown-item">Parts</a>
+            <a href="#chicken-tender" class="dropdown-item">Chicken Tender</a>
+            <a href="#cattle-care" class="dropdown-item">Cattle Care</a>
+            <a href="#pig-pal" class="dropdown-item">Pig Pal</a>
+            <a href="#goat-guardian" class="dropdown-item">Goat Guardian</a>
+            <a href="#duck-dock" class="dropdown-item">Duck Dock</a>
+              <a href="#predator-monitoring" class="dropdown-item">Predator Monitoring (In Development)</a>
+            <a href="#store" class="dropdown-item">Accessories</a>
+            <a href="#store" class="dropdown-item">Parts</a>
           </div>
         </div>
 
         <div class="nav-item dropdown">
           <button class="nav-link">Tender Cells in Education <span class="dropdown-arrow">▼</span></button>
           <div class="dropdown-menu">
-            <a href="#" class="dropdown-item">Curriculum</a>
-            <a href="#" class="dropdown-item">Case Studies</a>
-            <a href="#" class="dropdown-item">Teacher Resources</a>
-            <a href="#" class="dropdown-item">Student Projects</a>
+              <a href="#education/curriculum" class="dropdown-item">Curriculum</a>
+              <a href="#success-stories" class="dropdown-item">Case Studies</a>
+              <a href="#education/resources" class="dropdown-item">Teacher Resources</a>
+              <a href="#education/projects" class="dropdown-item">Student Projects</a>
           </div>
         </div>
 
         <div class="nav-item dropdown">
           <button class="nav-link">Applications <span class="dropdown-arrow">▼</span></button>
           <div class="dropdown-menu">
-            <a href="#" class="dropdown-item">Chicken Tender</a>
-            <a href="#" class="dropdown-item">Cattle Care (Soon)</a>
-            <a href="#" class="dropdown-item">Pig Pal (Soon)</a>
-            <a href="#" class="dropdown-item">Goat Guardian (Soon)</a>
+            <a href="#tender-cells-application" class="dropdown-item">Tender Cells Application</a>
+            <a href="#chicken-tender" class="dropdown-item">Chicken Tender</a>
+            <a href="#cattle-care" class="dropdown-item">Cattle Care (Soon)</a>
+            <a href="#pig-pal" class="dropdown-item">Pig Pal (Soon)</a>
+            <a href="#goat-guardian" class="dropdown-item">Goat Guardian (Soon)</a>
           </div>
         </div>
 
         <div class="nav-item dropdown">
           <button class="nav-link">Learn More <span class="dropdown-arrow">▼</span></button>
           <div class="dropdown-menu">
-            <a href="#" class="dropdown-item">How It Works</a>
-            <a href="#" class="dropdown-item">Technology</a>
-            <a href="#" class="dropdown-item">Success Stories</a>
-            <a href="#" class="dropdown-item">FAQ</a>
+              <a href="#how-it-works" class="dropdown-item">How It Works</a>
+              <a href="#technology" class="dropdown-item">Technology</a>
+              <a href="#success-stories" class="dropdown-item">Success Stories</a>
+              <a href="#faq" class="dropdown-item">FAQ</a>
           </div>
         </div>
 
@@ -418,6 +462,91 @@ document.querySelector('#app').innerHTML = `
 
 // Basic dropdown functionality
 document.addEventListener('DOMContentLoaded', function() {
+  resetBodyScroll();
+
+  // Ensure pageContainer exists for router
+  if (!document.getElementById('pageContainer')) {
+    const pageContainer = document.createElement('div');
+    pageContainer.id = 'pageContainer';
+    pageContainer.style.display = 'none'; // Hidden by default, shown when route changes
+    const appRoot = document.getElementById('app');
+    const header = document.querySelector('header');
+    const mainContent = document.querySelector('main');
+
+    if (appRoot && mainContent && mainContent.parentNode === appRoot) {
+      appRoot.insertBefore(pageContainer, mainContent);
+    } else if (appRoot && header && header.parentNode === appRoot) {
+      appRoot.insertBefore(pageContainer, header.nextSibling);
+    } else {
+      (appRoot || document.body).appendChild(pageContainer);
+    }
+  }
+
+      const authModal = new AuthModal({
+        onAuthSuccess: () => {
+          window.location.hash = '#tender-cells-application';
+
+          if (window.router && typeof window.router.handleRoute === 'function') {
+            window.router.handleRoute();
+          } else if (router && typeof router.handleRoute === 'function') {
+            router.handleRoute();
+          }
+        }
+      });
+
+      const loginButton = document.getElementById('loginBtn');
+      const logoutButton = document.getElementById('logoutBtn');
+      const cartButton = document.getElementById('cartBtn');
+      const userProfile = document.getElementById('userProfile');
+      const userAvatar = document.getElementById('userAvatar');
+      const userName = document.getElementById('userName');
+      const userEmail = document.getElementById('userEmail');
+
+      const getUserInitials = (user) => {
+        const displayName = user?.displayName?.trim();
+        if (displayName) {
+          const initials = displayName
+            .split(/\s+/)
+            .map((namePart) => namePart[0])
+            .slice(0, 2)
+            .join('');
+
+          if (initials) {
+            return initials.toUpperCase();
+          }
+        }
+
+        if (user?.email) {
+          return user.email.slice(0, 2).toUpperCase();
+        }
+
+        return 'TC';
+      };
+
+      const updateAuthUI = (user) => {
+        if (!loginButton || !userProfile || !userAvatar || !userName || !userEmail) {
+          return;
+        }
+
+        if (user) {
+          loginButton.style.display = 'none';
+          userProfile.style.display = 'block';
+          userAvatar.textContent = getUserInitials(user);
+          userName.textContent = user.displayName || 'Tender Cells User';
+          userEmail.textContent = user.email || 'Signed in';
+        } else {
+          loginButton.style.display = 'flex';
+          userProfile.style.display = 'none';
+          userProfile.classList.remove('active');
+          userAvatar.textContent = '';
+          userName.textContent = '';
+          userEmail.textContent = '';
+        }
+      };
+
+  // Initialize router - it's already instantiated when imported, but ensure it's ready
+  // The router listens for hashchange events automatically
+  
   // Dropdown functionality
   const dropdowns = document.querySelectorAll('.dropdown');
   dropdowns.forEach(dropdown => {
@@ -435,5 +564,114 @@ document.addEventListener('DOMContentLoaded', function() {
         dropdown.classList.remove('active');
       }
     });
+  });
+
+  if (loginButton) {
+    loginButton.addEventListener('click', () => {
+      if (getCurrentUser()) {
+        window.location.hash = '#tender-cells-application';
+
+        if (window.router && typeof window.router.handleRoute === 'function') {
+          window.router.handleRoute();
+        } else if (router && typeof router.handleRoute === 'function') {
+          router.handleRoute();
+        }
+        return;
+      }
+
+      authModal.open('signin');
+    });
+  }
+
+  if (cartButton) {
+    cartButton.addEventListener('click', () => {
+      cartModal.open();
+    });
+  }
+
+  if (userAvatar && userProfile) {
+    userAvatar.addEventListener('click', (event) => {
+      event.stopPropagation();
+      userProfile.classList.toggle('active');
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    if (userProfile && !userProfile.contains(event.target)) {
+      userProfile.classList.remove('active');
+    }
+  });
+
+  if (logoutButton) {
+    logoutButton.addEventListener('click', async () => {
+      const result = await logOut();
+
+      if (!result.success) {
+        window.alert(result.error || 'Unable to sign out right now.');
+        return;
+      }
+
+      userProfile?.classList.remove('active');
+      window.location.hash = '';
+      if (window.router && typeof window.router.handleRoute === 'function') {
+        window.router.handleRoute();
+      } else if (router && typeof router.handleRoute === 'function') {
+        router.handleRoute();
+      }
+    });
+  }
+
+  updateAuthUI(getCurrentUser());
+  onAuthStateChange((user) => {
+    updateAuthUI(user);
+  });
+
+  // Handle navigation links using event delegation for dynamically added content
+  document.addEventListener('click', function(e) {
+    // Handle logo click to go home
+    const logo = e.target.closest('[data-nav-home]');
+    if (logo) {
+      e.preventDefault();
+      window.location.hash = '';
+      if (window.router && typeof window.router.handleRoute === 'function') {
+        window.router.handleRoute();
+      }
+      return;
+    }
+
+    // Handle hash links
+    const link = e.target.closest('a[href^="#"]');
+    if (link) {
+      const href = link.getAttribute('href');
+      if (href && href !== '#' && href.startsWith('#')) {
+        e.preventDefault(); // Prevent default anchor behavior
+        
+        // Close dropdown when navigating
+        const dropdown = link.closest('.dropdown');
+        if (dropdown) {
+          dropdown.classList.remove('active');
+        }
+        
+        // Set the hash to trigger router
+        window.location.hash = href;
+        
+        // Ensure router handles the navigation immediately
+        if (window.router && typeof window.router.handleRoute === 'function') {
+          window.router.handleRoute();
+        } else if (router && typeof router.handleRoute === 'function') {
+          router.handleRoute();
+        }
+      }
+    }
+
+    // Handle buttons with data-category for services filtering
+    const categoryLink = e.target.closest('a[data-category]');
+    if (categoryLink) {
+      const category = categoryLink.getAttribute('data-category');
+      if (category) {
+        // Store category in sessionStorage for services page to read
+        sessionStorage.setItem('serviceCategory', category);
+      }
+    }
   });
 });

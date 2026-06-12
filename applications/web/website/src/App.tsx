@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Pages - Landing
 import LandingPage from './pages/LandingPage';
@@ -22,6 +22,9 @@ import HowItWorksPage from './pages/learn/HowItWorksPage';
 import TechnologyPage from './pages/learn/TechnologyPage';
 import FAQPage from './pages/learn/FAQPage';
 
+// Pages - Application
+import TenderCellsApplicationPage from './pages/TenderCellsApplicationPage';
+
 function App() {
   return (
     <BrowserRouter>
@@ -43,6 +46,9 @@ function App() {
         <Route path="/technology" element={<TechnologyPage />} />
         <Route path="/faq" element={<FAQPage />} />
         
+        {/* Application */}
+        <Route path="/tender-cells-application" element={<TenderCellsApplicationPage />} />
+        
         {/* Marketing Pages */}
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/contact" element={<ContactPage />} />
@@ -62,8 +68,8 @@ function App() {
         <Route path="/press" element={<NotFoundPage />} />
         <Route path="/partnerships" element={<NotFoundPage />} />
         <Route path="/assets" element={<NotFoundPage />} />
-        <Route path="/signin" element={<NotFoundPage />} />
-        <Route path="/signup" element={<NotFoundPage />} />
+        <Route path="/signin" element={<Navigate to="/tender-cells-application" replace />} />
+        <Route path="/signup" element={<Navigate to="/tender-cells-application" replace />} />
         <Route path="/cart" element={<NotFoundPage />} />
         <Route path="/search" element={<NotFoundPage />} />
         <Route path="/privacy" element={<NotFoundPage />} />

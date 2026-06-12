@@ -13,7 +13,7 @@ export function createHeader() {
       <div class="container">
         <div class="header-content">
           <!-- Logo -->
-          <a href="#" class="logo">
+          <a href="#" class="logo" data-nav-home>
             <div class="logo-icon">🐣</div>
             <span class="logo-text">Tender Cells</span>
           </a>
@@ -64,13 +64,40 @@ export function createHeader() {
         <nav class="main-nav" aria-label="Main navigation">
           <div class="nav-item dropdown">
             <button class="nav-link" aria-expanded="false" aria-haspopup="true">
+              Products <span class="dropdown-arrow" aria-hidden="true">▼</span>
+            </button>
+            <div class="dropdown-menu" role="menu">
+              <a href="#all-products" class="dropdown-item" role="menuitem">All Products</a>
+              <div class="dropdown-divider"></div>
+              <a href="#chicken-tender" class="dropdown-item" role="menuitem">Chicken Tender</a>
+              <a href="#pigeon-palace" class="dropdown-item" role="menuitem">Pigeon Palace</a>
+              <a href="#turkey-tower" class="dropdown-item" role="menuitem">Turkey Tower</a>
+              <a href="#bunny-burrow" class="dropdown-item" role="menuitem">Bunny Burrow</a>
+              <a href="#roaming-roost" class="dropdown-item" role="menuitem">Roaming Roost</a>
+              <div class="dropdown-divider"></div>
+              <a href="#cattle-care" class="dropdown-item" role="menuitem">Cattle Care</a>
+              <a href="#goat-guardian" class="dropdown-item" role="menuitem">Goat Guardian</a>
+              <a href="#pig-pal" class="dropdown-item" role="menuitem">Pig Pal</a>
+              <div class="dropdown-divider"></div>
+              <a href="#duck-dock" class="dropdown-item" role="menuitem">Duck Dock</a>
+              <div class="dropdown-divider"></div>
+              <a href="#predator-monitoring" class="dropdown-item" role="menuitem">Predator Monitoring</a>
+            </div>
+          </div>
+
+          <div class="nav-item dropdown">
+            <button class="nav-link" aria-expanded="false" aria-haspopup="true">
               Shop <span class="dropdown-arrow" aria-hidden="true">▼</span>
             </button>
             <div class="dropdown-menu" role="menu">
-              <a href="#" class="dropdown-item" role="menuitem">Chicken Tender</a>
-              <a href="#" class="dropdown-item" role="menuitem">Genesis XL</a>
-              <a href="#" class="dropdown-item" role="menuitem">Accessories</a>
-              <a href="#" class="dropdown-item" role="menuitem">Parts</a>
+              <a href="#chicken-tender" class="dropdown-item" role="menuitem">Chicken Tender</a>
+              <a href="#cattle-care" class="dropdown-item" role="menuitem">Cattle Care</a>
+              <a href="#pig-pal" class="dropdown-item" role="menuitem">Pig Pal</a>
+              <a href="#goat-guardian" class="dropdown-item" role="menuitem">Goat Guardian</a>
+              <a href="#duck-dock" class="dropdown-item" role="menuitem">Duck Dock</a>
+              <a href="#predator-monitoring" class="dropdown-item" role="menuitem">Predator Monitoring (In Development)</a>
+              <a href="#store" class="dropdown-item" role="menuitem">Accessories</a>
+              <a href="#store" class="dropdown-item" role="menuitem">Parts</a>
             </div>
           </div>
 
@@ -79,10 +106,10 @@ export function createHeader() {
               Tender Cells in Education <span class="dropdown-arrow" aria-hidden="true">▼</span>
             </button>
             <div class="dropdown-menu" role="menu">
-              <a href="#" class="dropdown-item" role="menuitem">Curriculum</a>
-              <a href="#" class="dropdown-item" role="menuitem">Case Studies</a>
-              <a href="#" class="dropdown-item" role="menuitem">Teacher Resources</a>
-              <a href="#" class="dropdown-item" role="menuitem">Student Projects</a>
+              <a href="#education/curriculum" class="dropdown-item" role="menuitem">Curriculum</a>
+              <a href="#success-stories" class="dropdown-item" role="menuitem">Case Studies</a>
+              <a href="#education/resources" class="dropdown-item" role="menuitem">Teacher Resources</a>
+              <a href="#education/projects" class="dropdown-item" role="menuitem">Student Projects</a>
             </div>
           </div>
 
@@ -91,10 +118,12 @@ export function createHeader() {
               Applications <span class="dropdown-arrow" aria-hidden="true">▼</span>
             </button>
             <div class="dropdown-menu" role="menu">
-              <a href="#" class="dropdown-item" role="menuitem">Chicken Tender</a>
-              <a href="#" class="dropdown-item" role="menuitem" aria-disabled="true">Cattle Care (Soon)</a>
-              <a href="#" class="dropdown-item" role="menuitem" aria-disabled="true">Pig Pal (Soon)</a>
-              <a href="#" class="dropdown-item" role="menuitem" aria-disabled="true">Goat Guardian (Soon)</a>
+              <a href="#tender-cells-application" class="dropdown-item" role="menuitem">Tender Cells Application</a>
+              <a href="#chicken-tender" class="dropdown-item" role="menuitem">Chicken Tender</a>
+              <a href="#cattle-care" class="dropdown-item" role="menuitem">Cattle Care</a>
+              <a href="#pig-pal" class="dropdown-item" role="menuitem">Pig Pal</a>
+              <a href="#goat-guardian" class="dropdown-item" role="menuitem">Goat Guardian</a>
+              <a href="#duck-dock" class="dropdown-item" role="menuitem">Duck Dock</a>
             </div>
           </div>
 
@@ -103,23 +132,23 @@ export function createHeader() {
               Learn More <span class="dropdown-arrow" aria-hidden="true">▼</span>
             </button>
             <div class="dropdown-menu" role="menu">
-              <a href="#" class="dropdown-item" role="menuitem">How It Works</a>
-              <a href="#" class="dropdown-item" role="menuitem">Technology</a>
-              <a href="#" class="dropdown-item" role="menuitem">Success Stories</a>
-              <a href="#" class="dropdown-item" role="menuitem">FAQ</a>
+              <a href="#how-it-works" class="dropdown-item" role="menuitem">How It Works</a>
+              <a href="#technology" class="dropdown-item" role="menuitem">Technology</a>
+              <a href="#success-stories" class="dropdown-item" role="menuitem">Success Stories</a>
+              <a href="#faq" class="dropdown-item" role="menuitem">FAQ</a>
             </div>
           </div>
 
           <div class="nav-item">
-            <a href="#" class="nav-link">Open Source</a>
+            <a href="#open-source" class="nav-link">Open Source</a>
           </div>
 
           <div class="nav-item">
-            <a href="#" class="nav-link">Blog</a>
+            <a href="#blog" class="nav-link">Blog</a>
           </div>
 
           <div class="nav-item">
-            <a href="#" class="nav-link">Signup for our Newsletter</a>
+            <a href="#contact" class="nav-link">Signup for our Newsletter</a>
           </div>
 
           <div class="nav-item dropdown">
@@ -139,10 +168,10 @@ export function createHeader() {
               Contact <span class="dropdown-arrow" aria-hidden="true">▼</span>
             </button>
             <div class="dropdown-menu" role="menu">
-              <a href="#" class="dropdown-item" role="menuitem">Support</a>
-              <a href="#" class="dropdown-item" role="menuitem">Sales</a>
-              <a href="#" class="dropdown-item" role="menuitem">Press</a>
-              <a href="#" class="dropdown-item" role="menuitem">Partnerships</a>
+              <a href="#support" class="dropdown-item" role="menuitem">Support</a>
+              <a href="#contact" class="dropdown-item" role="menuitem">Sales</a>
+              <a href="#press" class="dropdown-item" role="menuitem">Press</a>
+              <a href="#partnerships" class="dropdown-item" role="menuitem">Partnerships</a>
             </div>
           </div>
         </nav>

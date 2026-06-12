@@ -182,9 +182,9 @@ export function createServicesPage() {
                 </div>
               </div>
               <div class="affiliate-actions">
-                <button class="btn btn-primary" onclick="navigateTo('contact')">
+                <a href="#contact" class="btn btn-primary">
                   Become a Partner
-                </button>
+                </a>
                 <button class="btn btn-secondary" onclick="learnMoreAboutAffiliate()">
                   Learn More
                 </button>

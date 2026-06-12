@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc --noEmit --quiet
+
+      - name: ESLint
+        run: npx eslint . --max-warnings 0
+        continue-on-error: true
+
+  functions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: cd functions && npm ci
+
+      - name: TypeScript check
+        run: cd functions && npx tsc --noEmit --quiet
+
+      - name: Build
+        run: cd functions && npm run build
+
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v3
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('firmware/**/platformio.ini') }}
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Build Chicken Tender firmware
+        run: cd firmware/chicken-tender && pio run
+
+      - name: Check binary size
+        run: |
+          SIZE=$(stat -c%s firmware/chicken-tender/.pio/build/esp32-wroom-32/firmware.bin 2>/dev/null || echo "0")
+          echo "Firmware size: $SIZE bytes"
+          if [ "$SIZE" -gt 3932160 ]; then
+            echo "⚠️  Firmware exceeds 3.75MB flash limit"
+          fi
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for secrets
+        run: |
+          ! grep -rn 'AIza[0-9A-Za-z\-_]{35}' . --exclude-dir=node_modules --exclude-dir=.git --exclude=.env
+          ! grep -rn 'ANTHROPIC_API_KEY\s*=\s*"sk-[a-zA-Z0-9]' . --exclude-dir=node_modules --exclude=.env
+
+      - name: Scan for hardcoded WiFi passwords
+        run: |
+          ! grep -rn 'password\s*=\s*"[a-zA-Z0-9]\{6,\}' firmware/ --include='*.cpp'

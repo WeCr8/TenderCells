@@ -1,6 +1,7 @@
 // TenderCellsCloudDashboard.tsx
 import React from "react";
+import DashboardLayout from "../components/layout/DashboardLayout";
 
 export default function TenderCellsCloudDashboard() {
-  return <div>TenderCellsCloud Dashboard</div>;
+  return <DashboardLayout productName="TenderCells Cloud" />;
 }

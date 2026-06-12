@@ -3,6 +3,7 @@ import { products, getProductById } from '../store/products.js';
 import { cart } from '../store/cart.js';
 import { trackEvent, trackAddToCart, trackEngagement } from '../utils/analytics.js';
 import { generateProductData } from '../utils/seo.js';
+import { lockBodyScroll, unlockBodyScroll } from '../utils/scrollLock.js';
 
 export function createStorePage() {
   // Generate structured data for products
@@ -283,7 +284,7 @@ function showProductModal(productId) {
   
   // Show modal
   modal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll();
   
   // Close modal events
   closeBtn.addEventListener('click', closeProductModal);
@@ -294,7 +295,7 @@ function closeProductModal() {
   const modal = document.getElementById('productModal');
   if (modal) {
     modal.remove();
-    document.body.style.overflow = 'auto';
+    unlockBodyScroll();
   }
 }
 

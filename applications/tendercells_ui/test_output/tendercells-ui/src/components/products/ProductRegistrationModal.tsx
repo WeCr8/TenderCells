@@ -20,18 +20,21 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme, useMediaQuery } from '@mui/material';
 import QRCodeScanner from './QRCodeScanner';
-import type { RegisterProductData, ProductType } from '../../types/products';
+import ConnectionSetupWizard from './ConnectionSetupWizard';
+import type { RegisterProductData, ProductType, Product } from '../../types/products';
 
 interface ProductRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onRegister: (data: RegisterProductData) => Promise<void>;
+  onRegister: (data: RegisterProductData) => Promise<Product | void>;
+  showConnectionWizardAfterRegister?: boolean;
 }
 
 export default function ProductRegistrationModal({
   isOpen,
   onClose,
   onRegister,
+  showConnectionWizardAfterRegister = true,
 }: ProductRegistrationModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -47,6 +50,8 @@ export default function ProductRegistrationModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [qrScannerOpen, setQrScannerOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [registeredProduct, setRegisteredProduct] = useState<Product | null>(null);
+  const [isConnectionWizardOpen, setIsConnectionWizardOpen] = useState(false);
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -61,6 +66,8 @@ export default function ProductRegistrationModal({
       setQrCode('');
       setErrors({});
       setSubmitError(null);
+      setRegisteredProduct(null);
+      setIsConnectionWizardOpen(false);
     }
   }, [isOpen]);
 
@@ -123,8 +130,16 @@ export default function ProductRegistrationModal({
         activation_code: activeTab === 2 ? activationCode.trim() : undefined,
       };
 
-      await onRegister(registrationData);
-      onClose();
+      const result = await onRegister(registrationData);
+      
+      // If registration returns a product and we should show connection wizard, open it
+      if (result && 'id' in result && showConnectionWizardAfterRegister) {
+        setRegisteredProduct(result as Product);
+        setIsConnectionWizardOpen(true);
+        // Keep modal open but show connection wizard instead
+      } else {
+        onClose();
+      }
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to register product');
     } finally {
@@ -335,6 +350,24 @@ export default function ProductRegistrationModal({
         onClose={() => setQrScannerOpen(false)}
         onScan={handleQRScan}
       />
+
+      {/* Connection Setup Wizard - Opens after product registration */}
+      {registeredProduct && (
+        <ConnectionSetupWizard
+          isOpen={isConnectionWizardOpen}
+          onClose={() => {
+            setIsConnectionWizardOpen(false);
+            setRegisteredProduct(null);
+            onClose(); // Close registration modal after connection wizard closes
+          }}
+          product={registeredProduct}
+          onComplete={() => {
+            setIsConnectionWizardOpen(false);
+            setRegisteredProduct(null);
+            onClose();
+          }}
+        />
+      )}
     </>
   );
 }

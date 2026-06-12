@@ -1,6 +1,7 @@
 // RailSystemModulesDashboard.tsx
 import React from "react";
+import DashboardLayout from "../components/layout/DashboardLayout";
 
 export default function RailSystemModulesDashboard() {
-  return <div>RailSystemModules Dashboard</div>;
+  return <DashboardLayout productName="Rail System Modules" />;
 }

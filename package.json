@@ -7,14 +7,19 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "functions:build": "cd functions && npm run build",
+    "functions:deploy": "firebase deploy --only functions",
+    "functions:serve": "firebase emulators:start --only functions",
+    "firebase:emulate": "firebase emulators:start"
   },
   "dependencies": {
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
     "firebase": "^12.0.0",
     "firebase-tools": "^13.35.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

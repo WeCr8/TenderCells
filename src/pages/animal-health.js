@@ -34,9 +34,9 @@ export function createAnimalHealthPage() {
               <button class="btn btn-primary" onclick="scrollToHealthTopics()">
                 Browse Health Topics
               </button>
-              <button class="btn btn-secondary" onclick="navigateTo('services')">
+              <a href="#services" class="btn btn-secondary">
                 🏪 Find Local Services
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -151,45 +151,45 @@ export function createAnimalHealthPage() {
               <div class="resource-icon">🏥</div>
               <h3>Find Local Veterinarians</h3>
               <p>Connect with qualified veterinarians in your area for professional health care.</p>
-              <button class="btn btn-primary" onclick="navigateTo('services?category=veterinary')">
+              <a href="#services" class="btn btn-primary" data-category="veterinary">
                 Find Vets
-              </button>
+              </a>
             </div>
             
             <div class="resource-card">
               <div class="resource-icon">🚨</div>
               <h3>Emergency Animal Hospitals</h3>
               <p>24/7 emergency care facilities for critical situations and urgent medical needs.</p>
-              <button class="btn btn-primary" onclick="navigateTo('services?category=hospitals')">
+              <a href="#services" class="btn btn-primary" data-category="hospitals">
                 Emergency Care
-              </button>
+              </a>
             </div>
             
             <div class="resource-card">
               <div class="resource-icon">💊</div>
               <h3>Animal Pharmacies & Supplies</h3>
               <p>Find medical supplies, medications, and health products for your animals.</p>
-              <button class="btn btn-primary" onclick="navigateTo('services?category=supplies')">
+              <a href="#services" class="btn btn-primary" data-category="supplies">
                 Find Supplies
-              </button>
+              </a>
             </div>
             
             <div class="resource-card">
               <div class="resource-icon">🎓</div>
               <h3>Animal Training Services</h3>
               <p>Professional training services for behavior modification and skill development.</p>
-              <button class="btn btn-primary" onclick="navigateTo('services?category=training')">
+              <a href="#services" class="btn btn-primary" data-category="training">
                 Find Trainers
-              </button>
+              </a>
             </div>
             
             <div class="resource-card">
               <div class="resource-icon">🌹</div>
               <h3>Memorial Services</h3>
               <p>Compassionate memorial and burial services for end-of-life care.</p>
-              <button class="btn btn-primary" onclick="navigateTo('services?category=funeral')">
+              <a href="#services" class="btn btn-primary" data-category="funeral">
                 Memorial Services
-              </button>
+              </a>
             </div>
             
             <div class="resource-card">
@@ -214,12 +214,12 @@ export function createAnimalHealthPage() {
               qualified veterinarians for professional diagnosis and treatment.
             </p>
             <div class="cta-actions">
-              <button class="btn btn-primary btn-large" onclick="navigateTo('services')">
+              <a href="#services" class="btn btn-primary btn-large">
                 Find Local Services
-              </button>
-              <button class="btn btn-secondary btn-large" onclick="navigateTo('contact')">
+              </a>
+              <a href="#contact" class="btn btn-secondary btn-large">
                 Contact Support
-              </button>
+              </a>
             </div>
           </div>
         </div>

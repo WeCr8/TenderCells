@@ -9,8 +9,23 @@ import {
 } from 'firebase/auth';
 import { auth } from './config.js';
 
+const missingAuthConfigMessage = 'Authentication is unavailable until Firebase environment variables are configured.';
+
+const ensureAuthConfigured = () => {
+  if (!auth) {
+    return { success: false, error: missingAuthConfigMessage };
+  }
+
+  return null;
+};
+
 // Sign up with email and password
 export const signUp = async (email, password, displayName) => {
+  const authConfigError = ensureAuthConfigured();
+  if (authConfigError) {
+    return authConfigError;
+  }
+
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
@@ -30,6 +45,11 @@ export const signUp = async (email, password, displayName) => {
 
 // Sign in with email and password
 export const signIn = async (email, password) => {
+  const authConfigError = ensureAuthConfigured();
+  if (authConfigError) {
+    return authConfigError;
+  }
+
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return { success: true, user: userCredential.user };
@@ -40,6 +60,11 @@ export const signIn = async (email, password) => {
 
 // Sign out
 export const logOut = async () => {
+  const authConfigError = ensureAuthConfigured();
+  if (authConfigError) {
+    return authConfigError;
+  }
+
   try {
     await signOut(auth);
     return { success: true };
@@ -50,6 +75,11 @@ export const logOut = async () => {
 
 // Reset password
 export const resetPassword = async (email) => {
+  const authConfigError = ensureAuthConfigured();
+  if (authConfigError) {
+    return authConfigError;
+  }
+
   try {
     await sendPasswordResetEmail(auth, email);
     return { success: true };
@@ -60,10 +90,15 @@ export const resetPassword = async (email) => {
 
 // Auth state observer
 export const onAuthStateChange = (callback) => {
+  if (!auth) {
+    callback(null);
+    return () => {};
+  }
+
   return onAuthStateChanged(auth, callback);
 };
 
 // Get current user
 export const getCurrentUser = () => {
-  return auth.currentUser;
+  return auth ? auth.currentUser : null;
 };

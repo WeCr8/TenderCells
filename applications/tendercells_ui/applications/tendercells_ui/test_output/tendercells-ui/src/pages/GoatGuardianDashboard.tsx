@@ -1,6 +1,7 @@
 // GoatGuardianDashboard.tsx
 import React from "react";
+import DashboardLayout from "../components/layout/DashboardLayout";
 
 export default function GoatGuardianDashboard() {
-  return <div>GoatGuardian Dashboard</div>;
+  return <DashboardLayout productName="Goat Guardian" />;
 }

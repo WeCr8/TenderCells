@@ -17,7 +17,11 @@ interface NavDropdown {
 
 const shopItems: DropdownItem[] = [
   { label: 'Chicken Tender', href: '/products/chicken-tender' },
-  { label: 'Genesis XL', href: '/store' },
+  { label: 'Cattle Care', href: '/products/cattle-care' },
+  { label: 'Pig Pal', href: '/products/pig-pal' },
+  { label: 'Goat Guardian', href: '/products/goat-guardian' },
+  { label: 'Duck Dock', href: '/products/duck-dock' },
+  { label: 'Predator Monitoring (In Development)', href: '/products/predator-monitoring' },
   { label: 'Accessories', href: '/store' },
   { label: 'Parts', href: '/store' }
 ];
@@ -33,6 +37,7 @@ const educationItems: DropdownItem[] = [
 ];
 
 const applicationsItems: DropdownItem[] = [
+  { label: 'Tender Cells Application', href: '/tender-cells-application' },
   { label: 'Chicken Tender', href: '/products/chicken-tender' },
   { label: 'Cattle Care (Soon)', href: '/products/cattle-care' },
   { label: 'Pig Pal (Soon)', href: '/products/pig-pal' },
@@ -181,7 +186,7 @@ export default function Header() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full px-4 py-2 pr-10 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50"
                 />
-                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                <button type="submit" aria-label="Search" title="Search" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
                   <Search className="w-5 h-5" />
                 </button>
               </div>
@@ -199,7 +204,7 @@ export default function Header() {
             {/* User Actions */}
             <div className="flex items-center gap-2">
               <Link 
-                to="/signin"
+                to="/tender-cells-application"
                 className="flex items-center gap-2 px-3 py-2 text-slate-300 hover:text-white transition-colors"
               >
                 <User className="w-5 h-5" />
@@ -300,7 +305,7 @@ export default function Header() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full px-4 py-3 pr-10 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-slate-500"
                   />
-                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <button type="submit" aria-label="Search" title="Search" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
                     <Search className="w-5 h-5" />
                   </button>
                 </div>

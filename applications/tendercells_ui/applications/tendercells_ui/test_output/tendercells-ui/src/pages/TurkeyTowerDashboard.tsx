@@ -1,6 +1,7 @@
 // TurkeyTowerDashboard.tsx
 import React from "react";
+import DashboardLayout from "../components/layout/DashboardLayout";
 
 export default function TurkeyTowerDashboard() {
-  return <div>TurkeyTower Dashboard</div>;
+  return <DashboardLayout productName="Turkey Tower" />;
 }

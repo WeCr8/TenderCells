@@ -1,6 +1,7 @@
 // PigeonPalaceDashboard.tsx
 import React from "react";
+import DashboardLayout from "../components/layout/DashboardLayout";
 
 export default function PigeonPalaceDashboard() {
-  return <div>PigeonPalace Dashboard</div>;
+  return <DashboardLayout productName="Pigeon Palace" />;
 }

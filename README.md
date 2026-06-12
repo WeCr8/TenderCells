@@ -1,79 +1,259 @@
-# TenderCells
+# Tender Cells — AI-Powered Automated Animal Care Platform
 
-## Firebase Setup
+**WeCr8 Solutions** | Autonomous robot coop control system | React Native + Firebase + ESP32 + MQTT
 
-This project uses Firebase for authentication and data storage. Follow these steps to set up Firebase:
+---
 
-### 1. Create a Firebase Project
+## Project Structure
 
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Click "Create a project" or "Add project"
-3. Follow the setup wizard to create your project
-
-### 2. Enable Authentication
-
-1. In your Firebase project, go to "Authentication" in the left sidebar
-2. Click "Get started"
-3. Go to the "Sign-in method" tab
-4. Enable "Email/Password" authentication
-5. Optionally enable other sign-in methods as needed
-
-### 3. Create Firestore Database
-
-1. Go to "Firestore Database" in the left sidebar
-2. Click "Create database"
-3. Choose "Start in test mode" for development (remember to update security rules later)
-4. Choose a location for your database
-
-### 4. Get Firebase Configuration
-
-1. Go to Project Settings (gear icon next to "Project Overview")
-2. Scroll down to "Your apps" section
-3. Click on the web app icon `</>` to add a web app
-4. Register your app with a nickname
-5. Copy the configuration object
-
-### 5. Set Up Environment Variables
-
-Create a `.env` file in the root directory of your project and add your Firebase configuration:
-
-```env
-# Firebase Configuration
-VITE_FIREBASE_API_KEY=your_api_key_here
-VITE_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+```text
+tender-cells/
+├── .claude/                      ← Claude Code configuration
+│   ├── CLAUDE.md                 ← Agent skill file (READ THIS FIRST)
+│   ├── settings.json             ← MCP servers + hooks + agent routing
+│   ├── agents/                   ← Specialist agent definitions
+│   │   ├── firmware-engineer.md
+│   │   ├── app-builder.md
+│   │   ├── code-reviewer.md
+│   │   ├── docs-writer.md
+│   │   ├── coop-architect.md
+│   │   └── bom-tracker.md
+│   └── hooks/                    ← Safety verification scripts
+│       ├── pre-tool-check.ps1    ← Block hardcoded secrets
+│       └── post-tool-verify.ps1  ← Auto-verify TypeScript, firmware builds
+│
+├── firmware/                     ← ESP32 firmware (Arduino)
+│   ├── chicken-tender/           ← Main coop controller
+│   │   ├── src/main.cpp          ← State machine + sensor + MQTT
+│   │   └── platformio.ini        ← Build config
+│   ├── watchtower/               ← Predator monitor (ESP32-S3)
+│   ├── roaming-roost/            ← Mobile dome controller
+│
+├── functions/                    ← Firebase Cloud Functions (Node 18)
+│   ├── src/
+│   │   └── index.ts              ← AI proxy, alerts, schedules, cleanup
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── app/                          ← React app (Vite + Firebase)
+│   ├── src/
+│   │   ├── screens/              ← UI screens (Dashboard, CoopDetail, etc.)
+│   │   ├── components/           ← React components
+│   │   ├── services/             ← Firebase, MQTT, AI service clients
+│   │   ├── hooks/                ← Custom React hooks
+│   │   ├── store/                ← Zustand state management
+│   │   └── __tests__/
+│   └── package.json
+│
+├── docs/                         ← Documentation
+│   ├── architecture.md           ← System design
+│   ├── hardware-bom.md           ← Parts list + costs
+│   ├── adr/                      ← Architecture Decision Records
+│   ├── api/                      ← Auto-generated API docs
+│   └── user-guide/               ← Step-by-step guides
+│
+├── .env.example                  ← Environment variables template
+├── firebase.json                 ← Firebase hosting + emulator config
+├── firestore.rules               ← Firestore security rules
+├── package.json                  ← Root project (Vite + scripts)
+└── .github/workflows/ci.yml      ← GitHub Actions CI
 ```
 
-**Important:** Never commit your `.env` file to version control. The `.env.example` file shows the required variables.
+---
 
-### 6. Install Dependencies
+## Quick Start
+
+### 1. Install Dependencies
 
 ```bash
 npm install
+cd functions && npm install && cd ..
 ```
 
-### 7. Run the Development Server
+### 2. Configure Environment
+
+```bash
+# Copy template
+cp .env.example .env
+
+# Add your own values:
+# - VITE_FIREBASE_* — from Firebase Console
+# - ANTHROPIC_API_KEY — from https://console.anthropic.com
+# - MQTT_BROKER_HOST — local IP (e.g., 192.168.1.100)
+```
+
+### 3. Start Firebase Emulator (for local development)
+
+```bash
+npm run firebase:emulate
+# Opens emulator on http://localhost:4000
+```
+
+### 4. Build Firmware (optional, requires PlatformIO)
+
+```bash
+pip install platformio
+cd firmware/chicken-tender && pio run
+```
+
+### 5. Run Development Server
 
 ```bash
 npm run dev
+# Vite app on http://localhost:5173
 ```
 
-## Features
+---
 
-- User Authentication (Sign up, Sign in, Password reset)
-- Firestore Database integration
-- Analytics (optional)
-- Responsive design
+## Development with Local LLMs (Ollama)
 
-## Built with React + TypeScript + Vite
+The project is configured to use **local LLMs via Ollama** to minimize API costs:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+```bash
+# Install Ollama: https://ollama.ai
+ollama pull deepseek-coder-v2  # For code tasks (firmware, app)
+ollama pull llama3.2            # For docs/BOM tasks
 
-Currently, two official plugins are available:
+# Start Ollama
+ollama serve
+# Runs on http://localhost:11434
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Claude Code automatically routes tasks to local models:
+- **firmware, app code** → `deepseek-coder-v2`
+- **documentation, BOM** → `llama3.2`
+- **Architecture decisions** → `deepseek-coder-v2`
+- **Complex reasoning** → Claude Anthropic API (fallback)
+
+See `.claude/settings.json` for agent definitions.
+
+---
+
+## Claude Code Agents
+
+Read `.claude/CLAUDE.md` first — it contains the complete system design.
+
+Trigger agents with phrases like:
+
+```text
+"fix the watchdog timer in firmware"
+→ Routes to firmware-engineer agent (Ollama + deepseek-coder-v2)
+
+"add a new screen for egg collection"
+→ Routes to app-builder agent (Ollama + deepseek-coder-v2)
+
+"document the MQTT schema"
+→ Routes to docs-writer agent (Ollama + llama3.2)
+
+"review this PR"
+→ Routes to code-reviewer agent (auto-runs after Write/Edit)
+```
+
+---
+
+## Critical Rules (DO / NEVER)
+
+**NEVER:**
+- Send motion commands through Firebase (use MQTT instead)
+- Block ESP32 loop with `delay()` > 50ms
+- Leave stepper motors energized when idle
+- Hardcode WiFi credentials, API keys, device IDs
+- Allow hardware action without confirmation modal in app
+- Scope creep to new products until Chicken Tender v1 is stable
+
+**ALWAYS:**
+- Check E-STOP handling in firmware
+- Average sensor readings over 3 samples
+- Use MQTT QoS 2 + retain for E-STOP topic
+- Update docs when changing APIs or MQTT topics
+- Use color tokens, never raw hex in UI
+- Run `tsc --noEmit` after app changes
+- Run `pio run` after firmware changes
+
+---
+
+## Firebase Setup
+
+### 1. Create Firebase Project
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project (or use existing `tender-cells`)
+
+### 2. Enable Services
+
+- **Authentication** → Email/Password
+- **Firestore Database** → Test mode (for dev)
+- **Cloud Functions** → Node 18 runtime
+
+### 3. Get Credentials
+
+Project Settings → Web App → Copy config to `.env`:
+
+```env
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+```
+
+### 4. Deploy Functions
+
+```bash
+npm run functions:deploy
+# Or use emulator locally: npm run firebase:emulate
+```
+
+---
+
+## Architecture Overview
+
+```text
+React Native App (Expo)
+        ↓ (Firebase Auth + Firestore)
+        ↓
+    Firebase
+        ↓ (Cloud Functions)
+        ↓
+Pi MQTT Broker (Mosquitto)
+        ↓ (MQTT QoS 1/2 local commands)
+        ↓
+ESP32 Firmware (State Machine)
+        ├─ Sensors (temp, humidity, ammonia, feedLevel, water)
+        ├─ Arm Control (6DOF coordinate)
+        ├─ Door Servo
+        ├─ Feed Dispenser
+        ├─ Cleaning Cycle (stepper + scraper)
+        └─ Watchdog Timer (8s timeout)
+```
+
+**Local-First Control:** Motion commands over MQTT (< 50ms latency), not Firebase.
+
+---
+
+## Next Steps (Gap Analysis)
+
+See `.claude/CLAUDE.md` §6 for full gap table.
+
+**Highest Priority (RED):**
+- [ ] Finish Chicken Tender firmware state machine (skeleton created)
+- [ ] Set up Mosquitto MQTT broker (not yet running)
+- [ ] Deploy Cloud Functions (stubs created)
+- [ ] Add app screens: Schedules, WasteCleaning, EggMap, TenderAI chat
+- [ ] GitHub Actions CI pipeline (created, needs testing)
+
+---
+
+## Resources
+
+- 📖 **Design Spec:** [.claude/CLAUDE.md](./.claude/CLAUDE.md)
+- 🛠️ **Agent Definitions:** [.claude/agents/](./.claude/agents/)
+- 🐛 **Current Issues:** Check GitHub Issues
+- 📝 **Docs:** [docs/](./docs/)
+
+---
+
+## Contributing
+
+1. Read `.claude/CLAUDE.md` — architecture & rules
+2. Run `npm run lint` — check code style
+3. Run `npm run build` — ensure TypeScript clean
+4. Create pull request — CI runs automatically

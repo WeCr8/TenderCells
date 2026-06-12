@@ -76,10 +76,14 @@ export function createNavigation() {
           <div class="nav-item dropdown">
             <button class="nav-link">Shop <span class="dropdown-arrow">▼</span></button>
             <div class="dropdown-menu">
-              <a href="#" class="dropdown-item">Chicken Tender</a>
-              <a href="#" class="dropdown-item">Genesis XL</a>
-              <a href="#" class="dropdown-item">Accessories</a>
-              <a href="#" class="dropdown-item">Parts</a>
+              <a href="#chicken-tender" class="dropdown-item">Chicken Tender</a>
+              <a href="#cattle-care" class="dropdown-item">Cattle Care</a>
+              <a href="#pig-pal" class="dropdown-item">Pig Pal</a>
+              <a href="#goat-guardian" class="dropdown-item">Goat Guardian</a>
+              <a href="#duck-dock" class="dropdown-item">Duck Dock</a>
+              <a href="#" class="dropdown-item">Predator Monitoring (In Development)</a>
+              <a href="#store" class="dropdown-item">Accessories</a>
+              <a href="#store" class="dropdown-item">Parts</a>
             </div>
           </div>
 
@@ -99,6 +103,7 @@ export function createNavigation() {
           <div class="nav-item dropdown">
             <button class="nav-link">Applications <span class="dropdown-arrow">▼</span></button>
             <div class="dropdown-menu">
+              <a href="#tender-cells-application" class="dropdown-item">Tender Cells Application</a>
               <a href="#chicken-tender" class="dropdown-item">Chicken Tender</a>
               <a href="#cattle-care" class="dropdown-item">Cattle Care (Soon)</a>
               <a href="#pig-pal" class="dropdown-item">Pig Pal (Soon)</a>

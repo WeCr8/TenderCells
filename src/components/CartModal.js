@@ -1,5 +1,6 @@
 // Cart Modal Component
 import { cart } from '../store/cart.js';
+import { lockBodyScroll, unlockBodyScroll } from '../utils/scrollLock.js';
 
 export class CartModal {
   constructor() {
@@ -65,14 +66,14 @@ export class CartModal {
     this.updateCartDisplay();
     const modal = document.getElementById('cartModal');
     modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+    lockBodyScroll();
     this.isOpen = true;
   }
 
   close() {
     const modal = document.getElementById('cartModal');
     modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+    unlockBodyScroll();
     this.isOpen = false;
   }
 

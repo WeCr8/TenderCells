@@ -13,7 +13,7 @@ export function createNavigation() {
       <div class="container">
         <div class="header-content">
           <!-- Logo -->
-          <a href="#" class="logo">
+          <a href="#" class="logo" data-nav-home>
             <div class="logo-icon">🐣</div>
             <span class="logo-text">Tender Cells</span>
           </a>
@@ -74,12 +74,37 @@ export function createNavigation() {
         <!-- Navigation -->
         <nav class="main-nav">
           <div class="nav-item dropdown">
+            <button class="nav-link">Products <span class="dropdown-arrow">▼</span></button>
+            <div class="dropdown-menu">
+              <a href="#all-products" class="dropdown-item">All Products</a>
+              <div class="dropdown-divider"></div>
+              <a href="#chicken-tender" class="dropdown-item">Chicken Tender</a>
+              <a href="#pigeon-palace" class="dropdown-item">Pigeon Palace</a>
+              <a href="#turkey-tower" class="dropdown-item">Turkey Tower</a>
+              <a href="#bunny-burrow" class="dropdown-item">Bunny Burrow</a>
+              <a href="#roaming-roost" class="dropdown-item">Roaming Roost</a>
+              <div class="dropdown-divider"></div>
+              <a href="#cattle-care" class="dropdown-item">Cattle Care</a>
+              <a href="#goat-guardian" class="dropdown-item">Goat Guardian</a>
+              <a href="#pig-pal" class="dropdown-item">Pig Pal</a>
+              <div class="dropdown-divider"></div>
+              <a href="#duck-dock" class="dropdown-item">Duck Dock</a>
+              <div class="dropdown-divider"></div>
+              <a href="#predator-monitoring" class="dropdown-item">Predator Monitoring</a>
+            </div>
+          </div>
+
+          <div class="nav-item dropdown">
             <button class="nav-link">Shop <span class="dropdown-arrow">▼</span></button>
             <div class="dropdown-menu">
-              <a href="#" class="dropdown-item">Chicken Tender</a>
-              <a href="#" class="dropdown-item">Genesis XL</a>
-              <a href="#" class="dropdown-item">Accessories</a>
-              <a href="#" class="dropdown-item">Parts</a>
+              <a href="#chicken-tender" class="dropdown-item">Chicken Tender</a>
+              <a href="#cattle-care" class="dropdown-item">Cattle Care</a>
+              <a href="#pig-pal" class="dropdown-item">Pig Pal</a>
+              <a href="#goat-guardian" class="dropdown-item">Goat Guardian</a>
+              <a href="#duck-dock" class="dropdown-item">Duck Dock</a>
+              <a href="#" class="dropdown-item">Predator Monitoring (In Development)</a>
+              <a href="#store" class="dropdown-item">Accessories</a>
+              <a href="#store" class="dropdown-item">Parts</a>
             </div>
           </div>
 
@@ -99,6 +124,7 @@ export function createNavigation() {
           <div class="nav-item dropdown">
             <button class="nav-link">Applications <span class="dropdown-arrow">▼</span></button>
             <div class="dropdown-menu">
+              <a href="#tender-cells-application" class="dropdown-item">Tender Cells Application</a>
               <a href="#chicken-tender" class="dropdown-item">Chicken Tender</a>
               <a href="#cattle-care" class="dropdown-item">Cattle Care (Soon)</a>
               <a href="#pig-pal" class="dropdown-item">Pig Pal (Soon)</a>
@@ -110,10 +136,10 @@ export function createNavigation() {
           <div class="nav-item dropdown">
             <button class="nav-link">Learn More <span class="dropdown-arrow">▼</span></button>
             <div class="dropdown-menu">
-              <a href="#" class="dropdown-item">How It Works</a>
-              <a href="#" class="dropdown-item">Technology</a>
-              <a href="#" class="dropdown-item">Success Stories</a>
-              <a href="#" class="dropdown-item">FAQ</a>
+              <a href="#how-it-works" class="dropdown-item">How It Works</a>
+              <a href="#technology" class="dropdown-item">Technology</a>
+              <a href="#success-stories" class="dropdown-item">Success Stories</a>
+              <a href="#faq" class="dropdown-item">FAQ</a>
             </div>
           </div>
 

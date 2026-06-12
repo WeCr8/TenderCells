@@ -16,9 +16,9 @@ export function createChickenTenderPage() {
                 research facilities, and homesteads of all sizes.
               </p>
               <div class="app-hero-buttons">
-                <button class="btn btn-primary btn-large" onclick="navigateTo('store')">
+                <a href="#store" class="btn btn-primary btn-large">
                   Order Now - $2,999
-                </button>
+                </a>
                 <button class="btn btn-secondary btn-large">
                   Watch Demo
                 </button>
@@ -142,9 +142,9 @@ export function createChickenTenderPage() {
                 <li>✅ Open source platform</li>
               </ul>
             </div>
-            <button class="btn btn-primary btn-large" onclick="navigateTo('store')">
+            <a href="#store" class="btn btn-primary btn-large">
               Order Now
-            </button>
+            </a>
           </div>
         </div>
       </section>

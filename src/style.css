@@ -98,6 +98,8 @@
   --gray-500: #6b7280;
   --gray-600: #4b5563;
   --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
   
   /* Dark Mode Colors */
   --dark-bg: #1a1a1a;
@@ -138,6 +140,18 @@
   
   /* Grid System */
   --grid-gap: var(--space-4);
+
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--green-dark);
+  background-color: var(--off-white);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Responsive Grid System */
@@ -259,22 +273,6 @@
     margin: 2cm;
   }
 }
-  --gray-800: #1f2937;
-  --gray-900: #111827;
-  
-  /* Typography */
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: var(--green-dark);
-  background-color: var(--off-white);
-  
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
 
 * {
   margin: 0;
@@ -282,9 +280,16 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
 body {
   min-height: 100vh;
   background: var(--off-white);
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Responsive images - ensure all images are responsive */
@@ -689,11 +694,6 @@ button, .btn, a[role="button"] {
 
 .skip-nav:focus {
   top: 8px;
-}
-  text-decoration: none;
-  font-size: 14px;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid var(--gray-100);
 }
 
 .dropdown-item:last-child {
@@ -4050,6 +4050,12 @@ button, .btn, a[role="button"] {
 /* Application Pages Styles */
 .app-page {
   padding-top: 0;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--off-white);
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .app-hero {
@@ -4812,6 +4818,7 @@ button, .btn, a[role="button"] {
 .user-avatar {
   width: 32px;
   height: 32px;
+  border: none;
   border-radius: 50%;
   background: var(--teal);
   color: var(--white);
@@ -9532,3 +9539,219 @@ input:checked + .toggle-slider:before {
 }
 
 /* ===== END SERVICES PAGE STYLES ===== */
+
+/* ===== PAGE CONTAINER STYLES ===== */
+#pageContainer {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--off-white);
+  padding-top: 0;
+}
+
+#pageContainer > * {
+  width: 100%;
+}
+
+/* ===== ALL PRODUCTS PAGE STYLES ===== */
+.all-products-page {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--off-white);
+}
+
+.products-hero {
+  background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 100%);
+  color: var(--white);
+  padding: 80px 0 60px;
+  text-align: center;
+}
+
+.products-hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.products-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 24px;
+}
+
+.products-hero h1 {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--white);
+}
+
+.products-tagline {
+  font-size: 20px;
+  line-height: 1.6;
+  opacity: 0.95;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.products-grid-section {
+  padding: 80px 0;
+  background: var(--off-white);
+}
+
+.products-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.category-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.product-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.product-emoji {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.product-card h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-bottom: 12px;
+}
+
+.product-status {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.product-status.available {
+  background: var(--teal);
+  color: var(--white);
+}
+
+.product-status.coming-soon {
+  background: var(--blue);
+  color: var(--white);
+}
+
+.product-description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--gray-700);
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.product-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+
+.feature-tag {
+  padding: 6px 12px;
+  background: var(--gray-100);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+/* ===== PRODUCT PAGE STYLES (Pigeon Palace, Bunny Burrow, etc.) ===== */
+.pigeon-palace-page,
+.bunny-burrow-page,
+.turkey-tower-page,
+.roaming-roost-page,
+.predator-monitoring-page,
+.chicken-tender-page,
+.cattle-care-page,
+.pig-pal-page,
+.goat-guardian-page,
+.duck-dock-page,
+.tender-cells-application-page,
+.how-it-works-page,
+.technology-page,
+.success-stories-page,
+.faq-page,
+.open-source-page,
+.blog-page,
+.animal-health-page,
+.services-page,
+.press-page,
+.partnerships-page,
+.sales-page,
+.account-page,
+.assets-page,
+.store-page,
+.checkout-page,
+.contact-page,
+.support-page,
+.education-page {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--off-white);
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Responsive styles for product pages */
+@media (max-width: 768px) {
+  .products-hero h1 {
+    font-size: 36px;
+  }
+  
+  .products-tagline {
+    font-size: 18px;
+  }
+  
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .category-title {
+    font-size: 28px;
+  }
+}

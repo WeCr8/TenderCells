@@ -1,8 +1,12 @@
+import { resetPassword, signIn, signUp } from '../firebase/auth.js';
+import { lockBodyScroll, unlockBodyScroll } from '../utils/scrollLock.js';
+
 // Authentication Modal Component
 export class AuthModal {
-  constructor() {
+  constructor(options = {}) {
     this.isOpen = false;
     this.mode = 'signin'; // 'signin', 'signup', 'reset'
+    this.onAuthSuccess = options.onAuthSuccess || null;
     this.createModal();
   }
 
@@ -82,13 +86,125 @@ export class AuthModal {
     const modal = document.getElementById('authModal');
     const closeBtn = document.getElementById('closeAuthModal');
     const overlay = modal.querySelector('.auth-modal-overlay');
+    const signInForm = document.getElementById('signinForm');
+    const signUpForm = document.getElementById('signupForm');
+    const resetForm = document.getElementById('resetForm');
     
     // Close modal events
     closeBtn.addEventListener('click', () => this.close());
     overlay.addEventListener('click', () => this.close());
+    signInForm.addEventListener('submit', (event) => this.handleSignIn(event));
+    signUpForm.addEventListener('submit', (event) => this.handleSignUp(event));
+    resetForm.addEventListener('submit', (event) => this.handleReset(event));
 
     // Add more switcher links dynamically
     this.updateSwitcher();
+  }
+
+  clearMessages() {
+    document.querySelectorAll('.auth-error, .auth-success').forEach((element) => {
+      element.textContent = '';
+    });
+  }
+
+  setFormPending(formId, pending) {
+    const form = document.getElementById(formId);
+    if (!form) {
+      return;
+    }
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    const inputs = form.querySelectorAll('input');
+
+    inputs.forEach((input) => {
+      input.disabled = pending;
+    });
+
+    if (submitButton) {
+      submitButton.disabled = pending;
+      submitButton.dataset.defaultLabel = submitButton.dataset.defaultLabel || submitButton.textContent;
+      submitButton.textContent = pending ? 'Please wait...' : submitButton.dataset.defaultLabel;
+    }
+  }
+
+  showMessage(elementId, message) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.textContent = message;
+    }
+  }
+
+  async handleSignIn(event) {
+    event.preventDefault();
+    this.clearMessages();
+    this.setFormPending('signinForm', true);
+
+    const email = document.getElementById('signinEmail').value.trim();
+    const password = document.getElementById('signinPassword').value;
+    const result = await signIn(email, password);
+
+    this.setFormPending('signinForm', false);
+
+    if (!result.success) {
+      this.showMessage('signinError', result.error || 'Unable to sign in right now.');
+      return;
+    }
+
+    if (this.onAuthSuccess) {
+      this.onAuthSuccess(result.user);
+    }
+
+    this.close();
+  }
+
+  async handleSignUp(event) {
+    event.preventDefault();
+    this.clearMessages();
+    this.setFormPending('signupForm', true);
+
+    const displayName = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (password !== confirmPassword) {
+      this.setFormPending('signupForm', false);
+      this.showMessage('signupError', 'Passwords do not match.');
+      return;
+    }
+
+    const result = await signUp(email, password, displayName);
+
+    this.setFormPending('signupForm', false);
+
+    if (!result.success) {
+      this.showMessage('signupError', result.error || 'Unable to create your account right now.');
+      return;
+    }
+
+    if (this.onAuthSuccess) {
+      this.onAuthSuccess(result.user);
+    }
+
+    this.close();
+  }
+
+  async handleReset(event) {
+    event.preventDefault();
+    this.clearMessages();
+    this.setFormPending('resetForm', true);
+
+    const email = document.getElementById('resetEmail').value.trim();
+    const result = await resetPassword(email);
+
+    this.setFormPending('resetForm', false);
+
+    if (!result.success) {
+      this.showMessage('resetError', result.error || 'Unable to send a reset link right now.');
+      return;
+    }
+
+    this.showMessage('resetSuccess', 'Password reset link sent. Check your inbox.');
   }
 
   switchMode(mode) {
@@ -166,20 +282,21 @@ export class AuthModal {
 
   open(mode = 'signin') {
     this.switchMode(mode);
+    this.clearMessages();
     const modal = document.getElementById('authModal');
     modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+    lockBodyScroll();
     this.isOpen = true;
   }
 
   close() {
     const modal = document.getElementById('authModal');
     modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+    unlockBodyScroll();
     this.isOpen = false;
     
     // Clear forms
     document.querySelectorAll('.auth-form').forEach(form => form.reset());
-    document.querySelectorAll('.auth-error, .auth-success').forEach(el => el.textContent = '');
+    this.clearMessages();
   }
 }

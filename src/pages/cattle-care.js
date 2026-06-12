@@ -87,15 +87,15 @@ export function createCattleCarePage() {
                 and breeding management. Designed for modern ranchers and cattle operations of all sizes.
               </p>
               <div class="app-hero-buttons">
-                <button class="btn btn-primary btn-large" onclick="navigateTo('store')">
+                <a href="#store" class="btn btn-primary btn-large">
                   Shop System - $4,999
-                </button>
+                </a>
                 <button class="btn btn-secondary btn-large" onclick="scrollToHealthGuides()">
                   Health Guides
                 </button>
-                <button class="btn btn-outline btn-large" onclick="navigateTo('services?category=veterinary')">
+                <a href="#services" class="btn btn-outline btn-large" data-category="veterinary">
                   🏥 Find Local Vets
-                </button>
+                </a>
               </div>
             </div>
             <div class="app-hero-image">

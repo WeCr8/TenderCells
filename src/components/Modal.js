@@ -1,3 +1,5 @@
+import { lockBodyScroll, unlockBodyScroll } from '../utils/scrollLock.js';
+
 // Modal Component - Reusable modal system
 export class Modal {
   constructor(id, options = {}) {
@@ -69,7 +71,7 @@ export class Modal {
     const modal = document.getElementById(this.id);
     if (modal) {
       modal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
+      lockBodyScroll();
       this.isOpen = true;
       
       if (this.onOpen) {
@@ -82,7 +84,7 @@ export class Modal {
     const modal = document.getElementById(this.id);
     if (modal) {
       modal.style.display = 'none';
-      document.body.style.overflow = 'auto';
+      unlockBodyScroll();
       this.isOpen = false;
       
       if (this.onClose) {

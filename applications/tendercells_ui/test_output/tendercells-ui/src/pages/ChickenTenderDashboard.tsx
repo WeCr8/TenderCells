@@ -169,7 +169,7 @@ export default function ChickenTenderDashboard() {
                 </Box>
               </Box>
             ) : (
-              <Viewport3D />
+                <Viewport3D product="chicken-tender" title="Chicken TenderCell Yard View" />
             )}
           </Paper>
           <ProductSectionPanel product="chicken-tender" section={section} />

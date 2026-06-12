@@ -16,11 +16,25 @@ import { getPresetModel } from '../../models/presets/coopPresets';
 import { auth } from '../../lib/firebase/firebaseApp';
 import { modelUploadService } from '../../services/modelUploadService';
 import type { CoopModelConfig } from '../../types/coop';
+import {
+  ITEM_COLORS,
+  PROPERTY_LAYOUT_EVENT,
+  loadPropertyLayout,
+  type PropertyItem,
+  type PropertyLayoutState,
+} from '../property/propertyLayoutStore';
 
 type ViewMode = '2d' | '3d';
 type CameraPreset = 'top' | 'left' | 'right' | 'iso';
 type ControlMode = 'pan' | 'orbit';
 type WorkspaceMode = 'property' | 'products' | 'simulation';
+
+type Viewport3DProps = {
+  product?: string;
+  title?: string;
+  initialWorkspaceMode?: WorkspaceMode;
+  height?: string | number | Record<string, string | number>;
+};
 
 const createPlaceholderCoop = (model: CoopModelConfig) => {
   const group = new THREE.Group();
@@ -64,14 +78,16 @@ const createPlaceholderCoop = (model: CoopModelConfig) => {
   return group;
 };
 
-const createPropertyGrid = () => {
+const createPropertyGrid = (layout: PropertyLayoutState) => {
   const group = new THREE.Group();
-  const grid = new THREE.GridHelper(24, 24, 0x6bbf59, 0x1f5c3b);
+  const gridSize = Math.max(layout.property.widthFt, layout.property.depthFt);
+  const divisions = Math.max(4, Math.round(gridSize / layout.property.gridStepFt));
+  const grid = new THREE.GridHelper(gridSize, divisions, 0x6bbf59, 0x1f5c3b);
   grid.position.y = 0.01;
   group.add(grid);
 
   const boundary = new THREE.LineSegments(
-    new THREE.EdgesGeometry(new THREE.BoxGeometry(12, 0.03, 12)),
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(layout.property.widthFt, 0.03, layout.property.depthFt)),
     new THREE.LineBasicMaterial({ color: 0xc8b882 })
   );
   boundary.position.y = 0.03;
@@ -80,41 +96,86 @@ const createPropertyGrid = () => {
   return group;
 };
 
-const createProductMarkers = () => {
-  const group = new THREE.Group();
-  const markerMaterial = new THREE.MeshStandardMaterial({ color: 0xd0a34e, roughness: 0.5 });
+const propertyToScenePosition = (item: PropertyItem, layout: PropertyLayoutState) => ({
+  x: item.x + item.width / 2 - layout.property.widthFt / 2,
+  z: item.y + item.depth / 2 - layout.property.depthFt / 2,
+});
 
-  [
-    { x: -4.5, z: -3.5, name: 'Feed' },
-    { x: 4.2, z: -2.8, name: 'Water' },
-    { x: 3.8, z: 4.5, name: 'Sensor' },
-  ].forEach((marker) => {
-    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.16, 24), markerMaterial);
-    mesh.position.set(marker.x, 0.08, marker.z);
-    mesh.name = marker.name;
-    mesh.castShadow = true;
-    group.add(mesh);
+const createYardItem = (item: PropertyItem, layout: PropertyLayoutState, activeProduct?: string) => {
+  const group = new THREE.Group();
+  const color = new THREE.Color(ITEM_COLORS[item.type] || '#A5B1A9');
+  const selected = item.type === activeProduct || (activeProduct === 'predator-monitor' && item.type === 'watchtower');
+  const { x, z } = propertyToScenePosition(item, layout);
+
+  const material = new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.68,
+    transparent: item.type === 'no-go-zone',
+    opacity: item.type === 'no-go-zone' ? 0.45 : 0.9,
+    emissive: selected ? color.clone().multiplyScalar(0.28) : new THREE.Color(0x000000),
   });
+
+  let mesh: THREE.Mesh;
+  if (item.type === 'tree') {
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.6, 4, 12), new THREE.MeshStandardMaterial({ color: 0x6a4b2b }));
+    trunk.position.set(x, 2, z);
+    trunk.castShadow = true;
+    group.add(trunk);
+    mesh = new THREE.Mesh(new THREE.SphereGeometry(Math.max(item.width, item.depth) * 0.35, 24, 16), material);
+    mesh.position.set(x, 4.2, z);
+  } else if (item.type === 'rock') {
+    mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(Math.max(item.width, item.depth) * 0.35), material);
+    mesh.position.set(x, 0.55, z);
+  } else if (item.type === 'pond' || item.type === 'garden' || item.type === 'no-go-zone') {
+    mesh = new THREE.Mesh(new THREE.BoxGeometry(item.width, 0.08, item.depth), material);
+    mesh.position.set(x, 0.05, z);
+  } else if (item.kind === 'hardware') {
+    mesh = new THREE.Mesh(new THREE.BoxGeometry(item.width, selected ? 1.65 : 1.2, item.depth), material);
+    mesh.position.set(x, selected ? 0.82 : 0.6, z);
+  } else {
+    mesh = new THREE.Mesh(new THREE.BoxGeometry(item.width, 0.75, item.depth), material);
+    mesh.position.set(x, 0.38, z);
+  }
+
+  mesh.name = item.name;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  group.add(mesh);
 
   return group;
 };
 
-const createSimulationOverlay = () => {
+const createYardItems = (layout: PropertyLayoutState, activeProduct?: string) => {
   const group = new THREE.Group();
-  const path = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-5, 0.08, 3),
-    new THREE.Vector3(-2, 0.08, 1.2),
-    new THREE.Vector3(1.5, 0.08, 2.4),
-    new THREE.Vector3(4.5, 0.08, -2),
-  ]);
+  layout.items.forEach((item) => {
+    group.add(createYardItem(item, layout, activeProduct));
+  });
+  return group;
+};
+
+const createSimulationOverlay = (layout: PropertyLayoutState) => {
+  const group = new THREE.Group();
+  const hardwarePoints = layout.items
+    .filter((item) => item.kind === 'hardware' && item.type !== 'watchtower')
+    .map((item) => {
+      const { x, z } = propertyToScenePosition(item, layout);
+      return new THREE.Vector3(x, 0.18, z);
+    });
+
+  const fallbackPoints = [
+    new THREE.Vector3(-layout.property.widthFt * 0.3, 0.18, layout.property.depthFt * 0.25),
+    new THREE.Vector3(0, 0.18, 0),
+    new THREE.Vector3(layout.property.widthFt * 0.25, 0.18, -layout.property.depthFt * 0.2),
+  ];
+  const path = new THREE.CatmullRomCurve3(hardwarePoints.length > 1 ? hardwarePoints : fallbackPoints);
   const geometry = new THREE.TubeGeometry(path, 32, 0.045, 8, false);
   const material = new THREE.MeshStandardMaterial({ color: 0x8dd47a, emissive: 0x1f5c3b });
   group.add(new THREE.Mesh(geometry, material));
   return group;
 };
 
-const getCameraPosition = (preset: CameraPreset, mode: ViewMode) => {
-  const distance = mode === '2d' ? 13 : 9;
+const getCameraPosition = (preset: CameraPreset, mode: ViewMode, sceneSpan: number) => {
+  const distance = mode === '2d' ? sceneSpan : sceneSpan * 0.9;
   switch (preset) {
     case 'top':
       return new THREE.Vector3(0, distance, 0.001);
@@ -128,13 +189,39 @@ const getCameraPosition = (preset: CameraPreset, mode: ViewMode) => {
   }
 };
 
-export default function Viewport3D() {
+export default function Viewport3D({
+  product = 'chicken-tender',
+  title,
+  initialWorkspaceMode = 'property',
+  height,
+}: Viewport3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('3d');
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('iso');
   const [controlMode, setControlMode] = useState<ControlMode>('orbit');
-  const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>('property');
+  const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>(initialWorkspaceMode);
+  const [layout, setLayout] = useState<PropertyLayoutState>(() => loadPropertyLayout());
   const { model, loadedScene, loading, selectPreset, updateModel } = useCoopModel();
+
+  useEffect(() => {
+    const syncLayout = (event: Event) => {
+      const customEvent = event as CustomEvent<PropertyLayoutState>;
+      setLayout(customEvent.detail || loadPropertyLayout());
+    };
+
+    const syncStorage = (event: StorageEvent) => {
+      if (event.key) {
+        setLayout(loadPropertyLayout());
+      }
+    };
+
+    window.addEventListener(PROPERTY_LAYOUT_EVENT, syncLayout as EventListener);
+    window.addEventListener('storage', syncStorage);
+    return () => {
+      window.removeEventListener(PROPERTY_LAYOUT_EVENT, syncLayout as EventListener);
+      window.removeEventListener('storage', syncStorage);
+    };
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -146,10 +233,11 @@ export default function Viewport3D() {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x123d25);
 
+    const cameraSpan = Math.max(layout.property.widthFt, layout.property.depthFt) * 0.58;
     const camera = viewMode === '2d'
-      ? new THREE.OrthographicCamera(-8 * aspect, 8 * aspect, 8, -8, 0.1, 1000)
+      ? new THREE.OrthographicCamera(-cameraSpan * aspect, cameraSpan * aspect, cameraSpan, -cameraSpan, 0.1, 1000)
       : new THREE.PerspectiveCamera(55, aspect, 0.1, 1000);
-    camera.position.copy(getCameraPosition(cameraPreset, viewMode));
+    camera.position.copy(getCameraPosition(cameraPreset, viewMode, cameraSpan));
     camera.lookAt(0, 1, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -187,15 +275,21 @@ export default function Viewport3D() {
     scene.add(directionalLight);
 
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(24, 24),
+      new THREE.PlaneGeometry(layout.property.widthFt, layout.property.depthFt),
       new THREE.MeshStandardMaterial({ color: 0x2d6235, roughness: 0.85 })
     );
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
-    scene.add(createPropertyGrid());
+    scene.add(createPropertyGrid(layout));
 
-    if (loadedScene) {
+    if (workspaceMode === 'products' || workspaceMode === 'simulation') {
+      scene.add(createYardItems(layout, product));
+    } else {
+      scene.add(createYardItems({ ...layout, items: layout.items.filter((item) => item.kind === 'obstacle') }, product));
+    }
+
+    if (product === 'chicken-tender' && loadedScene) {
       loadedScene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           child.castShadow = true;
@@ -203,17 +297,12 @@ export default function Viewport3D() {
         }
       });
       scene.add(loadedScene);
-    } else {
+    } else if (product === 'chicken-tender') {
       scene.add(createPlaceholderCoop(model));
     }
 
-    if (workspaceMode === 'products') {
-      scene.add(createProductMarkers());
-    }
-
     if (workspaceMode === 'simulation') {
-      scene.add(createProductMarkers());
-      scene.add(createSimulationOverlay());
+      scene.add(createSimulationOverlay(layout));
     }
 
     let animationId: number;
@@ -233,10 +322,10 @@ export default function Viewport3D() {
         camera.aspect = nextWidth / nextHeight;
       } else {
         const nextAspect = nextWidth / nextHeight;
-        camera.left = -8 * nextAspect;
-        camera.right = 8 * nextAspect;
-        camera.top = 8;
-        camera.bottom = -8;
+        camera.left = -cameraSpan * nextAspect;
+        camera.right = cameraSpan * nextAspect;
+        camera.top = cameraSpan;
+        camera.bottom = -cameraSpan;
       }
 
       camera.updateProjectionMatrix();
@@ -251,13 +340,13 @@ export default function Viewport3D() {
       container.removeChild(renderer.domElement);
       renderer.dispose();
     };
-  }, [loadedScene, model, viewMode, cameraPreset, controlMode, workspaceMode]);
+  }, [loadedScene, model, viewMode, cameraPreset, controlMode, workspaceMode, layout, product]);
 
   return (
     <Paper
       elevation={3}
       sx={{
-        height: { xs: 'min(64dvh, 460px)', sm: 'min(68dvh, 520px)', lg: 560 },
+        height: height || { xs: 'min(64dvh, 460px)', sm: 'min(68dvh, 520px)', lg: 560 },
         minHeight: { xs: 340, sm: 400 },
         position: 'relative',
         overflow: 'hidden',
@@ -383,7 +472,7 @@ export default function Viewport3D() {
               borderRadius: '4px',
             }}
           >
-            {model.name} ({model.dimensions.width}x{model.dimensions.depth}x{model.dimensions.height}ft)
+            {title || layout.property.name} ({layout.property.widthFt}x{layout.property.depthFt} ft)
           </Typography>
           <Typography
             variant="caption"

@@ -27,84 +27,24 @@ import {
   Grass as GrassIcon,
   PlayArrow as PlayArrowIcon,
 } from '@mui/icons-material';
-
-type PropertyItemKind = 'hardware' | 'obstacle';
-type HardwareType = 'chicken-tender' | 'roaming-roost' | 'duck-dock' | 'watchtower' | 'rail-module' | 'sensor';
-type ObstacleType = 'tree' | 'fence' | 'pond' | 'rock' | 'building' | 'garden' | 'no-go-zone';
+import {
+  HARDWARE_TYPES,
+  ITEM_COLORS,
+  OBSTACLE_TYPES,
+  loadPropertyLayout,
+  savePropertyLayout,
+  type HardwareType,
+  type ObstacleType,
+  type PropertyConfig,
+  type PropertyItem,
+  type PropertyItemKind,
+} from '../components/property/propertyLayoutStore';
 type LayoutMode = 'edit' | 'simulation';
-
-interface PropertyConfig {
-  name: string;
-  widthFt: number;
-  depthFt: number;
-  gridStepFt: number;
-}
-
-interface PropertyItem {
-  id: string;
-  kind: PropertyItemKind;
-  name: string;
-  type: HardwareType | ObstacleType;
-  x: number;
-  y: number;
-  width: number;
-  depth: number;
-}
-
-const STORAGE_KEY = 'tendercells_property_layout_v2';
-
-const HARDWARE_TYPES: HardwareType[] = ['chicken-tender', 'roaming-roost', 'duck-dock', 'watchtower', 'rail-module', 'sensor'];
-const OBSTACLE_TYPES: ObstacleType[] = ['tree', 'fence', 'pond', 'rock', 'building', 'garden', 'no-go-zone'];
-
-const ITEM_COLORS: Record<string, string> = {
-  'chicken-tender': '#D4A574',
-  'roaming-roost': '#C8B882',
-  'duck-dock': '#4A90E2',
-  watchtower: '#8DD47A',
-  'rail-module': '#A5B1A9',
-  sensor: '#D0A34E',
-  tree: '#2F7D32',
-  fence: '#8B6F47',
-  pond: '#3F8FD2',
-  rock: '#777D82',
-  building: '#6A5D4D',
-  garden: '#4A7C59',
-  'no-go-zone': '#C62828',
-};
-
-const DEFAULT_PROPERTY: PropertyConfig = {
-  name: 'Home Yard',
-  widthFt: 120,
-  depthFt: 90,
-  gridStepFt: 10,
-};
-
-const DEFAULT_ITEMS: PropertyItem[] = [
-  { id: 'item-chicken-tender', kind: 'hardware', name: 'Chicken Tender', type: 'chicken-tender', x: 15, y: 14, width: 14, depth: 12 },
-  { id: 'item-roaming-roost', kind: 'hardware', name: 'Roaming Roost', type: 'roaming-roost', x: 62, y: 46, width: 12, depth: 10 },
-  { id: 'item-tree', kind: 'obstacle', name: 'Oak Tree', type: 'tree', x: 42, y: 18, width: 12, depth: 12 },
-  { id: 'item-pond', kind: 'obstacle', name: 'Pond', type: 'pond', x: 84, y: 20, width: 20, depth: 14 },
-  { id: 'item-fence', kind: 'obstacle', name: 'Fence Line', type: 'fence', x: 8, y: 72, width: 92, depth: 4 },
-];
-
-const loadLayout = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
-    const parsed = JSON.parse(saved) as { property: PropertyConfig; items: PropertyItem[] };
-    return {
-      property: parsed.property || DEFAULT_PROPERTY,
-      items: Array.isArray(parsed.items) ? parsed.items : DEFAULT_ITEMS,
-    };
-  } catch {
-    return { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
-  }
-};
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 export default function PropertyLayoutBuilder() {
-  const initial = useMemo(loadLayout, []);
+  const initial = useMemo(loadPropertyLayout, []);
   const [property, setProperty] = useState<PropertyConfig>(initial.property);
   const [items, setItems] = useState<PropertyItem[]>(initial.items);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(initial.items[0]?.id || null);
@@ -120,7 +60,7 @@ export default function PropertyLayoutBuilder() {
   const scaleY = mapHeight / property.depthFt;
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ property, items }));
+    savePropertyLayout({ property, items });
   }, [property, items]);
 
   const updateProperty = (updates: Partial<PropertyConfig>) => {

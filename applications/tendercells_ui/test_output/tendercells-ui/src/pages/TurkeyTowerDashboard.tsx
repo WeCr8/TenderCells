@@ -1,7 +1,7 @@
 // TurkeyTowerDashboard.tsx
 import React from "react";
 import Grid from "@mui/material/Grid";
-import Viewport3D from "../components/viewport/Viewport3D";
+import ProductViewportPanel from "../components/viewport/ProductViewportPanel";
 import TelemetryPanel from "../components/telemetry/TelemetryPanel";
 import BottomToolbar from "../components/toolbar/BottomToolbar";
 import Paper from "@mui/material/Paper";
@@ -9,7 +9,6 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import AgricultureIcon from "@mui/icons-material/Agriculture";
 import HeightIcon from "@mui/icons-material/Height";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SecurityIcon from "@mui/icons-material/Security";
@@ -26,12 +25,7 @@ export default function TurkeyTowerDashboard() {
       <ProductHero product="turkey-tower" />
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h5" gutterBottom>
-              Tower 3D View
-            </Typography>
-            <Viewport3D />
-          </Paper>
+          <ProductViewportPanel product="turkey-tower" title="Tower Yard View" />
           <ProductSectionPanel product="turkey-tower" section={section} />
           <BottomToolbar />
         </Grid>

@@ -1,6 +1,6 @@
 // RoamingRoostDashboard.tsx
 import Grid from "@mui/material/Grid";
-import Viewport3D from "../components/viewport/Viewport3D";
+import ProductViewportPanel from "../components/viewport/ProductViewportPanel";
 import TelemetryPanel from "../components/telemetry/TelemetryPanel";
 import BottomToolbar from "../components/toolbar/BottomToolbar";
 import Paper from "@mui/material/Paper";
@@ -8,7 +8,6 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import AgricultureIcon from "@mui/icons-material/Agriculture";
 import ExploreIcon from "@mui/icons-material/Explore";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MapIcon from "@mui/icons-material/Map";
@@ -25,12 +24,7 @@ export default function RoamingRoostDashboard() {
       <ProductHero product="roaming-roost" />
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h5" gutterBottom>
-              Mobile Coop 3D View
-            </Typography>
-            <Viewport3D />
-          </Paper>
+          <ProductViewportPanel product="roaming-roost" title="Mobile Coop Yard View" />
           <ProductSectionPanel product="roaming-roost" section={section} />
           <BottomToolbar />
         </Grid>

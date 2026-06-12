@@ -1,7 +1,7 @@
 // PigeonPalaceDashboard.tsx
 import React from "react";
 import Grid from "@mui/material/Grid";
-import Viewport3D from "../components/viewport/Viewport3D";
+import ProductViewportPanel from "../components/viewport/ProductViewportPanel";
 import TelemetryPanel from "../components/telemetry/TelemetryPanel";
 import BottomToolbar from "../components/toolbar/BottomToolbar";
 import Paper from "@mui/material/Paper";
@@ -26,12 +26,7 @@ export default function PigeonPalaceDashboard() {
       <ProductHero product="pigeon-palace" />
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h5" gutterBottom>
-              Loft 3D View
-            </Typography>
-            <Viewport3D />
-          </Paper>
+          <ProductViewportPanel product="pigeon-palace" title="Loft Yard View" />
           <ProductSectionPanel product="pigeon-palace" section={section} />
           <BottomToolbar />
         </Grid>

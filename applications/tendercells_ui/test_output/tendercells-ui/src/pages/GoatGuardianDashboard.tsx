@@ -1,6 +1,6 @@
 // GoatGuardianDashboard.tsx
 import Grid from "@mui/material/Grid";
-import Viewport3D from "../components/viewport/Viewport3D";
+import ProductViewportPanel from "../components/viewport/ProductViewportPanel";
 import TelemetryPanel from "../components/telemetry/TelemetryPanel";
 import BottomToolbar from "../components/toolbar/BottomToolbar";
 import Paper from "@mui/material/Paper";
@@ -25,12 +25,7 @@ export default function GoatGuardianDashboard() {
       <ProductHero product="goat-guardian" />
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h5" gutterBottom>
-              Pasture & Shelter 3D View
-            </Typography>
-            <Viewport3D />
-          </Paper>
+          <ProductViewportPanel product="goat-guardian" title="Pasture & Shelter Yard View" />
           <ProductSectionPanel product="goat-guardian" section={section} />
           <BottomToolbar />
         </Grid>

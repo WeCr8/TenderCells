@@ -13,7 +13,7 @@ import {
   Button,
 } from '@mui/material';
 import {
-  Package,
+  Devices,
   Wifi,
   WifiOff,
   Settings,
@@ -106,7 +106,7 @@ export default function ProductCard({ product, onUpdate }: ProductCardProps) {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Avatar sx={{ bgcolor: 'primary.main' }}>
-                <Package />
+                <Devices />
               </Avatar>
               <Box>
                 <Typography variant="h6">{product.product_name}</Typography>

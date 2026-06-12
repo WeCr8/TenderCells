@@ -15,9 +15,13 @@ import {
 import Viewport3D from '../components/viewport/Viewport3D';
 import TelemetryPanel from '../components/telemetry/TelemetryPanel';
 import QuickActions from '../components/toolbar/QuickActions';
+import CameraGrid from '../components/camera/CameraGrid';
+import BehaviorAnalytics from '../components/camera/BehaviorAnalytics';
 import EditIcon from '@mui/icons-material/Edit';
 import StorageIcon from '@mui/icons-material/Storage';
 import TimelineIcon from '@mui/icons-material/Timeline';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -50,6 +54,7 @@ export default function DeviceDetailPage({
   deviceName = 'Chicken Tender #1',
 }: DeviceDetailPageProps) {
   const [activeTab, setActiveTab] = useState(0);
+  const [cameras, setCameras] = useState<any[]>([]);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -73,6 +78,8 @@ export default function DeviceDetailPage({
         <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} aria-label="device tabs">
           <Tab label="3D Model" icon={<StorageIcon />} iconPosition="start" />
           <Tab label="Telemetry" icon={<TimelineIcon />} iconPosition="start" />
+          <Tab label="Cameras" icon={<VideocamIcon />} iconPosition="start" />
+          <Tab label="Health" icon={<FavoriteBorderIcon />} iconPosition="start" />
           <Tab label="Controls" />
           <Tab label="History" />
         </Tabs>
@@ -141,8 +148,25 @@ export default function DeviceDetailPage({
         </Grid>
       </TabPanel>
 
-      {/* Controls Tab */}
+      {/* Cameras Tab */}
       <TabPanel value={activeTab} index={2}>
+        <CameraGrid
+          deviceId={deviceId}
+          cameras={cameras}
+          onAddCamera={(camera) => setCameras([...cameras, camera])}
+          onRemoveCamera={(cameraId) =>
+            setCameras(cameras.filter((c) => c.id !== cameraId))
+          }
+        />
+      </TabPanel>
+
+      {/* Health Tab */}
+      <TabPanel value={activeTab} index={3}>
+        <BehaviorAnalytics />
+      </TabPanel>
+
+      {/* Controls Tab */}
+      <TabPanel value={activeTab} index={4}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ color: '#C8B882' }}>
             Hardware Controls
@@ -152,7 +176,7 @@ export default function DeviceDetailPage({
       </TabPanel>
 
       {/* History Tab */}
-      <TabPanel value={activeTab} index={3}>
+      <TabPanel value={activeTab} index={5}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ color: '#C8B882' }}>
             Event History

@@ -2,6 +2,9 @@ header {
   padding: 1rem;
   border-bottom: 1px solid #ddd;
   background-color: #f9f9f9;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 nav {
@@ -10,11 +13,13 @@ nav {
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
+  flex-wrap: wrap;
 }
 
 nav h1 {
   margin: 0;
   font-size: 1.5rem;
+  flex-shrink: 0;
 }
 
 nav h1 a {
@@ -26,14 +31,61 @@ nav div {
   display: flex;
   gap: 1rem;
   margin-left: auto;
+  flex-wrap: wrap;
 }
 
 nav a {
   text-decoration: none;
   color: #0066cc;
   font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.25rem;
+  white-space: nowrap;
 }
 
 nav a:hover {
   color: #0052a3;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  nav {
+    gap: 1rem;
+  }
+
+  nav h1 {
+    font-size: 1.2rem;
+  }
+
+  nav div {
+    gap: 0.5rem;
+  }
+
+  nav a {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 0.5rem;
+  }
+
+  nav {
+    gap: 0.5rem;
+  }
+
+  nav h1 {
+    font-size: 1rem;
+  }
+
+  nav div {
+    gap: 0.25rem;
+  }
+
+  nav a {
+    font-size: 0.75rem;
+    padding: 0.25rem 0;
+  }
 }

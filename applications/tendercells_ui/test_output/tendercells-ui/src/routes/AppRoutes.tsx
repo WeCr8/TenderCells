@@ -14,6 +14,7 @@ import {
   PropertyLayoutBuilder,
   RailSystemModulesDashboard,
   RoamingRoostDashboard,
+  SchedulesPage,
   SettingsPage,
   TenderCellsCloudDashboard,
   TurkeyTowerDashboard,
@@ -35,6 +36,7 @@ export default function AppRoutes() {
       <Route path="/pigeon-palace" element={<PigeonPalaceDashboard />} />
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/layout" element={<PropertyLayoutBuilder />} />
+      <Route path="/schedules" element={<SchedulesPage />} />
       <Route path="/specs" element={<ProductSpecsPage />} />
       <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
       <Route path="/settings" element={<SettingsPage />} />

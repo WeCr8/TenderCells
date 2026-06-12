@@ -266,6 +266,55 @@ export const executeSchedules = functions.pubsub
         .where("enabled", "==", true)
         .get();
 
+      // ── Safety pre-checks ─────────────────────────────────────────────────
+      // 1. Device online check: lastSeen must be within 5 minutes
+      // 2. Device state check: skip if estop or error
+      // 3. Chicken presence check: skip clean commands if chickens detected
+
+      let deviceState: Record<string, unknown> = {};
+      try {
+        const stateSnap = await rtdb.ref(`device-states/${deviceId}`).once("value");
+        if (stateSnap.exists()) deviceState = stateSnap.val() as Record<string, unknown>;
+      } catch {
+        // RTDB unavailable — fall through to Firestore state doc
+      }
+
+      // Try Firestore device-states if RTDB returned nothing
+      if (!deviceState.systemState) {
+        try {
+          const fsState = await db.doc(`device-states/${deviceId}`).get();
+          if (fsState.exists) deviceState = fsState.data() as Record<string, unknown>;
+        } catch { /* ignore */ }
+      }
+
+      // Check device online (lastSeen within 5 min)
+      const lastSeen = deviceState.lastSeen as number | null | undefined;
+      if (!lastSeen || now.getTime() - lastSeen > 5 * 60_000) {
+        console.warn(`[executeSchedules] Device ${deviceId} offline (lastSeen ${lastSeen ?? "never"}) — skipping all schedules`);
+        continue;
+      }
+
+      // Check device not in estop or error
+      const sysState = String(deviceState.systemState ?? "idle");
+      if (sysState === "estop" || sysState === "error") {
+        console.warn(`[executeSchedules] Device ${deviceId} in ${sysState} — skipping all schedules`);
+        continue;
+      }
+
+      // Fetch latest telemetry once per device (used for chicken presence check)
+      let lastChickenCount = 0;
+      try {
+        const telSnap = await db
+          .collection(`telemetry/${deviceId}/readings`)
+          .orderBy("timestamp", "desc")
+          .limit(1)
+          .get();
+        if (!telSnap.empty) {
+          const reading = telSnap.docs[0].data() as TelemetryReading;
+          lastChickenCount = reading.chickenCount ?? 0;
+        }
+      } catch { /* if telemetry missing, assume 0 — conservative */ }
+
       for (const schedDoc of schedulesSnap.docs) {
         const schedule = schedDoc.data() as ScheduleDoc;
 
@@ -276,6 +325,14 @@ export const executeSchedules = functions.pubsub
         if (schedule.lastRun) {
           const lastRunMs = schedule.lastRun.toMillis();
           if (now.getTime() - lastRunMs < 4 * 60_000) continue;
+        }
+
+        // Chicken presence check: block clean commands if chickens are in the coop
+        if (schedule.action === "clean" && lastChickenCount > 0) {
+          console.warn(
+            `[executeSchedules] Skipping 'clean' for ${deviceId} — chickenCount=${lastChickenCount} (chickens present)`
+          );
+          continue;
         }
 
         // Build command payload

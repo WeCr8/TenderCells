@@ -43,6 +43,10 @@ router.post("/devices/:deviceId/estop", (req: Request, res: Response) => {
   controller.sendEstop(req, res);
 });
 
+router.post("/devices/:deviceId/routine", (req: Request, res: Response) => {
+  controller.sendRoutineCommand(req, res);
+});
+
 // MQTT broker status
 router.get("/mqtt/status", (req: Request, res: Response) => {
   controller.getMQTTStatus(req, res);

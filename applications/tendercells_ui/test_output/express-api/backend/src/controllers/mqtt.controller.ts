@@ -38,10 +38,16 @@ function validatePayload(payload: unknown, schema: Schema): string | null {
   return null;
 }
 
+const KNOWN_ROUTINES = [
+  "egg_collection_routine",
+  "cleaning_sweep_routine",
+] as const;
+
 const SCHEMAS: Record<string, Schema> = {
-  door:  { state: { type: "string", required: true, values: ["open", "close"] } },
-  feed:  { amount: { type: "number", required: true, min: 1, max: 5000 } },
-  clean: { action: { type: "string", required: true, values: ["start", "stop"] } },
+  door:    { state:   { type: "string", required: true, values: ["open", "close"] } },
+  feed:    { amount:  { type: "number", required: true, min: 1, max: 5000 } },
+  clean:   { action:  { type: "string", required: true, values: ["start", "stop"] } },
+  routine: { routine: { type: "string", required: true, values: [...KNOWN_ROUTINES] } },
   arm: {
     joints: { type: "array",  required: true },
     speed:  { type: "number", required: false, min: 0, max: 1 },
@@ -271,6 +277,35 @@ export class MQTTController {
       command: "arm",
       joints,
       message: "Arm command sent",
+    });
+  }
+
+  sendRoutineCommand(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const { routine } = req.body;
+
+    const err = validatePayload(req.body, SCHEMAS.routine);
+    if (err) return res.status(400).json({ error: err });
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+
+    // Routines publish to cmd/motion — Jetson Nano interprets the routine name
+    const topic = `tc/${deviceId}/cmd/motion`;
+    const payload = {
+      seq: Date.now(),
+      routine,
+      timestamp: Date.now(),
+    };
+
+    MQTTController.client.publish(topic, JSON.stringify(payload), { qos: 1 });
+
+    res.json({
+      success: true,
+      deviceId,
+      command: "routine",
+      routine,
+      message: `Routine '${routine}' dispatched`,
     });
   }
 

@@ -15,4 +15,5 @@ export { default as ProductsPage } from './ProductsPage';
 export { default as PropertyLayoutBuilder } from './PropertyLayoutBuilder';
 export { default as ProductSpecsPage } from './ProductSpecsPage';
 export { default as DeviceDetailPage } from './DeviceDetailPage';
+export { default as SchedulesPage } from './SchedulesPage';
 

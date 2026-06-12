@@ -12,7 +12,7 @@ interface TelemetryData {
   [key: string]: any;
 }
 
-const API_BASE = 'http://localhost:4000/api/mqtt';
+const API_BASE = 'http://localhost:3001/api/mqtt';
 
 export const useTelemetry = (deviceId: string, pollIntervalMs = 5000) => {
   const [data, setData] = useState<TelemetryData | null>(null);

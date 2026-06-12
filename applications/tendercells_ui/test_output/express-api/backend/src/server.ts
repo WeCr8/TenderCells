@@ -2,21 +2,22 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { initializeFirebaseAdmin } from './config/firebase-admin.js';
-import mqttRoutes from './routes/mqtt.routes.js';
+import mqttRoutes from './routes/mqtt.routes.ts';
 
 dotenv.config();
 
-// Initialize Firebase Admin SDK
+// Firebase optional - MQTT is primary control path
 try {
-  initializeFirebaseAdmin();
+  // Lazy load Firebase if needed later
+  // const { initializeFirebaseAdmin } = await import('./config/firebase-admin.js');
+  // initializeFirebaseAdmin();
+  console.log('Firebase skipped - MQTT primary control path');
 } catch (error) {
-  console.error('Failed to initialize Firebase Admin SDK:', error);
-  console.warn('Server will continue without Firebase Admin SDK');
+  console.warn('Firebase not available (optional for MQTT-only mode)');
 }
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -27,7 +28,9 @@ app.get('/health', (req, res) => {
 });
 
 // MQTT hardware control routes
+console.log('Loading MQTT routes..., router:', typeof mqttRoutes);
 app.use('/api/mqtt', mqttRoutes);
+console.log('MQTT routes loaded successfully');
 
 // API status dashboard
 app.get('/api/status', (req, res) => {
@@ -44,7 +47,7 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '127.0.0.1', () => {
   console.log(`
 ╔════════════════════════════════════════════════════════╗
 ║  Tender Cells API Server                              ║

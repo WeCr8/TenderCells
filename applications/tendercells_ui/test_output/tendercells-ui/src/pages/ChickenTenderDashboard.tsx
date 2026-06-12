@@ -18,7 +18,7 @@ export default function ChickenTenderDashboard() {
 
   useEffect(() => {
     // Check API health on mount
-    fetch("http://localhost:4000/health")
+    fetch("http://localhost:3001/health")
       .then((res) => setApiStatus(res.ok ? "ok" : "error"))
       .catch(() => setApiStatus("error"));
   }, []);

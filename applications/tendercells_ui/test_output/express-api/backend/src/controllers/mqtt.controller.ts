@@ -2,7 +2,7 @@
 // MQTT hardware control logic
 // Last updated: 2026-06-11
 
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import mqtt from "mqtt";
 
 interface MQTTMessage {

@@ -2,8 +2,9 @@
 // Hardware control routes via MQTT broker
 // Last updated: 2026-06-11
 
-import { Router, Request, Response } from "express";
-import { MQTTController } from "../controllers/mqtt.controller";
+import { Router } from "express";
+import type { Request, Response } from "express";
+import { MQTTController } from "../controllers/mqtt.controller.ts";
 
 const router = Router();
 const controller = new MQTTController();

@@ -10,7 +10,7 @@ interface HardwareControlState {
   success: boolean;
 }
 
-const API_BASE = 'http://localhost:4000/api/mqtt';
+const API_BASE = 'http://localhost:3001/api/mqtt';
 
 export const useHardwareControl = (deviceId: string) => {
   const [state, setState] = useState<HardwareControlState>({

@@ -39,7 +39,6 @@ type Viewport3DProps = {
   height?: string | number | Record<string, string | number>;
 };
 
-// Maps ProductFamily values to PropertyItem type values
 const FAMILY_TO_ITEM_TYPE: Record<string, string> = {
   'chicken-tender': 'chicken-tender',
   'roaming-roost': 'roaming-roost',
@@ -70,7 +69,283 @@ const DEFAULT_SIZE_BY_TYPE: Record<string, { width: number; depth: number }> = {
 
 type EnrichedItem = PropertyItem & { product?: Product };
 
-// Device ID / product name label as a Sprite above item
+// ─── Product-specific 3D geometry ────────────────────────────────────────────
+
+const createHardwareMesh = (
+  item: EnrichedItem,
+  x: number,
+  z: number,
+  selected: boolean,
+  baseMaterial: THREE.MeshStandardMaterial
+): THREE.Object3D => {
+  const W = item.width;
+  const D = item.depth;
+  const scale = selected ? 1.15 : 1.0;
+  const H = (selected ? 1.8 : 1.3) * scale;
+
+  const mat = baseMaterial.clone();
+
+  switch (item.type) {
+    case 'chicken-tender': {
+      const g = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.BoxGeometry(W * 0.88, H, D * 0.88), mat);
+      body.position.set(x, H / 2, z);
+      body.castShadow = true;
+      g.add(body);
+      const roof = new THREE.Mesh(
+        new THREE.ConeGeometry(Math.max(W, D) * 0.54, H * 0.36, 4),
+        new THREE.MeshStandardMaterial({ color: 0x1a3d2b, roughness: 0.65 })
+      );
+      roof.position.set(x, H + H * 0.18, z);
+      roof.rotation.y = Math.PI / 4;
+      roof.castShadow = true;
+      g.add(roof);
+      const door = new THREE.Mesh(
+        new THREE.BoxGeometry(W * 0.2, H * 0.34, 0.05),
+        new THREE.MeshStandardMaterial({ color: 0xf0ede4 })
+      );
+      door.position.set(x, H * 0.22, z + D * 0.45);
+      g.add(door);
+      return g;
+    }
+
+    case 'roaming-roost': {
+      const g = new THREE.Group();
+      const baseR = Math.min(W, D) * 0.42;
+      const base = new THREE.Mesh(
+        new THREE.CylinderGeometry(baseR * 0.95, baseR, 0.22, 6),
+        new THREE.MeshStandardMaterial({ color: 0x4a7c59, roughness: 0.7 })
+      );
+      base.position.set(x, 0.11, z);
+      g.add(base);
+      const dome = new THREE.Mesh(
+        new THREE.SphereGeometry(baseR * 0.9, 10, 8, 0, Math.PI * 2, 0, Math.PI * 0.6),
+        new THREE.MeshStandardMaterial({ color: mat.color, roughness: 0.55, transparent: true, opacity: 0.88 })
+      );
+      dome.position.set(x, 0.22, z);
+      dome.castShadow = true;
+      g.add(dome);
+      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+      [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(([wx, wz]) => {
+        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.11, 12), wheelMat);
+        wheel.position.set(x + wx * W * 0.3, 0.11, z + wz * D * 0.3);
+        wheel.rotation.x = Math.PI / 2;
+        g.add(wheel);
+      });
+      return g;
+    }
+
+    case 'duck-dock': {
+      const g = new THREE.Group();
+      const water = new THREE.Mesh(
+        new THREE.BoxGeometry(W, 0.07, D),
+        new THREE.MeshStandardMaterial({ color: 0x2a6b8a, roughness: 0.12, transparent: true, opacity: 0.7 })
+      );
+      water.position.set(x, 0.04, z);
+      g.add(water);
+      const dock = new THREE.Mesh(new THREE.BoxGeometry(W * 0.72, 0.2, D * 0.55), mat);
+      dock.position.set(x + W * 0.06, 0.2, z - D * 0.06);
+      dock.castShadow = true;
+      g.add(dock);
+      const ramp = new THREE.Mesh(new THREE.BoxGeometry(W * 0.18, 0.05, D * 0.42), mat);
+      ramp.position.set(x - W * 0.27, 0.09, z + D * 0.18);
+      ramp.rotation.x = 0.22;
+      g.add(ramp);
+      const post = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.06, 0.06, 0.65, 8),
+        new THREE.MeshStandardMaterial({ color: 0x8a6030 })
+      );
+      post.position.set(x + W * 0.28, 0.52, z - D * 0.22);
+      g.add(post);
+      return g;
+    }
+
+    case 'goat-guardian': {
+      const g = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.BoxGeometry(W * 0.88, H * 0.7, D * 0.82), mat);
+      body.position.set(x, H * 0.35, z);
+      body.castShadow = true;
+      g.add(body);
+      const roof = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.01, Math.max(W, D) * 0.53, H * 0.38, 4),
+        new THREE.MeshStandardMaterial({ color: 0x5a3e20, roughness: 0.8 })
+      );
+      roof.position.set(x, H * 0.79, z);
+      roof.rotation.y = Math.PI / 4;
+      roof.castShadow = true;
+      g.add(roof);
+      const door = new THREE.Mesh(
+        new THREE.BoxGeometry(W * 0.18, H * 0.45, 0.06),
+        new THREE.MeshStandardMaterial({ color: 0xf0ede4 })
+      );
+      door.position.set(x, H * 0.22, z + D * 0.42);
+      g.add(door);
+      return g;
+    }
+
+    case 'bunny-burrow': {
+      const g = new THREE.Group();
+      const hutch = new THREE.Mesh(new THREE.BoxGeometry(W * 0.85, H * 0.52, D * 0.8), mat);
+      hutch.position.set(x, H * 0.26, z);
+      hutch.castShadow = true;
+      g.add(hutch);
+      // Wire mesh front panel
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(W * 0.85, H * 0.52, 0.04),
+        new THREE.MeshStandardMaterial({ color: 0x888888, wireframe: true })
+      );
+      mesh.position.set(x, H * 0.26, z + D * 0.41);
+      g.add(mesh);
+      // Arched tunnel
+      const tunnel = new THREE.Mesh(
+        new THREE.CylinderGeometry(Math.min(W, D) * 0.13, Math.min(W, D) * 0.13, 0.28, 10),
+        new THREE.MeshStandardMaterial({ color: 0x2d6235 })
+      );
+      tunnel.rotation.x = Math.PI / 2;
+      tunnel.position.set(x + W * 0.2, H * 0.17, z + D * 0.48);
+      g.add(tunnel);
+      return g;
+    }
+
+    case 'turkey-tower': {
+      const g = new THREE.Group();
+      const base = new THREE.Mesh(new THREE.BoxGeometry(W * 0.82, H * 0.38, D * 0.82), mat);
+      base.position.set(x, H * 0.19, z);
+      base.castShadow = true;
+      g.add(base);
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(W * 0.38, H * 0.88, D * 0.38), mat);
+      tower.position.set(x, H * 0.72, z);
+      tower.castShadow = true;
+      g.add(tower);
+      const platform = new THREE.Mesh(
+        new THREE.BoxGeometry(W * 0.68, 0.13, D * 0.68),
+        new THREE.MeshStandardMaterial({ color: 0x8a6030, roughness: 0.75 })
+      );
+      platform.position.set(x, H * 1.18, z);
+      platform.castShadow = true;
+      g.add(platform);
+      return g;
+    }
+
+    case 'pigeon-palace': {
+      const g = new THREE.Group();
+      const base = new THREE.Mesh(new THREE.BoxGeometry(W * 0.78, H * 0.42, D * 0.78), mat);
+      base.position.set(x, H * 0.21, z);
+      base.castShadow = true;
+      g.add(base);
+      const loft = new THREE.Mesh(
+        new THREE.CylinderGeometry(Math.min(W, D) * 0.28, Math.min(W, D) * 0.32, H * 0.68, 8),
+        mat.clone()
+      );
+      loft.position.set(x, H * 0.74, z);
+      loft.castShadow = true;
+      g.add(loft);
+      const cupola = new THREE.Mesh(
+        new THREE.ConeGeometry(Math.min(W, D) * 0.26, H * 0.28, 8),
+        new THREE.MeshStandardMaterial({ color: 0xc8b882, roughness: 0.5 })
+      );
+      cupola.position.set(x, H * 1.22, z);
+      g.add(cupola);
+      // Entry holes
+      [0, 90, 180, 270].forEach((deg) => {
+        const rad = (deg * Math.PI) / 180;
+        const hole = new THREE.Mesh(
+          new THREE.CircleGeometry(0.08, 8),
+          new THREE.MeshStandardMaterial({ color: 0x0a0a1a })
+        );
+        hole.position.set(
+          x + Math.sin(rad) * Math.min(W, D) * 0.3,
+          H * 0.78,
+          z + Math.cos(rad) * Math.min(W, D) * 0.3
+        );
+        hole.lookAt(new THREE.Vector3(x, H * 0.78, z));
+        g.add(hole);
+      });
+      return g;
+    }
+
+    case 'watchtower': {
+      const g = new THREE.Group();
+      const poleH = H * 2.4;
+      const pole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.1, 0.14, poleH, 8),
+        new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.6, roughness: 0.4 })
+      );
+      pole.position.set(x, poleH / 2, z);
+      pole.castShadow = true;
+      g.add(pole);
+      // Cross-braces
+      [0.3, 0.6].forEach((frac) => {
+        const brace = new THREE.Mesh(
+          new THREE.BoxGeometry(0.55, 0.06, 0.06),
+          new THREE.MeshStandardMaterial({ color: 0x666666 })
+        );
+        brace.position.set(x, poleH * frac, z);
+        g.add(brace);
+      });
+      const dome = new THREE.Mesh(
+        new THREE.SphereGeometry(0.44, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.6),
+        new THREE.MeshStandardMaterial({ color: 0x1a1a2e, roughness: 0.15, metalness: 0.7 })
+      );
+      dome.position.set(x, poleH + 0.08, z);
+      dome.castShadow = true;
+      g.add(dome);
+      [0, 120, 240].forEach((deg) => {
+        const rad = (deg * Math.PI) / 180;
+        const lens = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.055, 0.055, 0.15, 8),
+          new THREE.MeshStandardMaterial({ color: 0x080810 })
+        );
+        lens.rotation.z = Math.PI / 2;
+        lens.position.set(
+          x + Math.sin(rad) * 0.36,
+          poleH + 0.02,
+          z + Math.cos(rad) * 0.36
+        );
+        g.add(lens);
+      });
+      return g;
+    }
+
+    case 'rail-module': {
+      const g = new THREE.Group();
+      const bed = new THREE.Mesh(
+        new THREE.BoxGeometry(W, 0.15, D),
+        new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.85 })
+      );
+      bed.position.set(x, 0.075, z);
+      g.add(bed);
+      const railMat = new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 0.75 });
+      [-1, 1].forEach((side) => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(W, 0.09, 0.07), railMat);
+        rail.position.set(x, 0.19, z + side * D * 0.32);
+        g.add(rail);
+      });
+      // Ties
+      const tieCount = Math.max(2, Math.round(W));
+      for (let i = 0; i < tieCount; i++) {
+        const tie = new THREE.Mesh(
+          new THREE.BoxGeometry(0.1, 0.08, D * 0.9),
+          new THREE.MeshStandardMaterial({ color: 0x6a4b2b })
+        );
+        tie.position.set(x - W / 2 + (W / (tieCount - 1)) * i, 0.15, z);
+        g.add(tie);
+      }
+      return g;
+    }
+
+    default: {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(W, H, D), mat);
+      mesh.position.set(x, H / 2, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      return mesh;
+    }
+  }
+};
+
+// ─── Device ID label sprite ───────────────────────────────────────────────────
+
 const createDeviceLabel = (item: EnrichedItem): THREE.Sprite => {
   const label = item.product?.device_id || item.product?.product_name || item.name;
   const canvas = document.createElement('canvas');
@@ -79,30 +354,19 @@ const createDeviceLabel = (item: EnrichedItem): THREE.Sprite => {
   const ctx = canvas.getContext('2d')!;
   ctx.clearRect(0, 0, 320, 72);
   ctx.fillStyle = 'rgba(0,0,0,0.72)';
-  const r = 10;
   ctx.beginPath();
-  ctx.moveTo(r + 4, 4);
-  ctx.lineTo(316 - r, 4);
-  ctx.quadraticCurveTo(316, 4, 316, 4 + r);
-  ctx.lineTo(316, 68 - r);
-  ctx.quadraticCurveTo(316, 68, 316 - r, 68);
-  ctx.lineTo(r + 4, 68);
-  ctx.quadraticCurveTo(4, 68, 4, 68 - r);
-  ctx.lineTo(4, 4 + r);
-  ctx.quadraticCurveTo(4, 4, r + 4, 4);
-  ctx.closePath();
+  ctx.roundRect(4, 4, 312, 64, 10);
   ctx.fill();
-  // device id in gold monospace
   const hasProduct = Boolean(item.product);
   ctx.fillStyle = hasProduct ? '#C8B882' : '#8A7D55';
-  ctx.font = `bold ${hasProduct ? '22' : '18'}px monospace`;
+  ctx.font = `bold ${hasProduct ? '21' : '17'}px monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(label.slice(0, 20), 160, hasProduct ? 26 : 36);
+  ctx.fillText(label.slice(0, 20), 160, hasProduct ? 25 : 36);
   if (hasProduct && item.product?.id) {
     ctx.fillStyle = '#6BBF59';
-    ctx.font = '15px monospace';
-    ctx.fillText(item.product.id.slice(0, 24), 160, 52);
+    ctx.font = '14px monospace';
+    ctx.fillText(item.product.id.slice(0, 26), 160, 52);
   }
   const texture = new THREE.CanvasTexture(canvas);
   const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
@@ -110,6 +374,8 @@ const createDeviceLabel = (item: EnrichedItem): THREE.Sprite => {
   sprite.scale.set(3.6, 0.9, 1);
   return sprite;
 };
+
+// ─── Property-level helpers ───────────────────────────────────────────────────
 
 const createPlaceholderCoop = (model: CoopModelConfig) => {
   const group = new THREE.Group();
@@ -122,8 +388,7 @@ const createPlaceholderCoop = (model: CoopModelConfig) => {
   );
   base.position.y = height * 0.225;
   base.castShadow = true;
-  base.receiveShadow = true;
-  group.add(base);
+  g_add(group, base);
 
   const roof = new THREE.Mesh(
     new THREE.ConeGeometry(Math.max(width, depth) * 0.72, Math.max(height * 0.28, 0.75), 4),
@@ -153,6 +418,9 @@ const createPlaceholderCoop = (model: CoopModelConfig) => {
   return group;
 };
 
+// Helper to avoid shadowing - named workaround
+function g_add(group: THREE.Group, obj: THREE.Object3D) { group.add(obj); }
+
 const createPropertyGrid = (layout: PropertyLayoutState) => {
   const group = new THREE.Group();
   const gridSize = Math.max(layout.property.widthFt, layout.property.depthFt);
@@ -181,71 +449,89 @@ const createYardItem = (
   layout: PropertyLayoutState,
   activeProduct: string | undefined,
   loadedGlb: THREE.Group | undefined
-) => {
+): THREE.Group => {
   const group = new THREE.Group();
   const color = new THREE.Color(ITEM_COLORS[item.type] || '#A5B1A9');
-  const selected = item.type === activeProduct || (activeProduct === 'predator-monitor' && item.type === 'watchtower');
+  const selected =
+    item.type === activeProduct ||
+    (activeProduct === 'predator-monitor' && item.type === 'watchtower') ||
+    (activeProduct === 'rail-system-modules' && item.type === 'rail-module');
   const { x, z } = propertyToScenePosition(item, layout);
 
-  // Use loaded GLB if available
+  const material = new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.68,
+    transparent: item.type === 'no-go-zone',
+    opacity: item.type === 'no-go-zone' ? 0.45 : 0.9,
+    emissive: selected ? color.clone().multiplyScalar(0.32) : new THREE.Color(0x000000),
+  });
+
   if (loadedGlb) {
     const clone = loadedGlb.clone();
     const box = new THREE.Box3().setFromObject(clone);
     const size = box.getSize(new THREE.Vector3());
-    const scale = Math.min(item.width / Math.max(size.x, 0.01), item.depth / Math.max(size.z, 0.01), 2.5 / Math.max(size.y, 0.01));
+    const scale = Math.min(
+      item.width / Math.max(size.x, 0.01),
+      item.depth / Math.max(size.z, 0.01),
+      2.5 / Math.max(size.y, 0.01)
+    );
     clone.scale.setScalar(scale);
-    box.setFromObject(clone);
-    const min = box.min;
-    clone.position.set(x - (box.max.x + min.x) / 2, -min.y * scale * 0.5, z - (box.max.z + min.z) / 2);
+    const min = new THREE.Box3().setFromObject(clone).min;
+    clone.position.set(x, -min.y, z);
     clone.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
+      if (child instanceof THREE.Mesh) { child.castShadow = true; child.receiveShadow = true; }
     });
+    clone.name = item.product?.device_id || item.product?.id || item.name;
     group.add(clone);
-  } else {
-    const material = new THREE.MeshStandardMaterial({
-      color,
-      roughness: 0.68,
-      transparent: item.type === 'no-go-zone',
-      opacity: item.type === 'no-go-zone' ? 0.45 : 0.9,
-      emissive: selected ? color.clone().multiplyScalar(0.28) : new THREE.Color(0x000000),
+  } else if (item.type === 'tree') {
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.45, 0.6, 4, 12),
+      new THREE.MeshStandardMaterial({ color: 0x6a4b2b })
+    );
+    trunk.position.set(x, 2, z);
+    trunk.castShadow = true;
+    group.add(trunk);
+    const canopy = new THREE.Mesh(
+      new THREE.SphereGeometry(Math.max(item.width, item.depth) * 0.35, 24, 16),
+      material
+    );
+    canopy.position.set(x, 4.2, z);
+    canopy.castShadow = true;
+    group.add(canopy);
+  } else if (item.type === 'rock') {
+    const rock = new THREE.Mesh(
+      new THREE.DodecahedronGeometry(Math.max(item.width, item.depth) * 0.35),
+      material
+    );
+    rock.position.set(x, 0.55, z);
+    rock.name = item.name;
+    group.add(rock);
+  } else if (item.type === 'pond' || item.type === 'garden' || item.type === 'no-go-zone') {
+    const flat = new THREE.Mesh(new THREE.BoxGeometry(item.width, 0.08, item.depth), material);
+    flat.position.set(x, 0.05, z);
+    flat.name = item.name;
+    group.add(flat);
+  } else if (item.kind === 'hardware') {
+    const hw = createHardwareMesh(item, x, z, selected, material);
+    hw.name = item.product?.device_id || item.product?.id || item.name;
+    hw.traverse((child) => {
+      if (child instanceof THREE.Mesh) { child.receiveShadow = true; }
     });
-
-    let mesh: THREE.Mesh;
-    if (item.type === 'tree') {
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.6, 4, 12), new THREE.MeshStandardMaterial({ color: 0x6a4b2b }));
-      trunk.position.set(x, 2, z);
-      trunk.castShadow = true;
-      group.add(trunk);
-      mesh = new THREE.Mesh(new THREE.SphereGeometry(Math.max(item.width, item.depth) * 0.35, 24, 16), material);
-      mesh.position.set(x, 4.2, z);
-    } else if (item.type === 'rock') {
-      mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(Math.max(item.width, item.depth) * 0.35), material);
-      mesh.position.set(x, 0.55, z);
-    } else if (item.type === 'pond' || item.type === 'garden' || item.type === 'no-go-zone') {
-      mesh = new THREE.Mesh(new THREE.BoxGeometry(item.width, 0.08, item.depth), material);
-      mesh.position.set(x, 0.05, z);
-    } else if (item.kind === 'hardware') {
-      mesh = new THREE.Mesh(new THREE.BoxGeometry(item.width, selected ? 1.65 : 1.2, item.depth), material);
-      mesh.position.set(x, selected ? 0.82 : 0.6, z);
-    } else {
-      mesh = new THREE.Mesh(new THREE.BoxGeometry(item.width, 0.75, item.depth), material);
-      mesh.position.set(x, 0.38, z);
-    }
-
-    mesh.name = item.product?.device_id || item.product?.id || item.name;
+    group.add(hw);
+  } else {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(item.width, 0.75, item.depth), material);
+    mesh.position.set(x, 0.38, z);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+    mesh.name = item.name;
     group.add(mesh);
   }
 
   // Floating device label for hardware items
   if (item.kind === 'hardware') {
     const label = createDeviceLabel(item);
-    const labelHeight = loadedGlb ? 2.8 : (selected ? 2.4 : 1.9);
-    label.position.set(x, labelHeight, z);
+    const labelY = item.type === 'watchtower' ? 5.8 : item.type === 'turkey-tower' ? 3.4 : selected ? 2.6 : 2.0;
+    label.position.set(x, labelY, z);
     group.add(label);
   }
 
@@ -258,7 +544,7 @@ const createYardItems = (
   layout: PropertyLayoutState,
   activeProduct: string | undefined,
   glbCache: Map<string, THREE.Group>
-) => {
+): THREE.Group => {
   const group = new THREE.Group();
   items.forEach((item) => {
     const glbKey = item.product?.id;
@@ -268,7 +554,7 @@ const createYardItems = (
   return group;
 };
 
-const createSimulationOverlay = (layout: PropertyLayoutState) => {
+const createSimulationOverlay = (layout: PropertyLayoutState): THREE.Group => {
   const group = new THREE.Group();
   const hardwarePoints = layout.items
     .filter((item) => item.kind === 'hardware' && item.type !== 'watchtower')
@@ -292,17 +578,15 @@ const createSimulationOverlay = (layout: PropertyLayoutState) => {
 const getCameraPosition = (preset: CameraPreset, mode: ViewMode, sceneSpan: number) => {
   const distance = mode === '2d' ? sceneSpan : sceneSpan * 0.9;
   switch (preset) {
-    case 'top':
-      return new THREE.Vector3(0, distance, 0.001);
-    case 'left':
-      return new THREE.Vector3(-distance, 3, 0);
-    case 'right':
-      return new THREE.Vector3(distance, 3, 0);
+    case 'top':  return new THREE.Vector3(0, distance, 0.001);
+    case 'left': return new THREE.Vector3(-distance, 3, 0);
+    case 'right': return new THREE.Vector3(distance, 3, 0);
     case 'iso':
-    default:
-      return new THREE.Vector3(7, 6, 7);
+    default:     return new THREE.Vector3(7, 6, 7);
   }
 };
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Viewport3D({
   product = 'chicken-tender',
@@ -319,12 +603,10 @@ export default function Viewport3D({
   const { model, loadedScene, loading, selectPreset, updateModel } = useCoopModel();
 
   const { products } = useProducts();
-
-  // GLB cache: product.id → loaded THREE.Group
   const glbCacheRef = useRef<Map<string, THREE.Group>>(new Map());
   const [glbCacheVersion, setGlbCacheVersion] = useState(0);
 
-  // Match products to layout items; add unpositioned products
+  // Resolve layout items → matched Firestore products
   const enrichedItems = useMemo<EnrichedItem[]>(() => {
     const familyUsedCount = new Map<string, number>();
     const productsByFamily = new Map<string, Product[]>();
@@ -337,39 +619,34 @@ export default function Viewport3D({
     });
 
     const enriched: EnrichedItem[] = layout.items.map((item) => {
-      const familyKey = Object.keys(FAMILY_TO_ITEM_TYPE).find(
-        (k) => FAMILY_TO_ITEM_TYPE[k] === item.type
-      ) || item.type;
+      const familyKey =
+        Object.keys(FAMILY_TO_ITEM_TYPE).find((k) => FAMILY_TO_ITEM_TYPE[k] === item.type) ||
+        item.type;
       const prods = productsByFamily.get(familyKey) || productsByFamily.get(item.type) || [];
       const idx = familyUsedCount.get(familyKey) || 0;
       familyUsedCount.set(familyKey, idx + 1);
       return { ...item, product: prods[idx] };
     });
 
-    // Add Firestore products that have no matching layout item
+    // Add registered products that have no layout item
     products.forEach((p) => {
       const family = p.metadata?.product_family as string | undefined;
       if (!family) return;
       const itemType = FAMILY_TO_ITEM_TYPE[family] || family;
-      const familyKey = family;
-      const prods = productsByFamily.get(familyKey) || [];
-      const usedCount = familyUsedCount.get(familyKey) || 0;
+      const prods = productsByFamily.get(family) || [];
+      const usedCount = familyUsedCount.get(family) || 0;
       const prodIdx = prods.indexOf(p);
-      if (prodIdx < usedCount) return; // already matched
+      if (prodIdx < usedCount) return;
 
       const size = DEFAULT_SIZE_BY_TYPE[itemType] || { width: 3, depth: 3 };
-      // Spiral offset for multiple unpositioned items
-      const unpositionedIdx = prodIdx - usedCount;
-      const offsetX = (unpositionedIdx % 3) * (size.width + 1);
-      const offsetY = Math.floor(unpositionedIdx / 3) * (size.depth + 1);
-
+      const unposIdx = prodIdx - usedCount;
       enriched.push({
         id: p.id,
         name: p.product_name,
-        type: itemType,
+        type: itemType as PropertyItem['type'],
         kind: 'hardware',
-        x: Math.min(offsetX + 1, layout.property.widthFt - size.width - 1),
-        y: Math.min(offsetY + 1, layout.property.depthFt - size.depth - 1),
+        x: Math.min((unposIdx % 3) * (size.width + 1) + 1, layout.property.widthFt - size.width - 1),
+        y: Math.min(Math.floor(unposIdx / 3) * (size.depth + 1) + 1, layout.property.depthFt - size.depth - 1),
         width: size.width,
         depth: size.depth,
         product: p,
@@ -379,56 +656,38 @@ export default function Viewport3D({
     return enriched;
   }, [layout, products]);
 
-  // Load custom GLBs for products with custom_device_asset_url
+  // Load custom GLBs from product metadata
   useEffect(() => {
     const loader = new GLTFLoader();
     let cancelled = false;
-
     const toLoad = products.filter(
       (p) => p.metadata?.custom_device_asset_url && !glbCacheRef.current.has(p.id)
     );
-
     if (toLoad.length === 0) return;
 
-    let loadedCount = 0;
+    let done = 0;
     toLoad.forEach((p) => {
-      const url = p.metadata!.custom_device_asset_url as string;
       loader.load(
-        url,
+        p.metadata!.custom_device_asset_url as string,
         (gltf) => {
           if (cancelled) return;
           glbCacheRef.current.set(p.id, gltf.scene);
-          loadedCount++;
-          if (loadedCount === toLoad.length) {
-            setGlbCacheVersion((v) => v + 1);
-          }
+          if (++done === toLoad.length) setGlbCacheVersion((v) => v + 1);
         },
         undefined,
-        (err) => {
-          console.warn(`Viewport3D: failed to load GLB for product ${p.id}:`, err);
-          loadedCount++;
-          if (loadedCount === toLoad.length) {
-            setGlbCacheVersion((v) => v + 1);
-          }
-        }
+        () => { if (++done === toLoad.length && !cancelled) setGlbCacheVersion((v) => v + 1); }
       );
     });
-
     return () => { cancelled = true; };
   }, [products]);
 
+  // Sync layout from storage events
   useEffect(() => {
     const syncLayout = (event: Event) => {
-      const customEvent = event as CustomEvent<PropertyLayoutState>;
-      setLayout(customEvent.detail || loadPropertyLayout());
+      const e = event as CustomEvent<PropertyLayoutState>;
+      setLayout(e.detail || loadPropertyLayout());
     };
-
-    const syncStorage = (event: StorageEvent) => {
-      if (event.key) {
-        setLayout(loadPropertyLayout());
-      }
-    };
-
+    const syncStorage = () => setLayout(loadPropertyLayout());
     window.addEventListener(PROPERTY_LAYOUT_EVENT, syncLayout as EventListener);
     window.addEventListener('storage', syncStorage);
     return () => {
@@ -437,25 +696,46 @@ export default function Viewport3D({
     };
   }, []);
 
+  // Resolve the active product item for camera focus
+  const activeItem = useMemo(() => {
+    const itemType =
+      product === 'predator-monitor' ? 'watchtower' :
+      product === 'rail-system-modules' ? 'rail-module' :
+      product;
+    return enrichedItems.find((item) => item.type === itemType && item.kind === 'hardware');
+  }, [enrichedItems, product]);
+
+  // Three.js scene
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const width = containerRef.current.clientWidth || 800;
-    const height = containerRef.current.clientHeight || 500;
-    const aspect = width / height;
+    const w = containerRef.current.clientWidth || 800;
+    const h = containerRef.current.clientHeight || 500;
+    const aspect = w / h;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x123d25);
 
     const cameraSpan = Math.max(layout.property.widthFt, layout.property.depthFt) * 0.58;
-    const camera = viewMode === '2d'
-      ? new THREE.OrthographicCamera(-cameraSpan * aspect, cameraSpan * aspect, cameraSpan, -cameraSpan, 0.1, 1000)
-      : new THREE.PerspectiveCamera(55, aspect, 0.1, 1000);
-    camera.position.copy(getCameraPosition(cameraPreset, viewMode, cameraSpan));
-    camera.lookAt(0, 1, 0);
+    const camera =
+      viewMode === '2d'
+        ? new THREE.OrthographicCamera(-cameraSpan * aspect, cameraSpan * aspect, cameraSpan, -cameraSpan, 0.1, 1000)
+        : new THREE.PerspectiveCamera(55, aspect, 0.1, 1000);
+
+    // Camera target: focused on active product when in products/simulation mode
+    const focusX = activeItem && workspaceMode !== 'property'
+      ? activeItem.x + activeItem.width / 2 - layout.property.widthFt / 2
+      : 0;
+    const focusZ = activeItem && workspaceMode !== 'property'
+      ? activeItem.y + activeItem.depth / 2 - layout.property.depthFt / 2
+      : 0;
+
+    const camBase = getCameraPosition(cameraPreset, viewMode, cameraSpan);
+    camera.position.set(camBase.x + focusX, camBase.y, camBase.z + focusZ);
+    camera.lookAt(focusX, 1, focusZ);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
+    renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
 
@@ -469,7 +749,7 @@ export default function Viewport3D({
     controls.enableRotate = viewMode === '3d' && controlMode === 'orbit';
     controls.enableZoom = true;
     controls.screenSpacePanning = true;
-    controls.target.set(0, 1, 0);
+    controls.target.set(focusX, 1, focusZ);
     controls.mouseButtons = {
       LEFT: controlMode === 'pan' || viewMode === '2d' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
       MIDDLE: THREE.MOUSE.DOLLY,
@@ -480,13 +760,11 @@ export default function Viewport3D({
       TWO: THREE.TOUCH.DOLLY_PAN,
     };
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.62);
-    scene.add(ambientLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.82);
-    directionalLight.position.set(8, 10, 8);
-    directionalLight.castShadow = true;
-    scene.add(directionalLight);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.82);
+    sun.position.set(8, 10, 8);
+    sun.castShadow = true;
+    scene.add(sun);
 
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(layout.property.widthFt, layout.property.depthFt),
@@ -499,23 +777,38 @@ export default function Viewport3D({
 
     const glbCache = glbCacheRef.current;
 
-    if (workspaceMode === 'products' || workspaceMode === 'simulation') {
-      scene.add(createYardItems(enrichedItems, layout, product, glbCache));
-    } else {
-      const obstacleItems = enrichedItems.filter((item) => item.kind === 'obstacle') as EnrichedItem[];
+    if (workspaceMode === 'property') {
+      // Obstacles only + featured product model centered
+      const obstacleItems = enrichedItems.filter((i) => i.kind === 'obstacle') as EnrichedItem[];
       scene.add(createYardItems(obstacleItems, layout, product, glbCache));
-    }
 
-    if (product === 'chicken-tender' && loadedScene) {
-      loadedScene.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
+      if (product === 'chicken-tender') {
+        if (loadedScene) {
+          loadedScene.traverse((c) => { if (c instanceof THREE.Mesh) { c.castShadow = true; c.receiveShadow = true; } });
+          scene.add(loadedScene);
+        } else {
+          scene.add(createPlaceholderCoop(model));
         }
-      });
-      scene.add(loadedScene);
-    } else if (product === 'chicken-tender') {
-      scene.add(createPlaceholderCoop(model));
+      } else {
+        // Featured product placeholder centered at origin
+        const size = DEFAULT_SIZE_BY_TYPE[product] || { width: 4, depth: 4 };
+        const featuredItem: EnrichedItem = {
+          id: `featured-${product}`,
+          name: product,
+          type: (product === 'predator-monitor' ? 'watchtower' : product) as PropertyItem['type'],
+          kind: 'hardware',
+          x: layout.property.widthFt / 2 - size.width / 2,
+          y: layout.property.depthFt / 2 - size.depth / 2,
+          width: size.width * 1.4,
+          depth: size.depth * 1.4,
+          product: activeItem?.product,
+        };
+        const featuredGlb = activeItem?.product?.id ? glbCache.get(activeItem.product.id) : undefined;
+        scene.add(createYardItem(featuredItem, layout, product, featuredGlb));
+      }
+    } else {
+      // Products / simulation: all items with product-specific geometry
+      scene.add(createYardItems(enrichedItems, layout, product, glbCache));
     }
 
     if (workspaceMode === 'simulation') {
@@ -532,21 +825,19 @@ export default function Viewport3D({
 
     const handleResize = () => {
       if (!containerRef.current) return;
-      const nextWidth = containerRef.current.clientWidth;
-      const nextHeight = containerRef.current.clientHeight;
-
+      const nw = containerRef.current.clientWidth;
+      const nh = containerRef.current.clientHeight;
       if (camera instanceof THREE.PerspectiveCamera) {
-        camera.aspect = nextWidth / nextHeight;
+        camera.aspect = nw / nh;
       } else {
-        const nextAspect = nextWidth / nextHeight;
-        camera.left = -cameraSpan * nextAspect;
-        camera.right = cameraSpan * nextAspect;
+        const na = nw / nh;
+        camera.left = -cameraSpan * na;
+        camera.right = cameraSpan * na;
         camera.top = cameraSpan;
         camera.bottom = -cameraSpan;
       }
-
       camera.updateProjectionMatrix();
-      renderer.setSize(nextWidth, nextHeight);
+      renderer.setSize(nw, nh);
     };
     window.addEventListener('resize', handleResize);
 
@@ -557,7 +848,10 @@ export default function Viewport3D({
       container.removeChild(renderer.domElement);
       renderer.dispose();
     };
-  }, [loadedScene, model, viewMode, cameraPreset, controlMode, workspaceMode, layout, product, enrichedItems, glbCacheVersion]);
+  }, [
+    loadedScene, model, viewMode, cameraPreset, controlMode,
+    workspaceMode, layout, product, enrichedItems, glbCacheVersion, activeItem,
+  ]);
 
   const deviceCount = products.length;
   const matchedCount = enrichedItems.filter((i) => i.kind === 'hardware' && i.product).length;
@@ -577,194 +871,112 @@ export default function Viewport3D({
       {loading && (
         <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
+            position: 'absolute', top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 1,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
           }}
         >
           <CircularProgress />
-          <Typography variant="caption" color="white">
-            Loading model...
-          </Typography>
+          <Typography variant="caption" color="white">Loading model...</Typography>
         </Box>
       )}
 
+      {/* Top controls */}
       <Box
         sx={{
-          position: 'absolute',
-          top: 12,
-          left: 12,
-          right: 12,
-          display: 'flex',
-          flexWrap: { xs: 'nowrap', sm: 'wrap' },
-          gap: 1,
-          alignItems: 'center',
+          position: 'absolute', top: 12, left: 12, right: 12,
+          display: 'flex', flexWrap: { xs: 'nowrap', sm: 'wrap' },
+          gap: 1, alignItems: 'center',
           justifyContent: { xs: 'flex-start', sm: 'space-between' },
-          zIndex: 10,
-          overflowX: { xs: 'auto', sm: 'visible' },
-          pb: { xs: 0.5, sm: 0 },
-          WebkitOverflowScrolling: 'touch',
+          zIndex: 10, overflowX: { xs: 'auto', sm: 'visible' },
+          pb: { xs: 0.5, sm: 0 }, WebkitOverflowScrolling: 'touch',
           '& .MuiToggleButton-root': {
-            px: { xs: 1, sm: 1.5 },
-            py: { xs: 0.55, sm: 0.75 },
+            px: { xs: 1, sm: 1.5 }, py: { xs: 0.55, sm: 0.75 },
             fontSize: { xs: '0.72rem', sm: '0.8125rem' },
           },
         }}
       >
         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={viewMode}
-            onChange={(_, value) => value && setViewMode(value)}
-            sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}
-          >
+          <ToggleButtonGroup size="small" exclusive value={viewMode}
+            onChange={(_, v) => v && setViewMode(v)} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
             <ToggleButton value="2d">2D</ToggleButton>
             <ToggleButton value="3d">3D</ToggleButton>
           </ToggleButtonGroup>
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={cameraPreset}
-            onChange={(_, value) => value && setCameraPreset(value)}
-            sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}
-          >
+          <ToggleButtonGroup size="small" exclusive value={cameraPreset}
+            onChange={(_, v) => v && setCameraPreset(v)} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
             <ToggleButton value="top">Top</ToggleButton>
             <ToggleButton value="left">Left</ToggleButton>
             <ToggleButton value="right">Right</ToggleButton>
             <ToggleButton value="iso">ISO</ToggleButton>
           </ToggleButtonGroup>
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={controlMode}
-            onChange={(_, value) => value && setControlMode(value)}
-            sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}
-          >
+          <ToggleButtonGroup size="small" exclusive value={controlMode}
+            onChange={(_, v) => v && setControlMode(v)} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
             <ToggleButton value="pan">Pan</ToggleButton>
-            <ToggleButton value="orbit" disabled={viewMode === '2d'}>
-              Rotate
-            </ToggleButton>
+            <ToggleButton value="orbit" disabled={viewMode === '2d'}>Rotate</ToggleButton>
           </ToggleButtonGroup>
         </Stack>
-        <ToggleButtonGroup
-          size="small"
-          exclusive
-          value={workspaceMode}
-          onChange={(_, value) => value && setWorkspaceMode(value)}
-          sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}
-        >
+        <ToggleButtonGroup size="small" exclusive value={workspaceMode}
+          onChange={(_, v) => v && setWorkspaceMode(v)} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
           <ToggleButton value="property">Property</ToggleButton>
           <ToggleButton value="products">Products</ToggleButton>
           <ToggleButton value="simulation">Simulation</ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
+      {/* Bottom bar */}
       <Box
         sx={{
-          position: 'absolute',
-          bottom: 12,
-          left: 12,
-          right: 12,
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 1,
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          zIndex: 10,
-          '& .MuiButton-root': {
-            minHeight: 36,
-          },
+          position: 'absolute', bottom: 12, left: 12, right: 12,
+          display: 'flex', flexWrap: 'wrap', gap: 1,
+          alignItems: 'center', justifyContent: 'space-between',
+          zIndex: 10, '& .MuiButton-root': { minHeight: 36 },
         }}
       >
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
-          <Typography
-            variant="caption"
-            sx={{
-              color: '#E4E7E5',
-              background: 'rgba(0,0,0,0.56)',
-              padding: '4px 8px',
-              borderRadius: '4px',
-            }}
-          >
+          <Typography variant="caption" sx={{ color: '#E4E7E5', background: 'rgba(0,0,0,0.56)', p: '4px 8px', borderRadius: '4px' }}>
             {title || layout.property.name} ({layout.property.widthFt}x{layout.property.depthFt} ft)
           </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              color: '#C8B882',
-              background: 'rgba(0,0,0,0.56)',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              textTransform: 'capitalize',
-            }}
-          >
+          <Typography variant="caption" sx={{ color: '#C8B882', background: 'rgba(0,0,0,0.56)', p: '4px 8px', borderRadius: '4px', textTransform: 'capitalize' }}>
             {workspaceMode} / {viewMode.toUpperCase()} / {cameraPreset.toUpperCase()}
           </Typography>
           {deviceCount > 0 && (
-            <Typography
-              variant="caption"
-              sx={{
-                color: matchedCount === deviceCount ? '#6BBF59' : '#E8A020',
-                background: 'rgba(0,0,0,0.56)',
-                padding: '4px 8px',
-                borderRadius: '4px',
-              }}
-            >
+            <Typography variant="caption" sx={{
+              color: matchedCount === deviceCount ? '#6BBF59' : '#E8A020',
+              background: 'rgba(0,0,0,0.56)', p: '4px 8px', borderRadius: '4px',
+            }}>
               {matchedCount}/{deviceCount} devices
             </Typography>
           )}
         </Box>
         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-          <CoopModelSelector
-            currentModel={model}
-            onSelectModel={(m) => {
-              if (!m.isCustom && getPresetModel(m.size)) {
-                selectPreset(m.size);
-                return;
-              }
-
-              updateModel(m);
-            }}
-            onUploadCustom={async (file) => {
-              const localModel: CoopModelConfig = {
-                id: `custom-${Date.now()}`,
-                name: file.name.replace(/\.(glb|gltf)$/i, ''),
-                size: 'custom',
-                dimensions: model.dimensions,
-                modelUrl: URL.createObjectURL(file),
-                isCustom: true,
-              };
-
-              const userId = auth.currentUser?.uid;
-              if (!userId) {
-                updateModel(localModel);
-                return;
-              }
-
-              try {
-                const uploaded = await modelUploadService.uploadModel(file, userId, 'garage-chicken-tender-001');
-                updateModel(modelUploadService.createModelConfig(uploaded, model.dimensions));
-              } catch (error) {
-                console.warn('Firebase model upload failed, using local model for this session.', error);
-                updateModel(localModel);
-              }
-            }}
-          />
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => {
-              setCameraPreset('iso');
-              setViewMode('3d');
-              setControlMode('orbit');
-            }}
-          >
+          {product === 'chicken-tender' && (
+            <CoopModelSelector
+              currentModel={model}
+              onSelectModel={(m) => {
+                if (!m.isCustom && getPresetModel(m.size)) { selectPreset(m.size); return; }
+                updateModel(m);
+              }}
+              onUploadCustom={async (file) => {
+                const localModel: CoopModelConfig = {
+                  id: `custom-${Date.now()}`,
+                  name: file.name.replace(/\.(glb|gltf)$/i, ''),
+                  size: 'custom',
+                  dimensions: model.dimensions,
+                  modelUrl: URL.createObjectURL(file),
+                  isCustom: true,
+                };
+                const userId = auth.currentUser?.uid;
+                if (!userId) { updateModel(localModel); return; }
+                try {
+                  const uploaded = await modelUploadService.uploadModel(file, userId, 'garage-chicken-tender-001');
+                  updateModel(modelUploadService.createModelConfig(uploaded, model.dimensions));
+                } catch {
+                  updateModel(localModel);
+                }
+              }}
+            />
+          )}
+          <Button size="small" variant="outlined" onClick={() => { setCameraPreset('iso'); setViewMode('3d'); setControlMode('orbit'); }}>
             Reset View
           </Button>
         </Stack>

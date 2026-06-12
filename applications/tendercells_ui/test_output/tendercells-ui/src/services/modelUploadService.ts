@@ -18,9 +18,13 @@ export const modelUploadService = {
     userId: string,
     deviceId: string
   ): Promise<{ url: string; name: string; size: number }> {
-    // Validate file
-    if (!file.name.match(/\.(glb|gltf)$/i)) {
-      throw new Error('Only GLB or GLTF files are supported');
+    // GLB is the only 3D format loaded at runtime — reject everything else.
+    // Convert .gltf/.obj/.fbx to .glb first (Blender → Export → glTF Binary).
+    if (!file.name.match(/\.glb$/i)) {
+      throw new Error(
+        'Only .glb files are accepted for upload. ' +
+        'Convert your model to GLB first: Blender → File → Export → glTF 2.0 → Format: glTF Binary (.glb)'
+      );
     }
     if (file.size > MAX_FILE_SIZE) {
       throw new Error(`File size must be less than 50MB (yours: ${(file.size / 1024 / 1024).toFixed(2)}MB)`);

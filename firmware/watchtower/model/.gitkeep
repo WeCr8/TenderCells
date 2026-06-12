@@ -1,0 +1,3 @@
+# Place predator_model.tflite here.
+# Run ./scripts/convert-tflite.sh to convert it to src/model_data.cc
+# The .tflite file is NOT committed to the repo (gitignored — too large).

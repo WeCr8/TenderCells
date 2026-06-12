@@ -1,13 +1,61 @@
 // mqtt.controller.ts
 // MQTT hardware control logic
-// Last updated: 2026-06-11
+// Last updated: 2026-06-12
+// CONSTRAINT: All MQTT payloads MUST be JSON strings — no binary, no plain text.
 
 import type { Request, Response } from "express";
 import mqtt from "mqtt";
 
 interface MQTTMessage {
-  [key: string]: any;
+  [key: string]: unknown;
 }
+
+// ── Payload schema validators ─────────────────────────────────────────────────
+// All schemas match the MQTT payload contracts defined in CLAUDE.md §4.
+// Validation runs on both inbound (sensor/state/alert) and outbound (commands).
+
+type SchemaField = { type: string; required?: boolean; min?: number; max?: number; values?: string[] };
+type Schema = Record<string, SchemaField>;
+
+function validatePayload(payload: unknown, schema: Schema): string | null {
+  if (typeof payload !== "object" || payload === null) return "Payload must be a JSON object";
+  const obj = payload as Record<string, unknown>;
+  for (const [key, rule] of Object.entries(schema)) {
+    if (rule.required && !(key in obj)) return `Missing required field: ${key}`;
+    if (!(key in obj)) continue;
+    const val = obj[key];
+    if (rule.type === "number" && typeof val !== "number") return `${key} must be a number`;
+    if (rule.type === "string" && typeof val !== "string") return `${key} must be a string`;
+    if (rule.type === "boolean" && typeof val !== "boolean") return `${key} must be a boolean`;
+    if (rule.type === "array" && !Array.isArray(val)) return `${key} must be an array`;
+    if (rule.values && typeof val === "string" && !rule.values.includes(val))
+      return `${key} must be one of: ${rule.values.join(", ")}`;
+    if (rule.type === "number" && typeof val === "number") {
+      if (rule.min !== undefined && val < rule.min) return `${key} must be >= ${rule.min}`;
+      if (rule.max !== undefined && val > rule.max) return `${key} must be <= ${rule.max}`;
+    }
+  }
+  return null;
+}
+
+const SCHEMAS: Record<string, Schema> = {
+  door:  { state: { type: "string", required: true, values: ["open", "close"] } },
+  feed:  { amount: { type: "number", required: true, min: 1, max: 5000 } },
+  clean: { action: { type: "string", required: true, values: ["start", "stop"] } },
+  arm: {
+    joints: { type: "array",  required: true },
+    speed:  { type: "number", required: false, min: 0, max: 1 },
+  },
+  // Inbound sensor schema (for validation of received data)
+  sensors: {
+    temp:         { type: "number" },
+    humidity:     { type: "number", min: 0, max: 100 },
+    ammonia:      { type: "number", min: 0 },
+    feedLevel:    { type: "number", min: 0, max: 100 },
+    waterLevel:   { type: "number", min: 0, max: 100 },
+    chickenCount: { type: "number", min: 0 },
+  },
+};
 
 export class MQTTController {
   private static client: mqtt.MqttClient | null = null;
@@ -49,11 +97,19 @@ export class MQTTController {
 
   private static handleMessage(topic: string, message: Buffer) {
     try {
-      const payload = JSON.parse(message.toString());
+      // Constraint: reject non-JSON payloads immediately
+      const raw = message.toString().trim();
+      if (!raw.startsWith("{") && !raw.startsWith("[")) {
+        console.warn(`[MQTT] Non-JSON payload on ${topic} — ignored`);
+        return;
+      }
+      const payload = JSON.parse(raw) as MQTTMessage;
       const topicParts = topic.split("/");
 
       if (topicParts[2] === "sensors") {
         const deviceId = topicParts[1];
+        const err = validatePayload(payload, SCHEMAS.sensors);
+        if (err) console.warn(`[MQTT] Sensor schema warning (${deviceId}): ${err}`);
         MQTTController.telemetry.set(deviceId, payload);
       } else if (topicParts[2] === "state") {
         const deviceId = topicParts[1];
@@ -118,15 +174,16 @@ export class MQTTController {
 
   sendDoorCommand(req: Request, res: Response) {
     const { deviceId } = req.params;
-    const { state } = req.body; // 'open' or 'close'
+    const { state } = req.body;
 
+    const err = validatePayload(req.body, SCHEMAS.door);
+    if (err) return res.status(400).json({ error: err });
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }
 
     const topic = `tc/${deviceId}/cmd/door`;
     const payload = { state, timestamp: Date.now() };
-
     MQTTController.client.publish(topic, JSON.stringify(payload), { qos: 1 });
 
     res.json({
@@ -140,8 +197,10 @@ export class MQTTController {
 
   sendFeedCommand(req: Request, res: Response) {
     const { deviceId } = req.params;
-    const { amount } = req.body; // amount in grams or %
+    const { amount } = req.body;
 
+    const err = validatePayload(req.body, SCHEMAS.feed);
+    if (err) return res.status(400).json({ error: err });
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }
@@ -162,8 +221,10 @@ export class MQTTController {
 
   sendCleanCommand(req: Request, res: Response) {
     const { deviceId } = req.params;
-    const { action } = req.body; // 'start' or 'stop'
+    const { action } = req.body;
 
+    const err = validatePayload(req.body, SCHEMAS.clean);
+    if (err) return res.status(400).json({ error: err });
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }
@@ -184,8 +245,12 @@ export class MQTTController {
 
   sendArmCommand(req: Request, res: Response) {
     const { deviceId } = req.params;
-    const { joints, speed } = req.body; // joints: [0-360 degrees]
+    const { joints, speed } = req.body;
 
+    const err = validatePayload(req.body, SCHEMAS.arm);
+    if (err) return res.status(400).json({ error: err });
+    if (!Array.isArray(joints) || joints.length !== 6)
+      return res.status(400).json({ error: "joints must be an array of 6 angles" });
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }

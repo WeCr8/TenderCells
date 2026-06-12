@@ -2281,6 +2281,15 @@ WEEK 9-10: Polish + Pitch
 - **Owner:** WeCr8 Hardware Team
 - **Usage:** ESP32-CAM firmware requirements, 3-camera integration, LoRa module specs
 
+**Chicken Tender™ Master Specification:** `docs/CHICKEN_TENDER_MASTER_SPEC.md`
+
+- **Document ID:** TC-CHKN-MASTER-001
+- **Contents:** Complete product requirements, engineering specs, success criteria
+- **Covers:** Dimensions, zones, robot safety, cloud integration, manufacturing
+- **Variants:** S/M/L sizes; BASE/AUTO/PRO feature tiers
+- **Owner:** WeCr8 Product Team
+- **Usage:** Source of truth for product scope, design validation, roadmap alignment
+
 ---
 
 *Claude Code: read this file at the start of every session.

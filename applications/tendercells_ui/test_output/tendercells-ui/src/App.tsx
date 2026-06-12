@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import SplashScreen from "./components/SplashScreen";
 import MainLayout from "./components/layout/MainLayout";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { ChickenTenderDashboard, RoamingRoostDashboard, DuckDockDashboard, GoatGuardianDashboard, BunnyBurrowDashboard, TurkeyTowerDashboard, PredatorMonitorDashboard, RailSystemModulesDashboard, TenderCellsCloudDashboard, PigeonPalaceDashboard, SettingsPage, AccountPage, ProductsPage, PropertyLayoutBuilder } from "./pages";
+import { ChickenTenderDashboard, RoamingRoostDashboard, DuckDockDashboard, GoatGuardianDashboard, BunnyBurrowDashboard, TurkeyTowerDashboard, PredatorMonitorDashboard, RailSystemModulesDashboard, TenderCellsCloudDashboard, PigeonPalaceDashboard, SettingsPage, AccountPage, ProductsPage, PropertyLayoutBuilder, ProductSpecsPage, DeviceDetailPage } from "./pages";
 
 function AppContent() {
   const [product, setProduct] = useState("chicken-tender");
@@ -52,6 +52,8 @@ function AppContent() {
         <Route path="/pigeon-palace" element={<PigeonPalaceDashboard />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/layout" element={<PropertyLayoutBuilder />} />
+        <Route path="/specs" element={<ProductSpecsPage />} />
+        <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/account" element={<AccountPage />} />
       </Routes>

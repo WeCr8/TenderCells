@@ -51,6 +51,7 @@ import {
   type PropertyItem,
   type PropertyItemKind,
 } from '../components/property/propertyLayoutStore';
+import Viewport3D from '../components/viewport/Viewport3D';
 import './PropertyLayoutBuilder.css';
 
 type LayoutMode = 'edit' | 'simulation';
@@ -851,6 +852,24 @@ export default function PropertyLayoutBuilder() {
           </Stack>
         </Grid>
       </Grid>
+
+      {/* 3D Viewport — live preview of property layout, synced via PROPERTY_LAYOUT_EVENT */}
+      <Box sx={{ mt: 2 }}>
+        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+          <Box sx={{ width: 4, height: 20, bgcolor: '#4A7C59', borderRadius: 1, flexShrink: 0 }} />
+          <Typography variant="subtitle1" sx={{ color: '#C8B882', fontWeight: 700, letterSpacing: 0.5 }}>
+            3D Property View
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#4A7C59' }}>
+            Updates live as you edit the yard map above
+          </Typography>
+        </Stack>
+        <Viewport3D
+          title={`${items.length} items`}
+          initialWorkspaceMode="products"
+          height={{ xs: 'min(55dvh, 400px)', sm: 'min(62dvh, 480px)', lg: 520 }}
+        />
+      </Box>
 
       {/* Add / Edit Dialog */}
       <Dialog

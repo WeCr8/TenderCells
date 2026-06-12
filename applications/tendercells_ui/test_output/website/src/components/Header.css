@@ -43,6 +43,8 @@
 }
 .logo-icon { font-size: 1.5rem; }
 .logo-text  { font-size: 1.1rem; }
+.logo-img   { height: 36px; width: auto; object-fit: contain; }
+.logo-img-fallback { display: none; }
 
 /* Search */
 .header-search {

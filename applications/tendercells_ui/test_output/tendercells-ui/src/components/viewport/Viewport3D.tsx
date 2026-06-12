@@ -12,7 +12,10 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useCoopModel } from '../../hooks/useCoopModel';
 import CoopModelSelector from './CoopModelSelector';
-import { COOP_PRESETS, CoopModelConfig } from '../../types/coop';
+import { getPresetModel } from '../../models/presets/coopPresets';
+import { auth } from '../../lib/firebase/firebaseApp';
+import { modelUploadService } from '../../services/modelUploadService';
+import type { CoopModelConfig } from '../../types/coop';
 
 type ViewMode = '2d' | '3d';
 type CameraPreset = 'top' | 'left' | 'right' | 'iso';
@@ -399,7 +402,7 @@ export default function Viewport3D() {
           <CoopModelSelector
             currentModel={model}
             onSelectModel={(m) => {
-              if (!m.isCustom && COOP_PRESETS[m.size]) {
+              if (!m.isCustom && getPresetModel(m.size)) {
                 selectPreset(m.size);
                 return;
               }
@@ -407,13 +410,28 @@ export default function Viewport3D() {
               updateModel(m);
             }}
             onUploadCustom={async (file) => {
-              updateModel({
+              const localModel: CoopModelConfig = {
                 id: `custom-${Date.now()}`,
                 name: file.name.replace(/\.(glb|gltf)$/i, ''),
                 size: 'custom',
+                dimensions: model.dimensions,
                 modelUrl: URL.createObjectURL(file),
                 isCustom: true,
-              });
+              };
+
+              const userId = auth.currentUser?.uid;
+              if (!userId) {
+                updateModel(localModel);
+                return;
+              }
+
+              try {
+                const uploaded = await modelUploadService.uploadModel(file, userId, 'garage-chicken-tender-001');
+                updateModel(modelUploadService.createModelConfig(uploaded, model.dimensions));
+              } catch (error) {
+                console.warn('Firebase model upload failed, using local model for this session.', error);
+                updateModel(localModel);
+              }
             }}
           />
           <Button

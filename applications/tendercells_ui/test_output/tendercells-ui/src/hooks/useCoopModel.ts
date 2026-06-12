@@ -1,12 +1,13 @@
 // useCoopModel.ts - Manage coop 3D model state
 import { useState, useCallback, useEffect } from 'react';
-import { CoopModelConfig, COOP_PRESETS } from '../types/coop';
+import { getDefaultPreset, getPresetModel } from '../models/presets/coopPresets';
+import type { CoopModelConfig, COOP_PRESETS } from '../types/coop';
 import { ModelLoader } from '../models/loaders/ModelLoader';
 import * as THREE from 'three';
 
 const STORAGE_KEY = 'tendercells_coop_model';
 
-export interface CoopModelState {
+interface CoopModelState {
   current: CoopModelConfig;
   loadedScene: THREE.Group | null;
   loading: boolean;
@@ -15,7 +16,7 @@ export interface CoopModelState {
 
 export const useCoopModel = (defaultSize: keyof typeof COOP_PRESETS = '4x4x6') => {
   const [state, setState] = useState<CoopModelState>({
-    current: COOP_PRESETS[defaultSize],
+    current: getPresetModel(defaultSize) || getDefaultPreset(),
     loadedScene: null,
     loading: false,
     error: null,
@@ -37,7 +38,7 @@ export const useCoopModel = (defaultSize: keyof typeof COOP_PRESETS = '4x4x6') =
 
   // Select preset model
   const selectPreset = useCallback((size: keyof typeof COOP_PRESETS) => {
-    const preset = COOP_PRESETS[size];
+    const preset = getPresetModel(size) || getDefaultPreset();
     setState(prev => ({
       ...prev,
       current: preset,
@@ -69,7 +70,9 @@ export const useCoopModel = (defaultSize: keyof typeof COOP_PRESETS = '4x4x6') =
     if (saved) {
       try {
         const savedModel = JSON.parse(saved) as CoopModelConfig;
-        const model = savedModel.isCustom ? savedModel : COOP_PRESETS[savedModel.size] || COOP_PRESETS[defaultSize];
+        const model = savedModel.isCustom
+          ? savedModel
+          : getPresetModel(savedModel.size) || getPresetModel(defaultSize) || getDefaultPreset();
         setState(prev => ({ ...prev, current: model }));
         if (model.modelUrl) {
           loadModel(model.modelUrl);

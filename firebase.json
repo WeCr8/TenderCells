@@ -43,7 +43,7 @@
     },
     {
       "target": "chicken-tender",
-      "public": "applications/web/chicken-tender/dist",
+      "public": "applications/tendercells_ui/test_output/tendercells-ui/dist",
       "ignore": [
         "firebase.json",
         "**/.*",

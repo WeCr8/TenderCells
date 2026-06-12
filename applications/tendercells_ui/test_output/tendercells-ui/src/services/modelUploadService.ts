@@ -1,7 +1,12 @@
 // modelUploadService.ts - Firebase Storage for 3D model uploads
 import { storage } from '../lib/firebase/firebaseApp';
-import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
-import { CoopModelConfig } from '../types/coop';
+import { ref, listAll } from 'firebase/storage';
+import {
+  createCustomModelConfig,
+  deleteCoopModel,
+  uploadCoopModel,
+} from '../lib/firebase/modelStorageClient';
+import type { CoopModelConfig } from '../types/coop';
 
 const MODELS_PATH = 'models/coops/custom';
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
@@ -21,26 +26,8 @@ export const modelUploadService = {
       throw new Error(`File size must be less than 50MB (yours: ${(file.size / 1024 / 1024).toFixed(2)}MB)`);
     }
 
-    // Create storage path: models/coops/custom/{userId}/{deviceId}/{filename}
-    const timestamp = Date.now();
-    const filename = `${timestamp}-${file.name}`;
-    const path = `${MODELS_PATH}/${userId}/${deviceId}/${filename}`;
-    const fileRef = ref(storage, path);
-
     try {
-      // Upload with metadata
-      await uploadBytes(fileRef, file, {
-        contentType: file.type || 'application/octet-stream',
-        customMetadata: {
-          originalName: file.name,
-          uploadedAt: new Date().toISOString(),
-          deviceId,
-          userId,
-        },
-      });
-
-      // Get download URL
-      const url = await getDownloadURL(fileRef);
+      const url = await uploadCoopModel(file, userId, deviceId);
       return {
         url,
         name: file.name,
@@ -71,10 +58,20 @@ export const modelUploadService = {
   // Delete a model
   async deleteModel(path: string): Promise<void> {
     try {
-      const fileRef = ref(storage, path);
-      // Note: Firebase SDK v9+ doesn't have deleteObject in browser SDK by default
-      // This is a placeholder for when storage quota management is needed
-      console.log('Model deletion scheduled:', path);
+      const pathParts = path.split('/');
+      const usersIndex = pathParts.indexOf('users');
+      const coopsIndex = pathParts.indexOf('coops');
+      const modelsIndex = pathParts.indexOf('models');
+
+      if (usersIndex < 0 || coopsIndex < 0 || modelsIndex < 0) {
+        throw new Error('Unsupported model storage path');
+      }
+
+      await deleteCoopModel(
+        pathParts[usersIndex + 1],
+        pathParts[coopsIndex + 1],
+        pathParts.slice(modelsIndex + 1).join('/')
+      );
     } catch (error) {
       console.error('Failed to delete model:', error);
     }
@@ -85,17 +82,6 @@ export const modelUploadService = {
     uploadedFile: { url: string; name: string; size: number },
     dimensions: { width: number; depth: number; height: number }
   ): CoopModelConfig {
-    return {
-      id: `custom-${Date.now()}`,
-      name: `Custom Model (${uploadedFile.name})`,
-      size: 'custom',
-      dimensions,
-      modelUrl: uploadedFile.url,
-      isCustom: true,
-      uploadedAt: new Date().toISOString(),
-      scale: { x: 1, y: 1, z: 1 },
-      position: { x: 0, y: 0, z: 0 },
-      rotation: { x: 0, y: 0, z: 0 },
-    };
+    return createCustomModelConfig(uploadedFile.url, uploadedFile.name, dimensions);
   },
 };

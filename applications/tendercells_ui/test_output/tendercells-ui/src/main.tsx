@@ -5,6 +5,11 @@ import App from "./App";
 import CssBaseline from "@mui/material/CssBaseline";
 import createTheme from "@mui/material/styles/createTheme";
 import ThemeProvider from "@mui/material/styles/ThemeProvider";
+import { initAnalytics } from "./analytics";
+import { initErrorTracking } from "./error-tracking";
+
+initErrorTracking();
+void initAnalytics();
 
 class StartupErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state: { error: Error | null } = { error: null };

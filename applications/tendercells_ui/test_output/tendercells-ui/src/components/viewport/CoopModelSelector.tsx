@@ -14,7 +14,8 @@ import {
   DialogActions,
 } from '@mui/material';
 import { Upload as UploadIcon } from '@mui/icons-material';
-import { CoopModelConfig, COOP_PRESETS } from '@/types/coop';
+import { getAllPresets } from '../../models/presets/coopPresets';
+import type { CoopModelConfig } from '../../types/coop';
 
 type CoopModelSelectorProps = {
   currentModel?: CoopModelConfig;
@@ -69,7 +70,7 @@ export default function CoopModelSelector({
             Preset Models
           </Typography>
           <Grid container spacing={2} sx={{ mb: 3 }}>
-            {Object.values(COOP_PRESETS).map((preset) => (
+            {getAllPresets().map((preset) => (
               <Grid item xs={12} sm={4} key={preset.id}>
                 <Card
                   sx={{
@@ -93,7 +94,7 @@ export default function CoopModelSelector({
                     }}
                   >
                     <Typography variant="h6" color="text.secondary">
-                      {preset.dimensions.width}×{preset.dimensions.depth}×
+                      {preset.dimensions.width}x{preset.dimensions.depth}x
                       {preset.dimensions.height}
                     </Typography>
                   </CardMedia>

@@ -12,6 +12,7 @@ import {
   CardContent,
 } from '@mui/material';
 import { WATCHTOWER_SPECS } from '../../types/watchtower';
+import { CAMERA_LOCATIONS, WATCHTOWER_CAMERA_LOCATIONS } from '../../types/camera';
 import SolarPowerIcon from '@mui/icons-material/SolarPower';
 import BatteryCharging60Icon from '@mui/icons-material/BatteryCharging60';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -227,6 +228,27 @@ export default function WatchTowerMonitor({
                 ))}
               </Stack>
             </Box>
+
+            <Card sx={{ bgcolor: '#1A3D2B' }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom sx={{ color: '#C8B882' }}>
+                  Default Camera Coverage
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+                  {WATCHTOWER_CAMERA_LOCATIONS.map((location) => (
+                    <Chip
+                      key={location}
+                      label={CAMERA_LOCATIONS[location]}
+                      variant="outlined"
+                      sx={{
+                        borderColor: '#4A7C59',
+                        color: '#E4E7E5',
+                      }}
+                    />
+                  ))}
+                </Stack>
+              </CardContent>
+            </Card>
           </Stack>
         </Grid>
       </Grid>

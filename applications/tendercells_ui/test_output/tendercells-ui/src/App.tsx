@@ -1,10 +1,10 @@
 // App.tsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import SplashScreen from "./components/SplashScreen";
 import MainLayout from "./components/layout/MainLayout";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { ChickenTenderDashboard, RoamingRoostDashboard, DuckDockDashboard, GoatGuardianDashboard, BunnyBurrowDashboard, TurkeyTowerDashboard, PredatorMonitorDashboard, RailSystemModulesDashboard, TenderCellsCloudDashboard, PigeonPalaceDashboard, SettingsPage, AccountPage, ProductsPage, PropertyLayoutBuilder, ProductSpecsPage, DeviceDetailPage } from "./pages";
+import { BrowserRouter, useNavigate, useLocation } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import AppRoutes from "./routes/AppRoutes";
 
 function AppContent() {
   const [product, setProduct] = useState("chicken-tender");
@@ -39,37 +39,9 @@ function AppContent() {
 
   return (
     <MainLayout title={product} product={product} onProductChange={handleProductChange}>
-      <Routes>
-        <Route path="/" element={<Navigate to="/chicken-tender" replace />} />
-        <Route path="/chicken-tender" element={<ChickenTenderDashboard />} />
-        <Route path="/roaming-roost" element={<RoamingRoostDashboard />} />
-        <Route path="/duck-dock" element={<DuckDockDashboard />} />
-        <Route path="/goat-guardian" element={<GoatGuardianDashboard />} />
-        <Route path="/bunny-burrow" element={<BunnyBurrowDashboard />} />
-        <Route path="/turkey-tower" element={<TurkeyTowerDashboard />} />
-        <Route path="/predator-monitor" element={<PredatorMonitorDashboard />} />
-        <Route path="/rail-system-modules" element={<RailSystemModulesDashboard />} />
-        <Route path="/tender-cells-cloud" element={<TenderCellsCloudDashboard />} />
-        <Route path="/pigeon-palace" element={<PigeonPalaceDashboard />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/layout" element={<PropertyLayoutBuilder />} />
-        <Route path="/specs" element={<ProductSpecsPage />} />
-        <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/account" element={<AccountPage />} />
-      </Routes>
+      <AppRoutes />
     </MainLayout>
   );
-}
-
-// Protected route wrapper
-function ProtectedRoute({ element }: { element: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) return <SplashScreen />;
-  if (!isAuthenticated) return <Navigate to="/account" replace />;
-
-  return element;
 }
 
 function App() {

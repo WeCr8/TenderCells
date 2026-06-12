@@ -6,7 +6,7 @@
     "tender-cells": {
       "hosting": {
         "main": [
-          "default"
+          "tender-cells"
         ],
         "chicken-tender": [
           "chicken-tender-619sdla"

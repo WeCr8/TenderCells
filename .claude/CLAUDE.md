@@ -41,63 +41,85 @@ and real-time monitoring dashboard.
 
 ---
 
-## 2. Repository Structure
+## 2. Running Applications (June 2026)
 
+**Tender Cells Web Apps (All Running):**
+
+| App | Port | Path | Purpose |
+|---|---|---|---|
+| **tendercells-ui** | :5173 | applications/tendercells_ui/test_output/tendercells-ui | Main control dashboard (all products) |
+| **chicken-tender** | :5174 | applications/tendercells_ui/test_output/chicken-tender | Chicken Tender device-specific UI |
+| **duck-dock** | :5175 | applications/tendercells_ui/test_output/duck-dock | Duck Dock device-specific UI |
+| **website** | :5176 | applications/tendercells_ui/test_output/website | Public marketing site |
+| **express-api** | :4000 | applications/tendercells_ui/test_output/express-api | Backend API (Firebase + hardware control) |
+
+**Start all apps:**
+```bash
+cd applications/tendercells_ui/test_output/tendercells-ui && npm run dev    # :5173
+cd applications/tendercells_ui/test_output/chicken-tender && npm run dev    # :5174
+cd applications/tendercells_ui/test_output/duck-dock && npm run dev         # :5175
+cd applications/tendercells_ui/test_output/website && npm run dev           # :5176
+cd applications/tendercells_ui/test_output/express-api && npm run dev       # :4000
 ```
-tender-cells/
-├── CLAUDE.md                        ← agent skills (this file)
-├── .github/
-│   └── workflows/
-│       ├── ci.yml                   ← lint + test on PR
-│       ├── firmware-build.yml       ← PlatformIO compile check
-│       └── docs-gen.yml             ← auto-generate docs on merge
-├── app/                             ← React Native (Expo)
-│   ├── screens/
-│   │   ├── Dashboard.tsx
-│   │   ├── ProductRegistration.tsx
-│   │   ├── PropertyLayout.tsx
-│   │   ├── CoopDetail.tsx
-│   │   ├── WasteCleaning.tsx
-│   │   ├── EggMap.tsx
-│   │   └── Schedules.tsx
-│   ├── components/
-│   │   ├── SensorCard.tsx
-│   │   ├── StatusHeader.tsx         ← Idle/Running/Error/ESTOP
-│   │   ├── ConfirmModal.tsx         ← required before hardware actions
-│   │   └── PropertyGrid.tsx
-│   ├── hooks/
-│   │   ├── useDevice.ts
-│   │   ├── useSensors.ts
-│   │   └── useMqtt.ts
-│   ├── services/
-│   │   ├── firebase.ts
-│   │   ├── mqtt.ts
-│   │   └── aiAgent.ts               ← Claude API integration
-│   ├── store/
-│   │   └── deviceStore.ts
-│   └── __tests__/
-├── firmware/
-│   ├── chicken-tender/              ← ESP32 coop controller
-│   │   ├── src/main.cpp
-│   │   ├── src/state_machine.cpp
-│   │   ├── src/sensors.cpp
-│   │   ├── src/mqtt_client.cpp
-│   │   └── platformio.ini
-│   ├── watchtower/                  ← ESP32 predator monitor
-│   │   ├── src/main.cpp
-│   │   ├── src/camera.cpp
-│   │   ├── src/lora.cpp
-│   │   └── platformio.ini
-│   └── roaming-roost/               ← ESP32 drive controller
-│       ├── src/main.cpp
-│       ├── src/navigation.cpp
-│       └── platformio.ini
-├── functions/                       ← Firebase Cloud Functions
-│   ├── src/
-│   │   ├── alerts.ts
-│   │   ├── telemetry.ts
-│   │   ├── schedules.ts
-│   │   └── ai.ts                    ← Claude API proxy
+
+**Main control app:** tendercells-ui (:5173)
+- Multi-product dashboard (Chicken Tender, Roaming Roost, Duck Dock, etc.)
+- 3D viewport, telemetry panel, quick actions
+- **Status:** UI complete, MQTT bridge wired in express-api
+
+**MQTT Hardware Control (Express API :4000)**
+
+Hardware commands route through express-api → MQTT broker → ESP32 devices.
+
+API Endpoints:
+```bash
+# Query device state
+GET /api/mqtt/devices/{deviceId}/telemetry     # Sensor data (temp, humidity, feed, water, chickens)
+GET /api/mqtt/devices/{deviceId}/state         # System state (idle/running/error/estop)
+GET /api/mqtt/devices/{deviceId}/alerts        # Active alerts
+
+# Control hardware (QoS 1)
+POST /api/mqtt/devices/{deviceId}/door         # body: {state: "open"|"close"}
+POST /api/mqtt/devices/{deviceId}/feed         # body: {amount: number}
+POST /api/mqtt/devices/{deviceId}/clean        # body: {action: "start"|"stop"}
+POST /api/mqtt/devices/{deviceId}/arm          # body: {joints: [angles], speed: 0-1}
+
+# Emergency (QoS 2, retained)
+POST /api/mqtt/devices/{deviceId}/estop        # Immediate power cut to all actuators
+
+# Broker status
+GET /api/mqtt/mqtt/status                      # Connection status, device list
+POST /api/mqtt/mqtt/connect                    # Force reconnect
+```
+
+**MQTT Broker Connection:**
+```bash
+# Set environment variable to override default
+export MQTT_BROKER=mqtt://192.168.1.100:1883
+```
+
+**Example: Control Chicken Tender Door**
+```bash
+curl -X POST http://localhost:4000/api/mqtt/devices/chicken_tender_001/door \
+  -H "Content-Type: application/json" \
+  -d '{"state": "open"}'
+```
+
+**MQTT Topics (for ESP32 firmware):**
+```
+tc/{deviceId}/cmd/door        ← open|close
+tc/{deviceId}/cmd/feed        ← amount in grams
+tc/{deviceId}/cmd/clean       ← start|stop
+tc/{deviceId}/cmd/arm         ← joint angles + speed
+tc/{deviceId}/cmd/estop       ← active:true (QoS 2, retained)
+tc/{deviceId}/sensors         ← publish telemetry (10s interval)
+tc/{deviceId}/state           ← publish state transitions
+tc/{deviceId}/alert           ← publish alerts (predator/fault)
+```
+
+---
+
+## 3. Repository Structure (Development Layout)
 │   └── package.json
 ├── docs/
 │   ├── architecture.md

@@ -6,6 +6,9 @@ on:
   push:
     branches: [main, develop]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   tendercells-ui:
     name: "UI — build, type-check, tests"
@@ -57,7 +60,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Cache PlatformIO
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.platformio
           key: pio-${{ hashFiles('firmware/**/platformio.ini') }}

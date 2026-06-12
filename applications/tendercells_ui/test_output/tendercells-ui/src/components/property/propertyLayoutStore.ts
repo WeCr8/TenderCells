@@ -30,6 +30,8 @@ export interface PropertyItem {
   y: number;
   width: number;
   depth: number;
+  productId?: string;   // Firestore product.id — set by sync, used for 1:1 matching
+  deviceId?: string;    // hardware device_id label (e.g. 'ct_001')
 }
 
 export type PropertyLayoutState = {
@@ -37,7 +39,7 @@ export type PropertyLayoutState = {
   items: PropertyItem[];
 };
 
-export const PROPERTY_LAYOUT_STORAGE_KEY = 'tendercells_property_layout_v4';
+export const PROPERTY_LAYOUT_STORAGE_KEY = 'tendercells_property_layout_v5';
 export const PROPERTY_LAYOUT_EVENT = 'tendercells-property-layout-updated';
 
 export const HARDWARE_TYPES: HardwareType[] = [

@@ -116,14 +116,16 @@ export default function PropertyLayoutBuilder() {
   const { products } = useProducts();
 
   // Sync layout items to registered Firestore products.
-  // Uses enclosure_width_ft / enclosure_depth_ft from the product record when
-  // available, otherwise falls back to PRODUCT_DIMENSIONS spec values.
-  // Runs once per products fetch — does not overwrite user-moved positions.
+  // Match priority: 1) existing item with matching productId (stable 1:1 link)
+  //                 2) unlinked item of same hwType (first-use claim)
+  //                 3) add new item for product with no layout slot yet
+  // Preserves user x/y positions. Writes productId + deviceId onto items so
+  // the 3D viewport and labels can show the correct registered device per slot.
   useEffect(() => {
     if (!products || products.length === 0) return;
     setItems(prev => {
       let next = [...prev];
-      const usedIds = new Set<string>();
+      const claimedItemIds = new Set<string>();
 
       for (const product of products) {
         const family = product.metadata?.product_family as string | undefined;
@@ -131,33 +133,54 @@ export default function PropertyLayoutBuilder() {
         if (!hwType || !(hwType in PRODUCT_DIMENSIONS)) continue;
 
         const spec = PRODUCT_DIMENSIONS[hwType];
-        const w = product.metadata?.enclosure_width_ft ?? spec.width;
-        const d = product.metadata?.enclosure_depth_ft ?? spec.depth;
+        const w = Number(product.metadata?.enclosure_width_ft ?? spec.width);
+        const d = Number(product.metadata?.enclosure_depth_ft ?? spec.depth);
+        const deviceLabel = product.device_id ?? product.id;
 
-        // Find an existing item of same hardware type not already claimed
-        const existingIdx = next.findIndex(
-          it => it.kind === 'hardware' && it.type === hwType && !usedIds.has(it.id)
+        // 1. Try exact productId match (already linked from a previous sync)
+        let targetIdx = next.findIndex(
+          it => it.kind === 'hardware' && it.productId === product.id
         );
 
-        if (existingIdx >= 0) {
-          usedIds.add(next[existingIdx].id);
-          // Update dims + shape; keep user's x/y position
-          next[existingIdx] = { ...next[existingIdx], width: w, depth: d, shape: spec.shape };
-        } else {
-          // Add a new item for this registered product (no existing slot)
-          const newId = `item-${product.id}`;
-          usedIds.add(newId);
-          next.push({
-            id: newId,
-            kind: 'hardware',
-            name: product.product_name,
-            type: hwType,
-            shape: spec.shape,
-            x: 5,
-            y: 5,
+        // 2. Fall back: first unlinked item of matching hwType
+        if (targetIdx < 0) {
+          targetIdx = next.findIndex(
+            it => it.kind === 'hardware' && it.type === hwType && !it.productId && !claimedItemIds.has(it.id)
+          );
+        }
+
+        if (targetIdx >= 0) {
+          claimedItemIds.add(next[targetIdx].id);
+          next[targetIdx] = {
+            ...next[targetIdx],
             width: w,
             depth: d,
-          });
+            shape: spec.shape,
+            productId: product.id,
+            deviceId: deviceLabel,
+            name: product.product_name || next[targetIdx].name,
+          };
+        } else {
+          // 3. No slot exists — add one positioned away from existing items
+          const newId = `item-${product.id}`;
+          if (!next.some(it => it.id === newId)) {
+            const col = next.filter(it => it.kind === 'hardware').length % 4;
+            const row = Math.floor(next.filter(it => it.kind === 'hardware').length / 4);
+            claimedItemIds.add(newId);
+            next.push({
+              id: newId,
+              kind: 'hardware',
+              name: product.product_name,
+              type: hwType,
+              shape: spec.shape,
+              x: 5 + col * (w + 2),
+              y: 5 + row * (d + 2),
+              width: w,
+              depth: d,
+              productId: product.id,
+              deviceId: deviceLabel,
+            });
+          }
         }
       }
       return next;
@@ -758,21 +781,34 @@ export default function PropertyLayoutBuilder() {
                   >
                     {renderItemShape(item)}
                     {/* Label pill */}
-                    <rect
-                      x={(item.x + item.width / 2) * scaleX - (item.name.length * 3.8 + 8)}
-                      y={(item.y + item.depth / 2) * scaleY - 9}
-                      width={item.name.length * 7.6 + 16} height={17}
-                      rx={8} fill="rgba(0,0,0,0.55)" pointerEvents="none"
-                    />
-                    <text
-                      x={(item.x + item.width / 2) * scaleX}
-                      y={(item.y + item.depth / 2) * scaleY + 1}
-                      textAnchor="middle" dominantBaseline="middle"
-                      fill="#F0EDE4" fontSize={12} fontWeight={700}
-                      fontFamily="system-ui, sans-serif" pointerEvents="none"
-                    >
-                      {item.name}
-                    </text>
+                    {(() => {
+                      const label = item.name;
+                      const subLabel = item.kind === 'hardware' ? (item.deviceId ?? null) : null;
+                      const pillW = Math.max(label.length * 7.6 + 16, subLabel ? subLabel.length * 6.2 + 12 : 0);
+                      const pillH = subLabel ? 28 : 17;
+                      const cx2 = (item.x + item.width / 2) * scaleX;
+                      const cy2 = (item.y + item.depth / 2) * scaleY;
+                      return (
+                        <>
+                          <rect x={cx2 - pillW / 2} y={cy2 - pillH / 2}
+                            width={pillW} height={pillH} rx={8}
+                            fill="rgba(0,0,0,0.62)" pointerEvents="none" />
+                          <text x={cx2} y={cy2 - (subLabel ? 6 : 0)}
+                            textAnchor="middle" dominantBaseline="middle"
+                            fill="#F0EDE4" fontSize={12} fontWeight={700}
+                            fontFamily="system-ui, sans-serif" pointerEvents="none">
+                            {label}
+                          </text>
+                          {subLabel && (
+                            <text x={cx2} y={cy2 + 9}
+                              textAnchor="middle" dominantBaseline="middle"
+                              fill="#6BBF59" fontSize={9} fontFamily="monospace" pointerEvents="none">
+                              {subLabel}
+                            </text>
+                          )}
+                        </>
+                      );
+                    })()}
                     {/* Size label */}
                     <text
                       x={(item.x + item.width) * scaleX - 3}

@@ -641,49 +641,70 @@ export default function Viewport3D({
   const glbCacheRef = useRef<Map<string, THREE.Group>>(new Map());
   const [glbCacheVersion, setGlbCacheVersion] = useState(0);
 
-  // Resolve layout items → matched Firestore products
+  // Resolve layout items → matched Firestore products.
+  // Match priority: 1) item.productId === product.id (stable 1:1 from layout sync)
+  //                 2) first unclaimed product of same item type (legacy/unlinked)
+  //                 3) registered products with no layout slot get a virtual item
   const enrichedItems = useMemo<EnrichedItem[]>(() => {
-    const familyUsedCount = new Map<string, number>();
-    const productsByFamily = new Map<string, Product[]>();
+    const productsById = new Map<string, Product>(products.map((p) => [p.id, p]));
+    const productsByType = new Map<string, Product[]>();
 
-    products.forEach((p) => {
-      const family = p.metadata?.product_family as string | undefined;
-      if (!family) return;
-      if (!productsByFamily.has(family)) productsByFamily.set(family, []);
-      productsByFamily.get(family)!.push(p);
-    });
-
-    const enriched: EnrichedItem[] = layout.items.map((item) => {
-      const familyKey =
-        Object.keys(FAMILY_TO_ITEM_TYPE).find((k) => FAMILY_TO_ITEM_TYPE[k] === item.type) ||
-        item.type;
-      const prods = productsByFamily.get(familyKey) || productsByFamily.get(item.type) || [];
-      const idx = familyUsedCount.get(familyKey) || 0;
-      familyUsedCount.set(familyKey, idx + 1);
-      return { ...item, product: prods[idx] };
-    });
-
-    // Add registered products that have no layout item
     products.forEach((p) => {
       const family = p.metadata?.product_family as string | undefined;
       if (!family) return;
       const itemType = FAMILY_TO_ITEM_TYPE[family] || family;
-      const prods = productsByFamily.get(family) || [];
-      const usedCount = familyUsedCount.get(family) || 0;
-      const prodIdx = prods.indexOf(p);
-      if (prodIdx < usedCount) return;
+      if (!productsByType.has(itemType)) productsByType.set(itemType, []);
+      productsByType.get(itemType)!.push(p);
+    });
 
+    const claimedProductIds = new Set<string>();
+
+    // Pass 1: items that have a productId — resolve directly
+    const enriched: EnrichedItem[] = layout.items.map((item) => {
+      if (item.productId) {
+        const matched = productsById.get(item.productId);
+        if (matched) {
+          claimedProductIds.add(matched.id);
+          return { ...item, product: matched };
+        }
+      }
+      return { ...item, product: undefined };
+    });
+
+    // Pass 2: items without productId — claim first unclaimed product of same type
+    const typeClaimIdx = new Map<string, number>();
+    for (let i = 0; i < enriched.length; i++) {
+      const item = enriched[i];
+      if (item.productId || item.product) continue; // already resolved
+      const candidates = (productsByType.get(item.type) || []).filter(p => !claimedProductIds.has(p.id));
+      const claimAt = typeClaimIdx.get(item.type) || 0;
+      const matched = candidates[claimAt];
+      if (matched) {
+        claimedProductIds.add(matched.id);
+        typeClaimIdx.set(item.type, claimAt + 1);
+        enriched[i] = { ...item, product: matched };
+      }
+    }
+
+    // Pass 3: registered products with no layout slot → virtual items
+    products.forEach((p) => {
+      if (claimedProductIds.has(p.id)) return;
+      const family = p.metadata?.product_family as string | undefined;
+      if (!family) return;
+      const itemType = FAMILY_TO_ITEM_TYPE[family] || family;
       const size = DEFAULT_SIZE_BY_TYPE[itemType] || { width: 3, depth: 3 };
-      const unposIdx = prodIdx - usedCount;
+      const existingVirtual = enriched.filter(e => !layout.items.some(li => li.id === e.id)).length;
       enriched.push({
-        id: p.id,
+        id: `virtual-${p.id}`,
         name: p.product_name,
         type: itemType as PropertyItem['type'],
         kind: 'hardware',
-        x: Math.min((unposIdx % 3) * (size.width + 1) + 1, layout.property.widthFt - size.width - 1),
-        y: Math.min(Math.floor(unposIdx / 3) * (size.depth + 1) + 1, layout.property.depthFt - size.depth - 1),
+        x: Math.min((existingVirtual % 3) * (size.width + 2) + 1, layout.property.widthFt - size.width - 1),
+        y: Math.min(Math.floor(existingVirtual / 3) * (size.depth + 2) + 1, layout.property.depthFt - size.depth - 1),
         width: size.width,
         depth: size.depth,
+        productId: p.id,
+        deviceId: p.device_id ?? p.id,
         product: p,
       } as EnrichedItem);
     });

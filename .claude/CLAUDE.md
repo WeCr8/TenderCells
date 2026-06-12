@@ -2290,6 +2290,15 @@ WEEK 9-10: Polish + Pitch
 - **Owner:** WeCr8 Product Team
 - **Usage:** Source of truth for product scope, design validation, roadmap alignment
 
+**Chicken Tender™ Hardware Catalog:** `docs/CHICKEN_TENDER_HARDWARE_CATALOG.md`
+
+- **Document ID:** TC-CHKN-HW-001
+- **Contents:** Master hardware, electronics, sensors, components reference
+- **Covers:** Structural (lumber), fasteners, doors, motion, solar, networking
+- **Sections:** 23 subsystems, approved vendors, selection philosophy
+- **Owner:** WeCr8 Hardware Team
+- **Usage:** Component sourcing, vendor selection, future upgrade planning, BOM generation
+
 ---
 
 *Claude Code: read this file at the start of every session.

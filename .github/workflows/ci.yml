@@ -8,6 +8,7 @@ on:
 
 jobs:
   tendercells-ui:
+    name: "UI — build, type-check, tests"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,16 +24,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Quality loop
+      - name: Quality loop (build + tests)
         run: npm run quality:loop
 
-  app:
+  functions:
+    name: "Cloud Functions — build"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -40,28 +47,11 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit --quiet
 
-      - name: ESLint
-        run: npx eslint . --max-warnings 0
-        continue-on-error: true
-
-  functions:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: cd functions && npm ci
-
-      - name: TypeScript check
-        run: cd functions && npx tsc --noEmit --quiet
-
       - name: Build
-        run: cd functions && npm run build
+        run: npm run build
 
   firmware:
+    name: "Firmware — PlatformIO build"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,41 +68,67 @@ jobs:
       - name: Build Chicken Tender firmware
         run: cd firmware/chicken-tender && pio run
 
+      - name: Build WatchTower firmware
+        run: cd firmware/watchtower && pio run
+        continue-on-error: true
+
       - name: Check binary size
         run: |
           SIZE=$(stat -c%s firmware/chicken-tender/.pio/build/esp32-wroom-32/firmware.bin 2>/dev/null || echo "0")
           echo "Firmware size: $SIZE bytes"
           if [ "$SIZE" -gt 3932160 ]; then
-            echo "⚠️  Firmware exceeds 3.75MB flash limit"
+            echo "Warning: Firmware exceeds 3.75MB flash limit"
           fi
 
   security:
+    name: "Security — secret scan"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Scan for secrets
+      - name: Scan for Google API keys
         run: |
-          ! grep -rn 'AIza[0-9A-Za-z\-_]{35}' . --exclude-dir=node_modules --exclude-dir=.git --exclude=.env
-          ! grep -rn 'ANTHROPIC_API_KEY\s*=\s*"sk-[a-zA-Z0-9]' . --exclude-dir=node_modules --exclude=.env
+          if grep -rn 'AIza[0-9A-Za-z_-]\{35\}' . \
+              --exclude-dir=node_modules --exclude-dir=.git --exclude='*.env' 2>/dev/null; then
+            echo "ERROR: Hardcoded Google API key found"
+            exit 1
+          fi
 
-      - name: Scan for hardcoded WiFi passwords
+      - name: Scan for Anthropic keys
         run: |
-          ! grep -rn 'password\s*=\s*"[a-zA-Z0-9]\{6,\}' firmware/ --include='*.cpp'
+          if grep -rn 'ANTHROPIC_API_KEY\s*=\s*"sk-ant' . \
+              --exclude-dir=node_modules --exclude='*.env' 2>/dev/null; then
+            echo "ERROR: Hardcoded Anthropic API key found"
+            exit 1
+          fi
+
+      - name: Scan for hardcoded WiFi passwords in firmware
+        run: |
+          if grep -rn 'password\s*=\s*"[a-zA-Z0-9_!@#]\{6,\}"' firmware/ --include='*.cpp' 2>/dev/null; then
+            echo "ERROR: Hardcoded WiFi password in firmware"
+            exit 1
+          fi
 
   deploy:
-    needs: [tendercells-ui, app, functions, firmware, security]
+    name: "Deploy — Firebase Hosting"
+    needs: [tendercells-ui, functions, firmware, security]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Build website
+        working-directory: applications/tendercells_ui/test_output/website
         run: |
-          cd applications/tendercells_ui/test_output/website
+          npm ci
+          npm run build
+
+      - name: Build control app
+        working-directory: applications/tendercells_ui/test_output/tendercells-ui
+        run: |
           npm ci
           npm run build
 

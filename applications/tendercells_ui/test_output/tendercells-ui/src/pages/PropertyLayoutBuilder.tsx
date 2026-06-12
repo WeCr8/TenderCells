@@ -43,6 +43,7 @@ import {
   HARDWARE_TYPES,
   ITEM_COLORS,
   OBSTACLE_TYPES,
+  PRODUCT_DIMENSIONS,
   loadPropertyLayout,
   savePropertyLayout,
   type HardwareType,
@@ -144,16 +145,17 @@ export default function PropertyLayoutBuilder() {
   };
 
   const openAddDialog = (kind: PropertyItemKind) => {
-    const type = kind === 'hardware' ? 'roaming-roost' : 'tree';
+    const type: HardwareType | ObstacleType = kind === 'hardware' ? 'chicken-tender' : 'tree';
+    const dims = kind === 'hardware' ? PRODUCT_DIMENSIONS['chicken-tender'] : { width: 8, depth: 8 };
     setEditingItem({
       id: `item-${Date.now()}`,
       kind,
-      name: kind === 'hardware' ? 'New Hardware' : 'New Obstacle',
+      name: kind === 'hardware' ? 'Chicken Tender' : 'New Obstacle',
       type,
       x: 5,
       y: 5,
-      width: kind === 'hardware' ? 10 : 8,
-      depth: kind === 'hardware' ? 8 : 8,
+      width: dims.width,
+      depth: dims.depth,
     });
     setDialogOpen(true);
   };
@@ -691,10 +693,30 @@ export default function PropertyLayoutBuilder() {
                     fullWidth size="small" inputProps={{ min: 1 }} />
                 </Grid>
               </Grid>
-              <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+              <Stack direction="row" spacing={1} sx={{ mt: 1.5 }} flexWrap="wrap">
                 <Chip label={`${(property.widthFt * property.depthFt).toLocaleString()} sq ft`} size="small" sx={{ bgcolor: '#1A3D2B', color: '#A5B1A9', fontSize: '0.7rem' }} />
                 <Chip label={`${items.length} items`} size="small" sx={{ bgcolor: '#1A3D2B', color: '#A5B1A9', fontSize: '0.7rem' }} />
               </Stack>
+              <Box sx={{ mt: 1.5 }}>
+                <Typography variant="caption" sx={{ color: '#8A7D55', display: 'block', mb: 0.5 }}>Snap presets</Typography>
+                <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                  {[0.5, 1, 2, 5, 10].map((step) => (
+                    <Chip
+                      key={step}
+                      label={`${step} ft`}
+                      size="small"
+                      clickable
+                      onClick={() => updateProperty({ gridStepFt: step })}
+                      sx={{
+                        fontSize: '0.65rem',
+                        bgcolor: property.gridStepFt === step ? '#4A7C59' : '#1A3D2B',
+                        color: property.gridStepFt === step ? '#F0EDE4' : '#A5B1A9',
+                        border: property.gridStepFt === step ? '1px solid #6BBF59' : '1px solid transparent',
+                      }}
+                    />
+                  ))}
+                </Stack>
+              </Box>
             </Paper>
 
             {/* Selected Item Panel */}
@@ -904,7 +926,9 @@ export default function PropertyLayoutBuilder() {
                   select label="Kind" value={editingItem.kind}
                   onChange={(event) => {
                     const nextKind = event.target.value as PropertyItemKind;
-                    setEditingItem({ ...editingItem, kind: nextKind, type: nextKind === 'hardware' ? 'roaming-roost' : 'tree' });
+                    const nextType: HardwareType | ObstacleType = nextKind === 'hardware' ? 'chicken-tender' : 'tree';
+                    const dims = nextKind === 'hardware' ? PRODUCT_DIMENSIONS['chicken-tender'] : { width: 8, depth: 8 };
+                    setEditingItem({ ...editingItem, kind: nextKind, type: nextType, width: dims.width, depth: dims.depth });
                   }}
                   fullWidth
                 >
@@ -915,7 +939,14 @@ export default function PropertyLayoutBuilder() {
               <Grid item xs={12} sm={6}>
                 <TextField
                   select label="Type" value={editingItem.type}
-                  onChange={(event) => setEditingItem({ ...editingItem, type: event.target.value as HardwareType | ObstacleType })}
+                  onChange={(event) => {
+                    const nextType = event.target.value as HardwareType | ObstacleType;
+                    const dims = editingItem.kind === 'hardware' && nextType in PRODUCT_DIMENSIONS
+                      ? PRODUCT_DIMENSIONS[nextType as HardwareType]
+                      : { width: editingItem.width, depth: editingItem.depth };
+                    const defaultName = TYPE_LABELS[nextType] || nextType;
+                    setEditingItem({ ...editingItem, type: nextType, width: dims.width, depth: dims.depth, name: defaultName });
+                  }}
                   fullWidth
                 >
                   {(editingItem.kind === 'hardware' ? HARDWARE_TYPES : OBSTACLE_TYPES).map((type) => (
@@ -929,9 +960,22 @@ export default function PropertyLayoutBuilder() {
                 </TextField>
               </Grid>
               <Grid item xs={12}>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                  Position & Size (feet)
-                </Typography>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Position & Size (feet)
+                  </Typography>
+                  {editingItem.kind === 'hardware' && editingItem.type in PRODUCT_DIMENSIONS && (
+                    <Chip
+                      label={`Use spec: ${PRODUCT_DIMENSIONS[editingItem.type as HardwareType].width}×${PRODUCT_DIMENSIONS[editingItem.type as HardwareType].depth} ft`}
+                      size="small" clickable
+                      onClick={() => {
+                        const dims = PRODUCT_DIMENSIONS[editingItem.type as HardwareType];
+                        setEditingItem({ ...editingItem, width: dims.width, depth: dims.depth });
+                      }}
+                      sx={{ fontSize: '0.65rem', bgcolor: '#1A3D2B', color: '#6BBF59', border: '1px solid #4A7C59' }}
+                    />
+                  )}
+                </Stack>
                 <Grid container spacing={1.5}>
                   {(['x', 'y', 'width', 'depth'] as const).map((field) => (
                     <Grid item xs={6} sm={3} key={field}>

@@ -51,6 +51,21 @@ export const HARDWARE_TYPES: HardwareType[] = [
   'sensor',
 ];
 
+// Real-world footprint dimensions from product specs (CLAUDE.md)
+// width × depth in feet; height not used on 2D map
+export const PRODUCT_DIMENSIONS: Record<HardwareType, { width: number; depth: number }> = {
+  'chicken-tender': { width: 4,  depth: 4  }, // 4×4×5 ft
+  'roaming-roost':  { width: 3,  depth: 3  }, // 3×3×5 ft
+  'duck-dock':      { width: 4,  depth: 4  }, // 4×4×6 ft
+  'goat-guardian':  { width: 6,  depth: 6  }, // 6×6×8 ft
+  'bunny-burrow':   { width: 3,  depth: 3  }, // 3×3×5 ft
+  'turkey-tower':   { width: 4,  depth: 4  }, // 4×4×6 ft
+  'pigeon-palace':  { width: 4,  depth: 4  }, // 4×4×6 ft
+  'watchtower':     { width: 3,  depth: 3  }, // 3×3×5 ft
+  'rail-module':    { width: 4,  depth: 2  }, // linear rail segment
+  'sensor':         { width: 1,  depth: 1  }, // point sensor
+};
+
 export const OBSTACLE_TYPES: ObstacleType[] = ['tree', 'fence', 'pond', 'rock', 'building', 'garden', 'no-go-zone'];
 
 export const ITEM_COLORS: Record<string, string> = {
@@ -75,19 +90,20 @@ export const ITEM_COLORS: Record<string, string> = {
 
 export const DEFAULT_PROPERTY: PropertyConfig = {
   name: 'Home Yard',
-  widthFt: 120,
-  depthFt: 90,
-  gridStepFt: 10,
+  widthFt: 80,
+  depthFt: 60,
+  gridStepFt: 1,
 };
 
 export const DEFAULT_ITEMS: PropertyItem[] = [
-  { id: 'item-chicken-tender', kind: 'hardware', name: 'Chicken Tender', type: 'chicken-tender', x: 15, y: 14, width: 14, depth: 12 },
-  { id: 'item-roaming-roost', kind: 'hardware', name: 'Roaming Roost', type: 'roaming-roost', x: 62, y: 46, width: 12, depth: 10 },
-  { id: 'item-duck-dock', kind: 'hardware', name: 'Duck Dock', type: 'duck-dock', x: 88, y: 42, width: 16, depth: 12 },
-  { id: 'item-watchtower', kind: 'hardware', name: 'WatchTower', type: 'watchtower', x: 105, y: 12, width: 7, depth: 7 },
-  { id: 'item-tree', kind: 'obstacle', name: 'Oak Tree', type: 'tree', x: 42, y: 18, width: 12, depth: 12 },
-  { id: 'item-pond', kind: 'obstacle', name: 'Pond', type: 'pond', x: 84, y: 20, width: 20, depth: 14 },
-  { id: 'item-fence', kind: 'obstacle', name: 'Fence Line', type: 'fence', x: 8, y: 72, width: 92, depth: 4 },
+  // Dimensions match PRODUCT_DIMENSIONS — real product footprints
+  { id: 'item-chicken-tender', kind: 'hardware', name: 'Chicken Tender', type: 'chicken-tender', x: 10, y: 8,  width: 4, depth: 4 },
+  { id: 'item-roaming-roost',  kind: 'hardware', name: 'Roaming Roost',  type: 'roaming-roost',  x: 40, y: 28, width: 3, depth: 3 },
+  { id: 'item-duck-dock',      kind: 'hardware', name: 'Duck Dock',      type: 'duck-dock',      x: 58, y: 26, width: 4, depth: 4 },
+  { id: 'item-watchtower',     kind: 'hardware', name: 'WatchTower',     type: 'watchtower',     x: 70, y: 6,  width: 3, depth: 3 },
+  { id: 'item-tree',           kind: 'obstacle', name: 'Oak Tree',       type: 'tree',           x: 28, y: 10, width: 8, depth: 8 },
+  { id: 'item-pond',           kind: 'obstacle', name: 'Pond',           type: 'pond',           x: 52, y: 12, width: 14, depth: 10 },
+  { id: 'item-fence',          kind: 'obstacle', name: 'Fence Line',     type: 'fence',          x: 4,  y: 48, width: 60, depth: 3 },
 ];
 
 export const loadPropertyLayout = (): PropertyLayoutState => {

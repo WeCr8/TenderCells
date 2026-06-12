@@ -51,7 +51,7 @@ and real-time monitoring dashboard.
 | **chicken-tender** | :5174 | applications/tendercells_ui/test_output/chicken-tender | Chicken Tender device-specific UI |
 | **duck-dock** | :5175 | applications/tendercells_ui/test_output/duck-dock | Duck Dock device-specific UI |
 | **website** | :5176 | applications/tendercells_ui/test_output/website | Public marketing site |
-| **express-api** | :4000 | applications/tendercells_ui/test_output/express-api | Backend API (Firebase + hardware control) |
+| **express-api** | :3001 | applications/tendercells_ui/test_output/express-api | MQTT bridge (hardware control) |
 
 **Start all apps:**
 ```bash
@@ -59,48 +59,136 @@ cd applications/tendercells_ui/test_output/tendercells-ui && npm run dev    # :5
 cd applications/tendercells_ui/test_output/chicken-tender && npm run dev    # :5174
 cd applications/tendercells_ui/test_output/duck-dock && npm run dev         # :5175
 cd applications/tendercells_ui/test_output/website && npm run dev           # :5176
-cd applications/tendercells_ui/test_output/express-api && npm run dev       # :4000
+cd applications/tendercells_ui/test_output/express-api && npm run dev       # :3001
 ```
 
 **Main control app:** tendercells-ui (:5173)
 - Multi-product dashboard (Chicken Tender, Roaming Roost, Duck Dock, etc.)
 - 3D viewport, telemetry panel, quick actions
-- **Status:** UI complete, MQTT bridge wired in express-api
+- **Status:** UI complete with hardware control hooks
 
-**MQTT Hardware Control (Express API :4000)**
+**MQTT Hardware Control (Express API :3001)**
 
-Hardware commands route through express-api → MQTT broker → ESP32 devices.
+Hardware commands route through express-api (:3001) → MQTT broker → ESP32 devices.
 
-API Endpoints:
+**API Endpoints** (base: http://localhost:3001/api/mqtt):
 ```bash
 # Query device state
-GET /api/mqtt/devices/{deviceId}/telemetry     # Sensor data (temp, humidity, feed, water, chickens)
-GET /api/mqtt/devices/{deviceId}/state         # System state (idle/running/error/estop)
-GET /api/mqtt/devices/{deviceId}/alerts        # Active alerts
+GET /devices/{deviceId}/telemetry     # Sensor data (temp, humidity, feed, water, chickens)
+GET /devices/{deviceId}/state         # System state (idle/running/error/estop)
+GET /devices/{deviceId}/alerts        # Active alerts
 
 # Control hardware (QoS 1)
-POST /api/mqtt/devices/{deviceId}/door         # body: {state: "open"|"close"}
-POST /api/mqtt/devices/{deviceId}/feed         # body: {amount: number}
-POST /api/mqtt/devices/{deviceId}/clean        # body: {action: "start"|"stop"}
-POST /api/mqtt/devices/{deviceId}/arm          # body: {joints: [angles], speed: 0-1}
+POST /devices/{deviceId}/door         # body: {state: "open"|"close"}
+POST /devices/{deviceId}/feed         # body: {amount: number}
+POST /devices/{deviceId}/clean        # body: {action: "start"|"stop"}
+POST /devices/{deviceId}/arm          # body: {joints: [angles], speed: 0-1}
 
 # Emergency (QoS 2, retained)
-POST /api/mqtt/devices/{deviceId}/estop        # Immediate power cut to all actuators
+POST /devices/{deviceId}/estop        # Immediate power cut to all actuators
 
 # Broker status
-GET /api/mqtt/mqtt/status                      # Connection status, device list
-POST /api/mqtt/mqtt/connect                    # Force reconnect
+GET /mqtt/status                      # Connection status, device list
+POST /mqtt/connect                    # Force reconnect
 ```
 
-**MQTT Broker Connection:**
+**Example curl commands:**
 ```bash
-# Set environment variable to override default
+# Get sensor data
+curl http://localhost:3001/api/mqtt/devices/ct_001/telemetry
+
+# Open door
+curl -X POST http://localhost:3001/api/mqtt/devices/ct_001/door \
+  -H "Content-Type: application/json" \
+  -d '{"state":"open"}'
+
+# Dispense feed (100g)
+curl -X POST http://localhost:3001/api/mqtt/devices/ct_001/feed \
+  -H "Content-Type: application/json" \
+  -d '{"amount":100}'
+```
+
+**MQTT Broker Configuration:**
+```bash
+# Default: mqtt://localhost:1883
+# Override with environment variable:
 export MQTT_BROKER=mqtt://192.168.1.100:1883
 ```
 
-**Example: Control Chicken Tender Door**
+---
+
+## 2b. MCP Server Stack (Claude Code Integration)
+
+**Install these in order of impact (highest first):**
+
+### Tier 1 — Essential (Install Now)
 ```bash
-curl -X POST http://localhost:4000/api/mqtt/devices/chicken_tender_001/door \
+# CodeGraph — pre-indexes repo for 92% fewer tool calls
+npx @colbymchenry/codegraph
+codegraph init -i && codegraph index
+
+# GitHub MCP — repo + PR + issues access
+# (Already configured if GitHub connected to Claude)
+
+# Filesystem MCP — direct file ops
+# (Configured in ~/.claude/settings.json)
+```
+
+**Settings template** (~/.claude/settings.json):
+```json
+{
+  "mcpServers": {
+    "codegraph": {
+      "command": "npx",
+      "args": ["@colbymchenry/codegraph", "serve"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${REPO_ROOT}"]
+    }
+  }
+}
+```
+
+### Tier 2 — Recommended
+- **Brave Search MCP** — web search for ESP32 docs, datasheets, competitor research
+- **Memory MCP** — persistent context across sessions (which arm MCU, design decisions)
+- **Sequential Thinking MCP** — step-by-step reasoning for complex architecture decisions
+
+### Tier 3 — When Ready
+- **Playwright MCP** — E2E test automation
+- **SQLite MCP** — query Firebase emulator exports
+- **Autodesk Fusion MCP** — CAD design (native integration)
+
+**Local AI Models (Ollama :18789):**
+- `qwen2.5-coder:7b` — code generation (primary)
+- `llama3.2:latest` — reasoning
+- `llama3:8b` — general tasks
+
+Use models autonomously in code generation loops via Ollama API (`/api/chat/completions`).
+
+---
+
+## 3. Testing & Login
+
+**tendercells-ui (:5173)** requires login. Default test account:
+```
+Email: demo@tendercells.local
+Password: (check Firebase Emulator Auth or use sign-up flow)
+```
+
+After login, navigate to: Dashboard → Chicken Tender → Device Controls
+
+---
+
+## 4. Example: Control Chicken Tender Door
+```bash
+curl -X POST http://localhost:3001/api/mqtt/devices/ct_001/door \
   -H "Content-Type: application/json" \
   -d '{"state": "open"}'
 ```

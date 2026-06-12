@@ -13,10 +13,18 @@ import ServicesPage from "./pages/ServicesPage";
 import OpenSourcePage from "./pages/OpenSourcePage";
 import BlogPage from "./pages/BlogPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import { usePageTracking } from "./hooks/usePageTracking";
+
+// Fires GA4 page_view on every route change — must be inside <BrowserRouter>
+function PageTracker() {
+  usePageTracking();
+  return null;
+}
 
 function App() {
   return (
     <BrowserRouter>
+      <PageTracker />
       <Routes>
         <Route path="/" element={<LandingPage />} />
 

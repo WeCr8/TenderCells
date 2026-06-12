@@ -125,10 +125,9 @@
   margin: 0 auto;
   padding: 0 1.25rem;
   border-top: 1px solid #ebebeb;
-  overflow-x: auto;
-  scrollbar-width: none;
+  flex-wrap: wrap;
+  /* NO overflow here — it clips position:absolute dropdown children */
 }
-.site-nav::-webkit-scrollbar { display: none; }
 
 /* Every top-level nav item wrapper */
 .nav-item {

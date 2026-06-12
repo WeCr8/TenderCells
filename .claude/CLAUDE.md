@@ -2266,6 +2266,23 @@ WEEK 9-10: Polish + Pitch
 
 ---
 
+## 11. Hardware Specification References
+
+**Master Product Workbook:** `docs/Tender_Cells_Master_Product_Workbook.xlsx`
+
+- **Sheets:** Lists, Engineering_Assumptions, Product_Master, SKU_Master
+- **Contents:** Product specs, BOM data, component sources, cost estimates
+- **Owner:** WeCr8 Product Team
+- **Usage:** Source for hardware-bom.md, part specifications, supplier links
+
+**Predator Monitor Hardware List:** `docs/TenderCells_Predator_Monitor_Hardware_List.xlsx`
+
+- **Contents:** WatchTower AI component list, sensors, PCB specs, assembly guide
+- **Owner:** WeCr8 Hardware Team
+- **Usage:** ESP32-CAM firmware requirements, 3-camera integration, LoRa module specs
+
+---
+
 *Claude Code: read this file at the start of every session.
 When in doubt about a convention, check this file before asking.
 Keep this file updated as the project evolves — it is the source of truth.*

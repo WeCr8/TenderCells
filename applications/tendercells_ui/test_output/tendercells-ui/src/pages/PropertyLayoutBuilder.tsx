@@ -108,6 +108,9 @@ export default function PropertyLayoutBuilder() {
   const [editingItem, setEditingItem] = useState<PropertyItem | null>(null);
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('edit');
   const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
+  // Grab offset (feet) between pointer and item origin at drag start —
+  // keeps the cursor locked to the exact point that was clicked on the item.
+  const [dragOffset, setDragOffset] = useState<{ dx: number; dy: number } | null>(null);
   const [snapEnabled, setSnapEnabled] = useState(true);
   const [dragSnapPos, setDragSnapPos] = useState<{ x: number; y: number; width: number; depth: number } | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
@@ -305,13 +308,17 @@ export default function PropertyLayoutBuilder() {
     moveItemSnap(itemId, x, y, true);
   }, [moveItemSnap]);
 
-  const getPointerPosition = (event: React.PointerEvent<SVGSVGElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
+  // Convert client (screen) coords to yard feet relative to the SVG canvas.
+  const pointerToFt = (clientX: number, clientY: number, svg: SVGSVGElement) => {
+    const rect = svg.getBoundingClientRect();
     return {
-      x: ((event.clientX - rect.left) / rect.width) * property.widthFt,
-      y: ((event.clientY - rect.top) / rect.height) * property.depthFt,
+      x: ((clientX - rect.left) / rect.width) * property.widthFt,
+      y: ((clientY - rect.top) / rect.height) * property.depthFt,
     };
   };
+
+  const getPointerPosition = (event: React.PointerEvent<SVGSVGElement>) =>
+    pointerToFt(event.clientX, event.clientY, event.currentTarget);
 
   const handlePointerMove = (event: React.PointerEvent<SVGSVGElement>) => {
     const pointer = getPointerPosition(event);
@@ -320,8 +327,11 @@ export default function PropertyLayoutBuilder() {
     if (!draggingItemId) return;
     const item = items.find((candidate) => candidate.id === draggingItemId);
     if (!item) return;
-    const rawX = pointer.x - item.width / 2;
-    const rawY = pointer.y - item.depth / 2;
+    // Subtract the grab offset so the clicked point stays under the cursor.
+    // Fallback to center if drag started without a captured offset.
+    const off = dragOffset ?? { dx: item.width / 2, dy: item.depth / 2 };
+    const rawX = pointer.x - off.dx;
+    const rawY = pointer.y - off.dy;
     const doSnap = snapEnabled && !event.shiftKey;
     const step = doSnap ? property.gridStepFt : 1;
     const snappedX = clamp(snapToStep(rawX, step), 0, Math.max(0, property.widthFt - item.width));
@@ -439,6 +449,17 @@ export default function PropertyLayoutBuilder() {
     .filter((item) => item.kind === 'hardware' && item.type !== 'watchtower')
     .map((item) => `${(item.x + item.width / 2) * scaleX},${(item.y + item.depth / 2) * scaleY}`)
     .join(' ');
+
+  // Paint order: water/ground features (pond, garden) at the bottom, other
+  // obstacles in the middle, hardware on top. Lets Duck Dock sit on the pond.
+  // Selected item floats to the very top so its outline is never clipped.
+  const zLayer = (item: PropertyItem) => {
+    if (selectedItemId === item.id) return 3;
+    if (item.kind === 'hardware') return 2;
+    if (item.type === 'pond' || item.type === 'garden') return 0;
+    return 1;
+  };
+  const renderItems = [...items].sort((a, b) => zLayer(a) - zLayer(b));
 
   return (
     <Box sx={{ p: { xs: 1, sm: 1.5, md: 3 } }}>
@@ -598,8 +619,8 @@ export default function PropertyLayoutBuilder() {
                 aria-label={`${property.name} property layout`}
                 className="plb-canvas"
                 onPointerMove={handlePointerMove}
-                onPointerLeave={() => { setHoverPos(null); setDraggingItemId(null); setDragSnapPos(null); }}
-                onPointerUp={() => { setDraggingItemId(null); setDragSnapPos(null); }}
+                onPointerLeave={() => { setHoverPos(null); setDraggingItemId(null); setDragSnapPos(null); setDragOffset(null); }}
+                onPointerUp={() => { setDraggingItemId(null); setDragSnapPos(null); setDragOffset(null); }}
               >
                 <defs>
                   <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
@@ -767,15 +788,26 @@ export default function PropertyLayoutBuilder() {
                   </>
                 )}
 
-                {/* Items */}
-                {items.map((item) => (
+                {/* Items — painted back-to-front by z-layer so hardware (e.g. Duck
+                    Dock) overlays water features (pond) instead of being hidden under
+                    them. Stable sort preserves insertion order within a layer. */}
+                {renderItems.map((item) => (
                   <g
                     key={item.id}
                     className={layoutMode === 'edit' ? (draggingItemId === item.id ? 'plb-item-grabbing' : 'plb-item-grab') : 'plb-item-pointer'}
                     onPointerDown={(event) => {
                       event.preventDefault();
                       setSelectedItemId(item.id);
-                      if (layoutMode === 'edit') setDraggingItemId(item.id);
+                      if (layoutMode === 'edit') {
+                        const svg = (event.currentTarget as SVGGElement).ownerSVGElement;
+                        if (svg) {
+                          const p = pointerToFt(event.clientX, event.clientY, svg);
+                          setDragOffset({ dx: p.x - item.x, dy: p.y - item.y });
+                        } else {
+                          setDragOffset({ dx: item.width / 2, dy: item.depth / 2 });
+                        }
+                        setDraggingItemId(item.id);
+                      }
                     }}
                     onDoubleClick={() => openEditDialog(item)}
                   >

@@ -171,27 +171,74 @@ const createHardwareMesh = (
     }
 
     case 'duck-dock': {
+      // Floating perforated dock: deck sits ON the pond surface. Holes in the
+      // deck let droppings fall through to feed pond fish; an egg-capture
+      // channel runs along the nesting edge. Deck floats above the water plane.
       const g = new THREE.Group();
+      const waterLevel = 0.05;
+      const deckLevel = 0.22; // deck floats just above water — overlays, never submerged
+
+      // Pond water surface (the dock floats on top of this)
       const water = new THREE.Mesh(
-        new THREE.BoxGeometry(W, 0.07, D),
-        new THREE.MeshStandardMaterial({ color: 0x2a6b8a, roughness: 0.12, transparent: true, opacity: 0.7 })
+        new THREE.BoxGeometry(W, 0.06, D),
+        new THREE.MeshStandardMaterial({ color: 0x2a6b8a, roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.68 })
       );
-      water.position.set(x, 0.04, z);
+      water.position.set(x, waterLevel, z);
       g.add(water);
-      const dock = new THREE.Mesh(new THREE.BoxGeometry(W * 0.72, 0.2, D * 0.55), mat);
-      dock.position.set(x + W * 0.06, 0.2, z - D * 0.06);
-      dock.castShadow = true;
-      g.add(dock);
-      const ramp = new THREE.Mesh(new THREE.BoxGeometry(W * 0.18, 0.05, D * 0.42), mat);
-      ramp.position.set(x - W * 0.27, 0.09, z + D * 0.18);
-      ramp.rotation.x = 0.22;
-      g.add(ramp);
-      const post = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.06, 0.06, 0.65, 8),
-        new THREE.MeshStandardMaterial({ color: 0x8a6030 })
+
+      const deckW = W * 0.74;
+      const deckD = D * 0.6;
+      const deckX = x + W * 0.05;
+      const deckZ = z - D * 0.05;
+
+      // Perforated deck plank
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(deckW, 0.12, deckD), mat);
+      deck.position.set(deckX, deckLevel, deckZ);
+      deck.castShadow = true;
+      g.add(deck);
+
+      // Drop-through holes — grid of dark cylinders flush in the deck top.
+      // Feces fall through these into the pond to feed fish.
+      const holeMat = new THREE.MeshStandardMaterial({ color: 0x0a1a22, roughness: 0.9 });
+      const cols = 4, rows = 3;
+      const holeR = Math.min(deckW / cols, deckD / rows) * 0.16;
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          const hx = deckX - deckW / 2 + (deckW / (cols + 1)) * (c + 1);
+          const hz = deckZ - deckD / 2 + (deckD / (rows + 1)) * (r + 1);
+          const hole = new THREE.Mesh(new THREE.CylinderGeometry(holeR, holeR, 0.14, 10), holeMat);
+          hole.position.set(hx, deckLevel + 0.005, hz);
+          g.add(hole);
+        }
+      }
+
+      // Egg-capture channel along the back edge (gold collection trough)
+      const eggChannel = new THREE.Mesh(
+        new THREE.BoxGeometry(deckW * 0.92, 0.08, deckD * 0.14),
+        new THREE.MeshStandardMaterial({ color: 0xc8b882, roughness: 0.5, metalness: 0.3 })
       );
-      post.position.set(x + W * 0.28, 0.52, z - D * 0.22);
-      g.add(post);
+      eggChannel.position.set(deckX, deckLevel + 0.02, deckZ - deckD * 0.5 + deckD * 0.07);
+      g.add(eggChannel);
+
+      // Entry ramp from water to deck
+      const ramp = new THREE.Mesh(new THREE.BoxGeometry(W * 0.2, 0.05, D * 0.42), mat);
+      ramp.position.set(x - W * 0.3, deckLevel * 0.55, z + D * 0.2);
+      ramp.rotation.x = 0.24;
+      g.add(ramp);
+
+      // Corner support posts (anchor dock to pond bed)
+      const postMat = new THREE.MeshStandardMaterial({ color: 0x8a6030 });
+      const postPositions: [number, number][] = [
+        [deckX + deckW * 0.46, deckZ - deckD * 0.44],
+        [deckX - deckW * 0.46, deckZ - deckD * 0.44],
+        [deckX + deckW * 0.46, deckZ + deckD * 0.44],
+        [deckX - deckW * 0.46, deckZ + deckD * 0.44],
+      ];
+      for (const [px, pz] of postPositions) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8), postMat);
+        post.position.set(px, deckLevel - 0.1, pz);
+        g.add(post);
+      }
       return g;
     }
 

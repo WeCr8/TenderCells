@@ -1,0 +1,19 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Questions, ideas & show-and-tell (Discussions)
+    url: https://github.com/WeCr8/TenderCells/discussions
+    about: >-
+      New here, or a student/educator? Start here. Ask "how does this work?",
+      share what you're building, or propose a new animal product family —
+      no question is too basic.
+  - name: ▶ Try the live demo (no signup)
+    url: https://tendercells.com/app/demo
+    about: See the dashboard running in sim mode before you build anything.
+  - name: 🧭 Good first issues
+    url: https://github.com/WeCr8/TenderCells/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22
+    about: Beginner-friendly tasks picked so a newcomer can finish them.
+  - name: 🔒 Report a security or safety issue (private)
+    url: https://github.com/WeCr8/TenderCells/security/advisories/new
+    about: >-
+      Do NOT open a public issue for vulnerabilities or hardware-safety bugs.
+      Report privately here. See SECURITY.md.

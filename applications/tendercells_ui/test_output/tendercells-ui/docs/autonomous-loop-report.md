@@ -1,6 +1,6 @@
 # TenderCells Autonomous Loop Report
 
-Generated: 2026-06-13T20:15:24.906Z
+Generated: 2026-06-13T20:38:43.612Z
 Status: ready-with-warnings
 Iterations: 1
 Route base: http://localhost:5173
@@ -19,7 +19,7 @@ Required: yes
 
 
 ```text
-> tendercells-ui@1.0.0 build
+> tendercells-ui@0.0.1 build
 > tsc -b && vite build
 
 [36mvite v5.4.21 [32mbuilding for production...[36m[39m
@@ -35,7 +35,7 @@ computing gzip size...
 [2mdist/[22m[36massets/mui-D35VV_AL.js           [39m[1m[2m431.01 kB[22m[1m[22m[2m │ gzip: 129.37 kB[22m
 [2mdist/[22m[36massets/firebase-e_8nbQyS.js      [39m[1m[2m521.93 kB[22m[1m[22m[2m │ gzip: 120.86 kB[22m
 [2mdist/[22m[36massets/three-BGRmT1Yy.js         [39m[1m[2m593.08 kB[22m[1m[22m[2m │ gzip: 153.77 kB[22m
-[32m✓ built in 13.14s[39m
+[32m✓ built in 13.36s[39m
 ```
 
 ### WARN - Fallow codebase analysis
@@ -47,7 +47,7 @@ Required: no
 
 
 ```text
-> tendercells-ui@1.0.0 fallow
+> tendercells-ui@0.0.1 fallow
 > npx --yes fallow@2.94.0 --summary
 
        6  Unused files
@@ -60,24 +60,24 @@ Required: no
       26  Clone groups
      651  Duplicated lines
     3.6%  Duplication rate
-    1319  Functions analyzed
+    1324  Functions analyzed
      119  Above threshold
    91.9   Average maintainability (good)
 loaded config: C:\Users\zach\Documents\Projects\TenderCells\applications\tendercells_ui\test_output\tendercells-ui\.fallowrc.jsonc
 
-■ Metrics: dead files 6.1% (6 of 99) · dead exports 8.0% (18 of 226) · MI 91.9 (good)
-  99 files analyzed
-  16 entry points detected (6 package.json, 6 plugin, 4 manual entry)
+■ Metrics: dead files 6.0% (6 of 100) · dead exports 8.0% (18 of 226) · MI 91.9 (good)
+  100 files analyzed
+  17 entry points detected (7 package.json, 6 plugin, 4 manual entry)
   8 refactoring targets — start with src/services/demo/demoEnvironment.ts (dead code)
 
 ── Dead Code ──────────────────────────────────────
-✗ 26 issues (0.09s)
+✗ 26 issues (0.08s)
 
 ── Duplication ────────────────────────────────────
-✗ 3.6% duplication (0.07s)
+✗ 3.6% duplication (0.05s)
 
 ── Complexity ─────────────────────────────────────
-✓ 1319 functions analyzed (0.10s)
+✓ 1324 functions analyzed (0.09s)
 
 Failed: dead-code (26 issues), dupes (26 clone groups), health (119 above threshold) — start with src/services/demo/demoEnvironment.ts
 ```
@@ -1075,7 +1075,7 @@ URL: http://localhost:4000/health
 
 
 ```text
-{"status": "ok", "time": "2026-06-13T20:15:48.932888"}
+{"status": "ok", "time": "2026-06-13T20:39:07.558644"}
 ```
 
 ### PASS - OpenClaw gateway health

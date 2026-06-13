@@ -28,11 +28,16 @@ import TenderAIPage from "../pages/TenderAIPage";
 import SetupWizardPage from "../pages/SetupWizardPage";
 import ChickenEyeDashboardPage from "../pages/ChickenEyeDashboardPage";
 import ChickenEyeBirdPage from "../pages/ChickenEyeBirdPage";
+import DemoLandingPage from "../pages/DemoLandingPage";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+      {/* Public, no-signup demo front door — auto-seeds then lands on dashboard */}
+      <Route path="/demo" element={<DemoLandingPage />} />
+      <Route path="/try" element={<DemoLandingPage />} />
 
       {/* Product dashboards */}
       <Route path="/chicken-tender" element={<ChickenTenderDashboard />} />

@@ -12,6 +12,7 @@ import HealthPage from "./pages/HealthPage";
 import ServicesPage from "./pages/ServicesPage";
 import OpenSourcePage from "./pages/OpenSourcePage";
 import BlogPage from "./pages/BlogPage";
+import StoryPage from "./pages/StoryPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { usePageTracking } from "./hooks/usePageTracking";
 
@@ -52,6 +53,9 @@ function App() {
 
         {/* Open Source */}
         <Route path="/open-source" element={<OpenSourcePage />} />
+
+        {/* Story */}
+        <Route path="/story" element={<StoryPage />} />
 
         {/* Blog */}
         <Route path="/blog" element={<BlogPage />} />

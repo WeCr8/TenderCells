@@ -2,10 +2,28 @@
 
 ![Build](https://img.shields.io/badge/build-passing-6BBF59)
 ![Mobile Web](https://img.shields.io/badge/mobile%20web-responsive-6BBF59)
-![Release SHA](https://img.shields.io/badge/release%20sha-pending-lightgrey)
-![License](https://img.shields.io/badge/license-open%20source%20pending-D0A34E)
+![Version](https://img.shields.io/badge/version-0.0.1-6BBF59)
+![Release SHA](https://img.shields.io/badge/release%20sha-see%20v0.0.1%20tag-6BBF59)
+![License](https://img.shields.io/badge/license-Apache%202.0-6BBF59)
 
 **WeCr8 Solutions** | Autonomous robot coop control system | React Native + Firebase + ESP32 + MQTT
+
+## ▶ [Try the live demo — no signup](https://tendercells.com/app/demo)
+
+One click seeds a full Tender Cells environment — every product family, flocks,
+eggs, schedules, property layout — running **sim-only in your own browser**.
+Nothing leaves your machine. Then come build.
+
+> **Students, makers, classrooms welcome.** You can add a whole new automated
+> animal product to this platform without touching hardware — the simulation and
+> data pipeline extend themselves from one data file. See
+> [Build your own product family](#build-your-own-product-family) below and the
+> [`good first issue`](https://github.com/WeCr8/TenderCells/labels/good%20first%20issue)
+> label.
+
+Licensed under [Apache 2.0](LICENSE) — build, integrate, and even sell what you
+make on top of it. See [CONTRIBUTING](CONTRIBUTING.md),
+[CODE_OF_CONDUCT](CODE_OF_CONDUCT.md), and [SECURITY](SECURITY.md).
 
 ---
 
@@ -16,6 +34,8 @@ TenderCells is being built as an open-source operating system for home farming a
 Start here:
 
 - [Contributing guide](CONTRIBUTING.md)
+- [Usage guide](docs/USAGE.md)
+- [Roadmap](docs/ROADMAP.md)
 - [Open source launch plan](docs/OPEN_SOURCE_LAUNCH.md)
 - [Product documentation standard](docs/PRODUCT_DOCUMENTATION_STANDARD.md)
 - [Product documentation index](docs/products/README.md)
@@ -30,7 +50,48 @@ Current contributor tracks:
 - Simulation: browser Three.js layouts, Isaac Sim workflows, property obstacles, terrain capture, and hardware-in-loop planning.
 - Community: beta builders, FFA/4H/maker education, deployment photos, case studies, and build videos.
 
+Current release:
+
+- Version: `0.0.1`
+- Release SHA: see the pushed `v0.0.1` tag and final release commit.
+- Install/test today: responsive web app and PWA install flow.
+- Native Android/iOS: planned via Capacitor; APK/IPA artifacts are not ready until native wrappers and signing assets are generated.
+
 ---
+
+## Build your own product family
+
+You don't need hardware, a soldering iron, or a Firebase account to add a new
+automated animal product to Tender Cells. The web app's demo environment is
+**data-driven**: it builds the entire simulated stack — the product, its flock,
+egg map, schedules, property-grid placement, and equipment readouts — from a
+single source of truth, then verifies every layer is wired.
+
+Add one entry and the whole pipeline extends itself.
+
+**The exercise (≈30 minutes, no hardware):**
+
+1. Open `applications/tendercells_ui/test_output/tendercells-ui/src/services/birdsService.ts`
+   and add a new pack to `DEMO_ANIMAL_PACKS` — a `deviceId`, a `productFamily`, a
+   label, and a few animals (e.g. a "Quail Condo" with three quail).
+2. Run the app's demo (`npm run dev`, then visit `/demo`). Your new product now
+   appears on the dashboard, on the property map, with its flock and schedules —
+   you wrote zero UI and zero backend code.
+3. Run the test: `npx vitest run src/services/demo/demoEnvironment.test.ts`. The
+   suite automatically checks your new device across all six data layers.
+
+**How it works** (and what to read):
+
+- `src/services/demo/demoEnvironment.ts` — the orchestrator. Derives the device
+  list from your packs and seeds/reset/verifies everything coherently.
+- `docs/prd/demo-environment.md` — the product requirements, in plain language.
+- `docs/testing/demo-environment-testing.md` — how the tests prove it works.
+
+From there you can go as deep as you like: a real ESP32 firmware target, a CAD
+mount, an MQTT topic contract, a new sensor. Start in the simulator, graduate to
+hardware when you're ready. Pick up a [`good first
+issue`](https://github.com/WeCr8/TenderCells/labels/good%20first%20issue) or open
+a Discussion and tell us what you want to build.
 
 ## Project Structure
 

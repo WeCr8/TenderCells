@@ -65,6 +65,11 @@ export default function OpenSourcePage() {
           product registration, property simulation, and community custom builds without black-box lock-in.
         </p>
         <p>
+          We want farmers, developers, educators, and deeply technical builders to meet in one practical
+          ecosystem: healthier animals, better care records, safer automation, and stronger humans who can
+          understand, repair, and improve the systems around them.
+        </p>
+        <p>
           We are starting with Chicken TenderCell, WatchTower AI, Roaming Roost, and a registry for custom
           products so builders can connect their own devices, document their own hardware, and test safely.
         </p>

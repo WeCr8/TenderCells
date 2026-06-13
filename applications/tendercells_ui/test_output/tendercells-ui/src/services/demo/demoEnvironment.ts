@@ -1,46 +1,142 @@
-// demoEnvironment.ts — single orchestrator for the Tender Cells demo/test
-// environment. Seeds structures (products), flocks (birds), eggs, schedules,
-// property-grid placement and equipment sim-state across THREE coherent demo
-// devices so the whole app can be exercised end-to-end without real hardware.
+// demoEnvironment.ts — single orchestrator for the Tender Cells starter
+// environment. Seeds a coherent, end-to-end stack — structures (products),
+// flocks (animals), eggs, schedules, property-grid placement and equipment
+// sim-state — across EVERY product family the platform knows about, so the
+// whole app can be exercised with no real hardware.
+//
+// This is the open-source on-ramp, not a throwaway demo: a like-minded owner
+// can spin up any product family on their OWN network, sim-only, and later
+// swap in real hardware. The same verify harness then confirms each data layer
+// is wired for their real devices too.
 //
 // Design rules (match the sim-only data layer):
-//   • OPT-IN — nothing seeds automatically; the user/test presses "Load Demo".
+//   • OPT-IN — nothing seeds automatically; the owner presses "Load Demo".
+//   • LOCAL-FIRST / PRIVATE — everything lives in this browser's localStorage;
+//     seeded products carry telemetry_consent='local_only'. No animal data
+//     leaves the owner's machine/network unless they explicitly enable a backend.
 //   • IDEMPOTENT — every step upserts by fixed id, safe to re-run, never
-//     duplicates and never overwrites the user's own (non-demo) records.
+//     duplicates and never overwrites the owner's own (non-demo) records.
 //   • REVERSIBLE — resetDemoEnvironment() removes ONLY demo-tagged data.
-//   • COHERENT — product.device_id, bird.device, eggs deviceId, schedule
-//     deviceId and grid placement all share the DEMO_DEVICES ids below.
-//
-// Live-use swap point: when real devices register, the same verify harness
-// (verifyDemoEnvironment) confirms each data layer wired through for them too.
+//   • COHERENT — product.device_id, animal.device, eggs deviceId, schedule
+//     deviceId and grid placement all share one deviceId per device.
+//   • DATA-DRIVEN — the device list derives from birdsService DEMO_ANIMAL_PACKS,
+//     so adding a pack there automatically extends this whole pipeline.
 
 import type { Product } from '../../types/products';
 import { ProductsService } from '../productsService';
-import { birdsService, DEMO_ANIMALS, DEMO_BIRDS, DEMO_DUCKS } from '../birdsService';
+import {
+  birdsService,
+  DEMO_ANIMALS,
+  DEMO_ANIMAL_PACKS,
+  type Bird,
+} from '../birdsService';
 import { schedulesService, buildCron, type CreateScheduleData } from '../schedulesService';
 import { eggService } from '../eggService';
 import {
   loadPropertyLayout,
   savePropertyLayout,
-  PROPERTY_LAYOUT_STORAGE_KEY,
+  PRODUCT_DIMENSIONS,
   type HardwareType,
   type PropertyItem,
 } from '../../components/property/propertyLayoutStore';
 
-// ── Canonical demo device ids (single source of truth) ─────────────────────────
+export const DEMO_SOURCE = 'demo-environment';
+const GARAGE_SOURCE = 'garage-dev-seed';
+const DEMO_MARKER_KEY = 'tendercells_demo_seeded_v1';
+const DEMO_EQUIPMENT_KEY = 'tendercells_demo_equipment_v1';
+export const DEMO_EVENT = 'tendercells-demo-updated';
+
+// Back-compat: the three originally-named devices. The full device list comes
+// from DEMO_SPECS below, but these named ids are referenced elsewhere.
 export const DEMO_DEVICES = {
   chickenTender: 'ct_001',
   watchTower: 'wt_001',
   duckDock: 'dd_001',
 } as const;
-export type DemoDeviceId = (typeof DEMO_DEVICES)[keyof typeof DEMO_DEVICES];
 
-export const DEMO_SOURCE = 'demo-environment';
-const DEMO_MARKER_KEY = 'tendercells_demo_seeded_v1';
-const DEMO_EQUIPMENT_KEY = 'tendercells_demo_equipment_v1';
-export const DEMO_EVENT = 'tendercells-demo-updated';
+// ── Device spec (one coherent device) ──────────────────────────────────────────
+export interface DemoDeviceSpec {
+  deviceId: string;
+  family: string;             // product family / HardwareType key
+  hardwareType: HardwareType; // for the property grid
+  label: string;
+  animals: Bird[];            // [] for sensor-only devices (e.g. WatchTower)
+  laying: boolean;            // seed an egg map for this device
+  grid: { x: number; y: number };
+}
 
-// ── Equipment sim state ────────────────────────────────────────────────────────
+// Non-overlapping placements on the 80×60 ft default yard.
+const GRID: Record<string, { x: number; y: number }> = {
+  ct_001: { x: 10, y: 8 },
+  pp_001: { x: 26, y: 8 },
+  dd_001: { x: 44, y: 8 },
+  wt_001: { x: 70, y: 8 },
+  bb_001: { x: 12, y: 40 },
+  rr_001: { x: 40, y: 26 },
+  gg_001: { x: 40, y: 46 },
+  tt_001: { x: 66, y: 44 },
+};
+
+// A sensor-only device that has no animal pack but is still a first-class part
+// of the environment (predator monitor that meshes with the coops).
+const WATCHTOWER_SPEC: DemoDeviceSpec = {
+  deviceId: DEMO_DEVICES.watchTower,
+  family: 'watchtower',
+  hardwareType: 'watchtower',
+  label: 'WatchTower Demo',
+  animals: [],
+  laying: false,
+  grid: GRID.wt_001 ?? { x: 70, y: 8 },
+};
+
+// Build the full device list from the animal packs (single source of truth),
+// then append the sensor-only WatchTower.
+export const DEMO_SPECS: DemoDeviceSpec[] = [
+  ...DEMO_ANIMAL_PACKS.map((pack): DemoDeviceSpec => ({
+    deviceId: pack.deviceId,
+    family: pack.productFamily,
+    hardwareType: pack.productFamily as HardwareType,
+    label: pack.label,
+    animals: [...pack.animals],
+    laying: pack.animals.some((a) => a.avgEggsPerWeek > 0),
+    grid: GRID[pack.deviceId] ?? { x: 4, y: 4 },
+  })),
+  WATCHTOWER_SPEC,
+];
+
+// ── Schedules per family (deterministic starter set) ───────────────────────────
+function schedulesFor(family: string, deviceId: string): CreateScheduleData[] {
+  const cron = (hour: number, minute: number) => buildCron({ hour, minute, days: [] });
+  const door = (hour: number, minute: number, open: boolean): CreateScheduleData =>
+    ({ deviceId, action: 'door', cronExpression: cron(hour, minute), enabled: true, label: open ? 'Open enclosure' : 'Close enclosure' });
+  const feed = (hour: number, minute: number, amount: number): CreateScheduleData =>
+    ({ deviceId, action: 'feed', cronExpression: cron(hour, minute), enabled: true, label: 'Morning feed', amount });
+  const clean = (hour: number, minute: number): CreateScheduleData =>
+    ({ deviceId, action: 'clean', cronExpression: cron(hour, minute), enabled: true, label: 'Daily clean' });
+  const water = (hour: number, minute: number): CreateScheduleData =>
+    ({ deviceId, action: 'water', cronExpression: cron(hour, minute), enabled: true, label: 'Water top-up' });
+
+  switch (family) {
+    case 'duck-dock':
+      return [door(6, 0, true), feed(7, 30, 120), clean(8, 30), water(9, 0), door(20, 0, false)];
+    case 'bunny-burrow':
+      return [feed(7, 0, 80), clean(8, 30)];
+    case 'goat-guardian':
+      return [door(6, 0, true), feed(7, 0, 250), water(9, 0), door(20, 30, false)];
+    case 'watchtower':
+      return []; // sensor-only — no actuators to schedule
+    default: // chicken-tender, roaming-roost, turkey-tower, pigeon-palace
+      return [door(6, 0, true), feed(7, 0, 100), clean(8, 30), door(20, 0, false)];
+  }
+}
+
+// All schedule labels this orchestrator generates — used by reset to delete
+// only our schedules and leave the owner's own ones alone.
+const DEMO_SCHEDULE_LABELS = new Set([
+  'Open enclosure', 'Close enclosure', 'Morning feed', 'Daily clean', 'Water top-up',
+]);
+
+// ── Equipment sim-state ─────────────────────────────────────────────────────────
 export interface DemoEquipment {
   deviceId: string;
   door: 'open' | 'closed';
@@ -51,114 +147,34 @@ export interface DemoEquipment {
   updatedAt: string;
 }
 
-const DEMO_EQUIPMENT: Record<DemoDeviceId, Omit<DemoEquipment, 'updatedAt'>> = {
-  ct_001: {
-    deviceId: 'ct_001',
-    door: 'closed',
-    feedLevelPct: 78,
-    waterLevelPct: 64,
-    gantry: { x: 0, y: 0, z: 0 },
-    sensors: { tempF: 67, humidityPct: 72, ammoniaPpm: 4 },
-  },
-  wt_001: {
-    deviceId: 'wt_001',
-    door: 'closed', // n/a — watchtower has no door; kept for shape uniformity
-    feedLevelPct: 0,
-    waterLevelPct: 0,
-    sensors: { tempF: 64, humidityPct: 70, ammoniaPpm: 0 },
-  },
-  dd_001: {
-    deviceId: 'dd_001',
-    door: 'open',
-    feedLevelPct: 55,
-    waterLevelPct: 88, // pond top-up
-    sensors: { tempF: 63, humidityPct: 80, ammoniaPpm: 3 },
-  },
-};
+// Stable, device-specific pseudo-values so every device reads like a real one
+// without per-render churn (no Math.random).
+function hashInt(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
 
-// ── Schedules per device (deterministic demo set) ──────────────────────────────
-const DEMO_SCHEDULES: Record<string, CreateScheduleData[]> = {
-  ct_001: [
-    { deviceId: 'ct_001', action: 'door',  cronExpression: buildCron({ hour: 6,  minute: 0,  days: [] }), enabled: true,  label: 'Open coop door' },
-    { deviceId: 'ct_001', action: 'feed',  cronExpression: buildCron({ hour: 7,  minute: 0,  days: [] }), enabled: true,  label: 'Morning feed', amount: 100 },
-    { deviceId: 'ct_001', action: 'clean', cronExpression: buildCron({ hour: 8,  minute: 30, days: [] }), enabled: true,  label: 'Daily clean sweep' },
-    { deviceId: 'ct_001', action: 'door',  cronExpression: buildCron({ hour: 20, minute: 0,  days: [] }), enabled: true,  label: 'Close coop door' },
-  ],
-  dd_001: [
-    { deviceId: 'dd_001', action: 'feed',  cronExpression: buildCron({ hour: 7,  minute: 30, days: [] }), enabled: true,  label: 'Duck morning feed', amount: 120 },
-    { deviceId: 'dd_001', action: 'water', cronExpression: buildCron({ hour: 9,  minute: 0,  days: [] }), enabled: true,  label: 'Pond top-up' },
-  ],
-};
-
-// ── Property grid placement (ft) per demo device ───────────────────────────────
-const DEMO_PLACEMENT: Record<DemoDeviceId, { type: HardwareType; name: string; x: number; y: number }> = {
-  ct_001: { type: 'chicken-tender', name: 'Chicken Tender 001', x: 10, y: 8 },
-  wt_001: { type: 'watchtower',     name: 'WatchTower 001',     x: 70, y: 6 },
-  dd_001: { type: 'duck-dock',      name: 'Duck Dock 001',      x: 58, y: 26 },
-};
-
-// ── Product factories for the secondary demo devices ───────────────────────────
-function nowIso() { return new Date().toISOString(); }
-
-function buildDemoProduct(opts: {
-  id: string; deviceId: string; name: string; model: string; serial: string;
-  family: string; animalCount: number; firmwareTarget: string;
-}): Product {
-  const now = nowIso();
+function equipmentFor(spec: DemoDeviceSpec): Omit<DemoEquipment, 'updatedAt'> {
+  const id = spec.deviceId;
+  const sensorOnly = spec.family === 'watchtower';
   return {
-    id: opts.id,
-    user_id: ProductsService.GARAGE_OWNER_EMAIL,
-    product_type: 'hardware_unit',
-    product_name: opts.name,
-    model: opts.model,
-    serial_number: opts.serial,
-    activation_code: `TC-DEMO-${opts.deviceId.toUpperCase()}`,
-    qr_code: `tendercells://register?serial=${opts.serial}&device=${opts.deviceId}`,
-    status: 'setup_required',
-    connection_status: 'offline',
-    device_id: opts.deviceId,
-    network_config: { connected: false },
-    location: 'Demo Yard',
-    metadata: {
-      owner_email: ProductsService.GARAGE_OWNER_EMAIL,
-      source: DEMO_SOURCE,
-      product_family: opts.family,
-      firmware_target: opts.firmwareTarget,
-      mqtt_base_topic: `tc/${opts.deviceId}`,
-      animal_count: opts.animalCount,
-      hardware_setup_mode: 'sim_only',
-      simulation_backend: 'browser_threejs',
-      property_simulation_enabled: true,
-      telemetry_consent: 'local_only',
-      telemetry_retention_days: 30,
-      safety_validation_status: 'simulated',
-      notes: 'Demo environment device — seeded for end-to-end UI verification.',
+    deviceId: id,
+    door: 'closed',
+    feedLevelPct: sensorOnly ? 0 : 50 + (hashInt(id + 'feed') % 45),
+    waterLevelPct: sensorOnly ? 0 : 50 + (hashInt(id + 'water') % 45),
+    gantry: spec.family === 'chicken-tender' ? { x: 0, y: 0, z: 0 } : undefined,
+    sensors: {
+      tempF: 60 + (hashInt(id + 't') % 12),
+      humidityPct: 65 + (hashInt(id + 'h') % 20),
+      ammoniaPpm: sensorOnly ? 0 : hashInt(id + 'a') % 6,
     },
-    created_at: now,
-    updated_at: now,
   };
 }
 
-function secondaryDemoProducts(): Product[] {
-  return [
-    buildDemoProduct({
-      id: 'demo-watchtower-001', deviceId: DEMO_DEVICES.watchTower, name: 'WatchTower 001',
-      model: 'WatchTower AI - Demo', serial: 'TC-WT-DEMO-0001', family: 'predator-monitor',
-      animalCount: 0, firmwareTarget: 'firmware/watchtower',
-    }),
-    buildDemoProduct({
-      id: 'demo-duck-dock-001', deviceId: DEMO_DEVICES.duckDock, name: 'Duck Dock 001',
-      model: 'Duck Dock - Demo', serial: 'TC-DD-DEMO-0001', family: 'duck-dock',
-      animalCount: DEMO_DUCKS.length, firmwareTarget: 'firmware/duck-dock',
-    }),
-  ];
-}
-
-// ── Equipment store ────────────────────────────────────────────────────────────
 function writeEquipment(): DemoEquipment[] {
-  const at = nowIso();
-  const rows: DemoEquipment[] = (Object.values(DEMO_EQUIPMENT) as Omit<DemoEquipment, 'updatedAt'>[])
-    .map((e) => ({ ...e, updatedAt: at }));
+  const at = new Date().toISOString();
+  const rows: DemoEquipment[] = DEMO_SPECS.map((s) => ({ ...equipmentFor(s), updatedAt: at }));
   localStorage.setItem(DEMO_EQUIPMENT_KEY, JSON.stringify(rows));
   return rows;
 }
@@ -172,44 +188,83 @@ export function getDemoEquipment(deviceId?: string): DemoEquipment[] {
   }
 }
 
-// ── Status helpers ─────────────────────────────────────────────────────────────
-export function isDemoSeeded(): boolean {
-  return localStorage.getItem(DEMO_MARKER_KEY) != null;
-}
-export function demoSeededAt(): string | null {
-  return localStorage.getItem(DEMO_MARKER_KEY);
-}
-function emitChange() {
-  window.dispatchEvent(new CustomEvent(DEMO_EVENT));
+// ── Product factory for non-garage demo devices ────────────────────────────────
+function nowIso() { return new Date().toISOString(); }
+
+function abbr(deviceId: string): string {
+  return (deviceId.split('_')[0] || 'dev').toUpperCase();
 }
 
+function buildDemoProduct(spec: DemoDeviceSpec): Product {
+  const now = nowIso();
+  const dims = PRODUCT_DIMENSIONS[spec.hardwareType];
+  return {
+    id: `demo-${spec.family}-001`,
+    user_id: ProductsService.GARAGE_OWNER_EMAIL,
+    product_type: 'hardware_unit',
+    product_name: spec.label.replace(/ Demo$/, ''),
+    model: `${spec.label} Unit`,
+    serial_number: `TC-${abbr(spec.deviceId)}-DEMO-0001`,
+    activation_code: `TC-DEMO-${abbr(spec.deviceId)}`,
+    qr_code: `tendercells://register?serial=TC-${abbr(spec.deviceId)}-DEMO-0001&device=${spec.deviceId}`,
+    status: 'setup_required',
+    connection_status: 'offline',
+    device_id: spec.deviceId,
+    network_config: { connected: false },
+    location: 'Demo Yard',
+    metadata: {
+      owner_email: ProductsService.GARAGE_OWNER_EMAIL,
+      source: DEMO_SOURCE,
+      product_family: spec.family,
+      firmware_target: `firmware/${spec.family}`,
+      mqtt_base_topic: `tc/${spec.deviceId}`,
+      animal_count: spec.animals.length,
+      enclosure_width_ft: dims?.width,
+      enclosure_depth_ft: dims?.depth,
+      hardware_setup_mode: 'sim_only',
+      simulation_backend: 'browser_threejs',
+      property_simulation_enabled: true,
+      telemetry_consent: 'local_only', // privacy: nothing leaves the owner's machine
+      telemetry_retention_days: 30,
+      safety_validation_status: 'simulated',
+      notes: 'Demo environment device — seeded for end-to-end UI verification.',
+    },
+    created_at: now,
+    updated_at: now,
+  };
+}
+
+// ── Status helpers ─────────────────────────────────────────────────────────────
+export function isDemoSeeded(): boolean { return localStorage.getItem(DEMO_MARKER_KEY) != null; }
+export function demoSeededAt(): string | null { return localStorage.getItem(DEMO_MARKER_KEY); }
+function emitChange() { window.dispatchEvent(new CustomEvent(DEMO_EVENT)); }
+
 // ── Property layout placement (light-touch, idempotent) ────────────────────────
-async function seedLayout(): Promise<void> {
+function seedLayout(): void {
   const state = loadPropertyLayout();
   let changed = false;
   const items: PropertyItem[] = [...state.items];
 
-  for (const id of Object.values(DEMO_DEVICES)) {
-    const place = DEMO_PLACEMENT[id];
-    // already linked?
-    if (items.some((it) => it.deviceId === id)) continue;
-    // link the first matching hardware item that has no device yet…
-    const target = items.find((it) => it.kind === 'hardware' && it.type === place.type && !it.deviceId);
+  for (const spec of DEMO_SPECS) {
+    if (items.some((it) => it.deviceId === spec.deviceId)) continue; // already linked
+    // Prefer linking an existing same-type item that has no device yet…
+    const target = items.find((it) => it.kind === 'hardware' && it.type === spec.hardwareType && !it.deviceId);
     if (target) {
-      target.deviceId = id;
+      target.deviceId = spec.deviceId;
       changed = true;
     } else {
-      // …otherwise drop a new placed item for it.
+      const dims = PRODUCT_DIMENSIONS[spec.hardwareType];
       items.push({
-        id: `demo-${id}`,
+        id: `demo-${spec.deviceId}`,
         kind: 'hardware',
-        name: place.name,
-        type: place.type,
-        x: place.x,
-        y: place.y,
-        width: place.type === 'watchtower' ? 3 : place.type === 'roaming-roost' ? 5 : 4,
-        depth: place.type === 'watchtower' ? 3 : place.type === 'roaming-roost' ? 5 : 4,
-        deviceId: id,
+        name: spec.label.replace(/ Demo$/, ''),
+        type: spec.hardwareType,
+        shape: dims?.shape,
+        x: spec.grid.x,
+        y: spec.grid.y,
+        width: dims?.width ?? 4,
+        depth: dims?.depth ?? 4,
+        deviceId: spec.deviceId,
       });
       changed = true;
     }
@@ -220,34 +275,37 @@ async function seedLayout(): Promise<void> {
 
 // ── Schedules (idempotent per device) ──────────────────────────────────────────
 async function seedSchedules(): Promise<void> {
-  for (const [deviceId, schedules] of Object.entries(DEMO_SCHEDULES)) {
-    const existing = await schedulesService.getSchedules(deviceId);
+  for (const spec of DEMO_SPECS) {
+    const schedules = schedulesFor(spec.family, spec.deviceId);
+    if (schedules.length === 0) continue;
+    const existing = await schedulesService.getSchedules(spec.deviceId);
     if (existing.length > 0) continue; // already has schedules — leave them
-    for (const s of schedules) {
-      await schedulesService.createSchedule(deviceId, s);
-    }
+    for (const s of schedules) await schedulesService.createSchedule(spec.deviceId, s);
   }
 }
 
 // ── Public: seed / reset / verify ──────────────────────────────────────────────
 export async function seedDemoEnvironment(): Promise<DemoReport> {
-  // 1. Structures (products)
-  ProductsService.seedFirstGarageCoop();          // ct_001 garage coop
-  ProductsService.seedDemoProducts(secondaryDemoProducts()); // wt_001, dd_001
+  // 1. Structures (products). Chicken Tender keeps its dedicated garage build;
+  //    every other family gets a generic demo product.
+  ProductsService.seedFirstGarageCoop(); // ct_001 garage coop (source garage-dev-seed)
+  ProductsService.seedDemoProducts(
+    DEMO_SPECS.filter((s) => s.family !== 'chicken-tender').map(buildDemoProduct),
+  );
 
-  // 2. Flocks (idempotent per fixed id, per device)
-  await birdsService.seedFlock(DEMO_BIRDS); // ct_001 hens
-  await birdsService.seedFlock(DEMO_DUCKS); // dd_001 ducks
+  // 2. Flocks (idempotent per fixed id, per device) — every pack at once.
+  await birdsService.seedFlock(DEMO_ANIMALS);
 
-  // 3. Eggs (materialize today's nest-box map per laying device)
-  await eggService.getDay(DEMO_DEVICES.chickenTender);
-  await eggService.getDay(DEMO_DEVICES.duckDock);
+  // 3. Eggs — materialize today's nest-box map for each laying device.
+  for (const spec of DEMO_SPECS) {
+    if (spec.laying) await eggService.getDay(spec.deviceId);
+  }
 
   // 4. Schedules
   await seedSchedules();
 
   // 5. Property grid placement
-  await seedLayout();
+  seedLayout();
 
   // 6. Equipment sim-state
   writeEquipment();
@@ -258,31 +316,29 @@ export async function seedDemoEnvironment(): Promise<DemoReport> {
 }
 
 export async function resetDemoEnvironment(): Promise<void> {
-  // Products tagged with our source only
+  // Products — only our two tagged sources.
   ProductsService.removeProductsBySource(DEMO_SOURCE);
-  ProductsService.removeProductsBySource('garage-dev-seed'); // ct_001 garage coop
+  ProductsService.removeProductsBySource(GARAGE_SOURCE);
 
-  // Birds — remove only fixed demo ids
-  for (const b of DEMO_ANIMALS) {
-    await birdsService.deleteBird(b.id, b.device);
-  }
+  // Animals — remove only fixed demo ids across every pack.
+  for (const a of DEMO_ANIMALS) await birdsService.deleteBird(a.id, a.device);
 
-  // Schedules — delete only the demo-labelled ones we created
-  for (const [deviceId, schedules] of Object.entries(DEMO_SCHEDULES)) {
-    const labels = new Set(schedules.map((s) => s.label));
-    const existing = await schedulesService.getSchedules(deviceId);
+  // Schedules — delete only our generated labels, scoped per device.
+  for (const spec of DEMO_SPECS) {
+    const existing = await schedulesService.getSchedules(spec.deviceId);
     for (const e of existing) {
-      if (e.label && labels.has(e.label)) await schedulesService.deleteSchedule(deviceId, e.id);
+      if (e.label && DEMO_SCHEDULE_LABELS.has(e.label)) {
+        await schedulesService.deleteSchedule(spec.deviceId, e.id);
+      }
     }
   }
 
-  // Property layout — unlink demo device ids (and remove items we added)
+  // Property layout — drop items we added, unlink device ids we attached.
+  const demoIds = new Set(DEMO_SPECS.map((s) => s.deviceId));
   const state = loadPropertyLayout();
   const items = state.items
     .filter((it) => !it.id.startsWith('demo-'))
-    .map((it) => (it.deviceId && (Object.values(DEMO_DEVICES) as string[]).includes(it.deviceId)
-      ? { ...it, deviceId: undefined }
-      : it));
+    .map((it) => (it.deviceId && demoIds.has(it.deviceId) ? { ...it, deviceId: undefined } : it));
   savePropertyLayout({ property: state.property, items });
 
   // Equipment + marker
@@ -312,41 +368,30 @@ export interface DemoReport {
 
 const layerOk = (cond: boolean, ok: string, bad: string): DemoLayerResult => ({ ok: cond, detail: cond ? ok : bad });
 
-interface DeviceExpectation {
-  deviceId: DemoDeviceId;
-  family: string;
-  expectFlock: number;
-  expectEggs: boolean;
-  expectSchedules: number;
-}
-
-const EXPECTATIONS: DeviceExpectation[] = [
-  { deviceId: DEMO_DEVICES.chickenTender, family: 'chicken-tender',    expectFlock: DEMO_BIRDS.length, expectEggs: true,  expectSchedules: DEMO_SCHEDULES.ct_001.length },
-  { deviceId: DEMO_DEVICES.watchTower,    family: 'predator-monitor',  expectFlock: 0,                 expectEggs: false, expectSchedules: 0 },
-  { deviceId: DEMO_DEVICES.duckDock,      family: 'duck-dock',         expectFlock: DEMO_DUCKS.length, expectEggs: true,  expectSchedules: DEMO_SCHEDULES.dd_001.length },
-];
-
 export async function verifyDemoEnvironment(): Promise<DemoReport> {
   const products = await ProductsService.getUserProducts();
   const layout = loadPropertyLayout();
   const devices: DemoDeviceReport[] = [];
 
-  for (const exp of EXPECTATIONS) {
-    const product = products.find((p) => p.device_id === exp.deviceId);
-    const flock = await birdsService.getBirds(exp.deviceId);
-    const eggsDay = exp.expectEggs ? await eggService.getDay(exp.deviceId) : null;
+  for (const spec of DEMO_SPECS) {
+    const expectFlock = spec.animals.length;
+    const expectSchedules = schedulesFor(spec.family, spec.deviceId).length;
+
+    const product = products.find((p) => p.device_id === spec.deviceId);
+    const flock = await birdsService.getBirds(spec.deviceId);
+    const eggsDay = spec.laying ? await eggService.getDay(spec.deviceId) : null;
     const eggsCount = eggsDay ? eggsDay.nestBoxes.length : 0;
-    const schedules = await schedulesService.getSchedules(exp.deviceId);
-    const placed = layout.items.some((it) => it.deviceId === exp.deviceId);
-    const equip = getDemoEquipment(exp.deviceId);
+    const schedules = await schedulesService.getSchedules(spec.deviceId);
+    const placed = layout.items.some((it) => it.deviceId === spec.deviceId);
+    const equip = getDemoEquipment(spec.deviceId);
 
     devices.push({
-      deviceId: exp.deviceId,
-      family: exp.family,
+      deviceId: spec.deviceId,
+      family: spec.family,
       product: layerOk(!!product, `product ${product?.product_name}`, 'product missing'),
-      flock: layerOk(flock.length >= exp.expectFlock, `${flock.length} animals`, `expected ≥${exp.expectFlock}, got ${flock.length}`),
-      eggs: layerOk(!exp.expectEggs || eggsCount > 0, exp.expectEggs ? `${eggsCount} nest boxes` : 'n/a', 'no egg map'),
-      schedules: layerOk(schedules.length >= exp.expectSchedules, `${schedules.length} schedules`, `expected ≥${exp.expectSchedules}, got ${schedules.length}`),
+      flock: layerOk(flock.length >= expectFlock, `${flock.length} animals`, `expected ≥${expectFlock}, got ${flock.length}`),
+      eggs: layerOk(!spec.laying || eggsCount > 0, spec.laying ? `${eggsCount} nest boxes` : 'n/a', 'no egg map'),
+      schedules: layerOk(schedules.length >= expectSchedules, `${schedules.length} schedules`, `expected ≥${expectSchedules}, got ${schedules.length}`),
       layout: layerOk(placed, 'placed on grid', 'not on property grid'),
       equipment: layerOk(equip.length > 0, 'equipment sim-state present', 'no equipment state'),
     });

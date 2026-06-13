@@ -2,6 +2,8 @@
 
 FarmBot is a useful north star because it connects hardware kits, open-source software, documentation, education, and community into one understandable product ecosystem. TenderCells should use those cues while expanding the idea from plant beds to animal care, mobile roaming enclosures, property simulation, device fleets, and custom homestead automation.
 
+TenderCells should also be a bridge between farmers, developers, and deeply technical builders. The mission is practical animal wellness and human capability: healthier animals through better care, cleaner habitats, safer automation, and earlier health signals; healthier humans through open knowledge, repairable tools, and systems that make people more capable stewards.
+
 ## What TenderCells Should Borrow As Patterns
 
 - Visual planning first: users should place animals, coops, waterers, doors, cameras, obstacles, routes, charging zones, and feeding zones in a map-like editor.

@@ -15,9 +15,20 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import WarningIcon from "@mui/icons-material/Warning";
 import PersonIcon from "@mui/icons-material/Person";
 import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import LockIcon from "@mui/icons-material/Lock";
+import ScienceIcon from "@mui/icons-material/Science";
 import { useAuth } from "../contexts/AuthContext";
 import { settingsService, DEFAULT_SETTINGS, type UserSettings } from "../services/settingsService";
+import {
+  seedDemoEnvironment,
+  resetDemoEnvironment,
+  verifyDemoEnvironment,
+  isDemoSeeded,
+  demoSeededAt,
+  DEMO_EVENT,
+  type DemoReport,
+} from "../services/demo/demoEnvironment";
 
 const C = {
   bg: "#0D2B1E",
@@ -94,6 +105,13 @@ export default function SettingsPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePw, setDeletePw] = useState("");
 
+  // Demo / developer environment
+  const [demoSeeded, setDemoSeeded] = useState(isDemoSeeded());
+  const [demoAt, setDemoAt] = useState<string | null>(demoSeededAt());
+  const [demoBusy, setDemoBusy] = useState<"" | "seed" | "verify" | "reset">("");
+  const [demoReport, setDemoReport] = useState<DemoReport | null>(null);
+  const [demoResetOpen, setDemoResetOpen] = useState(false);
+
   const uid = user?.uid ?? "";
 
   const load = useCallback(async () => {
@@ -153,6 +171,51 @@ export default function SettingsPage() {
     } catch (e) {
       setSnack({ msg: e instanceof Error ? e.message : "Delete failed — check password", ok: false });
     }
+  };
+
+  // Keep the demo status chip in sync if seeding happens elsewhere (e.g. a
+  // per-page "Load Demo" button delegating to the orchestrator).
+  useEffect(() => {
+    const refresh = () => { setDemoSeeded(isDemoSeeded()); setDemoAt(demoSeededAt()); };
+    window.addEventListener(DEMO_EVENT, refresh);
+    return () => window.removeEventListener(DEMO_EVENT, refresh);
+  }, []);
+
+  const handleDemoSeed = async () => {
+    setDemoBusy("seed");
+    try {
+      const report = await seedDemoEnvironment();
+      setDemoReport(report);
+      setDemoSeeded(true);
+      setDemoAt(demoSeededAt());
+      setSnack({ msg: report.ok ? "Demo environment loaded — all layers verified" : "Demo loaded with warnings — see report", ok: report.ok });
+    } catch (e) {
+      setSnack({ msg: e instanceof Error ? e.message : "Demo load failed", ok: false });
+    } finally { setDemoBusy(""); }
+  };
+
+  const handleDemoVerify = async () => {
+    setDemoBusy("verify");
+    try {
+      const report = await verifyDemoEnvironment();
+      setDemoReport(report);
+      setSnack({ msg: report.ok ? "Verify passed — every device coherent" : "Verify found gaps — see report", ok: report.ok });
+    } catch (e) {
+      setSnack({ msg: e instanceof Error ? e.message : "Verify failed", ok: false });
+    } finally { setDemoBusy(""); }
+  };
+
+  const handleDemoReset = async () => {
+    setDemoBusy("reset");
+    try {
+      await resetDemoEnvironment();
+      setDemoReport(null);
+      setDemoSeeded(false);
+      setDemoAt(null);
+      setSnack({ msg: "Demo data cleared (your own records untouched)", ok: true });
+    } catch (e) {
+      setSnack({ msg: e instanceof Error ? e.message : "Reset failed", ok: false });
+    } finally { setDemoBusy(""); }
   };
 
   if (!isAuthenticated) {
@@ -436,6 +499,104 @@ export default function SettingsPage() {
           </AccordionDetails>
         </Accordion>
 
+        {/* Demo & Developer */}
+        <Accordion sx={accordSx} data-testid="demo-panel">
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: C.goldMuted }} />}>
+            <SectionHeader icon={<ScienceIcon />} label="Demo & Developer" />
+          </AccordionSummary>
+          <AccordionDetails>
+            <Stack spacing={2}>
+              <Alert severity="info" sx={{ bgcolor: C.accent + "22", color: C.white, fontSize: 12 }}>
+                Loads a complete, coherent starter across every product family — structures,
+                flocks, eggs, schedules, property-grid placement and equipment sim-state — so you
+                can explore the whole app with no hardware. Everything stays local to this browser
+                (<code>telemetry_consent: local_only</code>); your own records are never overwritten.
+              </Alert>
+
+              {/* Status chip */}
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: demoSeeded ? C.accent : C.goldMuted }} />
+                <Typography data-testid="demo-status" data-seeded={demoSeeded ? "true" : "false"} sx={{ color: C.white, fontSize: 14 }}>
+                  {demoSeeded
+                    ? `Demo data active${demoAt ? ` — seeded ${new Date(demoAt).toLocaleString()}` : ""}`
+                    : "No demo data loaded"}
+                </Typography>
+              </Stack>
+
+              {/* Actions */}
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+                <Button
+                  data-testid="demo-load"
+                  variant="contained"
+                  onClick={handleDemoSeed}
+                  disabled={demoBusy !== ""}
+                  startIcon={demoBusy === "seed" ? <CircularProgress size={16} color="inherit" /> : <ScienceIcon />}
+                  sx={{ bgcolor: C.accent }}
+                >
+                  {demoBusy === "seed" ? "Loading..." : demoSeeded ? "Reload Demo" : "Load Demo Environment"}
+                </Button>
+                <Button
+                  data-testid="demo-verify"
+                  variant="outlined"
+                  onClick={handleDemoVerify}
+                  disabled={demoBusy !== ""}
+                  startIcon={demoBusy === "verify" ? <CircularProgress size={16} color="inherit" /> : <CheckIcon />}
+                  sx={{ borderColor: C.accent, color: C.accent }}
+                >
+                  {demoBusy === "verify" ? "Verifying..." : "Verify Demo"}
+                </Button>
+                <Button
+                  data-testid="demo-reset"
+                  variant="outlined"
+                  onClick={() => setDemoResetOpen(true)}
+                  disabled={demoBusy !== "" || !demoSeeded}
+                  sx={{ borderColor: C.danger, color: C.danger }}
+                >
+                  {demoBusy === "reset" ? "Resetting..." : "Reset Demo"}
+                </Button>
+              </Stack>
+
+              {/* Verification report */}
+              {demoReport && (
+                <Box data-testid="demo-report" data-ok={demoReport.ok ? "true" : "false"} sx={{ border: "1px solid " + C.accent + "44", borderRadius: 1, p: 1.5 }}>
+                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                    {demoReport.ok
+                      ? <CheckIcon sx={{ color: C.accent, fontSize: 18 }} />
+                      : <WarningIcon sx={{ color: C.danger, fontSize: 18 }} />}
+                    <Typography sx={{ color: demoReport.ok ? C.accent : C.danger, fontWeight: 700, fontSize: 13 }}>
+                      {demoReport.ok ? "All devices coherent" : "Gaps found"} — {demoReport.devices.length} devices
+                    </Typography>
+                  </Stack>
+                  <Stack spacing={0.75}>
+                    {demoReport.devices.map((d) => {
+                      const layers: Array<[string, { ok: boolean; detail: string }]> = [
+                        ["product", d.product], ["flock", d.flock], ["eggs", d.eggs],
+                        ["schedules", d.schedules], ["layout", d.layout], ["equipment", d.equipment],
+                      ];
+                      const allOk = layers.every(([, l]) => l.ok);
+                      return (
+                        <Box key={d.deviceId}>
+                          <Stack direction="row" spacing={0.75} alignItems="center">
+                            {allOk
+                              ? <CheckIcon sx={{ color: C.accent, fontSize: 14 }} />
+                              : <CloseIcon sx={{ color: C.danger, fontSize: 14 }} />}
+                            <Typography sx={{ color: C.gold, fontSize: 12.5, fontWeight: 600 }}>
+                              {d.deviceId} <Box component="span" sx={{ color: C.goldMuted, fontWeight: 400 }}>({d.family})</Box>
+                            </Typography>
+                          </Stack>
+                          <Typography sx={{ color: C.goldMuted, fontSize: 11, pl: 2.5 }}>
+                            {layers.map(([name, l]) => `${l.ok ? "✓" : "✗"} ${name}: ${l.detail}`).join("  ·  ")}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </Stack>
+                </Box>
+              )}
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+
         {/* Danger Zone */}
         <Accordion sx={{ ...accordSx, border: "1px solid " + C.danger + "44" }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: C.danger + "aa" }} />}>
@@ -499,6 +660,19 @@ export default function SettingsPage() {
             sx={inputSx}
           />
         </Stack>
+      </DangerConfirmDialog>
+
+      {/* Reset demo confirm dialog */}
+      <DangerConfirmDialog
+        open={demoResetOpen}
+        title="Reset Demo Environment"
+        onConfirm={handleDemoReset}
+        onClose={() => setDemoResetOpen(false)}
+      >
+        <Typography sx={{ color: C.white }}>
+          Removes only demo-seeded structures, flocks, eggs, schedules, grid placement and
+          equipment state. Your own (non-demo) records are left untouched.
+        </Typography>
       </DangerConfirmDialog>
 
       <Snackbar

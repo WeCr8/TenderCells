@@ -128,5 +128,10 @@ export default defineConfig({
     },
     test: {
         include: ['src/**/*.test.{ts,tsx}'],
+        // Unit tests run the deterministic sim (localStorage) backend, never a
+        // real Firebase. Repo-root .env supplies VITE_FIREBASE_PROJECT_ID, which
+        // would route services to live Firestore (flaky, network/permission
+        // dependent). Blank it so FIREBASE_ENABLED is false during tests.
+        env: { VITE_FIREBASE_PROJECT_ID: '' },
     },
 });

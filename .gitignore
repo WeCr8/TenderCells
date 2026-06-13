@@ -78,3 +78,6 @@ applications/tendercells_ui/test_output/tendercells-ui/test-results/
 
 # Firebase deploy cache
 .firebase/*.cache
+
+# Local release packages
+release-artifacts/

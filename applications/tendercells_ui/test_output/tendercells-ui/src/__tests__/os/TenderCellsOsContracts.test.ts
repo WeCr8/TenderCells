@@ -92,4 +92,14 @@ describe('TenderCells OS contracts', () => {
     expect(cli).toContain('demo:watch');
     expect(cli).toContain('status');
   });
+
+  it('keeps mobile packaging honest about PWA and native readiness', () => {
+    const docs = readProjectFile('docs/mobile-packaging.md');
+    const audit = readProjectFile('scripts/mobile-package-audit.mjs');
+    expect(docs).toContain('PWA install/testing is ready');
+    expect(docs).toContain('native Android/iOS packages are not scaffolded yet');
+    expect(audit).toContain('TenderCells mobile package audit');
+    expect(audit).toContain('android');
+    expect(audit).toContain('ios');
+  });
 });

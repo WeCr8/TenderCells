@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import "./LandingPage.css";
 import { trackPageView, trackButtonClick } from "../utils/analytics";
+import { TENDERCELLS_DEMO_URL } from "../config/appLinks";
 
 export default function LandingPage() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -30,6 +31,13 @@ export default function LandingPage() {
             <h1>Tender Cells</h1>
             <p>Bring Smart Farming to the Homestead</p>
             <div className="hero-buttons">
+              <a
+                href={TENDERCELLS_DEMO_URL}
+                className="btn-order"
+                onClick={() => trackButtonClick("try-live-demo")}
+              >
+                ▶ TRY THE LIVE DEMO — NO SIGNUP
+              </a>
               <button
                 type="button"
                 className="btn-watch"

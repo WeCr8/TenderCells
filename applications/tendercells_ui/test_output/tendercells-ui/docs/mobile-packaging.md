@@ -1,11 +1,12 @@
 # TenderCells Mobile Packaging
 
-TenderCells is currently a responsive Vite/React PWA. The first mobile milestone is to make the web app installable and usable on phones and tablets. Native iOS and Android packages should wrap the same app once the kit workflows are stable.
+TenderCells is currently a responsive Vite/React PWA. The app can be tested on phones and tablets today through the browser install flow. Native iOS and Android packages are planned through Capacitor, but the `android/` and `ios/` native folders are not scaffolded yet.
 
 Before packaging, run the engineering loop in `docs/engineering-loop.md`:
 
 ```bash
 npm run quality:loop
+npm run mobile:audit
 ```
 
 ## Current Mobile Target
@@ -15,9 +16,25 @@ npm run quality:loop
 - Local development on `http://localhost:5173`.
 - Firebase Auth with email/password and Google provider.
 
+## Install on Your Own Devices Today
+
+PWA path:
+
+- Android: open the live app or local network URL in Chrome, then use **Install app** or **Add to Home screen**.
+- iOS/iPadOS: open the live app or local network URL in Safari, tap **Share**, then **Add to Home Screen**.
+- Local hardware testing: run the dev server on the same network and use the machine LAN IP, for example `http://192.168.x.x:5173`.
+
+Verification command:
+
+```bash
+npm run mobile:audit
+```
+
+Expected current result: PWA install/testing is ready; native Android/iOS packages are not scaffolded yet. The native wrapper checks show TODO until Capacitor is installed and platform folders are generated.
+
 ## Android Package Path
 
-Recommended first native wrapper: Capacitor.
+Recommended first native wrapper: Capacitor. This is not scaffolded yet.
 
 Planned commands after dependency approval:
 
@@ -39,7 +56,7 @@ Required release assets:
 
 ## iOS Package Path
 
-Recommended first native wrapper: Capacitor.
+Recommended first native wrapper: Capacitor. This is not scaffolded yet.
 
 Planned commands after dependency approval:
 

@@ -1,0 +1,250 @@
+.story-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 2rem;
+  align-items: end;
+  padding: 4rem 1.25rem 3rem;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.story-hero-copy {
+  max-width: 760px;
+}
+
+.story-kicker,
+.story-frame-copy p {
+  margin: 0 0 0.7rem;
+  color: #2a7b4f;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+}
+
+.story-hero h1 {
+  margin: 0 0 1rem;
+  color: #10251a;
+  font-size: clamp(2.2rem, 5vw, 4.7rem);
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+
+.story-hero p,
+.story-intro p,
+.story-community p {
+  color: #34463b;
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.story-hero-panel {
+  border: 1px solid #b9d2bf;
+  background: #f1f7f2;
+  border-radius: 8px;
+  padding: 1.25rem;
+  color: #183522;
+}
+
+.story-hero-panel span {
+  display: block;
+  color: #2a7b4f;
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin-bottom: 0.6rem;
+}
+
+.story-hero-panel strong {
+  display: block;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.story-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 2rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 3rem;
+}
+
+.story-intro h2,
+.story-community h2 {
+  margin: 0 0 1rem;
+  color: #10251a;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.story-intro ul {
+  margin: 0;
+  padding: 1.25rem 1.25rem 1.25rem 2.4rem;
+  background: #10251a;
+  color: #f4fbf5;
+  border-radius: 8px;
+  line-height: 1.7;
+}
+
+.story-mission {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.story-mission h2 {
+  margin: 0;
+  color: #10251a;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  line-height: 1.08;
+}
+
+.story-mission p:last-child {
+  margin: 0;
+  color: #34463b;
+  line-height: 1.8;
+  font-size: 1.05rem;
+  border-left: 4px solid #2a7b4f;
+  padding-left: 1.25rem;
+}
+
+.story-gallery {
+  background: #071910;
+  padding: 3rem 1.25rem;
+}
+
+.story-pathways {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+}
+
+.story-pathways article {
+  border: 1px solid #b9d2bf;
+  border-radius: 8px;
+  background: #f7fbf7;
+  padding: 1.3rem;
+}
+
+.story-pathways h2 {
+  margin: 0 0 0.65rem;
+  color: #10251a;
+  font-size: 1.35rem;
+}
+
+.story-pathways p {
+  margin: 0;
+  color: #34463b;
+  line-height: 1.65;
+  font-size: 0.96rem;
+}
+
+.story-frame {
+  max-width: 1180px;
+  margin: 0 auto 2.5rem;
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.story-frame:last-child {
+  margin-bottom: 0;
+}
+
+.story-frame:nth-child(even) {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+
+.story-frame:nth-child(even) .story-frame-copy {
+  order: 2;
+}
+
+.story-frame-copy {
+  color: #f4fbf5;
+}
+
+.story-frame-copy h2 {
+  margin: 0 0 0.8rem;
+  color: #f4fbf5;
+  font-size: 1.65rem;
+}
+
+.story-frame-copy span {
+  display: block;
+  color: #bed2c4;
+  line-height: 1.7;
+  font-size: 0.98rem;
+}
+
+.story-frame figure {
+  margin: 0;
+  border: 1px solid rgba(128, 194, 143, 0.35);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #001b13;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.32);
+}
+
+.story-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.story-community {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 3.5rem 1.25rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 2rem;
+  align-items: center;
+}
+
+.story-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.story-actions a {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  background: #2a7b4f;
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  font-weight: 800;
+}
+
+.story-actions a:nth-child(2),
+.story-actions a:nth-child(3) {
+  background: #10251a;
+}
+
+@media (max-width: 860px) {
+  .story-hero,
+  .story-intro,
+  .story-community,
+  .story-mission,
+  .story-frame,
+  .story-frame:nth-child(even),
+  .story-pathways {
+    grid-template-columns: 1fr;
+  }
+
+  .story-frame:nth-child(even) .story-frame-copy {
+    order: 0;
+  }
+
+  .story-hero {
+    padding-top: 2.75rem;
+  }
+}

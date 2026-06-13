@@ -10,7 +10,7 @@ interface HardwareControlState {
   success: boolean;
 }
 
-const API_BASE = 'http://localhost:3001/api/mqtt';
+const API_BASE = import.meta.env.VITE_MQTT_API_BASE_URL || 'http://localhost:4000/api/mqtt';
 
 export const useHardwareControl = (deviceId: string) => {
   const [state, setState] = useState<HardwareControlState>({
@@ -51,6 +51,9 @@ export const useHardwareControl = (deviceId: string) => {
     openDoor: () => sendCommand('door', { state: 'open' }),
     closeDoor: () => sendCommand('door', { state: 'close' }),
     dispenseFeed: (amount: number) => sendCommand('feed', { amount }),
+    primeWater: (seconds = 5) => sendCommand('water', { action: 'prime', seconds }),
+    stopWater: () => sendCommand('water', { action: 'stop' }),
+    setWaterValve: (state: 'open' | 'close') => sendCommand('water', { state }),
     startCleaning: () => sendCommand('clean', { action: 'start' }),
     stopCleaning: () => sendCommand('clean', { action: 'stop' }),
     controlArm: (joints: number[], speed = 0.5) =>

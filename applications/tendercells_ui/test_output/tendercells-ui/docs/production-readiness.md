@@ -12,6 +12,7 @@ This tracker turns repair work into production engineering requirements for open
 | Product registry governance | Started | Metadata, consent, safety, versioning, module links, and simulation considerations are in `docs/product-registry-considerations.md`. |
 | Property CRUD and simulation | Started | Property size, hardware placement, obstacles, and route preview are available. |
 | NVIDIA robotics simulation | Started | Optional simulation metadata and workflow notes are in `docs/nvidia-robotics-simulation.md`. |
+| FarmBot-inspired homestead OS | Started | Architecture cues for local OS, firmware, web app, API, broker, SDKs, offline use, simulation, kits, and community docs are in `docs/farmbot-inspired-homestead-os.md`. |
 | Device section CRUD | Started | Product-specific side menu sections support local device CRUD. Needs persistence contract docs. |
 | Firebase Auth | Started | Email/password and Google are enabled in UI. Needs graceful offline/demo mode hardening. |
 | API availability | Partial | UI falls back locally, but express-api health and startup need a one-command workflow. |
@@ -44,6 +45,7 @@ This tracker turns repair work into production engineering requirements for open
 ### Shared Platform
 
 - Product registration, QR pairing, firmware version display, and update status.
+- TenderCells OS runtime split between firmware, edge runtime, web app, API server, message broker, SDKs, scripting, and simulation adapters.
 - Product metadata validation for telemetry consent, safety status, parent-child module links, simulation backend, asset licensing, and revision tracking.
 - Local demo mode with no hardware attached.
 - Export/import property and product config for community sharing.

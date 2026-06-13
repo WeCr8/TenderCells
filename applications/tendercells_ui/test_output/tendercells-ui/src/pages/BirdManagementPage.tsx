@@ -13,6 +13,11 @@ import EggIcon from '@mui/icons-material/Egg';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
+import { useBirds } from '../hooks/useBirds';
+import {
+  EMPTY_BIRD, SPECIES_EMOJI, BREEDS_BY_SPECIES, DEMO_ANIMAL_PACKS,
+  type Bird, type Sex, type HealthStatus, type Species,
+} from '../services/birdsService';
 
 const C = {
   bg: '#0D2B1E', surface: '#1A3D2B', accent: '#4A7C59',
@@ -20,59 +25,9 @@ const C = {
   warning: '#E8A020', white: '#F0EDE4',
 };
 
-type Sex = 'hen' | 'rooster' | 'unknown';
-type HealthStatus = 'healthy' | 'watch' | 'sick' | 'quarantine';
-type Species = 'chicken' | 'duck' | 'turkey' | 'goose' | 'quail' | 'pigeon' | 'rabbit' | 'goat';
-
-interface Bird {
-  id: string;
-  name: string;
-  species: Species;
-  breed: string;
-  sex: Sex;
-  hatchDate: string;
-  color: string;
-  weight: string;
-  health: HealthStatus;
-  notes: string;
-  eggColor: string;
-  avgEggsPerWeek: number;
-  bandId: string;
-  device: string;
-}
-
-const EMPTY_BIRD: Omit<Bird, 'id'> = {
-  name: '', species: 'chicken', breed: '', sex: 'hen', hatchDate: '',
-  color: '', weight: '', health: 'healthy', notes: '',
-  eggColor: '', avgEggsPerWeek: 0, bandId: '', device: 'ct_001',
-};
-
 const HEALTH_COLORS: Record<HealthStatus, string> = {
   healthy: '#4CAF50', watch: C.warning, sick: C.danger, quarantine: '#9C27B0',
 };
-
-const SPECIES_EMOJI: Record<Species, string> = {
-  chicken: '🐔', duck: '🦆', turkey: '🦃', goose: '🪿',
-  quail: '🐦', pigeon: '🕊️', rabbit: '🐇', goat: '🐐',
-};
-
-const BREEDS_BY_SPECIES: Record<Species, string[]> = {
-  chicken: ['Rhode Island Red', 'Barred Rock', 'Buff Orpington', 'Leghorn', 'Easter Egger', 'Silkie', 'Australorp', 'Plymouth Rock', 'Other'],
-  duck: ['Pekin', 'Khaki Campbell', 'Muscovy', 'Runner', 'Rouen', 'Other'],
-  turkey: ['Broad Breasted White', 'Heritage', 'Narragansett', 'Bronze', 'Other'],
-  goose: ['Toulouse', 'Embden', 'Chinese', 'Pilgrim', 'Other'],
-  quail: ['Coturnix', 'Bobwhite', 'Button', 'Other'],
-  pigeon: ['Racing Homer', 'King', 'Fantail', 'Roller', 'Other'],
-  rabbit: ['Rex', 'Holland Lop', 'Flemish Giant', 'New Zealand', 'Other'],
-  goat: ['Boer', 'Nubian', 'LaMancha', 'Nigerian Dwarf', 'Other'],
-};
-
-const DEMO_BIRDS: Bird[] = [
-  { id: 'b1', name: 'Henrietta', species: 'chicken', breed: 'Rhode Island Red', sex: 'hen', hatchDate: '2023-03-15', color: 'Mahogany red', weight: '6.5 lbs', health: 'healthy', notes: 'Top of pecking order. Reliable layer.', eggColor: 'Brown', avgEggsPerWeek: 5, bandId: 'RIR-001', device: 'ct_001' },
-  { id: 'b2', name: 'Dotty', species: 'chicken', breed: 'Barred Rock', sex: 'hen', hatchDate: '2023-03-15', color: 'Black/white barred', weight: '7 lbs', health: 'healthy', notes: 'Very calm. Great forager.', eggColor: 'Brown', avgEggsPerWeek: 4, bandId: 'BR-002', device: 'ct_001' },
-  { id: 'b3', name: 'Goldie', species: 'chicken', breed: 'Buff Orpington', sex: 'hen', hatchDate: '2023-04-02', color: 'Golden buff', weight: '8 lbs', health: 'watch', notes: 'Showing mild lethargy — monitor for 48h.', eggColor: 'Light brown', avgEggsPerWeek: 3, bandId: 'BO-003', device: 'ct_001' },
-  { id: 'b4', name: 'Bluebell', species: 'chicken', breed: 'Easter Egger', sex: 'hen', hatchDate: '2023-05-10', color: 'Blue-grey mottled', weight: '5.5 lbs', health: 'healthy', notes: 'Lays blue-green eggs. Shy but friendly.', eggColor: 'Blue-green', avgEggsPerWeek: 4, bandId: 'EE-004', device: 'ct_001' },
-];
 
 function BirdCard({ bird, onEdit, onDelete }: { bird: Bird; onEdit: () => void; onDelete: () => void }) {
   const hc = HEALTH_COLORS[bird.health];
@@ -100,7 +55,7 @@ function BirdCard({ bird, onEdit, onDelete }: { bird: Bird; onEdit: () => void; 
               <EditIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Remove from flock">
+          <Tooltip title="Remove from roster">
             <IconButton size="small" onClick={onDelete} sx={{ color: C.danger + 'aa' }}>
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -155,7 +110,7 @@ function EditDialog({ open, bird, onClose, onSave }: EditDialogProps) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth
       PaperProps={{ sx: { bgcolor: C.surface, color: C.white } }}>
-      <DialogTitle sx={{ color: C.gold }}>{'name' in bird && (bird as Bird).id ? `Edit ${form.name}` : 'Add Bird'}</DialogTitle>
+      <DialogTitle sx={{ color: C.gold }}>{'name' in bird && (bird as Bird).id ? `Edit ${form.name}` : 'Add Animal'}</DialogTitle>
       <DialogContent>
         <Grid container spacing={2} mt={0.5}>
           <Grid item xs={12} sm={6}>
@@ -183,7 +138,7 @@ function EditDialog({ open, bird, onClose, onSave }: EditDialogProps) {
             <FormControl fullWidth size="small">
               <InputLabel sx={{ color: C.goldMuted }}>Sex</InputLabel>
               <Select value={form.sex} label="Sex" onChange={e => set('sex', e.target.value as Sex)} sx={{ color: C.white }}>
-                {(['hen', 'rooster', 'unknown'] as Sex[]).map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+                {(['hen', 'rooster', 'doe', 'buck', 'wether', 'unknown'] as Sex[]).map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
@@ -207,7 +162,7 @@ function EditDialog({ open, bird, onClose, onSave }: EditDialogProps) {
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Plumage Color" value={form.color} onChange={e => set('color', e.target.value)} fullWidth size="small" sx={inputSx} />
+            <TextField label="Color / Markings" value={form.color} onChange={e => set('color', e.target.value)} fullWidth size="small" sx={inputSx} />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField label="Weight (lbs)" value={form.weight} onChange={e => set('weight', e.target.value)} fullWidth size="small" sx={inputSx} />
@@ -238,7 +193,7 @@ function EditDialog({ open, bird, onClose, onSave }: EditDialogProps) {
 }
 
 export default function BirdManagementPage() {
-  const [birds, setBirds] = useState<Bird[]>(DEMO_BIRDS);
+  const { birds, loading, createBird, updateBird, deleteBird, seedDemoFlock, seedDemoAnimalsForProduct } = useBirds();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Bird | null>(null);
   const [filter, setFilter] = useState<HealthStatus | 'all'>('all');
@@ -254,13 +209,13 @@ export default function BirdManagementPage() {
 
   const handleSave = (data: Omit<Bird, 'id'>) => {
     if (editing) {
-      setBirds(prev => prev.map(b => b.id === editing.id ? { ...data, id: editing.id } : b));
+      void updateBird(editing.id, data);
     } else {
-      setBirds(prev => [...prev, { ...data, id: `b${Date.now()}` }]);
+      void createBird(data);
     }
   };
 
-  const handleDelete = (id: string) => setBirds(prev => prev.filter(b => b.id !== id));
+  const handleDelete = (id: string) => void deleteBird(id);
 
   return (
     <Box sx={{ bgcolor: C.bg, minHeight: '100dvh', p: { xs: 2, sm: 3 } }}>
@@ -271,12 +226,12 @@ export default function BirdManagementPage() {
           <Stack direction="row" spacing={1.5} alignItems="center">
             <PetsIcon sx={{ color: C.accent, fontSize: 28 }} />
             <Box>
-              <Typography variant="h5" sx={{ color: C.gold, fontWeight: 700 }}>Flock Roster</Typography>
-              <Typography sx={{ color: C.goldMuted, fontSize: 13 }}>Individual bird records, health tracking, and egg data</Typography>
+              <Typography variant="h5" sx={{ color: C.gold, fontWeight: 700 }}>Animal Roster</Typography>
+              <Typography sx={{ color: C.goldMuted, fontSize: 13 }}>Product-aware animal records, health tracking, and demo packs</Typography>
             </Box>
           </Stack>
           <Button startIcon={<AddIcon />} variant="contained" onClick={openAdd} sx={{ bgcolor: C.accent }}>
-            Add Bird
+            Add Animal
           </Button>
         </Stack>
 
@@ -284,8 +239,8 @@ export default function BirdManagementPage() {
         <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2 }}>
           <Grid container spacing={2}>
             {[
-              { label: 'Total Birds', value: birds.length, color: C.gold },
-              { label: 'Hens', value: hens, color: '#F48FB1' },
+              { label: 'Total Animals', value: birds.length, color: C.gold },
+              { label: 'Laying Hens', value: hens, color: '#F48FB1' },
               { label: 'Need Attention', value: watchList, color: watchList > 0 ? C.warning : '#4CAF50' },
               { label: 'Eggs/Week (avg)', value: totalEggs, color: '#D4A574' },
             ].map(s => (
@@ -309,15 +264,55 @@ export default function BirdManagementPage() {
               }} />
           ))}
           <Typography sx={{ color: C.goldMuted, fontSize: 12, alignSelf: 'center', ml: 1 }}>
-            {visible.length} bird{visible.length !== 1 ? 's' : ''}
+            {visible.length} animal{visible.length !== 1 ? 's' : ''}
           </Typography>
         </Stack>
 
+        <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2 }}>
+          <Typography sx={{ color: C.gold, fontWeight: 700, mb: 0.5 }}>Product Demo Animals</Typography>
+          <Typography sx={{ color: C.goldMuted, fontSize: 12, mb: 1.5 }}>
+            Load sample animals by product type so open-source builders can test dashboards before their hardware is ready.
+          </Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {DEMO_ANIMAL_PACKS.map((pack) => (
+              <Button
+                key={pack.productFamily}
+                variant="outlined"
+                size="small"
+                onClick={() => void seedDemoAnimalsForProduct(pack.productFamily)}
+                sx={{ borderColor: C.accent, color: C.accent }}
+              >
+                Load {pack.label}
+              </Button>
+            ))}
+          </Stack>
+        </Paper>
+
         {/* Bird grid */}
-        {visible.length === 0 ? (
+        {loading ? (
+          <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 4, textAlign: 'center' }}>
+            <Typography sx={{ color: C.goldMuted }}>Loading flock…</Typography>
+          </Paper>
+        ) : birds.length === 0 ? (
+          <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 4, textAlign: 'center' }}>
+            <PetsIcon sx={{ color: C.goldMuted, fontSize: 40, mb: 1 }} />
+            <Typography sx={{ color: C.gold, fontWeight: 700, mb: 0.5 }}>No animals yet</Typography>
+            <Typography sx={{ color: C.goldMuted, mb: 2 }}>
+              Add your own animals, or load a product demo pack to explore the features.
+            </Typography>
+            <Stack direction="row" spacing={1.5} justifyContent="center">
+              <Button startIcon={<AddIcon />} variant="contained" onClick={openAdd} sx={{ bgcolor: C.accent }}>
+                Add Animal
+              </Button>
+              <Button variant="outlined" onClick={() => void seedDemoFlock()} sx={{ borderColor: C.accent, color: C.accent }}>
+                Load Demo Flock
+              </Button>
+            </Stack>
+          </Paper>
+        ) : visible.length === 0 ? (
           <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 4, textAlign: 'center' }}>
             <LocalHospitalIcon sx={{ color: C.goldMuted, fontSize: 40, mb: 1 }} />
-            <Typography sx={{ color: C.goldMuted }}>No birds match this filter.</Typography>
+            <Typography sx={{ color: C.goldMuted }}>No animals match this filter.</Typography>
           </Paper>
         ) : (
           <Grid container spacing={2}>

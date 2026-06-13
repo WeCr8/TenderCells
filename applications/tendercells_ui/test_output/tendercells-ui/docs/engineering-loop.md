@@ -7,10 +7,30 @@ TenderCells should be buildable by open-source users, useful for makers building
 Run this before opening a pull request or packaging a release:
 
 ```bash
+npm run tc -- check
+npm run essential:loop
 npm run quality:loop
 ```
 
-The loop writes `docs/quality-loop-report.md` with the latest result. Fix the first required failure, rerun the loop, then turn repeated failures into tests, docs, or product backlog items.
+For terminal-first contributors, TenderCells also includes its own CLI:
+
+```bash
+npm run tc -- help
+npm run tc -- status
+npm run tc -- demo
+npm run tc -- demo:watch
+npm run tc -- loop
+```
+
+The CLI opens with a UTF-8 TenderCells barn splash and wraps the same local scripts used by maintainers. Published or linked installs can also expose `tendercells` and `tc` binaries through `package.json`.
+
+`npm run essential:loop` is the first required local gate: it runs Vitest contracts and then the seed-demo autonomous OS audit. It writes `docs/essential-loop-report.md`.
+
+`npm run ui:smoke` runs Playwright against the live app on `http://localhost:5173`. It checks real browser rendering, `/birds`, key product routes, console/runtime errors, and local backend health.
+
+`npm run platform:loop` runs the essential loop and Playwright UI smoke together.
+
+`npm run quality:loop` adds optional/non-blocking analysis such as Fallow and writes `docs/quality-loop-report.md`. Fix the first required failure, rerun the loop, then turn repeated failures into tests, docs, or product backlog items.
 
 ## Required Gates
 

@@ -130,6 +130,37 @@ export class ProductsService {
     return seed;
   }
 
+  /**
+   * Idempotent upsert of demo/seed products into the local dev store. Matches on
+   * id or serial_number so re-running never duplicates. User-registered products
+   * (different ids) are untouched. Used by the demo environment orchestrator.
+   */
+  static seedDemoProducts(seeds: Product[]): Product[] {
+    let products = this.getDevProducts();
+    for (const seed of seeds) {
+      const existing = products.find((p) => p.id === seed.id || p.serial_number === seed.serial_number);
+      if (existing) {
+        const merged = {
+          ...existing,
+          ...seed,
+          metadata: { ...existing.metadata, ...seed.metadata },
+          created_at: existing.created_at,
+          updated_at: new Date().toISOString(),
+        };
+        products = products.map((p) => (p.id === existing.id ? merged : p));
+      } else {
+        products = [seed, ...products];
+      }
+    }
+    this.setDevProducts(products);
+    return products;
+  }
+
+  /** Remove only products that carry a given metadata.source tag (demo reset). */
+  static removeProductsBySource(source: string): void {
+    this.setDevProducts(this.getDevProducts().filter((p) => p.metadata?.source !== source));
+  }
+
   private static createDevProduct(data: RegisterProductData): Product {
     const now = new Date().toISOString();
     const serial = data.serial_number || `DEV-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;

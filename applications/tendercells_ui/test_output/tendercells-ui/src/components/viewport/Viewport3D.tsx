@@ -658,13 +658,14 @@ const createSimulationOverlay = (layout: PropertyLayoutState): THREE.Group => {
 };
 
 const getCameraPosition = (preset: CameraPreset, mode: ViewMode, sceneSpan: number) => {
-  const distance = mode === '2d' ? sceneSpan : sceneSpan * 0.9;
+  const distance = mode === '2d' ? sceneSpan : sceneSpan * 1.05;
+  const sideHeight = mode === '2d' ? sceneSpan * 0.12 : sceneSpan * 0.42;
   switch (preset) {
     case 'top':  return new THREE.Vector3(0, distance, 0.001);
-    case 'left': return new THREE.Vector3(-distance, 3, 0);
-    case 'right': return new THREE.Vector3(distance, 3, 0);
+    case 'left': return new THREE.Vector3(-distance, sideHeight, 0);
+    case 'right': return new THREE.Vector3(distance, sideHeight, 0);
     case 'iso':
-    default:     return new THREE.Vector3(7, 6, 7);
+    default:     return new THREE.Vector3(distance * 0.82, distance * 0.62, distance * 0.82);
   }
 };
 
@@ -835,7 +836,9 @@ export default function Viewport3D({
 
     const camBase = getCameraPosition(cameraPreset, viewMode, cameraSpan);
     camera.position.set(camBase.x + focusX, camBase.y, camBase.z + focusZ);
-    camera.lookAt(focusX, 1, focusZ);
+    const focusY = viewMode === '2d' && cameraPreset === 'top' ? 0 : 1;
+    camera.up.set(cameraPreset === 'top' ? 0 : 0, cameraPreset === 'top' ? 0 : 1, cameraPreset === 'top' ? -1 : 0);
+    camera.lookAt(focusX, focusY, focusZ);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(w, h);
@@ -852,7 +855,7 @@ export default function Viewport3D({
     controls.enableRotate = viewMode === '3d' && controlMode === 'orbit';
     controls.enableZoom = true;
     controls.screenSpacePanning = true;
-    controls.target.set(focusX, 1, focusZ);
+    controls.target.set(focusX, focusY, focusZ);
     controls.mouseButtons = {
       LEFT: controlMode === 'pan' || viewMode === '2d' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
       MIDDLE: THREE.MOUSE.DOLLY,
@@ -948,7 +951,10 @@ export default function Viewport3D({
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationId);
       controls.dispose();
-      container.removeChild(renderer.domElement);
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
+      renderer.forceContextLoss();
       renderer.dispose();
     };
   }, [
@@ -958,6 +964,29 @@ export default function Viewport3D({
 
   const deviceCount = products.length;
   const matchedCount = enrichedItems.filter((i) => i.kind === 'hardware' && i.product).length;
+
+  const handleViewModeChange = (_: unknown, nextMode: ViewMode | null) => {
+    if (!nextMode) return;
+    setViewMode(nextMode);
+    if (nextMode === '2d') {
+      setCameraPreset((current) => (current === 'iso' ? 'top' : current));
+      setControlMode('pan');
+    }
+  };
+
+  const handleCameraPresetChange = (_: unknown, nextPreset: CameraPreset | null) => {
+    if (!nextPreset) return;
+    setCameraPreset(nextPreset);
+    if (nextPreset === 'iso') {
+      setViewMode('3d');
+      setControlMode('orbit');
+    }
+  };
+
+  const handleControlModeChange = (_: unknown, nextControlMode: ControlMode | null) => {
+    if (!nextControlMode) return;
+    setControlMode(viewMode === '2d' ? 'pan' : nextControlMode);
+  };
 
   return (
     <Paper
@@ -1001,19 +1030,19 @@ export default function Viewport3D({
       >
         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
           <ToggleButtonGroup size="small" exclusive value={viewMode}
-            onChange={(_, v) => v && setViewMode(v)} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
+            onChange={handleViewModeChange} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
             <ToggleButton value="2d">2D</ToggleButton>
             <ToggleButton value="3d">3D</ToggleButton>
           </ToggleButtonGroup>
           <ToggleButtonGroup size="small" exclusive value={cameraPreset}
-            onChange={(_, v) => v && setCameraPreset(v)} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
+            onChange={handleCameraPresetChange} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
             <ToggleButton value="top">Top</ToggleButton>
             <ToggleButton value="left">Left</ToggleButton>
             <ToggleButton value="right">Right</ToggleButton>
             <ToggleButton value="iso">ISO</ToggleButton>
           </ToggleButtonGroup>
           <ToggleButtonGroup size="small" exclusive value={controlMode}
-            onChange={(_, v) => v && setControlMode(v)} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
+            onChange={handleControlModeChange} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
             <ToggleButton value="pan">Pan</ToggleButton>
             <ToggleButton value="orbit" disabled={viewMode === '2d'}>Rotate</ToggleButton>
           </ToggleButtonGroup>

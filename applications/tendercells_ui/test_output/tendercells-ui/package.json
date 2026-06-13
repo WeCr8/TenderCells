@@ -3,31 +3,53 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "bin": {
+    "tendercells": "./scripts/tendercells-cli.mjs",
+    "tc": "./scripts/tendercells-cli.mjs"
+  },
   "scripts": {
+    "tc": "node scripts/tendercells-cli.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "check": "npm run quality:loop",
     "fallow": "npx --yes fallow@2.94.0 --summary",
     "lint": "eslint .",
+    "autonomous:loop": "node scripts/autonomous-loop.mjs",
+    "demo:smoke": "node scripts/autonomous-loop.mjs --seed-demo",
+    "essential:loop": "node scripts/essential-loop.mjs",
+    "platform:loop": "npm run essential:loop && npm run ui:smoke:desktop",
+    "llm:warmup": "node scripts/local-llm.mjs warmup",
+    "llm:prompt": "node scripts/local-llm.mjs prompt",
+    "llm:review": "node scripts/local-llm.mjs review",
+    "llm:repair-notes": "node scripts/local-llm.mjs repair-notes",
+    "llm:repair-apply": "node scripts/local-llm.mjs repair-apply",
+    "llm:task": "node scripts/local-llm.mjs task",
     "quality:loop": "node scripts/quality-loop.mjs",
+    "ui:smoke": "playwright test",
+    "ui:smoke:desktop": "playwright test --project=desktop-chromium",
+    "ui:smoke:all": "playwright test",
+    "ui:smoke:headed": "playwright test --headed --project=desktop-chromium",
+    "ui:demo": "playwright test tests/ui/watched-demo.spec.ts --project=desktop-chromium --workers=1",
+    "ui:demo:headed": "playwright test tests/ui/watched-demo.spec.ts --project=desktop-chromium --headed --workers=1",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
-    "@mui/material": "^5.15.0",
-    "@mui/icons-material": "^5.15.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.0",
+    "@mui/material": "^5.15.0",
+    "firebase": "^10.7.1",
+    "html5-qrcode": "^2.3.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
-    "three": "^0.160.0",
-    "firebase": "^10.7.1",
-    "html5-qrcode": "^2.3.8"
+    "three": "^0.160.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.160.0",
@@ -37,4 +59,3 @@
     "vitest": "^2.1.4"
   }
 }
-

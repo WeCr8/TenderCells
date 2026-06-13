@@ -66,3 +66,15 @@ dist-ssr
 
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md
+
+# Local LLM generated reports
+applications/tendercells_ui/test_output/tendercells-ui/docs/local-llm/*.md
+applications/tendercells_ui/test_output/tendercells-ui/docs/local-llm/patches/*.patch
+!applications/tendercells_ui/test_output/tendercells-ui/docs/local-llm.md
+
+# Playwright generated artifacts
+applications/tendercells_ui/test_output/tendercells-ui/playwright-report/
+applications/tendercells_ui/test_output/tendercells-ui/test-results/
+
+# Firebase deploy cache
+.firebase/*.cache

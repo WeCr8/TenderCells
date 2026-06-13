@@ -43,6 +43,13 @@ const contributionAreas = [
   { title: "Marketing", desc: "Build videos, community posts, case studies, deployment photos, and open-source launch coordination." },
 ];
 
+const farmBotCues = [
+  "Visual planning and remote operation",
+  "Open hardware, software, docs, and developer resources",
+  "DIY, kit, and education-friendly paths",
+  "Self-hosting, simulation, APIs, message broker, and SDK concepts",
+];
+
 export default function OpenSourcePage() {
   return (
     <PageLayout>
@@ -67,6 +74,28 @@ export default function OpenSourcePage() {
         <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer" className="btn-primary">GitHub Repository</a>
         <a href="https://github.com/WeCr8/TenderCells/issues/new/choose" target="_blank" rel="noopener noreferrer" className="btn-outline">Join Beta Builders</a>
         <a href="/app/products" className="btn-outline">Open Product Registry</a>
+      </div>
+
+      <h2 className="section-title" id="farmbot">Inspired by FarmBot</h2>
+      <div className="prose">
+        <p>
+          TenderCells started from the same open-source spirit that makes FarmBot compelling:
+          practical automation that people can study, repair, remix, self-host, document, and build into real-world systems.
+          FarmBot focuses on CNC-style plant care; TenderCells expands that pattern toward animal care, homesteads,
+          mobile enclosures, predator monitoring, property simulation, and community custom hardware.
+        </p>
+      </div>
+      <div className="card-grid">
+        {farmBotCues.map((cue) => (
+          <div key={cue} className="card compact-card">
+            <h3>{cue}</h3>
+          </div>
+        ))}
+      </div>
+      <div className="cta-bar" style={{ marginBottom: "2rem" }}>
+        <a href="https://farm.bot/" target="_blank" rel="noopener noreferrer" className="btn-outline">Visit FarmBot</a>
+        <a href="https://developer.farm.bot/v15/docs/farmbot-software-development" target="_blank" rel="noopener noreferrer" className="btn-outline">FarmBot Developer Docs</a>
+        <a href="https://github.com/FarmBot" target="_blank" rel="noopener noreferrer" className="btn-outline">FarmBot GitHub</a>
       </div>
 
       <h2 className="section-title">What We Are Building</h2>

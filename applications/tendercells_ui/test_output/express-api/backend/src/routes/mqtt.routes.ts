@@ -4,7 +4,7 @@
 
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { MQTTController } from "../controllers/mqtt.controller.ts";
+import { MQTTController } from "../controllers/mqtt.controller.js";
 
 const router = Router();
 const controller = new MQTTController();

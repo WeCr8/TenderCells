@@ -57,6 +57,44 @@ for (const check of checks) {
 const reportPath = resolve(root, 'docs', 'quality-loop-report.md');
 const requiredFailed = results.some((result) => result.required && !result.passed);
 const status = requiredFailed ? 'blocked' : 'ready-for-repair-review';
+const localLlmEnabled = process.env.LOCAL_LLM_REPAIR === '1';
+let localLlmNote = 'Local LLM repair notes were not requested. Set `LOCAL_LLM_REPAIR=1` to generate them.';
+
+if (localLlmEnabled && results.some((result) => !result.passed)) {
+  const failedSummary = results
+    .filter((result) => !result.passed)
+    .map((result) => [
+      `Check: ${result.name}`,
+      `Required: ${result.required ? 'yes' : 'no'}`,
+      `Repair target: ${result.repair}`,
+      'Output:',
+      result.output.slice(-2500),
+    ].join('\n'))
+    .join('\n\n');
+
+  console.log('\n== Local LLM repair notes ==');
+  const llm = spawnSync(
+    process.execPath,
+    [
+      'scripts/local-llm.mjs',
+      'prompt',
+      '--model',
+      process.env.OLLAMA_CODER_MODEL || 'qwen2.5-coder:7b',
+      '--text',
+      `TenderCells quality loop failed or warned. Give concise repair order and verification steps.\n\n${failedSummary}`,
+    ],
+    {
+      cwd: root,
+      encoding: 'utf8',
+      shell: process.platform === 'win32',
+      timeout: Number(process.env.LOCAL_LLM_TIMEOUT_MS || 240000),
+    }
+  );
+
+  const llmOutput = `${llm.stdout || ''}${llm.stderr || ''}${llm.error ? `\n${llm.error.message}` : ''}`.trim();
+  localLlmNote = llmOutput ? llmOutput.slice(-3000) : 'Local LLM produced no output.';
+  console.log(localLlmNote);
+}
 
 const report = [
   '# TenderCells Quality Loop Report',
@@ -85,6 +123,10 @@ const report = [
   '2. Run `npm run quality:loop` again.',
   '3. Convert repeated failures into tests or docs.',
   '4. Update the production readiness tracker when the fix changes product behavior.',
+  '',
+  '## Local LLM',
+  '',
+  localLlmNote,
   '',
 ].join('\n');
 

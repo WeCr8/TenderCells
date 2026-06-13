@@ -17,8 +17,16 @@ import CloudIcon from "@mui/icons-material/Cloud";
 import StopIcon from "@mui/icons-material/Stop";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import CircularProgress from "@mui/material/CircularProgress";
+import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useHardwareControl } from "../../hooks/useHardwareControl";
 
 // Product icons mapping - using AgricultureIcon for poultry products
 const PRODUCT_ICONS: Record<string, React.ReactNode> = {
@@ -43,6 +51,18 @@ type TopNavBarProps = {
 export default function TopNavBar({ title, product, onProductChange }: TopNavBarProps) {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
+  // Global E-STOP broadcasts to all devices via the MQTT bridge.
+  const hardware = useHardwareControl("broadcast");
+  const [estopOpen, setEstopOpen] = React.useState(false);
+
+  const handleEstop = async () => {
+    try {
+      await hardware.emergencyStop();
+      setEstopOpen(false);
+    } catch (error) {
+      console.error("E-STOP failed:", error);
+    }
+  };
 
   const handleAuthAction = async () => {
     if (!isAuthenticated) {
@@ -189,35 +209,44 @@ export default function TopNavBar({ title, product, onProductChange }: TopNavBar
           {isAuthenticated ? user?.email || 'Logout' : 'Sign In'}
         </Button>
         <Button
-          variant="outlined"
-          color="error"
-          size="small"
-          startIcon={<StopIcon />}
-          sx={{
-            minHeight: 40,
-            minWidth: 0,
-            mr: { xs: 0, md: 1 },
-            flex: { xs: '1 1 calc(50% - 8px)', sm: '0 0 auto' },
-            '& .MuiButton-startIcon': { mr: { xs: 0.5, sm: 1 } },
-          }}
-        >
-          E-STOP
-        </Button>
-        <Button
           variant="contained"
           color="error"
           size="small"
           startIcon={<StopIcon />}
+          onClick={() => setEstopOpen(true)}
           sx={{
             minHeight: 40,
             minWidth: 0,
-            flex: { xs: '1 1 calc(50% - 8px)', sm: '0 0 auto' },
+            flex: { xs: '1 1 100%', sm: '0 0 auto' },
             '& .MuiButton-startIcon': { mr: { xs: 0.5, sm: 1 } },
           }}
         >
           E-STOP
         </Button>
       </Toolbar>
+
+      <Dialog open={estopOpen} onClose={() => setEstopOpen(false)}>
+        <DialogTitle sx={{ color: '#CC3333', fontWeight: 700 }}>Emergency Stop</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Cut power to all actuators on every connected device immediately?
+            Devices stay stopped until manually cleared.
+          </DialogContentText>
+          {hardware.error && <Alert severity="error" sx={{ mt: 2 }}>{hardware.error}</Alert>}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEstopOpen(false)} disabled={hardware.isLoading}>Cancel</Button>
+          <Button
+            onClick={handleEstop}
+            variant="contained"
+            color="error"
+            disabled={hardware.isLoading}
+            startIcon={hardware.isLoading ? <CircularProgress size={16} color="inherit" /> : <StopIcon />}
+          >
+            {hardware.isLoading ? 'Stopping…' : 'Confirm E-STOP'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </AppBar>
   );
 }

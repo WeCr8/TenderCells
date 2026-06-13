@@ -2,7 +2,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import mqttRoutes from './routes/mqtt.routes.ts';
+import mqttRoutes from './routes/mqtt.routes.js';
+import productsRoutes from './routes/products.routes.js';
 
 dotenv.config();
 
@@ -17,7 +18,7 @@ try {
 }
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = Number(process.env.PORT || 4000);
 
 app.use(cors());
 app.use(express.json());
@@ -31,6 +32,7 @@ app.get('/health', (req, res) => {
 console.log('Loading MQTT routes..., router:', typeof mqttRoutes);
 app.use('/api/mqtt', mqttRoutes);
 console.log('MQTT routes loaded successfully');
+app.use('/api/products', productsRoutes);
 
 // API status dashboard
 app.get('/api/status', (req, res) => {
@@ -41,6 +43,8 @@ app.get('/api/status', (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       health: '/health',
+      products: '/api/products',
+      productStats: '/api/products/stats',
       mqtt: '/api/mqtt/mqtt/status',
       devices: '/api/mqtt/devices/:deviceId/telemetry',
     },

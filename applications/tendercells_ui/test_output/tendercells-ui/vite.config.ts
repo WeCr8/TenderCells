@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -63,9 +64,32 @@ export default defineConfig({
       plugins: [muiBoxOptimizerPatch],
     },
   },
+  build: {
+    chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        // Split heavy vendors into their own chunks so no single bundle blows
+        // the size budget, and so firebase (statically imported by some modules,
+        // dynamically by the dual-backend services) lands in one stable chunk.
+        manualChunks(rawId) {
+          // Rollup ids use OS path separators; normalize to POSIX so these
+          // substring checks work on Windows (backslashes) too.
+          const id = rawId.replace(/\\/g, '/');
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('/firebase/') || id.includes('/@firebase/')) return 'firebase';
+          if (id.includes('/three/') || id.includes('/@react-three/') || id.includes('/three-stdlib/')) return 'three';
+          if (id.includes('/@mui/') || id.includes('/@emotion/')) return 'mui';
+          if (id.includes('/react-dom/') || id.includes('/react/') || id.includes('/react-router')) return 'react-vendor';
+          return undefined;
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     strictPort: true,
   },
+  test: {
+    include: ['src/**/*.test.{ts,tsx}'],
+  },
 })
-

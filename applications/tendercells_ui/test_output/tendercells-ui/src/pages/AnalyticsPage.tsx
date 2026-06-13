@@ -20,12 +20,33 @@ const C = {
 
 type Range = '24h' | '7d' | '30d';
 
-// Generate simulated telemetry history
-function genHistory(points: number, base: number, variance: number, trend = 0): number[] {
+// Deterministic seeded PRNG (mulberry32) so simulated history is STABLE per
+// device/metric/range — it doesn't re-randomize on every render. Replaced the
+// old Math.random() so the charts read like real persisted telemetry until the
+// Express API history feed is wired in.
+function seededRng(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seedFrom(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h) || 1;
+}
+
+// Generate simulated telemetry history (deterministic, seeded).
+function genHistory(seedKey: string, points: number, base: number, variance: number, trend = 0): number[] {
+  const rng = seededRng(seedFrom(seedKey));
   const out: number[] = [];
   let v = base;
   for (let i = 0; i < points; i++) {
-    v += (Math.random() - 0.5) * variance + trend / points;
+    v += (rng() - 0.5) * variance + trend / points;
     out.push(Math.round(v * 10) / 10);
   }
   return out;
@@ -123,20 +144,22 @@ export default function AnalyticsPage() {
   const points = RANGE_POINTS[range];
 
   const metricData = useMemo(() =>
-    METRICS.map(m => ({ metric: m, values: genHistory(points, m.base, m.variance) })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [range, selectedDevice]
+    METRICS.map(m => ({ metric: m, values: genHistory(`${selectedDevice}:${range}:${m.label}`, points, m.base, m.variance) })),
+    [range, selectedDevice, points]
   );
 
   const deviceOptions = products.length > 0
     ? products.map(p => ({ id: p.device_id ?? p.id, name: p.product_name }))
     : [{ id: 'ct_001', name: 'Chicken Tender (sim)' }];
 
-  // Egg collection this week (simulated)
-  const weeklyEggs = Array.from({ length: 7 }, (_, i) => ({
-    day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i],
-    count: Math.floor(Math.random() * 4) + 2,
-  }));
+  // Egg collection this week (simulated, seeded — stable per device)
+  const weeklyEggs = useMemo(() => {
+    const rng = seededRng(seedFrom(`${selectedDevice}:eggs`));
+    return Array.from({ length: 7 }, (_, i) => ({
+      day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i],
+      count: Math.floor(rng() * 4) + 2,
+    }));
+  }, [selectedDevice]);
   const totalEggs = weeklyEggs.reduce((a, b) => a + b.count, 0);
 
   return (

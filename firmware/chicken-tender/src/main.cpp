@@ -124,13 +124,8 @@ void setup() {
   Serial.println("\n\n=== CHICKEN TENDER BOOTING ===");
   Serial.printf("Device ID: %s\n", MQTT_DEVICE_ID);
 
-  // Initialize watchdog timer — ESP-IDF 5.x struct API (espressif32@7+)
-  const esp_task_wdt_config_t wdt_config = {
-    .timeout_ms  = WATCHDOG_TIMEOUT_MS,
-    .idle_core_mask = 0,
-    .trigger_panic  = true,
-  };
-  esp_task_wdt_init(&wdt_config);
+  // Initialize watchdog timer — ESP-IDF 4.x API (timeout in seconds, panic on overflow)
+  esp_task_wdt_init(WATCHDOG_TIMEOUT_MS / 1000, true);
   esp_task_wdt_add(NULL);
   Serial.println("✓ Watchdog initialized (8s timeout)");
 

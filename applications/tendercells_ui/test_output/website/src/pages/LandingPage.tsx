@@ -107,11 +107,29 @@ export default function LandingPage() {
           <div className="section-inner">
             <h2>Open Source</h2>
             <p>
-              Tender Cells firmware and mobile app are open source. Build your own
-              integrations, contribute improvements, or audit the code running your coop.
+              The whole platform — firmware, mobile app, and dashboard — is open
+              source under Apache&nbsp;2.0. Build your own integrations, add a new
+              animal product family, contribute improvements, or audit the code
+              running your coop. Students, clubs, and first-time builders welcome —
+              explore it in your browser with no hardware, then pick a good first issue.
             </p>
-            <a href="https://github.com/WeCr8/TenderCells" className="btn-secondary" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://github.com/WeCr8/TenderCells"
+              className="btn-secondary"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackButtonClick("view-on-github")}
+            >
               View on GitHub
+            </a>
+            <a
+              href="https://github.com/WeCr8/TenderCells/issues?q=is%3Aopen+label%3A%22good+first+issue%22"
+              className="btn-secondary"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackButtonClick("good-first-issues")}
+            >
+              Good First Issues
             </a>
           </div>
         </section>

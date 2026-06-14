@@ -97,60 +97,38 @@ a Discussion and tell us what you want to build.
 
 ## Project Structure
 
+Tags: **[LIVE]** = deployed to production (tendercells.com) and built/tested in
+CI · **[CI]** = built/verified in CI · **[GEN]** = generator source ·
+**[EARLY]** = scaffolding, not wired into deploy yet.
+
 ```text
 tender-cells/
-├── .claude/                      ← Claude Code configuration
-│   ├── CLAUDE.md                 ← Agent skill file (READ THIS FIRST)
-│   ├── settings.json             ← MCP servers + hooks + agent routing
-│   ├── agents/                   ← Specialist agent definitions
-│   │   ├── firmware-engineer.md
-│   │   ├── app-builder.md
-│   │   ├── code-reviewer.md
-│   │   ├── docs-writer.md
-│   │   ├── coop-architect.md
-│   │   └── bom-tracker.md
-│   └── hooks/                    ← Safety verification scripts
-│       ├── pre-tool-check.ps1    ← Block hardcoded secrets
-│       └── post-tool-verify.ps1  ← Auto-verify TypeScript, firmware builds
-│
-├── firmware/                     ← ESP32 firmware (Arduino)
-│   ├── chicken-tender/           ← Main coop controller
-│   │   ├── src/main.cpp          ← State machine + sensor + MQTT
-│   │   └── platformio.ini        ← Build config
-│   ├── watchtower/               ← Predator monitor (ESP32-S3)
-│   ├── roaming-roost/            ← Mobile dome controller
-│
-├── functions/                    ← Firebase Cloud Functions (Node 18)
-│   ├── src/
-│   │   └── index.ts              ← AI proxy, alerts, schedules, cleanup
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── app/                          ← React app (Vite + Firebase)
-│   ├── src/
-│   │   ├── screens/              ← UI screens (Dashboard, CoopDetail, etc.)
-│   │   ├── components/           ← React components
-│   │   ├── services/             ← Firebase, MQTT, AI service clients
-│   │   ├── hooks/                ← Custom React hooks
-│   │   ├── store/                ← Zustand state management
-│   │   └── __tests__/
-│   └── package.json
-│
-├── docs/                         ← Documentation
-│   ├── architecture.md           ← System design
-│   ├── hardware-bom.md           ← Parts list + costs
-│   ├── adr/                      ← Architecture Decision Records
-│   ├── api/                      ← Auto-generated API docs
-│   └── user-guide/               ← Step-by-step guides
-│
-├── .env.example                  ← Environment variables template
-├── firebase.json                 ← Firebase hosting + emulator config
-├── firestore.rules               ← Firestore security rules
-├── package.json                  ← Root project (Vite + scripts)
-└── .github/workflows/ci.yml      ← GitHub Actions CI
+├── applications/tendercells_ui/
+│   ├── core/ builders/ templates/   [GEN] Python generator (cli.py, generator.py)
+│   └── test_output/                 <- generated, committed, shipped
+│       ├── website/        [LIVE] marketing site  -> tendercells.com
+│       ├── tendercells-ui/ [LIVE] dashboard + demo -> tendercells.com/app/demo
+│       ├── express-api/    MQTT <-> HTTP bridge (hardware control)
+│       └── chicken-tender/ duck-dock/ watchtower/  product dashboards
+├── firmware/                    ESP32 firmware (PlatformIO)
+│   ├── chicken-tender/src/main.cpp  [CI] state machine + sensors + MQTT
+│   ├── watchtower/              [CI] predator monitor (ESP32-S3)
+│   └── roaming-roost/           channel-ring dome controller
+├── functions/                   [CI] Firebase Cloud Functions (Node 18)
+├── app/                         [EARLY] Expo React Native mobile app
+├── docs/                        specs, hardware catalog, roadmap, developer hub
+├── .claude/                     Claude Code config (CLAUDE.md, agents, hooks)
+├── firebase.json                hosting (website + tendercells-ui) + functions
+├── src/ index.html vite.config.ts   [EARLY] legacy root scaffold (not deployed)
+└── .github/workflows/ci.yml     CI: UI build/test, functions, firmware, deploy
 ```
 
----
+> **Where to start reading:** the live demo dashboard is
+> `applications/tendercells_ui/test_output/tendercells-ui/`; the marketing site is
+> the sibling `website/`. Both are generated from the Python tooling in
+> `applications/tendercells_ui/` and committed so you can run them without the
+> generator. Edit the generated app directly to experiment — see
+> [Build your own product family](#build-your-own-product-family) above.
 
 ## Quick Start
 

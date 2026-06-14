@@ -8,15 +8,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        chickenTender: resolve(__dirname, 'applications/web/chicken-tender/index.html')
+        main: resolve(__dirname, 'index.html')
       }
-    }
-  },
-  server: {
-    fs: {
-      // Allow serving files from both root and applications directory
-      allow: ['.', 'applications/web/chicken-tender']
     }
   }
 })

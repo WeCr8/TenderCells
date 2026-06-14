@@ -19,31 +19,69 @@ service cloud.firestore {
              request.resource.data.userId == request.auth.uid;
     }
 
+    function isOwnedResource() {
+      return isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    function keepsOwner() {
+      return isAuthenticated() &&
+             resource.data.userId == request.auth.uid &&
+             request.resource.data.userId == request.auth.uid;
+    }
+
+    function deviceDoc(deviceId) {
+      return get(/databases/$(database)/documents/devices/$(deviceId));
+    }
+
+    function ownsDevice(deviceId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/devices/$(deviceId)) &&
+             deviceDoc(deviceId).data.userId == request.auth.uid;
+    }
+
+    function deviceItemCreateMatches(deviceId) {
+      return ownsDevice(deviceId) &&
+             request.resource.data.deviceId == deviceId;
+    }
+
+    function deviceItemKeepsDevice(deviceId) {
+      return ownsDevice(deviceId) &&
+             resource.data.deviceId == deviceId &&
+             request.resource.data.deviceId == deviceId;
+    }
+
     // Properties collection
     // Users can only read/write their own properties
     match /properties/{propertyId} {
-      // Allow read if user is authenticated (queries filter by userId in the app)
-      allow read: if isAuthenticated();
+      // Allow read only for the property owner.
+      allow read: if isOwnedResource();
       
       // Allow create if user is authenticated and sets their own userId
       allow create: if isCreatingOwnData();
       
       // Allow update if user owns the property
-      allow update: if isAuthenticated() && 
-                       resource.data.userId == request.auth.uid &&
-                       request.resource.data.userId == request.auth.uid;
+      allow update: if keepsOwner();
       
       // Allow delete if user owns the property
-      allow delete: if isAuthenticated() && 
-                       resource.data.userId == request.auth.uid;
+      allow delete: if isOwnedResource();
     }
 
     // Placements collection
     // Users can read/write placements for properties they own
     match /placements/{placementId} {
-      // Allow read/write for authenticated users
-      // The app verifies property ownership when needed
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() &&
+                     exists(/databases/$(database)/documents/properties/$(resource.data.propertyId)) &&
+                     get(/databases/$(database)/documents/properties/$(resource.data.propertyId)).data.userId == request.auth.uid;
+      allow create: if isAuthenticated() &&
+                       exists(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)) &&
+                       get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.userId == request.auth.uid;
+      allow update: if isAuthenticated() &&
+                       exists(/databases/$(database)/documents/properties/$(resource.data.propertyId)) &&
+                       get(/databases/$(database)/documents/properties/$(resource.data.propertyId)).data.userId == request.auth.uid &&
+                       request.resource.data.propertyId == resource.data.propertyId;
+      allow delete: if isAuthenticated() &&
+                       exists(/databases/$(database)/documents/properties/$(resource.data.propertyId)) &&
+                       get(/databases/$(database)/documents/properties/$(resource.data.propertyId)).data.userId == request.auth.uid;
     }
 
     // User profiles/settings collection
@@ -83,28 +121,25 @@ service cloud.firestore {
     // Products collection (if stored in Firestore)
     // Users can manage products associated with their properties
     match /products/{productId} {
-      // Allow read/write for authenticated users
-      // Products are linked to properties, and property ownership is verified in the app
-      allow read, write: if isAuthenticated();
+      allow read: if isOwnedResource();
+      allow create: if isCreatingOwnData();
+      allow update: if keepsOwner();
+      allow delete: if isOwnedResource();
     }
 
     // Devices collection (if stored in Firestore)
     // Users can manage their own devices
     match /devices/{deviceId} {
-      // Allow read if user owns the device or device doesn't exist yet
-      allow read: if isAuthenticated();
+      allow read: if isOwnedResource();
       
       // Allow create if user sets their own userId
       allow create: if isCreatingOwnData();
       
       // Allow update if user owns the device
-      allow update: if isAuthenticated() && 
-                       resource.data.userId == request.auth.uid &&
-                       request.resource.data.userId == request.auth.uid;
+      allow update: if keepsOwner();
       
       // Allow delete if user owns the device
-      allow delete: if isAuthenticated() && 
-                       resource.data.userId == request.auth.uid;
+      allow delete: if isOwnedResource();
     }
 
     // User preferences/notifications collection
@@ -126,21 +161,35 @@ service cloud.firestore {
     // Users can manage animals linked to their properties and products
     match /animals/{animalId} {
       // Allow read if user owns the animal
-      allow read: if isAuthenticated() && 
-                     (resource.data.userId == request.auth.uid || 
-                      !exists(/databases/$(database)/documents/animals/$(animalId)));
+      allow read: if isOwnedResource();
       
       // Allow create if user is authenticated and sets their own userId
       allow create: if isCreatingOwnData();
       
       // Allow update if user owns the animal
-      allow update: if isAuthenticated() && 
-                       resource.data.userId == request.auth.uid &&
-                       request.resource.data.userId == request.auth.uid;
+      allow update: if keepsOwner();
       
       // Allow delete if user owns the animal
-      allow delete: if isAuthenticated() && 
-                       resource.data.userId == request.auth.uid;
+      allow delete: if isOwnedResource();
+    }
+
+    // Per-device rosters used by the current app:
+    // birds/{deviceId}/items/{birdId}
+    match /birds/{deviceId}/items/{birdId} {
+      allow read, delete: if ownsDevice(deviceId);
+      allow create: if ownsDevice(deviceId) &&
+                       (!('device' in request.resource.data) || request.resource.data.device == deviceId);
+      allow update: if ownsDevice(deviceId) &&
+                       (!('device' in resource.data) || resource.data.device == deviceId) &&
+                       (!('device' in request.resource.data) || request.resource.data.device == deviceId);
+    }
+
+    // Per-device automation schedules used by the current app:
+    // schedules/{deviceId}/items/{scheduleId}
+    match /schedules/{deviceId}/items/{scheduleId} {
+      allow read, delete: if ownsDevice(deviceId);
+      allow create: if deviceItemCreateMatches(deviceId);
+      allow update: if deviceItemKeepsDevice(deviceId);
     }
 
     // Fallback: Deny access to any other collections by default

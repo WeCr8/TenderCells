@@ -48,6 +48,18 @@ test('live public demo exposes LLM-readable static context', async ({ request })
   expect(descriptionText).toContain('TenderCells Public Demo Static Description');
 });
 
+test('live demo explainer shell is useful to non-JS crawlers', async ({ request }) => {
+  const response = await request.get('https://tendercells.com/demo');
+  expect(response.ok()).toBe(true);
+  const html = await response.text();
+  expect(html).toContain('TenderCells Public Demo and Site Index');
+  expect(html).toContain('Public demo explainer');
+  expect(html).toContain('https://tendercells.com/app/demo-manifest.json');
+  expect(html).toContain('Chicken Tender');
+  expect(html).toContain('WatchTower AI');
+  expect(html).toContain('Roaming Roost');
+});
+
 test('live marketing site exposes Google policy and consent pages', async ({ page, request }) => {
   await page.goto('https://tendercells.com/cookie-policy', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('h1')).toContainText('Cookie Policy');

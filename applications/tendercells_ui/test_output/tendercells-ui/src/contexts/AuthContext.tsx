@@ -9,7 +9,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { auth } from '../lib/firebase/firebaseApp';
+import { FIREBASE_ENABLED, auth } from '../lib/firebase/firebaseApp';
 
 interface AuthContextType {
   user: User | null;
@@ -32,6 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Listen for auth state changes
   useEffect(() => {
+    if (!FIREBASE_ENABLED) {
+      setUser(null);
+      setLoading(false);
+      return undefined;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
@@ -43,6 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setError(null);
+      if (!FIREBASE_ENABLED) {
+        throw new Error('Authentication is disabled in the public demo.');
+      }
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
@@ -54,6 +63,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = async () => {
     try {
       setError(null);
+      if (!FIREBASE_ENABLED) {
+        throw new Error('Authentication is disabled in the public demo.');
+      }
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
@@ -67,6 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, password: string) => {
     try {
       setError(null);
+      if (!FIREBASE_ENABLED) {
+        throw new Error('Authentication is disabled in the public demo.');
+      }
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Registration failed';
@@ -78,6 +93,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       setError(null);
+      if (!FIREBASE_ENABLED) {
+        setUser(null);
+        return;
+      }
       await signOut(auth);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Logout failed';

@@ -1,10 +1,13 @@
 /// <reference types="vite/client" />
 
 // firebaseApp.ts - Firebase initialization
-import { initializeApp } from 'firebase/app';
+import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import type { Auth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import type { Firestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import type { FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,26 +20,14 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-const demoFirebaseConfig = {
-  apiKey: 'demo-api-key',
-  authDomain: 'demo-project.firebaseapp.com',
-  databaseURL: 'https://demo-project.firebaseio.com',
-  projectId: 'demo-project',
-  storageBucket: 'demo-project.appspot.com',
-  messagingSenderId: '000000000000',
-  appId: 'demo-app-id',
-};
-
-const config = import.meta.env.VITE_FIREBASE_PROJECT_ID
-  ? firebaseConfig
-  : demoFirebaseConfig;
+export const FIREBASE_ENABLED = Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID);
 
 // Initialize Firebase
-const app = initializeApp(config);
+const app: FirebaseApp | undefined = FIREBASE_ENABLED ? initializeApp(firebaseConfig) : undefined;
 
 // Initialize Firebase services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+export const auth = app ? getAuth(app) : ({ currentUser: null } as Auth);
+export const db = app ? getFirestore(app) : (undefined as unknown as Firestore);
+export const storage = app ? getStorage(app) : (undefined as unknown as FirebaseStorage);
 
 export default app;

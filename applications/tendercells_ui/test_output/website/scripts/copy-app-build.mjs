@@ -19,3 +19,8 @@ for (const target of targets) {
 
   console.log(`Copied app build into ${target}`);
 }
+
+await cp(resolve(appDist, "index.html"), resolve(websiteDist, "demo.html"));
+await cp(resolve(appDist, "index.html"), resolve(websiteDist, "try.html"));
+
+console.log("Copied app build shell for clean demo and try URLs");

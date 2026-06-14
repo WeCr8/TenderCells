@@ -1,0 +1,15 @@
+# Tender Cells
+
+Tender Cells is built to help students, families, homesteaders, makers, educators, and engineers create the future of animal care through open-source agricultural technology.
+
+Mission:
+Where future engineers learn by caring for animals.
+
+Built by:
+WeCr8 Solutions
+
+Website:
+https://tendercells.com
+
+Source:
+https://github.com/WeCr8/TenderCells

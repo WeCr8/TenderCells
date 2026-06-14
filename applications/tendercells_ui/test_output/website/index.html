@@ -2,20 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/assets/images/tc-mark.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TenderCells - Smart Farming Solutions</title>
-    <meta name="description" content="AI-powered automated animal care platform with Chicken Tender™, WatchTower AI™, and Roaming Roost™. Smart farming for modern farmers." />
-    <meta name="keywords" content="chicken coop, automation, smart farming, animal care, robotics, AI" />
+    <title>TenderCells - Open-Source Smart Animal Care</title>
+    <meta name="description" content="TenderCells is an open-source agricultural engineering ecosystem for smart animal care, STEM education, 4-H, FFA, homesteaders, makers, and future engineers." />
+    <meta name="keywords" content="smart animal care, smart chicken coop, automated chicken coop, open-source agriculture, agricultural robotics, STEM education, 4-H engineering, FFA technology, homestead automation, ESP32 firmware, MQTT device control" />
     <meta name="author" content="WeCr8 Solutions" />
+    <link rel="canonical" href="https://tendercells.com/" />
 
-    <!-- Google Search Console Verification -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TenderCells" />
+    <meta property="og:title" content="TenderCells - Open-Source Smart Animal Care" />
+    <meta property="og:description" content="Open-source animal-care automation for coops, predator monitoring, STEM education, homesteads, makers, and agricultural robotics." />
+    <meta property="og:url" content="https://tendercells.com/" />
+    <meta property="og:image" content="https://tendercells.com/assets/images/products/chicken-tender-concept.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TenderCells - Open-Source Smart Animal Care" />
+    <meta name="twitter:description" content="Open-source animal-care automation for coops, predator monitoring, STEM education, homesteads, makers, and agricultural robotics." />
+    <meta name="twitter:image" content="https://tendercells.com/assets/images/products/chicken-tender-concept.png" />
+
     <meta name="google-site-verification" content="TODO_ADD_GSC_TOKEN" />
-
-    <!-- Google AdSense publisher verification -->
     <meta name="google-adsense-account" content="ca-pub-3639153716376265" />
 
-    <!-- Google Analytics 4 — send_page_view: false because React Router fires page_view events manually on each route change -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KSY2D1YGSL"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -27,9 +35,41 @@
       });
     </script>
 
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3639153716376265"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3639153716376265" crossorigin="anonymous"></script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://tendercells.com/#organization",
+            "name": "TenderCells",
+            "url": "https://tendercells.com/",
+            "logo": "https://tendercells.com/assets/images/tender-cells-logo.svg",
+            "sameAs": ["https://github.com/WeCr8/TenderCells"],
+            "description": "TenderCells builds open-source agricultural engineering tools for smart animal care, STEM education, 4-H, FFA, homesteaders, makers, and future engineers."
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://tendercells.com/#website",
+            "url": "https://tendercells.com/",
+            "name": "TenderCells",
+            "publisher": { "@id": "https://tendercells.com/#organization" },
+            "about": ["smart animal care", "smart chicken coops", "agricultural robotics", "open-source agriculture", "STEM education"]
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://tendercells.com/app/demo#software",
+            "name": "TenderCells Public Demo",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Web",
+            "url": "https://tendercells.com/app/demo",
+            "description": "A no-signup browser demo that seeds local smart animal-care products, flocks, schedules, property layout, and device concepts."
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

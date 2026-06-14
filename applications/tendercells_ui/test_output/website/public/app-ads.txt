@@ -1,0 +1,2 @@
+# app-ads.txt intentionally not configured yet.
+# Add authorized sellers when Tender Cells uses in-app advertising.

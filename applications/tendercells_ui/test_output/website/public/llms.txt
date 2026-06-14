@@ -1,0 +1,43 @@
+# Tender Cells
+
+Tender Cells is an open-source agricultural engineering ecosystem that helps students, families, homesteaders, makers, and future engineers build smart animal care systems.
+
+Tender Cells combines animal-care products, robotics, public demos, developer documentation, product CAD concepts, firmware, and STEM education paths for 4-H, FFA, homeschool, and maker communities.
+
+## Primary Pages
+
+- https://tendercells.com/
+- https://tendercells.com/shop
+- https://tendercells.com/shop/chicken-tender
+- https://tendercells.com/shop/watchtower
+- https://tendercells.com/shop/roaming-roost
+- https://tendercells.com/developers
+- https://tendercells.com/tender-cells-overview
+- https://tendercells.com/open-source
+- https://tendercells.com/app/demo
+- https://tendercells.com/education
+- https://tendercells.com/learn
+- https://tendercells.com/health
+
+## Core Topics
+
+- smart animal care
+- smart chicken coops
+- automated chicken coop
+- agricultural robotics
+- open-source agriculture
+- animal welfare technology
+- STEM education
+- 4-H engineering projects
+- FFA technology projects
+- homestead automation
+- ESP32 firmware
+- MQTT device control
+- product CAD concepts
+
+## Open Source Resources
+
+- GitHub: https://github.com/WeCr8/TenderCells
+- Developer docs: https://github.com/WeCr8/TenderCells/tree/main/docs/developer
+- Product docs: https://github.com/WeCr8/TenderCells/tree/main/docs/products
+- Hardware catalog: https://github.com/WeCr8/TenderCells/blob/main/docs/CHICKEN_TENDER_HARDWARE_CATALOG.md

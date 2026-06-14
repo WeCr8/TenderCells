@@ -1,0 +1,5 @@
+Contact: https://github.com/WeCr8/TenderCells/security/advisories/new
+Policy: https://github.com/WeCr8/TenderCells/blob/main/SECURITY.md
+Preferred-Languages: en
+Canonical: https://tendercells.com/.well-known/security.txt
+Expires: 2027-06-14T00:00:00Z

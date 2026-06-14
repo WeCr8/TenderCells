@@ -6,6 +6,7 @@ import { trackPageView } from '../utils/analytics';
 interface RouteMeta {
   title: string;
   description: string;
+  image?: string;
 }
 
 const DEFAULT_META: RouteMeta = {
@@ -25,18 +26,21 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/shop/chicken-tender': {
     title: 'Chicken Tender - Automated Smart Chicken Coop',
     description: 'Chicken Tender is a compact automated coop concept with door control, feed and water modules, sensors, camera, and internal rail/robot service layer.',
+    image: 'https://tendercells.com/assets/images/products/chicken-tender-concept.png',
   },
   '/shop/watchtower': {
     title: 'WatchTower AI - Solar Predator Monitor',
     description: 'WatchTower AI is a solar pole-mounted predator monitor concept with 360-degree cameras, ESP32 electronics, battery, and local alerts.',
+    image: 'https://tendercells.com/assets/images/products/predator-monitor-pole-mount.png',
   },
   '/shop/roaming-roost': {
     title: 'Roaming Roost - Mobile Pasture Coop Concept',
     description: 'Roaming Roost is a mobile pasture coop concept for automated rotation, docking, GPS boundaries, and WatchTower predator-alert integration.',
+    image: 'https://tendercells.com/assets/images/products/roaming-roost-concept.png',
   },
   '/education': {
-    title: 'TenderCells Education - STEM, 4-H, FFA, and Homeschool',
-    description: 'TenderCells education resources help students learn robotics, animal care, agriculture, engineering, and open-source product design.',
+    title: '4-H STEM, FFA, and Young Engineer Projects - TenderCells',
+    description: 'TenderCells education resources help 4-H members, FFA students, homeschoolers, and young engineers build smart animal-care automation projects.',
   },
   '/apps': {
     title: 'TenderCells Apps - Web Dashboard and Integrations',
@@ -120,10 +124,12 @@ export function usePageTracking() {
     ensureMeta('og:title', 'property', meta.title);
     ensureMeta('og:description', 'property', meta.description);
     ensureMeta('og:url', 'property', canonical);
+    ensureMeta('og:image', 'property', meta.image || 'https://tendercells.com/assets/images/products/chicken-tender-concept.png');
     ensureMeta('og:type', 'property', location.pathname.startsWith('/shop/') ? 'product' : 'website');
     ensureMeta('twitter:card', 'name', 'summary_large_image');
     ensureMeta('twitter:title', 'name', meta.title);
     ensureMeta('twitter:description', 'name', meta.description);
+    ensureMeta('twitter:image', 'name', meta.image || 'https://tendercells.com/assets/images/products/chicken-tender-concept.png');
     ensureCanonical(canonical);
 
     trackPageView(location.pathname + location.search, meta.title);

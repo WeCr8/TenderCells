@@ -21,8 +21,17 @@
     <meta name="twitter:description" content="Open-source animal-care automation for coops, predator monitoring, STEM education, homesteads, makers, and agricultural robotics." />
     <meta name="twitter:image" content="https://tendercells.com/assets/images/products/chicken-tender-concept.png" />
 
-    <meta name="google-site-verification" content="TODO_ADD_GSC_TOKEN" />
     <meta name="google-adsense-account" content="ca-pub-3639153716376265" />
+
+    <!-- Google Tag Manager -->
+    <script>
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-TC4BKSKG');
+    </script>
+    <!-- End Google Tag Manager -->
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KSY2D1YGSL"></script>
     <script>
@@ -66,12 +75,54 @@
             "operatingSystem": "Web",
             "url": "https://tendercells.com/app/demo",
             "description": "A no-signup browser demo that seeds local smart animal-care products, flocks, schedules, property layout, and device concepts."
+          },
+          {
+            "@type": "EducationalOrganization",
+            "@id": "https://tendercells.com/education#education",
+            "name": "TenderCells Education",
+            "url": "https://tendercells.com/education",
+            "parentOrganization": { "@id": "https://tendercells.com/#organization" },
+            "description": "TenderCells education resources help 4-H members, FFA students, homeschool families, classrooms, makers, and young engineers build smart animal-care automation projects.",
+            "audience": [
+              { "@type": "Audience", "audienceType": "4-H members" },
+              { "@type": "Audience", "audienceType": "FFA students" },
+              { "@type": "Audience", "audienceType": "homeschool families" },
+              { "@type": "Audience", "audienceType": "young engineers" }
+            ]
+          },
+          {
+            "@type": "Course",
+            "@id": "https://tendercells.com/education#young-engineer-build-path",
+            "name": "TenderCells Young Engineer Build Path",
+            "url": "https://tendercells.com/education#young-engineers",
+            "description": "A practical path from public demo exploration to module building, project documentation, and open-source contribution for agricultural robotics students.",
+            "provider": { "@id": "https://tendercells.com/#organization" },
+            "educationalLevel": "K-12, homeschool, 4-H, FFA, makerspace"
+          },
+          {
+            "@type": "Product",
+            "@id": "https://tendercells.com/shop/roaming-roost#product",
+            "name": "Roaming Roost",
+            "url": "https://tendercells.com/shop/roaming-roost",
+            "image": "https://tendercells.com/assets/images/products/roaming-roost-concept.png",
+            "description": "Roaming Roost is a mobile pasture coop concept for automated rotation, docking, GPS boundaries, and smart animal-care education projects.",
+            "brand": { "@id": "https://tendercells.com/#organization" },
+            "offers": {
+              "@type": "Offer",
+              "price": "1299",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/PreOrder"
+            }
           }
         ]
       }
     </script>
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TC4BKSKG"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

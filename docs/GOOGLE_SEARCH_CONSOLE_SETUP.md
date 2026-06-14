@@ -1,155 +1,105 @@
-# Google Search Console & Analytics Setup Guide
+# Google Search Console, GA4, and GTM Setup Guide
 
-## Step 1: Google Search Console (GSC) Setup
+## Current Production Tracking
 
-### Prerequisites
-- tendercells.com domain registered and DNS configured
-- Admin access to Google Cloud Console
+- GA4 measurement ID: `G-KSY2D1YGSL`
+- Google Tag Manager container: `GTM-TC4BKSKG`
+- AdSense publisher: `ca-pub-3639153716376265`
+- Sitemap: `https://tendercells.com/sitemap.xml`
+- Robots: `https://tendercells.com/robots.txt`
+- LLM discovery file: `https://tendercells.com/llms.txt`
 
-### Setup Steps
+## Google Search Console
 
-1. **Visit Google Search Console**
-   - Go to https://search.google.com/search-console
-   - Sign in with your WeCr8 Google account
+1. Open https://search.google.com/search-console.
+2. Add `https://tendercells.com` as a URL-prefix property.
+3. Use the Google Tag Manager verification method if the Google account has access to `GTM-TC4BKSKG`.
+4. If GTM verification is not available, use either fallback:
+   - HTML file: place Google's verification file in `applications/tendercells_ui/test_output/website/public/`.
+   - HTML meta tag: add Google's `google-site-verification` meta tag to `applications/tendercells_ui/test_output/website/index.html`.
+5. Submit `https://tendercells.com/sitemap.xml` under Sitemaps.
+6. Inspect and request indexing for:
+   - `https://tendercells.com/education`
+   - `https://tendercells.com/developers`
+   - `https://tendercells.com/open-source`
+   - `https://tendercells.com/tender-cells-overview`
+   - `https://tendercells.com/shop/chicken-tender`
+   - `https://tendercells.com/shop/watchtower`
+   - `https://tendercells.com/shop/roaming-roost`
+   - `https://tendercells.com/app/demo`
 
-2. **Add Property**
-   - Click "Add property"
-   - Enter `https://tendercells.com`
-   - Select "URL prefix" method
+## GA4 Event Coverage
 
-3. **Verify Ownership**
-   - Google will offer 5 verification methods
-   - **Recommended: HTML file method** (easiest for Vite)
-     - Download the verification file (e.g., `google1a2b3c4d5e6f7g.html`)
-     - Place in `applications/tendercells_ui/test_output/website/public/`
-     - Verify in GSC interface
+The marketing site sends events through both `gtag` and `dataLayer`, so GA4 and GTM can use the same event names.
 
-4. **Update Meta Tag** (alternative/additional)
-   - Copy the verification meta tag from GSC
-   - Replace `TODO_ADD_GSC_TOKEN` in `index.html` with the actual token
-   - Current line:
-     ```html
-     <meta name="google-site-verification" content="TODO_ADD_GSC_TOKEN" />
-     ```
+Tracked events:
 
-5. **Submit Sitemap**
-   - In GSC, go to Sitemaps section
-   - Add sitemap URL: `https://tendercells.com/sitemap.xml`
-   - Wait 24-48 hours for initial crawl
+- `page_view`
+- `internal_link_click`
+- `click` for outbound links
+- `resource_click` for GitHub, docs, downloads, and external resources
+- `button_click`
+- `cta_click`
+- `view_item`
+- `read_depth` at 25%, 50%, 75%, and 90%
+- `form_submit`
+- `search`
+- `file_download`
 
-6. **Monitor Performance**
-   - Check "Performance" tab for search queries
-   - Monitor crawl errors in "Coverage" tab
-   - Track mobile usability
+## Recommended GTM Triggers
 
----
+- Page View: all pages
+- Custom Event: `read_depth`
+- Custom Event: `internal_link_click`
+- Custom Event: `resource_click`
+- Custom Event: `cta_click`
+- Custom Event: `view_item`
+- Click URL contains `github.com/WeCr8/TenderCells`
+- Page Path equals `/education`
+- Page Path equals `/developers`
+- Page Path equals `/app/demo`
 
-## Step 2: Google Analytics 4 (GA4) Setup
+## Recommended GA4 Conversions
 
-### Prerequisites
-- Google Analytics account (or create at analytics.google.com)
-- Admin access to GA account
+Mark these as key events in GA4:
 
-### Setup Steps
+- `cta_click` where `cta_label` is `try-live-demo`
+- `resource_click` where `resource_type` is `github`
+- `internal_link_click` where `destination` is `/education`
+- `internal_link_click` where `destination` is `/developers`
+- `view_item` for `chicken-tender`, `watchtower`, and `roaming-roost`
 
-1. **Create GA4 Property**
-   - Visit https://analytics.google.com
-   - Click "Create" → "Property"
-   - Property name: "Tender Cells Website"
-   - Reporting timezone: UTC
-   - Currency: USD
+## Search Monitoring
 
-2. **Create Data Stream**
-   - After property creation, click "Create data stream"
-   - Platform: **Web**
-   - Website URL: `https://tendercells.com`
-   - Stream name: "Main Website"
-   - Click "Create stream"
+Track these in Search Console:
 
-3. **Copy Measurement ID**
-   - GA4 will generate a measurement ID like `G-XXXXXXXXXX`
-   - Copy this ID
+- 4-H STEM projects
+- 4-H engineering projects
+- FFA technology projects
+- smart chicken coop
+- automated chicken coop
+- open-source agriculture
+- agricultural robotics
+- animal-care automation
+- homestead automation
+- STEM animal science projects
 
-4. **Update index.html**
-   - In `applications/tendercells_ui/test_output/website/index.html`
-   - Replace both instances of `G-XXXXXXXXXX` with your actual GA4 ID
-   - Current lines:
-     ```html
-     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-     ...
-     gtag('config', 'G-XXXXXXXXXX', {
-     ```
+## Deployment Check
 
-5. **Deploy and Test**
-   - After deployment, wait 24-48 hours
-   - Go to GA4 → Realtime to verify tracking is working
-   - Visit tendercells.com and confirm pageviews appear in Realtime
-
-6. **Set Up Events**
-   - Events are auto-tracked: page_view, button_click, anchor_click
-   - View custom events in GA4 → Events section
-
----
-
-## Step 3: Configure Analytics in index.html
-
-Current GA4 setup in `index.html`:
-- Tracks page views automatically
-- Passes page_path for each navigation
-
-Current events tracked via `src/utils/analytics.ts`:
-- `page_view` - when user lands on a page
-- `button_click` - when user clicks "Get Started"
-- `anchor_click` - when user clicks navigation links
-
----
-
-## Step 4: Deploy
-
-Once GSC and GA4 are configured:
+After any SEO or tracking change:
 
 ```bash
 cd applications/tendercells_ui/test_output/website
-npm run build
-npm run deploy  # or git push (if CI/CD is set up)
+npm.cmd run build:with-app
+npx.cmd firebase deploy --only hosting:main
 ```
 
----
+Then verify:
 
-## Monitoring Checklist
-
-- [ ] GSC meta tag verified
-- [ ] Sitemap submitted in GSC
-- [ ] GA4 measurement ID active
-- [ ] Realtime events showing in GA4
-- [ ] Search impressions appearing in GSC (after 24-48 hours)
-- [ ] Mobile usability report clean in GSC
-- [ ] No crawl errors in GSC Coverage tab
-
----
-
-## Troubleshooting
-
-### GSC shows "Verification pending"
-- Ensure HTML verification file is in `public/` folder
-- Or use the meta tag method and rebuild site
-
-### GA4 shows no data
-- Check that GA4 ID is correct in index.html
-- Wait 24-48 hours for data pipeline
-- Use Browser DevTools → Network to confirm gtag.js is loading
-
-### Sitemap shows 0 URLs indexed
-- Check robots.txt allows crawling
-- Verify sitemap.xml is accessible at `https://tendercells.com/sitemap.xml`
-- Submit individual URLs in GSC if needed
-
----
-
-## Next Steps
-
-1. Set up Google Search Console alerts for critical errors
-2. Create Google Analytics custom dashboards for tracking KPIs
-3. Link GSC to GA4 for search performance insights
-4. Configure Google Tag Manager (GTM) for advanced tracking
-5. Set up conversion tracking for "Get Started" CTA
+```bash
+curl.exe -I https://tendercells.com/robots.txt
+curl.exe -I https://tendercells.com/sitemap.xml
+curl.exe -I https://tendercells.com/llms.txt
+curl.exe -I https://tendercells.com/education
+curl.exe -I https://tendercells.com/shop/roaming-roost
+```

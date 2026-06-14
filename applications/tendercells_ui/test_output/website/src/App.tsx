@@ -17,10 +17,12 @@ import BlogPage from "./pages/BlogPage";
 import StoryPage from "./pages/StoryPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { usePageTracking } from "./hooks/usePageTracking";
+import { useMarketingTelemetry } from "./hooks/useMarketingTelemetry";
 
 // Fires GA4 page_view on every route change — must be inside <BrowserRouter>
 function PageTracker() {
   usePageTracking();
+  useMarketingTelemetry();
   return null;
 }
 

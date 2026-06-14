@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import { trackProductView } from "../utils/analytics";
 
 const PRODUCTS: Record<string, {
   icon: string; name: string; tagline: string; price: string; desc: string;
@@ -233,18 +235,21 @@ const PRODUCT_VISUALS: Record<string, {
     ],
   },
   "roaming-roost": {
-    image: "/app/assets/images/products/roaming-roost.svg",
-    alt: "Roaming Roost mobile pasture coop concept",
+    image: "/assets/images/products/roaming-roost-concept.png",
+    alt: "Roaming Roost mobile pasture coop concept with dome frame, wheels, and pasture automation hardware",
     notes: [
       "A mobile coop concept for pasture rotation instead of a fixed backyard cell.",
       "Drive base, docking, charging, and GPS boundary behavior need product-level docs.",
       "WatchTower alerts can command it to return to dock or pause movement.",
-      "The current image is a concept asset; BOM, wiring, and safety validation are the next docs to fill in.",
+      "The concept shows the physical direction for a student or maker build: mobile frame, protected flock space, drive hardware, charging dock, and monitoring sensors.",
     ],
     docs: [
       { label: "Product docs", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/roaming-roost" },
       { label: "Hardware index", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/hardware.md" },
       { label: "Product ideas", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md" },
+    ],
+    extraImages: [
+      { image: "/app/assets/images/products/roaming-roost.svg", alt: "Earlier Roaming Roost mobile coop diagram", label: "Earlier app concept" },
     ],
   },
   watchtower: {
@@ -273,6 +278,12 @@ export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const product = slug ? PRODUCTS[slug] : undefined;
   const visual = slug ? PRODUCT_VISUALS[slug] : undefined;
+
+  useEffect(() => {
+    if (product && slug) {
+      trackProductView(product.name, slug);
+    }
+  }, [product, slug]);
 
   if (!product) {
     return (

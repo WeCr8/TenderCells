@@ -19,11 +19,11 @@
 //   2. seed — full report ok, every device/layer wired
 //   3. idempotent — re-seed never duplicates
 //   4. reset — removes all demo-tagged data, report no longer ok
-//   5. reset preserves the owner's own (non-demo) flock and schedules
+//   5. reset preserves the owner's own (non-demo) flock, schedules and products
 
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-// ── Minimal browser-global shim (node env) ─────────────────────────────────────
+// ── Minimal browser-global shim (node env) ───────────────────────────────────
 beforeAll(() => {
   const store = new Map<string, string>();
   const localStorageShim = {
@@ -147,7 +147,7 @@ describe('demoEnvironment — reset', () => {
     expect(report.ok).toBe(false);
   });
 
-  it('preserves the owner’s own flock and schedules', async () => {
+  it('preserves the owner’s own flock, schedules and products', async () => {
     const myDevice = 'my_real_coop_001';
     const myBird = await birdsService.createBird({
       ...EMPTY_BIRD,
@@ -162,6 +162,17 @@ describe('demoEnvironment — reset', () => {
       label: 'My personal feed time',
       amount: 90,
     });
+    const myProduct = await ProductsService.registerProduct({
+      product_type: 'automation_device',
+      product_name: 'My coop door controller',
+      serial_number: 'MY-REAL-COOP-DOOR-001',
+      device_id: myDevice,
+      location: 'Backyard coop',
+      metadata: {
+        owner_email: 'owner@example.test',
+        source: 'owner-created',
+      },
+    });
 
     await seedDemoEnvironment();
     await resetDemoEnvironment();
@@ -171,5 +182,10 @@ describe('demoEnvironment — reset', () => {
 
     const schedules = await schedulesService.getSchedules(myDevice);
     expect(schedules.find((s) => s.id === mySchedule.id)?.label).toBe('My personal feed time');
+
+    const products = await ProductsService.getUserProducts();
+    const foundProduct = products.find((p) => p.id === myProduct.id);
+    expect(foundProduct, 'Owner-created product should survive reset').toBeDefined();
+    expect(foundProduct?.device_id).toBe(myDevice);
   });
 });

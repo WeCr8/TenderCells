@@ -19,6 +19,14 @@ const buildPaths = [
   "feed, water, and environmental monitoring modules",
 ];
 
+const topicPages = [
+  { label: "TenderCells Academy", href: "/academy" },
+  { label: "4-H STEM projects", href: "/4h" },
+  { label: "FFA agricultural technology projects", href: "/ffa" },
+  { label: "Homeschool STEM projects", href: "/homeschool" },
+  { label: "Science fair agricultural robotics projects", href: "/science-fair" },
+];
+
 export default function TenderCellsOverviewPage() {
   return (
     <PageLayout>
@@ -65,6 +73,9 @@ export default function TenderCellsOverviewPage() {
           <li><a href="/developers">Developer documentation hub</a></li>
           <li><a href="/open-source">Open-source program</a></li>
           <li><a href="/app/demo">No-signup public demo</a></li>
+          {topicPages.map((page) => (
+            <li key={page.href}><a href={page.href}>{page.label}</a></li>
+          ))}
           <li><a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer">GitHub repository</a></li>
         </ul>
       </div>

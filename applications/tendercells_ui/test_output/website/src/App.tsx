@@ -13,6 +13,7 @@ import ServicesPage from "./pages/ServicesPage";
 import OpenSourcePage from "./pages/OpenSourcePage";
 import DevelopersPage from "./pages/DevelopersPage";
 import TenderCellsOverviewPage from "./pages/TenderCellsOverviewPage";
+import AudienceProgramPage from "./pages/AudienceProgramPage";
 import BlogPage from "./pages/BlogPage";
 import StoryPage from "./pages/StoryPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -39,6 +40,11 @@ function App() {
 
         {/* Education */}
         <Route path="/education" element={<EducationPage />} />
+        <Route path="/academy" element={<AudienceProgramPage kind="academy" />} />
+        <Route path="/4h" element={<AudienceProgramPage kind="4h" />} />
+        <Route path="/ffa" element={<AudienceProgramPage kind="ffa" />} />
+        <Route path="/homeschool" element={<AudienceProgramPage kind="homeschool" />} />
+        <Route path="/science-fair" element={<AudienceProgramPage kind="science-fair" />} />
 
         {/* Applications */}
         <Route path="/apps" element={<ApplicationsPage />} />

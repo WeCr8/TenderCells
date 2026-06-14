@@ -42,6 +42,26 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: '4-H STEM, FFA, and Young Engineer Projects - TenderCells',
     description: 'TenderCells education resources help 4-H members, FFA students, homeschoolers, and young engineers build smart animal-care automation projects.',
   },
+  '/academy': {
+    title: 'TenderCells Academy - Agricultural Robotics Curriculum',
+    description: 'TenderCells Academy teaches smart animal care, robotics, sensors, computer vision, data science, open-source farming, and safe automation.',
+  },
+  '/4h': {
+    title: '4-H STEM Projects - Smart Animal Care and Engineering',
+    description: 'TenderCells helps 4-H members build smart chicken coop, predator monitor, sensor, data, and agricultural technology projects.',
+  },
+  '/ffa': {
+    title: 'FFA Agricultural Technology Projects - TenderCells',
+    description: 'TenderCells gives FFA students SAE-ready projects for poultry technology, livestock monitoring, farm automation, and animal-care data.',
+  },
+  '/homeschool': {
+    title: 'Homeschool STEM Projects - Robotics, Animal Care, and Homesteading',
+    description: 'TenderCells helps homeschool families teach robotics, coding, biology, data science, and smart homesteading through real animal-care projects.',
+  },
+  '/science-fair': {
+    title: 'Science Fair Agricultural Robotics Projects - TenderCells',
+    description: 'TenderCells science fair ideas combine animal welfare, environmental sensing, smart chicken coops, robotics, and open-source farming.',
+  },
   '/apps': {
     title: 'TenderCells Apps - Web Dashboard and Integrations',
     description: 'Explore TenderCells web dashboard, app concepts, developer APIs, MQTT integration, and public demo workflows.',

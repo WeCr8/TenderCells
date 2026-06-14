@@ -16,6 +16,11 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 - https://tendercells.com/open-source
 - https://tendercells.com/app/demo
 - https://tendercells.com/education
+- https://tendercells.com/academy
+- https://tendercells.com/4h
+- https://tendercells.com/ffa
+- https://tendercells.com/homeschool
+- https://tendercells.com/science-fair
 - https://tendercells.com/learn
 - https://tendercells.com/health
 
@@ -29,7 +34,11 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 - animal welfare technology
 - STEM education
 - 4-H engineering projects
+- 4-H STEM projects
 - FFA technology projects
+- FFA supervised agricultural experience projects
+- homeschool STEM projects
+- agricultural robotics science fair projects
 - homestead automation
 - ESP32 firmware
 - MQTT device control

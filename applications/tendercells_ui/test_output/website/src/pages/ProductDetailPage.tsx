@@ -274,10 +274,32 @@ const PRODUCT_VISUALS: Record<string, {
   },
 };
 
+const PRODUCT_HUB_LINKS: Record<string, { label: string; href: string; note: string }[]> = {
+  "chicken-tender": [
+    { label: "Chicken health and coop care", href: "/health#chicken", note: "Animal welfare and daily care context" },
+    { label: "4-H smart coop project", href: "/4h", note: "Student-friendly project path" },
+    { label: "FFA poultry technology SAE", href: "/ffa", note: "Record book and agricultural technology path" },
+    { label: "Developer hardware docs", href: "/developers", note: "Firmware, MQTT, hardware, and contribution links" },
+  ],
+  "roaming-roost": [
+    { label: "Science fair pasture rotation", href: "/science-fair", note: "Measurable grazing and route-planning project ideas" },
+    { label: "Homeschool mobile coop design", href: "/homeschool", note: "Geometry, robotics, and homestead learning path" },
+    { label: "TenderCells Academy", href: "/academy", note: "Curriculum path for mobile agricultural robotics" },
+    { label: "Developer hardware docs", href: "/developers", note: "Docking, device, and automation documentation" },
+  ],
+  watchtower: [
+    { label: "Predator prevention and health", href: "/health#predators", note: "Animal safety and monitoring context" },
+    { label: "4-H predator monitor project", href: "/4h", note: "Camera, solar, and alert-system project path" },
+    { label: "Science fair camera study", href: "/science-fair", note: "Observation and monitoring experiment ideas" },
+    { label: "Developer hardware docs", href: "/developers", note: "Camera, edge AI, and device integration links" },
+  ],
+};
+
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const product = slug ? PRODUCTS[slug] : undefined;
   const visual = slug ? PRODUCT_VISUALS[slug] : undefined;
+  const hubLinks = slug ? PRODUCT_HUB_LINKS[slug] : undefined;
 
   useEffect(() => {
     if (product && slug) {
@@ -343,6 +365,21 @@ export default function ProductDetailPage() {
         <a href="#order" className="btn-primary" style={{ background: "#2a9d8f" }}>Order {product.name}</a>
         <Link to="/shop" className="btn-outline">← All Products</Link>
       </div>
+
+      {hubLinks && (
+        <>
+          <h2 className="section-title">Build, Learn, and Contribute</h2>
+          <div className="card-grid">
+            {hubLinks.map((link) => (
+              <Link key={link.href} to={link.href} className="card" style={{ textDecoration: "none" }}>
+                <h3>{link.label}</h3>
+                <p>{link.note}</p>
+                <span className="tag">Open related guide</span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
 
       {product.features.length > 0 && (
         <>

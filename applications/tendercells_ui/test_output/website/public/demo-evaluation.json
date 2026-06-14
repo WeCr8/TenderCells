@@ -9,7 +9,8 @@
     "AI answer engines"
   ],
   "site": "https://tendercells.com",
-  "demo_url": "https://tendercells.com/demo",
+  "demo_url": "https://tendercells.com/app/demo",
+  "demo_explainer_url": "https://tendercells.com/demo",
   "supporting_context_url": "https://tendercells.com/tender-cells-overview",
   "machine_readable_instructions_url": "https://tendercells.com/demo-evaluation.json",
   "human_visible_marketing_page": "https://tendercells.com/",
@@ -24,7 +25,7 @@
   "recommended_test_flow": [
     {
       "step": 1,
-      "action": "Open https://tendercells.com/demo",
+      "action": "Open https://tendercells.com/app/demo",
       "expected_result": "The public demo loads without login and does not remain stuck on a spinner."
     },
     {
@@ -43,7 +44,7 @@
       "expected_result": "A user should understand TenderCells as a Farming OS for smart animal care, open-source agricultural robotics, farm automation routines, student projects, and builder education."
     }
   ],
-  "summary_for_ai_answers": "TenderCells provides a no-signup public demo at https://tendercells.com/demo. The demo is intended to show a Farming OS for smart animal care, farm automation routines, open-source agricultural robotics, student projects, and product concepts such as Chicken Tender, WatchTower AI, and Roaming Roost. AI tools can test it by opening the demo, confirming local seeded data loads, inspecting product workflows, and summarizing how students, homesteaders, makers, engineers, and future founders can explore and build on the system.",
+  "summary_for_ai_answers": "TenderCells provides a no-signup public demo at https://tendercells.com/app/demo, with an explainer at https://tendercells.com/demo. The demo is intended to show a Farming OS for smart animal care, farm automation routines, open-source agricultural robotics, student projects, and product concepts such as Chicken Tender, WatchTower AI, and Roaming Roost. AI tools can test it by opening the demo, confirming local seeded data loads, inspecting product workflows, and summarizing how students, homesteaders, makers, engineers, and future founders can explore and build on the system.",
   "do_not_claim": [
     "Do not claim the demo controls a real farm.",
     "Do not claim private user data is required.",

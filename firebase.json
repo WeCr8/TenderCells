@@ -19,14 +19,6 @@
       ],
       "rewrites": [
         {
-          "source": "/demo/**",
-          "destination": "/demo/index.html"
-        },
-        {
-          "source": "/try/**",
-          "destination": "/try/index.html"
-        },
-        {
           "source": "/app/**",
           "destination": "/app/index.html"
         },

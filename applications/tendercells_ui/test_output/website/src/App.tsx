@@ -19,6 +19,7 @@ import GuidePage from "./pages/GuidePage";
 import SeoHubPage from "./pages/SeoHubPage";
 import LLMDemoTestPage from "./pages/LLMDemoTestPage";
 import FarmAutomationPage from "./pages/FarmAutomationPage";
+import PublicDemoPage from "./pages/PublicDemoPage";
 import BlogPage from "./pages/BlogPage";
 import StoryPage from "./pages/StoryPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -54,6 +55,7 @@ function App() {
 
         {/* Applications */}
         <Route path="/apps" element={<ApplicationsPage />} />
+        <Route path="/demo" element={<PublicDemoPage />} />
 
         {/* Learn */}
         <Route path="/learn" element={<LearnPage />} />

@@ -85,7 +85,7 @@ var muiBoxOptimizerPatch = {
 export default defineConfig(function (_a) {
     var mode = _a.mode;
     return ({
-        base: mode === 'public-demo' ? '/demo/' : process.env.VITE_APP_BASE_PATH || '/',
+        base: mode === 'public-demo' ? '/app/' : process.env.VITE_APP_BASE_PATH || '/',
         plugins: [muiBoxCreateThemePatch(), react()],
         envDir: path.resolve(__dirname, '../../../..'),
         define: mode === 'public-demo' ? publicDemoEnv : undefined,

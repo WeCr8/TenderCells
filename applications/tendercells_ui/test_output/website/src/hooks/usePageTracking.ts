@@ -70,6 +70,10 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: 'TenderCells Apps - Web Dashboard and Integrations',
     description: 'Explore TenderCells web dashboard, app concepts, developer APIs, MQTT integration, and public demo workflows.',
   },
+  '/demo': {
+    title: 'TenderCells Public Demo - Farming OS Experience',
+    description: 'Learn what the TenderCells public demo shows, how to test it, and how AI tools can evaluate the smart animal-care Farming OS experience.',
+  },
   '/learn': {
     title: 'Learn Smart Animal Care Automation - TenderCells',
     description: 'Learn homestead automation, smart chicken coops, animal-care robotics, open-source agriculture, and practical STEM projects.',

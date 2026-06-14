@@ -2,7 +2,7 @@ import PageLayout from "../components/PageLayout";
 
 const quickLinks = [
   ["GitHub repository", "https://github.com/WeCr8/TenderCells"],
-  ["Live public demo", "/demo"],
+  ["Live public demo", "/app/demo"],
   ["Good first issues", "https://github.com/WeCr8/TenderCells/labels/good%20first%20issue"],
   ["Discussions", "https://github.com/WeCr8/TenderCells/discussions"],
 ];

@@ -111,7 +111,7 @@ export default function FarmAutomationPage() {
       </div>
 
       <div className="cta-bar">
-        <Link to="/demo" className="btn-primary">Test the Demo</Link>
+        <Link to="/app/demo" className="btn-primary">Test the Demo</Link>
         <Link to="/llm-demo-test" className="btn-outline">LLM Demo Test Guide</Link>
         <Link to="/academy" className="btn-outline">Start Learning</Link>
       </div>

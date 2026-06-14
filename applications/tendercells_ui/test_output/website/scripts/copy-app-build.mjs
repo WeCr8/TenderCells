@@ -6,21 +6,19 @@ const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = resolve(websiteRoot, "../../../..");
 const appDist = resolve(repoRoot, "applications/tendercells_ui/test_output/tendercells-ui/dist");
 const websiteDist = resolve(websiteRoot, "dist");
-const targets = [resolve(websiteDist, "app"), resolve(websiteDist, "demo"), resolve(websiteDist, "try")];
+const target = resolve(websiteDist, "app");
 
-for (const target of targets) {
-  if (!target.startsWith(websiteDist)) {
-    throw new Error(`Refusing to write outside website dist: ${target}`);
-  }
-
-  await rm(target, { recursive: true, force: true });
-  await mkdir(target, { recursive: true });
-  await cp(appDist, target, { recursive: true });
-
-  console.log(`Copied app build into ${target}`);
+if (!target.startsWith(websiteDist)) {
+  throw new Error(`Refusing to write outside website dist: ${target}`);
 }
 
-await cp(resolve(appDist, "index.html"), resolve(websiteDist, "demo.html"));
-await cp(resolve(appDist, "index.html"), resolve(websiteDist, "try.html"));
+await rm(target, { recursive: true, force: true });
+await mkdir(target, { recursive: true });
+await cp(appDist, target, { recursive: true });
 
-console.log("Copied app build shell for clean demo and try URLs");
+await cp(resolve(appDist, "index.html"), resolve(target, "demo.html"));
+await cp(resolve(appDist, "index.html"), resolve(target, "try.html"));
+await cp(resolve(appDist, "index.html"), resolve(target, "account.html"));
+
+console.log(`Copied app build into ${target}`);
+console.log("Copied app clean-url shells for /app/demo, /app/try, and /app/account");

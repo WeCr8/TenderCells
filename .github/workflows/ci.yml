@@ -127,13 +127,8 @@ jobs:
         working-directory: applications/tendercells_ui/test_output/website
         run: |
           npm ci
-          npm run build
-
-      - name: Build control app
-        working-directory: applications/tendercells_ui/test_output/tendercells-ui
-        run: |
-          npm ci
-          npm run build
+          npm ci --prefix ../tendercells-ui
+          npm run build:with-app
 
       - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0

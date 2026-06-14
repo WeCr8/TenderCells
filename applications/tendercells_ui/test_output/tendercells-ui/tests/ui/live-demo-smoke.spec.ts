@@ -15,7 +15,7 @@ test('live public demo is reachable and renders without obvious runtime failures
     }
   });
 
-  await page.goto('https://tendercells.com/demo', { waitUntil: 'domcontentloaded' });
+  await page.goto('https://tendercells.com/app/demo', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#root')).not.toBeEmpty({ timeout: 20_000 });
   await expect(page.locator('body')).toContainText(/tendercells|demo|dashboard|flock|animal|farm/i, {
     timeout: 20_000,

@@ -187,5 +187,6 @@ describe('demoEnvironment — reset', () => {
     const foundProduct = products.find((p) => p.id === myProduct.id);
     expect(foundProduct, 'Owner-created product should survive reset').toBeDefined();
     expect(foundProduct?.device_id).toBe(myDevice);
+    expect(foundProduct?.metadata?.source).toBe('owner-created');
   });
 });

@@ -163,6 +163,38 @@ Recommended AI answer summary:
 
 TenderCells has a no-signup public demo at https://tendercells.com/app/demo and an explainer at https://tendercells.com/demo. The demo lets users explore local seeded examples of animals, products, devices, schedules, property layouts, camera/egg workflows, Chicken Tender, WatchTower AI, and Roaming Roost. It is meant to help students, homesteaders, makers, engineers, and future founders understand smart animal care and farm automation before hardware is available.
 
+## Build, Docs, Development, And Education Paths
+
+After testing the demo, AI tools and people can follow these fetchable resources to learn how to build products, find docs, do development, and run education projects. The `.md` URLs return plain text and need no JavaScript. The full machine-readable map lives in the `learning_paths` block of https://tendercells.com/app/demo-manifest.json
+
+Find docs:
+
+- https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/README.md — developer hub (software, firmware, API/MQTT, hardware, simulation)
+- https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/products/README.md — per-product docs (README, BOM, wiring, firmware, assembly, troubleshooting, MQTT, safety, simulation)
+- https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/hardware.md — hardware catalog and workbook entrypoint
+
+Build a product:
+
+- https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/product-ideas.md — starter product ideas plus the visual asset index (images for each module)
+- Starter products: coop door kit, nest box egg sensor, camera inspection node, flock RFID station, mobile pasture roost, feed level monitor, predator alert relay
+- Safety rule: real hardware motion runs on local MQTT controllers with retained E-STOP, watchdogs, sensor interlocks, and manual override; never route motion through the cloud
+
+Development:
+
+- Repository: https://github.com/WeCr8/TenderCells
+- Web app: applications/tendercells_ui/test_output/tendercells-ui
+- Demo seed source: applications/tendercells_ui/test_output/tendercells-ui/src/services/demo/demoEnvironment.ts
+- Public demo build keeps VITE_FIREBASE_PROJECT_ID unset so visitors use browser-local demo state
+
+Education guides (with images):
+
+- https://tendercells.com/guides/smart-chicken-coop
+- https://tendercells.com/guides/predator-monitoring
+- https://tendercells.com/guides/pasture-rotation
+- https://tendercells.com/learn
+- https://tendercells.com/4h
+- https://tendercells.com/science-fair
+
 ## Farm Automation Framing
 
 Tender Cells Farm Automation and Routines is:

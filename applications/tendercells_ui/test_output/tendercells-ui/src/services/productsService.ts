@@ -185,8 +185,8 @@ export class ProductsService {
       metadata: {
         product_family: data.product_type === 'custom_product' ? 'community-custom' : undefined,
         mqtt_base_topic: deviceId ? `tc/${deviceId}` : undefined,
-        ...metadata,
         source: 'local-dev-fallback',
+        ...metadata,
       },
       created_at: now,
       updated_at: now,

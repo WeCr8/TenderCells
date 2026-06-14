@@ -108,7 +108,7 @@ export default function EducationPage() {
           {
             title: "1. Explore the Farming OS",
             desc: "Use the no-signup public demo to inspect flocks, devices, schedules, property layouts, and automation ideas before touching hardware.",
-            href: "/app/demo",
+            href: "/demo",
             label: "Open demo",
           },
           {

@@ -52,7 +52,7 @@ const muiBoxOptimizerPatch = {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === 'public-demo' ? '/app/' : process.env.VITE_APP_BASE_PATH || '/',
+  base: mode === 'public-demo' ? '/demo/' : process.env.VITE_APP_BASE_PATH || '/',
   plugins: [muiBoxCreateThemePatch(), react()],
   envDir: path.resolve(__dirname, '../../../..'),
   define: mode === 'public-demo' ? publicDemoEnv : undefined,

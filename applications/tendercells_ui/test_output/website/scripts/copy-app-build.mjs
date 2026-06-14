@@ -6,14 +6,16 @@ const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = resolve(websiteRoot, "../../../..");
 const appDist = resolve(repoRoot, "applications/tendercells_ui/test_output/tendercells-ui/dist");
 const websiteDist = resolve(websiteRoot, "dist");
-const target = resolve(websiteDist, "app");
+const targets = [resolve(websiteDist, "app"), resolve(websiteDist, "demo"), resolve(websiteDist, "try")];
 
-if (!target.startsWith(websiteDist)) {
-  throw new Error(`Refusing to write outside website dist: ${target}`);
+for (const target of targets) {
+  if (!target.startsWith(websiteDist)) {
+    throw new Error(`Refusing to write outside website dist: ${target}`);
+  }
+
+  await rm(target, { recursive: true, force: true });
+  await mkdir(target, { recursive: true });
+  await cp(appDist, target, { recursive: true });
+
+  console.log(`Copied app build into ${target}`);
 }
-
-await rm(target, { recursive: true, force: true });
-await mkdir(target, { recursive: true });
-await cp(appDist, target, { recursive: true });
-
-console.log(`Copied app build into ${target}`);

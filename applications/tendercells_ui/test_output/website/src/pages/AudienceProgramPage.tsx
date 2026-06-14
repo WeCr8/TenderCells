@@ -31,7 +31,7 @@ const programs: Record<string, Program> = {
       { title: "Predator Monitoring", desc: "Explore cameras, solar power, local AI, alerts, and animal safety response.", href: "/shop/watchtower" },
     ],
     resources: [
-      { label: "Public demo", href: "/app/demo" },
+      { label: "Public demo", href: "/demo" },
       { label: "Developer docs", href: "/developers" },
       { label: "Education hub", href: "/education" },
       { label: "GitHub repository", href: "https://github.com/WeCr8/TenderCells" },
@@ -81,7 +81,7 @@ const programs: Record<string, Program> = {
       { title: "Farm Safety Alert System", desc: "Study WatchTower AI as a solar predator and perimeter alert concept.", href: "/shop/watchtower" },
     ],
     resources: [
-      { label: "Public demo", href: "/app/demo" },
+      { label: "Public demo", href: "/demo" },
       { label: "Developers", href: "/developers" },
       { label: "Open source program", href: "/open-source" },
       { label: "Academy", href: "/academy" },
@@ -132,7 +132,7 @@ const programs: Record<string, Program> = {
     ],
     resources: [
       { label: "Academy", href: "/academy" },
-      { label: "Public demo", href: "/app/demo" },
+      { label: "Public demo", href: "/demo" },
       { label: "Learn automation", href: "/learn/automation" },
       { label: "Developer docs", href: "/developers" },
     ],

@@ -1,5 +1,5 @@
 const DEFAULT_APP_ENTRY_URL = "https://tendercells.com/app/account";
-const DEFAULT_DEMO_URL = "https://tendercells.com/app/demo";
+const DEFAULT_DEMO_URL = "https://tendercells.com/demo";
 
 export const TENDERCELLS_APP_ENTRY_URL =
   import.meta.env.VITE_TENDERCELLS_APP_URL || DEFAULT_APP_ENTRY_URL;

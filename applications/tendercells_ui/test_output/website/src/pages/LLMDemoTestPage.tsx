@@ -3,7 +3,7 @@ import PageLayout from "../components/PageLayout";
 const testFlows = [
   {
     title: "Open the public demo",
-    body: "Visit https://tendercells.com/app/demo. The demo should load without account creation, payment, private data, or live Firestore access.",
+    body: "Visit https://tendercells.com/demo. The demo should load without account creation, payment, private data, or live Firestore access.",
   },
   {
     title: "Check demo state",
@@ -67,7 +67,7 @@ export default function LLMDemoTestPage() {
       </div>
 
       <div className="cta-bar">
-        <a href="/app/demo" className="btn-primary">Open Public Demo</a>
+        <a href="/demo" className="btn-primary">Open Public Demo</a>
         <a href="/tender-cells-overview" className="btn-outline">Read Overview</a>
         <a href="/developers" className="btn-outline">Developer Docs</a>
       </div>

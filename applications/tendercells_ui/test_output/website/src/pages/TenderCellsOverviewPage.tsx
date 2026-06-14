@@ -73,7 +73,7 @@ export default function TenderCellsOverviewPage() {
           <li><a href="/shop/roaming-roost">Roaming Roost mobile pasture coop concept</a></li>
           <li><a href="/developers">Developer documentation hub</a></li>
           <li><a href="/open-source">Open-source program</a></li>
-          <li><a href="/app/demo">No-signup public demo</a></li>
+          <li><a href="/demo">No-signup public demo</a></li>
           {topicPages.map((page) => (
             <li key={page.href}><a href={page.href}>{page.label}</a></li>
           ))}

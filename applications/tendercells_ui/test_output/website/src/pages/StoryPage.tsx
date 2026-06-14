@@ -294,7 +294,7 @@ export default function StoryPage() {
             View the Repository
           </a>
           <a href="/academy">Start Learning</a>
-          <a href="/app/demo">Try the Demo</a>
+          <a href="/demo">Try the Demo</a>
         </div>
       </section>
     </PageLayout>

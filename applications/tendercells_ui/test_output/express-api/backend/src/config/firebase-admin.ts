@@ -1,11 +1,11 @@
 // Firebase Admin SDK Configuration
 import admin from 'firebase-admin';
 
-// Path to the Firebase Admin SDK credentials file
-// Default path: C:\Users\zach\Documents\Secrets\tender-cells\firebase-adminsdk-fbsvc.json
-// Can be overridden with FIREBASE_ADMIN_SDK_PATH environment variable
-const serviceAccountPath = process.env.FIREBASE_ADMIN_SDK_PATH || 
-  'C:\\Users\\zach\\Documents\\Secrets\\tender-cells\\firebase-adminsdk-fbsvc.json';
+// Path to a local Firebase Admin SDK credentials file.
+// Never commit service account JSON. Set FIREBASE_ADMIN_SDK_PATH in your shell
+// or use GOOGLE_APPLICATION_CREDENTIALS with Application Default Credentials.
+const serviceAccountPath =
+  process.env.FIREBASE_ADMIN_SDK_PATH || process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
 let adminApp: admin.app.App | null = null;
 
@@ -18,6 +18,12 @@ export function initializeFirebaseAdmin(): admin.app.App {
   }
 
   try {
+    if (!serviceAccountPath) {
+      throw new Error(
+        'Set FIREBASE_ADMIN_SDK_PATH or GOOGLE_APPLICATION_CREDENTIALS to a local service account JSON file.',
+      );
+    }
+
     // Initialize Firebase Admin with service account
     adminApp = admin.initializeApp({
       credential: admin.credential.cert(serviceAccountPath),

@@ -284,12 +284,14 @@ Trigger agents with phrases like:
 ### 2. Enable Services
 
 - **Authentication** → Email/Password
-- **Firestore Database** → Test mode (for dev)
+- **Firestore Database** → locked mode, then deploy the repository `firestore.rules`
 - **Cloud Functions** → Node 18 runtime
 
 ### 3. Get Credentials
 
-Project Settings → Web App → Copy config to `.env`:
+Project Settings → Web App → Copy config to `.env`. Firebase web config is not
+a server secret, but do not commit your `.env`, service account JSON, private
+API keys, MQTT credentials, WiFi credentials, or local device tokens:
 
 ```env
 VITE_FIREBASE_API_KEY=...

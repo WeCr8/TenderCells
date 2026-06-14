@@ -12,6 +12,7 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 - https://tendercells.com/shop/watchtower
 - https://tendercells.com/shop/roaming-roost
 - https://tendercells.com/developers
+- https://tendercells.com/apps
 - https://tendercells.com/tender-cells-overview
 - https://tendercells.com/llm-demo-test
 - https://tendercells.com/open-source

@@ -59,5 +59,26 @@ test('live marketing site exposes Google policy and consent pages', async ({ pag
   await expect(page.locator('body')).toContainText('Invalid traffic');
 
   const sitemap = await request.get('https://tendercells.com/sitemap.xml');
-  expect(await sitemap.text()).toContain('https://tendercells.com/cookie-policy');
+  const sitemapText = await sitemap.text();
+  expect(sitemapText).toContain('https://tendercells.com/cookie-policy');
+  expect(sitemapText).toContain('https://tendercells.com/apps');
+});
+
+test('live sitemap URLs are crawlable', async ({ request }) => {
+  const sitemap = await request.get('https://tendercells.com/sitemap.xml');
+  expect(sitemap.ok()).toBe(true);
+
+  const sitemapText = await sitemap.text();
+  const urls = [...sitemapText.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+  expect(urls.length).toBeGreaterThan(30);
+
+  const failures: string[] = [];
+  for (const url of urls) {
+    const response = await request.get(url);
+    if (response.status() >= 400) {
+      failures.push(`${response.status()} ${url}`);
+    }
+  }
+
+  expect(failures, failures.join('\n')).toEqual([]);
 });

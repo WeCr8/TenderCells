@@ -38,6 +38,10 @@ Every product or major hardware module should include:
 
 - The change is scoped to one product, module, or workflow when possible.
 - Build and type checks pass for the affected package.
+- No local `.env`, service account JSON, WiFi credentials, MQTT credentials,
+  private API keys, device tokens, or personal filesystem paths are committed.
+- Public docs describe interfaces and safety behavior without publishing
+  private deployment secrets, owner data, or unreleased commercial vendor terms.
 - Firmware changes preserve E-STOP and watchdog behavior.
 - Hardware movement is guarded by safety state, confirmation, or simulation mode.
 - Docs are updated when APIs, wiring, MQTT topics, or setup steps change.

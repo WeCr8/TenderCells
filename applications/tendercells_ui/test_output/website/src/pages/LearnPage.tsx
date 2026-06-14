@@ -37,7 +37,7 @@ export default function LearnPage() {
         </ol>
       </div>
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
-        <Link to="/shop/chicken-tender" className="btn-primary">Order Chicken Tender™</Link>
+        <Link to="/shop/chicken-tender" className="btn-primary">Explore Chicken Tender™</Link>
         <Link to="/learn/homesteading" className="btn-outline">Homesteading Guide</Link>
       </div>
 

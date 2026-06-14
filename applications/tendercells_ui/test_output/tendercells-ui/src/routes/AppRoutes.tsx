@@ -61,6 +61,7 @@ export default function AppRoutes() {
       <Route path="/flock-roster" element={<Navigate to="/birds" replace />} />
       <Route path="/tenderai" element={<Navigate to="/ai" replace />} />
       <Route path="/tender-ai" element={<Navigate to="/ai" replace />} />
+      <Route path="/tender-ai-chat" element={<Navigate to="/ai" replace />} />
       <Route path="/chat" element={<Navigate to="/ai" replace />} />
       <Route path="/automation/schedules" element={<Navigate to="/schedules" replace />} />
       <Route path="/products" element={<ProductsPage />} />

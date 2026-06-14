@@ -2,15 +2,77 @@ import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "./LandingPage.css";
-import { trackPageView, trackButtonClick } from "../utils/analytics";
+import { trackPageView, trackButtonClick, trackProductInterest } from "../utils/analytics";
 import { TENDERCELLS_DEMO_URL } from "../config/appLinks";
+
+const PRODUCTS = [
+  {
+    name: "Chicken Tender",
+    href: "/shop/chicken-tender",
+    image: "/assets/images/products/chicken-tender-concept.png",
+    desc: "Fully automated backyard coop with rail service, egg workflows, sensors, cameras, and real-time monitoring.",
+  },
+  {
+    name: "WatchTower AI",
+    href: "/shop/watchtower",
+    image: "/assets/images/products/predator-monitor-pole-mount.png",
+    desc: "Solar-powered predator monitor concept with camera coverage, local detection, alerts, and farm safety workflows.",
+  },
+  {
+    name: "Roaming Roost",
+    href: "/shop/roaming-roost",
+    image: "/assets/images/products/roaming-roost-concept.png",
+    desc: "Mobile pasture coop concept for automated rotation, docking, GPS boundaries, and predator-response learning.",
+  },
+  {
+    name: "Duck Dock",
+    href: "/shop/duck-dock",
+    image: "/assets/images/products/chicken-tender-concept.png",
+    desc: "Automated waterfowl platform concept with water monitoring, feeding routines, and weather-aware care.",
+  },
+  {
+    name: "Bunny Burrow",
+    href: "/shop/bunny-burrow",
+    image: "/assets/images/products/roaming-roost-concept.png",
+    desc: "Rabbit housing automation concept with climate sensing, feeding schedules, and safe daily care records.",
+  },
+  {
+    name: "Goat Guardian",
+    href: "/shop/goat-guardian",
+    image: "/assets/images/products/predator-monitor-top-view.png",
+    desc: "Large enclosure monitoring concept for pasture safety, gates, water, feed, and health signal capture.",
+  },
+];
+
+const HERO_IMAGES = [
+  {
+    src: "/assets/images/products/chicken-tender-concept.png",
+    alt: "Chicken Tender smart coop concept with automated animal-care hardware",
+  },
+  {
+    src: "/assets/images/products/predator-monitor-pole-mount.png",
+    alt: "WatchTower AI pole-mounted predator monitor concept",
+  },
+  {
+    src: "/assets/images/products/roaming-roost-concept.png",
+    alt: "Roaming Roost mobile pasture coop concept",
+  },
+];
 
 export default function LandingPage() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterDismissed, setNewsletterDismissed] = useState(false);
+  const [heroIndex, setHeroIndex] = useState(0);
 
   useEffect(() => {
     trackPageView("/");
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setHeroIndex((current) => (current + 1) % HERO_IMAGES.length);
+    }, 6500);
+    return () => window.clearInterval(timer);
   }, []);
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
@@ -27,10 +89,15 @@ export default function LandingPage() {
       <main>
         {/* ── Hero ─────────────────────────────────── */}
         <section className="hero">
+          <img
+            className="hero-image"
+            src={HERO_IMAGES[heroIndex].src}
+            alt={HERO_IMAGES[heroIndex].alt}
+          />
           <div className="hero-overlay" />
           <div className="hero-content">
             <h1>Tender Cells</h1>
-            <p>Bring Smart Farming to the Homestead</p>
+            <p>Open-source animal-care automation for homesteads, 4-H, FFA, makers, and young engineers.</p>
             <div className="hero-buttons">
               <a
                 href={TENDERCELLS_DEMO_URL}
@@ -49,9 +116,9 @@ export default function LandingPage() {
               <button
                 type="button"
                 className="btn-order"
-                onClick={() => trackButtonClick("order-now")}
+                onClick={() => trackProductInterest("TenderCells", "homepage", "homepage-hero")}
               >
-                ORDER NOW
+                I'M INTERESTED
               </button>
             </div>
           </div>
@@ -62,18 +129,17 @@ export default function LandingPage() {
           <div className="section-inner">
             <h2>Our Products</h2>
             <div className="product-grid">
-              {[
-                { name: "Chicken Tender™",  desc: "Fully automated backyard coop with ceiling-mounted 6DOF robot arm, egg collection, and real-time monitoring." },
-                { name: "WatchTower AI™",   desc: "Solar-powered 360° predator detection with LoRa mesh networking and three-camera dome." },
-                { name: "Roaming Roost™",   desc: "Mobile geodesic dome on mecanum wheels — brings the coop to fresh pasture automatically." },
-                { name: "Duck Dock™",       desc: "Automated waterfowl platform with integrated pond management and smart feeding." },
-                { name: "Bunny Burrow™",    desc: "Rabbit automation system with temperature control and automated feeding schedules." },
-                { name: "Goat Guardian™",   desc: "Large enclosure automation with enhanced security and full health monitoring." },
-              ].map((p) => (
-                <div className="product-card" key={p.name}>
+              {PRODUCTS.map((p) => (
+                <a
+                  className="product-card"
+                  href={p.href}
+                  key={p.name}
+                  onClick={() => trackProductInterest(p.name, p.href.replace("/shop/", ""), "homepage-product-card")}
+                >
+                  <img src={p.image} alt={`${p.name} concept image`} loading="lazy" />
                   <h3>{p.name}</h3>
                   <p>{p.desc}</p>
-                </div>
+                </a>
               ))}
             </div>
           </div>

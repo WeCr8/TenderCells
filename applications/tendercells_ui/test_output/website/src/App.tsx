@@ -83,6 +83,7 @@ function App() {
 
         {/* Story */}
         <Route path="/story" element={<StoryPage />} />
+        <Route path="/our-story" element={<StoryPage />} />
         <Route path="/about" element={<TrustPage kind="about" />} />
         <Route path="/contact" element={<TrustPage kind="contact" />} />
         <Route path="/privacy" element={<TrustPage kind="privacy" />} />

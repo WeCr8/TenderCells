@@ -54,6 +54,7 @@ test('live app natural demo routes render real content instead of blank shells',
     { path: '/app/sensors', text: /sensors|temperature|ammonia|coop/i },
     { path: '/app/flock-roster', text: /flock roster|total animals|sample animals/i },
     { path: '/app/tender-ai', text: /tenderai|sensor readings|flock/i },
+    { path: '/app/tender-ai-chat', text: /tenderai|sensor readings|flock/i },
     { path: '/app/schedules', text: /schedules|routines|automate/i },
   ];
 
@@ -78,6 +79,15 @@ test('live demo explainer shell is useful to non-JS crawlers', async ({ request 
 });
 
 test('live marketing site exposes Google policy and consent pages', async ({ page, request }) => {
+  await page.goto('https://tendercells.com/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).toContainText('Tender Cells');
+  expect(await page.locator('img[src*="chicken-tender-concept"]').count()).toBeGreaterThan(0);
+  await expect(page.locator('body')).toContainText('WatchTower AI');
+  await expect(page.locator('body')).not.toContainText(/order now|free shipping/i);
+
+  await page.goto('https://tendercells.com/our-story', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).toContainText(/future builders|young engineers|companies/i);
+
   await page.goto('https://tendercells.com/cookie-policy', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('h1')).toContainText('Cookie Policy');
   await expect(page.locator('body')).toContainText('Google AdSense');
@@ -91,6 +101,7 @@ test('live marketing site exposes Google policy and consent pages', async ({ pag
   const sitemapText = await sitemap.text();
   expect(sitemapText).toContain('https://tendercells.com/cookie-policy');
   expect(sitemapText).toContain('https://tendercells.com/apps');
+  expect(sitemapText).toContain('https://tendercells.com/our-story');
 });
 
 test('live sitemap URLs are crawlable', async ({ request }) => {

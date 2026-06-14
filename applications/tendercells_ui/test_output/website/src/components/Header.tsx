@@ -163,7 +163,7 @@ export default function Header() {
   return (
     <div ref={headerRef}>
       <div className="promo-banner">
-        🍗 Order Chicken Tender v1.0.0 today &mdash; Free shipping worldwide!
+        TenderCells hardware kits and 3D files are coming soon. Explore concepts, docs, and the live demo today.
       </div>
 
       <header className="site-header">
@@ -194,19 +194,19 @@ export default function Header() {
           </form>
 
           <div className="header-shipping-badge">
-            <span className="shipping-icon">📦</span>
+            <span className="shipping-icon">🛠</span>
             <span>
-              <strong>All Tender Cells ship FREE</strong>
+              <strong>Concepts open for interest</strong>
               <br />
-              worldwide
+              kits coming soon
             </span>
           </div>
 
           <a href={TENDERCELLS_APP_ENTRY_URL} className="header-login">
             <span>👤</span> Login
           </a>
-          <a href="#cart" className="header-cart" aria-label="Shopping cart">
-            🛒
+          <a href="/shop" className="header-cart" aria-label="Product concepts">
+            ☆
           </a>
 
           <button

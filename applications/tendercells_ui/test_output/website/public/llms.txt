@@ -35,6 +35,7 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 - https://tendercells.com/guides/pasture-rotation
 - https://tendercells.com/health
 - https://tendercells.com/about
+- https://tendercells.com/our-story
 - https://tendercells.com/contact
 - https://tendercells.com/privacy
 - https://tendercells.com/cookie-policy

@@ -138,6 +138,10 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: 'TenderCells Story - Teaching Future Builders, AI Tools, Robotics, and Product Creation',
     description: 'TenderCells helps kids, students, engineers, makers, and future founders use AI tools, robotics, software, and hardware to build products, ideas, and companies.',
   },
+  '/our-story': {
+    title: 'TenderCells Story - Teaching Future Builders, AI Tools, Robotics, and Product Creation',
+    description: 'TenderCells helps kids, students, engineers, makers, and future founders use AI tools, robotics, software, and hardware to build products, ideas, and companies.',
+  },
   '/about': {
     title: 'About Tender Cells',
     description: 'Learn about Tender Cells, an open-source agricultural engineering project for smart animal care, education, makers, and homesteaders.',

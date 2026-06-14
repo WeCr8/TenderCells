@@ -55,6 +55,14 @@ export function trackProductView(productName: string, productId?: string) {
   trackEvent('view_item', { item_name: productName, item_id: productId });
 }
 
+export function trackProductInterest(productName: string, productId?: string, source?: string) {
+  trackEvent('product_interest', {
+    item_name: productName,
+    item_id: productId,
+    source,
+  });
+}
+
 export function trackFormSubmit(formName: string) {
   trackEvent('form_submit', { form_name: formName });
 }

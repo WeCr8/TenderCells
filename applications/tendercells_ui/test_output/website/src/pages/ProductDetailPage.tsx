@@ -1,14 +1,14 @@
 import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
-import { trackProductView } from "../utils/analytics";
+import { trackProductInterest, trackProductView } from "../utils/analytics";
 
 const PRODUCTS: Record<string, {
   icon: string; name: string; tagline: string; price: string; desc: string;
   specs: [string, string][]; features: string[]; heroClass: string;
 }> = {
   "chicken-tender": {
-    icon: "🐔", name: "Chicken Tender™", price: "$999",
+    icon: "🐔", name: "Chicken Tender™", price: "Coming soon",
     tagline: "The world's first fully automated backyard chicken coop.",
     heroClass: "green",
     desc: "Chicken Tender automates every daily task in backyard chicken keeping — feeding, watering, door control, egg collection, and coop cleaning — via a ceiling-mounted 9DOF robot arm. One app controls everything.",
@@ -40,7 +40,7 @@ const PRODUCTS: Record<string, {
     ],
   },
   "roaming-roost": {
-    icon: "🚜", name: "Roaming Roost™", price: "$1,299",
+    icon: "🚜", name: "Roaming Roost™", price: "Concept",
     tagline: "A mobile geodesic dome that brings fresh pasture to your flock automatically.",
     heroClass: "green",
     desc: "The Roaming Roost is a 3×3×5 ft geodesic dome mounted on mecanum wheels. It moves your chickens to fresh pasture on a schedule — automated pasture rotation without moving a tractor.",
@@ -65,7 +65,7 @@ const PRODUCTS: Record<string, {
     ],
   },
   "watchtower": {
-    icon: "👁️", name: "WatchTower AI™", price: "$299",
+    icon: "👁️", name: "WatchTower AI™", price: "Concept",
     tagline: "Solar-powered AI predator detection with LoRa mesh alerts.",
     heroClass: "dark",
     desc: "WatchTower AI mounts on a 5ft pole and watches 360° with 3 cameras. TensorFlow Lite Micro classifies threats on-device — no cloud. LoRa broadcasts alerts to all Tender Cells devices within 500m.",
@@ -91,7 +91,7 @@ const PRODUCTS: Record<string, {
     ],
   },
   "duck-dock": {
-    icon: "🦆", name: "Duck Dock™", price: "$1,149",
+    icon: "🦆", name: "Duck Dock™", price: "Concept",
     tagline: "Automated duck habitat with integrated pond management.",
     heroClass: "green",
     desc: "Duck Dock is built around duck-specific needs — access to water, messier environments, and different housing requirements. Includes automated pond fill/drain, water quality monitoring, and robust cleaning.",
@@ -112,7 +112,7 @@ const PRODUCTS: Record<string, {
     ],
   },
   "bunny-burrow": {
-    icon: "🐰", name: "Bunny Burrow™", price: "$799",
+    icon: "🐰", name: "Bunny Burrow™", price: "Concept",
     tagline: "Rabbit habitat automation — feeding, temperature, enrichment.",
     heroClass: "green",
     desc: "Bunny Burrow automates rabbit care — precise portioned feeding, temperature control for delicate rabbits, and scheduled enrichment activities.",
@@ -132,7 +132,7 @@ const PRODUCTS: Record<string, {
     ],
   },
   "goat-guardian": {
-    icon: "🐐", name: "Goat Guardian™", price: "$1,599",
+    icon: "🐐", name: "Goat Guardian™", price: "Concept",
     tagline: "Large enclosure automation for goats.",
     heroClass: "orange",
     desc: "Goat Guardian handles the unique challenges of goat keeping — escape-proof gate control, large-volume feed dispensing, mineral supplementation, and health monitoring for a more demanding animal.",
@@ -152,7 +152,7 @@ const PRODUCTS: Record<string, {
     ],
   },
   "turkey-tower": {
-    icon: "🦃", name: "Turkey Tower™", price: "$1,099",
+    icon: "🦃", name: "Turkey Tower™", price: "Concept",
     tagline: "Turkey-specific enclosure built for larger birds.",
     heroClass: "orange",
     desc: "Turkeys have different space, roost height, and social needs than chickens. Turkey Tower is designed around these requirements — higher roost bars, wider door, larger nest boxes, and breed-appropriate monitoring.",
@@ -171,7 +171,7 @@ const PRODUCTS: Record<string, {
     ],
   },
   "pigeon-palace": {
-    icon: "🕊️", name: "Pigeon Palace™", price: "$899",
+    icon: "🕊️", name: "Pigeon Palace™", price: "Concept",
     tagline: "Smart pigeon loft with individual bird tracking.",
     heroClass: "dark",
     desc: "Pigeon Palace is built for pigeon fanciers — individual bird RFID tracking, loft door timing for racing birds, and health dashboards for each bird in the loft.",
@@ -190,7 +190,7 @@ const PRODUCTS: Record<string, {
     ],
   },
   "accessories": {
-    icon: "🔧", name: "Accessories & Parts", price: "From $19",
+    icon: "🔧", name: "Accessories & Parts", price: "Coming later",
     tagline: "End effectors, sensors, upgrade kits, and spare parts.",
     heroClass: "green",
     desc: "Expand what your Tender Cells system can do with official accessories and parts.",
@@ -198,7 +198,7 @@ const PRODUCTS: Record<string, {
     features: [],
   },
   "gift-cards": {
-    icon: "🎁", name: "Gift Cards", price: "From $50",
+    icon: "🎁", name: "Gift Cards", price: "Not available yet",
     tagline: "Give the gift of smart homesteading.",
     heroClass: "green",
     desc: "Tender Cells gift cards are redeemable on any product or accessory. Available in any amount from $50. Digital delivery within minutes.",
@@ -362,7 +362,14 @@ export default function ProductDetailPage() {
         </div>
       )}
       <div className="cta-bar" style={{ marginBottom: "2.5rem" }}>
-        <a href="#order" className="btn-primary" style={{ background: "#2a9d8f" }}>Order {product.name}</a>
+        <button
+          type="button"
+          className="btn-primary"
+          style={{ background: "#2a9d8f", border: 0, cursor: "pointer" }}
+          onClick={() => trackProductInterest(product.name, slug, "product-detail")}
+        >
+          I'm interested
+        </button>
         <Link to="/shop" className="btn-outline">← All Products</Link>
       </div>
 
@@ -408,24 +415,28 @@ export default function ProductDetailPage() {
         </>
       )}
 
-      <h2 className="section-title">In the Box</h2>
+      <h2 className="section-title">Planned Build Package</h2>
       <div className="prose">
+        <p>
+          Kits and full production-ready 3D files are not available yet. This section shows the intended
+          direction so builders can follow the project, study the architecture, and contribute safely.
+        </p>
         <ul>
-          <li>{product.name} fully assembled unit</li>
-          <li>Power cable (10 ft, 120V)</li>
-          <li>Raspberry Pi 4 (pre-configured MQTT broker)</li>
-          <li>Quick-start guide (printed + QR to digital version)</li>
-          <li>Mounting hardware kit</li>
-          <li>1-year hardware warranty</li>
+          <li>Open product documentation and build notes</li>
+          <li>Firmware targets and local MQTT control patterns</li>
+          <li>Hardware catalog references and safety constraints</li>
+          <li>Concept renders, diagrams, and demo workflows</li>
+          <li>Future BOM, CAD, and kit files as they become field-tested</li>
         </ul>
       </div>
 
       <div style={{ marginTop: "2.5rem", padding: "2rem", background: "#f0fff4", borderRadius: "8px", border: "1px solid #b2dfdb" }}>
         <h3 style={{ margin: "0 0 0.5rem", color: "#1b5e20" }}>Open Source Guarantee</h3>
         <p style={{ margin: "0", color: "#333" }}>
-          Every {product.name} ships with full access to its firmware source code, hardware schematics,
-          and 3D print files on <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer">GitHub</a>.
-          No cloud lock-in. Works fully offline on your local network.
+          TenderCells is building toward open firmware, hardware documentation, and reproducible build files on
+          <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer"> GitHub</a>.
+          The goal is local-first animal-care automation that students, makers, and engineers can inspect,
+          improve, and eventually build from.
         </p>
       </div>
     </PageLayout>

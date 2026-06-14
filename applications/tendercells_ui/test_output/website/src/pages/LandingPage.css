@@ -25,13 +25,22 @@ body { margin: 0; padding: 0; }
     linear-gradient(180deg, #4a7c3f 0%, #2d5a27 100%);
 }
 
-/* swap in a real image when one is available: */
-/* background-image: url('/hero-farm.jpg'); background-size: cover; background-position: center; */
+.hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(0.98) contrast(1.04);
+}
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.18);
+  background:
+    linear-gradient(90deg, rgba(0, 24, 17, 0.86) 0%, rgba(0, 24, 17, 0.58) 52%, rgba(0, 0, 0, 0.24) 100%),
+    rgba(0,0,0,0.18);
   pointer-events: none;
 }
 
@@ -115,12 +124,14 @@ body { margin: 0; padding: 0; }
 }
 
 .product-card {
-  padding: 1.75rem;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   background: #fafafa;
   transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
-  cursor: default;
+  color: inherit;
+  display: block;
+  overflow: hidden;
+  text-decoration: none;
 }
 .product-card:hover {
   box-shadow: 0 6px 18px rgba(0,0,0,0.09);
@@ -128,16 +139,24 @@ body { margin: 0; padding: 0; }
   border-color: #4a90d9;
 }
 .product-card h3 {
-  margin: 0 0 0.6rem;
+  margin: 1rem 1.25rem 0.6rem;
   font-size: 1.15rem;
   font-weight: 700;
   color: #4a90d9;
 }
 .product-card p {
-  margin: 0;
+  margin: 0 1.25rem 1.25rem;
   font-size: 0.93rem;
   color: #555;
   line-height: 1.55;
+}
+.product-card img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+  background: #e8eee9;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 /* ── About ──────────────────────────────────────── */

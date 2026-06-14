@@ -1,17 +1,18 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import { trackProductInterest } from "../utils/analytics";
 
 const PRODUCTS = [
-  { slug: "chicken-tender",  icon: "🐔", name: "Chicken Tender™",  price: "$999",  desc: "Fully automated backyard coop with 9DOF robot arm, egg collection, feeding, watering, and AI monitoring." },
-  { slug: "roaming-roost",   icon: "🚜", name: "Roaming Roost™",   price: "$1,299",desc: "Mobile geodesic dome on mecanum wheels — brings the coop to fresh pasture automatically." },
-  { slug: "watchtower",      icon: "👁️", name: "WatchTower AI™",   price: "$299",  desc: "Solar-powered 3-camera predator monitor with LoRa mesh alerts up to 500m range." },
-  { slug: "duck-dock",       icon: "🦆", name: "Duck Dock™",       price: "$1,149",desc: "Duck enclosure with integrated pond management, water quality monitoring, and auto-fill." },
-  { slug: "bunny-burrow",    icon: "🐰", name: "Bunny Burrow™",    price: "$799",  desc: "Rabbit habitat automation — feeding, temperature control, enrichment scheduling." },
-  { slug: "goat-guardian",   icon: "🐐", name: "Goat Guardian™",   price: "$1,599",desc: "Large-enclosure automation for goats — gate control, feed dispensing, health monitoring." },
-  { slug: "turkey-tower",    icon: "🦃", name: "Turkey Tower™",    price: "$1,099",desc: "Turkey-specific enclosure with breed-appropriate space, roost heights, and nest management." },
-  { slug: "pigeon-palace",   icon: "🕊️", name: "Pigeon Palace™",   price: "$899",  desc: "Smart pigeon loft — individual bird tracking, loft door timing, health dashboards." },
-  { slug: "accessories",     icon: "🔧", name: "Accessories & Parts", price: "From $19", desc: "End effectors, sensors, spare parts, mounting hardware, and upgrade kits." },
-  { slug: "gift-cards",      icon: "🎁", name: "Gift Cards",       price: "From $50", desc: "Give the gift of smart homesteading. Redeemable on all Tender Cells products." },
+  { slug: "chicken-tender",  icon: "🐔", name: "Chicken Tender™",  status: "Coming soon",  desc: "Fully automated backyard coop concept with robot-arm workflows, egg collection, feeding, watering, and AI monitoring." },
+  { slug: "roaming-roost",   icon: "🚜", name: "Roaming Roost™",   status: "Concept", desc: "Mobile pasture coop concept that brings the flock to fresh pasture automatically." },
+  { slug: "watchtower",      icon: "👁️", name: "WatchTower AI™",   status: "Concept",  desc: "Solar-powered 3-camera predator monitor concept with LoRa mesh alert workflows." },
+  { slug: "duck-dock",       icon: "🦆", name: "Duck Dock™",       status: "Concept", desc: "Duck enclosure concept with pond management, water quality monitoring, and auto-fill ideas." },
+  { slug: "bunny-burrow",    icon: "🐰", name: "Bunny Burrow™",    status: "Concept",  desc: "Rabbit habitat automation concept for feeding, temperature control, and enrichment scheduling." },
+  { slug: "goat-guardian",   icon: "🐐", name: "Goat Guardian™",   status: "Concept", desc: "Large-enclosure automation concept for gates, feed, water, and health monitoring." },
+  { slug: "turkey-tower",    icon: "🦃", name: "Turkey Tower™",    status: "Concept", desc: "Turkey-specific enclosure concept with breed-appropriate space, roost heights, and nest management." },
+  { slug: "pigeon-palace",   icon: "🕊️", name: "Pigeon Palace™",   status: "Concept",  desc: "Smart pigeon loft concept for individual bird tracking, loft door timing, and health dashboards." },
+  { slug: "accessories",     icon: "🔧", name: "Accessories & Parts", status: "Coming later", desc: "End effectors, sensors, spare parts, mounting hardware, and upgrade ideas." },
+  { slug: "gift-cards",      icon: "🎁", name: "Gift Cards",       status: "Not available yet", desc: "Gift cards are planned for later after hardware availability is clearer." },
 ];
 
 const BUILD_IDEAS = [
@@ -37,7 +38,7 @@ export default function ShopPage() {
     <PageLayout>
       <div className="page-hero green">
         <h1>Shop Tender Cells</h1>
-        <p>AI-powered automation for every animal on your homestead.</p>
+        <p>Explore product concepts, register interest, and follow the open-source build path.</p>
       </div>
 
       <h2 className="section-title">All Products</h2>
@@ -47,15 +48,16 @@ export default function ShopPage() {
             key={p.slug}
             to={`/shop/${p.slug}`}
             style={{ textDecoration: "none" }}
+            onClick={() => trackProductInterest(p.name, p.slug, "shop-card")}
           >
             <div className="card" style={{ height: "100%", boxSizing: "border-box" }}>
               <div style={{ fontSize: "2.2rem", marginBottom: "0.5rem" }}>{p.icon}</div>
               <h3>{p.name}</h3>
               <p>{p.desc}</p>
               <div style={{ marginTop: "0.75rem", fontWeight: 700, color: "#2a9d8f" }}>
-                {p.price}
+                {p.status}
               </div>
-              <span className="tag">View Details →</span>
+              <span className="tag">View details / I'm interested</span>
             </div>
           </Link>
         ))}
@@ -76,9 +78,9 @@ export default function ShopPage() {
       <h2 className="section-title">Why Tender Cells?</h2>
       <div className="prose">
         <p>
-          Every Tender Cells product ships with the <strong>Tender Cells app</strong> (iOS + Android),
-          free lifetime firmware updates, and a 1-year hardware warranty.
-          The open-source firmware means your system is yours — no cloud lock-in required for local operation.
+          TenderCells is not taking hardware orders yet. These pages document the product direction,
+          demo workflows, and build ideas so students, makers, and early supporters can follow the
+          project while kits, 3D files, BOMs, and field-tested docs come together.
         </p>
         <ul>
           <li>One app controls all products on your property</li>
@@ -89,7 +91,7 @@ export default function ShopPage() {
         </ul>
       </div>
       <div className="cta-bar">
-        <Link to="/shop/chicken-tender" className="btn-primary">Start with Chicken Tender™</Link>
+        <Link to="/shop/chicken-tender" className="btn-primary">Explore Chicken Tender™</Link>
         <Link to="/learn" className="btn-outline">How It Works</Link>
       </div>
     </PageLayout>

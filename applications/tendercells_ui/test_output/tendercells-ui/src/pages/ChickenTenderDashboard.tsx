@@ -73,6 +73,15 @@ export default function ChickenTenderDashboard() {
   const selectedCamera = cameras.find((camera) => camera.id === selectedCameraId) || cameras[0];
 
   useEffect(() => {
+    const shouldProbeLocalApi =
+      import.meta.env.DEV ||
+      ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
+    if (!shouldProbeLocalApi) {
+      setApiStatus("ok");
+      return;
+    }
+
     // Check API health on mount
     fetch("http://localhost:4000/health")
       .then((res) => setApiStatus(res.ok ? "ok" : "error"))

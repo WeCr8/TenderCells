@@ -53,6 +53,16 @@ export default function AppRoutes() {
 
       {/* Global pages */}
       <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/coop" element={<Navigate to="/chicken-tender" replace />} />
+      <Route path="/sensors" element={<Navigate to="/chicken-tender?section=sensors" replace />} />
+      <Route path="/egg-map" element={<Navigate to="/chicken-tender?section=eggs" replace />} />
+      <Route path="/eggs" element={<Navigate to="/chicken-tender?section=eggs" replace />} />
+      <Route path="/flock" element={<Navigate to="/birds" replace />} />
+      <Route path="/flock-roster" element={<Navigate to="/birds" replace />} />
+      <Route path="/tenderai" element={<Navigate to="/ai" replace />} />
+      <Route path="/tender-ai" element={<Navigate to="/ai" replace />} />
+      <Route path="/chat" element={<Navigate to="/ai" replace />} />
+      <Route path="/automation/schedules" element={<Navigate to="/schedules" replace />} />
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/layout" element={<PropertyLayoutBuilder />} />
       <Route path="/schedules" element={<SchedulesPage />} />
@@ -68,6 +78,7 @@ export default function AppRoutes() {
       <Route path="/chicken-eye/:birdId" element={<ChickenEyeBirdPage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/account" element={<AccountPage />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

@@ -12,7 +12,24 @@ interface TelemetryData {
   [key: string]: any;
 }
 
-const API_BASE = 'http://localhost:3001/api/mqtt';
+const API_BASE = import.meta.env.VITE_MQTT_API_BASE_URL as string | undefined;
+
+function buildSimTelemetry(deviceId: string): TelemetryData {
+  const seed = [...deviceId].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const minute = Math.floor(Date.now() / 60000);
+  const wave = Math.sin((minute + seed) / 7);
+
+  return {
+    temperature: Math.round((72 + wave * 5) * 10) / 10,
+    humidity: Math.round(54 + wave * 8),
+    ammonia: Math.max(2, Math.round(7 + wave * 4)),
+    feedLevel: Math.max(18, Math.round(68 - ((minute + seed) % 18))),
+    waterLevel: Math.max(22, Math.round(74 - ((minute + seed) % 14))),
+    chickenCount: 8,
+    doorState: 'closed',
+    systemState: 'simulated',
+  };
+}
 
 export const useTelemetry = (deviceId: string, pollIntervalMs = 5000) => {
   const [data, setData] = useState<TelemetryData | null>(null);
@@ -21,6 +38,13 @@ export const useTelemetry = (deviceId: string, pollIntervalMs = 5000) => {
 
   useEffect(() => {
     const fetchTelemetry = async () => {
+      if (!API_BASE) {
+        setData(buildSimTelemetry(deviceId));
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch(`${API_BASE}/devices/${deviceId}/telemetry`);
         if (!response.ok) {

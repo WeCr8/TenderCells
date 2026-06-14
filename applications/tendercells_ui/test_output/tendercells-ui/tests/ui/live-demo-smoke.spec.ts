@@ -48,6 +48,23 @@ test('live public demo exposes LLM-readable static context', async ({ request })
   expect(descriptionText).toContain('TenderCells Public Demo Static Description');
 });
 
+test('live app natural demo routes render real content instead of blank shells', async ({ page }) => {
+  const routes = [
+    { path: '/app/eggs', text: /egg map|nest|coop/i },
+    { path: '/app/sensors', text: /sensors|temperature|ammonia|coop/i },
+    { path: '/app/flock-roster', text: /flock roster|total animals|sample animals/i },
+    { path: '/app/tender-ai', text: /tenderai|sensor readings|flock/i },
+    { path: '/app/schedules', text: /schedules|routines|automate/i },
+  ];
+
+  for (const route of routes) {
+    await page.goto(`https://tendercells.com${route.path}`, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#root')).not.toBeEmpty({ timeout: 20_000 });
+    await expect(page.locator('body')).toContainText(route.text, { timeout: 20_000 });
+    await expect(page.locator('body')).not.toContainText(/api server unavailable on :4000|page not found/i);
+  }
+});
+
 test('live demo explainer shell is useful to non-JS crawlers', async ({ request }) => {
   const response = await request.get('https://tendercells.com/demo');
   expect(response.ok()).toBe(true);

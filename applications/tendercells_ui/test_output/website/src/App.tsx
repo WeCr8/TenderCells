@@ -23,6 +23,7 @@ import PublicDemoPage from "./pages/PublicDemoPage";
 import BlogPage from "./pages/BlogPage";
 import StoryPage from "./pages/StoryPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import CookieConsent from "./components/CookieConsent";
 import { usePageTracking } from "./hooks/usePageTracking";
 import { useMarketingTelemetry } from "./hooks/useMarketingTelemetry";
 
@@ -85,6 +86,8 @@ function App() {
         <Route path="/about" element={<TrustPage kind="about" />} />
         <Route path="/contact" element={<TrustPage kind="contact" />} />
         <Route path="/privacy" element={<TrustPage kind="privacy" />} />
+        <Route path="/cookie-policy" element={<TrustPage kind="cookies" />} />
+        <Route path="/advertising-disclosure" element={<TrustPage kind="advertising" />} />
         <Route path="/terms" element={<TrustPage kind="terms" />} />
         <Route path="/editorial-policy" element={<TrustPage kind="editorial" />} />
 
@@ -93,6 +96,7 @@ function App() {
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      <CookieConsent />
     </BrowserRouter>
   );
 }

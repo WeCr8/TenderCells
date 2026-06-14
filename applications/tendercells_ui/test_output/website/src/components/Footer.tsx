@@ -33,6 +33,8 @@ const footerGroups = [
       { label: "About", to: "/about" },
       { label: "Contact", to: "/contact" },
       { label: "Privacy", to: "/privacy" },
+      { label: "Cookie Policy", to: "/cookie-policy" },
+      { label: "Advertising Disclosure", to: "/advertising-disclosure" },
       { label: "Terms", to: "/terms" },
       { label: "Editorial Policy", to: "/editorial-policy" },
     ],

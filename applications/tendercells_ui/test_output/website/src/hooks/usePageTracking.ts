@@ -148,7 +148,15 @@ const ROUTE_META: Record<string, RouteMeta> = {
   },
   '/privacy': {
     title: 'Privacy Policy - Tender Cells',
-    description: 'Tender Cells privacy policy for public website analytics, advertising, contact messages, and student-oriented educational content.',
+    description: 'Tender Cells privacy policy for public website analytics, Google advertising, cookies, contact messages, and student-oriented educational content.',
+  },
+  '/cookie-policy': {
+    title: 'Cookie Policy - Tender Cells',
+    description: 'Tender Cells cookie policy for necessary storage, Google Analytics, Google Tag Manager, Google AdSense, advertising cookies, consent choices, and opt-outs.',
+  },
+  '/advertising-disclosure': {
+    title: 'Advertising Disclosure - Tender Cells',
+    description: 'Tender Cells advertising disclosure for Google AdSense, Google Ads, ad cookies, personalized ads, editorial separation, and invalid traffic policy.',
   },
   '/terms': {
     title: 'Terms of Use - Tender Cells',

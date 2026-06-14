@@ -36,8 +36,17 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 - https://tendercells.com/about
 - https://tendercells.com/contact
 - https://tendercells.com/privacy
+- https://tendercells.com/cookie-policy
+- https://tendercells.com/advertising-disclosure
 - https://tendercells.com/terms
 - https://tendercells.com/editorial-policy
+
+## Policy And Advertising Conformance
+
+- Privacy policy: https://tendercells.com/privacy
+- Cookie policy and consent reset: https://tendercells.com/cookie-policy
+- Advertising disclosure: https://tendercells.com/advertising-disclosure
+- TenderCells discloses use of Google Analytics, Google Tag Manager, Google Ads, Google AdSense, advertising cookies, analytics storage, consent choices, personalized ad opt-outs, invalid traffic expectations, and student/family safeguards.
 
 ## Core Topics
 

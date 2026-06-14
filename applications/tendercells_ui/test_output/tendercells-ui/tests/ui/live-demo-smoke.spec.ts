@@ -47,3 +47,17 @@ test('live public demo exposes LLM-readable static context', async ({ request })
   const descriptionText = await description.text();
   expect(descriptionText).toContain('TenderCells Public Demo Static Description');
 });
+
+test('live marketing site exposes Google policy and consent pages', async ({ page, request }) => {
+  await page.goto('https://tendercells.com/cookie-policy', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1')).toContainText('Cookie Policy');
+  await expect(page.locator('body')).toContainText('Google AdSense');
+  await expect(page.locator('body')).toContainText('Change Cookie Choice');
+
+  await page.goto('https://tendercells.com/advertising-disclosure', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1')).toContainText('Advertising Disclosure');
+  await expect(page.locator('body')).toContainText('Invalid traffic');
+
+  const sitemap = await request.get('https://tendercells.com/sitemap.xml');
+  expect(await sitemap.text()).toContain('https://tendercells.com/cookie-policy');
+});

@@ -8,7 +8,7 @@ export default function AutomationPage() {
       <PageHero
         gradient="linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%)"
         title="Automation Ideas"
-        subtitle="Creative ways homesteaders are using Tender Cells to save time and improve animal welfare."
+        subtitle="Creative ways Tender Cells is designed to save time and improve animal welfare."
         image="/assets/images/demos/door-device-crud-demo.png"
         imageAlt="TenderCells door and device automation dashboard"
       />
@@ -33,14 +33,14 @@ export default function AutomationPage() {
 
       <h2 className="section-title">Community Automation Ideas</h2>
       <div className="prose">
-        <p>These ideas come from beta testers and the open-source community. Many are buildable
-          today with the MQTT API and a bit of custom code.</p>
+        <p>These ideas come from the design direction and the open-source community. Many are
+          buildable today with the MQTT API and a bit of custom code.</p>
       </div>
       <div className="card-grid">
         {[
           { title: "Broody Hen Detection", desc: "If the same nest box is occupied for >4 hours mid-day three days running, flag as potentially broody hen. Alert owner with option to collect eggs manually." },
           { title: "Visitor Notification", desc: "Motion in coop during non-scheduled hours triggers camera snapshot and push notification — catch predators, check on a sick bird, or just watch the flock." },
-          { title: "Feed Supplier Auto-Order", desc: "When feed drops below 20%, trigger a webhook to your preferred supplier's order API. Never run out of feed again." },
+          { title: "Feed Supplier Auto-Order", desc: "When feed drops below 20%, trigger a webhook to your preferred supplier's order API so refills are ordered before you run low." },
           { title: "Weather-Adaptive Scheduling", desc: "Integrate with a weather API. Delay outdoor foraging on heavy rain days. Move Roaming Roost to shelter before storms." },
           { title: "Egg Production Logging", desc: "Export daily egg counts to a Google Sheet via the REST API. Track production trends, correlate with feed changes, share with buyers." },
           { title: "Multi-Coop Coordination", desc: "Run two Chicken Tender units and one Roaming Roost from one app. Stagger cleaning cycles so both don't run at peak power draw simultaneously." },

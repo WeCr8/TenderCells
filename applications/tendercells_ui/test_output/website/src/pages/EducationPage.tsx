@@ -135,11 +135,11 @@ export default function EducationPage() {
         ))}
       </div>
 
-      <h2 className="section-title" id="schools">K-12 School Partnerships</h2>
+      <h2 className="section-title" id="schools">For K-12 Schools</h2>
       <div className="prose">
         <p>
-          Tender Cells supports school gardens, agricultural labs, classrooms, maker spaces,
-          homeschool groups, robotics clubs, and agriculture programs that want hands-on
+          Tender Cells is built to support school gardens, agricultural labs, classrooms, maker
+          spaces, homeschool groups, robotics clubs, and agriculture programs that want hands-on
           animal-care engineering projects.
         </p>
         <ul>
@@ -192,7 +192,7 @@ export default function EducationPage() {
         </p>
         <ul>
           <li>USDA and rural education grants</li>
-          <li>NSF STEM and computing partnerships</li>
+          <li>NSF STEM and computing education grants</li>
           <li>State CTE equipment funds</li>
           <li>4-H Foundation equipment grants</li>
           <li>Local community foundation small grants</li>

@@ -2,42 +2,44 @@ import { useState } from "react";
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
 
+// TenderCells is concept-stage and not shipping hardware. Answers below describe the
+// intended design and the public demo — not a product you can buy or unbox today.
 const FAQ_SECTIONS = [
   {
     section: "Getting Started",
     items: [
-      { q: "What do I need to get started?", a: "A Chicken Tender unit, a standard 120V outlet within 10 ft, WiFi (2.4GHz or 5GHz), a smartphone (iOS 15+ or Android 9+), and chickens. The Raspberry Pi 4 MQTT broker ships pre-configured inside the unit." },
-      { q: "How long does setup take?", a: "2–4 hours including unboxing, placement, WiFi setup, app installation, and the guided wizard. Most users have their first automated door schedule running the same day." },
-      { q: "Do I need any technical skills?", a: "No. The app wizard guides every step. Technical skills are only needed if you want to customize firmware or build integrations — the base product requires none." },
-      { q: "Does it work in cold climates?", a: "Yes. Electronics are rated –20°C to +60°C. Below 35°F, the system sends alerts. You can add a relay-controlled heat lamp via the GPIO expansion header." },
+      { q: "Can I buy a Chicken Tender today?", a: "Not yet. TenderCells is concept-stage and not taking hardware orders. You can explore the no-signup public demo, follow the build-your-own developer path, or register interest on the Shop page." },
+      { q: "What would a unit need to run?", a: "The design targets a standard 120V outlet, WiFi (2.4GHz or 5GHz), a smartphone, and a local MQTT broker (Raspberry Pi 4 class) for on-network control. These are design targets, not a shipped spec." },
+      { q: "Do I need technical skills to follow along?", a: "No. The public demo needs no skills. Building your own module from the open docs does take some maker/electronics experience — the docs and good-first-issues are written to help you start small." },
+      { q: "Is it intended for cold climates?", a: "The design targets electronics rated roughly –20°C to +60°C, with alerts below 35°F and an optional relay-controlled heat lamp via a GPIO expansion header." },
     ],
   },
   {
-    section: "Hardware",
+    section: "Hardware (design)",
     items: [
-      { q: "What is the 9DOF system?", a: "9 Degrees of Freedom: 3 from the XYZ gantry (moves the arm to any position in the coop), plus 6 from the robot arm itself. Together, they cover 100% of the coop interior." },
-      { q: "How heavy is the robot arm payload?", a: "The gantry carries up to 10kg. The 6DOF arm (UR3e class) handles up to 3kg at the end effector — enough for egg grippers, scrapers, feeders, and most tools." },
-      { q: "Can the arm hurt my chickens?", a: "Safety is the top priority. The arm checks camera for chicken presence before moving. Force sensors cut power on unexpected resistance. E-STOP cuts all actuator power in <100ms from any trigger." },
-      { q: "What end effectors are included?", a: "Base unit ships with the scraper (cleaning) and soft egg gripper. Additional end effectors (water nozzle, seed spreader, health sensor wand) are available in the accessories shop." },
-      { q: "Is the coop weather-tight?", a: "Yes. The enclosure is 3/4\" BC plywood with weather-sealed joints. Electronics are in IP54-rated enclosures inside. The unit is designed for year-round outdoor use." },
+      { q: "What is the 9DOF system?", a: "9 Degrees of Freedom: 3 from the XYZ gantry (moves the arm to any position in the coop), plus 6 from the robot arm itself. Together they are designed to cover the full coop interior." },
+      { q: "What payload is the arm designed for?", a: "The gantry targets up to 10kg, and a 6DOF arm (UR3e class) around 3kg at the end effector — enough for egg grippers, scrapers, feeders, and most tools." },
+      { q: "Could the arm hurt my chickens?", a: "Safety is the top design priority: a chicken-presence check before motion, force limits that cut power on unexpected resistance, and an E-STOP designed to cut all actuator power in under 100ms." },
+      { q: "What end effectors are planned?", a: "The first planned tools are a scraper (cleaning) and a soft egg gripper, with a tool-changer interface so the community can design more — water nozzle, seed spreader, sensor wand, and others." },
+      { q: "Is the coop designed to be weather-tight?", a: "Yes — the structure concept uses 3/4\" BC plywood with sealed joints and IP54-rated electronics enclosures inside, intended for year-round outdoor use." },
     ],
   },
   {
     section: "Software & Connectivity",
     items: [
-      { q: "What happens if my internet goes down?", a: "All control runs locally over MQTT. The Raspberry Pi broker on your LAN continues operating. You lose push notifications and remote access, but all scheduled automations continue." },
-      { q: "Is my data private?", a: "Telemetry syncs to Firebase (Google Cloud) encrypted. Video from WatchTower AI is stored locally on an SD card and not uploaded unless you explicitly share. No video leaves your property by default." },
-      { q: "Can I use it without the cloud at all?", a: "Yes. The system operates fully offline. The app connects directly to the local MQTT broker over your LAN. Firebase sync is optional and only needed for remote access and push notifications." },
-      { q: "How often does firmware update?", a: "Monthly patch releases, quarterly feature releases. All OTA via the app. You review release notes and approve before any update installs. Rollback supported." },
+      { q: "What happens if internet goes down?", a: "Control is designed to run locally over MQTT, so a local broker on your LAN keeps scheduled automations running. You would lose push notifications and remote access, not local control." },
+      { q: "How is data privacy handled?", a: "The design keeps motion and control local. Where cloud sync is used (e.g. Firebase) it is for optional remote access; camera video is intended to stay local and not leave your property unless you choose to share it." },
+      { q: "Can it work without the cloud at all?", a: "Yes — local-first is a core principle. The app is designed to talk directly to the local MQTT broker over your LAN, with cloud sync optional and only needed for remote access and notifications." },
+      { q: "How would firmware updates work?", a: "The plan is reviewed OTA updates via the app: you read release notes and approve before anything installs, with rollback support. All firmware is open source." },
     ],
   },
   {
-    section: "Pricing & Support",
+    section: "Pricing & Support (planned)",
     items: [
-      { q: "Is there a subscription fee?", a: "No mandatory subscription. TenderCare ($19/mo) adds AI health analysis, extended data history (90 days vs 7), priority support, and remote access from outside your network." },
-      { q: "What is the warranty?", a: "1 year hardware warranty from WeCr8. Covers manufacturing defects and component failure under normal use. Does not cover animal damage, water intrusion from improper installation, or firmware modifications." },
-      { q: "Can I repair it myself?", a: "Yes, and we encourage it. Every component is documented, sourced from standard suppliers (not OEM-only), and listed in the open-source hardware BOM. Repair guides are on GitHub." },
-      { q: "Where is Tender Cells manufactured?", a: "Assembled in the USA by WeCr8 Solutions. Core electronics (ESP32, sensors) are sourced from Espressif, LCSC, and US distributors. Structural components (plywood, hardware) are US-sourced." },
+      { q: "Will there be a subscription fee?", a: "No mandatory subscription is planned for local operation. An optional TenderCare plan (target around $19/mo) would add AI health analysis, longer data history, and remote access. Pricing is not final." },
+      { q: "What about warranty?", a: "A hardware warranty is planned once units ship, intended to cover manufacturing defects and normal-use component failure. Exact terms are TBD." },
+      { q: "Will I be able to repair it myself?", a: "Yes — repairability is a goal. Components are chosen from standard suppliers (not OEM-only) and documented in the open hardware docs, so parts can be sourced anywhere." },
+      { q: "Where would it be made?", a: "The intent is US assembly by WeCr8 Solutions, with core electronics (ESP32, sensors) from suppliers like Espressif and LCSC and US-sourced structural materials. This reflects the plan, not current production." },
     ],
   },
 ];
@@ -50,7 +52,7 @@ export default function FaqPage() {
       <PageHero
         gradient="linear-gradient(135deg, #f57c00 0%, #bf360c 100%)"
         title="Frequently Asked Questions"
-        subtitle="Everything you want to know before buying or building with Tender Cells."
+        subtitle="What TenderCells is today (a concept-stage, open, demo-able platform) and where it's headed."
         image="/assets/images/products/animal-health-stress-monitoring-concept.png"
         imageAlt="TenderCells animal stress and health monitoring concept"
       />
@@ -82,7 +84,7 @@ export default function FaqPage() {
       <div style={{ marginTop: "2.5rem", padding: "2rem", background: "#f0f7ff", borderRadius: "8px", border: "1px solid #b3d4f5" }}>
         <h3 style={{ margin: "0 0 0.5rem", color: "#1a5276" }}>Still have questions?</h3>
         <p style={{ margin: "0 0 1rem", color: "#333" }}>
-          Our support team answers within 1 business day. TenderCare subscribers get same-day response.
+          Email the team or open a GitHub issue and we'll get back to you as soon as we can.
         </p>
         <a href="mailto:support@wecr8.info" className="btn-primary">Email Support</a>
       </div>

@@ -7,16 +7,17 @@ export default function ServicesPage() {
       <PageHero
         variant="orange"
         title="Local Services"
-        subtitle="Find certified installers, feed suppliers, and technicians near you."
+        subtitle="The planned installer, supplier, and technician network — what support will look like once hardware ships."
         image="/assets/images/products/predator-monitor-pole-mount.png"
         imageAlt="Pole-mounted WatchTower AI predator monitor concept"
       />
 
       <div className="prose">
         <p>
-          Tender Cells is designed for self-installation, but we know not everyone wants to
-          do it alone. Our network of certified installers and technicians can help with
-          setup, customization, and ongoing maintenance.
+          TenderCells is concept-stage and not yet shipping hardware, so the services below
+          describe the planned support model, not programs you can buy today. They are
+          designed for self-installation first, with an optional installer and technician
+          network to follow once kits are available.
         </p>
       </div>
 
@@ -43,8 +44,9 @@ export default function ServicesPage() {
           <li>Safety protocols for robot arm systems</li>
         </ul>
         <p>
-          Certification includes access to the installer portal, discounted hardware, and
-          listing in the installer directory (coming Q3 2026).
+          The planned program would include access to an installer portal and a listing in the
+          installer directory. It is not open yet — TenderCells is concept-stage and not shipping
+          hardware.
         </p>
       </div>
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
@@ -60,16 +62,16 @@ export default function ServicesPage() {
         <ul>
           <li><strong>Manual reorder:</strong> App alert → you call or drive to your local farm store</li>
           <li><strong>Webhook automation:</strong> Configure a webhook to trigger an email or text to your supplier when feed drops below threshold</li>
-          <li><strong>API integration (coming):</strong> Direct ordering integration with Tractor Supply Co., Farm &amp; Fleet, and independent co-ops</li>
+          <li><strong>API integration (planned):</strong> A direct reorder integration with farm-supply retailers and independent co-ops is on the roadmap</li>
         </ul>
       </div>
 
       <h2 className="section-title" id="technicians">Certified Technicians</h2>
       <div className="card-grid">
         {[
-          { title: "Remote Support", desc: "Our support team can view your device telemetry (with your permission) and walk you through any issue via video call. Included free for 30 days after purchase." },
-          { title: "On-Site Service", desc: "Certified technicians can come to your property for annual maintenance, firmware customization, or hardware repairs. Available in select states — expanding 2026." },
-          { title: "Extended Warranty", desc: "TenderCare subscribers get access to the extended warranty program — replacement parts shipped same day for any component failure after year 1." },
+          { title: "Remote Support (planned)", desc: "A support flow where the team can review device telemetry with your permission and walk through issues over video call." },
+          { title: "On-Site Service (planned)", desc: "An optional certified-technician visit for setup, firmware customization, or repairs, once an installer network exists." },
+          { title: "Warranty & Parts (planned)", desc: "A planned replacement-parts and warranty program so a failed sensor or actuator can be sourced quickly — exact terms TBD." },
         ].map((c) => (
           <div key={c.title} className="card">
             <h3>{c.title}</h3>
@@ -78,17 +80,22 @@ export default function ServicesPage() {
         ))}
       </div>
 
-      <h2 className="section-title" id="events">Community Events</h2>
+      <h2 className="section-title" id="events">Community Events (planned)</h2>
+      <div className="prose">
+        <p>
+          As the community grows, we want to support events like these. None are scheduled yet —
+          follow GitHub Discussions for updates.
+        </p>
+      </div>
       <div className="card-grid">
         {[
-          { title: "Homestead Meetups", date: "Monthly", desc: "Informal gatherings of Tender Cells users to share tips, see installations, and meet WeCr8 team members. Check GitHub Discussions for your state." },
-          { title: "Farm Tours", date: "Quarterly", desc: "We host open-house tours of working Tender Cells installations. See the robot arm in action, ask questions, meet the flock." },
-          { title: "Maker Days", date: "Annual", desc: "Full-day workshop — build your own end effector, learn to modify firmware, contribute to open-source hardware designs." },
-          { title: "State Fair Presence", date: "Summer", desc: "Find us at agricultural state fairs. Live demo of Chicken Tender, talk to engineers, get beta access to new features." },
+          { title: "Homestead Meetups", desc: "Informal gatherings to share tips, see builds, and meet the WeCr8 team." },
+          { title: "Build & Demo Tours", desc: "Open-house looks at TenderCells prototypes — see the motion system, ask questions." },
+          { title: "Maker Days", desc: "Workshops to design end effectors, modify firmware, and contribute to open hardware." },
+          { title: "Ag Fair Presence", desc: "Demoing TenderCells at agricultural fairs and talking with engineers and educators." },
         ].map((c) => (
           <div key={c.title} className="card">
             <h3>{c.title}</h3>
-            <p style={{ fontSize: "0.78rem", color: "#4a90d9", fontWeight: 600, marginBottom: "0.3rem" }}>{c.date}</p>
             <p>{c.desc}</p>
           </div>
         ))}

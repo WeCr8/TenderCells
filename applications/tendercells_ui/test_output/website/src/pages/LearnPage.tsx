@@ -5,12 +5,12 @@ import PageHero from "../components/PageHero";
 
 const FAQS = [
   { q: "Do I need internet to use Chicken Tender?", a: "No. All real-time control runs over MQTT on your local network via a Raspberry Pi 4. Internet is only needed for cloud sync, push notifications, and remote access." },
-  { q: "How long does installation take?", a: "Typical setup is 2–4 hours: unbox, place coop, run power, connect to WiFi, download app, run guided setup wizard. No special tools required." },
-  { q: "Can I use my existing coop with the robot arm?", a: "The XYZ gantry + arm system mounts to the ceiling of any 4×4 ft or larger enclosure with 5 ft minimum clearance. A retrofit kit is in development for existing coops." },
+  { q: "How long would installation take?", a: "The design goal is a few hours: place coop, run power, connect to WiFi, and run a guided setup. TenderCells is concept-stage, so this is a target, not a measured time from shipped units." },
+  { q: "Could it work with my existing coop?", a: "The XYZ gantry + arm concept is meant to mount to the ceiling of a 4×4 ft or larger enclosure with about 5 ft of clearance. A retrofit path for existing coops is a goal, not a finished kit." },
   { q: "What happens during a power outage?", a: "The coop door defaults to closed (spring-loaded latch). Feed/water dispensers hold position. The ESP32 reconnects automatically when power returns and resumes the last schedule." },
   { q: "Is the robot arm safe around chickens?", a: "Yes. The arm checks for chicken presence (via camera) before any motion. Force sensors cut power if unexpected resistance is detected. E-STOP cuts all actuator power in <100ms." },
   { q: "Can I add more cameras or sensors?", a: "Yes. The MQTT architecture supports unlimited device nodes. Add WatchTower AI units for camera coverage or additional ESP32 sensor nodes for more measurement points." },
-  { q: "What is the monthly cost?", a: "Hardware has no mandatory subscription. The optional TenderCare plan ($19/mo) adds AI health alerts, extended history, remote access, and priority support." },
+  { q: "What would the monthly cost be?", a: "No mandatory subscription is planned for local operation. An optional TenderCare plan (target around $19/mo) would add AI health alerts, longer history, and remote access. Pricing is not final." },
   { q: "How is the firmware updated?", a: "OTA (over-the-air) updates push from the app. You approve each update. Rollback to any previous version is supported. All firmware is open source — you can also compile and flash manually." },
 ];
 
@@ -98,12 +98,12 @@ export default function LearnPage() {
         </div>
       ))}
 
-      <h2 className="section-title" id="forum">Community Forum</h2>
+      <h2 className="section-title" id="forum">Community</h2>
       <div className="prose">
         <p>
-          Join thousands of homesteaders sharing build logs, automation ideas, and tips on the
-          Tender Cells community forum. Ask questions, share your egg map stats, and vote on
-          the next firmware feature.
+          The Tender Cells community lives on GitHub Discussions. Ask questions, share build logs
+          and automation ideas, report issues, and help shape what gets built next. It is open
+          and just getting started — early contributors set the direction.
         </p>
       </div>
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
@@ -116,9 +116,8 @@ export default function LearnPage() {
           Need help? Start with the FAQ and troubleshooting docs. If you're still stuck:
         </p>
         <ul>
-          <li><strong>Email:</strong> <a href="mailto:support@wecr8.info">support@wecr8.info</a> — response within 1 business day</li>
-          <li><strong>GitHub Issues:</strong> <a href="https://github.com/WeCr8/TenderCells/issues" target="_blank" rel="noopener noreferrer">github.com/WeCr8/TenderCells/issues</a></li>
-          <li><strong>TenderCare subscribers:</strong> priority support with same-day response</li>
+          <li><strong>Email:</strong> <a href="mailto:support@wecr8.info">support@wecr8.info</a> — we reply as soon as we can</li>
+          <li><strong>GitHub Issues:</strong> <a href="https://github.com/WeCr8/TenderCells/issues" target="_blank" rel="noopener noreferrer">github.com/WeCr8/TenderCells/issues</a> for public bug reports and doc fixes</li>
         </ul>
       </div>
     </PageLayout>

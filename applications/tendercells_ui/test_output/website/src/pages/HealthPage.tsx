@@ -97,8 +97,8 @@ export default function HealthPage() {
       <h2 className="section-title" id="predators">Predator Prevention</h2>
       <div className="prose">
         <p>
-          Predators kill an estimated 25% of backyard flocks annually. Tender Cells provides
-          a layered defense:
+          Predator loss is one of the biggest risks to a backyard flock. Tender Cells is designed
+          for a layered defense:
         </p>
         <ul>
           <li><strong>WatchTower AI:</strong> 3-camera 360° AI detection. Classifies predators (raccoon, fox, hawk, dog) vs false positives (cats, squirrels). Alert with photo to your phone.</li>

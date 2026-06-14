@@ -127,7 +127,7 @@ export default function ApplicationsPage() {
       </table>
       <div className="prose">
         <p>
-          All firmware is open source under MIT license.
+          All firmware is open source under the Apache-2.0 license.
           See the <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer">GitHub repo</a> for
           PlatformIO build instructions and OTA update guide.
         </p>

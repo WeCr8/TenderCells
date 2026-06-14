@@ -1,54 +1,48 @@
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
 
+// Editorial roadmap. TenderCells is pre-hardware and concept-stage, so these are
+// planned/in-progress articles describing the design, not published case studies.
 const POSTS = [
   {
-    date: "June 10, 2026",
-    tag: "Product Update",
-    title: "Introducing the 9DOF Motion System: XYZ Gantry + 6DOF Arm",
-    excerpt: "We've upgraded the Chicken Tender motion system from a single 6DOF arm to a full 9DOF architecture — an XYZ gantry that positions the arm anywhere in the coop, combined with the 6DOF arm for task execution. Here's what that means for your flock.",
+    tag: "Architecture",
+    title: "The 9DOF Motion System: XYZ Gantry + 6DOF Arm",
+    excerpt: "How the Chicken Tender design pairs an XYZ gantry that positions the arm anywhere in the coop with a 6DOF arm for task execution — and why full-floor coverage matters for cleaning, feeding, and egg collection.",
   },
   {
-    date: "May 28, 2026",
     tag: "Tutorial",
     title: "Setting Up MQTT for Custom Homestead Automations",
-    excerpt: "The Tender Cells MQTT API is fully open. In this guide we walk through connecting Node-RED, Home Assistant, and a simple Python script to your coop's data stream — and how to trigger actions from other smart home devices.",
+    excerpt: "The Tender Cells MQTT contract is open. This guide walks through connecting Node-RED, Home Assistant, and a simple Python script to a coop's data stream, and triggering actions from other smart-home devices.",
   },
   {
-    date: "May 15, 2026",
     tag: "Homesteading",
-    title: "Pasture Rotation Automation with Roaming Roost™",
-    excerpt: "Manual pasture rotation requires moving a tractor every 2–3 days. Roaming Roost automates this entirely. We tested the mecanum wheel system on six different terrain types — here are the results.",
+    title: "Pasture Rotation with the Roaming Roost™ Concept",
+    excerpt: "Why pasture rotation matters for soil and flock health, and how the Roaming Roost concept aims to relocate an igloo-dome enclosure on a channel-ring drive instead of manually moving a tractor coop.",
   },
   {
-    date: "May 3, 2026",
     tag: "Open Source",
     title: "WatchTower AI: Training Your Own Predator Detection Model",
-    excerpt: "The WatchTower AI firmware ships with a pre-trained TensorFlow Lite Micro model. But what if you want to add a species that's not in the base model? We cover the full retraining pipeline — data collection, labeling, training, quantization, and OTA deployment.",
+    excerpt: "The WatchTower AI concept runs a TensorFlow Lite Micro classifier on-device. This article outlines the planned retraining pipeline — data collection, labeling, training, quantization, and OTA deployment — for adding a species.",
   },
   {
-    date: "April 20, 2026",
     tag: "Community",
-    title: "Maker Day Recap: 12 New End Effectors in One Day",
-    excerpt: "Our first Maker Day produced 12 new end effector designs contributed by community members — a water nozzle, a seed spreader, a health sensor wand, a brooder lamp holder, and more. All designs are now on GitHub with STL files.",
+    title: "End Effector Ideas for a Tool-Changer Arm",
+    excerpt: "A running list of end effector concepts the community could design for a tool-changer arm — scraper, soft egg gripper, water nozzle, seed spreader, sensor wand — and how to document one as an open hardware module.",
   },
   {
-    date: "April 8, 2026",
     tag: "Education",
-    title: "How Roosevelt High School's FFA Chapter Used Tender Cells for SAE Projects",
-    excerpt: "Roosevelt FFA in Nebraska placed a Chicken Tender unit in their ag lab last semester. Three students used the live sensor data for SAE record books. Here's what they tracked, what they learned, and why their advisor calls it 'the best learning tool we've ever had.'",
+    title: "Using TenderCells for FFA / 4-H Record Books",
+    excerpt: "How students could use the public demo and sensor concepts for SAE and 4-H projects: what to track, which readings tell a story, and how to turn an automation idea into a documented build.",
   },
   {
-    date: "March 25, 2026",
     tag: "Hardware",
-    title: "Choosing the Right 6DOF Arm: UR3e, Custom Stepper, or Simulator",
-    excerpt: "The Chicken Tender arm controller supports three arm types. We compare the UR3e (high-precision, commercial), custom stepper builds (cheapest, most hackable), and pure simulator mode (no hardware needed for app development).",
+    title: "Choosing a 6DOF Arm: UR3e, Custom Stepper, or Simulator",
+    excerpt: "The arm controller design targets three arm types. We compare the UR3e (high-precision, commercial), custom stepper builds (cheapest, most hackable), and simulator mode (no hardware needed for app development).",
   },
   {
-    date: "March 10, 2026",
     tag: "Animal Health",
     title: "What Ammonia Levels Tell You Before You Can See the Problem",
-    excerpt: "The MQ-137 sensor catches rising ammonia 2–3 days before you'd smell it and several days before chickens show symptoms. We analyzed a full season of sensor logs from our beta farm — here's the pattern we found.",
+    excerpt: "Why ammonia is a leading indicator of coop air quality: the MQ-137 sensor can flag rising levels well before they are noticeable, and what the 10 ppm warning / 25 ppm critical thresholds mean for flock health.",
   },
 ];
 
@@ -57,31 +51,35 @@ export default function BlogPage() {
     <PageLayout>
       <PageHero
         gradient="linear-gradient(135deg, #37474f 0%, #1c313a 100%)"
-        title="Tender Cells Blog"
-        subtitle="Product updates, tutorials, homesteading guides, and open-source community stories."
+        title="Tender Cells Notebook"
+        subtitle="Design notes, tutorials, and homesteading guides. TenderCells is concept-stage, so these are the topics we are writing — not field reports."
         image="/assets/images/demos/tendercells-education-format.png"
         imageAlt="Tender Cells education poster: Build, Learn, Care, Share"
       />
+
+      <div className="prose" style={{ marginBottom: "1.5rem" }}>
+        <p>
+          These articles are planned or in progress. They explain how the system is designed and how
+          to build with it, rather than reporting results from products that are not shipping yet.
+        </p>
+      </div>
 
       <div style={{ display: "grid", gap: "1.5rem" }}>
         {POSTS.map((post) => (
           <div key={post.title} className="card" style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
             <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
               <span className="tag">{post.tag}</span>
-              <span style={{ fontSize: "0.8rem", color: "#888" }}>{post.date}</span>
+              <span style={{ fontSize: "0.8rem", color: "#888" }}>Planned</span>
             </div>
             <h3 style={{ margin: 0, fontSize: "1.15rem" }}>{post.title}</h3>
             <p style={{ margin: 0, color: "#555", lineHeight: 1.6 }}>{post.excerpt}</p>
-            <a href="#" style={{ marginTop: "0.25rem", fontSize: "0.87rem", color: "#4a90d9", fontWeight: 600, textDecoration: "none" }}>
-              Read more →
-            </a>
           </div>
         ))}
       </div>
 
       <div style={{ marginTop: "3rem", padding: "2rem", background: "#f0f7ff", borderRadius: "8px", border: "1px solid #b3d4f5", textAlign: "center" }}>
-        <h3 style={{ margin: "0 0 0.5rem", color: "#1a5276" }}>Subscribe to New Posts</h3>
-        <p style={{ margin: "0 0 1rem", color: "#555" }}>Weekly digest — no spam, unsubscribe anytime.</p>
+        <h3 style={{ margin: "0 0 0.5rem", color: "#1a5276" }}>Get notified when articles go live</h3>
+        <p style={{ margin: "0 0 1rem", color: "#555" }}>No spam, unsubscribe anytime.</p>
         <form onSubmit={(e) => e.preventDefault()} style={{ display: "flex", gap: "0.5rem", maxWidth: "400px", margin: "0 auto" }}>
           <input
             type="email"

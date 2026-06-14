@@ -44,24 +44,24 @@ const PRODUCTS: Record<string, {
   },
   "roaming-roost": {
     icon: "🚜", name: "Roaming Roost™", price: "Concept",
-    tagline: "A mobile geodesic dome that brings fresh pasture to your flock automatically.",
+    tagline: "A mobile igloo-dome coop concept that brings fresh pasture to your flock automatically.",
     heroClass: "green",
-    desc: "The Roaming Roost is a 3×3×5 ft geodesic dome mounted on mecanum wheels. It moves your chickens to fresh pasture on a schedule — automated pasture rotation without moving a tractor.",
+    desc: "The Roaming Roost is a concept for a mobile igloo-style dome on an octagonal base — roughly 5 ft outer diameter with a 4 ft inner living octagon. Drive wheels ride inside a perimeter channel ring, so the whole enclosure can relocate to fresh pasture on a schedule without moving a tractor.",
     specs: [
-      ["Footprint", "3 × 3 × 5 ft"],
-      ["Drive System", "4× mecanum wheels, DC motors"],
-      ["Slope Rating", "Up to 8° grade"],
-      ["Navigation", "GPS boundary + obstacle avoidance"],
+      ["Footprint", "~5 ft OD octagon (4 ft inner octagon)"],
+      ["Drive System", "DC motor wheel assemblies riding inside a perimeter channel ring"],
+      ["Slope Rating", "Up to 8° grade (target)"],
+      ["Navigation", "GPS boundary + obstacle avoidance (concept)"],
       ["Main MCU", "ESP32-WROOM-32"],
       ["Connectivity", "WiFi + LoRa SX1276"],
-      ["Power", "120V AC dock charging or 20Ah LiFePO4 battery"],
+      ["Power", "Dock charging or LiFePO4 battery (TBD)"],
       ["Sensors", "DHT22, GPS, ultrasonic obstacle detection"],
     ],
     features: [
       "Scheduled pasture rotation — daily, every 3 days, or vegetation-triggered",
-      "GPS boundary fence — never over-ranges",
+      "GPS boundary fence to limit over-ranging",
       "Return-to-dock at sunset or on WatchTower predator alert",
-      "Mecanum wheels — omnidirectional movement, no turning radius constraint",
+      "Channel-ring drive — wheels hidden inside the base, no external protrusions",
       "Live position map in app — see where the Roost is on your property",
       "Automated watering station at dock position",
       "LoRa integration with WatchTower AI for predator response",
@@ -230,9 +230,9 @@ const PRODUCTS: Record<string, {
   },
   "gift-cards": {
     icon: "🎁", name: "Gift Cards", price: "Not available yet",
-    tagline: "Give the gift of smart homesteading.",
+    tagline: "Planned for after hardware availability is clearer.",
     heroClass: "green",
-    desc: "Tender Cells gift cards are redeemable on any product or accessory. Available in any amount from $50. Digital delivery within minutes.",
+    desc: "Gift cards are not available yet. TenderCells is not taking hardware orders, so gift cards are a planned feature for later, once kits and pricing are confirmed.",
     specs: [],
     features: [],
   },
@@ -554,7 +554,7 @@ export default function ProductDetailPage() {
       </div>
 
       <div style={{ marginTop: "2.5rem", padding: "2rem", background: "#f0fff4", borderRadius: "8px", border: "1px solid #b2dfdb" }}>
-        <h3 style={{ margin: "0 0 0.5rem", color: "#1b5e20" }}>Open Source Guarantee</h3>
+        <h3 style={{ margin: "0 0 0.5rem", color: "#1b5e20" }}>Open Source Commitment</h3>
         <p style={{ margin: "0", color: "#333" }}>
           TenderCells is building toward open firmware, hardware documentation, and reproducible build files on
           <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer"> GitHub</a>.

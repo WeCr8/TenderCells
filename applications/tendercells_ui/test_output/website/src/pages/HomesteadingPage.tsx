@@ -16,7 +16,7 @@ export default function HomesteadingPage() {
       <div className="prose">
         <p>
           Modern homesteading isn't about rejecting technology — it's about using the right tools
-          to do more with less time. Tender Cells was built by homesteaders who wanted to spend
+          to do more with less time. Tender Cells is being built by homesteaders who want to spend
           mornings drinking coffee on the porch, not mucking coops before dawn.
         </p>
       </div>
@@ -39,8 +39,9 @@ export default function HomesteadingPage() {
         <p>
           Pasture rotation is the single highest-impact practice for both soil health and flock
           wellbeing — chickens get fresh forage, and soil regenerates without overgrazing.
-          The Roaming Roost™ automates this by moving the entire enclosure on mecanum wheels
-          to a new grid square on your property map.
+          The Roaming Roost™ concept automates this by relocating the entire igloo-dome enclosure
+          to a new grid square on your property map. Drive wheels ride inside a perimeter channel
+          ring around the octagonal base, so nothing protrudes to snag on terrain.
         </p>
         <ul>
           <li>Set a rotation schedule in the app — daily, every 3 days, or triggered by vegetation density sensor</li>
@@ -53,8 +54,9 @@ export default function HomesteadingPage() {
       <h2 className="section-title">Open Source Philosophy</h2>
       <div className="prose">
         <p>
-          Every line of Tender Cells firmware, the mobile app, and the hardware schematics are
-          open source under the MIT license. This isn't just marketing — it's a commitment.
+          Tender Cells software is open source under the Apache-2.0 license, with hardware
+          documentation and build files published as they are field-tested. This isn't just
+          marketing — it's a commitment.
         </p>
         <p>
           We believe the future of small-scale agriculture depends on farmers owning their tools

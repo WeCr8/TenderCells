@@ -38,6 +38,7 @@ describe('TenderCells OS contracts', () => {
       'sensor-pod',
       'camera-kit',
       'controller-board',
+      'barn-brain',
       'printed-part',
       'custom_product',
     ].forEach((marker) => expect(registration).toContain(marker));

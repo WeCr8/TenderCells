@@ -385,6 +385,24 @@ export default function ProductRegistrationModal({
       activeTab: 3,
     },
     {
+      id: 'barn-brain',
+      title: 'Barn Brain',
+      subtitle: 'NVIDIA Jetson edge hub for the local farm automation brain.',
+      description: 'Register a Barn Brain prototype for Jetson setup, local MQTT, routines, AI vision, device registry, and safety interlock work.',
+      icon: <DeveloperBoardOutlinedIcon />,
+      productType: 'automation_device' as ProductType,
+      productFamily: 'barn-brain' as ProductFamily,
+      buildSource: 'prototype' as BuildSource,
+      productName: 'Barn Brain',
+      model: 'Jetson Orin Nano Super Edge Hub',
+      firmwareTarget: 'edge/barn-brain',
+      hardwareSetupMode: 'connect_now' as HardwareSetupMode,
+      simulationBackend: 'hardware_in_loop' as SimulationBackend,
+      roboticsMiddleware: 'mqtt_bridge',
+      notes: 'Start with official NVIDIA Jetson setup, then add TenderCells MQTT, routines, device registry, and safety services.',
+      activeTab: 3,
+    },
+    {
       id: 'printed-part',
       title: '3D Printed Part',
       subtitle: 'Printable brackets, housings, adapters, and fixtures.',
@@ -821,6 +839,7 @@ export default function ProductRegistrationModal({
                     <MenuItem value="camera-kit">Camera Kit</MenuItem>
                     <MenuItem value="motor-axis-kit">Motor / Axis Kit</MenuItem>
                     <MenuItem value="controller-board">Controller Board</MenuItem>
+                    <MenuItem value="barn-brain">Barn Brain</MenuItem>
                     <MenuItem value="printed-part">3D Printed Part</MenuItem>
                     <MenuItem value="community-custom">Community Custom</MenuItem>
                   </Select>

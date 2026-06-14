@@ -21,11 +21,11 @@ const ROUTE_META: Record<string, RouteMeta> = {
   },
   '/shop': {
     title: 'TenderCells Products - Smart Animal Care Hardware',
-    description: 'Explore TenderCells product concepts including Chicken Tender, WatchTower AI, Roaming Roost, and animal-care automation modules.',
+    description: 'Explore TenderCells product concepts including Chicken Tender, WatchTower AI, Roaming Roost, Barn Brain, and animal-care automation modules.',
   },
   '/shop/chicken-tender': {
-    title: 'Chicken Tender - Automated Smart Chicken Coop',
-    description: 'Chicken Tender is a compact automated coop concept with door control, feed and water modules, sensors, camera, and internal rail/robot service layer.',
+    title: 'Chicken Tender - Smart Coop, Health Monitoring, Cameras, and Swappable Robotics',
+    description: 'Chicken Tender is the first TenderCells OS hardware cell for smart coop automation, animal health monitoring, cameras, Jetson edge AI, and swappable robotics modules.',
     image: 'https://tendercells.com/assets/images/products/chicken-tender-concept.png',
   },
   '/shop/watchtower': {
@@ -37,6 +37,11 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: 'Roaming Roost - Mobile Pasture Coop Concept',
     description: 'Roaming Roost is a mobile pasture coop concept for automated rotation, docking, GPS boundaries, and WatchTower predator-alert integration.',
     image: 'https://tendercells.com/assets/images/products/roaming-roost-concept.png',
+  },
+  '/shop/barn-brain': {
+    title: 'Barn Brain - TenderCells Edge Hub Idea',
+    description: 'Barn Brain is a TenderCells edge hub idea for local MQTT, device registry, routines, safety interlocks, offline dashboards, and student-built farm automation.',
+    image: 'https://tendercells.com/assets/images/demos/door-device-crud-demo.png',
   },
   '/education': {
     title: '4-H STEM, FFA, and Young Engineer Projects - TenderCells',

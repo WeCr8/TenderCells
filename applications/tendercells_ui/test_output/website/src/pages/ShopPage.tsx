@@ -3,9 +3,10 @@ import PageLayout from "../components/PageLayout";
 import { trackProductInterest } from "../utils/analytics";
 
 const PRODUCTS = [
-  { slug: "chicken-tender",  icon: "🐔", name: "Chicken Tender™",  status: "Coming soon",  desc: "Fully automated backyard coop concept with robot-arm workflows, egg collection, feeding, watering, and AI monitoring." },
+  { slug: "chicken-tender",  icon: "🐔", name: "Chicken Tender™",  status: "Buy later / build now",  desc: "Smart coop OS cell for cameras, health monitoring, swappable robotics, egg collection, feeding, watering, and AI monitoring." },
   { slug: "roaming-roost",   icon: "🚜", name: "Roaming Roost™",   status: "Concept", desc: "Mobile pasture coop concept that brings the flock to fresh pasture automatically." },
   { slug: "watchtower",      icon: "👁️", name: "WatchTower AI™",   status: "Concept",  desc: "Solar-powered 3-camera predator monitor concept with LoRa mesh alert workflows." },
+  { slug: "barn-brain",      icon: "BB", name: "Barn Brain",       status: "Buy later / build now", desc: "NVIDIA Jetson Nano-class edge hub concept for local MQTT, rules, device registry, safety interlocks, AI vision, and offline-first farm automation." },
   { slug: "duck-dock",       icon: "🦆", name: "Duck Dock™",       status: "Concept", desc: "Duck enclosure concept with pond management, water quality monitoring, and auto-fill ideas." },
   { slug: "bunny-burrow",    icon: "🐰", name: "Bunny Burrow™",    status: "Concept",  desc: "Rabbit habitat automation concept for feeding, temperature control, and enrichment scheduling." },
   { slug: "goat-guardian",   icon: "🐐", name: "Goat Guardian™",   status: "Concept", desc: "Large-enclosure automation concept for gates, feed, water, and health monitoring." },
@@ -31,6 +32,11 @@ const BUILD_IDEAS = [
     image: "/assets/images/demos/chickeneye-eggs-demo.png",
     desc: "Prototype egg detection, nest occupancy, production maps, and ChickenEye AI workflows.",
   },
+  {
+    title: "Barn Brain edge hub",
+    image: "/assets/images/demos/door-device-crud-demo.png",
+    desc: "Prototype the local brain for a barn with NVIDIA Jetson, MQTT broker, routines, safety events, device registry, AI vision, and offline dashboards.",
+  },
 ];
 
 export default function ShopPage() {
@@ -38,7 +44,7 @@ export default function ShopPage() {
     <PageLayout>
       <div className="page-hero green">
         <h1>Shop Tender Cells</h1>
-        <p>Explore product concepts, register interest, and follow the open-source build path.</p>
+        <p>Register interest for future TenderCells products, or follow the developer path to build your own and insert it into the OS.</p>
       </div>
 
       <h2 className="section-title">All Products</h2>
@@ -57,7 +63,7 @@ export default function ShopPage() {
               <div style={{ marginTop: "0.75rem", fontWeight: 700, color: "#2a9d8f" }}>
                 {p.status}
               </div>
-              <span className="tag">View details / I'm interested</span>
+              <span className="tag">View details / build your own</span>
             </div>
           </Link>
         ))}
@@ -79,8 +85,9 @@ export default function ShopPage() {
       <div className="prose">
         <p>
           TenderCells is not taking hardware orders yet. These pages document the product direction,
-          demo workflows, and build ideas so students, makers, and early supporters can follow the
-          project while kits, 3D files, BOMs, and field-tested docs come together.
+          demo workflows, and build ideas so students, makers, and early supporters can register
+          interest, build their own devices, and insert custom 3D assets into the OS while kits,
+          BOMs, CAD, and field-tested docs come together.
         </p>
         <ul>
           <li>One app controls all products on your property</li>

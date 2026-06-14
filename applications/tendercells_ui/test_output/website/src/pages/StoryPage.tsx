@@ -77,7 +77,7 @@ const whatWeBuild = [
   {
     title: "Real product families",
     body:
-      "Chicken Tender, WatchTower, Roaming Roost, and future animal-care systems that students can inspect, improve, remix, or build around.",
+      "Chicken Tender, WatchTower, Roaming Roost, Barn Brain, and future animal-care systems that students can inspect, improve, remix, or build around.",
   },
   {
     title: "An AI-enabled learning path",

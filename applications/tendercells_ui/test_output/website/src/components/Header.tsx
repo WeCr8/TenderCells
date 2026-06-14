@@ -23,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Chicken Tender™",   to: "/shop/chicken-tender" },
       { label: "Roaming Roost™",    to: "/shop/roaming-roost" },
       { label: "WatchTower AI™",    to: "/shop/watchtower" },
+      { label: "Barn Brain",        to: "/shop/barn-brain" },
       { label: "Duck Dock™",        to: "/shop/duck-dock" },
       { label: "Bunny Burrow™",     to: "/shop/bunny-burrow" },
       { label: "Goat Guardian™",    to: "/shop/goat-guardian" },
@@ -163,7 +164,7 @@ export default function Header() {
   return (
     <div ref={headerRef}>
       <div className="promo-banner">
-        TenderCells hardware kits and 3D files are coming soon. Explore concepts, docs, and the live demo today.
+        TenderCells kits are coming later. Register interest, explore docs, or build your own and bring it into the OS today.
       </div>
 
       <header className="site-header">

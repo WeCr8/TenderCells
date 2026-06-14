@@ -25,7 +25,7 @@ const sections = [
   },
   {
     title: "Hardware",
-    body: "The Chicken Tender hardware catalog lists structural hardware, sensors, motors, power, networking, WatchTower AI, rail systems, and tool modules.",
+    body: "The Chicken Tender hardware catalog lists structural hardware, sensors, motors, power, networking, WatchTower AI, rail systems, tool modules, camera/health monitoring, and swappable robotics concepts.",
     path: "docs/CHICKEN_TENDER_HARDWARE_CATALOG.md",
   },
   {
@@ -57,7 +57,7 @@ const buildIdeas = [
     title: "Coop Door Kit",
     image: "/assets/images/products/chicken-tender-concept.png",
     alt: "Concept render of the Chicken Tender automated coop",
-    prompt: "Start from the Chicken Tender cell: document automatic doors, latches, feed/water modules, and the internal rail/arm service layer.",
+    prompt: "Start from the Chicken Tender cell: document automatic doors, latches, feed/water modules, health/camera monitoring, and a swappable rail/arm service layer.",
     firstDoc: "docs/products/chicken-tendercell/README.md",
     productPage: "/shop/chicken-tender",
     docsHref: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/chicken-tendercell",
@@ -150,7 +150,7 @@ export default function DevelopersPage() {
         <p>
           Hardware is listed, but the new docs hub makes it easier to find. Start with the Chicken Tender
           hardware catalog for approved components, sensors, actuators, rail concepts, WatchTower AI,
-          solar, networking, and control-box guidance.
+          solar, networking, camera/health monitoring, swappable robotics, and control-box guidance.
         </p>
       </div>
       <table className="info-table">
@@ -161,6 +161,7 @@ export default function DevelopersPage() {
           <tr><td>Chicken TenderCell</td><td><code>docs/CHICKEN_TENDER_HARDWARE_CATALOG.md</code></td><td>Reference catalog</td></tr>
           <tr><td>WatchTower AI</td><td><code>docs/TenderCells_Predator_Monitor_Hardware_List.xlsx</code></td><td>Needs Markdown product folder</td></tr>
           <tr><td>Roaming Roost</td><td><code>docs/products/roaming-roost/README.md</code></td><td>Needs BOM and wiring</td></tr>
+          <tr><td>Barn Brain</td><td><code>docs/products/barn-brain/README.md</code></td><td>Jetson edge hub concept</td></tr>
           <tr><td>Firmware targets</td><td><code>firmware/chicken-tender</code>, <code>firmware/watchtower</code>, <code>firmware/roaming-roost</code></td><td>Active prototypes</td></tr>
         </tbody>
       </table>
@@ -204,6 +205,8 @@ export default function DevelopersPage() {
         <ul>
           <li>Turn WatchTower AI hardware workbook data into a complete Markdown product folder.</li>
           <li>Add BOM, wiring, and safety validation docs for Roaming Roost.</li>
+          <li>Document swappable Chicken Tender robot arms, gantries, end effectors, cameras, health sensors, and Jetson edge controllers.</li>
+          <li>Prototype Barn Brain on NVIDIA Jetson Nano-class hardware with local MQTT, routines, device registry, and safety events.</li>
           <li>Promote MQTT examples into per-product <code>api-mqtt.md</code> contracts.</li>
           <li>Add simulator examples that become good-first-issues for students and makers.</li>
         </ul>

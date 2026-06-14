@@ -71,6 +71,7 @@ export default function TenderCellsOverviewPage() {
           <li><a href="/shop/chicken-tender">Chicken Tender automated coop concept</a></li>
           <li><a href="/shop/watchtower">WatchTower AI solar predator monitor concept</a></li>
           <li><a href="/shop/roaming-roost">Roaming Roost mobile pasture coop concept</a></li>
+          <li><a href="/shop/barn-brain">Barn Brain Jetson edge hub idea</a></li>
           <li><a href="/developers">Developer documentation hub</a></li>
           <li><a href="/open-source">Open-source program</a></li>
           <li><a href="/app/demo">No-signup public demo</a></li>

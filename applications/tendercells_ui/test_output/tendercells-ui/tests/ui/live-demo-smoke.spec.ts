@@ -133,11 +133,21 @@ test('live marketing site exposes Google policy and consent pages', async ({ pag
   await expect(page.locator('h1')).toContainText('Advertising Disclosure');
   await expect(page.locator('body')).toContainText('Invalid traffic');
 
+  await page.goto('https://tendercells.com/shop/barn-brain', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1')).toContainText('Barn Brain');
+  await expect(page.locator('body')).toContainText(/Jetson|NVIDIA|MQTT|edge hub/i);
+
+  await page.goto('https://tendercells.com/shop/chicken-tender', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1')).toContainText('Chicken Tender');
+  await expect(page.locator('body')).toContainText(/swappable robotics|health monitoring|Jetson|camera/i);
+  await expect(page.locator('body')).toContainText(/Build your own|3D\/GLB|TenderCells OS/i);
+
   const sitemap = await request.get('https://tendercells.com/sitemap.xml');
   const sitemapText = await sitemap.text();
   expect(sitemapText).toContain('https://tendercells.com/cookie-policy');
   expect(sitemapText).toContain('https://tendercells.com/apps');
   expect(sitemapText).toContain('https://tendercells.com/our-story');
+  expect(sitemapText).toContain('https://tendercells.com/shop/barn-brain');
 });
 
 test('live sitemap URLs are crawlable', async ({ request }) => {

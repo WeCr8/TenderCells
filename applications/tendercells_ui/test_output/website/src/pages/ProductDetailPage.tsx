@@ -8,21 +8,21 @@ const PRODUCTS: Record<string, {
   specs: [string, string][]; features: string[]; heroClass: string;
 }> = {
   "chicken-tender": {
-    icon: "🐔", name: "Chicken Tender™", price: "Coming soon",
-    tagline: "The world's first fully automated backyard chicken coop.",
+    icon: "🐔", name: "Chicken Tender™", price: "Buy later / build now",
+    tagline: "The first TenderCells OS hardware cell for cameras, health monitoring, and swappable robotics.",
     heroClass: "green",
-    desc: "Chicken Tender automates every daily task in backyard chicken keeping — feeding, watering, door control, egg collection, and coop cleaning — via a ceiling-mounted 9DOF robot arm. One app controls everything.",
+    desc: "Chicken Tender is the first TenderCells OS hardware cell: a smart coop concept for feeding, watering, door control, egg collection, cleaning, camera monitoring, health signals, and robotics experiments. The robotics layer is meant to stay open and swappable so builders can try different arms, gantries, tool heads, camera systems, sensors, and Barn Brain / Jetson edge hubs while using the same open-source OS patterns.",
     specs: [
       ["Footprint", "4 × 4 × 5 ft (1220 × 1220 × 1500 mm)"],
-      ["Motion System", "XYZ gantry + 6DOF arm (9DOF total)"],
+      ["Motion System", "XYZ gantry + swappable 6DOF arm/tool module concept (9DOF reference path)"],
       ["Gantry Speed", "100 mm/sec per axis (X, Y, Z)"],
       ["Arm Payload", "3 kg at end effector"],
       ["Main MCU", "ESP32-WROOM-32"],
-      ["Arm Controller", "Jetson Nano"],
-      ["Sensors", "DHT22 × 2, MQ-137, load cells × 2, reed switches × 4"],
+      ["Edge AI Controller", "Jetson Nano-class monitoring path; Jetson Orin Nano Super recommended for new AI prototypes"],
+      ["Sensors", "DHT22 × 2, MQ-137, load cells × 2, reed switches × 4, camera and health-monitoring inputs"],
       ["Connectivity", "WiFi 802.11 b/g/n, MQTT via local broker"],
       ["Power", "120V AC, 60W idle, 200W peak"],
-      ["Warranty", "1 year hardware"],
+      ["Status", "Buy from TenderCells when available, or build your own now through developer docs"],
     ],
     features: [
       "Automated door open/close — sunrise/sunset or scheduled",
@@ -33,6 +33,9 @@ const PRODUCTS: Record<string, {
       "Water level monitoring — automated top-off valve support",
       "Ammonia monitoring (MQ-137) — vent alert at 10ppm, critical at 25ppm",
       "Temperature/humidity (DHT22) — cold/heat stress alerts",
+      "Jetson Nano-class camera and health monitoring path for local animal checks and vision experiments",
+      "Swappable robotics concept — builders can test different arms, gantries, end effectors, and service modules",
+      "TenderCells OS compatibility — use the same product registry, MQTT topics, routines, safety state, and demo workflows with community hardware",
       "WatchTower AI compatible — LoRa predator alert closes door in <100ms",
       "E-STOP — all actuator power cut in <100ms from app or hardware button",
       "OTA firmware updates via app — all updates open source",
@@ -88,6 +91,34 @@ const PRODUCTS: Record<string, {
       "Solar + battery — fully off-grid, no wiring required",
       "Night vision capable (IR illumination)",
       "5+ day battery backup in winter low-sun conditions",
+    ],
+  },
+  "barn-brain": {
+    icon: "BB", name: "Barn Brain", price: "Buy later / build now",
+    tagline: "A Jetson-powered edge hub idea for the local farm automation brain.",
+    heroClass: "dark",
+    desc: "Barn Brain is a hardware and edge-software concept for the TenderCells local control layer. It is intended as a Jetson Nano-class edge hub, with new builder paths pointing toward the NVIDIA Jetson Orin Nano Super Developer Kit for local AI, MQTT, device registry, routines, safety events, offline dashboard, and bridges to Chicken Tender, WatchTower AI, Roaming Roost, and community-built modules.",
+    specs: [
+      ["Role", "Local edge hub for farm automation"],
+      ["Recommended developer kit", "NVIDIA Jetson Orin Nano Super Developer Kit for new AI/robotics prototypes"],
+      ["Legacy/low-cost path", "Jetson Nano Developer Kit or other Jetson Nano-class edge computer where available"],
+      ["AI workload", "Local vision models, alert classification, routine assistants, and future barn-side agents"],
+      ["Messaging", "MQTT broker and device topics"],
+      ["Rules", "Local routines, schedules, alert triggers, and manual overrides"],
+      ["Connectivity", "WiFi, Ethernet, optional LoRa bridge, local-only mode"],
+      ["Install path", "Flash NVIDIA JetPack / Jetson Linux from official NVIDIA setup docs"],
+      ["Security", "Local credentials, least-privilege device access, audit logs, and no cloud required for core control"],
+      ["Status", "Naming and architecture idea for contributors"],
+    ],
+    features: [
+      "Runs the local TenderCells brain when internet is unavailable",
+      "Coordinates Chicken Tender, WatchTower AI, Roaming Roost, sensors, doors, feeders, and custom modules",
+      "Keeps safety events such as E-stop, lockout, predator alert, and manual override close to the hardware",
+      "Gives students a clear project: build the local rules engine, dashboard, or device bridge",
+      "Uses NVIDIA Jetson as the preferred edge AI learning path for camera inference and robotics experiments",
+      "Can become a reference edge kit once hardware, enclosure, power, and update docs are ready",
+      "Designed as a community contribution path before official kits or full 3D files are available",
+      "Bring your own 3D model or GLB asset into the TenderCells OS product registry as the hardware evolves",
     ],
   },
   "duck-dock": {
@@ -220,13 +251,17 @@ const PRODUCT_VISUALS: Record<string, {
     notes: [
       "A compact square backyard coop with a visible service side.",
       "Automatic chicken door, nest box access, camera, sensors, feed, and water modules are mounted as serviceable hardware.",
-      "The rail and robot arm are the internal service system for cleaning, inspection, and egg handling.",
+      "The rail and robot arm are the internal service system for cleaning, inspection, egg handling, and builder robotics experiments.",
+      "The robotics layer is intentionally open: builders should be able to swap robot arms, gantries, camera modules, end effectors, and sensor packages as long as they preserve safety contracts.",
+      "Chicken Tender can use Barn Brain or Jetson Nano-class edge hardware for local camera inference, health monitoring, routine execution, and offline-first OS behavior.",
       "The CAD concept source includes a 72-inch square cell, X/Y/Z rails, and a 6DOF mounting plate.",
     ],
     docs: [
       { label: "Product docs", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/chicken-tendercell" },
       { label: "CAD source", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/chicken-tendercell/cad" },
       { label: "Hardware catalog", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/CHICKEN_TENDER_HARDWARE_CATALOG.md" },
+      { label: "Barn Brain edge hub", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/barn-brain" },
+      { label: "NVIDIA Jetson setup", href: "https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit" },
     ],
     extraImages: [
       { image: "/assets/images/demos/door-device-crud-demo.png", alt: "Door and device control demo for Chicken Tender modules", label: "Door and device controls" },
@@ -272,6 +307,30 @@ const PRODUCT_VISUALS: Record<string, {
       { image: "/assets/images/products/predator-monitor-sketch-idea.png", alt: "Early sketch idea for the predator monitor housing", label: "Early concept sketch" },
     ],
   },
+  "barn-brain": {
+    image: "/assets/images/demos/door-device-crud-demo.png",
+    alt: "TenderCells local device and automation dashboard concept for a Barn Brain edge hub",
+    notes: [
+      "Barn Brain is the possible name for the local edge hub that lets TenderCells run close to the barn hardware.",
+      "It would coordinate device discovery, MQTT topics, schedules, rules, alerts, and safety states.",
+      "A builder version should try NVIDIA Jetson Nano-class hardware, with the Jetson Orin Nano Super Developer Kit as the recommended current path for new AI and robotics prototypes.",
+      "Builders should install NVIDIA JetPack / Jetson Linux from official NVIDIA documentation, then layer TenderCells services on top.",
+      "This is not an orderable product yet; it is a contribution-ready idea for students, makers, and edge software developers.",
+    ],
+    docs: [
+      { label: "Buy Jetson Orin Nano Super", href: "https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/nano-super-developer-kit/" },
+      { label: "Jetson Orin Nano setup", href: "https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit" },
+      { label: "JetPack SDK", href: "https://developer.nvidia.com/embedded/jetpack" },
+      { label: "Jetson Nano legacy setup", href: "https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit" },
+      { label: "Developer docs", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/developer" },
+      { label: "Product ideas", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md" },
+      { label: "Open source repo", href: "https://github.com/WeCr8/TenderCells" },
+    ],
+    extraImages: [
+      { image: "/assets/images/demos/coop-camera-demo.png", alt: "Camera module dashboard concept connected to local farm automation", label: "Camera/device input" },
+      { image: "/assets/images/demos/animal-roster-demo.png", alt: "Animal roster records connected to local farm automation", label: "Animal records" },
+    ],
+  },
 };
 
 const PRODUCT_HUB_LINKS: Record<string, { label: string; href: string; note: string }[]> = {
@@ -292,6 +351,12 @@ const PRODUCT_HUB_LINKS: Record<string, { label: string; href: string; note: str
     { label: "4-H predator monitor project", href: "/4h", note: "Camera, solar, and alert-system project path" },
     { label: "Science fair camera study", href: "/science-fair", note: "Observation and monitoring experiment ideas" },
     { label: "Developer hardware docs", href: "/developers", note: "Camera, edge AI, and device integration links" },
+  ],
+  "barn-brain": [
+    { label: "Farm automation routines", href: "/farm-automation", note: "Rules, triggers, and local automation framing" },
+    { label: "TenderCells apps", href: "/apps", note: "Dashboard, MQTT, API, and integration entrypoints" },
+    { label: "Developer hardware docs", href: "/developers", note: "Firmware, broker, SDK, and device registry links" },
+    { label: "4-H engineering projects", href: "/4h", note: "Student-friendly edge hub and device bridge project ideas" },
   ],
 };
 
@@ -370,6 +435,7 @@ export default function ProductDetailPage() {
         >
           I'm interested
         </button>
+        <Link to="/developers#hardware" className="btn-outline">Build your own</Link>
         <Link to="/shop" className="btn-outline">← All Products</Link>
       </div>
 
@@ -415,13 +481,18 @@ export default function ProductDetailPage() {
         </>
       )}
 
-      <h2 className="section-title">Planned Build Package</h2>
+      <h2 className="section-title">Buy Later Or Build Your Own</h2>
       <div className="prose">
         <p>
-          Kits and full production-ready 3D files are not available yet. This section shows the intended
-          direction so builders can follow the project, study the architecture, and contribute safely.
+          TenderCells will use this page to measure interest for future kits and products. Builders do not
+          need to wait: use the developer docs, register a custom product in the OS, and insert your own
+          3D/GLB model or device asset while the official kit, BOM, CAD, and field-tested files mature.
         </p>
         <ul>
+          <li>Register interest now so we know which products people want from TenderCells first</li>
+          <li>Use the developer docs to build your own module, cell, controller, or edge hub</li>
+          <li>Insert a custom 3D asset into the OS with the product registry or model upload workflow</li>
+          <li>Map the hardware to MQTT topics, local routines, safety states, and demo workflows</li>
           <li>Open product documentation and build notes</li>
           <li>Firmware targets and local MQTT control patterns</li>
           <li>Hardware catalog references and safety constraints</li>
@@ -436,7 +507,7 @@ export default function ProductDetailPage() {
           TenderCells is building toward open firmware, hardware documentation, and reproducible build files on
           <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer"> GitHub</a>.
           The goal is local-first animal-care automation that students, makers, and engineers can inspect,
-          improve, and eventually build from.
+          improve, buy from TenderCells when available, or build themselves and bring into the TenderCells OS.
         </p>
       </div>
     </PageLayout>

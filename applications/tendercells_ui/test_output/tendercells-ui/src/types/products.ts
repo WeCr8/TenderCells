@@ -24,6 +24,7 @@ export type ProductFamily =
   | 'camera-kit'
   | 'motor-axis-kit'
   | 'controller-board'
+  | 'barn-brain'
   | 'printed-part'
   | 'community-custom';
 

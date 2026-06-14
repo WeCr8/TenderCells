@@ -679,7 +679,7 @@ export default function ProductsPage() {
                 ['Property Scene', detailProduct.metadata?.property_scene_url || 'Not set'],
                 ['Terrain Source', detailProduct.metadata?.terrain_source || 'Not set'],
                 ['Terrain Capture', detailProduct.metadata?.terrain_capture_device_id || 'Not set'],
-                ['Device Asset', detailProduct.metadata?.custom_device_asset_url || 'Not set'],
+                ['3D / Device Asset', detailProduct.metadata?.custom_device_asset_url || 'Not set'],
                 ['Telemetry Consent', detailProduct.metadata?.telemetry_consent || 'Not requested'],
                 ['Retention Days', detailProduct.metadata?.telemetry_retention_days || 'Not set'],
                 ['Safety Status', detailProduct.metadata?.safety_validation_status || 'Not started'],
@@ -819,6 +819,7 @@ export default function ProductsPage() {
                   <MenuItem value="camera-kit">Camera Kit</MenuItem>
                   <MenuItem value="motor-axis-kit">Motor / Axis Kit</MenuItem>
                   <MenuItem value="controller-board">Controller Board</MenuItem>
+                  <MenuItem value="barn-brain">Barn Brain</MenuItem>
                   <MenuItem value="printed-part">3D Printed Part</MenuItem>
                   <MenuItem value="community-custom">Community Custom</MenuItem>
                 </Select>
@@ -943,7 +944,7 @@ export default function ProductsPage() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Custom device asset URL"
+                label="Custom 3D / device asset URL"
                 value={editForm.custom_device_asset_url}
                 onChange={(event) => setEditForm((form) => ({ ...form, custom_device_asset_url: event.target.value }))}
               />

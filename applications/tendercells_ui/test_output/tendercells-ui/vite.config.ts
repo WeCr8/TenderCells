@@ -4,6 +4,17 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 import { readFile } from 'fs/promises'
 
+const publicDemoEnv = {
+  'import.meta.env.VITE_FIREBASE_API_KEY': JSON.stringify(''),
+  'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN': JSON.stringify(''),
+  'import.meta.env.VITE_FIREBASE_DATABASE_URL': JSON.stringify(''),
+  'import.meta.env.VITE_FIREBASE_PROJECT_ID': JSON.stringify(''),
+  'import.meta.env.VITE_FIREBASE_STORAGE_BUCKET': JSON.stringify(''),
+  'import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(''),
+  'import.meta.env.VITE_FIREBASE_APP_ID': JSON.stringify(''),
+  'import.meta.env.VITE_FIREBASE_MEASUREMENT_ID': JSON.stringify(''),
+}
+
 const muiBoxCreateThemePatch = () => ({
   name: 'mui-box-create-theme-patch',
   enforce: 'pre' as const,
@@ -39,10 +50,11 @@ const muiBoxOptimizerPatch = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  base: process.env.VITE_APP_BASE_PATH || '/',
+export default defineConfig(({ mode }) => ({
+  base: mode === 'public-demo' ? '/app/' : process.env.VITE_APP_BASE_PATH || '/',
   plugins: [muiBoxCreateThemePatch(), react()],
   envDir: path.resolve(__dirname, '../../../..'),
+  define: mode === 'public-demo' ? publicDemoEnv : undefined,
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -97,4 +109,4 @@ export default defineConfig({
     // dependent). Blank it so FIREBASE_ENABLED is false during tests.
     env: { VITE_FIREBASE_PROJECT_ID: '' },
   },
-})
+}))

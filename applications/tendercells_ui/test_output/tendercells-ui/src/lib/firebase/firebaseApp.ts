@@ -17,8 +17,22 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
+const demoFirebaseConfig = {
+  apiKey: 'demo-api-key',
+  authDomain: 'demo-project.firebaseapp.com',
+  databaseURL: 'https://demo-project.firebaseio.com',
+  projectId: 'demo-project',
+  storageBucket: 'demo-project.appspot.com',
+  messagingSenderId: '000000000000',
+  appId: 'demo-app-id',
+};
+
+const config = import.meta.env.VITE_FIREBASE_PROJECT_ID
+  ? firebaseConfig
+  : demoFirebaseConfig;
+
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(config);
 
 // Initialize Firebase services
 export const auth = getAuth(app);

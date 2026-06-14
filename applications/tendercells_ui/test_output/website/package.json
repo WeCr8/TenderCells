@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:with-app": "npm run build && node scripts/copy-app-build.mjs",
+    "build:with-app": "npm run build && npm --prefix ../tendercells-ui run build:public-demo && node scripts/copy-app-build.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

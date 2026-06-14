@@ -39,6 +39,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { readFile } from 'fs/promises';
+var publicDemoEnv = {
+    'import.meta.env.VITE_FIREBASE_API_KEY': JSON.stringify(''),
+    'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN': JSON.stringify(''),
+    'import.meta.env.VITE_FIREBASE_DATABASE_URL': JSON.stringify(''),
+    'import.meta.env.VITE_FIREBASE_PROJECT_ID': JSON.stringify(''),
+    'import.meta.env.VITE_FIREBASE_STORAGE_BUCKET': JSON.stringify(''),
+    'import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(''),
+    'import.meta.env.VITE_FIREBASE_APP_ID': JSON.stringify(''),
+    'import.meta.env.VITE_FIREBASE_MEASUREMENT_ID': JSON.stringify(''),
+};
 var muiBoxCreateThemePatch = function () { return ({
     name: 'mui-box-create-theme-patch',
     enforce: 'pre',
@@ -71,67 +81,71 @@ var muiBoxOptimizerPatch = {
     },
 };
 // https://vitejs.dev/config/
-export default defineConfig({
-    base: process.env.VITE_APP_BASE_PATH || '/',
-    plugins: [muiBoxCreateThemePatch(), react()],
-    envDir: path.resolve(__dirname, '../../../..'),
-    resolve: {
-        alias: {
-            '@': path.resolve(__dirname, './src'),
+export default defineConfig(function (_a) {
+    var mode = _a.mode;
+    return ({
+        base: mode === 'public-demo' ? '/app/' : process.env.VITE_APP_BASE_PATH || '/',
+        plugins: [muiBoxCreateThemePatch(), react()],
+        envDir: path.resolve(__dirname, '../../../..'),
+        define: mode === 'public-demo' ? publicDemoEnv : undefined,
+        resolve: {
+            alias: {
+                '@': path.resolve(__dirname, './src'),
+            },
         },
-    },
-    optimizeDeps: {
-        include: [
-            '@mui/material',
-            '@mui/icons-material',
-            '@mui/material/styles',
-            '@mui/material/styles/createTheme',
-            '@mui/material/styles/ThemeProvider',
-            '@mui/system',
-            '@emotion/react',
-            '@emotion/styled',
-            'hoist-non-react-statics',
-        ],
-        esbuildOptions: {
-            plugins: [muiBoxOptimizerPatch],
+        optimizeDeps: {
+            include: [
+                '@mui/material',
+                '@mui/icons-material',
+                '@mui/material/styles',
+                '@mui/material/styles/createTheme',
+                '@mui/material/styles/ThemeProvider',
+                '@mui/system',
+                '@emotion/react',
+                '@emotion/styled',
+                'hoist-non-react-statics',
+            ],
+            esbuildOptions: {
+                plugins: [muiBoxOptimizerPatch],
+            },
         },
-    },
-    build: {
-        chunkSizeWarningLimit: 900,
-        rollupOptions: {
-            output: {
-                // Split heavy vendors into their own chunks so no single bundle blows
-                // the size budget, and so firebase (statically imported by some modules,
-                // dynamically by the dual-backend services) lands in one stable chunk.
-                manualChunks: function (rawId) {
-                    // Rollup ids use OS path separators; normalize to POSIX so these
-                    // substring checks work on Windows (backslashes) too.
-                    var id = rawId.replace(/\\/g, '/');
-                    if (!id.includes('node_modules'))
+        build: {
+            chunkSizeWarningLimit: 900,
+            rollupOptions: {
+                output: {
+                    // Split heavy vendors into their own chunks so no single bundle blows
+                    // the size budget, and so firebase (statically imported by some modules,
+                    // dynamically by the dual-backend services) lands in one stable chunk.
+                    manualChunks: function (rawId) {
+                        // Rollup ids use OS path separators; normalize to POSIX so these
+                        // substring checks work on Windows (backslashes) too.
+                        var id = rawId.replace(/\\/g, '/');
+                        if (!id.includes('node_modules'))
+                            return undefined;
+                        if (id.includes('/firebase/') || id.includes('/@firebase/'))
+                            return 'firebase';
+                        if (id.includes('/three/') || id.includes('/@react-three/') || id.includes('/three-stdlib/'))
+                            return 'three';
+                        if (id.includes('/@mui/') || id.includes('/@emotion/'))
+                            return 'mui';
+                        if (id.includes('/react-dom/') || id.includes('/react/') || id.includes('/react-router'))
+                            return 'react-vendor';
                         return undefined;
-                    if (id.includes('/firebase/') || id.includes('/@firebase/'))
-                        return 'firebase';
-                    if (id.includes('/three/') || id.includes('/@react-three/') || id.includes('/three-stdlib/'))
-                        return 'three';
-                    if (id.includes('/@mui/') || id.includes('/@emotion/'))
-                        return 'mui';
-                    if (id.includes('/react-dom/') || id.includes('/react/') || id.includes('/react-router'))
-                        return 'react-vendor';
-                    return undefined;
+                    },
                 },
             },
         },
-    },
-    server: {
-        port: 5173,
-        strictPort: true,
-    },
-    test: {
-        include: ['src/**/*.test.{ts,tsx}'],
-        // Unit tests run the deterministic sim (localStorage) backend, never a
-        // real Firebase. Repo-root .env supplies VITE_FIREBASE_PROJECT_ID, which
-        // would route services to live Firestore (flaky, network/permission
-        // dependent). Blank it so FIREBASE_ENABLED is false during tests.
-        env: { VITE_FIREBASE_PROJECT_ID: '' },
-    },
+        server: {
+            port: 5173,
+            strictPort: true,
+        },
+        test: {
+            include: ['src/**/*.test.{ts,tsx}'],
+            // Unit tests run the deterministic sim (localStorage) backend, never a
+            // real Firebase. Repo-root .env supplies VITE_FIREBASE_PROJECT_ID, which
+            // would route services to live Firestore (flaky, network/permission
+            // dependent). Blank it so FIREBASE_ENABLED is false during tests.
+            env: { VITE_FIREBASE_PROJECT_ID: '' },
+        },
+    });
 });

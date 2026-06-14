@@ -11,6 +11,7 @@
     "tc": "node scripts/tendercells-cli.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:public-demo": "tsc -b && vite build --mode public-demo",
     "check": "npm run quality:loop",
     "fallow": "npx --yes fallow@2.94.0 --summary",
     "lint": "eslint .",

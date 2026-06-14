@@ -13,6 +13,7 @@ const publicDemoEnv = {
   'import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(''),
   'import.meta.env.VITE_FIREBASE_APP_ID': JSON.stringify(''),
   'import.meta.env.VITE_FIREBASE_MEASUREMENT_ID': JSON.stringify(''),
+  'import.meta.env.VITE_API_BASE_URL': JSON.stringify(''),
 }
 
 const muiBoxCreateThemePatch = () => ({

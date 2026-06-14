@@ -17,8 +17,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
-import { seedDemoEnvironment } from "../services/demo/demoEnvironment";
+import { Alert, Box, Button, Chip, CircularProgress, Grid, Paper, Stack, Typography } from "@mui/material";
+import YardIcon from "@mui/icons-material/Yard";
+import PetsIcon from "@mui/icons-material/Pets";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import { seedDemoEnvironment, type DemoReport } from "../services/demo/demoEnvironment";
 
 const C = {
   bg: "#0D2B1E",
@@ -26,11 +31,23 @@ const C = {
   accent: "#4A7C59",
   gold: "#C8B882",
   goldMuted: "#8A7D55",
+  warning: "#E8A020",
   danger: "#CC3333",
   white: "#F0EDE4",
 };
 
-type Phase = "seeding" | "error";
+type Phase = "seeding" | "ready" | "error";
+
+const DEMO_TIMEOUT_MS = 12000;
+
+const useCases = [
+  { label: "Command Center", detail: "All registered demo systems, alerts, and quick actions", path: "/dashboard", icon: <DashboardIcon /> },
+  { label: "Chicken Tender", detail: "Coop automation, cameras, doors, feed, cleaning, and egg map", path: "/chicken-tender", icon: <PetsIcon /> },
+  { label: "ChickenEye AI", detail: "Vision simulation, identity, health, and nest-box egg detection", path: "/chicken-eye", icon: <VisibilityIcon /> },
+  { label: "Property Layout", detail: "Full yard layout with every product family placed on the grid", path: "/layout", icon: <YardIcon /> },
+  { label: "Schedules", detail: "Automated doors, feed, cleaning, water, and routines", path: "/schedules", icon: <ScheduleIcon /> },
+  { label: "WatchTower", detail: "Predator-monitor view and yard security scenario", path: "/predator-monitor", icon: <VisibilityIcon /> },
+];
 
 /** Fire a GA4 event if analytics is present. No-op otherwise. */
 function track(event: string, params?: Record<string, unknown>) {
@@ -42,6 +59,7 @@ export default function DemoLandingPage() {
   const navigate = useNavigate();
   const [phase, setPhase] = useState<Phase>("seeding");
   const [error, setError] = useState<string>("");
+  const [report, setReport] = useState<DemoReport | null>(null);
   const started = useRef(false);
 
   useEffect(() => {
@@ -51,9 +69,15 @@ export default function DemoLandingPage() {
     (async () => {
       track("demo_load_start");
       try {
-        const report = await seedDemoEnvironment();
-        track("demo_loaded", { ok: report.ok, devices: report.devices.length });
-        navigate("/dashboard", { replace: true });
+        const seeded = await Promise.race([
+          seedDemoEnvironment(),
+          new Promise<never>((_, reject) =>
+            window.setTimeout(() => reject(new Error("Demo seed timed out. You can still explore the app, or reload the demo.")), DEMO_TIMEOUT_MS),
+          ),
+        ]);
+        setReport(seeded);
+        track("demo_loaded", { ok: seeded.ok, devices: seeded.devices.length });
+        setPhase("ready");
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         track("demo_load_error", { message: msg });
@@ -79,7 +103,7 @@ export default function DemoLandingPage() {
           <>
             <CircularProgress sx={{ color: C.gold }} />
             <Typography variant="h5" sx={{ color: C.gold, fontWeight: 700 }}>
-              Spinning up your demo coop…
+              Building your live demo yard...
             </Typography>
             <Typography sx={{ color: C.white }}>
               Seeding a full Tender Cells environment — every product family, flocks,
@@ -89,6 +113,74 @@ export default function DemoLandingPage() {
               Private &amp; local-first. Nothing leaves your machine. No account needed.
             </Typography>
           </>
+        )}
+
+        {phase === "ready" && (
+          <Stack spacing={2.5} sx={{ width: "min(1080px, 92vw)" }}>
+            <Stack spacing={1} alignItems="center">
+              <Chip
+                label={report?.ok ? "Demo environment verified" : "Demo loaded with gaps"}
+                sx={{ bgcolor: report?.ok ? C.accent + "33" : C.warning + "33", color: report?.ok ? C.accent : C.warning, fontWeight: 700 }}
+              />
+              <Typography variant="h4" sx={{ color: C.gold, fontWeight: 800, textAlign: "center" }}>
+                Tender Cells Demo Yard
+              </Typography>
+              <Typography sx={{ color: C.white, textAlign: "center", maxWidth: 760 }}>
+                Explore the full no-signup simulation: coops, animals, nest boxes, schedules,
+                property layout, vision AI, and predator monitoring. All data is local to this browser.
+              </Typography>
+            </Stack>
+
+            <Grid container spacing={1.5}>
+              {[
+                { label: "Systems", value: report?.devices.length ?? 0 },
+                { label: "Coherent", value: report?.devices.filter((d) => d.product.ok && d.layout.ok && d.equipment.ok).length ?? 0 },
+                { label: "Animal Packs", value: report?.devices.filter((d) => d.flock.detail !== "0 animals").length ?? 0 },
+                { label: "Egg Maps", value: report?.devices.filter((d) => d.eggs.detail.includes("nest boxes")).length ?? 0 },
+              ].map((item) => (
+                <Grid item xs={6} sm={3} key={item.label}>
+                  <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 1.5, textAlign: "center" }}>
+                    <Typography sx={{ color: C.gold, fontSize: 26, fontWeight: 800, lineHeight: 1 }}>{item.value}</Typography>
+                    <Typography sx={{ color: C.goldMuted, fontSize: 12 }}>{item.label}</Typography>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+
+            {!report?.ok && (
+              <Alert severity="warning" sx={{ bgcolor: C.warning + "22", color: C.white }}>
+                Some demo layers did not verify. You can still explore, or reload the demo to reseed local state.
+              </Alert>
+            )}
+
+            <Grid container spacing={1.5}>
+              {useCases.map((item) => (
+                <Grid item xs={12} sm={6} md={4} key={item.path}>
+                  <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2, height: "100%" }}>
+                    <Stack spacing={1.25} height="100%">
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Box sx={{ color: C.accent, display: "flex" }}>{item.icon}</Box>
+                        <Typography sx={{ color: C.gold, fontWeight: 700 }}>{item.label}</Typography>
+                      </Stack>
+                      <Typography sx={{ color: C.goldMuted, fontSize: 13, flex: 1 }}>{item.detail}</Typography>
+                      <Button variant="outlined" onClick={() => navigate(item.path)} sx={{ borderColor: C.accent, color: C.accent }}>
+                        Open
+                      </Button>
+                    </Stack>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} justifyContent="center">
+              <Button variant="contained" onClick={() => navigate("/dashboard")} sx={{ bgcolor: C.accent, color: C.white }}>
+                Start at Dashboard
+              </Button>
+              <Button variant="outlined" onClick={() => window.location.reload()} sx={{ borderColor: C.goldMuted, color: C.gold }}>
+                Reload Demo
+              </Button>
+            </Stack>
+          </Stack>
         )}
 
         {phase === "error" && (

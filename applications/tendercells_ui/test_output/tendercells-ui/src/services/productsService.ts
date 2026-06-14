@@ -14,6 +14,7 @@ import type {
  */
 export class ProductsService {
   private static readonly API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+  private static readonly API_ENABLED = Boolean(import.meta.env.VITE_API_BASE_URL);
   private static readonly DEV_PRODUCTS_KEY = 'tendercells_dev_products';
   static readonly GARAGE_OWNER_EMAIL = 'zgoodbody@gmail.com';
   static readonly FIRST_COOP_PRODUCT_ID = 'garage-chicken-tender-001';
@@ -206,6 +207,10 @@ export class ProductsService {
   }
 
   private static async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    if (!this.API_ENABLED) {
+      throw new Error('Products API is not configured');
+    }
+
     const response = await fetch(`${this.API_BASE_URL}${endpoint}`, {
       ...options,
       headers: {
@@ -420,4 +425,3 @@ export class ProductsService {
     }
   }
 }
-

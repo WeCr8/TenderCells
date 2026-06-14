@@ -81,7 +81,7 @@ const GRID: Record<string, { x: number; y: number }> = {
 // of the environment (predator monitor that meshes with the coops).
 const WATCHTOWER_SPEC: DemoDeviceSpec = {
   deviceId: DEMO_DEVICES.watchTower,
-  family: 'watchtower',
+  family: 'predator-monitor',
   hardwareType: 'watchtower',
   label: 'WatchTower Demo',
   animals: [],
@@ -123,7 +123,7 @@ function schedulesFor(family: string, deviceId: string): CreateScheduleData[] {
       return [feed(7, 0, 80), clean(8, 30)];
     case 'goat-guardian':
       return [door(6, 0, true), feed(7, 0, 250), water(9, 0), door(20, 30, false)];
-    case 'watchtower':
+    case 'predator-monitor':
       return []; // sensor-only — no actuators to schedule
     default: // chicken-tender, roaming-roost, turkey-tower, pigeon-palace
       return [door(6, 0, true), feed(7, 0, 100), clean(8, 30), door(20, 0, false)];

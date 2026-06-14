@@ -255,6 +255,25 @@
   border: 1px solid #b9d2bf;
   border-radius: 8px;
   background: #f7fbf7;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.story-pathways figure {
+  margin: 0;
+  background: #0D2B1E;
+  border-bottom: 1px solid #b9d2bf;
+}
+
+.story-pathways figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.story-pathway-copy {
   padding: 1.3rem;
 }
 

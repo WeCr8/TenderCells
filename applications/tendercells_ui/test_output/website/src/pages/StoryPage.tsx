@@ -68,6 +68,51 @@ const builderPath = [
   "Turn the best ideas into products, clubs, services, research, or companies.",
 ];
 
+const pathways = [
+  {
+    title: "Imagine it.",
+    image: "/assets/images/story/imagine.svg",
+    alt: "Sketching a product idea under a lightbulb",
+    body:
+      "Start with a problem in animal care, then sketch the product, ask what data matters, and use AI tools to explore designs, risks, parts, and code.",
+  },
+  {
+    title: "Simulate it.",
+    image: "/assets/images/story/simulate.svg",
+    alt: "6DOF robot arm running inside a 3D simulation viewport",
+    body:
+      "Test ideas in the public demo, browser workflows, CAD-style layouts, local scripts, or robotics simulations before risking hardware or animals.",
+  },
+  {
+    title: "Build it.",
+    image: "/assets/images/story/build.svg",
+    alt: "Soldering iron joining components on a circuit board",
+    body:
+      "Community builders can model and 3D print their own mounts, gates, waterer brackets, sensor housings, rails, or replacement parts, then register those parts as product modules.",
+  },
+  {
+    title: "Wire it.",
+    image: "/assets/images/story/wire.svg",
+    alt: "ESP32 microcontroller wired into a board with circuit traces",
+    body:
+      "Developers can wire custom boards, motors, cameras, and MQTT devices into the same software surface used by official TenderCells products.",
+  },
+  {
+    title: "Share it.",
+    image: "/assets/images/story/share.svg",
+    alt: "Open-source contribution graph with a merged pull request",
+    body:
+      "A build log, lesson, dataset, issue, pull request, or demo video can help the next student move faster and think more clearly.",
+  },
+  {
+    title: "Launch it.",
+    image: "/assets/images/story/launch.svg",
+    alt: "Rocket lifting off beside a packaged product kit",
+    body:
+      "The best ideas can become kits, local services, school programs, research tools, community products, or companies built by the people who learned here.",
+  },
+];
+
 const whatWeBuild = [
   {
     title: "A Farming OS for small builders",
@@ -274,49 +319,17 @@ export default function StoryPage() {
       </section>
 
       <section className="story-pathways">
-        <article>
-          <h2>Imagine it.</h2>
-          <p>
-            Start with a problem in animal care, then sketch the product, ask what
-            data matters, and use AI tools to explore designs, risks, parts, and code.
-          </p>
-        </article>
-        <article>
-          <h2>Simulate it.</h2>
-          <p>
-            Test ideas in the public demo, browser workflows, CAD-style layouts,
-            local scripts, or robotics simulations before risking hardware or animals.
-          </p>
-        </article>
-        <article>
-          <h2>Build it.</h2>
-          <p>
-            Community builders can model and 3D print their own mounts, gates,
-            waterer brackets, sensor housings, rails, or replacement parts, then
-            register those parts as product modules.
-          </p>
-        </article>
-        <article>
-          <h2>Wire it.</h2>
-          <p>
-            Developers can wire custom boards, motors, cameras, and MQTT devices
-            into the same software surface used by official TenderCells products.
-          </p>
-        </article>
-        <article>
-          <h2>Share it.</h2>
-          <p>
-            A build log, lesson, dataset, issue, pull request, or demo video can help
-            the next student move faster and think more clearly.
-          </p>
-        </article>
-        <article>
-          <h2>Launch it.</h2>
-          <p>
-            The best ideas can become kits, local services, school programs, research
-            tools, community products, or companies built by the people who learned here.
-          </p>
-        </article>
+        {pathways.map((step) => (
+          <article key={step.title}>
+            <figure>
+              <img src={step.image} alt={step.alt} loading="lazy" />
+            </figure>
+            <div className="story-pathway-copy">
+              <h2>{step.title}</h2>
+              <p>{step.body}</p>
+            </div>
+          </article>
+        ))}
       </section>
 
       <section className="story-company-path">

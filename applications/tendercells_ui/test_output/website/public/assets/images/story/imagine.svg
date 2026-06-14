@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" role="img" aria-label="Imagine: sketching an idea">
+  <rect width="400" height="250" fill="#0D2B1E"/>
+  <rect width="400" height="250" fill="url(#ig)"/>
+  <defs>
+    <linearGradient id="ig" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#143524"/>
+      <stop offset="1" stop-color="#0D2B1E"/>
+    </linearGradient>
+  </defs>
+  <!-- sketch grid -->
+  <g stroke="#1f4a33" stroke-width="1">
+    <path d="M40 60H360M40 110H360M40 160H360M40 210H360"/>
+    <path d="M90 40V220M160 40V220M230 40V220M300 40V220"/>
+  </g>
+  <!-- bulb -->
+  <circle cx="200" cy="110" r="46" fill="none" stroke="#C8B882" stroke-width="4"/>
+  <path d="M200 64a46 46 0 0 0-26 84h52a46 46 0 0 0-26-84z" fill="#C8B882" opacity="0.12"/>
+  <path d="M182 150h36M186 162h28M192 174h16" stroke="#C8B882" stroke-width="4" stroke-linecap="round"/>
+  <path d="M200 90v34M186 104l28 16M214 104l-28 16" stroke="#E8C66A" stroke-width="3" stroke-linecap="round"/>
+  <!-- rays -->
+  <g stroke="#4A7C59" stroke-width="3" stroke-linecap="round">
+    <path d="M200 44V30M256 66l10-10M144 66l-10-10M270 110h14M116 110h-14"/>
+  </g>
+  <!-- pencil -->
+  <g transform="rotate(40 300 190)">
+    <rect x="286" y="150" width="14" height="70" rx="3" fill="#8A7D55"/>
+    <path d="M286 150l7-14 7 14z" fill="#C8B882"/>
+    <rect x="286" y="214" width="14" height="8" fill="#10251a"/>
+  </g>
+</svg>

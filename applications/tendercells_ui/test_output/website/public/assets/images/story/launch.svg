@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" role="img" aria-label="Launch: shipping a product to market">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a2030"/>
+      <stop offset="1" stop-color="#0D2B1E"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="250" fill="url(#lg)"/>
+  <!-- stars -->
+  <g fill="#C8B882" opacity="0.7">
+    <circle cx="60" cy="50" r="2"/><circle cx="120" cy="30" r="1.5"/><circle cx="320" cy="60" r="2"/>
+    <circle cx="350" cy="120" r="1.5"/><circle cx="40" cy="120" r="1.5"/><circle cx="300" cy="30" r="1.5"/>
+  </g>
+  <!-- rocket -->
+  <g transform="rotate(35 200 130)">
+    <path d="M200 60c26 18 30 60 30 90h-60c0-30 4-72 30-90z" fill="#C8B882"/>
+    <circle cx="200" cy="115" r="12" fill="#0D2B1E"/>
+    <circle cx="200" cy="115" r="6" fill="#3ad17a"/>
+    <path d="M170 150c-16 4-22 18-22 30 14-2 22-8 28-18z" fill="#4A7C59"/>
+    <path d="M230 150c16 4 22 18 22 30-14-2-22-8-28-18z" fill="#4A7C59"/>
+    <!-- flame -->
+    <path d="M186 150h28c-2 24-14 42-14 42s-12-18-14-42z" fill="#E8A020"/>
+    <path d="M193 152h14c-1 14-7 26-7 26s-6-12-7-26z" fill="#FFD66B"/>
+  </g>
+  <!-- ground / box -->
+  <rect x="40" y="200" width="320" height="6" rx="3" fill="#1f4a33"/>
+  <g>
+    <rect x="290" y="170" width="60" height="34" rx="3" fill="#0e3a28" stroke="#4A7C59" stroke-width="2"/>
+    <path d="M290 182h60M320 170v34" stroke="#4A7C59" stroke-width="2"/>
+    <text x="320" y="160" fill="#bed2c4" font-family="monospace" font-size="11" text-anchor="middle">kit</text>
+  </g>
+</svg>

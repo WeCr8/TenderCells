@@ -51,9 +51,10 @@ export default function PageHero({
         {children}
       </div>
       {image ? (
-        <div className="page-hero-visual">
+        <figure className="page-hero-visual">
           <img src={image} alt={imageAlt ?? ""} loading="eager" />
-        </div>
+          <figcaption className="page-hero-visual-label">{title}</figcaption>
+        </figure>
       ) : null}
     </div>
   );

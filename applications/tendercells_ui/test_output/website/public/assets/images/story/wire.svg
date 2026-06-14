@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" role="img" aria-label="Wire: microcontroller and circuit traces">
+  <defs>
+    <linearGradient id="wg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e3a28"/>
+      <stop offset="1" stop-color="#0D2B1E"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="250" fill="url(#wg)"/>
+  <!-- traces -->
+  <g stroke="#3ad17a" stroke-width="2.5" fill="none" opacity="0.85" stroke-linecap="round">
+    <path d="M40 60h70v40h60"/>
+    <path d="M40 120h50v60h70"/>
+    <path d="M360 70h-70v50h-60"/>
+    <path d="M360 150h-60v40h-70"/>
+    <path d="M200 30v40M200 220v-40"/>
+  </g>
+  <g fill="#C8B882">
+    <circle cx="40" cy="60" r="4"/><circle cx="40" cy="120" r="4"/>
+    <circle cx="360" cy="70" r="4"/><circle cx="360" cy="150" r="4"/>
+    <circle cx="200" cy="30" r="4"/><circle cx="200" cy="220" r="4"/>
+  </g>
+  <!-- MCU chip (ESP32) -->
+  <rect x="158" y="95" width="84" height="60" rx="4" fill="#10251a" stroke="#4A7C59" stroke-width="2"/>
+  <text x="200" y="130" fill="#C8B882" font-family="monospace" font-size="13" text-anchor="middle">ESP32</text>
+  <g stroke="#8A7D55" stroke-width="3">
+    <path d="M158 108h-12M158 125h-12M158 142h-12M242 108h12M242 125h12M242 142h12"/>
+    <path d="M172 95v-12M186 95v-12M214 95v-12M228 95v-12M172 155v12M186 155v12M214 155v12M228 155v12"/>
+  </g>
+</svg>

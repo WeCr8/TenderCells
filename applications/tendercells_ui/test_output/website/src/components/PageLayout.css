@@ -114,6 +114,8 @@
   opacity: 0.85;
 }
 .page-hero-visual {
+  position: relative;
+  margin: 0;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
@@ -125,6 +127,19 @@
   height: 100%;
   aspect-ratio: 16 / 10;
   object-fit: cover;
+}
+.page-hero-visual-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1.4rem 1rem 0.85rem;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  text-align: left;
+  background: linear-gradient(to top, rgba(8, 22, 15, 0.85), rgba(8, 22, 15, 0));
 }
 
 .section-title {

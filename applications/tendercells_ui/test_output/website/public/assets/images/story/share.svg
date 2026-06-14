@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" role="img" aria-label="Share: open-source contribution network">
+  <defs>
+    <linearGradient id="shg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#143524"/>
+      <stop offset="1" stop-color="#0D2B1E"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="250" fill="url(#shg)"/>
+  <!-- branch lines -->
+  <g stroke="#4A7C59" stroke-width="3" fill="none">
+    <path d="M90 200V70"/>
+    <path d="M90 140C90 110 160 120 160 90"/>
+    <path d="M90 170C90 150 250 160 250 130"/>
+    <path d="M160 90V70M250 130V110"/>
+  </g>
+  <!-- commit nodes -->
+  <g fill="#C8B882">
+    <circle cx="90" cy="200" r="9"/><circle cx="90" cy="140" r="9"/><circle cx="90" cy="80" r="9"/>
+  </g>
+  <circle cx="160" cy="80" r="11" fill="#3ad17a"/>
+  <circle cx="250" cy="100" r="11" fill="#E8A020"/>
+  <!-- merge arrow -->
+  <path d="M250 100C310 100 320 200 230 200H110" stroke="#7fd7a3" stroke-width="3" fill="none" stroke-dasharray="6 6"/>
+  <path d="M120 194l-12 6 12 6z" fill="#7fd7a3"/>
+  <!-- label -->
+  <g font-family="monospace" font-size="12" fill="#bed2c4">
+    <text x="178" y="60">feature</text>
+    <text x="268" y="100">PR</text>
+    <text x="100" y="225">main</text>
+  </g>
+</svg>

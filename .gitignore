@@ -81,3 +81,4 @@ applications/tendercells_ui/test_output/tendercells-ui/test-results/
 
 # Local release packages
 release-artifacts/
+applications/web/

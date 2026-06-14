@@ -132,6 +132,22 @@ tender-cells/
 
 ## Quick Start
 
+### Connect a device (no hardware needed)
+
+Run the real control plane — embedded MQTT broker + API bridge + a virtual device —
+and watch sensor data flow up and commands flow down:
+
+```bash
+cd applications/tendercells_ui/test_output/express-api
+npm install
+npm run dev        # terminal 1: embedded broker (:1883) + API (:4000)
+npm run simulate   # terminal 2: a virtual device
+npm run smoke      # terminal 3: proves the loop end-to-end ("✓ SMOKE PASS")
+```
+
+Full runbook — virtual device, your own ESP32, topic/payload tables, troubleshooting:
+**[docs/CONNECT_A_DEVICE.md](docs/CONNECT_A_DEVICE.md)**.
+
 ## Engineering Loop
 
 For the active TenderCells UI app:

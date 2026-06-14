@@ -1,11 +1,16 @@
 // server.ts
+
+// Load .env first (see loadEnv.ts — ESM evaluates imports before body code).
+import './loadEnv.js';
+
+// Start the embedded MQTT broker BEFORE importing the MQTT bridge, so the broker
+// is listening when the bridge auto-connects on module load.
+import './broker.js';
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import mqttRoutes from './routes/mqtt.routes.js';
 import productsRoutes from './routes/products.routes.js';
-
-dotenv.config();
 
 // Firebase optional - MQTT is primary control path
 try {

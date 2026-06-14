@@ -13,5 +13,9 @@
     "resolveJsonModule": true
   },
   "include": ["backend/src/**/*"],
-  "exclude": ["node_modules", "dist", "backend/src/routes/index.ts"]
+  "exclude": ["node_modules", "dist", "backend/src/routes/index.ts"],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
 }

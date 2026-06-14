@@ -15,6 +15,44 @@ export default function HealthPage() {
         </p>
       </div>
 
+      <div className="product-visual">
+        <img
+          src="/assets/images/products/animal-health-stress-monitoring-concept.png"
+          alt="TenderCells concept view of animal stress, health, behavior, and sensor monitoring"
+        />
+        <div>
+          <h2>How We Plan To Monitor Stress And Health</h2>
+          <ul>
+            <li>Environmental stress: temperature, humidity, light, air quality, ammonia risk, and ventilation context.</li>
+            <li>Resource changes: feed intake, water level, nest-box activity, egg count, and sudden changes from recent baselines.</li>
+            <li>Behavior patterns: low activity, isolation, unusual roosting, missed routines, repeated nest time, and flock separation.</li>
+            <li>Camera review: ChickenEye and WatchTower-style overlays can help point a caretaker toward what changed.</li>
+            <li>Human-first alerts: the system should recommend review, manual checks, and veterinary help when needed, not claim a diagnosis.</li>
+          </ul>
+        </div>
+        <div className="product-component-map" aria-label="TenderCells health monitoring component map">
+          <h3>Real Component Match</h3>
+          <div>
+            <article>
+              <strong>BehaviorAnalytics</strong>
+              <p>Flock-level scores, feeding, water, activity, egg-laying, and per-bird watch states.</p>
+            </article>
+            <article>
+              <strong>Animal roster</strong>
+              <p>Named animals, health labels, notes, and history make alerts explainable.</p>
+            </article>
+            <article>
+              <strong>Settings alerts</strong>
+              <p>Temperature, feed, water, predator, and health notices can be adjusted instead of hard-coded.</p>
+            </article>
+            <article>
+              <strong>TenderAI review</strong>
+              <p>Sensor explanations should guide next checks while keeping care decisions with the human caretaker.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+
       <h2 className="section-title" id="chicken">Chicken Health Guide</h2>
       <table className="info-table">
         <thead>

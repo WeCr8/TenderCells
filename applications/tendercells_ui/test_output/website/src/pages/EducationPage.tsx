@@ -1,5 +1,62 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import "./EducationPage.css";
+
+const authorityClusters = [
+  {
+    title: "Animal Care Engineering",
+    image: "/assets/images/products/animal-health-stress-monitoring-concept.png",
+    alt: "TenderCells concept view for animal stress and health monitoring education",
+    body: "Use sensors, records, cameras, daily care data, and human-review alerts to teach how engineering can improve animal welfare, health, safety, and quality of life.",
+    href: "/health",
+    label: "Animal health",
+  },
+  {
+    title: "Smart Chicken Coop Systems",
+    image: "/assets/images/products/chicken-tender-concept.png",
+    alt: "Chicken Tender smart chicken coop concept for education and engineering",
+    body: "Study doors, latches, feed, water, egg maps, camera views, swappable robotics, and Jetson edge AI as one practical open-source system.",
+    href: "/shop/chicken-tender",
+    label: "Chicken Tender",
+  },
+  {
+    title: "Predator Protection",
+    image: "/assets/images/products/predator-monitor-pole-mount.png",
+    alt: "WatchTower AI pole-mounted predator monitor concept",
+    body: "Turn predator detection, solar power, camera placement, local AI, and alert response into student projects with measurable safety goals.",
+    href: "/guides/predator-monitoring",
+    label: "Predator guide",
+  },
+  {
+    title: "Farm Automation Routines",
+    image: "/assets/images/demos/door-device-crud-demo.png",
+    alt: "TenderCells device and door control dashboard for farm automation routines",
+    body: "Teach the automation loop: inputs, logic, safety checks, actions, logs, and community routines that can run locally through Barn Brain.",
+    href: "/farm-automation",
+    label: "Farm automation",
+  },
+];
+
+const studentBuilds = [
+  {
+    title: "Camera And Computer Vision",
+    image: "/assets/images/demos/coop-camera-demo.png",
+    alt: "TenderCells coop camera dashboard for computer vision lessons",
+    body: "Build camera stations, compare views, annotate events, and learn why local inference and privacy matter around animals.",
+  },
+  {
+    title: "Egg And Nest-Box Data",
+    image: "/assets/images/demos/chickeneye-eggs-demo.png",
+    alt: "ChickenEye egg detection and nest-box map dashboard",
+    body: "Use egg records and nest-box maps for data science, production trends, animal behavior, and fair-ready project explanations.",
+  },
+  {
+    title: "Mobile Pasture Robotics",
+    image: "/assets/images/products/roaming-roost-concept.png",
+    alt: "Roaming Roost mobile pasture coop concept for robotics education",
+    body: "Study route planning, grazing recovery, docking, battery assumptions, and movement safety before trying mobile hardware.",
+  },
+];
 
 export default function EducationPage() {
   return (
@@ -16,6 +73,46 @@ export default function EducationPage() {
           so students can interact with real embedded systems, not just simulations.
         </p>
       </div>
+
+      <section className="education-poster" aria-label="TenderCells education format">
+        <img
+          src="/assets/images/demos/tendercells-education-format.png"
+          alt="Tender Cells education poster showing Build Learn Care Share with animal-care engineering projects"
+        />
+        <div>
+          <p className="education-kicker">Build. Learn. Care. Share.</p>
+          <h2>A project format young engineers can understand and repeat.</h2>
+          <p>
+            Start from a real care problem, use the demo and docs to understand the system,
+            build one safe module, measure what changed, then share the work so another
+            student can learn from it.
+          </p>
+        </div>
+      </section>
+
+      <section className="education-visual-band" aria-label="Tender Cells authority learning paths">
+        <div className="education-band-copy">
+          <p className="education-kicker">Authority clusters</p>
+          <h2>Own the whole learning ecosystem, not one keyword.</h2>
+          <p>
+            Tender Cells should help students and AI search tools understand the full map:
+            animal care engineering, smart coops, predator protection, farm automation,
+            agricultural robotics, and future engineering education.
+          </p>
+        </div>
+        <div className="education-visual-grid">
+          {authorityClusters.map((cluster) => (
+            <Link key={cluster.title} to={cluster.href} className="education-visual-card">
+              <img src={cluster.image} alt={cluster.alt} loading="lazy" />
+              <div>
+                <h3>{cluster.title}</h3>
+                <p>{cluster.body}</p>
+                <span>{cluster.label}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <h2 className="section-title" id="stem">STEM Programs</h2>
       <div className="card-grid">
@@ -64,6 +161,24 @@ export default function EducationPage() {
         ))}
       </div>
 
+      <section className="education-image-strip" aria-label="Student build examples">
+        <div className="education-strip-heading">
+          <p className="education-kicker">What students can build</p>
+          <h2>Projects with visible hardware, data, and animal-care meaning.</h2>
+        </div>
+        <div className="education-strip-grid">
+          {studentBuilds.map((item) => (
+            <article key={item.title}>
+              <img src={item.image} alt={item.alt} loading="lazy" />
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <h2 className="section-title" id="grants">Grant Information</h2>
       <div className="prose">
         <p>
@@ -85,7 +200,8 @@ export default function EducationPage() {
       </div>
 
       <h2 className="section-title" id="ffa-4h">FFA &amp; 4-H Integration</h2>
-      <div className="prose">
+      <div className="education-split">
+        <div className="prose">
         <p>
           Tender Cells gives 4-H members, FFA students, homeschoolers, and young engineers
           a real project path into agricultural robotics, smart chicken coops, animal-care
@@ -100,6 +216,11 @@ export default function EducationPage() {
           <li>Chapter fundraising through egg production tracking, flock dashboards, and student-built modules</li>
           <li>Beginner-friendly GitHub issues for students learning open-source collaboration</li>
         </ul>
+        </div>
+        <figure>
+          <img src="/assets/images/products/predator-monitor-top-view.png" alt="Top-view WatchTower camera concept for student predator protection projects" loading="lazy" />
+          <figcaption>4-H and FFA students can turn cameras, sensors, and animal records into projects that explain both engineering and care outcomes.</figcaption>
+        </figure>
       </div>
 
       <h2 className="section-title" id="young-engineers">Young Engineer Build Path</h2>

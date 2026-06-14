@@ -123,6 +123,16 @@ test('live marketing site exposes Google policy and consent pages', async ({ pag
 
   await page.goto('https://tendercells.com/our-story', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('body')).toContainText(/future builders|young engineers|companies/i);
+  await expect(page.locator('body')).toContainText(/Animal care engineering|Predator protection|Agricultural robotics/i);
+  expect(await page.locator('img[src*="predator-monitor-pole-mount"]').count()).toBeGreaterThan(0);
+  expect(await page.locator('img[src*="tendercells-education-format"]').count()).toBeGreaterThan(0);
+  expect(await page.locator('img[src*="animal-health-stress-monitoring"]').count()).toBeGreaterThan(0);
+
+  await page.goto('https://tendercells.com/education', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).toContainText(/Authority clusters|Animal Care Engineering|Smart Chicken Coop Systems/i);
+  await expect(page.locator('body')).toContainText(/Build\. Learn\. Care\. Share\.|stress and health|human-review alerts/i);
+  expect(await page.locator('img[src*="chicken-tender-concept"]').count()).toBeGreaterThan(0);
+  expect(await page.locator('img[src*="tendercells-education-format"]').count()).toBeGreaterThan(0);
 
   await page.goto('https://tendercells.com/cookie-policy', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('h1')).toContainText('Cookie Policy');
@@ -141,6 +151,21 @@ test('live marketing site exposes Google policy and consent pages', async ({ pag
   await expect(page.locator('h1')).toContainText('Chicken Tender');
   await expect(page.locator('body')).toContainText(/swappable robotics|health monitoring|Jetson|camera/i);
   await expect(page.locator('body')).toContainText(/Build your own|3D\/GLB|TenderCells OS/i);
+  expect(await page.locator('img[src*="animal-health-stress-monitoring"]').count()).toBeGreaterThan(0);
+
+  await page.goto('https://tendercells.com/shop/watchtower', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1')).toContainText('WatchTower AI');
+  await expect(page.locator('body')).toContainText(/Threat species detection|Non-threat classification|Night vision mode/i);
+  expect(await page.locator('img[src*="watchtower-threat-detection"]').count()).toBeGreaterThan(0);
+  expect(await page.locator('img[src*="watchtower-night-vision"]').count()).toBeGreaterThan(0);
+
+  await page.goto('https://tendercells.com/shop/duck-dock', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1')).toContainText('Duck Dock');
+  expect(await page.locator('img[src*="duck-dock-concept"]').count()).toBeGreaterThan(0);
+
+  await page.goto('https://tendercells.com/health', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).toContainText(/How We Plan To Monitor Stress And Health|Human-first alerts|Real Component Match/i);
+  expect(await page.locator('img[src*="animal-health-stress-monitoring"]').count()).toBeGreaterThan(0);
 
   const sitemap = await request.get('https://tendercells.com/sitemap.xml');
   const sitemapText = await sitemap.text();

@@ -248,6 +248,41 @@
   color: #355243;
   font-weight: 600;
 }
+.product-component-map {
+  grid-column: 1 / -1;
+  padding: 1rem;
+  border: 1px solid #d4e2d9;
+  border-radius: 8px;
+  background: #ffffff;
+}
+.product-component-map h3 {
+  margin: 0 0 0.85rem;
+  color: #1f5c3b;
+  font-size: 1.05rem;
+}
+.product-component-map > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+.product-component-map article {
+  padding: 0.85rem;
+  border: 1px solid #e2ebe5;
+  border-radius: 6px;
+  background: #f8fbf9;
+}
+.product-component-map strong {
+  display: block;
+  color: #234b35;
+  font-size: 0.92rem;
+  margin-bottom: 0.35rem;
+}
+.product-component-map p {
+  margin: 0;
+  color: #4b5a51;
+  line-height: 1.5;
+  font-size: 0.88rem;
+}
 
 .prose {
   font-size: 1rem;

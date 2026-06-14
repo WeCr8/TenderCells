@@ -244,6 +244,7 @@ const PRODUCT_VISUALS: Record<string, {
   notes: string[];
   docs: { label: string; href: string }[];
   extraImages?: { image: string; alt: string; label: string }[];
+  componentMap?: { label: string; body: string }[];
 }> = {
   "chicken-tender": {
     image: "/assets/images/products/chicken-tender-concept.png",
@@ -267,6 +268,13 @@ const PRODUCT_VISUALS: Record<string, {
       { image: "/assets/images/demos/door-device-crud-demo.png", alt: "Door and device control demo for Chicken Tender modules", label: "Door and device controls" },
       { image: "/assets/images/demos/chickeneye-eggs-demo.png", alt: "ChickenEye egg detection and nest-box map", label: "Egg and nest-box ideas" },
       { image: "/assets/images/demos/animal-roster-demo.png", alt: "Animal roster and health records demo", label: "Flock records" },
+      { image: "/assets/images/products/animal-health-stress-monitoring-concept.png", alt: "Concept view of TenderCells animal stress and health monitoring with camera overlays and sensor cards", label: "Stress and health monitoring concept" },
+    ],
+    componentMap: [
+      { label: "Animal roster", body: "Health status, individual records, and flock context are represented in the app before any automation acts." },
+      { label: "Behavior analytics", body: "Camera-derived signals can flag low activity, isolation, reduced feeding, and abnormal routine patterns for human review." },
+      { label: "Sensor thresholds", body: "Temperature, humidity, ammonia, feed, water, and nest-box activity map to configurable alerts instead of hidden black-box decisions." },
+      { label: "TenderAI review", body: "The assistant can explain sensor readings and suggest next checks while keeping animal care decisions with the human caretaker." },
     ],
   },
   "roaming-roost": {
@@ -295,6 +303,7 @@ const PRODUCT_VISUALS: Record<string, {
       "A solar panel and battery make it a mostly self-contained outdoor monitor.",
       "Three camera cradles provide 360-degree coverage around the yard.",
       "The ESP32, battery, and electronics sit inside the weather-resistant head.",
+      "The detection visuals below are concept views of the intended workflow: classify species, separate threat from non-threat, and request human review before escalating routines.",
     ],
     docs: [
       { label: "Hardware index", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/hardware.md" },
@@ -305,6 +314,30 @@ const PRODUCT_VISUALS: Record<string, {
       { image: "/assets/images/products/predator-monitor-top-view.png", alt: "Top view sketch of three camera cradles around the predator monitor", label: "Top view camera carrier" },
       { image: "/assets/images/products/predator-monitor-split-view.png", alt: "Split view render showing ESP32, battery, solar panel, and cameras inside the predator monitor", label: "Electronics split view" },
       { image: "/assets/images/products/predator-monitor-sketch-idea.png", alt: "Early sketch idea for the predator monitor housing", label: "Early concept sketch" },
+      { image: "/assets/images/products/watchtower-threat-detection-concept.png", alt: "WatchTower AI concept view showing coyote, snake, and hawk threat detection bounding boxes", label: "Threat species detection" },
+      { image: "/assets/images/products/watchtower-non-threat-detection-concept.png", alt: "WatchTower AI concept view showing non-threat dog, rabbit, songbird, and flock classification", label: "Non-threat classification" },
+      { image: "/assets/images/products/watchtower-night-vision-detection-concept.png", alt: "WatchTower AI night vision concept showing coyote, owl, snake, and deer classification", label: "Night vision mode" },
+    ],
+    componentMap: [
+      { label: "WatchTower monitor", body: "The app already has a predator monitor surface for camera status, property placement, and alert review." },
+      { label: "Species labels", body: "Concept classes include coyotes, snakes, hawks, owls, farm dogs, rabbits, deer, and flock members so alerts can distinguish risk from background activity." },
+      { label: "Routines and lockouts", body: "Alerts can feed door closure, Roaming Roost return-to-dock, schedule pause, and human review flows." },
+      { label: "Night mode", body: "Infrared/night-vision concepts should be treated as reviewable monitoring events, not autonomous proof of danger." },
+    ],
+  },
+  "duck-dock": {
+    image: "/assets/images/products/duck-dock-concept.png",
+    alt: "Duck Dock open-source aquatic animal care platform concept with pond, gantry, Barn Brain controller, and duck automation",
+    notes: [
+      "Duck Dock is the aquatic animal-care concept for ducks, fish, ponds, water quality, egg collection, and outdoor comfort.",
+      "The concept shows a shaded floating platform with HDPE floats, sloped net floor, egg collection lane, modular gantry, and interchangeable tools.",
+      "Barn Brain integration is shown as the local operating layer for automation, routines, alerts, data, AI vision, and remote monitoring.",
+      "This image belongs specifically to Duck Dock and should not be reused for unrelated product pages.",
+    ],
+    docs: [
+      { label: "Developer docs", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/developer" },
+      { label: "Product ideas", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md" },
+      { label: "Open source repo", href: "https://github.com/WeCr8/TenderCells" },
     ],
   },
   "barn-brain": {
@@ -351,6 +384,12 @@ const PRODUCT_HUB_LINKS: Record<string, { label: string; href: string; note: str
     { label: "4-H predator monitor project", href: "/4h", note: "Camera, solar, and alert-system project path" },
     { label: "Science fair camera study", href: "/science-fair", note: "Observation and monitoring experiment ideas" },
     { label: "Developer hardware docs", href: "/developers", note: "Camera, edge AI, and device integration links" },
+  ],
+  "duck-dock": [
+    { label: "Animal health", href: "/health", note: "Water, habitat, and welfare context" },
+    { label: "Farm automation routines", href: "/farm-automation", note: "Pond, water, feeder, and alert routines" },
+    { label: "Developer hardware docs", href: "/developers", note: "Gantry, water sensors, and module documentation" },
+    { label: "Academy", href: "/academy", note: "Student project path for aquatic animal care engineering" },
   ],
   "barn-brain": [
     { label: "Farm automation routines", href: "/farm-automation", note: "Rules, triggers, and local automation framing" },
@@ -422,6 +461,19 @@ export default function ProductDetailPage() {
                   <figcaption>{item.label}</figcaption>
                 </figure>
               ))}
+            </div>
+          )}
+          {visual.componentMap && (
+            <div className="product-component-map" aria-label="How this concept maps to TenderCells components">
+              <h3>How This Maps To The App</h3>
+              <div>
+                {visual.componentMap.map((item) => (
+                  <article key={item.label}>
+                    <strong>{item.label}</strong>
+                    <p>{item.body}</p>
+                  </article>
+                ))}
+              </div>
             </div>
           )}
         </div>

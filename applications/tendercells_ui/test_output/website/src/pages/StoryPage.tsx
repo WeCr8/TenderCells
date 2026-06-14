@@ -91,6 +91,33 @@ const whatWeBuild = [
   },
 ];
 
+const authorityMap = [
+  {
+    title: "Animal care engineering",
+    image: "/assets/images/products/animal-health-stress-monitoring-concept.png",
+    alt: "TenderCells animal stress and health monitoring concept with camera and sensor overlays",
+    body: "Students learn that engineering choices should improve animal health, safety, stress awareness, and daily care.",
+  },
+  {
+    title: "Predator protection",
+    image: "/assets/images/products/predator-monitor-pole-mount.png",
+    alt: "Pole-mounted WatchTower AI predator monitor concept",
+    body: "Cameras, solar power, local AI, alerts, and routines become a practical safety system.",
+  },
+  {
+    title: "Farm automation",
+    image: "/assets/images/demos/door-device-crud-demo.png",
+    alt: "TenderCells door and device automation dashboard",
+    body: "Inputs, logic, actions, and logs turn chores into routines that students can inspect and improve.",
+  },
+  {
+    title: "Agricultural robotics",
+    image: "/assets/images/products/roaming-roost-concept.png",
+    alt: "Roaming Roost mobile pasture robotics concept",
+    body: "Mobile systems, swappable robots, rails, sensors, and simulation connect code to real motion.",
+  },
+];
+
 const companyPath = [
   "Notice a real problem in animal care, agriculture, education, or local services.",
   "Research the user, animal, environment, cost, and safety constraints.",
@@ -157,6 +184,29 @@ export default function StoryPage() {
         </p>
       </section>
 
+      <section className="story-authority-map" aria-label="TenderCells authority areas">
+        <div className="story-authority-heading">
+          <p className="story-kicker">Category vision</p>
+          <h2>Animal care engineering should be a category students can see.</h2>
+          <p>
+            The strategy is not to chase isolated keywords. It is to own useful categories:
+            animal health, predator protection, smart coops, farm automation, agricultural
+            robotics, and future engineering education.
+          </p>
+        </div>
+        <div className="story-authority-grid">
+          {authorityMap.map((item) => (
+            <article key={item.title}>
+              <img src={item.image} alt={item.alt} loading="lazy" />
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="story-future">
         <div className="story-future-heading">
           <p className="story-kicker">Future-ready skills</p>
@@ -196,6 +246,25 @@ export default function StoryPage() {
               <p>{item.body}</p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="story-poster" aria-label="TenderCells education format">
+        <figure>
+          <img
+            src="/assets/images/demos/tendercells-education-format.png"
+            alt="Tender Cells education poster showing Build Learn Care Share with open-source animal-care projects"
+            loading="lazy"
+          />
+        </figure>
+        <div>
+          <p className="story-kicker">Learning format</p>
+          <h2>Build, learn, care, and share.</h2>
+          <p>
+            The story we want young builders to hear is simple: use modern tools,
+            care about real-world outcomes, document what you learn, and make the
+            next project easier for someone else.
+          </p>
         </div>
       </section>
 

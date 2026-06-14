@@ -131,6 +131,11 @@ export default function StoryPage() {
   return (
     <PageLayout>
       <section className="story-hero">
+        <img
+          className="story-hero-img"
+          src="/assets/images/products/chicken-tender-concept.png"
+          alt="Chicken Tender automated coop concept render"
+        />
         <div className="story-hero-copy">
           <p className="story-kicker">TenderCells story</p>
           <h1>Teaching the next generation to build the future, not wait for it.</h1>

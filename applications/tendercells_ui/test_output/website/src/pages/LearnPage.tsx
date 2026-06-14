@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 const FAQS = [
   { q: "Do I need internet to use Chicken Tender?", a: "No. All real-time control runs over MQTT on your local network via a Raspberry Pi 4. Internet is only needed for cloud sync, push notifications, and remote access." },
@@ -18,10 +19,13 @@ export default function LearnPage() {
 
   return (
     <PageLayout>
-      <div className="page-hero" style={{ background: "linear-gradient(135deg, #0288d1 0%, #01579b 100%" }}>
-        <h1>Learn More</h1>
-        <p>Everything you need to understand, set up, and master Tender Cells.</p>
-      </div>
+      <PageHero
+        gradient="linear-gradient(135deg, #0288d1 0%, #01579b 100%)"
+        title="Learn More"
+        subtitle="Everything you need to understand, set up, and master Tender Cells."
+        image="/assets/images/demos/chickeneye-eggs-demo.png"
+        imageAlt="TenderCells ChickenEye page showing camera tabs and egg detection simulation"
+      />
 
       <h2 className="section-title" id="getting-started">Getting Started</h2>
       <div className="prose">

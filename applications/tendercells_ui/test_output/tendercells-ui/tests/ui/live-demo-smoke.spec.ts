@@ -167,12 +167,18 @@ test('live marketing site exposes Google policy and consent pages', async ({ pag
   await expect(page.locator('body')).toContainText(/How We Plan To Monitor Stress And Health|Human-first alerts|Real Component Match/i);
   expect(await page.locator('img[src*="animal-health-stress-monitoring"]').count()).toBeGreaterThan(0);
 
+  await page.goto('https://tendercells.com/partners', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1')).toContainText('Partners And Sponsors');
+  await expect(page.locator('body')).toContainText(/4-H|FFA|Festo|FarmBot|hello@wecr8\.info/i);
+  expect(await page.locator('img[src*="tendercells-education-format"]').count()).toBeGreaterThan(0);
+
   const sitemap = await request.get('https://tendercells.com/sitemap.xml');
   const sitemapText = await sitemap.text();
   expect(sitemapText).toContain('https://tendercells.com/cookie-policy');
   expect(sitemapText).toContain('https://tendercells.com/apps');
   expect(sitemapText).toContain('https://tendercells.com/our-story');
   expect(sitemapText).toContain('https://tendercells.com/shop/barn-brain');
+  expect(sitemapText).toContain('https://tendercells.com/partners');
 });
 
 test('live sitemap URLs are crawlable', async ({ request }) => {

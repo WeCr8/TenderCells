@@ -42,6 +42,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "K-12 School Partnerships", to: "/education#schools" },
       { label: "Curriculum Resources",  to: "/education#curriculum" },
       { label: "Grant Information",     to: "/education#grants" },
+      { label: "Partners & Sponsors",   to: "/partners" },
       { label: "FFA & 4-H Integration", to: "/education#ffa-4h" },
       { label: "TenderCells Academy",   to: "/academy" },
       { label: "4-H STEM Projects",     to: "/4h" },
@@ -121,6 +122,7 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   { label: "Developers", to: "/developers" },
+  { label: "Partners", to: "/partners" },
   { label: "Our Story", to: "/story" },
   { label: "Blog", to: "/blog" },
   {

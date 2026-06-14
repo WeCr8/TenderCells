@@ -1,12 +1,16 @@
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 export default function ServicesPage() {
   return (
     <PageLayout>
-      <div className="page-hero orange">
-        <h1>Local Services</h1>
-        <p>Find certified installers, feed suppliers, and technicians near you.</p>
-      </div>
+      <PageHero
+        variant="orange"
+        title="Local Services"
+        subtitle="Find certified installers, feed suppliers, and technicians near you."
+        image="/assets/images/products/predator-monitor-pole-mount.png"
+        imageAlt="Pole-mounted WatchTower AI predator monitor concept"
+      />
 
       <div className="prose">
         <p>

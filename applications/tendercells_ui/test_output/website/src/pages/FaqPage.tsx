@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 const FAQ_SECTIONS = [
   {
@@ -46,10 +47,13 @@ export default function FaqPage() {
 
   return (
     <PageLayout>
-      <div className="page-hero" style={{ background: "linear-gradient(135deg, #f57c00 0%, #bf360c 100%" }}>
-        <h1>Frequently Asked Questions</h1>
-        <p>Everything you want to know before buying or building with Tender Cells.</p>
-      </div>
+      <PageHero
+        gradient="linear-gradient(135deg, #f57c00 0%, #bf360c 100%)"
+        title="Frequently Asked Questions"
+        subtitle="Everything you want to know before buying or building with Tender Cells."
+        image="/assets/images/products/animal-health-stress-monitoring-concept.png"
+        imageAlt="TenderCells animal stress and health monitoring concept"
+      />
 
       {FAQ_SECTIONS.map((sec) => (
         <div key={sec.section}>

@@ -1,4 +1,5 @@
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 import { TENDERCELLS_DEMO_URL } from "../config/appLinks";
 
 const demoSections = [
@@ -23,13 +24,13 @@ const demoSections = [
 export default function PublicDemoPage() {
   return (
     <PageLayout>
-      <div className="page-hero dark">
-        <h1>TenderCells Public Demo</h1>
-        <p>
-          A no-signup way to explore the TenderCells Farming OS for smart animal care,
-          farm automation routines, student projects, and open-source agricultural robotics.
-        </p>
-      </div>
+      <PageHero
+        variant="dark"
+        title="TenderCells Public Demo"
+        subtitle="A no-signup way to explore the TenderCells Farming OS for smart animal care, farm automation routines, student projects, and open-source agricultural robotics."
+        image="/assets/images/demos/animal-roster-demo.png"
+        imageAlt="TenderCells animal roster showing product demo animal packs"
+      />
 
       <div className="prose">
         <p>

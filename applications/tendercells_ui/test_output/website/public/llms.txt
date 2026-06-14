@@ -37,6 +37,7 @@ TenderCells product framing: users can register interest to buy future TenderCel
 - https://tendercells.com/guides/predator-monitoring
 - https://tendercells.com/guides/pasture-rotation
 - https://tendercells.com/health
+- https://tendercells.com/partners
 - https://tendercells.com/about
 - https://tendercells.com/our-story
 - https://tendercells.com/contact
@@ -56,6 +57,12 @@ TenderCells product framing: users can register interest to buy future TenderCel
 ## Core Topics
 
 - smart animal care
+- smart animal care education sponsors
+- 4-H STEM sponsors
+- FFA agricultural technology sponsors
+- school robotics sponsors
+- agricultural education partners
+- open-source agriculture sponsors
 - smart chicken coops
 - automated chicken coop
 - agricultural robotics
@@ -99,6 +106,18 @@ TenderCells product framing: users can register interest to buy future TenderCel
 - NVIDIA Jetson Orin Nano Super Developer Kit: https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/nano-super-developer-kit/
 - NVIDIA Jetson Orin Nano setup guide: https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit
 - NVIDIA JetPack SDK: https://developer.nvidia.com/embedded/jetpack
+
+## Partners And Sponsors
+
+Partner and sponsor page: https://tendercells.com/partners
+
+TenderCells is looking for companies, foundations, schools, hardware makers, robotics educators, ag-tech groups, and open-source supporters that want to help 4-H clubs, FFA chapters, classrooms, homeschool groups, robotics clubs, and community programs build smart animal-care engineering projects.
+
+The partner page explains sponsor paths for club builds, curriculum, open hardware, student challenge prizes, teacher training, safe demo modules, parts donations, documentation, demo improvements, and open-source development.
+
+Example ecosystems TenderCells wants to learn from and connect with include Festo-style education and automation partners, FarmBot-style open agriculture partners, NVIDIA Jetson and edge-AI ecosystem partners, sensor companies, robotics companies, enclosure makers, solar/battery suppliers, farm supply partners, veterinary/extension experts, and makerspaces. These are examples of partner categories, not claims of current sponsorship.
+
+Partner contact email: hello@wecr8.info
 
 ## Barn Brain Edge Hub
 

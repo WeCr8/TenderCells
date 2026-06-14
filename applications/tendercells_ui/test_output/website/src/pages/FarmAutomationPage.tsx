@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 const routineExamples = [
   {
@@ -38,10 +39,13 @@ const ecosystem = [
 export default function FarmAutomationPage() {
   return (
     <PageLayout>
-      <div className="page-hero green">
-        <h1>Tender Cells Farm Automation &amp; Routines</h1>
-        <p>Roomba for farms. Home Assistant for agriculture. IFTTT for animal care. Node-RED for homesteaders.</p>
-      </div>
+      <PageHero
+        variant="green"
+        title={<>Tender Cells Farm Automation &amp; Routines</>}
+        subtitle="Roomba for farms. Home Assistant for agriculture. IFTTT for animal care. Node-RED for homesteaders."
+        image="/assets/images/products/roaming-roost-concept.png"
+        imageAlt="Roaming Roost mobile pasture robotics concept"
+      />
 
       <div className="prose">
         <p>

@@ -1,13 +1,17 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 export default function HomesteadingPage() {
   return (
     <PageLayout>
-      <div className="page-hero green">
-        <h1>The Homesteader's Automation Guide</h1>
-        <p>Practical wisdom for building a self-sufficient, tech-enabled homestead.</p>
-      </div>
+      <PageHero
+        variant="green"
+        title="The Homesteader's Automation Guide"
+        subtitle="Practical wisdom for building a self-sufficient, tech-enabled homestead."
+        image="/assets/images/products/roaming-roost-concept.png"
+        imageAlt="Roaming Roost mobile pasture robotics concept"
+      />
 
       <div className="prose">
         <p>

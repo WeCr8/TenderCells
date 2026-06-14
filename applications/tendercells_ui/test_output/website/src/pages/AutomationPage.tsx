@@ -1,13 +1,17 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 export default function AutomationPage() {
   return (
     <PageLayout>
-      <div className="page-hero" style={{ background: "linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%" }}>
-        <h1>Automation Ideas</h1>
-        <p>Creative ways homesteaders are using Tender Cells to save time and improve animal welfare.</p>
-      </div>
+      <PageHero
+        gradient="linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%)"
+        title="Automation Ideas"
+        subtitle="Creative ways homesteaders are using Tender Cells to save time and improve animal welfare."
+        image="/assets/images/demos/door-device-crud-demo.png"
+        imageAlt="TenderCells door and device automation dashboard"
+      />
 
       <h2 className="section-title">Built-in Automation Routines</h2>
       <div className="card-grid">

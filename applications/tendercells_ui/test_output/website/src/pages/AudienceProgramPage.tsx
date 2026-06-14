@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 type Program = {
   title: string;
@@ -164,11 +165,14 @@ export default function AudienceProgramPage({ kind }: AudienceProgramPageProps) 
 
   return (
     <PageLayout>
-      <div className="page-hero green">
-        <p style={{ margin: "0 0 0.5rem", fontWeight: 700 }}>{program.kicker}</p>
-        <h1>{program.title}</h1>
-        <p>{program.description}</p>
-      </div>
+      <PageHero
+        variant="green"
+        kicker={program.kicker}
+        title={program.title}
+        subtitle={program.description}
+        image="/assets/images/demos/tendercells-education-format.png"
+        imageAlt="Tender Cells education poster: Build, Learn, Care, Share"
+      />
 
       <div className="prose">
         <p>{program.audience}</p>

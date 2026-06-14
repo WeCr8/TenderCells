@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 const guides = {
   "smart-chicken-coop": {
@@ -61,10 +62,13 @@ export default function GuidePage({ slug }: GuidePageProps) {
 
   return (
     <PageLayout>
-      <div className="page-hero green">
-        <h1>{guide.title}</h1>
-        <p>{guide.subtitle}</p>
-      </div>
+      <PageHero
+        variant="green"
+        title={guide.title}
+        subtitle={guide.subtitle}
+        image="/assets/images/demos/coop-camera-demo.png"
+        imageAlt="TenderCells coop dashboard showing selectable camera views"
+      />
 
       <div className="prose">
         {guide.sections.map(([title, body]) => (

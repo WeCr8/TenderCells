@@ -11,6 +11,7 @@ const footerGroups = [
       { label: "FFA Projects", to: "/ffa" },
       { label: "Homeschool STEM", to: "/homeschool" },
       { label: "Science Fair", to: "/science-fair" },
+      { label: "Partners & Sponsors", to: "/partners" },
       { label: "Guides", to: "/guides" },
       { label: "Farm Automation", to: "/farm-automation" },
       { label: "Smart Coop Guide", to: "/guides/smart-chicken-coop" },
@@ -32,6 +33,7 @@ const footerGroups = [
     links: [
       { label: "About", to: "/about" },
       { label: "Contact", to: "/contact" },
+      { label: "Partners", to: "/partners" },
       { label: "Privacy", to: "/privacy" },
       { label: "Cookie Policy", to: "/cookie-policy" },
       { label: "Advertising Disclosure", to: "/advertising-disclosure" },

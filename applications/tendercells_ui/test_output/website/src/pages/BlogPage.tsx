@@ -1,4 +1,5 @@
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 const POSTS = [
   {
@@ -54,10 +55,13 @@ const POSTS = [
 export default function BlogPage() {
   return (
     <PageLayout>
-      <div className="page-hero" style={{ background: "linear-gradient(135deg, #37474f 0%, #1c313a 100%" }}>
-        <h1>Tender Cells Blog</h1>
-        <p>Product updates, tutorials, homesteading guides, and open-source community stories.</p>
-      </div>
+      <PageHero
+        gradient="linear-gradient(135deg, #37474f 0%, #1c313a 100%)"
+        title="Tender Cells Blog"
+        subtitle="Product updates, tutorials, homesteading guides, and open-source community stories."
+        image="/assets/images/demos/tendercells-education-format.png"
+        imageAlt="Tender Cells education poster: Build, Learn, Care, Share"
+      />
 
       <div style={{ display: "grid", gap: "1.5rem" }}>
         {POSTS.map((post) => (

@@ -1,4 +1,5 @@
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 const roadmap = [
   {
@@ -53,10 +54,13 @@ const farmBotCues = [
 export default function OpenSourcePage() {
   return (
     <PageLayout>
-      <div className="page-hero dark">
-        <h1>Open Source TenderCells OS</h1>
-        <p>Build it yourself, improve it, repair it, simulate it, or buy a kit when you want the faster path.</p>
-      </div>
+      <PageHero
+        variant="dark"
+        title="Open Source TenderCells OS"
+        subtitle="Build it yourself, improve it, repair it, simulate it, or buy a kit when you want the faster path."
+        image="/assets/images/demos/chickeneye-eggs-demo.png"
+        imageAlt="TenderCells ChickenEye page showing camera tabs and egg detection simulation"
+      />
 
       <div className="prose">
         <p>

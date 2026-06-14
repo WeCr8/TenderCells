@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 import { trackProductInterest } from "../utils/analytics";
 
 const PRODUCTS = [
@@ -42,10 +43,13 @@ const BUILD_IDEAS = [
 export default function ShopPage() {
   return (
     <PageLayout>
-      <div className="page-hero green">
-        <h1>Shop Tender Cells</h1>
-        <p>Register interest for future TenderCells products, or follow the developer path to build your own and insert it into the OS.</p>
-      </div>
+      <PageHero
+        variant="green"
+        title="Shop Tender Cells"
+        subtitle="Register interest for future TenderCells products, or follow the developer path to build your own and insert it into the OS."
+        image="/assets/images/products/chicken-tender-concept.png"
+        imageAlt="Chicken Tender automated coop concept render"
+      />
 
       <h2 className="section-title">All Products</h2>
       <div className="card-grid">

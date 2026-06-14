@@ -1,4 +1,5 @@
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 const quickLinks = [
   ["GitHub repository", "https://github.com/WeCr8/TenderCells"],
@@ -107,10 +108,13 @@ function external(href: string) {
 export default function DevelopersPage() {
   return (
     <PageLayout>
-      <div className="page-hero dark">
-        <h1>TenderCells Developer</h1>
-        <p>Software, firmware, hardware, simulation, and integration docs for open animal-care automation.</p>
-      </div>
+      <PageHero
+        variant="dark"
+        title="TenderCells Developer"
+        subtitle="Software, firmware, hardware, simulation, and integration docs for open animal-care automation."
+        image="/assets/images/demos/door-device-crud-demo.png"
+        imageAlt="TenderCells door and device automation dashboard"
+      />
 
       <div className="prose">
         <p>

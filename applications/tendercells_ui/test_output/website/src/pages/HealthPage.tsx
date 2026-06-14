@@ -1,12 +1,16 @@
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 export default function HealthPage() {
   return (
     <PageLayout>
-      <div className="page-hero red">
-        <h1>Animal Health</h1>
-        <p>Evidence-based guides for keeping your flock healthy — powered by live sensor data.</p>
-      </div>
+      <PageHero
+        variant="red"
+        title="Animal Health"
+        subtitle="Evidence-based guides for keeping your flock healthy — powered by live sensor data."
+        image="/assets/images/products/animal-health-stress-monitoring-concept.png"
+        imageAlt="TenderCells animal stress and health monitoring concept"
+      />
 
       <div className="prose">
         <p>

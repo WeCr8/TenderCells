@@ -22,6 +22,7 @@ import FarmAutomationPage from "./pages/FarmAutomationPage";
 import PublicDemoPage from "./pages/PublicDemoPage";
 import BlogPage from "./pages/BlogPage";
 import StoryPage from "./pages/StoryPage";
+import PartnersPage from "./pages/PartnersPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import CookieConsent from "./components/CookieConsent";
 import { usePageTracking } from "./hooks/usePageTracking";
@@ -74,6 +75,7 @@ function App() {
 
         {/* Local Services */}
         <Route path="/services" element={<ServicesPage />} />
+        <Route path="/partners" element={<PartnersPage />} />
 
         {/* Open Source */}
         <Route path="/open-source" element={<OpenSourcePage />} />

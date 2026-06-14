@@ -1,4 +1,5 @@
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 const audiences = [
   "students and classrooms",
@@ -31,10 +32,13 @@ const topicPages = [
 export default function TenderCellsOverviewPage() {
   return (
     <PageLayout>
-      <div className="page-hero green">
-        <h1>TenderCells Overview</h1>
-        <p>Plain-language overview for search engines, AI tools, educators, partners, and builders.</p>
-      </div>
+      <PageHero
+        variant="green"
+        title="TenderCells Overview"
+        subtitle="Plain-language overview for search engines, AI tools, educators, partners, and builders."
+        image="/assets/images/products/chicken-tender-concept.png"
+        imageAlt="Chicken Tender automated coop concept render"
+      />
 
       <div className="prose">
         <p>

@@ -1,4 +1,5 @@
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 import { resetConsentChoice } from "../utils/consent";
 
 interface TrustPageContent {
@@ -106,10 +107,13 @@ export default function TrustPage({ kind }: TrustPageProps) {
 
   return (
     <PageLayout>
-      <div className="page-hero dark">
-        <h1>{page.title}</h1>
-        <p>{page.intro}</p>
-      </div>
+      <PageHero
+        variant="dark"
+        title={page.title}
+        subtitle={page.intro}
+        image="/assets/images/products/animal-health-stress-monitoring-concept.png"
+        imageAlt="TenderCells animal stress and health monitoring concept"
+      />
 
       <div className="prose">
         {page.sections.map(([title, body]) => (

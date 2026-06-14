@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 
 const hubs = {
   audiences: {
@@ -63,10 +64,13 @@ export default function SeoHubPage({ kind }: SeoHubPageProps) {
 
   return (
     <PageLayout>
-      <div className="page-hero green">
-        <h1>{hub.title}</h1>
-        <p>{hub.subtitle}</p>
-      </div>
+      <PageHero
+        variant="green"
+        title={hub.title}
+        subtitle={hub.subtitle}
+        image="/assets/images/demos/tendercells-education-format.png"
+        imageAlt="Tender Cells education poster: Build, Learn, Care, Share"
+      />
 
       <div className="prose">
         <p>{hub.intro}</p>

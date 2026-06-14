@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 import "./EducationPage.css";
 
 const authorityClusters = [
@@ -61,10 +62,13 @@ const studentBuilds = [
 export default function EducationPage() {
   return (
     <PageLayout>
-      <div className="page-hero" style={{ background: "linear-gradient(135deg, #43a047 0%, #1b5e20 100%" }}>
-        <h1>Tender Cells in Education</h1>
-        <p>Real-world automation, robotics, animal science, and open-source engineering for students.</p>
-      </div>
+      <PageHero
+        gradient="linear-gradient(135deg, #43a047 0%, #1b5e20 100%)"
+        title="Tender Cells in Education"
+        subtitle="Real-world automation, robotics, animal science, and open-source engineering for students."
+        image="/assets/images/demos/animal-roster-demo.png"
+        imageAlt="TenderCells animal roster showing product demo animal packs"
+      />
 
       <div className="prose">
         <p>
@@ -196,6 +200,7 @@ export default function EducationPage() {
       </div>
       <div className="cta-bar">
         <a href="mailto:education@wecr8.info" className="btn-primary">Contact Education Team</a>
+        <Link to="/partners" className="btn-outline">Partner or Sponsor</Link>
         <Link to="/learn" className="btn-outline">View Learning Docs</Link>
       </div>
 

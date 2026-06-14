@@ -123,6 +123,11 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: 'TenderCells Services - Installers and Local Support',
     description: 'Find local service concepts for installers, technicians, feed suppliers, and community support around smart animal-care systems.',
   },
+  '/partners': {
+    title: 'TenderCells Partners and Sponsors - 4-H, FFA, Schools, and AgTech',
+    description: 'Partner with TenderCells to sponsor 4-H, FFA, school, homeschool, open-source, robotics, and smart animal-care engineering programs.',
+    image: 'https://tendercells.com/assets/images/demos/tendercells-education-format.png',
+  },
   '/open-source': {
     title: 'Open Source TenderCells OS',
     description: 'TenderCells is an open-source platform for animal-care automation, firmware, hardware docs, simulation, and community-built products.',

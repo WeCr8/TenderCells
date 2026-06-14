@@ -1,13 +1,17 @@
 import PageLayout from "../components/PageLayout";
+import PageHero from "../components/PageHero";
 import { TENDERCELLS_APP_ENTRY_URL } from "../config/appLinks";
 
 export default function ApplicationsPage() {
   return (
     <PageLayout>
-      <div className="page-hero dark">
-        <h1>Applications &amp; Downloads</h1>
-        <p>Control your entire homestead from one app. Open APIs for builders.</p>
-      </div>
+      <PageHero
+        variant="dark"
+        title={<>Applications &amp; Downloads</>}
+        subtitle="Control your entire homestead from one app. Open APIs for builders."
+        image="/assets/images/demos/coop-camera-demo.png"
+        imageAlt="TenderCells coop dashboard showing selectable camera views"
+      />
 
       <h2 className="section-title" id="ios">Mobile App — iOS</h2>
       <div className="prose">

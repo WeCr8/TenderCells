@@ -5,11 +5,17 @@ const footerGroups = [
   {
     title: "Learn",
     links: [
+      { label: "Audiences", to: "/audiences" },
       { label: "Academy", to: "/academy" },
       { label: "4-H Projects", to: "/4h" },
       { label: "FFA Projects", to: "/ffa" },
+      { label: "Homeschool STEM", to: "/homeschool" },
       { label: "Science Fair", to: "/science-fair" },
+      { label: "Guides", to: "/guides" },
+      { label: "Farm Automation", to: "/farm-automation" },
       { label: "Smart Coop Guide", to: "/guides/smart-chicken-coop" },
+      { label: "Predator Monitoring", to: "/guides/predator-monitoring" },
+      { label: "Pasture Rotation", to: "/guides/pasture-rotation" },
     ],
   },
   {

@@ -42,6 +42,10 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: '4-H STEM, FFA, and Young Engineer Projects - TenderCells',
     description: 'TenderCells education resources help 4-H members, FFA students, homeschoolers, and young engineers build smart animal-care automation projects.',
   },
+  '/audiences': {
+    title: 'TenderCells Audiences - 4-H, FFA, Homeschool, Makers, and Future Founders',
+    description: 'Find TenderCells pages for 4-H, FFA, homeschool, young engineers, makers, teachers, developers, and future founders.',
+  },
   '/academy': {
     title: 'TenderCells Academy - Agricultural Robotics Curriculum',
     description: 'TenderCells Academy teaches smart animal care, robotics, sensors, computer vision, data science, open-source farming, and safe automation.',
@@ -82,6 +86,10 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: 'TenderCells FAQ - Smart Animal Care Questions',
     description: 'Answers about TenderCells products, open-source hardware, animal-care automation, demos, education, and developer docs.',
   },
+  '/guides': {
+    title: 'TenderCells Guides - Smart Coop, Predator Monitoring, and Pasture Rotation',
+    description: 'Original TenderCells guides for smart chicken coops, predator monitoring, mobile coops, pasture rotation, and animal-care automation.',
+  },
   '/guides/smart-chicken-coop': {
     title: 'Smart Chicken Coop Guide - TenderCells',
     description: 'Plan a smart chicken coop with sensors, safe automation, manual override, animal-care records, and open-source learning paths.',
@@ -93,6 +101,10 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/guides/pasture-rotation': {
     title: 'Mobile Coop and Pasture Rotation Guide - TenderCells',
     description: 'Study mobile coop design, route planning, docking, safety, and pasture rotation ideas for students and homesteaders.',
+  },
+  '/farm-automation': {
+    title: 'Farm Automation Software and Smart Farm Routines - TenderCells',
+    description: 'TenderCells Farm Automation and Routines is a Home Assistant for agriculture, IFTTT for animal care, and Node-RED for homesteaders.',
   },
   '/health': {
     title: 'Animal Health Knowledge Base - TenderCells',
@@ -114,9 +126,13 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: 'TenderCells Overview - Smart Animal Care, STEM, and Open Agriculture',
     description: 'Plain-language overview of TenderCells for search engines, AI tools, educators, partners, journalists, homesteaders, and open-source builders.',
   },
+  '/llm-demo-test': {
+    title: 'TenderCells Demo Evaluation Protocol for ChatGPT and LLM Search Tools',
+    description: 'Machine-oriented instructions for ChatGPT, Gemini, Perplexity, Claude-style browsers, AI answer engines, and search tools to test and summarize the TenderCells public demo.',
+  },
   '/story': {
-    title: 'TenderCells Story - Teaching Future Builders With AI, Robotics, and Open Agriculture',
-    description: 'The TenderCells mission is to help kids, students, engineers, makers, and future founders use AI tools, robotics, software, and hardware to build real animal-care products.',
+    title: 'TenderCells Story - Teaching Future Builders, AI Tools, Robotics, and Product Creation',
+    description: 'TenderCells helps kids, students, engineers, makers, and future founders use AI tools, robotics, software, and hardware to build products, ideas, and companies.',
   },
   '/about': {
     title: 'About Tender Cells',

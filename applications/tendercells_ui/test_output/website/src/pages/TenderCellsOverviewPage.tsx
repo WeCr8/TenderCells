@@ -25,6 +25,7 @@ const topicPages = [
   { label: "FFA agricultural technology projects", href: "/ffa" },
   { label: "Homeschool STEM projects", href: "/homeschool" },
   { label: "Science fair agricultural robotics projects", href: "/science-fair" },
+  { label: "LLM and reviewer demo test guide", href: "/llm-demo-test" },
 ];
 
 export default function TenderCellsOverviewPage() {

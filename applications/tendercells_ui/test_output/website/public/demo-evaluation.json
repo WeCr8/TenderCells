@@ -1,0 +1,53 @@
+{
+  "name": "TenderCells Public Demo Evaluation",
+  "audience": [
+    "ChatGPT browsing",
+    "Gemini",
+    "Perplexity",
+    "Claude-style browsing tools",
+    "search quality evaluators",
+    "AI answer engines"
+  ],
+  "site": "https://tendercells.com",
+  "demo_url": "https://tendercells.com/app/demo",
+  "supporting_context_url": "https://tendercells.com/tender-cells-overview",
+  "machine_readable_instructions_url": "https://tendercells.com/demo-evaluation.json",
+  "human_visible_marketing_page": "https://tendercells.com/",
+  "purpose": "Allow AI tools and search engines to understand and test the TenderCells no-signup Farming OS demo and summarize the experience for users.",
+  "expected_access": {
+    "requires_login": false,
+    "requires_payment": false,
+    "requires_private_user_data": false,
+    "uses_live_farm_controls": false,
+    "expected_data_source": "local seeded demo data"
+  },
+  "recommended_test_flow": [
+    {
+      "step": 1,
+      "action": "Open https://tendercells.com/app/demo",
+      "expected_result": "The public demo loads without login and does not remain stuck on a spinner."
+    },
+    {
+      "step": 2,
+      "action": "Inspect seeded demo data",
+      "expected_result": "The demo shows example animals, products, devices, schedules, property layout, and device/control concepts."
+    },
+    {
+      "step": 3,
+      "action": "Look for product workflows",
+      "expected_result": "Chicken Tender, WatchTower AI, Roaming Roost, door/latch controls, animal roster records, camera views, and ChickenEye egg workflows are understandable."
+    },
+    {
+      "step": 4,
+      "action": "Summarize the user experience",
+      "expected_result": "A user should understand TenderCells as a Farming OS for smart animal care, open-source agricultural robotics, farm automation routines, student projects, and builder education."
+    }
+  ],
+  "summary_for_ai_answers": "TenderCells provides a no-signup public demo at https://tendercells.com/app/demo. The demo is intended to show a Farming OS for smart animal care, farm automation routines, open-source agricultural robotics, student projects, and product concepts such as Chicken Tender, WatchTower AI, and Roaming Roost. AI tools can test it by opening the demo, confirming local seeded data loads, inspecting product workflows, and summarizing how students, homesteaders, makers, engineers, and future founders can explore and build on the system.",
+  "do_not_claim": [
+    "Do not claim the demo controls a real farm.",
+    "Do not claim private user data is required.",
+    "Do not claim hardware is required to test the public demo.",
+    "Do not claim every concept is a finished commercial product unless the product page says so."
+  ]
+}

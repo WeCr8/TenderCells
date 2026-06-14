@@ -194,6 +194,78 @@
   font-size: 0.96rem;
 }
 
+.story-build-plan,
+.story-company-path {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+}
+
+.story-build-plan {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.story-build-plan-heading h2,
+.story-company-path h2 {
+  margin: 0 0 1rem;
+  color: #10251a;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  line-height: 1.08;
+}
+
+.story-build-plan-heading p:last-child,
+.story-company-path p {
+  margin: 0;
+  color: #34463b;
+  line-height: 1.75;
+}
+
+.story-build-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.story-build-grid article {
+  background: #fff;
+  border: 1px solid #b9d2bf;
+  border-radius: 8px;
+  padding: 1.2rem;
+}
+
+.story-build-grid h3 {
+  margin: 0 0 0.55rem;
+  color: #10251a;
+  font-size: 1.05rem;
+}
+
+.story-build-grid p {
+  margin: 0;
+  color: #34463b;
+  line-height: 1.65;
+  font-size: 0.94rem;
+}
+
+.story-company-path {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 440px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.story-company-path ol {
+  margin: 0;
+  padding: 1.25rem 1.25rem 1.25rem 2.4rem;
+  background: #f1f7f2;
+  border: 1px solid #b9d2bf;
+  border-radius: 8px;
+  color: #183522;
+  line-height: 1.75;
+}
+
 .story-frame {
   max-width: 1180px;
   margin: 0 auto 2.5rem;
@@ -284,6 +356,8 @@
   .story-community,
   .story-mission,
   .story-future,
+  .story-build-plan,
+  .story-company-path,
   .story-frame,
   .story-frame:nth-child(even),
   .story-pathways {
@@ -291,6 +365,10 @@
   }
 
   .story-skill-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .story-build-grid {
     grid-template-columns: 1fr;
   }
 

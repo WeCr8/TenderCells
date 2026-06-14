@@ -36,6 +36,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "Tender Cells in Education",
     to: "/education",
     children: [
+      { label: "All Audience Paths",     to: "/audiences" },
       { label: "STEM Programs",         to: "/education#stem" },
       { label: "K-12 School Partnerships", to: "/education#schools" },
       { label: "Curriculum Resources",  to: "/education#curriculum" },
@@ -65,10 +66,15 @@ const NAV_ITEMS: NavItem[] = [
     label: "Learn More",
     to: "/learn",
     children: [
+      { label: "All Guides",         to: "/guides" },
+      { label: "Farm Automation",    to: "/farm-automation" },
       { label: "Getting Started",    to: "/learn#getting-started" },
       { label: "How It Works",       to: "/learn#how-it-works" },
       { label: "Homesteading Guide", to: "/learn/homesteading" },
       { label: "Automation Ideas",   to: "/learn/automation" },
+      { label: "Smart Coop Guide",   to: "/guides/smart-chicken-coop" },
+      { label: "Predator Monitoring", to: "/guides/predator-monitoring" },
+      { label: "Pasture Rotation",   to: "/guides/pasture-rotation" },
       { label: "Documentation",      to: "/learn#docs" },
       { label: "FAQ",                to: "/learn/faq" },
       { label: "Community Forum",    to: "/learn#forum" },
@@ -96,6 +102,9 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Community Events",      to: "/services#events" },
     ],
   },
+  { label: "Audiences", to: "/audiences" },
+  { label: "Guides", to: "/guides" },
+  { label: "Automation", to: "/farm-automation" },
   { label: "Store", to: "/shop" },
   {
     label: "Open Source",

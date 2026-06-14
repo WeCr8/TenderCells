@@ -68,6 +68,38 @@ const builderPath = [
   "Turn the best ideas into products, clubs, services, research, or companies.",
 ];
 
+const whatWeBuild = [
+  {
+    title: "A Farming OS for small builders",
+    body:
+      "A shared operating layer for animals, devices, property layouts, schedules, alerts, records, simulations, and product modules.",
+  },
+  {
+    title: "Real product families",
+    body:
+      "Chicken Tender, WatchTower, Roaming Roost, and future animal-care systems that students can inspect, improve, remix, or build around.",
+  },
+  {
+    title: "An AI-enabled learning path",
+    body:
+      "Guides, demos, prompts, docs, and build workflows that teach learners to use AI tools while still checking facts, testing hardware, and owning the result.",
+  },
+  {
+    title: "A launchpad for young founders",
+    body:
+      "A place where a school build, 4-H project, FFA SAE, homeschool prototype, or maker idea can grow into a kit, service, open-source module, or company.",
+  },
+];
+
+const companyPath = [
+  "Notice a real problem in animal care, agriculture, education, or local services.",
+  "Research the user, animal, environment, cost, and safety constraints.",
+  "Prototype with AI assistance, open docs, hardware modules, and simulation.",
+  "Test with real data and explain the outcome clearly.",
+  "Package the result as a guide, kit, service, app, module, or support offering.",
+  "Learn pricing, customer support, documentation, maintenance, and responsible growth.",
+];
+
 export default function StoryPage() {
   return (
     <PageLayout>
@@ -146,6 +178,27 @@ export default function StoryPage() {
         </div>
       </section>
 
+      <section className="story-build-plan">
+        <div className="story-build-plan-heading">
+          <p className="story-kicker">What we want to build</p>
+          <h2>A bridge from curiosity to capable products.</h2>
+          <p>
+            TenderCells should become a place where a young person can move from
+            "I wonder if this is possible" to "I built a working prototype" to
+            "other people can use this." We want the platform, docs, demo, and
+            community to make that path visible.
+          </p>
+        </div>
+        <div className="story-build-grid">
+          {whatWeBuild.map((item) => (
+            <article key={item.title}>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="story-pathways">
         <article>
           <h2>Imagine it.</h2>
@@ -190,6 +243,24 @@ export default function StoryPage() {
             tools, community products, or companies built by the people who learned here.
           </p>
         </article>
+      </section>
+
+      <section className="story-company-path">
+        <div>
+          <p className="story-kicker">From project to company</p>
+          <h2>We want students to learn how ideas become real offerings.</h2>
+          <p>
+            The future will reward people who can combine AI tools with taste,
+            judgment, domain knowledge, and follow-through. TenderCells should help
+            learners practice that full loop, from problem discovery to product,
+            documentation, support, and responsible entrepreneurship.
+          </p>
+        </div>
+        <ol>
+          {companyPath.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
       </section>
 
       <section className="story-gallery" aria-label="TenderCells demo screenshots">

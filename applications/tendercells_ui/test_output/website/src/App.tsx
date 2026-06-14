@@ -16,6 +16,9 @@ import TenderCellsOverviewPage from "./pages/TenderCellsOverviewPage";
 import AudienceProgramPage from "./pages/AudienceProgramPage";
 import TrustPage from "./pages/TrustPage";
 import GuidePage from "./pages/GuidePage";
+import SeoHubPage from "./pages/SeoHubPage";
+import LLMDemoTestPage from "./pages/LLMDemoTestPage";
+import FarmAutomationPage from "./pages/FarmAutomationPage";
 import BlogPage from "./pages/BlogPage";
 import StoryPage from "./pages/StoryPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -42,6 +45,7 @@ function App() {
 
         {/* Education */}
         <Route path="/education" element={<EducationPage />} />
+        <Route path="/audiences" element={<SeoHubPage kind="audiences" />} />
         <Route path="/academy" element={<AudienceProgramPage kind="academy" />} />
         <Route path="/4h" element={<AudienceProgramPage kind="4h" />} />
         <Route path="/ffa" element={<AudienceProgramPage kind="ffa" />} />
@@ -56,9 +60,11 @@ function App() {
         <Route path="/learn/homesteading" element={<HomesteadingPage />} />
         <Route path="/learn/automation" element={<AutomationPage />} />
         <Route path="/learn/faq" element={<FaqPage />} />
+        <Route path="/guides" element={<SeoHubPage kind="guides" />} />
         <Route path="/guides/smart-chicken-coop" element={<GuidePage slug="smart-chicken-coop" />} />
         <Route path="/guides/predator-monitoring" element={<GuidePage slug="predator-monitoring" />} />
         <Route path="/guides/pasture-rotation" element={<GuidePage slug="pasture-rotation" />} />
+        <Route path="/farm-automation" element={<FarmAutomationPage />} />
 
         {/* Animal Health */}
         <Route path="/health" element={<HealthPage />} />
@@ -70,6 +76,7 @@ function App() {
         <Route path="/open-source" element={<OpenSourcePage />} />
         <Route path="/developers" element={<DevelopersPage />} />
         <Route path="/tender-cells-overview" element={<TenderCellsOverviewPage />} />
+        <Route path="/llm-demo-test" element={<LLMDemoTestPage />} />
 
         {/* Story */}
         <Route path="/story" element={<StoryPage />} />

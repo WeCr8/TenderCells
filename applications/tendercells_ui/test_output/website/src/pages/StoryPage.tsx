@@ -36,65 +36,133 @@ const demoFrames = [
   },
 ];
 
+const futureSkills = [
+  {
+    title: "Use AI as a workshop partner",
+    body:
+      "Students should learn to ask better questions, inspect generated code, test ideas, document decisions, and use AI tools as accelerators instead of shortcuts.",
+  },
+  {
+    title: "Build products from real problems",
+    body:
+      "Animal care gives builders tangible constraints: safety, weather, power, maintenance, daily chores, cost, and responsibility to living systems.",
+  },
+  {
+    title: "Connect software to the physical world",
+    body:
+      "Dashboards matter more when they move doors, read sensors, capture camera events, control motors, and help someone make a better decision.",
+  },
+  {
+    title: "Think like founders",
+    body:
+      "A school project can become a kit, a service, a local installation business, a research tool, or a new open-source module someone else can improve.",
+  },
+];
+
+const builderPath = [
+  "Explore a working demo before buying hardware.",
+  "Pick one real problem: feed, water, doors, predators, records, pasture, or health signals.",
+  "Use AI, docs, simulation, and mentors to plan a safe first prototype.",
+  "Build, test, measure, and explain what worked and what failed.",
+  "Publish the project so another student can learn from it.",
+  "Turn the best ideas into products, clubs, services, research, or companies.",
+];
+
 export default function StoryPage() {
   return (
     <PageLayout>
       <section className="story-hero">
         <div className="story-hero-copy">
           <p className="story-kicker">TenderCells story</p>
-          <h1>From one backyard coop idea to an open animal-care OS.</h1>
+          <h1>Teaching the next generation to build the future, not wait for it.</h1>
           <p>
-            TenderCells started as a way to make a smarter Chicken Tender coop, then
-            grew into a bigger question: what if homesteaders, students, makers, and
-            hardware developers could all build animal-care automation on the same
-            open software foundation?
+            TenderCells started as a smarter Chicken Tender coop idea. It grew into a
+            bigger mission: help kids, students, engineers, homesteaders, makers, and
+            future founders learn how to use AI, robotics, software, hardware, and
+            open-source collaboration to build useful things in the real world.
           </p>
         </div>
         <div className="story-hero-panel">
-          <span>Current proof</span>
-          <strong>Demo animals, device registry, camera views, egg simulation, property layout, CLI loops.</strong>
+          <span>What we are aiming for</span>
+          <strong>A Farming OS where learners can imagine, simulate, build, document, and launch animal-care products.</strong>
         </div>
       </section>
 
       <section className="story-intro">
         <div>
-          <h2>The goal is not just a product. It is a platform.</h2>
+          <h2>The goal is bigger than a product. It is a training ground.</h2>
           <p>
-            Some people will buy a kit. Some will 3D print parts, wire their own
-            motors, and run everything locally. Some will attach third-party
-            waterers, door systems, cameras, feeders, or corral equipment. Some
-            will use Isaac Sim, ROS, MQTT, or browser simulation before touching
-            hardware. TenderCells is being shaped so all of those paths can meet
-            in one operating system.
+            The world is moving fast. AI tools, simulation, robotics, computer vision,
+            local agents, and open-source hardware will change how products are built.
+            We do not want young people to become passive users of these systems. We
+            want them to understand the tools, question them, use them responsibly,
+            and build with them.
+          </p>
+          <p>
+            TenderCells uses animal care because it is real. A sensor reading matters.
+            A door schedule matters. A predator alert matters. A waterer that fails
+            matters. That makes the work honest, practical, and memorable.
           </p>
         </div>
         <ul>
-          <li>Local-first operation when cloud services are unavailable.</li>
-          <li>Product-aware demos for builders without finished hardware.</li>
-          <li>Open device contracts for community sensors and actuators.</li>
-          <li>Property and corral placement for products, obstacles, and animals.</li>
-          <li>Repository-backed health checks, history, and animal records.</li>
-          <li>Simulation paths for yards, enclosures, cameras, and robotics.</li>
+          {builderPath.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
         </ul>
       </section>
 
       <section className="story-mission">
         <div>
           <p className="story-kicker">Who this is for</p>
-          <h2>Farmers, developers, and super nerds building healthier systems together.</h2>
+          <h2>Young kids, engineers, teachers, parents, makers, and founders learning together.</h2>
         </div>
         <p>
-          TenderCells is for people who care about animal wellness and human
-          capability in the same breath. Better records, cleaner habitats,
-          safer automation, and earlier health signals help animals live better.
-          Better tools, open knowledge, and repairable systems help humans become
-          more capable stewards of the animals and land around them.
+          We want a student to see a coop door and think about firmware. To see a
+          pasture and think about route planning. To see a sensor chart and ask a
+          better science question. To use an AI assistant, then verify the answer.
+          To build a prototype, show it, improve it, and maybe realize they can start
+          a company around a problem they understand deeply.
         </p>
+      </section>
+
+      <section className="story-future">
+        <div className="story-future-heading">
+          <p className="story-kicker">Future-ready skills</p>
+          <h2>AI should make young builders more capable, not more dependent.</h2>
+          <p>
+            TenderCells is a place to practice the new toolchain: AI assistance,
+            code, CAD, sensors, dashboards, robotics, documentation, data, and
+            community review. The point is not to hide complexity. The point is to
+            make complexity approachable enough that more people can participate.
+          </p>
+        </div>
+        <div className="story-skill-grid">
+          {futureSkills.map((skill) => (
+            <article key={skill.title}>
+              <h3>{skill.title}</h3>
+              <p>{skill.body}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="story-pathways">
         <article>
-          <h2>Print it.</h2>
+          <h2>Imagine it.</h2>
+          <p>
+            Start with a problem in animal care, then sketch the product, ask what
+            data matters, and use AI tools to explore designs, risks, parts, and code.
+          </p>
+        </article>
+        <article>
+          <h2>Simulate it.</h2>
+          <p>
+            Test ideas in the public demo, browser workflows, CAD-style layouts,
+            local scripts, or robotics simulations before risking hardware or animals.
+          </p>
+        </article>
+        <article>
+          <h2>Build it.</h2>
           <p>
             Community builders can model and 3D print their own mounts, gates,
             waterer brackets, sensor housings, rails, or replacement parts, then
@@ -102,17 +170,24 @@ export default function StoryPage() {
           </p>
         </article>
         <article>
-          <h2>Build it.</h2>
+          <h2>Wire it.</h2>
           <p>
             Developers can wire custom boards, motors, cameras, and MQTT devices
             into the same software surface used by official TenderCells products.
           </p>
         </article>
         <article>
-          <h2>Buy it.</h2>
+          <h2>Share it.</h2>
           <p>
-            Users who want a faster path can buy kits or prebuilt units from us
-            and still manage them beside their own community or custom hardware.
+            A build log, lesson, dataset, issue, pull request, or demo video can help
+            the next student move faster and think more clearly.
+          </p>
+        </article>
+        <article>
+          <h2>Launch it.</h2>
+          <p>
+            The best ideas can become kits, local services, school programs, research
+            tools, community products, or companies built by the people who learned here.
           </p>
         </article>
       </section>
@@ -134,21 +209,21 @@ export default function StoryPage() {
 
       <section className="story-community">
         <div>
-          <h2>For builders, the story continues in code.</h2>
+          <h2>For builders, the story continues in code, hardware, and companies.</h2>
           <p>
-            The next phase is letting real garage hardware, open-source modules,
-            local LLM repair loops, and community product designs plug into the
-            same registry and simulation surfaces shown here, while animal
-            health records stay connected to the devices and places that care
-            for them.
+            The next phase is letting garage hardware, open-source modules, local
+            AI repair loops, community product designs, and student projects plug
+            into the same registry and simulation surfaces shown here. We want
+            TenderCells to help people learn the tools of the future, care for
+            animals better, and build products or companies around problems that matter.
           </p>
         </div>
         <div className="story-actions">
           <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer">
             View the Repository
           </a>
-          <a href="/open-source">Open Source Plan</a>
-          <a href="/apps">Try the App</a>
+          <a href="/academy">Start Learning</a>
+          <a href="/app/demo">Try the Demo</a>
         </div>
       </section>
     </PageLayout>

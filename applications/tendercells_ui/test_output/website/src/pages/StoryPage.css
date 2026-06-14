@@ -116,6 +116,55 @@
   padding: 3rem 1.25rem;
 }
 
+.story-future {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.story-future-heading h2 {
+  margin: 0 0 1rem;
+  color: #10251a;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  line-height: 1.08;
+}
+
+.story-future-heading p:last-child {
+  margin: 0;
+  color: #34463b;
+  line-height: 1.75;
+}
+
+.story-skill-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.story-skill-grid article {
+  border: 1px solid #b9d2bf;
+  border-radius: 8px;
+  background: #f7fbf7;
+  padding: 1.2rem;
+}
+
+.story-skill-grid h3 {
+  margin: 0 0 0.55rem;
+  color: #10251a;
+  font-size: 1.05rem;
+}
+
+.story-skill-grid p {
+  margin: 0;
+  color: #34463b;
+  line-height: 1.65;
+  font-size: 0.94rem;
+}
+
 .story-pathways {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -234,9 +283,14 @@
   .story-intro,
   .story-community,
   .story-mission,
+  .story-future,
   .story-frame,
   .story-frame:nth-child(even),
   .story-pathways {
+    grid-template-columns: 1fr;
+  }
+
+  .story-skill-grid {
     grid-template-columns: 1fr;
   }
 

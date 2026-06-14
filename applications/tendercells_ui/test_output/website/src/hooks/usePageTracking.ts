@@ -115,8 +115,8 @@ const ROUTE_META: Record<string, RouteMeta> = {
     description: 'Plain-language overview of TenderCells for search engines, AI tools, educators, partners, journalists, homesteaders, and open-source builders.',
   },
   '/story': {
-    title: 'TenderCells Story - Open Agricultural Engineering',
-    description: 'The mission behind TenderCells: helping families, students, makers, and future engineers care for animals with open technology.',
+    title: 'TenderCells Story - Teaching Future Builders With AI, Robotics, and Open Agriculture',
+    description: 'The TenderCells mission is to help kids, students, engineers, makers, and future founders use AI tools, robotics, software, and hardware to build real animal-care products.',
   },
   '/about': {
     title: 'About Tender Cells',

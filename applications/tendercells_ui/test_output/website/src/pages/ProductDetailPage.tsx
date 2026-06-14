@@ -205,7 +205,13 @@ const PRODUCTS: Record<string, {
   },
 };
 
-const PRODUCT_VISUALS: Record<string, { image: string; alt: string; notes: string[]; extraImages?: { image: string; alt: string; label: string }[] }> = {
+const PRODUCT_VISUALS: Record<string, {
+  image: string;
+  alt: string;
+  notes: string[];
+  docs: { label: string; href: string }[];
+  extraImages?: { image: string; alt: string; label: string }[];
+}> = {
   "chicken-tender": {
     image: "/assets/images/products/chicken-tender-concept.png",
     alt: "Concept render of the Chicken Tender automated backyard coop",
@@ -214,6 +220,31 @@ const PRODUCT_VISUALS: Record<string, { image: string; alt: string; notes: strin
       "Automatic chicken door, nest box access, camera, sensors, feed, and water modules are mounted as serviceable hardware.",
       "The rail and robot arm are the internal service system for cleaning, inspection, and egg handling.",
       "The CAD concept source includes a 72-inch square cell, X/Y/Z rails, and a 6DOF mounting plate.",
+    ],
+    docs: [
+      { label: "Product docs", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/chicken-tendercell" },
+      { label: "CAD source", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/chicken-tendercell/cad" },
+      { label: "Hardware catalog", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/CHICKEN_TENDER_HARDWARE_CATALOG.md" },
+    ],
+    extraImages: [
+      { image: "/assets/images/demos/door-device-crud-demo.png", alt: "Door and device control demo for Chicken Tender modules", label: "Door and device controls" },
+      { image: "/assets/images/demos/chickeneye-eggs-demo.png", alt: "ChickenEye egg detection and nest-box map", label: "Egg and nest-box ideas" },
+      { image: "/assets/images/demos/animal-roster-demo.png", alt: "Animal roster and health records demo", label: "Flock records" },
+    ],
+  },
+  "roaming-roost": {
+    image: "/app/assets/images/products/roaming-roost.svg",
+    alt: "Roaming Roost mobile pasture coop concept",
+    notes: [
+      "A mobile coop concept for pasture rotation instead of a fixed backyard cell.",
+      "Drive base, docking, charging, and GPS boundary behavior need product-level docs.",
+      "WatchTower alerts can command it to return to dock or pause movement.",
+      "The current image is a concept asset; BOM, wiring, and safety validation are the next docs to fill in.",
+    ],
+    docs: [
+      { label: "Product docs", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/roaming-roost" },
+      { label: "Hardware index", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/hardware.md" },
+      { label: "Product ideas", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md" },
     ],
   },
   watchtower: {
@@ -224,6 +255,11 @@ const PRODUCT_VISUALS: Record<string, { image: string; alt: string; notes: strin
       "A solar panel and battery make it a mostly self-contained outdoor monitor.",
       "Three camera cradles provide 360-degree coverage around the yard.",
       "The ESP32, battery, and electronics sit inside the weather-resistant head.",
+    ],
+    docs: [
+      { label: "Hardware index", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/hardware.md" },
+      { label: "Product ideas", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md" },
+      { label: "Hardware catalog", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/CHICKEN_TENDER_HARDWARE_CATALOG.md#16-watchtower-ai-hardware" },
     ],
     extraImages: [
       { image: "/assets/images/products/predator-monitor-top-view.png", alt: "Top view sketch of three camera cradles around the predator monitor", label: "Top view camera carrier" },
@@ -272,6 +308,13 @@ export default function ProductDetailPage() {
                 <li key={note}>{note}</li>
               ))}
             </ul>
+            <div className="product-doc-links">
+              {visual.docs.map((doc) => (
+                <a key={doc.href} href={doc.href} target="_blank" rel="noopener noreferrer">
+                  {doc.label}
+                </a>
+              ))}
+            </div>
           </div>
           {visual.extraImages && (
             <div className="product-visual-strip">

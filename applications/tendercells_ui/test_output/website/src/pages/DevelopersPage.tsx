@@ -59,6 +59,8 @@ const buildIdeas = [
     alt: "Concept render of the Chicken Tender automated coop",
     prompt: "Start from the Chicken Tender cell: document automatic doors, latches, feed/water modules, and the internal rail/arm service layer.",
     firstDoc: "docs/products/chicken-tendercell/README.md",
+    productPage: "/shop/chicken-tender",
+    docsHref: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/chicken-tendercell",
   },
   {
     title: "Camera Inspection Node",
@@ -66,6 +68,8 @@ const buildIdeas = [
     alt: "Pole-mounted WatchTower AI predator monitor",
     prompt: "Create the WatchTower predator monitor: a solar pole-mounted 360-degree camera pod with ESP32, battery, and LoRa alerts.",
     firstDoc: "docs/products/watchtower-ai/README.md",
+    productPage: "/shop/watchtower",
+    docsHref: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md",
   },
   {
     title: "Nest Box Egg Sensor",
@@ -73,6 +77,8 @@ const buildIdeas = [
     alt: "ChickenEye egg detection and nest box map",
     prompt: "Document an IR, load-cell, or vision-based nest-box sensor that feeds the egg map and production history.",
     firstDoc: "docs/products/nest-box-egg-sensor/README.md",
+    productPage: "/shop/chicken-tender",
+    docsHref: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md",
   },
   {
     title: "Flock RFID Station",
@@ -80,6 +86,8 @@ const buildIdeas = [
     alt: "TenderCells animal roster and health records",
     prompt: "Prototype a weigh/RFID checkpoint that updates per-animal profiles, last-seen status, and health notes.",
     firstDoc: "docs/products/flock-rfid-station/README.md",
+    productPage: "/shop/chicken-tender",
+    docsHref: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md",
   },
   {
     title: "Mobile Pasture Roost",
@@ -87,6 +95,8 @@ const buildIdeas = [
     alt: "Roaming Roost mobile pasture coop concept",
     prompt: "Turn Roaming Roost into a builder-friendly product folder with drive base, docking, GPS boundary, and safety docs.",
     firstDoc: "docs/products/roaming-roost/README.md",
+    productPage: "/shop/roaming-roost",
+    docsHref: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/roaming-roost",
   },
 ];
 
@@ -169,6 +179,10 @@ export default function DevelopersPage() {
             <h3>{idea.title}</h3>
             <p>{idea.prompt}</p>
             <p><code>{idea.firstDoc}</code></p>
+            <div className="product-doc-links">
+              <a href={idea.productPage}>Product page</a>
+              <a href={idea.docsHref} target="_blank" rel="noopener noreferrer">Docs</a>
+            </div>
           </div>
         ))}
       </div>

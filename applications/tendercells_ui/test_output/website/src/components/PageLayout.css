@@ -152,6 +152,26 @@
 .product-visual li {
   margin-bottom: 0.45rem;
 }
+.product-doc-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+.product-doc-links a {
+  display: inline-block;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #4a7c59;
+  border-radius: 4px;
+  color: #1f5c3b;
+  background: #fff;
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+.product-doc-links a:hover {
+  background: #e8f4ec;
+}
 .product-visual-strip {
   grid-column: 1 / -1;
   display: grid;

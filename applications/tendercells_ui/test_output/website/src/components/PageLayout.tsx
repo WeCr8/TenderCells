@@ -1,4 +1,5 @@
 import Header from "./Header";
+import Footer from "./Footer";
 import "./PageLayout.css";
 
 interface PageLayoutProps {
@@ -12,6 +13,7 @@ export default function PageLayout({ children }: PageLayoutProps) {
       <main className="page-main">
         {children}
       </main>
+      <Footer />
     </>
   );
 }

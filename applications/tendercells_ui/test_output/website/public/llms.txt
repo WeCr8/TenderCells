@@ -22,7 +22,15 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 - https://tendercells.com/homeschool
 - https://tendercells.com/science-fair
 - https://tendercells.com/learn
+- https://tendercells.com/guides/smart-chicken-coop
+- https://tendercells.com/guides/predator-monitoring
+- https://tendercells.com/guides/pasture-rotation
 - https://tendercells.com/health
+- https://tendercells.com/about
+- https://tendercells.com/contact
+- https://tendercells.com/privacy
+- https://tendercells.com/terms
+- https://tendercells.com/editorial-policy
 
 ## Core Topics
 
@@ -39,6 +47,9 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 - FFA supervised agricultural experience projects
 - homeschool STEM projects
 - agricultural robotics science fair projects
+- smart chicken coop guide
+- predator monitoring guide
+- mobile coop pasture rotation
 - homestead automation
 - ESP32 firmware
 - MQTT device control

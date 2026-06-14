@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import "./LandingPage.css";
 import { trackPageView, trackButtonClick } from "../utils/analytics";
 import { TENDERCELLS_DEMO_URL } from "../config/appLinks";
@@ -170,6 +171,7 @@ export default function LandingPage() {
           </form>
         </div>
       )}
+      <Footer />
     </>
   );
 }

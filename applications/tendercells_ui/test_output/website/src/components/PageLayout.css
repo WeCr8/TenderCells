@@ -4,6 +4,57 @@
   padding: 2.5rem 1.25rem 4rem;
 }
 
+.site-footer {
+  margin-top: 3rem;
+  background: #15201b;
+  color: #f5f7f4;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.site-footer-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem;
+  display: grid;
+  grid-template-columns: minmax(240px, 1.6fr) repeat(3, minmax(150px, 1fr));
+  gap: 1.5rem;
+}
+
+.site-footer h2,
+.site-footer h3 {
+  margin: 0 0 0.75rem;
+  color: #fff;
+}
+
+.site-footer p {
+  margin: 0;
+  color: #d9e2dc;
+  line-height: 1.6;
+}
+
+.site-footer nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.site-footer a {
+  color: #d9e2dc;
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.site-footer a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+@media (max-width: 760px) {
+  .site-footer-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
 .page-hero {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;

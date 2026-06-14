@@ -14,6 +14,8 @@ import OpenSourcePage from "./pages/OpenSourcePage";
 import DevelopersPage from "./pages/DevelopersPage";
 import TenderCellsOverviewPage from "./pages/TenderCellsOverviewPage";
 import AudienceProgramPage from "./pages/AudienceProgramPage";
+import TrustPage from "./pages/TrustPage";
+import GuidePage from "./pages/GuidePage";
 import BlogPage from "./pages/BlogPage";
 import StoryPage from "./pages/StoryPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -54,6 +56,9 @@ function App() {
         <Route path="/learn/homesteading" element={<HomesteadingPage />} />
         <Route path="/learn/automation" element={<AutomationPage />} />
         <Route path="/learn/faq" element={<FaqPage />} />
+        <Route path="/guides/smart-chicken-coop" element={<GuidePage slug="smart-chicken-coop" />} />
+        <Route path="/guides/predator-monitoring" element={<GuidePage slug="predator-monitoring" />} />
+        <Route path="/guides/pasture-rotation" element={<GuidePage slug="pasture-rotation" />} />
 
         {/* Animal Health */}
         <Route path="/health" element={<HealthPage />} />
@@ -68,6 +73,11 @@ function App() {
 
         {/* Story */}
         <Route path="/story" element={<StoryPage />} />
+        <Route path="/about" element={<TrustPage kind="about" />} />
+        <Route path="/contact" element={<TrustPage kind="contact" />} />
+        <Route path="/privacy" element={<TrustPage kind="privacy" />} />
+        <Route path="/terms" element={<TrustPage kind="terms" />} />
+        <Route path="/editorial-policy" element={<TrustPage kind="editorial" />} />
 
         {/* Blog */}
         <Route path="/blog" element={<BlogPage />} />

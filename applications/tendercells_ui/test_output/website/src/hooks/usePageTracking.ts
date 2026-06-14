@@ -82,6 +82,18 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: 'TenderCells FAQ - Smart Animal Care Questions',
     description: 'Answers about TenderCells products, open-source hardware, animal-care automation, demos, education, and developer docs.',
   },
+  '/guides/smart-chicken-coop': {
+    title: 'Smart Chicken Coop Guide - TenderCells',
+    description: 'Plan a smart chicken coop with sensors, safe automation, manual override, animal-care records, and open-source learning paths.',
+  },
+  '/guides/predator-monitoring': {
+    title: 'Predator Monitoring Guide - TenderCells',
+    description: 'Learn how camera, solar, alert, and local AI concepts can support safer outdoor animal care and student engineering projects.',
+  },
+  '/guides/pasture-rotation': {
+    title: 'Mobile Coop and Pasture Rotation Guide - TenderCells',
+    description: 'Study mobile coop design, route planning, docking, safety, and pasture rotation ideas for students and homesteaders.',
+  },
   '/health': {
     title: 'Animal Health Knowledge Base - TenderCells',
     description: 'Animal health resources for chickens, ducks, goats, rabbits, and smart monitoring systems for better daily care.',
@@ -105,6 +117,26 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/story': {
     title: 'TenderCells Story - Open Agricultural Engineering',
     description: 'The mission behind TenderCells: helping families, students, makers, and future engineers care for animals with open technology.',
+  },
+  '/about': {
+    title: 'About Tender Cells',
+    description: 'Learn about Tender Cells, an open-source agricultural engineering project for smart animal care, education, makers, and homesteaders.',
+  },
+  '/contact': {
+    title: 'Contact Tender Cells',
+    description: 'Contact Tender Cells for education, open-source, product, partnership, support, and media questions.',
+  },
+  '/privacy': {
+    title: 'Privacy Policy - Tender Cells',
+    description: 'Tender Cells privacy policy for public website analytics, advertising, contact messages, and student-oriented educational content.',
+  },
+  '/terms': {
+    title: 'Terms of Use - Tender Cells',
+    description: 'Terms for using the Tender Cells public website, educational materials, demo, product concepts, and open-source resources.',
+  },
+  '/editorial-policy': {
+    title: 'Editorial Policy - Tender Cells',
+    description: 'How Tender Cells publishes original, useful, safety-aware educational and technical content.',
   },
   '/blog': {
     title: 'TenderCells Blog - Smart Animal Care and Ag Robotics',

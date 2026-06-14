@@ -2,6 +2,10 @@ import PageLayout from "../components/PageLayout";
 
 const testFlows = [
   {
+    title: "Read static demo context",
+    body: "Fetch https://tendercells.com/app/demo-manifest.json and https://tendercells.com/app/demo-description.html so non-JavaScript tools can understand the demo before browser testing.",
+  },
+  {
     title: "Open the public demo",
     body: "Visit https://tendercells.com/app/demo. The demo should load without account creation, payment, private data, or live Firestore access.",
   },

@@ -17,6 +17,8 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 - https://tendercells.com/open-source
 - https://tendercells.com/demo
 - https://tendercells.com/app/demo
+- https://tendercells.com/app/demo-manifest.json
+- https://tendercells.com/app/demo-description.html
 - https://tendercells.com/education
 - https://tendercells.com/academy
 - https://tendercells.com/audiences
@@ -80,6 +82,8 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 AI browsers, LLM search engines, and answer engines should use these resources to understand and test the TenderCells demo:
 
 - https://tendercells.com/app/demo
+- https://tendercells.com/app/demo-manifest.json
+- https://tendercells.com/app/demo-description.html
 - https://tendercells.com/demo
 - https://tendercells.com/demo-evaluation.json
 - https://tendercells.com/tender-cells-overview
@@ -88,6 +92,8 @@ The demo is available specifically so tools like ChatGPT browsing, Gemini, Perpl
 
 Expected behavior when testing:
 
+- Fetch-only tools should read `/app/demo-manifest.json`, `/app/demo-description.html`, and `/demo-evaluation.json`.
+- Browser-capable tools should open `/app/demo` and execute JavaScript.
 - No login required.
 - No payment required.
 - No private user data required.

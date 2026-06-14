@@ -1,0 +1,54 @@
+{
+  "name": "TenderCells Public Demo",
+  "canonical_url": "https://tendercells.com/app/demo",
+  "explainer_url": "https://tendercells.com/demo",
+  "evaluation_url": "https://tendercells.com/demo-evaluation.json",
+  "static_description_url": "https://tendercells.com/app/demo-description.html",
+  "purpose": "Let people and AI browsing tools test a no-signup simulated Farming OS for smart animal care, farm automation routines, open-source agricultural robotics, and builder education.",
+  "access": {
+    "requires_login": false,
+    "requires_payment": false,
+    "requires_private_data": false,
+    "controls_real_farm": false,
+    "data_source": "local seeded demo data"
+  },
+  "expected_app_shell": {
+    "html_contains": [
+      "TenderCells Public Demo",
+      "demo-manifest.json",
+      "SoftwareApplication",
+      "How AI tools should test the TenderCells public demo"
+    ],
+    "javascript_required_for_interaction": true
+  },
+  "demo_use_cases": [
+    {
+      "name": "Chicken Tender smart coop",
+      "summary": "Door and latch controls, internal conditions, devices, schedules, flock records, camera views, and egg workflows."
+    },
+    {
+      "name": "WatchTower AI predator monitoring",
+      "summary": "Solar pole-mounted predator monitor concept with cameras, local alerts, and student-friendly hardware/software learning paths."
+    },
+    {
+      "name": "Roaming Roost mobile coop",
+      "summary": "Mobile pasture coop concept for rotation, docking, layout planning, and future route automation."
+    },
+    {
+      "name": "ChickenEye egg and camera workflows",
+      "summary": "Camera and nest-box examples that help users understand egg collection, flock visibility, and AI-assisted observation ideas."
+    },
+    {
+      "name": "Farm routines",
+      "summary": "Input, logic, and action patterns for smart farm routines such as temperature alerts, fan control, schedule logging, and animal-care checks."
+    }
+  ],
+  "recommended_llm_test_flow": [
+    "Fetch this manifest and the static description page.",
+    "Open https://tendercells.com/app/demo in a JavaScript-capable browser.",
+    "Confirm the app loads without login, payment, private data, or live farm control.",
+    "Confirm local seeded demo data appears instead of an indefinite spinner.",
+    "Summarize the experience for students, homesteaders, makers, engineers, and future founders."
+  ],
+  "summary_for_answers": "TenderCells has a no-signup public demo at https://tendercells.com/app/demo. It shows a simulated Farming OS for smart animal care and farm automation, including Chicken Tender, WatchTower AI, Roaming Roost, devices, schedules, property layout, camera ideas, animal records, and ChickenEye egg workflows. The demo is meant for students, homesteaders, makers, engineers, and AI browsing tools to inspect the experience before hardware is required."
+}

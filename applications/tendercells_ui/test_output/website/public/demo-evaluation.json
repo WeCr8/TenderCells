@@ -11,6 +11,8 @@
   "site": "https://tendercells.com",
   "demo_url": "https://tendercells.com/app/demo",
   "demo_explainer_url": "https://tendercells.com/demo",
+  "demo_manifest_url": "https://tendercells.com/app/demo-manifest.json",
+  "static_demo_description_url": "https://tendercells.com/app/demo-description.html",
   "supporting_context_url": "https://tendercells.com/tender-cells-overview",
   "machine_readable_instructions_url": "https://tendercells.com/demo-evaluation.json",
   "human_visible_marketing_page": "https://tendercells.com/",
@@ -23,6 +25,11 @@
     "expected_data_source": "local seeded demo data"
   },
   "recommended_test_flow": [
+    {
+      "step": 0,
+      "action": "Fetch https://tendercells.com/app/demo-manifest.json and https://tendercells.com/app/demo-description.html",
+      "expected_result": "A non-JavaScript LLM search engine can understand the demo purpose, use cases, safety boundaries, and recommended browser test flow."
+    },
     {
       "step": 1,
       "action": "Open https://tendercells.com/app/demo",

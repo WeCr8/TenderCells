@@ -2,7 +2,7 @@
 
 **Purpose:** Register and test Chicken Tender hardware while developing software and CAD in parallel.
 
-**Your Account:** zgoodbody@gmail.com | Firebase UID: `TjOwH6kl8hgGPqNTDSvRU8ZpNAH2`
+**Demo owner:** `demo-local-owner` | Firebase UID placeholder: `YOUR_FIREBASE_UID`
 
 ---
 
@@ -18,7 +18,7 @@
 ```json
 {
   "id": "ct_test_001",
-  "userId": "TjOwH6kl8hgGPqNTDSvRU8ZpNAH2",
+  "userId": "YOUR_FIREBASE_UID",
   "productType": "chicken-tender",
   "nickname": "Test Coop - Motor Testing",
   "size": "4x4x6",
@@ -35,7 +35,7 @@
 
 ### Option B: Via App UI (Once Integrated)
 
-1. Login: zgoodbody@gmail.com
+1. Sign in with your local development account.
 2. Products → Add Device
 3. Fill form:
    - Name: "Test Coop - Motor Testing"
@@ -213,7 +213,7 @@ Door opens ----→ Topic: tc/ct_test_001/state → Dashboard updates
 4. Test endpoint: `curl http://localhost:3001/api/mqtt/devices/ct_test_001/telemetry`
 
 **Device not in app?**
-1. Login as zgoodbody@gmail.com
+1. Sign in with your local development account.
 2. Check Firestore: device exists in `devices` collection
 3. Verify `userId` matches your Firebase UID
 
@@ -264,7 +264,7 @@ Structure per device:
 ```typescript
 interface Device {
   id: string;                    // "ct_test_001"
-  userId: string;                // "TjOwH6kl8hgGPqNTDSvRU8ZpNAH2"
+  userId: string;                // "YOUR_FIREBASE_UID"
   productType: string;            // "chicken-tender"
   nickname: string;               // "Test Coop - Motor Testing"
   size: string;                   // "4x4x6"
@@ -310,8 +310,8 @@ match /devices/{deviceId} {
 # Open browser console and run:
 import { registerDevice } from './services/deviceService';
 
-registerDevice('TjOwH6kl8hgGPqNTDSvRU8ZpNAH2', {
-  userId: 'TjOwH6kl8hgGPqNTDSvRU8ZpNAH2',
+registerDevice('YOUR_FIREBASE_UID', {
+  userId: 'YOUR_FIREBASE_UID',
   productType: 'chicken-tender',
   nickname: 'Test Coop',
   size: '4x4x6',

@@ -152,6 +152,19 @@ const formatDate = (value?: string) => {
   return new Date(value).toLocaleString();
 };
 
+const displayOwner = (product: Product) => {
+  const owner = String(product.metadata?.owner_email || product.user_id || '');
+  if (!owner) return 'Private local owner';
+  if (owner === ProductsService.GARAGE_OWNER_EMAIL) return 'Private local owner';
+  if (owner.includes('@')) return 'Private local owner';
+  return owner;
+};
+
+const editableOwnerValue = (product: Product) => {
+  const owner = displayOwner(product);
+  return owner === 'Private local owner' ? '' : owner;
+};
+
 const getProductNeeds = (product: Product) => {
   const needs: string[] = [];
   if (product.status === 'setup_required') needs.push('Complete setup');
@@ -173,7 +186,7 @@ const productToForm = (product: Product): EditableProduct => ({
   device_id: product.device_id || '',
   status: product.status,
   connection_status: product.connection_status,
-  owner_email: String(product.metadata?.owner_email || product.user_id || ''),
+  owner_email: editableOwnerValue(product),
   product_family: String(product.metadata?.product_family || 'community-custom'),
   build_source: String(product.metadata?.build_source || 'prototype'),
   custom_product_name: String(product.metadata?.custom_product_name || ''),
@@ -233,7 +246,6 @@ export default function ProductsPage() {
         product.activation_code,
         product.device_id,
         product.location,
-        product.metadata?.owner_email,
         product.metadata?.product_family,
         product.metadata?.build_source,
         product.metadata?.custom_product_name,
@@ -364,7 +376,7 @@ export default function ProductsPage() {
             Product & Device Registry
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            All registered products, devices, build details, setup needs, and garage test metadata.
+            All registered products, devices, build details, setup needs, and local test metadata.
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -387,10 +399,10 @@ export default function ProductsPage() {
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} justifyContent="space-between">
           <Box>
             <Typography variant="subtitle2" sx={{ color: '#C8B882' }}>
-              First garage build
+              Browser-local demo build
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Owner {ProductsService.GARAGE_OWNER_EMAIL} | Serial {ProductsService.FIRST_COOP_SERIAL} | Device {ProductsService.FIRST_COOP_DEVICE_ID}
+              Owner Private local owner | Serial {ProductsService.FIRST_COOP_SERIAL} | Device {ProductsService.FIRST_COOP_DEVICE_ID}
             </Typography>
           </Box>
           <Chip label={`MQTT tc/${ProductsService.FIRST_COOP_DEVICE_ID}/...`} color="success" variant="outlined" />
@@ -423,7 +435,7 @@ export default function ProductsPage() {
               label="Search registry"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Name, serial, device id, owner, MQTT..."
+              placeholder="Name, serial, device id, MQTT..."
             />
           </Grid>
           <Grid item xs={12} sm={4} md={2.5}>
@@ -503,7 +515,7 @@ export default function ProductsPage() {
               {products.length === 0 ? 'No products registered' : 'No products match your filters'}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Register the garage coop or add a product manually to begin local testing.
+              Register the demo coop or add a product manually to begin local testing.
             </Typography>
             <Button variant="contained" startIcon={<AddIcon />} onClick={() => setIsRegistrationModalOpen(true)}>
               Register Product
@@ -650,7 +662,7 @@ export default function ProductsPage() {
             <Grid container spacing={1.5}>
               {[
                 ['Product ID', detailProduct.id],
-                ['Owner', detailProduct.metadata?.owner_email || detailProduct.user_id],
+                ['Owner', displayOwner(detailProduct)],
                 ['Type', detailProduct.product_type.replace('_', ' ')],
                 ['Family', detailProduct.metadata?.product_family || 'Needed'],
                 ['Build Source', detailProduct.metadata?.build_source || 'Needed'],
@@ -775,7 +787,7 @@ export default function ProductsPage() {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Owner email"
+                label="Owner label"
                 value={editForm.owner_email}
                 onChange={(event) => setEditForm((form) => ({ ...form, owner_email: event.target.value }))}
               />

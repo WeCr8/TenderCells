@@ -19,7 +19,7 @@ This tracker turns repair work into production engineering requirements for open
 | Mobile packages | Planned | PWA-first. Capacitor Android/iOS wrapper documented, not yet installed. |
 | Release SHA badge | Planned | Badge placeholder exists. CI should replace with current short SHA on release. |
 | Hardware kit docs | Planned | Need BOM, wiring, flashing, pairing, reset, and safety docs per product. |
-| First garage coop | Started | `docs/garage-first-coop-build.md` defines `ct_001` for `zgoodbody@gmail.com`. |
+| First demo coop | Started | `docs/garage-first-coop-build.md` defines `ct_001` with browser-local demo ownership. |
 
 ## Product Engineering Needs
 

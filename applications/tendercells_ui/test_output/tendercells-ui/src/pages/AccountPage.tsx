@@ -186,7 +186,7 @@ export default function AccountPage() {
         </Card>
 
         <Typography variant="caption" sx={{ display: 'block', mt: 3, textAlign: 'center', color: '#8A7D55' }}>
-          Test account: zgoodbody@gmail.com
+          Demo account data stays browser-local unless a backend is configured.
         </Typography>
       </Box>
     );
@@ -298,7 +298,7 @@ export default function AccountPage() {
         </Box>
 
         <Alert severity="info" sx={{ mb: 2 }}>
-          First garage coop target: {ProductsService.FIRST_COOP_SERIAL} / {ProductsService.FIRST_COOP_DEVICE_ID} for {ProductsService.GARAGE_OWNER_EMAIL}.
+          Demo coop target: {ProductsService.FIRST_COOP_SERIAL} / {ProductsService.FIRST_COOP_DEVICE_ID}.
         </Alert>
 
         {productsLoading ? (

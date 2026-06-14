@@ -4,7 +4,7 @@ const roadmap = [
   {
     phase: "Phase 1",
     title: "Foundation",
-    items: ["Dashboard", "WatchTower AI", "Chicken TenderCell MVP", "First garage hardware tests"],
+    items: ["Dashboard", "WatchTower AI", "Chicken TenderCell MVP", "First local hardware validation tests"],
   },
   {
     phase: "Phase 2",

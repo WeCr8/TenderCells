@@ -66,6 +66,42 @@ test('live app natural demo routes render real content instead of blank shells',
   }
 });
 
+test('live products page redacts stale local owner data', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      'tendercells_dev_products',
+      JSON.stringify([
+        {
+          id: 'garage-chicken-tender-001',
+          user_id: 'private-owner@example.test',
+          product_type: 'hardware_unit',
+          product_name: 'Garage Chicken Tender 001',
+          model: 'Chicken Tender Coop - Garage Dev Build',
+          serial_number: 'TC-CT-GARAGE-9999',
+          activation_code: 'TC-GARAGE-001',
+          status: 'setup_required',
+          connection_status: 'offline',
+          location: 'Garage Electronics Bench',
+          metadata: {
+            owner_email: 'private-owner@example.test',
+            source: 'garage-dev-seed',
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ]),
+    );
+  });
+
+  await page.goto('https://tendercells.com/app/products', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#root')).not.toBeEmpty({ timeout: 20_000 });
+  await expect(page.locator('body')).toContainText('Product & Device Registry', { timeout: 20_000 });
+  await expect(page.locator('body')).toContainText('Private local owner');
+  await expect(page.locator('body')).toContainText('TC-CT-DEMO-0001');
+  await expect(page.locator('body')).not.toContainText(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  await expect(page.locator('body')).not.toContainText(/private-owner@example\.test|TC-CT-GARAGE-9999|First\s+garage\s+build/i);
+});
+
 test('live demo explainer shell is useful to non-JS crawlers', async ({ request }) => {
   const response = await request.get('https://tendercells.com/demo');
   expect(response.ok()).toBe(true);

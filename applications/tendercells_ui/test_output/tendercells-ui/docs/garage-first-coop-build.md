@@ -1,29 +1,29 @@
-# Garage First Coop Build
+# Demo First Coop Build
 
-This is the first local Chicken Tender device target for `zgoodbody@gmail.com`.
+This is the first local Chicken Tender device target for browser-local demo and hardware bring-up workflows.
 
 ## Registered Device
 
 | Field | Value |
 | --- | --- |
-| Owner account | `zgoodbody@gmail.com` |
-| Product name | `Garage Chicken Tender 001` |
-| Product id | `garage-chicken-tender-001` |
+| Owner label | `demo-local-owner` |
+| Product name | `Demo Chicken Tender 001` |
+| Product id | `demo-chicken-tender-001` |
 | Device id | `ct_001` |
-| Serial | `TC-CT-GARAGE-0001` |
-| Activation code | `TC-GARAGE-001` |
-| Model | `Chicken Tender Coop - Garage Dev Build` |
-| Location | `Garage Electronics Bench` |
+| Serial | `TC-CT-DEMO-0001` |
+| Activation code | `TC-DEMO-001` |
+| Model | `Chicken Tender Coop - Demo Build` |
+| Location | `Demo Workspace` |
 | MQTT base topic | `tc/ct_001` |
 | API health | `http://localhost:4000/health` |
 
 ## Software Setup
 
-1. Sign in as `zgoodbody@gmail.com`.
+1. Sign in with a local development account, or use the public demo without sign-in.
 2. Go to `Products` or `Account -> Products`.
-3. Select `Register Garage Coop`.
-4. Confirm the device card shows serial `TC-CT-GARAGE-0001`.
-5. Use `Reset Garage Coop` when testing needs a clean local product record.
+3. Select `Register First Device`.
+4. Confirm the device card shows serial `TC-CT-DEMO-0001`.
+5. Reset the local demo environment when testing needs a clean local product record.
 
 Local registration is stored in browser localStorage under `tendercells_dev_products` when the API is unavailable.
 
@@ -45,7 +45,7 @@ Initial bring-up should use the smallest safe hardware loop:
 
 ## MQTT Contract
 
-Use these topics for garage testing:
+Use these topics for local testing:
 
 ```text
 tc/ct_001/status
@@ -63,8 +63,8 @@ Suggested status payload:
 ```json
 {
   "deviceId": "ct_001",
-  "serial": "TC-CT-GARAGE-0001",
-  "firmware": "garage-dev-r0",
+  "serial": "TC-CT-DEMO-0001",
+  "firmware": "demo-r0",
   "online": true,
   "estop": false
 }

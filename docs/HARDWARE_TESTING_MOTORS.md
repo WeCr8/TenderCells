@@ -1,6 +1,6 @@
 # Hardware Testing: Motors, Axis & Drives
 
-**Device ID:** ct_test_001 (registered under zgoodbody@gmail.com)  
+**Device ID:** ct_test_001 (registered under your local development account)
 **Test Phase:** Week 1 (Dec 8-14, 2025)  
 **Components:** TB6600 stepper drivers, NEMA 17/23 motors, door servo, feed auger
 
@@ -291,7 +291,7 @@ Expected: <100ms from command to full stop
 
 **Date:** Dec 8, 2025  
 **Component:** Door Servo  
-**Tester:** zgoodbody@gmail.com  
+**Tester:** Local development owner
 
 ```
 Test: Open command

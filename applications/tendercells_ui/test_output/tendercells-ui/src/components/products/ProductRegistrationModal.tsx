@@ -116,27 +116,27 @@ export default function ProductRegistrationModal({
     {
       id: 'first-chicken-tender',
       title: 'First Chicken TenderCell',
-      subtitle: 'Garage dev coop for zgoodbody@gmail.com with device ct_001.',
-      description: 'Register our first real Chicken TenderCell for garage electronics, axes, motors, and safety testing.',
+      subtitle: 'Browser-local demo coop with device ct_001.',
+      description: 'Register a local demo Chicken TenderCell for electronics, axes, motors, and safety workflow testing.',
       icon: <CottageOutlinedIcon />,
       productType: 'hardware_unit' as ProductType,
       productFamily: 'chicken-tender' as ProductFamily,
       buildSource: 'prototype' as BuildSource,
-      productName: 'Garage Chicken Tender 001',
-      model: 'Chicken Tender Coop - Garage Dev Build',
-      location: 'Garage Electronics Bench',
-      ownerEmail: 'zgoodbody@gmail.com',
+      productName: 'Demo Chicken Tender 001',
+      model: 'Chicken Tender Coop - Demo Build',
+      location: 'Demo Workspace',
+      ownerEmail: '',
       deviceId: 'ct_001',
-      hardwareRevision: 'garage-dev-r0',
+      hardwareRevision: 'demo-r0',
       firmwareTarget: 'firmware/chicken-tender',
       mqttBaseTopic: 'tc/ct_001',
-      serialNumber: 'TC-CT-GARAGE-0001',
-      activationCode: 'TC-GARAGE-001',
+      serialNumber: 'TC-CT-DEMO-0001',
+      activationCode: 'TC-DEMO-001',
       animalCount: '4',
       hardwareSetupMode: 'connect_now' as HardwareSetupMode,
       simulationBackend: 'hardware_in_loop' as SimulationBackend,
       roboticsMiddleware: 'mqtt_bridge',
-      notes: 'First local coop device for garage electronics bring-up, axes, motors, and community kit validation.',
+      notes: 'Browser-local demo device for electronics bring-up, axes, motors, and community kit planning.',
       primaryAction: 'Register First Device',
     },
     {
@@ -918,7 +918,7 @@ export default function ProductRegistrationModal({
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Owner Email"
+                  label="Owner label"
                   value={ownerEmail}
                   onChange={(e) => setOwnerEmail(e.target.value)}
                   placeholder="Optional for shared/community builds"
@@ -1103,7 +1103,7 @@ export default function ProductRegistrationModal({
                   label="Hardware Revision"
                   value={hardwareRevision}
                   onChange={(e) => setHardwareRevision(e.target.value)}
-                  placeholder="e.g., garage-dev-r0, community-v1"
+                  placeholder="e.g., demo-r0, community-v1"
                 />
               </Grid>
               <Grid item xs={12} md={6}>

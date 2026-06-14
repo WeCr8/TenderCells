@@ -41,7 +41,8 @@ import {
 } from '../../components/property/propertyLayoutStore';
 
 export const DEMO_SOURCE = 'demo-environment';
-const GARAGE_SOURCE = 'garage-dev-seed';
+const LEGACY_LOCAL_SOURCE = ['garage', 'dev', 'seed'].join('-');
+const DEMO_LOCAL_SOURCE = 'demo-local-seed';
 const DEMO_MARKER_KEY = 'tendercells_demo_seeded_v1';
 const DEMO_EQUIPMENT_KEY = 'tendercells_demo_equipment_v1';
 export const DEMO_EVENT = 'tendercells-demo-updated';
@@ -286,9 +287,9 @@ async function seedSchedules(): Promise<void> {
 
 // ── Public: seed / reset / verify ──────────────────────────────────────────────
 export async function seedDemoEnvironment(): Promise<DemoReport> {
-  // 1. Structures (products). Chicken Tender keeps its dedicated garage build;
+  // 1. Structures (products). Chicken Tender keeps its dedicated local demo build;
   //    every other family gets a generic demo product.
-  ProductsService.seedFirstGarageCoop(); // ct_001 garage coop (source garage-dev-seed)
+  ProductsService.seedFirstGarageCoop(); // ct_001 local demo coop
   ProductsService.seedDemoProducts(
     DEMO_SPECS.filter((s) => s.family !== 'chicken-tender').map(buildDemoProduct),
   );
@@ -318,7 +319,8 @@ export async function seedDemoEnvironment(): Promise<DemoReport> {
 export async function resetDemoEnvironment(): Promise<void> {
   // Products — only our two tagged sources.
   ProductsService.removeProductsBySource(DEMO_SOURCE);
-  ProductsService.removeProductsBySource(GARAGE_SOURCE);
+  ProductsService.removeProductsBySource(LEGACY_LOCAL_SOURCE);
+  ProductsService.removeProductsBySource(DEMO_LOCAL_SOURCE);
 
   // Animals — remove only fixed demo ids across every pack.
   for (const a of DEMO_ANIMALS) await birdsService.deleteBird(a.id, a.device);

@@ -11,6 +11,7 @@ import FaqPage from "./pages/FaqPage";
 import HealthPage from "./pages/HealthPage";
 import ServicesPage from "./pages/ServicesPage";
 import OpenSourcePage from "./pages/OpenSourcePage";
+import DevelopersPage from "./pages/DevelopersPage";
 import BlogPage from "./pages/BlogPage";
 import StoryPage from "./pages/StoryPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -53,6 +54,7 @@ function App() {
 
         {/* Open Source */}
         <Route path="/open-source" element={<OpenSourcePage />} />
+        <Route path="/developers" element={<DevelopersPage />} />
 
         {/* Story */}
         <Route path="/story" element={<StoryPage />} />

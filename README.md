@@ -35,6 +35,8 @@ Start here:
 
 - [Contributing guide](CONTRIBUTING.md)
 - [Usage guide](docs/USAGE.md)
+- [Developer documentation hub](docs/developer/README.md)
+- [Hardware developer index](docs/developer/hardware.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Open source launch plan](docs/OPEN_SOURCE_LAUNCH.md)
 - [Product documentation standard](docs/PRODUCT_DOCUMENTATION_STANDARD.md)

@@ -105,6 +105,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "License",              to: "/open-source#license" },
     ],
   },
+  { label: "Developers", to: "/developers" },
   { label: "Our Story", to: "/story" },
   { label: "Blog", to: "/blog" },
   {

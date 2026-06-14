@@ -55,16 +55,16 @@ const productDocs = [
 const buildIdeas = [
   {
     title: "Coop Door Kit",
-    image: "/assets/images/demos/door-device-crud-demo.png",
-    alt: "TenderCells device controls for automated doors and latches",
-    prompt: "Build a standalone ESP32 door/latch controller with limit switches, MQTT state, and E-STOP-safe behavior.",
-    firstDoc: "docs/products/coop-door-kit/README.md",
+    image: "/assets/images/products/chicken-tender-concept.png",
+    alt: "Concept render of the Chicken Tender automated coop",
+    prompt: "Start from the Chicken Tender cell: document automatic doors, latches, feed/water modules, and the internal rail/arm service layer.",
+    firstDoc: "docs/products/chicken-tendercell/README.md",
   },
   {
     title: "Camera Inspection Node",
-    image: "/assets/images/demos/coop-camera-demo.png",
-    alt: "TenderCells coop camera monitoring screen",
-    prompt: "Create a weatherproof camera module for coop inspection, event snapshots, and WatchTower handoff.",
+    image: "/assets/images/products/predator-monitor-pole-mount.png",
+    alt: "Pole-mounted WatchTower AI predator monitor",
+    prompt: "Create the WatchTower predator monitor: a solar pole-mounted 360-degree camera pod with ESP32, battery, and LoRa alerts.",
     firstDoc: "docs/products/watchtower-ai/README.md",
   },
   {

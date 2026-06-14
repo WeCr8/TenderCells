@@ -205,9 +205,38 @@ const PRODUCTS: Record<string, {
   },
 };
 
+const PRODUCT_VISUALS: Record<string, { image: string; alt: string; notes: string[]; extraImages?: { image: string; alt: string; label: string }[] }> = {
+  "chicken-tender": {
+    image: "/assets/images/products/chicken-tender-concept.png",
+    alt: "Concept render of the Chicken Tender automated backyard coop",
+    notes: [
+      "A compact square backyard coop with a visible service side.",
+      "Automatic chicken door, nest box access, camera, sensors, feed, and water modules are mounted as serviceable hardware.",
+      "The rail and robot arm are the internal service system for cleaning, inspection, and egg handling.",
+      "The CAD concept source includes a 72-inch square cell, X/Y/Z rails, and a 6DOF mounting plate.",
+    ],
+  },
+  watchtower: {
+    image: "/assets/images/products/predator-monitor-pole-mount.png",
+    alt: "Pole-mounted WatchTower AI predator monitor with solar panel and three camera lenses",
+    notes: [
+      "A pole-mounted camera pod placed near the coop, run, or property edge.",
+      "A solar panel and battery make it a mostly self-contained outdoor monitor.",
+      "Three camera cradles provide 360-degree coverage around the yard.",
+      "The ESP32, battery, and electronics sit inside the weather-resistant head.",
+    ],
+    extraImages: [
+      { image: "/assets/images/products/predator-monitor-top-view.png", alt: "Top view sketch of three camera cradles around the predator monitor", label: "Top view camera carrier" },
+      { image: "/assets/images/products/predator-monitor-split-view.png", alt: "Split view render showing ESP32, battery, solar panel, and cameras inside the predator monitor", label: "Electronics split view" },
+      { image: "/assets/images/products/predator-monitor-sketch-idea.png", alt: "Early sketch idea for the predator monitor housing", label: "Early concept sketch" },
+    ],
+  },
+};
+
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const product = slug ? PRODUCTS[slug] : undefined;
+  const visual = slug ? PRODUCT_VISUALS[slug] : undefined;
 
   if (!product) {
     return (
@@ -233,6 +262,29 @@ export default function ProductDetailPage() {
       <div className="prose" style={{ marginBottom: "2rem" }}>
         <p>{product.desc}</p>
       </div>
+      {visual && (
+        <div className="product-visual">
+          <img src={visual.image} alt={visual.alt} />
+          <div>
+            <h2>What It Looks Like</h2>
+            <ul>
+              {visual.notes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          </div>
+          {visual.extraImages && (
+            <div className="product-visual-strip">
+              {visual.extraImages.map((item) => (
+                <figure key={item.image}>
+                  <img src={item.image} alt={item.alt} loading="lazy" />
+                  <figcaption>{item.label}</figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <div className="cta-bar" style={{ marginBottom: "2.5rem" }}>
         <a href="#order" className="btn-primary" style={{ background: "#2a9d8f" }}>Order {product.name}</a>
         <Link to="/shop" className="btn-outline">← All Products</Link>

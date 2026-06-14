@@ -14,6 +14,24 @@ const PRODUCTS = [
   { slug: "gift-cards",      icon: "🎁", name: "Gift Cards",       price: "From $50", desc: "Give the gift of smart homesteading. Redeemable on all Tender Cells products." },
 ];
 
+const BUILD_IDEAS = [
+  {
+    title: "Door and latch controllers",
+    image: "/assets/images/demos/door-device-crud-demo.png",
+    desc: "Turn a coop door, feeder lid, or service hatch into a documented open hardware module.",
+  },
+  {
+    title: "Camera and vision modules",
+    image: "/assets/images/demos/coop-camera-demo.png",
+    desc: "Build inspection nodes, WatchTower cameras, and event snapshots for safer animal care.",
+  },
+  {
+    title: "Egg and nest-box sensors",
+    image: "/assets/images/demos/chickeneye-eggs-demo.png",
+    desc: "Prototype egg detection, nest occupancy, production maps, and ChickenEye AI workflows.",
+  },
+];
+
 export default function ShopPage() {
   return (
     <PageLayout>
@@ -40,6 +58,18 @@ export default function ShopPage() {
               <span className="tag">View Details →</span>
             </div>
           </Link>
+        ))}
+      </div>
+
+      <h2 className="section-title">Ideas Builders Can Make</h2>
+      <div className="card-grid">
+        {BUILD_IDEAS.map((idea) => (
+          <div key={idea.title} className="card product-idea-card">
+            <img src={idea.image} alt={idea.title} loading="lazy" />
+            <h3>{idea.title}</h3>
+            <p>{idea.desc}</p>
+            <Link to="/developers#ideas" className="tag">Build from this idea</Link>
+          </div>
         ))}
       </div>
 

@@ -103,6 +103,23 @@
   color: #4a90d9;
 }
 
+.product-idea-card {
+  overflow: hidden;
+}
+.product-idea-card img {
+  width: calc(100% + 3rem);
+  height: 180px;
+  margin: -1.5rem -1.5rem 1rem;
+  display: block;
+  object-fit: cover;
+  background: #eef3f1;
+  border-bottom: 1px solid #e0e0e0;
+}
+.product-idea-card code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .prose {
   font-size: 1rem;
   line-height: 1.75;

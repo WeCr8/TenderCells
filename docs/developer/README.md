@@ -14,6 +14,7 @@ This page is the TenderCells developer hub. It follows the same broad documentat
 | Security | [SECURITY.md](../../SECURITY.md) |
 | License | [Apache-2.0](../../LICENSE) |
 | Hardware | [Hardware developer index](./hardware.md) |
+| Product ideas | [Product ideas and visual asset index](./product-ideas.md) |
 | Product docs | [Product documentation index](../products/README.md) |
 | Product standard | [Product documentation standard](../PRODUCT_DOCUMENTATION_STANDARD.md) |
 | Demo testing | [Demo environment testing](../../applications/tendercells_ui/test_output/tendercells-ui/docs/testing/demo-environment-testing.md) |
@@ -90,6 +91,8 @@ Expected firmware docs per product:
 ## Hardware
 
 Use [Hardware developer index](./hardware.md) as the canonical hardware entrypoint. It links the current catalog, workbook, firmware targets, and product documentation standard.
+
+Use [Product ideas and visual asset index](./product-ideas.md) to see which images are already available for demos, product pages, good-first-issues, and build prompts.
 
 Each hardware contribution should add or update the relevant product folder:
 

@@ -6,6 +6,7 @@ Start here if you are browsing the repository docs.
 
 - [Developer documentation](developer/README.md) - software, firmware, APIs, message broker, simulation, licensing, and contribution paths.
 - [Hardware developer index](developer/hardware.md) - hardware catalogs, product coverage, firmware targets, and safety documentation status.
+- [Product ideas and visual asset index](developer/product-ideas.md) - tracked images and build ideas for contributors.
 - [Product documentation](products/README.md) - per-product build folders and expected file structure.
 - [Product documentation standard](PRODUCT_DOCUMENTATION_STANDARD.md) - acceptance checklist for complete build docs.
 

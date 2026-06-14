@@ -52,6 +52,44 @@ const productDocs = [
   "simulation.md",
 ];
 
+const buildIdeas = [
+  {
+    title: "Coop Door Kit",
+    image: "/assets/images/demos/door-device-crud-demo.png",
+    alt: "TenderCells device controls for automated doors and latches",
+    prompt: "Build a standalone ESP32 door/latch controller with limit switches, MQTT state, and E-STOP-safe behavior.",
+    firstDoc: "docs/products/coop-door-kit/README.md",
+  },
+  {
+    title: "Camera Inspection Node",
+    image: "/assets/images/demos/coop-camera-demo.png",
+    alt: "TenderCells coop camera monitoring screen",
+    prompt: "Create a weatherproof camera module for coop inspection, event snapshots, and WatchTower handoff.",
+    firstDoc: "docs/products/watchtower-ai/README.md",
+  },
+  {
+    title: "Nest Box Egg Sensor",
+    image: "/assets/images/demos/chickeneye-eggs-demo.png",
+    alt: "ChickenEye egg detection and nest box map",
+    prompt: "Document an IR, load-cell, or vision-based nest-box sensor that feeds the egg map and production history.",
+    firstDoc: "docs/products/nest-box-egg-sensor/README.md",
+  },
+  {
+    title: "Flock RFID Station",
+    image: "/assets/images/demos/animal-roster-demo.png",
+    alt: "TenderCells animal roster and health records",
+    prompt: "Prototype a weigh/RFID checkpoint that updates per-animal profiles, last-seen status, and health notes.",
+    firstDoc: "docs/products/flock-rfid-station/README.md",
+  },
+  {
+    title: "Mobile Pasture Roost",
+    image: "/app/assets/images/products/roaming-roost.svg",
+    alt: "Roaming Roost mobile pasture coop concept",
+    prompt: "Turn Roaming Roost into a builder-friendly product folder with drive base, docking, GPS boundary, and safety docs.",
+    firstDoc: "docs/products/roaming-roost/README.md",
+  },
+];
+
 function external(href: string) {
   return href.startsWith("http");
 }
@@ -116,6 +154,24 @@ export default function DevelopersPage() {
           <tr><td>Firmware targets</td><td><code>firmware/chicken-tender</code>, <code>firmware/watchtower</code>, <code>firmware/roaming-roost</code></td><td>Active prototypes</td></tr>
         </tbody>
       </table>
+
+      <h2 className="section-title" id="ideas">Product Ideas To Build</h2>
+      <div className="prose">
+        <p>
+          These are the visual assets already in the repo. Use them as starter prompts for product docs,
+          good-first-issues, hardware proposals, classroom projects, and simulator-only product families.
+        </p>
+      </div>
+      <div className="card-grid">
+        {buildIdeas.map((idea) => (
+          <div key={idea.title} className="card product-idea-card">
+            <img src={idea.image} alt={idea.alt} loading="lazy" />
+            <h3>{idea.title}</h3>
+            <p>{idea.prompt}</p>
+            <p><code>{idea.firstDoc}</code></p>
+          </div>
+        ))}
+      </div>
 
       <h2 className="section-title" id="product-standard">Product Folder Standard</h2>
       <div className="prose">

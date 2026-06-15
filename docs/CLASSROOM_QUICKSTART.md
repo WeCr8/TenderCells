@@ -145,6 +145,10 @@ The sky's the limit.
 | Commands say "unreachable" | Is the first terminal still running `npm run demo`? It must stay open. |
 | Nothing changes when I send commands | Check you typed `demo_coop` exactly. |
 
+**Got real boards?** Run the teacher-led
+[Build Your Own Smart-Animal Device](CLASSROOM_BUILD_YOUR_OWN_DEVICE.md) lesson —
+students flash an ESP32, invent a species + threat, and make a live alert fire.
+
 Want the deep version (real ESP32 hardware, the MQTT topics, the firmware contract)?
 See [CONNECT_A_DEVICE.md](CONNECT_A_DEVICE.md).
 

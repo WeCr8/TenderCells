@@ -9,6 +9,7 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <LoRa.h>
+#include "tc_mesh.h"          // shared Tender Cells LoRa mesh (firmware/shared/tc_mesh)
 #include <esp_task_wdt.h>
 
 // — Credentials (override at build time or from NVS flash) —
@@ -43,6 +44,23 @@ static const unsigned long LORA_BROADCAST_COOLDOWN_MS = 30000;
 static const float BATTERY_CRITICAL_VOLTS       = 10.5f;
 static const float BATTERY_LOW_VOLTS            = 11.1f;
 
+// — Camera setup —
+// WatchTower scales from a single fixed camera to a full 360° 3-camera dome.
+// CAMERA_COUNT is set per build via -DWATCHTOWER_CAMERAS (1, 2, or 3); see
+// platformio.ini. The inference loop iterates only the cameras that exist, and
+// the count is reported in telemetry so the dashboard renders the right layout.
+#ifndef WATCHTOWER_CAMERAS
+#define WATCHTOWER_CAMERAS 3
+#endif
+#if WATCHTOWER_CAMERAS < 1 || WATCHTOWER_CAMERAS > 3
+#error "WATCHTOWER_CAMERAS must be 1, 2, or 3"
+#endif
+static const int CAMERA_COUNT = WATCHTOWER_CAMERAS;
+// Mounting bearing of each camera (degrees); only the first CAMERA_COUNT are used.
+// 1 cam → forward only; 2 → 180° apart; 3 → 120° apart (full perimeter).
+static const int CAMERA_BEARINGS_3[3] = {0, 120, 240};
+static const int CAMERA_BEARINGS_2[2] = {0, 180};
+
 // — State machine —
 enum class SystemState { BOOT, CONNECTING, IDLE, RUNNING, ERROR, ESTOP };
 static SystemState currentState = SystemState::BOOT;
@@ -50,6 +68,7 @@ static SystemState currentState = SystemState::BOOT;
 // — Runtime state —
 static WiFiClient wifiClient;
 static PubSubClient mqttClient(wifiClient);
+static TcMesh mesh;   // shared LoRa mesh: send alerts + receive/relay from other nodes
 static unsigned long lastSensorPublish  = 0;
 static unsigned long lastReconnectAttempt = 0;
 static unsigned long lastLoraAlert      = 0;
@@ -78,6 +97,7 @@ void publishSensors();
 void publishState(const char* stateStr);
 void onMqttMessage(char* topic, uint8_t* payload, unsigned int length);
 void broadcastLoraAlert(float confidence);
+void onMeshMessage(uint16_t src, uint8_t type, const uint8_t* payload, uint8_t len, int rssi);
 float readBatteryVolts();
 float readSolarVolts();
 float runInference(uint8_t* frame, size_t frameLen);
@@ -90,14 +110,13 @@ void setup() {
   esp_task_wdt_init(WATCHDOG_TIMEOUT_MS / 1000, true);
   esp_task_wdt_add(NULL);
 
-  // LoRa init
-  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);
-  if (!LoRa.begin(915E6)) {
-    Serial.println("[LoRa] Init failed — continuing without LoRa");
+  // LoRa mesh init — shared PHY config + addressing/dedup/relay (tc_mesh).
+  if (!mesh.begin(LORA_SS, LORA_RST, LORA_DIO0)) {
+    Serial.println("[Mesh] LoRa init failed — continuing without mesh");
   } else {
-    LoRa.setTxPower(20);
-    LoRa.setSpreadingFactor(9);
-    Serial.println("[LoRa] Ready 915 MHz");
+    mesh.onMessage(onMeshMessage);
+    Serial.printf("[Mesh] Ready — node 0x%04X, 915 MHz, %d camera(s)\n",
+                  mesh.nodeAddr(), CAMERA_COUNT);
   }
 
   // WiFi
@@ -134,6 +153,7 @@ void loop() {
   }
 
   mqttClient.loop();
+  mesh.poll();          // drain LoRa RX: dedup, relay, and fan out remote alerts
   reconnectIfNeeded();
 
   batteryVolts = readBatteryVolts();
@@ -167,12 +187,15 @@ void handleRunning() {
     lastSensorPublish = now;
   }
 
-  // Capture and run inference on all 3 cameras
-  // Stub: replace with actual camera_capture() + model inference per frame
+  // Capture and run inference on each installed camera (1..CAMERA_COUNT).
+  // Stub: replace with actual camera_capture(i) + model inference per frame.
   float maxConfidence = 0.0f;
   if (modelAvailable) {
-    // maxConfidence = runInference(frameBuffer, frameLen);
-    // Stub returns 0 until real camera integration
+    for (int cam = 0; cam < CAMERA_COUNT; cam++) {
+      // float c = runInference(frameBuffer[cam], frameLen[cam]);
+      // if (c > maxConfidence) maxConfidence = c;
+      // Stub returns 0 until real camera integration
+    }
   }
 
   // Threshold: 0.75 confidence = alert
@@ -276,6 +299,9 @@ void publishSensors() {
                           currentState == SystemState::RUNNING ? "running" : "idle";
   doc["modelAvailable"] = modelAvailable;
   doc["detectionCount"] = detectionCount;
+  doc["cameraCount"]    = CAMERA_COUNT;
+  doc["meshNode"]       = mesh.nodeAddr();
+  doc["meshRelayed"]    = mesh.relayed();
   doc["ts"]             = millis();
 
   char buf[512];
@@ -293,25 +319,55 @@ void publishState(const char* stateStr) {
   doc["rssi"]     = WiFi.RSSI();
   doc["ts"]       = millis();
   char buf[256];
-  serializeJson(doc, buf, sizeof(buf));
-  mqttClient.publish("tc/" DEVICE_ID "/state", buf, 1, false);
+  size_t n = serializeJson(doc, buf, sizeof(buf));
+  // PubSubClient publishes QoS 0 only (no QoS arg). retained=false.
+  mqttClient.publish("tc/" DEVICE_ID "/state", (const uint8_t*)buf, (unsigned int)n, false);
 }
 
-// ── LoRa broadcast ───────────────────────────────────────────────────────────
+// ── LoRa mesh broadcast ──────────────────────────────────────────────────────
+// Flood the alert across the mesh (TTL + dedup handled by tc_mesh). Every node
+// — coop relay, other WatchTowers, the MQTT bridge — gets it and relays it on,
+// so a far-fence detection still reaches the broker even with no direct link.
 void broadcastLoraAlert(float confidence) {
-  // JSON payload over LoRa — all devices on the mesh receive this
+  if (!mesh.ready()) return;
   JsonDocument doc;
   doc["type"]       = "predator";
   doc["confidence"] = confidence;
   doc["src"]        = DEVICE_ID;
   doc["ts"]         = millis();
-  char buf[128];
+  char buf[TC_MESH_MAX_PAYLOAD];
   serializeJson(doc, buf, sizeof(buf));
 
-  LoRa.beginPacket();
-  LoRa.print(buf);
-  LoRa.endPacket();
-  Serial.printf("[LoRa] Broadcast: %s\n", buf);
+  uint16_t id = mesh.sendBroadcast(TC_MSG_ALERT, buf);
+  Serial.printf("[Mesh] Alert broadcast (msgId=%u): %s\n", id, buf);
+}
+
+// ── LoRa mesh receive: bridge remote alerts to the cloud ─────────────────────
+// A node that can reach the broker forwards any mesh alert it hears onto MQTT
+// tc/broadcast/alert so the app sees detections from radios it can't hear
+// directly. ESTOP from the mesh fans out locally (cut into our own state).
+void onMeshMessage(uint16_t src, uint8_t type, const uint8_t* payload,
+                   uint8_t len, int rssi) {
+  switch (type) {
+    case TC_MSG_ALERT: {
+      Serial.printf("[Mesh] Alert from 0x%04X (rssi=%d): %.*s\n",
+                    src, rssi, len, (const char*)payload);
+      if (mqttClient.connected()) {
+        // Re-publish verbatim; payload is already the alert JSON.
+        mqttClient.publish("tc/broadcast/alert", payload, len, false);
+      }
+      break;
+    }
+    case TC_MSG_ESTOP:
+      Serial.printf("[Mesh] ESTOP from 0x%04X — entering ESTOP\n", src);
+      eStopRequested = true;
+      break;
+    case TC_MSG_PING:
+      Serial.printf("[Mesh] Ping from 0x%04X (rssi=%d)\n", src, rssi);
+      break;
+    default:
+      break;
+  }
 }
 
 // ── ADC helpers ──────────────────────────────────────────────────────────────

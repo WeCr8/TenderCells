@@ -113,6 +113,26 @@
   <section id="easy" class="panel active" role="tabpanel">
 
     <div class="card">
+      <h3 class="gold-h">What can I build right now? (pick a use case)</h3>
+      <p class="hint">One Starter Node board + this flasher gets you a real, live device on the
+        Tender Cells open-source stack in minutes. At WiFi setup (Step 4) set <strong>peripheral</strong>
+        to match — that's all that changes between these:</p>
+      <ul>
+        <li>📷 <strong>Remote camera node</strong> — set peripheral <code>camera</code>. Registers as a
+            remote camera on your LAN; point it at a coop/run and it shows up on the dashboard.</li>
+        <li>🌡️ <strong>Temp / humidity monitor</strong> — set <code>temp-humidity</code>; wire a DHT22
+            and watch readings live.</li>
+        <li>💨 <strong>Air-quality (ammonia) node</strong> — set <code>ammonia</code>; MQ-137 for coop
+            air health.</li>
+        <li>🚪 <strong>Door / entry sensor</strong> — set <code>door</code>; reed switch reports open/closed.</li>
+        <li>🦅 <strong>Threat demo</strong> — leave peripheral <code>none</code>, set a
+            <strong>species</strong> + <strong>threat</strong>, press the board's BOOT button to fire a
+            live alert into the dashboard. Zero extra wiring — great for classrooms.</li>
+      </ul>
+      <p class="hint">All open source — read and change the code anytime (see 📚 Learn mode).</p>
+    </div>
+
+    <div class="card">
       <h3 class="gold-h">Prerequisites</h3>
 
       <div class="callout">

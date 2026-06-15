@@ -56,6 +56,11 @@ String productType;
 String species;
 // Label used when the threat button fires (e.g. "predator", "hawk", "overheat").
 String threatLabel;
+// What this node physically carries, so the dashboard knows what it is rather than
+// guessing. Values: none, camera, temp-humidity, ammonia, door, load-cell, or any
+// free-text label for a custom build. Starter Node ships no real sensor, so this is
+// a declaration of intent (demo) or the actual attached part (live).
+String peripheral;
 
 // ── Runtime ──────────────────────────────────────────────────────────────────
 WiFiClient net;
@@ -112,6 +117,7 @@ void publishHeartbeat() {
   doc["productType"]  = productType;  // which product this node stands in for
   if (species.length())     doc["species"] = species;
   if (threatLabel.length()) doc["threat"]  = threatLabel;
+  if (peripheral.length())  doc["peripheral"] = peripheral;  // camera / sensor it carries
   doc["freeHeap"]     = ESP.getFreeHeap();
   doc["ts"]           = millis();
   char buf[256];
@@ -191,6 +197,7 @@ void provisionConfig() {
   productType = prefs.getString("product", "starter");
   species     = prefs.getString("species", "");
   threatLabel = prefs.getString("threat", "predator");
+  peripheral  = prefs.getString("peripheral", "none");
 
   // Default device id from chip MAC if unset.
   if (deviceId.isEmpty()) {
@@ -211,12 +218,16 @@ void provisionConfig() {
   // School/maker fields: name your animal + the threat your project detects.
   WiFiManagerParameter pSpecies("species", "Species (e.g. axolotl) — optional", species.c_str(), 24);
   WiFiManagerParameter pThreat("threat", "Threat label (button fires this)", threatLabel.c_str(), 20);
+  // What this board carries: none, camera, temp-humidity, ammonia, door, load-cell,
+  // or any free-text for a custom build. "camera" marks a remote camera node.
+  WiFiManagerParameter pPeripheral("peripheral", "Item/sensor on this board (none, camera, temp-humidity, ammonia, door, load-cell)", peripheral.c_str(), 24);
   wm.addParameter(&pBroker);
   wm.addParameter(&pPort);
   wm.addParameter(&pId);
   wm.addParameter(&pProduct);
   wm.addParameter(&pSpecies);
   wm.addParameter(&pThreat);
+  wm.addParameter(&pPeripheral);
 
   // Blink while waiting for setup so the user knows it's in portal mode.
   wm.setConfigPortalTimeout(0);  // stay until configured
@@ -229,14 +240,17 @@ void provisionConfig() {
   productType = pProduct.getValue();
   species     = pSpecies.getValue();
   threatLabel = pThreat.getValue();
+  peripheral  = pPeripheral.getValue();
   if (productType.isEmpty()) productType = "starter";
   if (threatLabel.isEmpty()) threatLabel = "predator";
+  if (peripheral.isEmpty())  peripheral = "none";
   prefs.putString("brokerIp", brokerIp);
   prefs.putString("brokerPort", brokerPort);
   prefs.putString("deviceId", deviceId);
   prefs.putString("product", productType);
   prefs.putString("species", species);
   prefs.putString("threat", threatLabel);
+  prefs.putString("peripheral", peripheral);
   prefs.end();
 
   Serial.printf("[WIFI] %s | broker=%s:%s | id=%s | product=%s | species=%s | threat=%s\n",

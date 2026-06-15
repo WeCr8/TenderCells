@@ -44,6 +44,15 @@ Start here:
 - [Marketing kit](docs/marketing/OPEN_SOURCE_MARKETING_KIT.md)
 - [NVIDIA robotics simulation guide](applications/tendercells_ui/test_output/tendercells-ui/docs/nvidia-robotics-simulation.md)
 
+Students, teachers & makers (see [For students, teachers & makers](#for-students-teachers--makers)):
+
+- [Classroom Quickstart](docs/CLASSROOM_QUICKSTART.md) — no hardware, 5 minutes
+- [Build Your Own Smart-Animal Device](docs/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md) — teacher-led ESP32 lesson
+- [Connect a Device](docs/CONNECT_A_DEVICE.md) — full hardware runbook
+- [Browser flasher](https://tender-cells.web.app/flash) + [Starter Node firmware](firmware/starter-node/README.md)
+- [Flipper Field Kit](docs/hardware/flipper-field-kit.md) — field diagnostics
+- [Analytics Guide](docs/ANALYTICS_GUIDE.md) — privacy-safe tracking, no kid demographics
+
 Current contributor tracks:
 
 - Software: dashboard, product registry, mobile/tablet UX, Firebase auth, telemetry, CRUD, and simulation views.
@@ -95,6 +104,36 @@ hardware when you're ready. Pick up a [`good first
 issue`](https://github.com/WeCr8/TenderCells/labels/good%20first%20issue) or open
 a Discussion and tell us what you want to build.
 
+## For students, teachers & makers
+
+Tender Cells is open source **so adults and kids alike can build their own devices** —
+invent a species, define a threat it faces, and make real software treat it like a
+product. No accounts, no cloud signup, nothing leaves the local network.
+
+**Pick your path:**
+
+| You have… | Start here |
+|---|---|
+| Just a laptop (no hardware) | **[Classroom Quickstart](docs/CLASSROOM_QUICKSTART.md)** — run a real coop in 5 minutes |
+| A cheap ESP32 board | **[Build Your Own Smart-Animal Device](docs/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md)** — teacher-led lesson |
+| A board + want the deep version | **[Connect a Device](docs/CONNECT_A_DEVICE.md)** — topics, payloads, troubleshooting |
+| A Flipper Zero | **[Flipper Field Kit](docs/hardware/flipper-field-kit.md)** — serial log reader, RF/WiFi survey, GPIO test |
+
+**Flash a board in the browser — no toolchain:**
+Open **<https://tender-cells.web.app/flash>** in Chrome or Edge, plug in an ESP32 with a
+**data** USB cable, pick **Starter Node**, and click Install. In the setup portal you
+name your species + threat and leave **Broker IP blank** to auto-find the teacher's
+laptop over the network. Prefer building from source? See the
+**[Starter Node firmware README](firmware/starter-node/README.md)** (Arduino IDE on-ramp).
+
+**Go further:** turn the button into a real sensor, mesh two boards over LoRa
+(`firmware/shared/tc_mesh`), or fold a whole class's invented devices into one
+edge hub — the **[Barn Brain plan](docs/products/barn-brain/IMPLEMENTATION_PLAN.md)**.
+
+> **Privacy for the classroom:** the public site/app collect **no age or gender** and
+> no personal data from kids — behavior only, consent-gated. See
+> [Analytics Guide](docs/ANALYTICS_GUIDE.md).
+
 ## Project Structure
 
 Tags: **[LIVE]** = deployed to production (tendercells.com) and built/tested in
@@ -107,13 +146,17 @@ tender-cells/
 │   ├── core/ builders/ templates/   [GEN] Python generator (cli.py, generator.py)
 │   └── test_output/                 <- generated, committed, shipped
 │       ├── website/        [LIVE] marketing site  -> tendercells.com
+│       │   └── public/flash/    [LIVE] browser ESP32 flasher -> /flash (WebSerial)
 │       ├── tendercells-ui/ [LIVE] dashboard + demo -> tendercells.com/app/demo
-│       ├── express-api/    MQTT <-> HTTP bridge (hardware control)
+│       ├── express-api/    MQTT <-> HTTP bridge + embedded broker + mDNS advertise
 │       └── chicken-tender/ duck-dock/ watchtower/  product dashboards
 ├── firmware/                    ESP32 firmware (PlatformIO)
+│   ├── starter-node/            [CI] one binary = any product; web-flashable on-ramp
 │   ├── chicken-tender/src/main.cpp  [CI] state machine + sensors + MQTT
-│   ├── watchtower/              [CI] predator monitor (ESP32-S3)
-│   └── roaming-roost/           channel-ring dome controller
+│   ├── watchtower/              [CI] predator monitor (ESP32-S3) + LoRa mesh
+│   ├── roaming-roost/           channel-ring dome controller
+│   └── shared/tc_mesh/          shared LoRa flood-mesh library
+├── flipper/tendercells_fieldkit/  Flipper Zero field-diagnostic app (FAP, ufbt)
 ├── functions/                   [CI] Firebase Cloud Functions (Node 18)
 ├── app/                         [EARLY] Expo React Native mobile app
 ├── docs/                        specs, hardware catalog, roadmap, developer hub

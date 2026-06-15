@@ -10,6 +10,15 @@ Start here if you are browsing the repository docs.
 - [Product documentation](products/README.md) - per-product build folders and expected file structure.
 - [Product documentation standard](PRODUCT_DOCUMENTATION_STANDARD.md) - acceptance checklist for complete build docs.
 
+## Students, Teachers & Makers
+
+- [Classroom Quickstart](CLASSROOM_QUICKSTART.md) - run a real coop in 5 minutes, no hardware.
+- [Build Your Own Smart-Animal Device](CLASSROOM_BUILD_YOUR_OWN_DEVICE.md) - teacher-led ESP32 lesson; invent a species + threat.
+- [Connect a Device](CONNECT_A_DEVICE.md) - full hardware runbook, MQTT topics, troubleshooting.
+- Browser flasher: <https://tender-cells.web.app/flash> + [Starter Node firmware](../firmware/starter-node/README.md).
+- [Flipper Field Kit](hardware/flipper-field-kit.md) - serial log reader, RF/WiFi survey, GPIO test.
+- [Analytics Guide](ANALYTICS_GUIDE.md) - privacy-safe tracking; no age/gender collected from kids.
+
 ## Key Reference Docs
 
 - [Chicken Tender hardware catalog](CHICKEN_TENDER_HARDWARE_CATALOG.md)

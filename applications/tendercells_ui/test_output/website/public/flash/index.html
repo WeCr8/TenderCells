@@ -17,6 +17,15 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       line-height: 1.6;
     }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 8px 16px; padding: 10px 20px; background: var(--surface);
+      border-bottom: 1px solid var(--accent);
+    }
+    .topbar .brand { color: var(--gold); font-weight: 800; text-decoration: none; font-size: 1.05rem; }
+    .topbar .toplinks { display: flex; gap: 16px; flex-wrap: wrap; }
+    .topbar .toplinks a { color: var(--white); text-decoration: none; font-size: .92rem; }
+    .topbar .toplinks a:hover { color: var(--gold); text-decoration: underline; }
     .wrap { max-width: 760px; margin: 0 auto; padding: 24px 20px 80px; }
     header { text-align: center; padding: 16px 0 8px; }
     h1 { color: var(--gold); margin: 0 0 4px; font-size: 2rem; }
@@ -97,6 +106,17 @@
   </style>
 </head>
 <body>
+<nav class="topbar">
+  <a class="brand" href="/">🐔 Tender Cells</a>
+  <div class="toplinks">
+    <a href="/">Home</a>
+    <a href="/shop">Products</a>
+    <a href="/open-source">Open Source</a>
+    <a href="/demo">App Demo</a>
+    <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </div>
+</nav>
+
 <div class="wrap">
   <header>
     <h1>🐔 Tender Cells Flasher</h1>
@@ -382,7 +402,13 @@
   </section>
 
   <footer>
-    Tender Cells · open-source automated animal care · works in Chrome &amp; Edge (WebSerial)
+    <p>📚 Docs:
+      <a href="https://github.com/WeCr8/TenderCells/blob/main/firmware/starter-node/README.md" target="_blank" rel="noopener noreferrer">Arduino IDE guide</a> ·
+      <a href="https://github.com/WeCr8/TenderCells/blob/main/docs/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md" target="_blank" rel="noopener noreferrer">Classroom: build your own device</a> ·
+      <a href="https://github.com/WeCr8/TenderCells/blob/main/docs/CONNECT_A_DEVICE.md" target="_blank" rel="noopener noreferrer">Connect a device</a> ·
+      <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer">All docs / source</a>
+    </p>
+    <p>Tender Cells · open-source automated animal care · works in Chrome &amp; Edge (WebSerial)</p>
   </footer>
 </div>
 

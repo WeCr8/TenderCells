@@ -27,11 +27,21 @@ import NotFoundPage from "./pages/NotFoundPage";
 import CookieConsent from "./components/CookieConsent";
 import { usePageTracking } from "./hooks/usePageTracking";
 import { useMarketingTelemetry } from "./hooks/useMarketingTelemetry";
+import { useEffect } from "react";
+import { getConsentChoice } from "./utils/consent";
+import { identifyVisitor } from "./utils/analytics";
 
 // Fires GA4 page_view on every route change — must be inside <BrowserRouter>
 function PageTracker() {
   usePageTracking();
   useMarketingTelemetry();
+
+  // Returning visitor who already accepted analytics in a prior session: re-attach
+  // their pseudonymous user_id once on load (fresh accept/withdraw is handled in consent.ts).
+  useEffect(() => {
+    if (getConsentChoice() === "accepted") identifyVisitor();
+  }, []);
+
   return null;
 }
 

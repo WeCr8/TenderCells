@@ -46,6 +46,11 @@
           });
         }
       } catch (error) {}
+      // Kids/4-H/FFA/classroom audience: never collect age/gender demographics.
+      // Force Google Signals OFF site-wide so demographics/remarketing stay disabled
+      // regardless of the GA4 admin toggle — keeps us COPPA-safe and child-directed compliant.
+      gtag('set', 'allow_google_signals', false);
+      gtag('set', 'allow_ad_personalization_signals', false);
       gtag('js', new Date());
       gtag('config', 'G-KSY2D1YGSL', {
         send_page_view: false,

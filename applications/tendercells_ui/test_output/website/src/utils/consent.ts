@@ -1,3 +1,5 @@
+import { clearVisitorId, identifyVisitor } from './analytics';
+
 const CONSENT_KEY = 'tendercells_cookie_consent_v1';
 
 export type ConsentChoice = 'accepted' | 'rejected';
@@ -48,4 +50,12 @@ export function applyConsentChoice(choice: ConsentChoice) {
     ad_personalization: granted,
     analytics_storage: granted,
   });
+
+  // Tie the pseudonymous visitor id to the consent state: assign on grant, forget
+  // on withdrawal. Keeps user-level tracking strictly consent-gated.
+  if (choice === 'accepted') {
+    identifyVisitor();
+  } else {
+    clearVisitorId();
+  }
 }

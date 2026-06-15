@@ -1,5 +1,7 @@
 // AppRoutes.tsx
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { trackPageView } from "../analytics";
 import {
   AccountPage,
   BunnyBurrowDashboard,
@@ -30,8 +32,19 @@ import ChickenEyeDashboardPage from "../pages/ChickenEyeDashboardPage";
 import ChickenEyeBirdPage from "../pages/ChickenEyeBirdPage";
 import DemoLandingPage from "../pages/DemoLandingPage";
 
+// Fires a page_view on every route change. No-op when analytics is disabled.
+function RouteAnalytics() {
+  const location = useLocation();
+  useEffect(() => {
+    void trackPageView(location.pathname + location.search);
+  }, [location.pathname, location.search]);
+  return null;
+}
+
 export default function AppRoutes() {
   return (
+    <>
+    <RouteAnalytics />
     <Routes>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
@@ -81,5 +94,6 @@ export default function AppRoutes() {
       <Route path="/account" element={<AccountPage />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    </>
   );
 }

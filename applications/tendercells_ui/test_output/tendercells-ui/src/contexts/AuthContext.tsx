@@ -10,6 +10,7 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth';
 import { FIREBASE_ENABLED, auth } from '../lib/firebase/firebaseApp';
+import { setAnalyticsUser } from '../analytics';
 
 interface AuthContextType {
   user: User | null;
@@ -41,6 +42,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+      // Attribute analytics events to the signed-in user (uid only, not PII);
+      // clears attribution on sign-out. No-op if analytics is disabled.
+      void setAnalyticsUser(currentUser?.uid ?? null);
     });
 
     return unsubscribe;

@@ -20,6 +20,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiManager.h>
+#include <ESPmDNS.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <Preferences.h>
@@ -29,6 +30,9 @@
 // XIAO ESP32-S3 user LED is on GPIO21 and is active-LOW.
 static const int LED_PIN = 21;
 static const bool LED_ACTIVE_LOW = true;
+// BOOT button (GPIO0, active-LOW) doubles as the "trigger a threat" button so a
+// learner can make an alert fire with no extra wiring. Press = publish a threat.
+static const int BTN_PIN = 0;
 
 // ── Timing ─────────────────────────────────────────────────────────────────
 static const unsigned long HEARTBEAT_INTERVAL_MS = 10000;  // matches sensor cadence
@@ -45,7 +49,13 @@ String deviceId;
 // so the dashboard groups/labels it correctly. Valid values match the app's
 // productType union (chicken-tender, roaming-roost, duck-dock, bunny-burrow,
 // goat-guardian, turkey-tower, pigeon-palace, watchtower) or "starter" for a bare node.
+// Use "custom" for an invented device (a school/maker project) — pair it with a
+// free-text species + threat label below so kids can model any animal + any threat.
 String productType;
+// Free-text species this node watches (e.g. "axolotl", "honeybee", "chicken"). Blank ok.
+String species;
+// Label used when the threat button fires (e.g. "predator", "hawk", "overheat").
+String threatLabel;
 
 // ── Runtime ──────────────────────────────────────────────────────────────────
 WiFiClient net;
@@ -56,6 +66,10 @@ unsigned long lastHeartbeat = 0;
 unsigned long lastReconnectAttempt = 0;
 unsigned long lastBlink = 0;
 bool ledOn = false;
+// Threat button debounce.
+bool btnLast = HIGH;
+unsigned long lastBtnChange = 0;
+static const unsigned long BTN_DEBOUNCE_MS = 50;
 
 // ── LED helpers ──────────────────────────────────────────────────────────────
 void setLed(bool on) {
@@ -67,6 +81,7 @@ void setLed(bool on) {
 String topicSensors() { return "tc/" + deviceId + "/sensors"; }
 String topicState()   { return "tc/" + deviceId + "/state"; }
 String topicEstop()   { return "tc/" + deviceId + "/cmd/estop"; }
+String topicAlert()   { return "tc/" + deviceId + "/alert"; }
 
 // ── Publish current state (retained when E-STOP, like the coop controller) ───
 void publishState(const char* state) {
@@ -95,11 +110,32 @@ void publishHeartbeat() {
   doc["chickenCount"] = 0;
   doc["node"]         = "starter";
   doc["productType"]  = productType;  // which product this node stands in for
+  if (species.length())     doc["species"] = species;
+  if (threatLabel.length()) doc["threat"]  = threatLabel;
   doc["freeHeap"]     = ESP.getFreeHeap();
   doc["ts"]           = millis();
-  char buf[192];
+  char buf[256];
   size_t n = serializeJson(doc, buf);
   mqtt.publish(topicSensors().c_str(), (const uint8_t*)buf, n);
+}
+
+// ── Threat alert (button-triggered) ──────────────────────────────────────────
+// Publishes a learner-defined threat to tc/{id}/alert so it shows up in the app
+// exactly like a real predator detection. Same alert schema the platform uses.
+void publishThreat() {
+  if (!mqtt.connected()) return;
+  StaticJsonDocument<192> doc;
+  doc["type"]       = threatLabel.length() ? threatLabel : String("predator");
+  doc["species"]    = species;
+  doc["confidence"] = 1.0;        // manual trigger = certain
+  doc["manual"]     = true;       // distinguishes a learner press from real inference
+  doc["src"]        = deviceId;
+  doc["ts"]         = millis();
+  char buf[192];
+  size_t n = serializeJson(doc, buf);
+  mqtt.publish(topicAlert().c_str(), (const uint8_t*)buf, n, false);
+  Serial.printf("[ALERT] threat fired: %s (species=%s)\n",
+                doc["type"].as<const char*>(), species.c_str());
 }
 
 // ── E-STOP ───────────────────────────────────────────────────────────────────
@@ -153,6 +189,8 @@ void provisionConfig() {
   brokerPort  = prefs.getString("brokerPort", "1883");
   deviceId    = prefs.getString("deviceId", "");
   productType = prefs.getString("product", "starter");
+  species     = prefs.getString("species", "");
+  threatLabel = prefs.getString("threat", "predator");
 
   // Default device id from chip MAC if unset.
   if (deviceId.isEmpty()) {
@@ -163,17 +201,22 @@ void provisionConfig() {
   }
 
   WiFiManager wm;
-  WiFiManagerParameter pBroker("broker", "Broker IP (from `npm run demo`)", brokerIp.c_str(), 40);
+  WiFiManagerParameter pBroker("broker", "Broker IP (leave blank to auto-find)", brokerIp.c_str(), 40);
   WiFiManagerParameter pPort("port", "Broker port", brokerPort.c_str(), 6);
   WiFiManagerParameter pId("devid", "Device ID", deviceId.c_str(), 22);
   // Which product this node represents. Same firmware, any product type — type one of:
   // starter, chicken-tender, roaming-roost, duck-dock, bunny-burrow, goat-guardian,
-  // turkey-tower, pigeon-palace, watchtower.
+  // turkey-tower, pigeon-palace, watchtower, or "custom" for an invented device.
   WiFiManagerParameter pProduct("product", "Product type", productType.c_str(), 20);
+  // School/maker fields: name your animal + the threat your project detects.
+  WiFiManagerParameter pSpecies("species", "Species (e.g. axolotl) — optional", species.c_str(), 24);
+  WiFiManagerParameter pThreat("threat", "Threat label (button fires this)", threatLabel.c_str(), 20);
   wm.addParameter(&pBroker);
   wm.addParameter(&pPort);
   wm.addParameter(&pId);
   wm.addParameter(&pProduct);
+  wm.addParameter(&pSpecies);
+  wm.addParameter(&pThreat);
 
   // Blink while waiting for setup so the user knows it's in portal mode.
   wm.setConfigPortalTimeout(0);  // stay until configured
@@ -184,16 +227,55 @@ void provisionConfig() {
   brokerPort  = pPort.getValue();
   deviceId    = pId.getValue();
   productType = pProduct.getValue();
+  species     = pSpecies.getValue();
+  threatLabel = pThreat.getValue();
   if (productType.isEmpty()) productType = "starter";
+  if (threatLabel.isEmpty()) threatLabel = "predator";
   prefs.putString("brokerIp", brokerIp);
   prefs.putString("brokerPort", brokerPort);
   prefs.putString("deviceId", deviceId);
   prefs.putString("product", productType);
+  prefs.putString("species", species);
+  prefs.putString("threat", threatLabel);
   prefs.end();
 
-  Serial.printf("[WIFI] %s | broker=%s:%s | id=%s | product=%s\n",
+  Serial.printf("[WIFI] %s | broker=%s:%s | id=%s | product=%s | species=%s | threat=%s\n",
                 ok ? "connected" : "NOT connected", brokerIp.c_str(),
-                brokerPort.c_str(), deviceId.c_str(), productType.c_str());
+                brokerPort.c_str(), deviceId.c_str(), productType.c_str(),
+                species.c_str(), threatLabel.c_str());
+}
+
+// ── mDNS broker discovery ─────────────────────────────────────────────────────
+// If the learner left the broker IP blank, find the demo broker on the LAN by its
+// advertised _mqtt._tcp service (express-api advertises this). Removes IP-typing —
+// the #1 classroom stumble. Runs BEFORE the watchdog is armed (query blocks ~3s).
+void discoverBrokerIfNeeded() {
+  if (brokerIp.length()) return;             // user gave an explicit IP — respect it
+  if (WiFi.status() != WL_CONNECTED) return; // no LAN, nothing to find
+  if (!MDNS.begin(deviceId.c_str())) {
+    Serial.println("[mDNS] init failed — set the broker IP manually");
+    return;
+  }
+  Serial.println("[mDNS] searching for _mqtt._tcp broker ...");
+  int n = MDNS.queryService("mqtt", "tcp");
+  if (n <= 0) {
+    Serial.println("[mDNS] no broker found — set the broker IP manually");
+    return;
+  }
+  brokerIp   = MDNS.IP(0).toString();
+  brokerPort = String(MDNS.port(0));
+  Serial.printf("[mDNS] found broker %s:%s\n", brokerIp.c_str(), brokerPort.c_str());
+}
+
+// ── Threat button (debounced, non-blocking) ──────────────────────────────────
+void handleThreatButton() {
+  bool reading = digitalRead(BTN_PIN);
+  if (reading != btnLast) lastBtnChange = millis();
+  // Fire once on a stable HIGH→LOW transition (press).
+  if ((millis() - lastBtnChange) > BTN_DEBOUNCE_MS && reading == LOW && btnLast == HIGH) {
+    publishThreat();
+  }
+  btnLast = reading;
 }
 
 void setup() {
@@ -205,12 +287,16 @@ void setup() {
                 ESP.getFlashChipSize() / (1024 * 1024));
 
   pinMode(LED_PIN, OUTPUT);
+  pinMode(BTN_PIN, INPUT_PULLUP);  // BOOT button = threat trigger
   setLed(false);
 
   // Provision FIRST — the captive portal blocks until the user configures WiFi,
   // which is far longer than the 8s watchdog. Arming the watchdog before this
   // would panic-reboot the board mid-portal (AP flickers, "never asks for WiFi").
   provisionConfig();
+
+  // Auto-find the broker if no IP was entered (blocks ~3s — before watchdog arm).
+  discoverBrokerIfNeeded();
 
   // Now arm the watchdog for the steady-state loop().
   esp_task_wdt_init(WATCHDOG_TIMEOUT_S, true);
@@ -249,6 +335,9 @@ void loop() {
     return;
   }
   mqtt.loop();
+
+  // Learner can fire a threat alert anytime with the BOOT button.
+  handleThreatButton();
 
   // Slow "alive" blink (500ms toggle) — no blocking delay.
   if (millis() - lastBlink > 500) {

@@ -12,9 +12,27 @@
 
 import Aedes from "aedes";
 import { createServer } from "net";
+import { Bonjour } from "bonjour-service";
 
 const EMBED = process.env.EMBED_BROKER !== "0";
 const MQTT_PORT = Number(process.env.MQTT_PORT || 1883);
+// Advertise the broker over mDNS (_mqtt._tcp) so ESP32 nodes auto-discover it and
+// learners never type an IP. Set MDNS_ADVERTISE=0 to disable on locked-down nets.
+const MDNS_ADVERTISE = process.env.MDNS_ADVERTISE !== "0";
+
+// Publish the _mqtt._tcp service. Soft-fail: a network that blocks multicast must
+// not take down the broker (devices can still be given the IP by hand).
+function advertiseBroker() {
+  if (!MDNS_ADVERTISE) return;
+  try {
+    const bonjour = new Bonjour();
+    bonjour.publish({ name: "TenderCells Broker", type: "mqtt", port: MQTT_PORT });
+    console.log(`✓ mDNS: advertising broker as _mqtt._tcp on port ${MQTT_PORT}`);
+    console.log("  (devices can leave Broker IP blank to auto-find it)");
+  } catch (err) {
+    console.log("• mDNS advertise unavailable — devices must use the broker IP directly");
+  }
+}
 
 if (EMBED) {
   const aedes = new Aedes();
@@ -23,6 +41,7 @@ if (EMBED) {
   server.listen(MQTT_PORT, () => {
     console.log(`✓ Embedded MQTT broker listening on mqtt://localhost:${MQTT_PORT}`);
     console.log("  (set EMBED_BROKER=0 to use an external broker instead)");
+    advertiseBroker();
   });
 
   server.on("error", (err: NodeJS.ErrnoException) => {

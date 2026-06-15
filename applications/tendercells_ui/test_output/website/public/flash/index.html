@@ -113,13 +113,43 @@
   <section id="easy" class="panel active" role="tabpanel">
 
     <div class="card">
-      <h3 class="gold-h">What you need</h3>
-      <ul>
-        <li>A laptop or desktop using <strong>Chrome</strong> or <strong>Edge</strong> (not a phone, not Safari, not Firefox).</li>
-        <li>Your ESP32 board.</li>
-        <li>A <strong>USB data cable</strong> that fits the board. ⚠️ Many cheap cables only charge —
-            if the board never shows up, the cable is the usual culprit.</li>
-      </ul>
+      <h3 class="gold-h">Prerequisites</h3>
+
+      <div class="callout">
+        <strong>To flash right now — that's all you need:</strong>
+        <ul>
+          <li>A <strong>laptop or desktop</strong> (not a phone or tablet).</li>
+          <li><strong>Chrome 89+</strong> or <strong>Microsoft Edge</strong>. ❌ Safari and Firefox
+              can't flash — they don't support WebSerial.</li>
+          <li>An <strong>ESP32 board</strong> (the Chicken Tender brain).</li>
+          <li>A <strong>USB <u>data</u> cable</strong> that fits the board. ⚠️ Many cheap cables only
+              charge — if the board never shows up, the cable is the #1 culprit.</li>
+          <li><strong>No installs.</strong> No Arduino, no Python, no drivers to download by hand —
+              the browser does it all.</li>
+        </ul>
+      </div>
+
+      <p class="hint">
+        🪟/🍎 <strong>One-time USB driver:</strong> a few boards use a <code>CH340</code> or
+        <code>CP210x</code> USB chip that Windows/macOS may need a small driver for. If your board
+        never appears in the port list even with a good cable, install that driver once
+        (search your board model + "CH340 driver" or "CP210x driver"), then try again.
+      </p>
+
+      <details class="trouble">
+        <summary>📡 What you'll <em>also</em> need to actually USE the coop afterward</summary>
+        <p>Flashing puts the program on the chip. To make the coop <em>do</em> things, the board
+        joins your WiFi and talks to the Tender Cells backend on your network:</p>
+        <ul>
+          <li>Your <strong>home WiFi name + password</strong> (you enter these on the board after flashing — Step 4).</li>
+          <li>The <strong>Tender Cells backend running</strong> on a computer on the same network —
+              start it with <code>npm run demo</code> from the repo. It prints a <strong>broker IP</strong>
+              you'll type into the board.</li>
+          <li>That's it — no cloud account, no internet required. Everything stays on your LAN.</li>
+        </ul>
+        <p class="hint">Don't have the backend yet? You can still flash now and set up WiFi later —
+        the board just waits.</p>
+      </details>
     </div>
 
     <div class="card">
@@ -221,11 +251,14 @@
     <div class="card">
       <ol class="steps">
         <li><strong>This page (Easy mode)</strong> — zero installs, just Chrome/Edge. Best for a first run or a classroom.</li>
-        <li><strong>Arduino IDE</strong> — install the IDE, add the ESP32 boards, open
-            <code>firmware/chicken-tender</code>, pick your board + port, press Upload. Good when you
-            want to <em>read and change</em> the code and watch the Serial Monitor.</li>
-        <li><strong>PlatformIO</strong> — for power users: <kbd>pio run -t upload</kbd> from a terminal.
-            Same code, scripted builds, used by our automated tests.</li>
+        <li><strong>Arduino IDE</strong> — <em>needs installs:</em> the Arduino IDE itself, plus the
+            ESP32 board package (Boards Manager → "esp32"), plus the libraries listed in
+            <code>platformio.ini</code>. Then open <code>firmware/chicken-tender</code>, pick your
+            board + port, press Upload. Good when you want to <em>read and change</em> the code and
+            watch the Serial Monitor.</li>
+        <li><strong>PlatformIO</strong> — <em>needs installs:</em> Python + PlatformIO Core (or the
+            VS Code extension). Then <kbd>pio run -t upload</kbd> from a terminal — it auto-fetches the
+            toolchain and libraries. Same code, scripted builds, used by our automated tests.</li>
       </ol>
       <p class="hint">All three flash the <em>same</em> program. Start at #1; graduate to #2 when you
       want to tinker.</p>

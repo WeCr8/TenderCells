@@ -1,0 +1,16 @@
+# Tender Cells Field Kit — external Flipper Zero app (FAP)
+# Build with ufbt:  cd flipper/tendercells_fieldkit && ufbt && ufbt launch
+App(
+    appid="tendercells_fieldkit",
+    name="Tender Cells Field Kit",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="tendercells_fieldkit_app",
+    stack_size=4 * 1024,
+    fap_category="Tools",
+    fap_author="WeCr8 Solutions",
+    fap_version="1.0",
+    fap_description="Field-diagnostic tool for Tender Cells hardware: read ESP32 serial logs over the Flipper USB-UART bridge, survey 915 MHz RF energy near WatchTower, scan for device setup APs, and check GPIO/reed-switch wiring during bring-up.",
+    requires=[
+        "gui",
+    ],
+)

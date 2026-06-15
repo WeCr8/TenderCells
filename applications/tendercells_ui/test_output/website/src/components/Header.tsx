@@ -61,7 +61,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Web Dashboard",           href: TENDERCELLS_APP_ENTRY_URL },
       { label: "Developer API",           to: "/apps#api" },
       { label: "MQTT Integration Guide",  to: "/apps#mqtt" },
-      { label: "Firmware Downloads",      to: "/apps#firmware" },
+      { label: "⚡ Flash a Device",        href: "/flash" },
     ],
   },
   {
@@ -113,6 +113,7 @@ const NAV_ITEMS: NavItem[] = [
     to: "/open-source",
     children: [
       { label: "GitHub Repository",    href: "https://github.com/WeCr8/TenderCells" },
+      { label: "⚡ Flash a Device",     href: "/flash" },
       { label: "Firmware Source",      to: "/open-source#firmware" },
       { label: "Mobile App Source",    to: "/open-source#app" },
       { label: "Hardware Schematics",  to: "/open-source#schematics" },

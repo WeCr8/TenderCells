@@ -70,6 +70,7 @@
       background: var(--bg); border: 1px solid var(--accent);
       border-radius: 6px; padding: 1px 6px; color: var(--gold);
     }
+    .gold-h { color: var(--gold); margin: 4px 0 6px; }
     .learn h2 { color: var(--gold); margin-top: 28px; }
     .pipe {
       font-family: ui-monospace, Menlo, Consolas, monospace; white-space: pre;
@@ -77,6 +78,21 @@
       padding: 14px; overflow-x: auto; color: var(--white); font-size: .85rem;
     }
     a { color: var(--gold); }
+    .url-pill {
+      display: inline-block; margin: 8px auto 0; background: var(--surface);
+      border: 1px solid var(--accent); border-radius: 999px; padding: 6px 16px;
+      color: var(--white); font-size: .9rem;
+    }
+    .url-pill strong { color: var(--gold); }
+    .callout {
+      background: #10241a; border-left: 4px solid var(--gold);
+      border-radius: 8px; padding: 12px 16px; margin: 14px 0;
+    }
+    .trouble summary {
+      cursor: pointer; color: var(--gold); font-weight: 600; padding: 6px 0;
+    }
+    .trouble[open] summary { margin-bottom: 8px; }
+    .footnote { text-align: center; }
     footer { text-align: center; color: var(--goldMuted); margin-top: 40px; font-size: .85rem; }
   </style>
 </head>
@@ -85,6 +101,7 @@
   <header>
     <h1>🐔 Tender Cells Flasher</h1>
     <p class="tag">Put the brain into your coop — right from this page. No installs.</p>
+    <p class="url-pill">Bookmark this: <strong>tender-cells.web.app/flash</strong></p>
   </header>
 
   <div class="tabs" role="tablist">
@@ -94,45 +111,76 @@
 
   <!-- ===================== EASY MODE ===================== -->
   <section id="easy" class="panel active" role="tabpanel">
-    <div class="card">
-      <p><strong>Pick your board, plug it into this computer with a USB cable, and press the button.</strong>
-         That's the whole thing.</p>
 
+    <div class="card">
+      <h3 class="gold-h">What you need</h3>
+      <ul>
+        <li>A laptop or desktop using <strong>Chrome</strong> or <strong>Edge</strong> (not a phone, not Safari, not Firefox).</li>
+        <li>Your ESP32 board.</li>
+        <li>A <strong>USB data cable</strong> that fits the board. ⚠️ Many cheap cables only charge —
+            if the board never shows up, the cable is the usual culprit.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3 class="gold-h">Step 1 — Pick your board</h3>
       <div class="device-pick" id="devicePick">
-        <div class="device" data-manifest="manifest-chicken-tender.json" aria-pressed="true" tabindex="0">
+        <div class="device" data-manifest="manifest-chicken-tender.json" role="button" aria-pressed="true" tabindex="0">
           🐔 <h3>Chicken Tender</h3><small>ESP32 coop controller</small>
         </div>
-        <div class="device soon" aria-disabled="true">
+        <div class="device soon" role="button" aria-disabled="true">
           🦅 <h3>WatchTower AI</h3><small>coming soon</small>
         </div>
-        <div class="device soon" aria-disabled="true">
+        <div class="device soon" role="button" aria-disabled="true">
           🛞 <h3>Roaming Roost</h3><small>coming soon</small>
         </div>
       </div>
 
+      <h3 class="gold-h">Step 2 — Plug the board into this computer</h3>
+      <p>Use the USB cable. A light on the board should turn on.</p>
+
+      <h3 class="gold-h">Step 3 — Press the button</h3>
       <div class="install-row">
         <esp-web-install-button id="installer" manifest="manifest-chicken-tender.json">
-          <button class="btn-fallback" slot="activate">🔌 Connect &amp; Install</button>
+          <button type="button" class="btn-fallback" slot="activate">🔌 Connect &amp; Install</button>
           <span slot="unsupported"></span>
           <span slot="not-allowed"></span>
         </esp-web-install-button>
       </div>
-      <p class="hint" style="text-align:center">A little window will ask which USB port — pick the one that appears when you plug the board in.</p>
+      <ol class="steps">
+        <li>A little window pops up asking which USB port. Pick the one that appears when the
+            board is plugged in (often named <code>CP210x</code>, <code>CH340</code>, or
+            <code>USB Serial</code>), then press <strong>Connect</strong>.</li>
+        <li>Press <strong>Install Tender Cells — Chicken Tender</strong> and confirm.
+            A green bar fills up.</li>
+        <li>When it says <strong>done</strong>, the program is on the chip. Unplug or keep going to WiFi setup below. 🎉</li>
+      </ol>
+
+      <details class="trouble">
+        <summary>❓ Board doesn't show up / install fails</summary>
+        <ol class="steps">
+          <li><strong>Swap the cable</strong> for a known data cable — #1 cause.</li>
+          <li>Hold the <strong>BOOT</strong> button on the board, press the button above,
+              keep holding BOOT until the green bar starts, then let go.</li>
+          <li>Close any other program using the port (Arduino IDE Serial Monitor, etc.).</li>
+          <li>Still stuck? Switch to <a href="#" data-panel="learn">Learn mode</a> and use the Arduino IDE path.</li>
+        </ol>
+      </details>
 
       <div class="unsupported">
         <strong>This browser can't flash directly.</strong> The one-click flasher needs
         <strong>Chrome</strong> or <strong>Edge</strong> on a laptop/desktop (it uses WebSerial).
-        On phones, Safari, or Firefox it won't work — open this page in Chrome or Edge instead,
-        or use the <button class="tab" data-panel="learn" style="padding:4px 12px">Learn mode</button>
-        path with Arduino IDE.
+        On phones, Safari, or Firefox it won't work — open
+        <strong>tender-cells.web.app/flash</strong> in Chrome or Edge,
+        or use the <a href="#" data-panel="learn">Learn mode</a> Arduino IDE path.
       </div>
     </div>
 
     <div class="card">
-      <h3 style="color:var(--gold);margin-top:0">After it flashes: tell it your WiFi</h3>
+      <h3 class="gold-h">Step 4 — Tell the coop your WiFi</h3>
       <ol class="steps">
-        <li>The board makes its own WiFi network called <code>ChickenTender-Setup</code>.</li>
-        <li>On your phone, join that network. A setup page pops up.</li>
+        <li>After flashing, the board makes its own WiFi network called <code>ChickenTender-Setup</code>.</li>
+        <li>On your phone, join that network. A setup page pops up automatically.</li>
         <li>Pick your home WiFi, type the password, and enter the <strong>broker IP</strong>
             (the address the <code>npm run demo</code> screen prints, e.g. <code>192.168.1.42</code>).</li>
         <li>Save. The coop connects and shows up when you run <code>tc status</code>. Done! 🎉</li>

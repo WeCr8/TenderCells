@@ -1,7 +1,7 @@
 // Mock data service for demo/testing
 // Last updated: 2026-06-11
 
-import { Device, TelemetryReading, Property } from '../types';
+import type { Device, TelemetryReading, Property } from '../types';
 
 export const mockProperty: Property = {
   id: 'property_001',

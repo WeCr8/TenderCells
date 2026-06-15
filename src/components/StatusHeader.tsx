@@ -1,7 +1,7 @@
 // StatusHeader component — displays device state
 // Last updated: 2026-06-11
 
-import { SystemState } from '../types';
+import type { SystemState } from '../types';
 
 const colors = {
   bg: '#0D2B1E',

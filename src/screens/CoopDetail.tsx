@@ -2,12 +2,11 @@
 // Last updated: 2026-06-11
 
 import { useEffect, useState } from 'react';
-import { useDeviceStore } from '../store/deviceStore';
 import { TelemetryCard } from '../components/TelemetryCard';
 import { StatusHeader } from '../components/StatusHeader';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { mockDevices, getMockTelemetryForDevice } from '../services/mockData';
-import { Device, TelemetryReading } from '../types';
+import type { Device, TelemetryReading, Alert } from '../types';
 
 const colors = {
   bg: '#0D2B1E',
@@ -26,7 +25,7 @@ interface CoopDetailProps {
   onNavigate?: (screen: string) => void;
 }
 
-export function CoopDetail({ deviceId, onBack }: CoopDetailProps) {
+export function CoopDetail({ deviceId, onBack, onNavigate }: CoopDetailProps) {
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [telemetryReadings, setTelemetryReadings] = useState<TelemetryReading[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -62,7 +61,7 @@ export function CoopDetail({ deviceId, onBack }: CoopDetailProps) {
   }
 
   const latestTelemetry = telemetryReadings[0];
-  const criticalAlerts = [];
+  const criticalAlerts: Alert[] = [];
 
   const handleAction = (action: string) => {
     setPendingAction(action);

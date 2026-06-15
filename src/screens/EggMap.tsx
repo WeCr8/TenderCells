@@ -36,7 +36,7 @@ const SAMPLE_NEST_BOXES: NestBox[] = [
   { id: 'box_6', position: { row: 2, col: 3 }, hasEgg: true, eggAge: 90, lastCollected: Date.now() - 24 * 60 * 60 * 1000 },
 ];
 
-export function EggMap({ deviceId, onBack }: EggMapProps) {
+export function EggMap({ onBack }: EggMapProps) {
   const [nestBoxes, setNestBoxes] = useState<NestBox[]>(SAMPLE_NEST_BOXES);
   const totalEggs = nestBoxes.filter((b) => b.hasEgg).length;
   const staleEggs = nestBoxes.filter((b) => b.hasEgg && b.eggAge > 240).length;

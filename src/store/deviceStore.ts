@@ -2,7 +2,7 @@
 // Last updated: 2026-06-11
 
 import { create } from 'zustand';
-import { Device, TelemetryReading, Schedule, Alert } from '../types';
+import type { Device, TelemetryReading, Schedule, Alert } from '../types';
 import {
   getDevices,
   getDevice,
@@ -13,7 +13,6 @@ import {
   subscribeToTelemetry,
   subscribeToAlerts,
 } from '../services/firebase';
-import { getMockDeviceForProperty, getMockTelemetryForDevice } from '../services/mockData';
 
 interface DeviceStore {
   // State

@@ -20,7 +20,7 @@ interface WastecleaningProps {
   onBack: () => void;
 }
 
-export function WasteCleaning({ deviceId, onBack }: WastecleaningProps) {
+export function WasteCleaning({ onBack }: WastecleaningProps) {
   const [isCleaning, setIsCleaning] = useState(false);
   const [cleaningProgress, setCleaningProgress] = useState(0);
   const [showConfirm, setShowConfirm] = useState(false);

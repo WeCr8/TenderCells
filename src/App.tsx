@@ -7,7 +7,7 @@ import { CoopDetail } from './screens/CoopDetail';
 import { Schedules } from './screens/Schedules';
 import { WasteCleaning } from './screens/WasteCleaning';
 import { EggMap } from './screens/EggMap';
-import { mockProperty, mockDevices } from './services/mockData';
+import { mockProperty } from './services/mockData';
 import './App.css';
 
 type Screen = 'login' | 'properties' | 'dashboard' | 'detail' | 'schedules' | 'cleaning' | 'eggmap';
@@ -25,8 +25,8 @@ const colors = {
 
 function App() {
   const [screen, setScreen] = useState<Screen>('login');
-  const [user, setUser] = useState<any>(null);
-  const [properties, setProperties] = useState<any[]>([]);
+  const [, setUser] = useState<any>(null);
+  const [, setProperties] = useState<any[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

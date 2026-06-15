@@ -2,8 +2,7 @@
 // Last updated: 2026-06-11
 
 import { useEffect, useState } from 'react';
-import { Device } from '../types';
-import { useDeviceStore } from '../store/deviceStore';
+import type { Device } from '../types';
 import { getMockDeviceForProperty } from '../services/mockData';
 
 const colors = {

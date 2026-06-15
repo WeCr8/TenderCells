@@ -4,15 +4,13 @@
 import { initializeApp } from 'firebase/app';
 import {
   getAuth,
-  Auth,
   signInWithEmailAndPassword,
   signOut,
-  User as FirebaseUser,
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
+import type { Auth } from 'firebase/auth';
 import {
   getFirestore,
-  Firestore,
   collection,
   doc,
   getDoc,
@@ -23,10 +21,10 @@ import {
   query,
   where,
   onSnapshot,
-  Unsubscribe,
 } from 'firebase/firestore';
+import type { Firestore, Unsubscribe } from 'firebase/firestore';
 
-import { Device, TelemetryReading, Schedule, Alert, Property } from '../types';
+import type { Device, TelemetryReading, Schedule, Alert, Property } from '../types';
 
 // Firebase configuration from .env
 const firebaseConfig = {

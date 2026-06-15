@@ -2,7 +2,7 @@
 // Last updated: 2026-06-11
 
 import { useState } from 'react';
-import { Schedule } from '../types';
+import type { Schedule } from '../types';
 
 const colors = {
   bg: '#0D2B1E',

@@ -153,16 +153,19 @@
     </div>
 
     <div class="card">
-      <h3 class="gold-h">Step 1 — Pick your board</h3>
+      <h3 class="gold-h">Step 1 — Pick what to flash</h3>
+      <p class="hint">New here, or using a small dev board like a <strong>Seeed XIAO ESP32-S3</strong>?
+         Start with <strong>Starter Node</strong> — it needs no coop hardware and proves everything works.
+         The flasher checks your chip on connect and won't let you flash the wrong one.</p>
       <div class="device-pick" id="devicePick">
-        <div class="device" data-manifest="manifest-chicken-tender.json" role="button" aria-pressed="true" tabindex="0">
-          🐔 <h3>Chicken Tender</h3><small>ESP32 coop controller</small>
+        <div class="device" data-manifest="manifest-starter-node.json" role="button" aria-pressed="true" tabindex="0">
+          🌱 <h3>Starter Node</h3><small>ESP32-S3 (XIAO &amp; dev boards) · start here</small>
+        </div>
+        <div class="device" data-manifest="manifest-chicken-tender.json" role="button" aria-pressed="false" tabindex="0">
+          🐔 <h3>Chicken Tender</h3><small>needs ESP32-WROOM-32 + coop hardware</small>
         </div>
         <div class="device soon" role="button" aria-disabled="true">
           🦅 <h3>WatchTower AI</h3><small>coming soon</small>
-        </div>
-        <div class="device soon" role="button" aria-disabled="true">
-          🛞 <h3>Roaming Roost</h3><small>coming soon</small>
         </div>
       </div>
 
@@ -171,7 +174,7 @@
 
       <h3 class="gold-h">Step 3 — Press the button</h3>
       <div class="install-row">
-        <esp-web-install-button id="installer" manifest="manifest-chicken-tender.json">
+        <esp-web-install-button id="installer" manifest="manifest-starter-node.json">
           <button type="button" class="btn-fallback" slot="activate">🔌 Connect &amp; Install</button>
           <span slot="unsupported"></span>
           <span slot="not-allowed"></span>
@@ -181,7 +184,7 @@
         <li>A little window pops up asking which USB port. Pick the one that appears when the
             board is plugged in (often named <code>CP210x</code>, <code>CH340</code>, or
             <code>USB Serial</code>), then press <strong>Connect</strong>.</li>
-        <li>Press <strong>Install Tender Cells — Chicken Tender</strong> and confirm.
+        <li>Press <strong>Install</strong> (it names the board you picked) and confirm.
             A green bar fills up.</li>
         <li>When it says <strong>done</strong>, the program is on the chip. Unplug or keep going to WiFi setup below. 🎉</li>
       </ol>
@@ -209,7 +212,8 @@
     <div class="card">
       <h3 class="gold-h">Step 4 — Tell the coop your WiFi</h3>
       <ol class="steps">
-        <li>After flashing, the board makes its own WiFi network called <code>ChickenTender-Setup</code>.</li>
+        <li>After flashing, the board makes its own WiFi network —
+            <code>TenderNode-Setup</code> for the Starter Node, or <code>ChickenTender-Setup</code> for a coop.</li>
         <li>On your phone, join that network. A setup page pops up automatically.</li>
         <li>Pick your home WiFi, type the password, and enter the <strong>broker IP</strong>
             (the address the <code>npm run demo</code> screen prints, e.g. <code>192.168.1.42</code>).</li>

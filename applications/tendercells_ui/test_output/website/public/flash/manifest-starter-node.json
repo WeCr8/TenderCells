@@ -1,0 +1,16 @@
+{
+  "name": "Tender Cells — Starter Node",
+  "version": "1.0.0",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        { "path": "firmware/starter-node/bootloader.bin", "offset": 0 },
+        { "path": "firmware/starter-node/partitions.bin", "offset": 32768 },
+        { "path": "firmware/starter-node/boot_app0.bin", "offset": 57344 },
+        { "path": "firmware/starter-node/firmware.bin", "offset": 65536 }
+      ]
+    }
+  ]
+}

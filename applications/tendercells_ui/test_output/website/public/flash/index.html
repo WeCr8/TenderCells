@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tender Cells Flasher — Put the brain in your coop</title>
+  <meta name="description" content="One-click web flasher for Tender Cells ESP32 devices. No installs. Works in Chrome or Edge." />
+  <style>
+    :root {
+      --bg: #0D2B1E; --surface: #1A3D2B; --accent: #4A7C59;
+      --gold: #C8B882; --goldMuted: #8A7D55; --white: #F0EDE4;
+      --danger: #CC3333; --warning: #E8A020;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--white);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 24px 20px 80px; }
+    header { text-align: center; padding: 16px 0 8px; }
+    h1 { color: var(--gold); margin: 0 0 4px; font-size: 2rem; }
+    .tag { color: var(--goldMuted); margin: 0 0 8px; }
+    .tabs { display: flex; gap: 8px; justify-content: center; margin: 20px 0; }
+    .tab {
+      background: var(--surface); color: var(--gold); border: 1px solid var(--accent);
+      padding: 10px 22px; border-radius: 999px; cursor: pointer; font-size: 1rem; font-weight: 600;
+    }
+    .tab[aria-selected="true"] { background: var(--accent); color: var(--white); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card {
+      background: var(--surface); border: 1px solid var(--accent);
+      border-radius: 14px; padding: 22px; margin: 16px 0;
+    }
+    .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+    .steps li { position: relative; padding: 10px 0 10px 48px; }
+    .steps li::before {
+      counter-increment: step; content: counter(step);
+      position: absolute; left: 0; top: 8px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--gold); color: var(--bg);
+      display: grid; place-items: center; font-weight: 800;
+    }
+    .device-pick { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0 20px; }
+    .device {
+      flex: 1 1 180px; background: var(--bg); border: 2px solid var(--accent);
+      border-radius: 12px; padding: 14px; cursor: pointer; text-align: center;
+    }
+    .device[aria-pressed="true"] { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold) inset; }
+    .device.soon { opacity: .5; cursor: not-allowed; }
+    .device h3 { margin: 6px 0 2px; color: var(--gold); font-size: 1.05rem; }
+    .device small { color: var(--goldMuted); }
+    .install-row { text-align: center; margin: 8px 0 4px; }
+    esp-web-install-button { --esp-tools-button-color: var(--bg); }
+    esp-web-install-button[install-unsupported] { display: none; }
+    .btn-fallback {
+      display: inline-block; background: var(--gold); color: var(--bg);
+      font-weight: 800; font-size: 1.1rem; padding: 14px 28px; border-radius: 12px;
+      border: none; cursor: pointer; text-decoration: none;
+    }
+    .unsupported {
+      display: none; background: #3a2410; border: 1px solid var(--warning);
+      color: var(--white); border-radius: 10px; padding: 14px; margin-top: 12px;
+    }
+    .no-webserial .unsupported { display: block; }
+    .no-webserial .install-row { display: none; }
+    .hint { color: var(--goldMuted); font-size: .92rem; }
+    code, kbd {
+      background: var(--bg); border: 1px solid var(--accent);
+      border-radius: 6px; padding: 1px 6px; color: var(--gold);
+    }
+    .learn h2 { color: var(--gold); margin-top: 28px; }
+    .pipe {
+      font-family: ui-monospace, Menlo, Consolas, monospace; white-space: pre;
+      background: var(--bg); border: 1px solid var(--accent); border-radius: 10px;
+      padding: 14px; overflow-x: auto; color: var(--white); font-size: .85rem;
+    }
+    a { color: var(--gold); }
+    footer { text-align: center; color: var(--goldMuted); margin-top: 40px; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🐔 Tender Cells Flasher</h1>
+    <p class="tag">Put the brain into your coop — right from this page. No installs.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true"  data-panel="easy">⚡ Easy mode</button>
+    <button class="tab" role="tab" aria-selected="false" data-panel="learn">📚 Learn mode</button>
+  </div>
+
+  <!-- ===================== EASY MODE ===================== -->
+  <section id="easy" class="panel active" role="tabpanel">
+    <div class="card">
+      <p><strong>Pick your board, plug it into this computer with a USB cable, and press the button.</strong>
+         That's the whole thing.</p>
+
+      <div class="device-pick" id="devicePick">
+        <div class="device" data-manifest="manifest-chicken-tender.json" aria-pressed="true" tabindex="0">
+          🐔 <h3>Chicken Tender</h3><small>ESP32 coop controller</small>
+        </div>
+        <div class="device soon" aria-disabled="true">
+          🦅 <h3>WatchTower AI</h3><small>coming soon</small>
+        </div>
+        <div class="device soon" aria-disabled="true">
+          🛞 <h3>Roaming Roost</h3><small>coming soon</small>
+        </div>
+      </div>
+
+      <div class="install-row">
+        <esp-web-install-button id="installer" manifest="manifest-chicken-tender.json">
+          <button class="btn-fallback" slot="activate">🔌 Connect &amp; Install</button>
+          <span slot="unsupported"></span>
+          <span slot="not-allowed"></span>
+        </esp-web-install-button>
+      </div>
+      <p class="hint" style="text-align:center">A little window will ask which USB port — pick the one that appears when you plug the board in.</p>
+
+      <div class="unsupported">
+        <strong>This browser can't flash directly.</strong> The one-click flasher needs
+        <strong>Chrome</strong> or <strong>Edge</strong> on a laptop/desktop (it uses WebSerial).
+        On phones, Safari, or Firefox it won't work — open this page in Chrome or Edge instead,
+        or use the <button class="tab" data-panel="learn" style="padding:4px 12px">Learn mode</button>
+        path with Arduino IDE.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="color:var(--gold);margin-top:0">After it flashes: tell it your WiFi</h3>
+      <ol class="steps">
+        <li>The board makes its own WiFi network called <code>ChickenTender-Setup</code>.</li>
+        <li>On your phone, join that network. A setup page pops up.</li>
+        <li>Pick your home WiFi, type the password, and enter the <strong>broker IP</strong>
+            (the address the <code>npm run demo</code> screen prints, e.g. <code>192.168.1.42</code>).</li>
+        <li>Save. The coop connects and shows up when you run <code>tc status</code>. Done! 🎉</li>
+      </ol>
+      <p class="hint">Nothing secret is ever baked into the chip — you set the WiFi yourself, so it's safe to share boards.</p>
+    </div>
+  </section>
+
+  <!-- ===================== LEARN MODE ===================== -->
+  <section id="learn" class="panel learn" role="tabpanel">
+    <div class="card">
+      <p><strong>What does "flashing" even mean?</strong> A microcontroller (the ESP32) is a tiny
+      computer with no hard drive. "Flashing" copies a program into its memory so it runs that
+      program every time it powers on. We're copying the Tender Cells coop program into your board.</p>
+    </div>
+
+    <h2>What's on the chip after you flash</h2>
+    <div class="card">
+      <ul>
+        <li><strong>Bootloader</strong> — the first code that runs; it starts everything else.</li>
+        <li><strong>Partition table</strong> — a map of what lives where in memory.</li>
+        <li><strong>The coop program (firmware)</strong> — reads sensors, opens the door, runs the
+            feeder, and listens for commands. This is the part you'd change to teach the coop new tricks.</li>
+      </ul>
+    </div>
+
+    <h2>How a command reaches the coop</h2>
+    <div class="card">
+      <div class="pipe">  your tap  ─▶  app / tc CLI  ─▶  REST  ─▶  bridge  ─▶  MQTT  ─▶  ESP32 coop
+                                                                    │
+  sensors / state  ◀──────────────── MQTT ◀───────────── ESP32 publishes</div>
+      <p>The board talks <strong>MQTT</strong> — little JSON messages on named "topics" like
+      <code>tc/your-coop/cmd/door</code>. Motion never goes through the cloud; it stays on your
+      own network so it's fast and works without internet.</p>
+    </div>
+
+    <h2>Three ways to put the program on, easiest first</h2>
+    <div class="card">
+      <ol class="steps">
+        <li><strong>This page (Easy mode)</strong> — zero installs, just Chrome/Edge. Best for a first run or a classroom.</li>
+        <li><strong>Arduino IDE</strong> — install the IDE, add the ESP32 boards, open
+            <code>firmware/chicken-tender</code>, pick your board + port, press Upload. Good when you
+            want to <em>read and change</em> the code and watch the Serial Monitor.</li>
+        <li><strong>PlatformIO</strong> — for power users: <kbd>pio run -t upload</kbd> from a terminal.
+            Same code, scripted builds, used by our automated tests.</li>
+      </ol>
+      <p class="hint">All three flash the <em>same</em> program. Start at #1; graduate to #2 when you
+      want to tinker.</p>
+    </div>
+
+    <h2>Try changing something</h2>
+    <div class="card">
+      <p>Open <code>firmware/chicken-tender/src/main.cpp</code>. Find <code>DOOR_OPEN_DEG</code> near
+      the top — that's how far the door swings. Change the number, flash again (Arduino IDE), and
+      watch the door move differently. That's your first edit. 🛠️</p>
+      <p class="hint">Safety is baked in: the code refuses to move the arm while a chicken is
+      detected, and an E-STOP command freezes every motor instantly. Read the comments to see how.</p>
+    </div>
+  </section>
+
+  <footer>
+    Tender Cells · open-source automated animal care · works in Chrome &amp; Edge (WebSerial)
+  </footer>
+</div>
+
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+<script>
+  // Tabs
+  const tabs = document.querySelectorAll('.tab');
+  function selectPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === name));
+    document.querySelectorAll('[role="tab"]').forEach(t =>
+      t.setAttribute('aria-selected', t.dataset.panel === name ? 'true' : 'false'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  tabs.forEach(t => t.addEventListener('click', () => selectPanel(t.dataset.panel)));
+  document.querySelectorAll('[data-panel]').forEach(el =>
+    el.addEventListener('click', () => selectPanel(el.dataset.panel)));
+
+  // Device picker → swaps the installer manifest
+  const installer = document.getElementById('installer');
+  document.querySelectorAll('#devicePick .device:not(.soon)').forEach(d => {
+    const choose = () => {
+      document.querySelectorAll('#devicePick .device').forEach(x => x.setAttribute('aria-pressed', 'false'));
+      d.setAttribute('aria-pressed', 'true');
+      installer.setAttribute('manifest', d.dataset.manifest);
+    };
+    d.addEventListener('click', choose);
+    d.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(); } });
+  });
+
+  // WebSerial support gate → reveals the "use Chrome/Edge" note
+  if (!('serial' in navigator)) document.body.classList.add('no-webserial');
+</script>
+</body>
+</html>

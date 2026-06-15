@@ -24,6 +24,7 @@ const footerGroups = [
     links: [
       { label: "Developers", to: "/developers" },
       { label: "Open Source", to: "/open-source" },
+      { label: "Flash a Device", href: "/flash" },
       { label: "Public Demo", to: "/app/demo" },
       { label: "GitHub", href: "https://github.com/WeCr8/TenderCells" },
     ],

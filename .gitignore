@@ -82,3 +82,8 @@ applications/tendercells_ui/test_output/tendercells-ui/test-results/
 # Local release packages
 release-artifacts/
 applications/web/
+
+# PlatformIO build output (firmware binaries are exported to the web flasher, not committed here)
+.pio/
+firmware/**/.pio/
+functions/lib/

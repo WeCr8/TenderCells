@@ -141,7 +141,8 @@
         <p>Flashing puts the program on the chip. To make the coop <em>do</em> things, the board
         joins your WiFi and talks to the Tender Cells backend on your network:</p>
         <ul>
-          <li>Your <strong>home WiFi name + password</strong> (you enter these on the board after flashing — Step 4).</li>
+          <li>Your <strong>home WiFi name + password</strong> (you enter these on the board after flashing — Step 4).
+              ⚠️ It must be a <strong>2.4 GHz</strong> network — ESP32 boards can't see 5 GHz-only WiFi.</li>
           <li>The <strong>Tender Cells backend running</strong> on a computer on the same network —
               start it with <code>npm run demo</code> from the repo. It prints a <strong>broker IP</strong>
               you'll type into the board.</li>
@@ -156,10 +157,12 @@
       <h3 class="gold-h">Step 1 — Pick what to flash</h3>
       <p class="hint">New here, or using a small dev board like a <strong>Seeed XIAO ESP32-S3</strong>?
          Start with <strong>Starter Node</strong> — it needs no coop hardware and proves everything works.
+         <strong>One Starter Node binary works for <em>any</em> product</strong> (Chicken Tender, Roaming Roost,
+         Duck Dock, WatchTower, …) — you pick which product it represents during WiFi setup (Step 4).
          The flasher checks your chip on connect and won't let you flash the wrong one.</p>
       <div class="device-pick" id="devicePick">
         <div class="device" data-manifest="/flash/manifest-starter-node.json" role="button" aria-pressed="true" tabindex="0">
-          🌱 <h3>Starter Node</h3><small>ESP32-S3 (XIAO &amp; dev boards) · start here</small>
+          🌱 <h3>Starter Node</h3><small>ESP32-S3 (XIAO &amp; dev boards) · works for <em>any</em> product · start here</small>
         </div>
         <div class="device" data-manifest="/flash/manifest-chicken-tender.json" role="button" aria-pressed="false" tabindex="0">
           🐔 <h3>Chicken Tender</h3><small>needs ESP32-WROOM-32 + coop hardware</small>
@@ -242,8 +245,14 @@
         <li>After flashing, the board makes its own WiFi network —
             <code>TenderNode-Setup</code> for the Starter Node, or <code>ChickenTender-Setup</code> for a coop.</li>
         <li>On your phone, join that network. A setup page pops up automatically.</li>
-        <li>Pick your home WiFi, type the password, and enter the <strong>broker IP</strong>
-            (the address the <code>npm run demo</code> screen prints, e.g. <code>192.168.1.42</code>).</li>
+        <li>Pick your home WiFi (<strong>2.4 GHz</strong>), type the password, and enter the
+            <strong>broker IP</strong> (the address the <code>npm run demo</code> screen prints,
+            e.g. <code>192.168.1.42</code>).</li>
+        <li><strong>Starter Node only:</strong> set <strong>Product type</strong> to which product this
+            board stands in for — <code>starter</code>, <code>chicken-tender</code>,
+            <code>roaming-roost</code>, <code>duck-dock</code>, <code>bunny-burrow</code>,
+            <code>goat-guardian</code>, <code>turkey-tower</code>, <code>pigeon-palace</code>, or
+            <code>watchtower</code>. The dashboard groups it under that product.</li>
         <li>Save. The coop connects and shows up when you run <code>tc status</code>. Done! 🎉</li>
       </ol>
       <p class="hint">Nothing secret is ever baked into the chip — you set the WiFi yourself, so it's safe to share boards.</p>
@@ -283,10 +292,15 @@
       <ol class="steps">
         <li><strong>This page (Easy mode)</strong> — zero installs, just Chrome/Edge. Best for a first run or a classroom.</li>
         <li><strong>Arduino IDE</strong> — <em>needs installs:</em> the Arduino IDE itself, plus the
-            ESP32 board package (Boards Manager → "esp32"), plus the libraries listed in
-            <code>platformio.ini</code>. Then open <code>firmware/chicken-tender</code>, pick your
-            board + port, press Upload. Good when you want to <em>read and change</em> the code and
-            watch the Serial Monitor.</li>
+            ESP32 board package (Boards Manager → "esp32"), plus the libraries
+            (WiFiManager, PubSubClient, ArduinoJson v7). Then open
+            <code>firmware/starter-node</code> (any product) or <code>firmware/chicken-tender</code>
+            (full coop), pick your board + port, press Upload. Good when you want to
+            <em>read and change</em> the code and watch the Serial Monitor.
+            <br>📖 Full step-by-step:
+            <a href="https://github.com/WeCr8/TenderCells/blob/main/firmware/starter-node/README.md"
+               target="_blank" rel="noopener noreferrer">Arduino IDE on-ramp guide</a>
+            (board settings, drivers, hardware needs, product types).</li>
         <li><strong>PlatformIO</strong> — <em>needs installs:</em> Python + PlatformIO Core (or the
             VS Code extension). Then <kbd>pio run -t upload</kbd> from a terminal — it auto-fetches the
             toolchain and libraries. Same code, scripted builds, used by our automated tests.</li>

@@ -40,6 +40,12 @@ Preferences prefs;
 String brokerIp;
 String brokerPort;
 String deviceId;
+// One Starter Node binary can stand in for ANY product type. The user picks which
+// product this node represents in the setup portal; it's reported in the heartbeat
+// so the dashboard groups/labels it correctly. Valid values match the app's
+// productType union (chicken-tender, roaming-roost, duck-dock, bunny-burrow,
+// goat-guardian, turkey-tower, pigeon-palace, watchtower) or "starter" for a bare node.
+String productType;
 
 // ── Runtime ──────────────────────────────────────────────────────────────────
 WiFiClient net;
@@ -88,6 +94,7 @@ void publishHeartbeat() {
   doc["waterLevel"]   = 0;
   doc["chickenCount"] = 0;
   doc["node"]         = "starter";
+  doc["productType"]  = productType;  // which product this node stands in for
   doc["freeHeap"]     = ESP.getFreeHeap();
   doc["ts"]           = millis();
   char buf[192];
@@ -142,9 +149,10 @@ bool reconnectMqtt() {
 // ── Captive-portal provisioning (no hardcoded secrets) ───────────────────────
 void provisionConfig() {
   prefs.begin("tcnode", false);
-  brokerIp   = prefs.getString("brokerIp", "");
-  brokerPort = prefs.getString("brokerPort", "1883");
-  deviceId   = prefs.getString("deviceId", "");
+  brokerIp    = prefs.getString("brokerIp", "");
+  brokerPort  = prefs.getString("brokerPort", "1883");
+  deviceId    = prefs.getString("deviceId", "");
+  productType = prefs.getString("product", "starter");
 
   // Default device id from chip MAC if unset.
   if (deviceId.isEmpty()) {
@@ -158,26 +166,34 @@ void provisionConfig() {
   WiFiManagerParameter pBroker("broker", "Broker IP (from `npm run demo`)", brokerIp.c_str(), 40);
   WiFiManagerParameter pPort("port", "Broker port", brokerPort.c_str(), 6);
   WiFiManagerParameter pId("devid", "Device ID", deviceId.c_str(), 22);
+  // Which product this node represents. Same firmware, any product type — type one of:
+  // starter, chicken-tender, roaming-roost, duck-dock, bunny-burrow, goat-guardian,
+  // turkey-tower, pigeon-palace, watchtower.
+  WiFiManagerParameter pProduct("product", "Product type", productType.c_str(), 20);
   wm.addParameter(&pBroker);
   wm.addParameter(&pPort);
   wm.addParameter(&pId);
+  wm.addParameter(&pProduct);
 
   // Blink while waiting for setup so the user knows it's in portal mode.
   wm.setConfigPortalTimeout(0);  // stay until configured
   Serial.println("[WIFI] Starting setup portal 'TenderNode-Setup' ...");
   bool ok = wm.autoConnect("TenderNode-Setup");
 
-  brokerIp   = pBroker.getValue();
-  brokerPort = pPort.getValue();
-  deviceId   = pId.getValue();
+  brokerIp    = pBroker.getValue();
+  brokerPort  = pPort.getValue();
+  deviceId    = pId.getValue();
+  productType = pProduct.getValue();
+  if (productType.isEmpty()) productType = "starter";
   prefs.putString("brokerIp", brokerIp);
   prefs.putString("brokerPort", brokerPort);
   prefs.putString("deviceId", deviceId);
+  prefs.putString("product", productType);
   prefs.end();
 
-  Serial.printf("[WIFI] %s | broker=%s:%s | id=%s\n",
+  Serial.printf("[WIFI] %s | broker=%s:%s | id=%s | product=%s\n",
                 ok ? "connected" : "NOT connected", brokerIp.c_str(),
-                brokerPort.c_str(), deviceId.c_str());
+                brokerPort.c_str(), deviceId.c_str(), productType.c_str());
 }
 
 void setup() {
@@ -204,6 +220,11 @@ void setup() {
   if (port == 0) port = 1883;
   mqtt.setServer(brokerIp.c_str(), port);
   mqtt.setCallback(onMqttMessage);
+  // Socket timeout MUST stay below the 8s watchdog. PubSubClient defaults to 15s,
+  // so a wrong/unreachable broker IP would block connect() past the watchdog and
+  // reboot-loop the board forever (looks like "it flashed but does nothing"). 4s
+  // fails fast so loop() can retry without tripping the watchdog.
+  mqtt.setSocketTimeout(4);
 
   Serial.println("Setup done — heartbeat every 10s, LED blinks when alive.");
 }

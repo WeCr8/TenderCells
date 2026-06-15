@@ -171,6 +171,10 @@ void setup() {
   mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
   mqttClient.setCallback(onMqttMessage);
   mqttClient.setBufferSize(512);
+  // Socket timeout MUST stay below the 8s watchdog. PubSubClient defaults to 15s,
+  // so a wrong/unreachable broker IP would block connect() long enough to trip the
+  // watchdog and reboot-loop the board forever. 4s fails fast and lets loop() retry.
+  mqttClient.setSocketTimeout(4);
   Serial.printf("✓ MQTT target %s:%d  device=%s\n", MQTT_BROKER, MQTT_PORT, MQTT_DEVICE_ID);
 
   transitionTo(SystemState::CONNECTING);

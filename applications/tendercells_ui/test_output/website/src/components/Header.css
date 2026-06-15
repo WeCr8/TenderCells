@@ -50,6 +50,8 @@
 .header-search {
   flex: 1;
   min-width: 0;
+  display: flex;
+  gap: 0.4rem;
 }
 .header-search input {
   width: 100%;
@@ -60,6 +62,19 @@
   background: #f9f9f9;
   outline: none;
   transition: border-color 0.2s;
+}
+.header-search-btn {
+  flex-shrink: 0;
+  padding: 0 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f3f3f3;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.header-search-btn:hover {
+  background: #e6e6e6;
 }
 .header-search input:focus {
   border-color: #4a90d9;

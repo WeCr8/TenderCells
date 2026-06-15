@@ -23,6 +23,7 @@ import PublicDemoPage from "./pages/PublicDemoPage";
 import BlogPage from "./pages/BlogPage";
 import StoryPage from "./pages/StoryPage";
 import PartnersPage from "./pages/PartnersPage";
+import SearchPage from "./pages/SearchPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import CookieConsent from "./components/CookieConsent";
 import { usePageTracking } from "./hooks/usePageTracking";
@@ -106,6 +107,9 @@ function App() {
 
         {/* Blog */}
         <Route path="/blog" element={<BlogPage />} />
+
+        {/* Search */}
+        <Route path="/search" element={<SearchPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

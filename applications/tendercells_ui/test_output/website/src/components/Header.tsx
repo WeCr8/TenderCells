@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TENDERCELLS_APP_ENTRY_URL } from "../config/appLinks";
 import "./Header.css";
 
@@ -144,6 +144,15 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const headerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchValue.trim();
+    if (!q) return;
+    closeAll();
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+  };
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -187,7 +196,7 @@ export default function Header() {
             <span className="logo-text">Tender Cells</span>
           </Link>
 
-          <form className="header-search" onSubmit={(e) => e.preventDefault()}>
+          <form className="header-search" onSubmit={submitSearch} role="search">
             <input
               type="search"
               placeholder="What are you looking for?"
@@ -195,6 +204,9 @@ export default function Header() {
               onChange={(e) => setSearchValue(e.target.value)}
               aria-label="Site search"
             />
+            <button type="submit" className="header-search-btn" aria-label="Search">
+              🔍
+            </button>
           </form>
 
           <div className="header-shipping-badge">

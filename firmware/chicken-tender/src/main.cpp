@@ -141,11 +141,6 @@ void setup() {
   delay(500);
   Serial.println("\n\n=== CHICKEN TENDER BOOTING ===");
 
-  // Watchdog (8s, panic on overflow). Pinned to Arduino-ESP32 core 2.x API.
-  esp_task_wdt_init(WATCHDOG_TIMEOUT_MS / 1000, true);
-  esp_task_wdt_add(NULL);
-  Serial.println("✓ Watchdog initialized (8s timeout)");
-
   // GPIO — steppers/feed disabled by default (no idle energizing).
   pinMode(PIN_STEPPER_ENABLE, OUTPUT);
   pinMode(PIN_STEPPER_STEP, OUTPUT);
@@ -163,9 +158,15 @@ void setup() {
   dht.begin();
   Serial.println("✓ Sensors initialized");
 
-  // Load config + WiFi via captive portal (blocks here only on first setup;
-  // the watchdog is fed inside the portal callback path by WiFiManager).
+  // Load config + WiFi via captive portal. This BLOCKS until the user finishes
+  // setup — far longer than the 8s watchdog — so the watchdog must NOT be armed
+  // yet, or the board panic-reboots mid-portal and the setup AP never stays up.
   provisionConfig();
+
+  // Safe to arm the watchdog now that the blocking portal is done.
+  esp_task_wdt_init(WATCHDOG_TIMEOUT_MS / 1000, true);
+  esp_task_wdt_add(NULL);
+  Serial.println("✓ Watchdog initialized (8s timeout)");
 
   mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
   mqttClient.setCallback(onMqttMessage);

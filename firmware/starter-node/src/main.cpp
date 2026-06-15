@@ -191,10 +191,14 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
   setLed(false);
 
+  // Provision FIRST — the captive portal blocks until the user configures WiFi,
+  // which is far longer than the 8s watchdog. Arming the watchdog before this
+  // would panic-reboot the board mid-portal (AP flickers, "never asks for WiFi").
+  provisionConfig();
+
+  // Now arm the watchdog for the steady-state loop().
   esp_task_wdt_init(WATCHDOG_TIMEOUT_S, true);
   esp_task_wdt_add(NULL);
-
-  provisionConfig();
 
   uint16_t port = (uint16_t)brokerPort.toInt();
   if (port == 0) port = 1883;

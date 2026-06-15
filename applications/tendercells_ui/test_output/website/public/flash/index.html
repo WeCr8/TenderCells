@@ -200,6 +200,33 @@
         </ol>
       </details>
 
+      <details class="trouble">
+        <summary>❓ It flashed, but no setup WiFi network appears</summary>
+        <ol class="steps">
+          <li><strong>Unplug and replug the board.</strong> The flasher holds the USB port;
+              a fresh power-up boots the new program, which then starts the setup network.</li>
+          <li>Wait ~10 seconds, then re-scan WiFi on your phone for
+              <code>TenderNode-Setup</code> (Starter Node) or <code>ChickenTender-Setup</code> (coop).
+              It's an open network — no password.</li>
+          <li>Watch what the board is doing over USB (see the Serial Monitor tip below) — the boot
+              banner and <code>[WIFI] Starting setup portal …</code> line confirm it's alive.</li>
+        </ol>
+      </details>
+
+      <details class="trouble">
+        <summary>🔎 See what the board is doing (Serial Monitor)</summary>
+        <p>The board prints a live log over the same USB cable. Watching it is the fastest way
+           to see WiFi/broker connection problems.</p>
+        <ul>
+          <li><strong>Easiest:</strong> in Chrome/Edge, the ESP Web Tools dialog has a
+              <strong>“Logs &amp; Console”</strong> option — open it to read the board live, right here.</li>
+          <li><strong>Arduino IDE:</strong> Tools → Serial Monitor, set baud to <strong>115200</strong>,
+              pick the board's port (e.g. <code>COM5</code>).</li>
+          <li>You should see the <code>=== Tender Cells Starter Node ===</code> banner, the chip model,
+              then WiFi and <code>[MQTT] connected</code> once it reaches your broker.</li>
+        </ul>
+      </details>
+
       <div class="unsupported">
         <strong>This browser can't flash directly.</strong> The one-click flasher needs
         <strong>Chrome</strong> or <strong>Edge</strong> on a laptop/desktop (it uses WebSerial).

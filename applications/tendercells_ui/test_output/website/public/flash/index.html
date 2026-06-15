@@ -341,6 +341,36 @@
       want to tinker.</p>
     </div>
 
+    <h2>Control real things: doors, lights, camera, speaker, more</h2>
+    <div class="card">
+      <p>The board listens on MQTT command topics and acts on its GPIO pins. To add an
+      output (a light, a lock, a relay, a buzzer), do two things in
+      <code>firmware/starter-node/src/main.cpp</code>:</p>
+      <ol class="steps">
+        <li><strong>Pick a pin + set it as output</strong> in <code>setup()</code>:
+            <code>pinMode(5, OUTPUT);</code> (wire your light/relay to GPIO5 + GND).</li>
+        <li><strong>Subscribe to a command topic</strong> and act on it. In
+            <code>subscribeCommands()</code> add
+            <code>mqtt.subscribe(("tc/"+deviceId+"/cmd/light").c_str(), 1);</code>, then in
+            <code>onMqttMessage()</code> read the JSON and drive the pin:
+            <code>digitalWrite(5, doc["on"] | false);</code></li>
+      </ol>
+      <p class="hint">Now publish <code>{"on":true}</code> to <code>tc/&lt;your-id&gt;/cmd/light</code>
+      (from the app, the <code>tc</code> CLI, or any MQTT client) and the light turns on. Same pattern
+      for every output:</p>
+      <ul>
+        <li>💡 <strong>Light / relay</strong> — <code>cmd/light</code> → <code>digitalWrite()</code> a relay pin.</li>
+        <li>🚪 <strong>Door / lock</strong> — <code>cmd/door</code> → drive a servo (<code>#include &lt;ESP32Servo.h&gt;</code>, <code>servo.write(open?100:0)</code>) or a solenoid relay.</li>
+        <li>🔊 <strong>Speaker / buzzer</strong> — <code>cmd/sound</code> → <code>tone(pin, freq)</code> on a passive buzzer, or trigger a DFPlayer Mini for real audio clips.</li>
+        <li>🌡️ <strong>Read a sensor</strong> — read it in <code>publishHeartbeat()</code> (e.g. DHT22 → <code>doc["temp"]=t;</code>) so it streams to the app.</li>
+        <li>📷 <strong>Camera</strong> — set peripheral <code>camera</code>; for live video use an ESP32-S3-EYE / ESP32-CAM board (the WatchTower path) — that firmware streams frames; the Starter Node registers and signals the camera node.</li>
+      </ul>
+      <p class="hint">Rules baked in for safety: motion/relay commands never route through the cloud
+      (local MQTT only, fast + offline), and an <strong>E-STOP</strong> on
+      <code>tc/&lt;id&gt;/cmd/estop</code> freezes the board instantly — keep that handler intact when
+      you add outputs.</p>
+    </div>
+
     <h2>Try changing something</h2>
     <div class="card">
       <p>Open <code>firmware/chicken-tender/src/main.cpp</code>. Find <code>DOOR_OPEN_DEG</code> near

@@ -158,10 +158,10 @@
          Start with <strong>Starter Node</strong> — it needs no coop hardware and proves everything works.
          The flasher checks your chip on connect and won't let you flash the wrong one.</p>
       <div class="device-pick" id="devicePick">
-        <div class="device" data-manifest="manifest-starter-node.json" role="button" aria-pressed="true" tabindex="0">
+        <div class="device" data-manifest="/flash/manifest-starter-node.json" role="button" aria-pressed="true" tabindex="0">
           🌱 <h3>Starter Node</h3><small>ESP32-S3 (XIAO &amp; dev boards) · start here</small>
         </div>
-        <div class="device" data-manifest="manifest-chicken-tender.json" role="button" aria-pressed="false" tabindex="0">
+        <div class="device" data-manifest="/flash/manifest-chicken-tender.json" role="button" aria-pressed="false" tabindex="0">
           🐔 <h3>Chicken Tender</h3><small>needs ESP32-WROOM-32 + coop hardware</small>
         </div>
         <div class="device soon" role="button" aria-disabled="true">
@@ -174,7 +174,7 @@
 
       <h3 class="gold-h">Step 3 — Press the button</h3>
       <div class="install-row">
-        <esp-web-install-button id="installer" manifest="manifest-starter-node.json">
+        <esp-web-install-button id="installer" manifest="/flash/manifest-starter-node.json">
           <button type="button" class="btn-fallback" slot="activate">🔌 Connect &amp; Install</button>
           <span slot="unsupported"></span>
           <span slot="not-allowed"></span>

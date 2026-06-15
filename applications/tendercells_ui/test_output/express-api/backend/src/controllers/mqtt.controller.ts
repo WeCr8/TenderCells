@@ -72,7 +72,11 @@ export class MQTTController {
   private static initializeClient() {
     if (MQTTController.client) return;
 
-    const brokerUrl = process.env.MQTT_BROKER || "mqtt://localhost:1883";
+    // FIX(2026-06-15): default to the embedded broker's actual port (MQTT_PORT).
+    // Without this, setting MQTT_PORT (the documented Windows EADDRINUSE workaround)
+    // moves the broker but the bridge still dialed :1883 → no ingest, every device 404s.
+    const brokerUrl =
+      process.env.MQTT_BROKER || `mqtt://localhost:${process.env.MQTT_PORT || 1883}`;
 
     try {
       MQTTController.client = mqtt.connect(brokerUrl, {
@@ -335,7 +339,11 @@ export class MQTTController {
 
   getMQTTStatus(req: Request, res: Response) {
     const connected = MQTTController.client?.connected || false;
-    const brokerUrl = process.env.MQTT_BROKER || "mqtt://localhost:1883";
+    // FIX(2026-06-15): default to the embedded broker's actual port (MQTT_PORT).
+    // Without this, setting MQTT_PORT (the documented Windows EADDRINUSE workaround)
+    // moves the broker but the bridge still dialed :1883 → no ingest, every device 404s.
+    const brokerUrl =
+      process.env.MQTT_BROKER || `mqtt://localhost:${process.env.MQTT_PORT || 1883}`;
 
     res.json({
       connected,

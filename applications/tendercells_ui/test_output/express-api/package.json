@@ -2,12 +2,16 @@
   "name": "tendercells-api",
   "version": "1.0.0",
   "type": "module",
+  "bin": {
+    "tc": "tools/tc.mjs"
+  },
   "scripts": {
     "dev": "tsx backend/src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "simulate": "node tools/simulate-device.mjs",
-    "smoke": "node tools/smoke-test.mjs"
+    "smoke": "node tools/smoke-test.mjs",
+    "tc": "node tools/tc.mjs"
   },
   "dependencies": {
     "aedes": "^0.51.3",

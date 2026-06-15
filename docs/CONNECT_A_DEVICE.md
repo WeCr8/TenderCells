@@ -65,6 +65,37 @@ curl http://localhost:4000/api/mqtt/devices/sim_001/state
 `doorState` flips `closed → open`. That is the full loop: command → broker → device →
 state → REST.
 
+### Or use the `tc` CLI (for advanced users and agents)
+
+`curl` works, but the repo ships a real CLI — `tools/tc.mjs` — that wraps every
+endpoint, prints human output by default, and prints machine JSON + meaningful exit
+codes under `--json`. That last part is the point for **agent control**: an AI agent
+or shell script can call `tc … --json`, parse the result, and branch on the exit code
+(0 ok, 1 command/validation error, 2 API unreachable).
+
+```bash
+# from express-api/ (server must be running)
+npm run tc -- status                 # broker + known devices
+npm run tc -- telemetry sim_001
+npm run tc -- door sim_001 open
+npm run tc -- feed sim_001 100
+npm run tc -- arm sim_001 --joints 0,45,90,0,45,0 --speed 0.3
+npm run tc -- estop sim_001          # emergency stop
+npm run tc -- watch sim_001          # live poll
+
+# install it as a global `tc` command:
+npm link        # then:  tc status   /   tc door sim_001 open
+
+# agent / script style — JSON out, exit code in:
+tc telemetry sim_001 --json          # {"deviceId":...,"data":{...}}  exit 0
+tc door sim_001 sideways --json      # {"ok":false,"error":...}       exit 1
+TC_API=http://coop.local:4000 tc status --json   # target a remote API
+```
+
+Full command list: `tc help`. The CLI only ever calls the REST API, so it honors the
+same MQTT control path and safety rules — `tc estop` cuts motion via the retained
+E-STOP topic just like the dashboard's E-STOP button.
+
 ### Prove it in one shot
 
 ```bash

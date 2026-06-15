@@ -145,6 +145,13 @@ npm run simulate   # terminal 2: a virtual device
 npm run smoke      # terminal 3: proves the loop end-to-end ("✓ SMOKE PASS")
 ```
 
+Drive devices from the command line (scriptable, agent-friendly with `--json`):
+
+```bash
+npm run tc -- status                 # broker + known devices
+npm run tc -- door sim_001 open      # or `npm link` then: tc door sim_001 open
+```
+
 Full runbook — virtual device, your own ESP32, topic/payload tables, troubleshooting:
 **[docs/CONNECT_A_DEVICE.md](docs/CONNECT_A_DEVICE.md)**.
 

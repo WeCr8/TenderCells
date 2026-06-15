@@ -1,0 +1,48 @@
+/* Developer page — code samples and reference helpers. */
+.code-sample {
+  background: #0d2b1e;
+  color: #f0ede4;
+  border: 1px solid #4a7c59;
+  border-radius: 10px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre;
+  margin: 0 0 1rem;
+}
+
+.code-label {
+  font-weight: 700;
+  color: #1a3d2b;
+  margin: 0 0 0.35rem;
+}
+
+.method {
+  display: inline-block;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 1px 8px;
+  border-radius: 5px;
+  color: #fff;
+}
+.method.get { background: #2f6f4f; }
+.method.post { background: #b9892f; }
+
+.dev-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 0 0 2rem;
+}
+.dev-toc a {
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: #1a3d2b;
+  border: 1px solid #cdd9cf;
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+.dev-toc a:hover { background: #eef3ee; }

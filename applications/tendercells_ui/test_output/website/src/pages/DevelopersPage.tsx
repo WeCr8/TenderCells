@@ -1,11 +1,62 @@
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
+import "./DevelopersPage.css";
 
 const quickLinks = [
   ["GitHub repository", "https://github.com/WeCr8/TenderCells"],
   ["Live public demo", "/app/demo"],
+  ["Flash a device", "/flash"],
   ["Good first issues", "https://github.com/WeCr8/TenderCells/labels/good%20first%20issue"],
   ["Discussions", "https://github.com/WeCr8/TenderCells/discussions"],
+];
+
+// On-page jump links — mirrors mature open-robotics dev portals.
+const toc = [
+  ["Quick start", "#quickstart"],
+  ["Architecture", "#architecture"],
+  ["Tech stack", "#stack"],
+  ["REST API", "#rest"],
+  ["MQTT topics", "#mqtt"],
+  ["Code examples", "#examples"],
+  ["CLI", "#cli"],
+  ["Hardware", "#hardware"],
+  ["Contributing", "#contributing"],
+];
+
+// Tech stack — matches the project's actual layers.
+const stack = [
+  ["Web / dashboard", "React + Vite + TypeScript", "applications/tendercells_ui/test_output/tendercells-ui"],
+  ["Mobile app", "React Native (Expo), Zustand", "app/"],
+  ["API / MQTT bridge", "Express (Node 18) → MQTT", "applications/.../express-api"],
+  ["Backend / auth", "Firebase Auth, Firestore, Functions", "functions/"],
+  ["Real-time control", "MQTT (Mosquitto) on Raspberry Pi", "tc/{deviceId}/…"],
+  ["Coop firmware", "ESP32 / ESP32-S3, Arduino + PlatformIO", "firmware/"],
+  ["Edge AI / vision", "ESP32-S3, TensorFlow Lite Micro", "firmware/watchtower"],
+];
+
+// REST reference (express-api, base http://localhost:3001/api/mqtt).
+const restApi = [
+  ["GET", "/devices/{id}/telemetry", "Sensor data: temp, humidity, ammonia, feed, water, count"],
+  ["GET", "/devices/{id}/state", "System state: idle | running | error | estop"],
+  ["GET", "/devices/{id}/alerts", "Active alerts (predator / fault / health)"],
+  ["POST", "/devices/{id}/door", `Open/close door — {"state":"open"|"close"}`],
+  ["POST", "/devices/{id}/feed", `Dispense feed — {"amount": grams}`],
+  ["POST", "/devices/{id}/clean", `Cleaning cycle — {"action":"start"|"stop"}`],
+  ["POST", "/devices/{id}/arm", `6DOF arm — {"joints":[...],"speed":0-1}`],
+  ["POST", "/devices/{id}/estop", "Emergency stop — cuts all actuators (QoS 2, retained)"],
+  ["GET", "/mqtt/status", "Broker connection + device list"],
+];
+
+// MQTT topic contracts (deviceId-scoped).
+const mqttTopics = [
+  ["tc/{id}/cmd/arm", "1", "Joint angle commands"],
+  ["tc/{id}/cmd/door", "1", "open | close"],
+  ["tc/{id}/cmd/feed", "1", "Dispense amount (g)"],
+  ["tc/{id}/cmd/clean", "1", "start | stop cleaning cycle"],
+  ["tc/{id}/cmd/estop", "2 · retain", "EMERGENCY STOP"],
+  ["tc/{id}/state", "1", "Device publishes state transitions"],
+  ["tc/{id}/sensors", "0", "10s telemetry / Starter Node heartbeat"],
+  ["tc/{id}/alert", "2", "Predator / fault alerts"],
 ];
 
 const sections = [
@@ -138,6 +189,111 @@ export default function DevelopersPage() {
         ))}
       </div>
 
+      <nav className="dev-toc" aria-label="Developer sections">
+        {toc.map(([label, href]) => (
+          <a key={href} href={href}>{label}</a>
+        ))}
+      </nav>
+
+      <h2 className="section-title" id="quickstart">Quick Start</h2>
+      <div className="prose">
+        <p>From clone to a live device talking to the dashboard:</p>
+      </div>
+      <pre className="code-sample">{`# 1. Clone + install
+git clone https://github.com/WeCr8/TenderCells.git
+cd TenderCells
+
+# 2. Run the stack (embedded MQTT broker + API + sim devices)
+cd applications/tendercells_ui/test_output/express-api && npm install && npm run dev   # :3001
+cd ../tendercells-ui && npm install && npm run dev                                     # :5173
+
+# 3. Flash a real board (no installs) — Chrome/Edge:
+#    https://tendercells.com/flash   → set WiFi + broker IP in the portal
+#    or build firmware: cd firmware/starter-node && pio run -t upload
+
+# 4. See it: open the dashboard, the device appears and streams telemetry.`}</pre>
+      <div className="prose">
+        <p>No hardware yet? The <a href="/app/demo">public demo</a> seeds simulated devices, flocks,
+          schedules, and egg maps in your browser — no signup, no backend.</p>
+      </div>
+
+      <h2 className="section-title" id="architecture">Architecture</h2>
+      <div className="prose">
+        <p>Local-first control: motion never routes through the cloud. Commands take the fast LAN path
+          over MQTT; only alerts and history sync to the cloud.</p>
+      </div>
+      <pre className="code-sample">{`  app / web / tc CLI ──▶ REST (Express :3001) ──▶ MQTT broker ──▶ ESP32 device
+                                                      ▲                │
+                                                      └── sensors/state/alerts ──┘
+  Firebase (auth, history, alerts)  ◀── cloud sync (non-realtime)`}</pre>
+
+      <h2 className="section-title" id="stack">Tech Stack</h2>
+      <table className="info-table">
+        <thead><tr><th>Layer</th><th>Technology</th><th>Path</th></tr></thead>
+        <tbody>
+          {stack.map(([layer, tech, path]) => (
+            <tr key={layer}><td>{layer}</td><td>{tech}</td><td><code>{path}</code></td></tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2 className="section-title" id="rest">REST API</h2>
+      <div className="prose">
+        <p>The Express bridge exposes hardware control over HTTP. Base:
+          <code>http://localhost:3001/api/mqtt</code>. Commands are forwarded to the device over MQTT.</p>
+      </div>
+      <table className="info-table">
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead>
+        <tbody>
+          {restApi.map(([m, ep, desc]) => (
+            <tr key={ep}>
+              <td><span className={`method ${m.toLowerCase()}`}>{m}</span></td>
+              <td><code>{ep}</code></td>
+              <td>{desc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2 className="section-title" id="mqtt">MQTT Topics</h2>
+      <div className="prose">
+        <p>Devices speak MQTT directly. Topics are <code>deviceId</code>-scoped. E-STOP is QoS 2 and
+          retained so a reconnecting device always receives an active stop.</p>
+      </div>
+      <table className="info-table">
+        <thead><tr><th>Topic</th><th>QoS</th><th>Payload / meaning</th></tr></thead>
+        <tbody>
+          {mqttTopics.map(([t, qos, desc]) => (
+            <tr key={t}><td><code>{t}</code></td><td>{qos}</td><td>{desc}</td></tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2 className="section-title" id="examples">Code Examples</h2>
+      <p className="code-label">Read telemetry (curl)</p>
+      <pre className="code-sample">{`curl http://localhost:3001/api/mqtt/devices/ct_001/telemetry`}</pre>
+      <p className="code-label">Open the coop door</p>
+      <pre className="code-sample">{`curl -X POST http://localhost:3001/api/mqtt/devices/ct_001/door \\
+  -H "Content-Type: application/json" \\
+  -d '{"state":"open"}'`}</pre>
+      <p className="code-label">Subscribe to live sensors (Node, mqtt.js)</p>
+      <pre className="code-sample">{`import mqtt from "mqtt";
+const c = mqtt.connect("mqtt://localhost:1883");
+c.on("connect", () => c.subscribe("tc/ct_001/sensors"));
+c.on("message", (t, m) => console.log(t, JSON.parse(m.toString())));`}</pre>
+      <p className="code-label">Emergency stop (always QoS 2 + retain)</p>
+      <pre className="code-sample">{`curl -X POST http://localhost:3001/api/mqtt/devices/ct_001/estop`}</pre>
+
+      <h2 className="section-title" id="cli">Command-Line (tc)</h2>
+      <div className="prose">
+        <p>The <code>tc</code> CLI ships with the express-api package for scripting and diagnostics:</p>
+      </div>
+      <pre className="code-sample">{`tc status                 # list connected devices + broker state
+tc devices                # registered device IDs
+tc telemetry ct_001       # latest sensor readings
+tc door ct_001 open       # send a command
+tc estop ct_001           # emergency stop`}</pre>
+
       <h2 className="section-title">Developer Map</h2>
       <div className="card-grid">
         {sections.map((section) => (
@@ -202,6 +358,21 @@ export default function DevelopersPage() {
             <h3><code>{doc}</code></h3>
           </div>
         ))}
+      </div>
+
+      <h2 className="section-title" id="contributing">Contributing</h2>
+      <div className="prose">
+        <p>TenderCells is Apache-2.0 open source. Good first contributions: a new
+          <code>peripheral</code> sensor driver, a product-folder doc, a simulator example, or an
+          MQTT contract. Safety rules are non-negotiable in review:</p>
+        <ul>
+          <li>Motion commands go over MQTT, never Firebase.</li>
+          <li>E-STOP stays QoS 2 + retained; never remove the handler.</li>
+          <li>No hardcoded WiFi creds, API keys, or device IDs (CI secret-scan blocks them).</li>
+          <li>Firmware: watchdog armed, non-blocking reconnect, no <code>delay()</code> &gt; 50ms, steppers disabled when idle.</li>
+          <li>UI hardware actions go through a confirmation modal.</li>
+        </ul>
+        <p>Open a PR against <code>main</code>; CI runs type-check, tests, firmware build, and secret-scan.</p>
       </div>
 
       <h2 className="section-title" id="next">What To Build Next</h2>

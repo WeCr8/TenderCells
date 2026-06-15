@@ -7,6 +7,9 @@ export interface SearchEntry {
   path: string;
   description: string;
   keywords: string[];
+  // Static/non-router path (e.g. /flash) — render as a real <a> for a full page
+  // load instead of a client-side react-router <Link>.
+  external?: boolean;
 }
 
 export const SEARCH_INDEX: SearchEntry[] = [
@@ -37,7 +40,8 @@ export const SEARCH_INDEX: SearchEntry[] = [
   { title: "Applications", path: "/apps", description: "Mobile app, web dashboard, developer API, MQTT integration.", keywords: ["app", "ios", "android", "dashboard", "api", "mqtt"] },
   { title: "Public Demo", path: "/demo", description: "No-signup browser demo of the Tender Cells app.", keywords: ["demo", "try", "app demo", "test"] },
   { title: "Developers", path: "/developers", description: "API, firmware, hardware, simulation, and contribution routes.", keywords: ["developers", "api", "firmware", "code", "docs"] },
-  { title: "Open Source", path: "/open-source", description: "Firmware, app source, schematics, STL files, and how to contribute.", keywords: ["open source", "github", "firmware", "stl", "contribute", "license", "flash"] },
+  { title: "Open Source", path: "/open-source", description: "Firmware, app source, schematics, STL files, and how to contribute.", keywords: ["open source", "github", "firmware", "stl", "contribute", "license"] },
+  { title: "⚡ Flash a Device", path: "/flash", description: "Browser flasher — install Tender Cells firmware onto an ESP32 (XIAO ESP32-S3 or ESP32-WROOM) right from Chrome or Edge.", keywords: ["flash", "flasher", "firmware", "esp32", "xiao", "wroom", "install", "webserial", "starter node", "device", "burn", "upload"], external: true },
 
   // Learn / guides
   { title: "Learn More", path: "/learn", description: "Getting started, how it works, documentation, and support.", keywords: ["learn", "getting started", "docs", "support", "help"] },

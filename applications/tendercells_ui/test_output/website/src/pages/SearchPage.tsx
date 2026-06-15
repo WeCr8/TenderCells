@@ -36,9 +36,15 @@ export default function SearchPage() {
         <ul className="search-list">
           {results.map((r) => (
             <li key={r.path} className="search-item">
-              <Link to={r.path} className="search-item-title">
-                {r.title}
-              </Link>
+              {r.external ? (
+                <a href={r.path} className="search-item-title">
+                  {r.title}
+                </a>
+              ) : (
+                <Link to={r.path} className="search-item-title">
+                  {r.title}
+                </Link>
+              )}
               <span className="search-item-path">{r.path}</span>
               <p className="search-item-desc">{r.description}</p>
             </li>

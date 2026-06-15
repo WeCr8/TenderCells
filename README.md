@@ -135,15 +135,27 @@ tender-cells/
 ### Connect a device (no hardware needed)
 
 Run the real control plane — embedded MQTT broker + API bridge + a virtual device —
-and watch sensor data flow up and commands flow down:
+and watch sensor data flow up and commands flow down. **One command does it all:**
 
 ```bash
 cd applications/tendercells_ui/test_output/express-api
 npm install
+npm run demo       # broker + API + a virtual coop, together. Ctrl+C stops all.
+```
+
+> New to this / teaching it? Start with the **[Classroom Quickstart](docs/CLASSROOM_QUICKSTART.md)**
+> — step-by-step for students, science fairs, and robotics competitions, no jargon.
+
+Prefer the pieces separately:
+
+```bash
 npm run dev        # terminal 1: embedded broker (:1883) + API (:4000)
 npm run simulate   # terminal 2: a virtual device
 npm run smoke      # terminal 3: proves the loop end-to-end ("✓ SMOKE PASS")
 ```
+
+`npm run demo` binds to the LAN so a phone or another laptop can open the printed URL
+(`LOCAL=1` keeps it private). With `npm run dev`, set `HOST=0.0.0.0` for the same.
 
 Drive devices from the command line (scriptable, agent-friendly with `--json`):
 

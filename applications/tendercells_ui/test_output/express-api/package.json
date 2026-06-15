@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "tsx backend/src/server.ts",
+    "demo": "node tools/demo.mjs",
     "build": "tsc",
     "start": "node dist/server.js",
     "simulate": "node tools/simulate-device.mjs",

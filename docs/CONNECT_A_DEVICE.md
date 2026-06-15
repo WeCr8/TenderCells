@@ -33,6 +33,31 @@ Motion/sensor data **never** routes through Firebase — MQTT is the control pat
 
 ---
 
+## Fastest start — one command
+
+```bash
+cd applications/tendercells_ui/test_output/express-api
+npm install
+npm run demo         # broker + API + a virtual coop, all together
+```
+
+That boots everything and prints a URL. Leave it running, open a second terminal:
+
+```bash
+npm run tc -- telemetry demo_coop      # live sensor data
+npm run tc -- door demo_coop open       # send a command
+```
+
+`Ctrl+C` stops all of it. `npm run demo` binds to the **whole network by default** so a
+phone or a second laptop at a science fair can open the printed `LAN:` URL. Add
+`LOCAL=1 npm run demo` to keep it on this machine only. Override the API port with
+`PORT=4100 npm run demo`.
+
+The rest of this page is the manual, piece-by-piece version — useful when you want to
+run a device on a different machine, bring your own ESP32, or understand the parts.
+
+---
+
 ## Quick start (zero hardware, ~2 minutes)
 
 ```bash
@@ -40,6 +65,17 @@ cd applications/tendercells_ui/test_output/express-api
 npm install
 npm run dev          # starts embedded broker (:1883) + API (:4000)
 ```
+
+By default the API binds to loopback (`127.0.0.1`) — reachable only from this machine.
+To let other devices on the network reach it (classroom, science fair), expose it:
+
+```bash
+HOST=0.0.0.0 npm run dev     # or: LAN=1 npm run dev
+```
+
+The startup banner prints a `LAN:` URL (e.g. `http://192.168.1.42:4000`) — that is the
+address a phone, a judge's tablet, or a second laptop opens. `npm run demo` does this
+automatically.
 
 In a second terminal, start a virtual device:
 

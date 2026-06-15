@@ -9,8 +9,23 @@ import './broker.js';
 
 import express from 'express';
 import cors from 'cors';
+import os from 'node:os';
 import mqttRoutes from './routes/mqtt.routes.js';
 import productsRoutes from './routes/products.routes.js';
+
+/**
+ * First non-internal IPv4 address, so we can print a URL other devices on the
+ * same network (a phone, a second laptop, a judge's tablet at a science fair)
+ * can actually open. Returns null if only loopback is available.
+ */
+function lanAddress(): string | null {
+  for (const ifaces of Object.values(os.networkInterfaces())) {
+    for (const i of ifaces ?? []) {
+      if (i.family === 'IPv4' && !i.internal) return i.address;
+    }
+  }
+  return null;
+}
 
 // Firebase optional - MQTT is primary control path
 try {
@@ -24,6 +39,10 @@ try {
 
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
+// Bind to loopback by default (safe). Set HOST=0.0.0.0 (or LAN=1) to expose the
+// API to other devices on the network — needed for science-fair / classroom setups
+// where the dashboard or a phone runs on a different machine than the coop.
+const HOST = process.env.HOST || (process.env.LAN === '1' ? '0.0.0.0' : '127.0.0.1');
 
 app.use(cors());
 app.use(express.json());
@@ -56,11 +75,16 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-app.listen(PORT, '127.0.0.1', () => {
+app.listen(PORT, HOST, () => {
+  const lan = HOST === '0.0.0.0' ? lanAddress() : null;
+  const lanLine = lan
+    ? `║  LAN:   http://${lan}:${PORT}  (open this on a phone / other laptop)`
+    : `║  (loopback only — set HOST=0.0.0.0 to reach from other devices)`;
   console.log(`
 ╔════════════════════════════════════════════════════════╗
 ║  Tender Cells API Server                              ║
-║  http://localhost:${PORT}                                 ║
+║  Local: http://localhost:${PORT}
+${lanLine}
 ╚════════════════════════════════════════════════════════╝
 
 Endpoints:

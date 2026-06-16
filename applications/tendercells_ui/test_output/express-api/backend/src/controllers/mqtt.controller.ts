@@ -558,6 +558,18 @@ export class MQTTController {
     });
   }
 
+  // Publish a command from server-side code (e.g. the schedule runner). Returns
+  // false if the broker isn't connected. Local MQTT only, same as the HTTP handlers.
+  static publishCommand(deviceId: string, suffix: string, payload: Record<string, unknown>): boolean {
+    if (!MQTTController.client?.connected) return false;
+    MQTTController.client.publish(
+      `tc/${deviceId}/cmd/${suffix}`,
+      JSON.stringify({ ...payload, timestamp: Date.now() }),
+      { qos: 1 },
+    );
+    return true;
+  }
+
   getMQTTStatus(req: Request, res: Response) {
     const connected = MQTTController.client?.connected || false;
     // FIX(2026-06-15): default to the embedded broker's actual port (MQTT_PORT).

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tender Cells 3D Viewer — see your model & watch it move</title>
+<meta name="description" content="Drag in an STL, OBJ, or glTF/GLB file to see it in 3D. Animated glTF files play their movement." />
+<style>
+  :root{--bg:#0D2B1E;--surface:#1A3D2B;--accent:#4A7C59;--gold:#C8B882;--goldMuted:#8A7D55;--white:#F0EDE4;--danger:#CC3333;}
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--white);font-family:system-ui,Segoe UI,Roboto,sans-serif;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--accent);}
+  .brand{color:var(--gold);font-weight:800;text-decoration:none;}
+  .topbar a{color:var(--white);text-decoration:none;font-size:.9rem;margin-left:14px;}
+  .topbar a:hover{color:var(--gold);}
+  #stage{position:relative;height:calc(100vh - 52px);}
+  #drop{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;
+        border:2px dashed var(--accent);margin:16px;border-radius:16px;background:rgba(26,61,43,.4);}
+  #drop.hide{display:none;}
+  #drop h1{color:var(--gold);margin:0 0 8px;}
+  #drop p{color:var(--goldMuted);max-width:520px;}
+  .btn{display:inline-block;background:var(--gold);color:var(--bg);font-weight:800;padding:12px 22px;border:none;border-radius:12px;cursor:pointer;font-size:1rem;margin-top:8px;}
+  #hud{position:absolute;left:16px;bottom:16px;background:rgba(13,43,30,.85);border:1px solid var(--accent);border-radius:12px;padding:12px 14px;display:none;gap:10px;align-items:center;flex-wrap:wrap;max-width:92vw;}
+  #hud.show{display:flex;}
+  #hud button,#hud label{background:var(--surface);color:var(--gold);border:1px solid var(--accent);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:.9rem;}
+  #hud .name{color:var(--white);font-size:.85rem;}
+  #hud select{background:var(--surface);color:var(--white);border:1px solid var(--accent);border-radius:8px;padding:7px;}
+  #err{color:var(--danger);font-size:.85rem;}
+  canvas{display:block;}
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <a class="brand" href="/">🐔 Tender Cells</a>
+  <div>
+    <a href="/flash">Flash</a>
+    <a href="/demo">App Demo</a>
+    <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</nav>
+
+<div id="stage">
+  <div id="drop">
+    <div>
+      <h1>🧊 3D Model Viewer</h1>
+      <p>Drag a file here — or pick one. See it in 3D, spin it, zoom in.
+         Export from Fusion / OpenSCAD / Tinkercad. Animated <b>glTF/GLB</b> files
+         play their movement.</p>
+      <p style="font-size:.85rem">Supported: <b>.stl</b> · <b>.obj</b> · <b>.gltf</b> · <b>.glb</b>. Everything stays on your computer — nothing uploads.</p>
+      <input id="file" type="file" accept=".stl,.obj,.gltf,.glb" hidden />
+      <button class="btn" onclick="document.getElementById('file').click()">Choose a file</button>
+      <div id="err"></div>
+    </div>
+  </div>
+
+  <div id="hud">
+    <span class="name" id="fname"></span>
+    <button id="spin">⏸ Auto-spin</button>
+    <button id="reset">⟳ Reset view</button>
+    <span id="anim" style="display:none;align-items:center;gap:6px;">
+      <label for="clip">Animation</label>
+      <select id="clip"></select>
+      <button id="play">▶ Play</button>
+    </span>
+    <button onclick="document.getElementById('file').click()">📂 Open another</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+const stage = document.getElementById('stage');
+const drop  = document.getElementById('drop');
+const hud   = document.getElementById('hud');
+const errEl = document.getElementById('err');
+
+let renderer, scene, camera, controls, current, mixer, clock, autoSpin = true, spinTarget = null;
+
+function init(){
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0D2B1E);
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth/(window.innerHeight-52), 0.01, 5000);
+  camera.position.set(120,90,120);
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight-52);
+  stage.appendChild(renderer.domElement);
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x223322, 1.1));
+  const d = new THREE.DirectionalLight(0xffffff, 0.9); d.position.set(1,2,1); scene.add(d);
+  scene.add(new THREE.GridHelper(400, 20, 0x4A7C59, 0x1A3D2B));
+  clock = new THREE.Clock();
+  animate();
+  window.addEventListener('resize', onResize);
+}
+function onResize(){
+  camera.aspect = window.innerWidth/(window.innerHeight-52); camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight-52);
+}
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  if (mixer) mixer.update(dt);
+  if (autoSpin && spinTarget) spinTarget.rotation.y += dt*0.6;
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+// Frame the object: center it and move the camera to fit its size.
+function frame(obj){
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  obj.position.sub(center);                 // center at origin
+  const max = Math.max(size.x,size.y,size.z) || 1;
+  const dist = max * 2.2;
+  camera.position.set(dist, dist*0.8, dist);
+  camera.near = max/100; camera.far = max*100; camera.updateProjectionMatrix();
+  controls.target.set(0,0,0); controls.update();
+}
+
+function clearCurrent(){
+  if (current){ scene.remove(current); current = null; }
+  mixer = null; spinTarget = null;
+  document.getElementById('anim').style.display = 'none';
+  document.getElementById('clip').innerHTML = '';
+}
+
+function show(obj, clips){
+  clearCurrent();
+  current = obj; spinTarget = obj; scene.add(obj);
+  frame(obj);
+  drop.classList.add('hide'); hud.classList.add('show');
+  if (clips && clips.length){
+    mixer = new THREE.AnimationMixer(obj);
+    const sel = document.getElementById('clip'); sel.innerHTML='';
+    clips.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=c.name||('clip '+i); sel.appendChild(o); });
+    document.getElementById('anim').style.display='inline-flex';
+    window._clips = clips;
+  }
+}
+
+function loadFile(file){
+  errEl.textContent='';
+  document.getElementById('fname').textContent = file.name;
+  const name = file.name.toLowerCase();
+  const reader = new FileReader();
+  reader.onerror = ()=> errEl.textContent = 'Could not read file.';
+  if (name.endsWith('.stl')){
+    reader.onload = e => {
+      try{
+        const geo = new THREE.STLLoader().parse(e.target.result);
+        geo.computeVertexNormals();
+        const mat = new THREE.MeshStandardMaterial({color:0xC8B882, metalness:0.1, roughness:0.7});
+        show(new THREE.Mesh(geo, mat));
+      }catch(ex){ errEl.textContent='Bad STL: '+ex.message; }
+    };
+    reader.readAsArrayBuffer(file);
+  } else if (name.endsWith('.obj')){
+    reader.onload = e => {
+      try{ show(new THREE.OBJLoader().parse(e.target.result)); }
+      catch(ex){ errEl.textContent='Bad OBJ: '+ex.message; }
+    };
+    reader.readAsText(file);
+  } else if (name.endsWith('.gltf') || name.endsWith('.glb')){
+    reader.onload = e => {
+      new THREE.GLTFLoader().parse(e.target.result, '', g => show(g.scene, g.animations),
+        ex => errEl.textContent='Bad glTF: '+ex.message);
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    errEl.textContent = 'Unsupported file. Use STL, OBJ, glTF, or GLB.';
+  }
+}
+
+// Wire UI
+document.getElementById('file').addEventListener('change', e => e.target.files[0] && loadFile(e.target.files[0]));
+['dragover','dragenter'].forEach(ev => stage.addEventListener(ev, e=>{e.preventDefault();}));
+stage.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+document.getElementById('spin').addEventListener('click', e=>{ autoSpin=!autoSpin; e.target.textContent=(autoSpin?'⏸':'▶')+' Auto-spin'; });
+document.getElementById('reset').addEventListener('click', ()=> current && frame(current));
+document.getElementById('play').addEventListener('click', ()=>{
+  if (!mixer || !window._clips) return;
+  const i = +document.getElementById('clip').value;
+  mixer.stopAllAction();
+  mixer.clipAction(window._clips[i]).reset().play();
+});
+
+init();
+</script>
+</body>
+</html>

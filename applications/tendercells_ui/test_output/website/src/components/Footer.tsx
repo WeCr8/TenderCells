@@ -5,8 +5,9 @@ const footerGroups = [
   {
     title: "Learn",
     links: [
-      { label: "🐣 Start Here (ages 7+)", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/lessons/00-your-first-coop-brain.md" },
-      { label: "🗺️ Learning Tracks", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/LEARNING_TRACKS.md" },
+      { label: "🐣 Start Here (ages 7+)", to: "/lessons/your-first-coop-brain" },
+      { label: "🗺️ Learning Tracks", to: "/lessons/learning-tracks" },
+      { label: "🧱 All Lessons", to: "/lessons" },
       { label: "Audiences", to: "/audiences" },
       { label: "Academy", to: "/academy" },
       { label: "4-H Projects", to: "/4h" },
@@ -28,7 +29,7 @@ const footerGroups = [
       { label: "Open Source", to: "/open-source" },
       { label: "Flash a Device", href: "/flash" },
       { label: "3D Model Viewer", href: "/viewer" },
-      { label: "Hands-on Lessons", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/lessons" },
+      { label: "Hands-on Lessons", to: "/lessons" },
       { label: "Public Demo", to: "/app/demo" },
       { label: "GitHub", href: "https://github.com/WeCr8/TenderCells" },
     ],

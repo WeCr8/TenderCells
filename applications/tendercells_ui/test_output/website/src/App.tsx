@@ -5,6 +5,8 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import EducationPage from "./pages/EducationPage";
 import ApplicationsPage from "./pages/ApplicationsPage";
 import LearnPage from "./pages/LearnPage";
+import LessonsPage from "./pages/LessonsPage";
+import LessonPage from "./pages/LessonPage";
 import HomesteadingPage from "./pages/HomesteadingPage";
 import AutomationPage from "./pages/AutomationPage";
 import FaqPage from "./pages/FaqPage";
@@ -72,6 +74,8 @@ function App() {
 
         {/* Learn */}
         <Route path="/learn" element={<LearnPage />} />
+        <Route path="/lessons" element={<LessonsPage />} />
+        <Route path="/lessons/:slug" element={<LessonPage />} />
         <Route path="/learn/homesteading" element={<HomesteadingPage />} />
         <Route path="/learn/automation" element={<AutomationPage />} />
         <Route path="/learn/faq" element={<FaqPage />} />

@@ -23,6 +23,11 @@ router.get("/devices/:deviceId/state", ...owns, (req: Request, res: Response) =>
   controller.getState(req, res);
 });
 
+// Live arm/gantry sub-state for the control UI (sliders, 3D viewport).
+router.get("/devices/:deviceId/state/:sub", ...owns, (req: Request, res: Response) => {
+  controller.getSubState(req, res);
+});
+
 router.get("/devices/:deviceId/alerts", ...owns, (req: Request, res: Response) => {
   controller.getAlerts(req, res);
 });

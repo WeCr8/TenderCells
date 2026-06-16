@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { TENDERCELLS_APP_ENTRY_URL } from "../config/appLinks";
+import { searchSite } from "../data/searchIndex";
 import "./Header.css";
 
 interface NavChild {
@@ -131,15 +132,29 @@ export default function Header() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Live suggestions as the user types (>=2 chars). Top 6 matches from the index.
+  const suggestions =
+    searchValue.trim().length >= 2 ? searchSite(searchValue).slice(0, 6) : [];
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = searchValue.trim();
     if (!q) return;
+    setSearchFocused(false);
     closeAll();
     navigate(`/search?q=${encodeURIComponent(q)}`);
+  };
+
+  const pickSuggestion = (path: string, external?: boolean) => {
+    setSearchValue("");
+    setSearchFocused(false);
+    closeAll();
+    if (external) window.location.href = path;
+    else navigate(path);
   };
 
   useEffect(() => {
@@ -184,17 +199,34 @@ export default function Header() {
             <span className="logo-text">Tender Cells</span>
           </Link>
 
-          <form className="header-search" onSubmit={submitSearch} role="search">
+          <form className="header-search" onSubmit={submitSearch} role="search" autoComplete="off">
             <input
               type="search"
               placeholder="What are you looking for?"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
               aria-label="Site search"
             />
             <button type="submit" className="header-search-btn" aria-label="Search">
               🔍
             </button>
+            {searchFocused && suggestions.length > 0 && (
+              <ul className="search-suggest" id="search-suggest">
+                {suggestions.map((s) => (
+                  <li key={s.path}>
+                    <button type="button" onClick={() => pickSuggestion(s.path, s.external)}>
+                      <span className="ss-title">{s.title}</span>
+                      <span className="ss-desc">{s.description}</span>
+                    </button>
+                  </li>
+                ))}
+                <li className="ss-all">
+                  <button type="button" onClick={submitSearch}>See all results for “{searchValue.trim()}” →</button>
+                </li>
+              </ul>
+            )}
           </form>
 
           <div className="header-shipping-badge">

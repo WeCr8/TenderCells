@@ -52,7 +52,44 @@
   min-width: 0;
   display: flex;
   gap: 0.4rem;
+  position: relative;
 }
+
+/* Live search suggestions dropdown */
+.search-suggest {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #4A7C59;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.search-suggest li { margin: 0; }
+.search-suggest button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.search-suggest button:hover { background: #f0ede4; }
+.search-suggest .ss-title { display: block; font-weight: 600; color: #0D2B1E; font-size: 0.92rem; }
+.search-suggest .ss-desc {
+  display: block; color: #5a6b5e; font-size: 0.78rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.search-suggest .ss-all button { color: #4A7C59; font-weight: 700; font-size: 0.85rem; }
 .header-search input {
   width: 100%;
   padding: 0.5rem 0.9rem;

@@ -47,6 +47,9 @@ static const int BTN_PIN = 0;
 static const int PIN_DOOR_SERVO  = 2;   // D1 — door (peripheral=door)
 static const int PIN_DRIVE_LEFT  = 3;   // D2 — left drive servo  (peripheral=drive)
 static const int PIN_DRIVE_RIGHT = 4;   // D3 — right drive servo (peripheral=drive)
+// peripheral=relay → a relay module drives any farm load: heat lamp, water pump,
+// grow light, ventilation fan. Active-HIGH; wire relay IN to this pin.
+static const int PIN_RELAY       = 5;   // D4 — relay (peripheral=relay)
 
 static const int DOOR_OPEN_DEG  = 90;   // matches Chicken Tender coop door
 static const int DOOR_CLOSE_DEG = 0;
@@ -96,8 +99,10 @@ Servo driveLeft;
 Servo driveRight;
 bool doorEnabled  = false;
 bool driveEnabled = false;
+bool relayEnabled = false;
 String doorState = "closed";          // reported in heartbeat
 String driveDir  = "stop";            // last drive direction
+bool relayOn = false;                 // relay/light state
 unsigned long lastDriveCmd = 0;       // for the deadman stop
 
 volatile bool eStopActive = false;
@@ -123,6 +128,14 @@ String topicEstop()   { return "tc/" + deviceId + "/cmd/estop"; }
 String topicAlert()   { return "tc/" + deviceId + "/alert"; }
 String topicDoor()    { return "tc/" + deviceId + "/cmd/door"; }
 String topicDrive()   { return "tc/" + deviceId + "/cmd/drive"; }
+String topicLight()   { return "tc/" + deviceId + "/cmd/light"; }
+
+// Relay/light: drive any farm load on/off (heat lamp, pump, fan, grow light).
+void applyLight(bool on) {
+  if (!relayEnabled || eStopActive) return;
+  relayOn = on;
+  digitalWrite(PIN_RELAY, on ? HIGH : LOW);
+}
 
 // ── Actuators ────────────────────────────────────────────────────────────────
 // Stop both drive servos (center = no rotation). Safe to call even if not attached.
@@ -195,6 +208,7 @@ void publishHeartbeat() {
   // Report live actuator state so the dashboard shows door/rover position.
   if (doorEnabled)  doc["doorState"] = doorState;
   if (driveEnabled) doc["driveDir"]  = driveDir;
+  if (relayEnabled) doc["relayOn"]   = relayOn;
   doc["freeHeap"]     = ESP.getFreeHeap();
   doc["ts"]           = millis();
   char buf[256];
@@ -226,6 +240,7 @@ void enterEStop() {
   if (eStopActive) return;
   eStopActive = true;
   stopDrive();          // freeze the rover instantly — motion is the hazard
+  if (relayEnabled) { digitalWrite(PIN_RELAY, LOW); relayOn = false; }  // cut load
   setLed(false);
   publishState("estop");
   Serial.println("[ESTOP] active — node frozen until cleared");
@@ -254,6 +269,8 @@ void onMqttMessage(char* topic, byte* payload, unsigned int len) {
     applyDoor(doc["state"] | "close");
   } else if (driveEnabled && String(topic) == topicDrive()) {
     applyDrive(doc["dir"] | "stop", doc["speed"] | 0.5f);
+  } else if (relayEnabled && String(topic) == topicLight()) {
+    applyLight(doc["on"] | false);
   }
 }
 
@@ -263,6 +280,7 @@ void subscribeCommands() {
   // Only subscribe to the actuator this board actually carries.
   if (doorEnabled)  mqtt.subscribe(topicDoor().c_str(), 1);
   if (driveEnabled) mqtt.subscribe(topicDrive().c_str(), 1);
+  if (relayEnabled) mqtt.subscribe(topicLight().c_str(), 1);
 }
 
 bool reconnectMqtt() {
@@ -418,6 +436,11 @@ void setup() {
     stopDrive();         // never roll on boot
     Serial.printf("[ACT] drive servos on GPIO%d/%d (basic Roaming Roost)\n",
                   PIN_DRIVE_LEFT, PIN_DRIVE_RIGHT);
+  } else if (peripheral == "relay") {
+    relayEnabled = true;
+    pinMode(PIN_RELAY, OUTPUT);
+    digitalWrite(PIN_RELAY, LOW);  // load OFF on boot
+    Serial.printf("[ACT] relay on GPIO%d (heat lamp / pump / fan / light)\n", PIN_RELAY);
   }
 
   // Now arm the watchdog for the steady-state loop().

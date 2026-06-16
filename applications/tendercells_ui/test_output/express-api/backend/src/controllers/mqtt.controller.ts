@@ -52,6 +52,8 @@ const SCHEMAS: Record<string, Schema> = {
     dir:   { type: "string", required: true, values: ["forward", "back", "left", "right", "stop"] },
     speed: { type: "number", required: false, min: 0, max: 1 },
   },
+  // Relay/light: any farm load on/off (heat lamp, water pump, fan, grow light).
+  light:   { on:      { type: "boolean", required: true } },
   feed:    { amount:  { type: "number", required: true, min: 1, max: 5000 } },
   clean:   { action:  { type: "string", required: true, values: ["start", "stop"] } },
   routine: { routine: { type: "string", required: true, values: [...KNOWN_ROUTINES] } },
@@ -269,6 +271,22 @@ export class MQTTController {
     } catch {
       return res.status(500).json({ error: "Claim failed" });
     }
+  }
+
+  sendLightCommand(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const { on } = req.body;
+
+    const err = validatePayload(req.body, SCHEMAS.light);
+    if (err) return res.status(400).json({ error: err });
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+
+    const topic = `tc/${deviceId}/cmd/light`;
+    MQTTController.client.publish(topic, JSON.stringify({ on, timestamp: Date.now() }), { qos: 1 });
+
+    res.json({ success: true, deviceId, command: "light", on, message: "Light/relay command sent" });
   }
 
   sendFeedCommand(req: Request, res: Response) {

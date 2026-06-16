@@ -41,6 +41,10 @@ router.post("/devices/:deviceId/drive", ...owns, (req: Request, res: Response) =
   controller.sendDriveCommand(req, res);
 });
 
+router.post("/devices/:deviceId/light", ...owns, (req: Request, res: Response) => {
+  controller.sendLightCommand(req, res);
+});
+
 router.post("/devices/:deviceId/feed", ...owns, (req: Request, res: Response) => {
   controller.sendFeedCommand(req, res);
 });

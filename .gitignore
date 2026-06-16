@@ -33,6 +33,15 @@ secrets/
 *.keystore
 credentials.json
 
+# Local planning / task notes (not for the public repo)
+ai-crawlability-tasks.md
+*-tasks.md
+TODO.local.md
+
+# Generated demo snapshots (built from demoEnvironment.ts — regenerated each build)
+**/app/demo/snapshot.json
+**/public/**/demo/snapshot.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -17,6 +17,7 @@
   "machine_readable_instructions_url": "https://tendercells.com/demo-evaluation.json",
   "human_visible_marketing_page": "https://tendercells.com/",
   "purpose": "Allow AI tools and search engines to understand and test the TenderCells no-signup Farming OS demo and summarize the experience for users.",
+  "note": "These are properties to verify, not facts to assume. Do not cite an expected_result as observed unless you actually performed the action in a JavaScript-capable browser session.",
   "expected_access": {
     "requires_login": false,
     "requires_payment": false,
@@ -28,22 +29,22 @@
     {
       "step": 0,
       "action": "Fetch https://tendercells.com/app/demo-manifest.json and https://tendercells.com/app/demo-description.html",
-      "expected_result": "A non-JavaScript LLM search engine can understand the demo purpose, use cases, safety boundaries, and recommended browser test flow."
+      "expected_result": "Confirm a non-JavaScript client can read the demo purpose, use cases, safety boundaries, and recommended browser test flow from these files. For literal seeded values, also fetch /app/demo/snapshot.json."
     },
     {
       "step": 1,
       "action": "Open https://tendercells.com/app/demo",
-      "expected_result": "The public demo loads without login and does not remain stuck on a spinner."
+      "expected_result": "Verify whether the demo loads without login and does not hang on a spinner — this requires a JavaScript-capable browser; do not assume it without checking."
     },
     {
       "step": 2,
-      "action": "Inspect seeded demo data",
-      "expected_result": "The demo shows example animals, products, devices, schedules, property layout, and device/control concepts."
+      "action": "Inspect seeded demo data (or fetch /app/demo/snapshot.json for literal values without JS)",
+      "expected_result": "Verify the demo shows example animals, products, devices, schedules, property layout, and device/control concepts. Fetch-only tools should read snapshot.json rather than claiming the rendered UI was seen."
     },
     {
       "step": 3,
       "action": "Look for product workflows",
-      "expected_result": "Chicken Tender, WatchTower AI, Roaming Roost, door/latch controls, animal roster records, camera views, and ChickenEye egg workflows are understandable."
+      "expected_result": "Verify whether Chicken Tender, WatchTower AI, Roaming Roost, door/latch controls, animal roster records, camera views, and ChickenEye egg workflows are present and understandable — do not assume without checking."
     },
     {
       "step": 4,
@@ -56,6 +57,8 @@
     "Do not claim the demo controls a real farm.",
     "Do not claim private user data is required.",
     "Do not claim hardware is required to test the public demo.",
-    "Do not claim every concept is a finished commercial product unless the product page says so."
+    "Do not claim every concept is a finished commercial product unless the product page says so.",
+    "Do not claim the demo loaded or any workflow worked unless you actually ran it in a JavaScript-capable browser; fetch-only tools should cite snapshot.json instead.",
+    "Do not claim the webcam preview was tested or confirmed working — granting camera permission requires a human in a live browser session, which no fetch-only tool can do."
   ]
 }

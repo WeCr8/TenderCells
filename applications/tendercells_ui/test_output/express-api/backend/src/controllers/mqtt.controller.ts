@@ -114,6 +114,30 @@ export class MQTTController {
     }
   }
 
+  // Mirror live device data to Firestore so signed-in users see their devices from
+  // anywhere — not just the LAN. No-op in demo/LAN mode (no admin creds). Fire-and-
+  // forget: never blocks the MQTT path, swallows errors.
+  private static mirrorToFirestore(
+    kind: "sensors" | "state" | "alert",
+    deviceId: string,
+    payload: MQTTMessage,
+  ) {
+    if (!AUTH_ENABLED) return;
+    try {
+      const db = getFirestoreAdmin();
+      const ts = Date.now();
+      const ref = db.collection("devices").doc(deviceId);
+      if (kind === "alert") {
+        void ref.collection("alerts").add({ ...payload, ts }).catch(() => {});
+      } else {
+        const field = kind === "sensors" ? "telemetry" : "state";
+        void ref.set({ [field]: payload, [`${field}At`]: ts }, { merge: true }).catch(() => {});
+      }
+    } catch {
+      /* admin not initialized — skip silently */
+    }
+  }
+
   private static handleMessage(topic: string, message: Buffer) {
     try {
       // Constraint: reject non-JSON payloads immediately
@@ -130,14 +154,17 @@ export class MQTTController {
         const err = validatePayload(payload, SCHEMAS.sensors);
         if (err) console.warn(`[MQTT] Sensor schema warning (${deviceId}): ${err}`);
         MQTTController.telemetry.set(deviceId, payload);
+        MQTTController.mirrorToFirestore("sensors", deviceId, payload);
       } else if (topicParts[2] === "state") {
         const deviceId = topicParts[1];
         MQTTController.states.set(deviceId, payload);
+        MQTTController.mirrorToFirestore("state", deviceId, payload);
       } else if (topicParts[2] === "alert") {
         const deviceId = topicParts[1];
         const alerts = MQTTController.alerts.get(deviceId) || [];
         alerts.push(payload);
         MQTTController.alerts.set(deviceId, alerts.slice(-100)); // Keep last 100
+        MQTTController.mirrorToFirestore("alert", deviceId, payload);
       }
     } catch (error) {
       console.error("Failed to parse MQTT message:", error);

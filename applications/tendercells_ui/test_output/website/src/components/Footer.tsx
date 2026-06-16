@@ -5,6 +5,7 @@ const footerGroups = [
   {
     title: "Learn",
     links: [
+      { label: "📚 Learn Home (guides & FAQ)", to: "/learn" },
       { label: "🐣 Start Here (ages 7+)", to: "/lessons/your-first-coop-brain" },
       { label: "🗺️ Learning Tracks", to: "/lessons/learning-tracks" },
       { label: "🧱 All Lessons", to: "/lessons" },

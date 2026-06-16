@@ -25,6 +25,7 @@ export default function LessonsPage() {
       <div className="cta-bar" style={{ marginTop: "1.5rem" }}>
         <a href="/flash" className="btn-primary">⚡ Flash a device</a>
         <a href="/viewer" className="btn-outline">🧊 3D Model Viewer</a>
+        <Link to="/learn" className="btn-outline">📚 Guides &amp; FAQ</Link>
       </div>
     </PageLayout>
   );

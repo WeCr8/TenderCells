@@ -17,6 +17,22 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Secrets — never commit service accounts, private keys, or credential files
+*serviceAccount*.json
+*service-account*.json
+*firebase-adminsdk*.json
+*-adminsdk-*.json
+google-services.json
+GoogleService-Info.plist
+secrets/
+**/secrets/
+*.pem
+*.key
+*.p8
+*.p12
+*.keystore
+credentials.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -14,6 +14,19 @@ const FAQS = [
   { q: "How is the firmware updated?", a: "OTA (over-the-air) updates push from the app. You approve each update. Rollback to any previous version is supported. All firmware is open source — you can also compile and flash manually." },
 ];
 
+// Hands-on lessons live as markdown in the repo (docs/). Linked here so they're
+// discoverable from the site — no dead ends. Ordered as the learning path.
+const DOCS_BASE = "https://github.com/WeCr8/TenderCells/blob/main/docs";
+const LESSONS = [
+  { title: "🐣 Start Here — Your First Coop Brain", desc: "Ages 7+. Flash a board and watch it come alive. LEGO-style steps.", href: `${DOCS_BASE}/lessons/00-your-first-coop-brain.md`, tag: "Ages 7+" },
+  { title: "🚪 Build a Door + Roaming Roost", desc: "Wire a servo, open/close a door and drive a rover from the OS.", href: `${DOCS_BASE}/CLASSROOM_DOOR_AND_ROAMING_ROOST.md`, tag: "Beginner" },
+  { title: "🌡️ Sensors → Automation", desc: "Add a light sensor; auto-open the door at sunrise.", href: `${DOCS_BASE}/CLASSROOM_SENSORS_AND_AUTOMATION.md`, tag: "Beginner" },
+  { title: "🍽️ Feeder + Waterer", desc: "Relay-driven feeding and watering, on a schedule.", href: `${DOCS_BASE}/CLASSROOM_FEEDER_AND_WATERER.md`, tag: "Beginner" },
+  { title: "🦅 Build Your Own Device", desc: "Invent an animal + threat; fire a live alert. No extra wiring.", href: `${DOCS_BASE}/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md`, tag: "Beginner" },
+  { title: "🤖 Gantry + BOMs", desc: "Build an XY robot gantry (coop & duck dock) with parts lists.", href: `${DOCS_BASE}/CLASSROOM_GANTRY_AND_BOM.md`, tag: "Advanced" },
+  { title: "🧠 AI + CAD with Fusion MCP", desc: "Design parts with AI, model in Fusion 360 over MCP.", href: `${DOCS_BASE}/CLASSROOM_AI_CAD_FUSION_MCP.md`, tag: "Advanced" },
+];
+
 export default function LearnPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -45,6 +58,27 @@ export default function LearnPage() {
         <Link to="/learn/homesteading" className="btn-outline">Homesteading Guide</Link>
       </div>
 
+      <h2 className="section-title" id="lessons">Hands-on Lessons (ages 7+)</h2>
+      <div className="prose">
+        <p>LEGO-style, step-by-step builds. Start at the top and follow the
+          “What’s next” link inside each lesson — they form a path from a blinking
+          board to a full robot coop.</p>
+      </div>
+      <div className="card-grid">
+        {LESSONS.map((l) => (
+          <a key={l.title} className="card" href={l.href} target="_blank" rel="noopener noreferrer"
+            style={{ textDecoration: "none", color: "inherit" }}>
+            <h3>{l.title}</h3>
+            <p>{l.desc}</p>
+            <span className="tag">{l.tag}</span>
+          </a>
+        ))}
+      </div>
+      <div className="cta-bar" style={{ marginBottom: "2rem" }}>
+        <a href={`${DOCS_BASE}/LEARNING_TRACKS.md`} target="_blank" rel="noopener noreferrer" className="btn-primary">🗺️ Full Learning Tracks map →</a>
+        <a href="/flash" className="btn-outline">⚡ Flash a device</a>
+      </div>
+
       <h2 className="section-title" id="how-it-works">How It Works</h2>
       <div className="card-grid">
         {[
@@ -66,18 +100,19 @@ export default function LearnPage() {
       <h2 className="section-title" id="docs">Documentation</h2>
       <div className="card-grid">
         {[
-          { title: "User Guide",          desc: "Complete setup, operation, and maintenance guide for all Tender Cells products.", tag: "PDF + Web" },
-          { title: "API Reference",       desc: "Full REST API and MQTT topic reference with payload schemas and code examples.", tag: "Web" },
-          { title: "Firmware Guide",      desc: "PlatformIO build, OTA update, and custom firmware development guide.", tag: "GitHub" },
-          { title: "Hardware Assembly",   desc: "Step-by-step assembly instructions with photos for all hardware kits.", tag: "PDF" },
-          { title: "Troubleshooting",     desc: "Diagnostic codes, common errors, and resolution steps for every component.", tag: "Web" },
-          { title: "Architecture Overview", desc: "System architecture: app → Firebase → MQTT → ESP32 → sensors + actuators.", tag: "Web" },
+          { title: "User Guide",          desc: "Complete setup, operation, and maintenance guide for all Tender Cells products.", tag: "GitHub", href: `${DOCS_BASE}/README.md` },
+          { title: "API Reference",       desc: "Full REST API and MQTT topic reference with payload schemas and code examples.", tag: "GitHub", href: "https://github.com/WeCr8/TenderCells/blob/main/README.md" },
+          { title: "Firmware Guide",      desc: "PlatformIO build, OTA update, and custom firmware development guide.", tag: "GitHub", href: "https://github.com/WeCr8/TenderCells/tree/main/firmware" },
+          { title: "Hardware Catalog",    desc: "Master hardware, electronics, sensors, and components reference.", tag: "GitHub", href: `${DOCS_BASE}/CHICKEN_TENDER_HARDWARE_CATALOG.md` },
+          { title: "Troubleshooting",     desc: "Diagnostic codes, common errors, and resolution steps for every component.", tag: "GitHub", href: `${DOCS_BASE}/AUDIT_STUDENT_JOURNEY.md` },
+          { title: "Control Types & Arm Plan", desc: "Every control type the OS supports, printing tactics, robot-arm plan.", tag: "GitHub", href: `${DOCS_BASE}/CONTROL_TYPES_AND_ARM_PLAN.md` },
         ].map((c) => (
-          <div key={c.title} className="card">
+          <a key={c.title} className="card" href={c.href} target="_blank" rel="noopener noreferrer"
+            style={{ textDecoration: "none", color: "inherit" }}>
             <h3>{c.title}</h3>
             <p>{c.desc}</p>
             <span className="tag">{c.tag}</span>
-          </div>
+          </a>
         ))}
       </div>
 

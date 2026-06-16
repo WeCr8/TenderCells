@@ -54,6 +54,13 @@ const SCHEMAS: Record<string, Schema> = {
   },
   // Relay/light: any farm load on/off (heat lamp, water pump, fan, grow light).
   light:   { on:      { type: "boolean", required: true } },
+  // GRBL gantry: coordinate move {x,y,speed} or real-time control {cmd}.
+  gantry:  {
+    x:     { type: "number", required: false },
+    y:     { type: "number", required: false },
+    speed: { type: "number", required: false, min: 0, max: 1 },
+    cmd:   { type: "string", required: false, values: ["home", "unlock", "hold", "resume", "stop"] },
+  },
   feed:    { amount:  { type: "number", required: true, min: 1, max: 5000 } },
   clean:   { action:  { type: "string", required: true, values: ["start", "stop"] } },
   routine: { routine: { type: "string", required: true, values: [...KNOWN_ROUTINES] } },
@@ -314,6 +321,29 @@ export class MQTTController {
     MQTTController.client.publish(topic, JSON.stringify({ on, timestamp: Date.now() }), { qos: 1 });
 
     res.json({ success: true, deviceId, command: "light", on, message: "Light/relay command sent" });
+  }
+
+  sendGantryCommand(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const { x, y, speed, cmd } = req.body;
+
+    const err = validatePayload(req.body, SCHEMAS.gantry);
+    if (err) return res.status(400).json({ error: err });
+    if (cmd === undefined && x === undefined && y === undefined)
+      return res.status(400).json({ error: "Provide cmd, or x/y coordinates" });
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+
+    const topic = `tc/${deviceId}/cmd/gantry`;
+    const payload: MQTTMessage = { timestamp: Date.now() };
+    if (cmd !== undefined) payload.cmd = cmd;
+    if (x !== undefined) payload.x = x;
+    if (y !== undefined) payload.y = y;
+    if (speed !== undefined) payload.speed = speed;
+    MQTTController.client.publish(topic, JSON.stringify(payload), { qos: 1 });
+
+    res.json({ success: true, deviceId, command: "gantry", payload, message: "Gantry command sent" });
   }
 
   sendFeedCommand(req: Request, res: Response) {

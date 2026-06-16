@@ -45,6 +45,10 @@ router.post("/devices/:deviceId/light", ...owns, (req: Request, res: Response) =
   controller.sendLightCommand(req, res);
 });
 
+router.post("/devices/:deviceId/gantry", ...owns, (req: Request, res: Response) => {
+  controller.sendGantryCommand(req, res);
+});
+
 router.post("/devices/:deviceId/feed", ...owns, (req: Request, res: Response) => {
   controller.sendFeedCommand(req, res);
 });

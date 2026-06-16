@@ -50,6 +50,12 @@ static const int PIN_DRIVE_RIGHT = 4;   // D3 — right drive servo (peripheral=
 // peripheral=relay → a relay module drives any farm load: heat lamp, water pump,
 // grow light, ventilation fan. Active-HIGH; wire relay IN to this pin.
 static const int PIN_RELAY       = 5;   // D4 — relay (peripheral=relay)
+// peripheral=gantry → bridge MQTT moves to a GRBL controller over UART as G-code.
+// Works with any GRBL: Arduino Uno + CNC shield, grbl_ESP32, or FluidNC. Wire this
+// board's TX→GRBL RX, RX←GRBL TX, common GND.
+static const int PIN_GRBL_TX = 43;      // D6 → GRBL RX
+static const int PIN_GRBL_RX = 44;      // D7 ← GRBL TX
+#define GRBL Serial1
 
 static const int DOOR_OPEN_DEG  = 90;   // matches Chicken Tender coop door
 static const int DOOR_CLOSE_DEG = 0;
@@ -103,6 +109,8 @@ bool relayEnabled = false;
 String doorState = "closed";          // reported in heartbeat
 String driveDir  = "stop";            // last drive direction
 bool relayOn = false;                 // relay/light state
+bool gantryEnabled = false;
+float gantryX = 0, gantryY = 0;       // last commanded gantry position (mm)
 unsigned long lastDriveCmd = 0;       // for the deadman stop
 
 volatile bool eStopActive = false;
@@ -135,6 +143,36 @@ void applyLight(bool on) {
   if (!relayEnabled || eStopActive) return;
   relayOn = on;
   digitalWrite(PIN_RELAY, on ? HIGH : LOW);
+}
+
+String topicGantry() { return "tc/" + deviceId + "/cmd/gantry"; }
+
+// Send one G-code line to the GRBL controller.
+void grblSend(const char* line) { GRBL.print(line); GRBL.print('\n'); }
+
+// Bridge an MQTT gantry command to GRBL. Supports coordinate moves {x,y,speed} and
+// real-time controls {cmd: home|unlock|hold|resume|stop}. GRBL real-time bytes
+// (!, ~, 0x18) are sent raw, not as G-code lines.
+void handleGantry(JsonDocument& doc) {
+  if (!gantryEnabled || eStopActive) return;
+  String c = (const char*)(doc["cmd"] | "");
+  if      (c == "home")   grblSend("$H");          // home against limit switches
+  else if (c == "unlock") grblSend("$X");          // clear alarm after E-STOP
+  else if (c == "hold")   GRBL.write('!');         // feed hold
+  else if (c == "resume") GRBL.write('~');         // cycle resume
+  else if (c == "stop") { GRBL.write('!'); GRBL.write(0x18); }  // hold + soft reset
+  else {
+    // Coordinate move in mm. speed 0..1 maps to feed rate.
+    float x = doc["x"] | gantryX;
+    float y = doc["y"] | gantryY;
+    float sp = doc["speed"] | 0.5f;
+    if (sp < 0) sp = 0; if (sp > 1) sp = 1;
+    int feed = 200 + (int)(sp * 2800);             // 200..3000 mm/min
+    char line[56];
+    snprintf(line, sizeof(line), "G90 G21 G1 X%.2f Y%.2f F%d", x, y, feed);
+    grblSend(line);
+    gantryX = x; gantryY = y;
+  }
 }
 
 // ── Actuators ────────────────────────────────────────────────────────────────
@@ -209,6 +247,7 @@ void publishHeartbeat() {
   if (doorEnabled)  doc["doorState"] = doorState;
   if (driveEnabled) doc["driveDir"]  = driveDir;
   if (relayEnabled) doc["relayOn"]   = relayOn;
+  if (gantryEnabled) { doc["gantryX"] = gantryX; doc["gantryY"] = gantryY; }
   doc["freeHeap"]     = ESP.getFreeHeap();
   doc["ts"]           = millis();
   char buf[256];
@@ -241,6 +280,7 @@ void enterEStop() {
   eStopActive = true;
   stopDrive();          // freeze the rover instantly — motion is the hazard
   if (relayEnabled) { digitalWrite(PIN_RELAY, LOW); relayOn = false; }  // cut load
+  if (gantryEnabled) { GRBL.write('!'); GRBL.write(0x18); }  // GRBL feed-hold + reset
   setLed(false);
   publishState("estop");
   Serial.println("[ESTOP] active — node frozen until cleared");
@@ -271,6 +311,8 @@ void onMqttMessage(char* topic, byte* payload, unsigned int len) {
     applyDrive(doc["dir"] | "stop", doc["speed"] | 0.5f);
   } else if (relayEnabled && String(topic) == topicLight()) {
     applyLight(doc["on"] | false);
+  } else if (gantryEnabled && String(topic) == topicGantry()) {
+    handleGantry(doc);
   }
 }
 
@@ -281,6 +323,7 @@ void subscribeCommands() {
   if (doorEnabled)  mqtt.subscribe(topicDoor().c_str(), 1);
   if (driveEnabled) mqtt.subscribe(topicDrive().c_str(), 1);
   if (relayEnabled) mqtt.subscribe(topicLight().c_str(), 1);
+  if (gantryEnabled) mqtt.subscribe(topicGantry().c_str(), 1);
 }
 
 bool reconnectMqtt() {
@@ -441,6 +484,12 @@ void setup() {
     pinMode(PIN_RELAY, OUTPUT);
     digitalWrite(PIN_RELAY, LOW);  // load OFF on boot
     Serial.printf("[ACT] relay on GPIO%d (heat lamp / pump / fan / light)\n", PIN_RELAY);
+  } else if (peripheral == "gantry") {
+    gantryEnabled = true;
+    GRBL.begin(115200, SERIAL_8N1, PIN_GRBL_RX, PIN_GRBL_TX);
+    grblSend("");        // wake GRBL
+    grblSend("G21 G90"); // mm, absolute — no auto-home (let the OS command $H)
+    Serial.printf("[ACT] GRBL gantry bridge on UART TX%d/RX%d\n", PIN_GRBL_TX, PIN_GRBL_RX);
   }
 
   // Now arm the watchdog for the steady-state loop().

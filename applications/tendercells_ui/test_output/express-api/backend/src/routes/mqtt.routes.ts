@@ -32,6 +32,11 @@ router.get("/devices/:deviceId/alerts", ...owns, (req: Request, res: Response) =
   controller.getAlerts(req, res);
 });
 
+// Devices heard on the network with no owner yet — for the claim picker (auth only).
+router.get("/unclaimed", requireAuth, (req: Request, res: Response) => {
+  controller.listUnclaimed(req, res);
+});
+
 // Claim a device to the signed-in account (auth only — device may be unclaimed).
 router.post("/devices/:deviceId/claim", requireAuth, (req: Request, res: Response) => {
   controller.claimDevice(req, res);

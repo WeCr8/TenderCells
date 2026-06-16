@@ -163,6 +163,33 @@ export class MQTTController {
     }
   }
 
+  // Upsert a device doc the first time a board is heard, so unclaimed devices show
+  // up for a user to claim (no need to already know the id). Never overwrites an
+  // existing owner. No-op in demo/LAN mode. Throttled to once per device per run.
+  private static seen = new Set<string>();
+  private static autoRegister(deviceId: string, payload: MQTTMessage) {
+    if (!AUTH_ENABLED || MQTTController.seen.has(deviceId)) return;
+    MQTTController.seen.add(deviceId);
+    try {
+      const db = getFirestoreAdmin();
+      const ref = db.collection("devices").doc(deviceId);
+      void db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        if (snap.exists && snap.data()?.ownerId) return;  // already claimed — leave it
+        tx.set(ref, {
+          id: deviceId,
+          mqttDeviceId: deviceId,
+          productType: payload.productType ?? "starter",
+          peripheral: payload.peripheral ?? "none",
+          unclaimed: true,
+          firstSeen: Date.now(),
+        }, { merge: true });
+      }).catch(() => {});
+    } catch {
+      /* admin not ready — skip */
+    }
+  }
+
   private static handleMessage(topic: string, message: Buffer) {
     try {
       // Constraint: reject non-JSON payloads immediately
@@ -180,6 +207,7 @@ export class MQTTController {
         if (err) console.warn(`[MQTT] Sensor schema warning (${deviceId}): ${err}`);
         MQTTController.telemetry.set(deviceId, payload);
         MQTTController.mirrorToFirestore("sensors", deviceId, payload);
+        MQTTController.autoRegister(deviceId, payload);
       } else if (topicParts[2] === "state") {
         const deviceId = topicParts[1];
         const sub = topicParts[3];  // "arm" | "gantry" | undefined (plain state)
@@ -246,6 +274,21 @@ export class MQTTController {
       return res.status(404).json({ error: `No ${sub} state for device`, deviceId });
     }
     res.json({ deviceId, sub, timestamp: Date.now(), data });
+  }
+
+  // List devices heard on the network that nobody owns yet, so a signed-in user can
+  // pick one to claim. Falls back to the in-memory telemetry keys in demo/LAN mode.
+  async listUnclaimed(_req: Request, res: Response) {
+    if (!AUTH_ENABLED) {
+      return res.json({ devices: Array.from(MQTTController.telemetry.keys()).map((id) => ({ id })) });
+    }
+    try {
+      const snap = await getFirestoreAdmin().collection("devices").where("unclaimed", "==", true).get();
+      const devices = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      return res.json({ devices });
+    } catch {
+      return res.status(500).json({ error: "Could not list devices" });
+    }
   }
 
   getAlerts(req: Request, res: Response) {
@@ -328,7 +371,7 @@ export class MQTTController {
         const snap = await tx.get(ref);
         const existing = snap.exists ? (snap.data()?.ownerId as string | undefined) : undefined;
         if (existing && existing !== uid) return { ok: false as const, ownerId: existing };
-        tx.set(ref, { ownerId: uid, claimedAt: Date.now() }, { merge: true });
+        tx.set(ref, { ownerId: uid, claimedAt: Date.now(), unclaimed: false }, { merge: true });
         return { ok: true as const, ownerId: uid };
       });
 

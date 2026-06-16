@@ -62,7 +62,11 @@ export default function RobotControlPanel({ deviceId = 'ct_001' }: { deviceId?: 
     tick();
     const id = setInterval(tick, 1500);
     return () => { alive = false; clearInterval(id); };
-  }, [hw]);
+    // Poll on a fixed 1.5s interval keyed to the device only. Depending on `hw`
+    // (a fresh object each render) would tear down + refetch every render — with
+    // live joint updates that becomes a tight fetch/render loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deviceId]);
 
   // ── Actions (all go through the wired hook) ──
   const applyJoints = useCallback(async (j: Joints) => {

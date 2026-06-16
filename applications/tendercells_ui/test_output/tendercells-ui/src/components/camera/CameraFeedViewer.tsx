@@ -65,12 +65,24 @@ export default function CameraFeedViewer({
         border: camera.connected ? '2px solid #4A7C59' : '2px solid #CC3333',
       }}
     >
-      <canvas
-        ref={canvasRef}
-        width={typeof width === 'number' ? width : 640}
-        height={typeof height === 'number' ? height : 360}
-        style={{ width: '100%', height: '100%', display: 'block' }}
-      />
+      {/* Real live feed: MJPEG streams render natively in <img> (works with any
+          off-the-shelf ESP32-CAM/S3-EYE serving /stream). Falls back to the canvas
+          status card when no streamUrl is set. */}
+      {camera.streamUrl ? (
+        <img
+          src={camera.streamUrl}
+          alt={`Live feed: ${camera.name}`}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+        />
+      ) : (
+        <canvas
+          ref={canvasRef}
+          width={typeof width === 'number' ? width : 640}
+          height={typeof height === 'number' ? height : 360}
+          style={{ width: '100%', height: '100%', display: 'block' }}
+        />
+      )}
 
       {connecting && (
         <Box

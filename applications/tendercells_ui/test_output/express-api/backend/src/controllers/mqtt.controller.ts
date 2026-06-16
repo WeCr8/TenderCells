@@ -181,6 +181,9 @@ export class MQTTController {
           mqttDeviceId: deviceId,
           productType: payload.productType ?? "starter",
           peripheral: payload.peripheral ?? "none",
+          // Camera nodes advertise their LAN MJPEG URL in the heartbeat so the live
+          // feed renders automatically where the device is placed (no manual URL).
+          ...(payload.streamUrl ? { streamUrl: payload.streamUrl } : {}),
           unclaimed: true,
           firstSeen: Date.now(),
         }, { merge: true });

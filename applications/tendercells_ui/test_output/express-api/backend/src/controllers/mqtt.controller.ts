@@ -5,6 +5,8 @@
 
 import type { Request, Response } from "express";
 import mqtt from "mqtt";
+import { AUTH_ENABLED, type AuthedRequest } from "../middleware/auth.js";
+import { getFirestoreAdmin } from "../config/firebase-admin.js";
 
 interface MQTTMessage {
   [key: string]: unknown;
@@ -45,6 +47,11 @@ const KNOWN_ROUTINES = [
 
 const SCHEMAS: Record<string, Schema> = {
   door:    { state:   { type: "string", required: true, values: ["open", "close"] } },
+  // Basic Roaming Roost differential drive (classroom rover + real product share this).
+  drive:   {
+    dir:   { type: "string", required: true, values: ["forward", "back", "left", "right", "stop"] },
+    speed: { type: "number", required: false, min: 0, max: 1 },
+  },
   feed:    { amount:  { type: "number", required: true, min: 1, max: 5000 } },
   clean:   { action:  { type: "string", required: true, values: ["start", "stop"] } },
   routine: { routine: { type: "string", required: true, values: [...KNOWN_ROUTINES] } },
@@ -203,6 +210,65 @@ export class MQTTController {
       state,
       message: "Door command sent",
     });
+  }
+
+  sendDriveCommand(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const { dir, speed } = req.body;
+
+    const err = validatePayload(req.body, SCHEMAS.drive);
+    if (err) return res.status(400).json({ error: err });
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+
+    // Local-only motion (never cloud) — same QoS 1 contract as the door.
+    const topic = `tc/${deviceId}/cmd/drive`;
+    const payload = { dir, speed: speed ?? 0.5, timestamp: Date.now() };
+    MQTTController.client.publish(topic, JSON.stringify(payload), { qos: 1 });
+
+    res.json({
+      success: true,
+      deviceId,
+      command: "drive",
+      dir,
+      message: "Drive command sent",
+    });
+  }
+
+  // Bind a device to the signed-in account (first-claim-wins). After this, only the
+  // owner can actuate it (see requireDeviceOwner). No-op in demo/LAN mode (no auth).
+  async claimDevice(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const uid = (req as AuthedRequest).uid;
+
+    if (!AUTH_ENABLED || !uid) {
+      return res.json({
+        success: true,
+        deviceId,
+        claimed: false,
+        note: "Demo/LAN mode — no account binding required",
+      });
+    }
+
+    try {
+      const db = getFirestoreAdmin();
+      const ref = db.collection("devices").doc(deviceId);
+      const result = await db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        const existing = snap.exists ? (snap.data()?.ownerId as string | undefined) : undefined;
+        if (existing && existing !== uid) return { ok: false as const, ownerId: existing };
+        tx.set(ref, { ownerId: uid, claimedAt: Date.now() }, { merge: true });
+        return { ok: true as const, ownerId: uid };
+      });
+
+      if (!result.ok) {
+        return res.status(409).json({ error: "Device already claimed by another account" });
+      }
+      return res.json({ success: true, deviceId, claimed: true, ownerId: uid });
+    } catch {
+      return res.status(500).json({ error: "Claim failed" });
+    }
   }
 
   sendFeedCommand(req: Request, res: Response) {

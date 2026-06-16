@@ -95,7 +95,9 @@ Endpoints:
   GET  /api/mqtt/devices/:id/telemetry    — Device sensor data
   GET  /api/mqtt/devices/:id/state        — Device state
   GET  /api/mqtt/devices/:id/alerts       — Device alerts
+  POST /api/mqtt/devices/:id/claim        — Claim device to account (auth)
   POST /api/mqtt/devices/:id/door         — Control door (open|close)
+  POST /api/mqtt/devices/:id/drive        — Drive rover (forward|back|left|right|stop)
   POST /api/mqtt/devices/:id/feed         — Dispense feed
   POST /api/mqtt/devices/:id/clean        — Start cleaning cycle
   POST /api/mqtt/devices/:id/arm          — Control arm joints

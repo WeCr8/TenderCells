@@ -25,6 +25,7 @@
 #include <ArduinoJson.h>
 #include <Preferences.h>
 #include <esp_task_wdt.h>
+#include <ESP32Servo.h>   // door servo + continuous-rotation drive servos
 
 // ── Board ──────────────────────────────────────────────────────────────────
 // XIAO ESP32-S3 user LED is on GPIO21 and is active-LOW.
@@ -34,10 +35,32 @@ static const bool LED_ACTIVE_LOW = true;
 // learner can make an alert fire with no extra wiring. Press = publish a threat.
 static const int BTN_PIN = 0;
 
+// ── Actuator pins (classroom wiring) ─────────────────────────────────────────
+// One Starter Node binary, two teachable actuators, selected by `peripheral`:
+//   peripheral=door  → a single hobby servo swings a 3D-printed coop door.
+//   peripheral=drive → two CONTINUOUS-rotation servos = the basic Roaming Roost
+//                      (differential drive). Cheapest classroom rover: no H-bridge,
+//                      low current, USB-safe. The real product uses DC motors + L298N
+//                      (see firmware/roaming-roost) — same MQTT contract, bigger parts.
+// Wire signal to these GPIOs, servo V+ to 5V, GND common. Pins chosen to avoid the
+// strapping/USB pins on the XIAO ESP32-S3.
+static const int PIN_DOOR_SERVO  = 2;   // D1 — door (peripheral=door)
+static const int PIN_DRIVE_LEFT  = 3;   // D2 — left drive servo  (peripheral=drive)
+static const int PIN_DRIVE_RIGHT = 4;   // D3 — right drive servo (peripheral=drive)
+
+static const int DOOR_OPEN_DEG  = 90;   // matches Chicken Tender coop door
+static const int DOOR_CLOSE_DEG = 0;
+// Continuous-rotation servo: 90µs-center = STOP; offset = speed/direction.
+static const int DRIVE_STOP_DEG = 90;
+static const int DRIVE_SPAN_DEG = 70;   // max offset from stop (90±70 → 20..160)
+
 // ── Timing ─────────────────────────────────────────────────────────────────
 static const unsigned long HEARTBEAT_INTERVAL_MS = 10000;  // matches sensor cadence
 static const unsigned long MQTT_RECONNECT_MS      = 5000;
 static const unsigned long WATCHDOG_TIMEOUT_S     = 8;
+// Drive deadman: a moving robot must stop itself if commands stop arriving (lost
+// WiFi, closed app). If no fresh cmd/drive within this window, motors stop.
+static const unsigned long DRIVE_DEADMAN_MS       = 1500;
 
 // ── Provisioned config (stored in NVS, never hardcoded) ──────────────────────
 Preferences prefs;
@@ -66,6 +89,17 @@ String peripheral;
 WiFiClient net;
 PubSubClient mqtt(net);
 
+// Actuators — only attached when `peripheral` selects them, so a bare node wastes
+// no pins/timers. doorServo for peripheral=door; left/right for peripheral=drive.
+Servo doorServo;
+Servo driveLeft;
+Servo driveRight;
+bool doorEnabled  = false;
+bool driveEnabled = false;
+String doorState = "closed";          // reported in heartbeat
+String driveDir  = "stop";            // last drive direction
+unsigned long lastDriveCmd = 0;       // for the deadman stop
+
 volatile bool eStopActive = false;
 unsigned long lastHeartbeat = 0;
 unsigned long lastReconnectAttempt = 0;
@@ -87,6 +121,46 @@ String topicSensors() { return "tc/" + deviceId + "/sensors"; }
 String topicState()   { return "tc/" + deviceId + "/state"; }
 String topicEstop()   { return "tc/" + deviceId + "/cmd/estop"; }
 String topicAlert()   { return "tc/" + deviceId + "/alert"; }
+String topicDoor()    { return "tc/" + deviceId + "/cmd/door"; }
+String topicDrive()   { return "tc/" + deviceId + "/cmd/drive"; }
+
+// ── Actuators ────────────────────────────────────────────────────────────────
+// Stop both drive servos (center = no rotation). Safe to call even if not attached.
+void stopDrive() {
+  if (!driveEnabled) return;
+  driveLeft.write(DRIVE_STOP_DEG);
+  driveRight.write(DRIVE_STOP_DEG);
+  driveDir = "stop";
+}
+
+// Differential drive from a direction + 0..1 speed. Mirrors the Roaming Roost
+// cmd/drive contract so the OS controls the classroom rover identically.
+void applyDrive(const char* dir, float speed) {
+  if (!driveEnabled || eStopActive) return;
+  if (speed < 0) speed = 0;
+  if (speed > 1) speed = 1;
+  int off = (int)(DRIVE_SPAN_DEG * speed);
+  // Servos face opposite ways on a chassis, so "forward" = left fwd + right rev.
+  int l = DRIVE_STOP_DEG, r = DRIVE_STOP_DEG;
+  String d = dir ? String(dir) : String("stop");
+  if      (d == "forward") { l = DRIVE_STOP_DEG + off; r = DRIVE_STOP_DEG - off; }
+  else if (d == "back")    { l = DRIVE_STOP_DEG - off; r = DRIVE_STOP_DEG + off; }
+  else if (d == "left")    { l = DRIVE_STOP_DEG - off; r = DRIVE_STOP_DEG - off; }
+  else if (d == "right")   { l = DRIVE_STOP_DEG + off; r = DRIVE_STOP_DEG + off; }
+  else                     { stopDrive(); return; }  // "stop" or unknown → halt
+  driveLeft.write(l);
+  driveRight.write(r);
+  driveDir = d;
+  lastDriveCmd = millis();
+}
+
+// Swing the door servo open/closed.
+void applyDoor(const char* state) {
+  if (!doorEnabled || eStopActive) return;
+  String s = state ? String(state) : String("close");
+  if (s == "open") { doorServo.write(DOOR_OPEN_DEG);  doorState = "open"; }
+  else             { doorServo.write(DOOR_CLOSE_DEG); doorState = "closed"; }
+}
 
 // ── Publish current state (retained when E-STOP, like the coop controller) ───
 void publishState(const char* state) {
@@ -118,6 +192,9 @@ void publishHeartbeat() {
   if (species.length())     doc["species"] = species;
   if (threatLabel.length()) doc["threat"]  = threatLabel;
   if (peripheral.length())  doc["peripheral"] = peripheral;  // camera / sensor it carries
+  // Report live actuator state so the dashboard shows door/rover position.
+  if (doorEnabled)  doc["doorState"] = doorState;
+  if (driveEnabled) doc["driveDir"]  = driveDir;
   doc["freeHeap"]     = ESP.getFreeHeap();
   doc["ts"]           = millis();
   char buf[256];
@@ -148,6 +225,7 @@ void publishThreat() {
 void enterEStop() {
   if (eStopActive) return;
   eStopActive = true;
+  stopDrive();          // freeze the rover instantly — motion is the hazard
   setLed(false);
   publishState("estop");
   Serial.println("[ESTOP] active — node frozen until cleared");
@@ -168,12 +246,23 @@ void onMqttMessage(char* topic, byte* payload, unsigned int len) {
     bool active = doc["active"] | false;
     if (active) enterEStop();
     else clearEStop();
+    return;
+  }
+  // Actuation commands are refused while E-STOP is latched (safety first).
+  if (eStopActive) return;
+  if (doorEnabled && String(topic) == topicDoor()) {
+    applyDoor(doc["state"] | "close");
+  } else if (driveEnabled && String(topic) == topicDrive()) {
+    applyDrive(doc["dir"] | "stop", doc["speed"] | 0.5f);
   }
 }
 
 void subscribeCommands() {
   // E-STOP retained + QoS — same contract as the coop controller.
   mqtt.subscribe(topicEstop().c_str(), 1);
+  // Only subscribe to the actuator this board actually carries.
+  if (doorEnabled)  mqtt.subscribe(topicDoor().c_str(), 1);
+  if (driveEnabled) mqtt.subscribe(topicDrive().c_str(), 1);
 }
 
 bool reconnectMqtt() {
@@ -312,6 +401,25 @@ void setup() {
   // Auto-find the broker if no IP was entered (blocks ~3s — before watchdog arm).
   discoverBrokerIfNeeded();
 
+  // Attach only the actuator this board carries (set during WiFi setup, Step 4).
+  // ESP32Servo needs an LEDC timer per servo, so we don't grab them on a bare node.
+  if (peripheral == "door") {
+    doorEnabled = true;
+    doorServo.setPeriodHertz(50);
+    doorServo.attach(PIN_DOOR_SERVO, 500, 2400);
+    applyDoor("close");  // known safe start state
+    Serial.printf("[ACT] door servo on GPIO%d\n", PIN_DOOR_SERVO);
+  } else if (peripheral == "drive") {
+    driveEnabled = true;
+    driveLeft.setPeriodHertz(50);
+    driveRight.setPeriodHertz(50);
+    driveLeft.attach(PIN_DRIVE_LEFT, 500, 2400);
+    driveRight.attach(PIN_DRIVE_RIGHT, 500, 2400);
+    stopDrive();         // never roll on boot
+    Serial.printf("[ACT] drive servos on GPIO%d/%d (basic Roaming Roost)\n",
+                  PIN_DRIVE_LEFT, PIN_DRIVE_RIGHT);
+  }
+
   // Now arm the watchdog for the steady-state loop().
   esp_task_wdt_init(WATCHDOG_TIMEOUT_S, true);
   esp_task_wdt_add(NULL);
@@ -352,6 +460,13 @@ void loop() {
 
   // Learner can fire a threat alert anytime with the BOOT button.
   handleThreatButton();
+
+  // Drive deadman: if the rover is moving but no fresh command arrived recently,
+  // stop it. Protects against lost WiFi / closed app leaving motors running.
+  if (driveEnabled && driveDir != "stop" && millis() - lastDriveCmd > DRIVE_DEADMAN_MS) {
+    stopDrive();
+    Serial.println("[DRIVE] deadman stop — no command in window");
+  }
 
   // Slow "alive" blink (500ms toggle) — no blocking delay.
   if (millis() - lastBlink > 500) {

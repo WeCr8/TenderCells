@@ -115,5 +115,19 @@ export const useHardwareControl = (deviceId: string) => {
     // Live state for sliders / 3D viewport
     getArmState: () => getSubState('arm'),
     getGantryState: () => getSubState('gantry'),
+
+    // Register this device to the signed-in account (first-claim-wins).
+    claim: () => sendCommand('claim'),
   };
 };
+
+// List devices heard on the network that nobody owns yet (for a claim picker).
+export async function listUnclaimedDevices(): Promise<Array<{ id: string }>> {
+  try {
+    const res = await fetch(`${API_BASE}/unclaimed`, { headers: await authHeaders() });
+    if (!res.ok) return [];
+    return (await res.json()).devices ?? [];
+  } catch {
+    return [];
+  }
+}

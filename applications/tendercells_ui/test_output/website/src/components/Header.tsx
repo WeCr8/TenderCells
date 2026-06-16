@@ -69,6 +69,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "Learn More",
     to: "/learn",
     children: [
+      { label: "📚 Learn Home (guides & FAQ)", to: "/learn" },
       { label: "🐣 Start Here — First Coop Brain (ages 7+)", to: "/lessons/your-first-coop-brain" },
       { label: "🧱 Hands-on Lessons",  to: "/lessons" },
       { label: "🗺️ Learning Tracks (curriculum map)", to: "/lessons/learning-tracks" },

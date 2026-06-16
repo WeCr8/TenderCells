@@ -16,6 +16,52 @@ Do those first if you've never flashed a board.
 
 ---
 
+## 🧱 LEGO-style quick build (ages 7+)
+
+> New here? Do [🐣 Your First Coop Brain](lessons/00-your-first-coop-brain.md) first —
+> it shows how to **flash** a board. This lesson adds a **door that opens**. Hard words
+> live in that lesson's [Picture Dictionary](lessons/00-your-first-coop-brain.md#-picture-dictionary-hard-words-made-easy).
+
+**Parts list — lay them out first:**
+```text
+ ┌──────────────────────────────────────────────────────────┐
+ │  BAG 2 — Make a Door That Opens                           │
+ ├──────────────────────────────────────────────────────────┤
+ │  [ 1 ]  🟩  Your flashed board (from Lesson 0)  ... x1     │
+ │  [ 2 ]  ⚙️  Servo (a tiny motor with an arm)  ..... x1     │
+ │  [ 3 ]  🚪  3D-printed door + hinge  ............. x1     │
+ │  [ 4 ]  🔌  3 jumper wires  ...................... x3     │
+ │  [ 5 ]  💻  Laptop with the app open  ............ x1     │
+ └──────────────────────────────────────────────────────────┘
+```
+- [ ] **Part 1** — board (already blinking from Lesson 0)
+- [ ] **Part 2** — servo (the little motor)
+- [ ] **Part 3** — printed door + hinge
+- [ ] **Part 4** — 3 wires
+- [ ] **Part 5** — laptop
+
+**Build steps (one at a time):**
+1. **Step 1 of 5 — Wire the servo.** Push the 3 wires onto the servo, then into the
+   board: orange/yellow → **GPIO2**, red → **5V**, brown/black → **GND**.
+   *✓ Click each wire on firmly.*
+2. **Step 2 of 5 — Stick the door on.** Push the door's hinge arm onto the servo's white
+   spinner. *✓ It should swing by hand.*
+3. **Step 3 of 5 — Tell the board it has a door.** Plug in, join the board's
+   `TenderNode-Setup` Wi-Fi, and on the setup page set **peripheral = `door`**. Save.
+4. **Step 4 of 5 — Open it from the app.** Press the **door open** button.
+   *✓ The door swings open!* 🚪
+5. **Step 5 of 5 — Close it.** Press **close**. *✓ It swings back.* 🎉
+
+> 🦺 **Safety:** keep fingers clear while it moves. The big red **E-STOP** freezes
+> everything — try it!
+
+**👉 What's next:** open it by itself at sunrise →
+[Sensors → Automated Tasks](CLASSROOM_SENSORS_AND_AUTOMATION.md) · add feeding →
+[Feeder + Waterer](CLASSROOM_FEEDER_AND_WATERER.md) · all projects →
+[Learning Tracks](LEARNING_TRACKS.md).
+
+---
+
 ## What you're building
 
 ```text

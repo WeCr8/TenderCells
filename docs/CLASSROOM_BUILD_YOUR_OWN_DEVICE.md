@@ -14,6 +14,29 @@ students / clubs can run it solo. Pairs with the no-hardware
 
 ---
 
+## 🧱 LEGO-style quick build (ages 7+)
+
+> Do [🐣 Your First Coop Brain](lessons/00-your-first-coop-brain.md) first. Hard words:
+> [Picture Dictionary](lessons/00-your-first-coop-brain.md#-picture-dictionary-hard-words-made-easy).
+
+```text
+ ┌──────────────────────────────────────────────┐
+ │  BAG 5 — Invent Your Own Animal Alarm          │
+ │  [1] 🟩 flashed board (has a BOOT button)      │
+ │  [2] 💻 laptop with the app open               │
+ └──────────────────────────────────────────────┘
+```
+1. **Step 1 of 3 — Name your animal.** Setup page → **species** (e.g. `axolotl`) +
+   **threat** (e.g. `hawk`). Save. *✓*
+2. **Step 2 of 3 — Watch the app.** Find your device on the dashboard. *✓*
+3. **Step 3 of 3 — Fire the alarm!** Press the board's **BOOT** button → your threat
+   pops up in the app, live. *✓ you invented a real alert!* 🦅
+
+**👉 Next:** make a real door move → [Door lesson](CLASSROOM_DOOR_AND_ROAMING_ROOST.md) ·
+[Learning Tracks](LEARNING_TRACKS.md)
+
+---
+
 ## What you're building (the big idea)
 
 ```text

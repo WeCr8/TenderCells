@@ -14,6 +14,33 @@ Builds on the [sensors](CLASSROOM_SENSORS_AND_AUTOMATION.md) and
 
 ---
 
+## 🧱 LEGO-style quick build (ages 7+)
+
+> Advanced! Do [🐣 Your First Coop Brain](lessons/00-your-first-coop-brain.md) +
+> [Door lesson](CLASSROOM_DOOR_AND_ROAMING_ROOST.md) first. Hard words:
+> [Picture Dictionary](lessons/00-your-first-coop-brain.md#-picture-dictionary-hard-words-made-easy).
+
+```text
+ ┌──────────────────────────────────────────────┐
+ │  BAG 6 — A Robot That Moves a Tool (1 axis)    │
+ │  [1] 🟩 flashed board  ............ x1         │
+ │  [2] ⚙️ NEMA17 stepper + driver  .. x1         │
+ │  [3] 🟫 rail + belt + pulley  ..... x1         │
+ │  [4] 🛑 limit switch (home)  ...... x1         │
+ └──────────────────────────────────────────────┘
+```
+1. **Step 1 of 3 — Build one rail.** Mount motor, belt, carriage. *✓ slides freely.*
+2. **Step 2 of 3 — Wire + home.** Driver to board; add limit switch as "home".
+   *✓ finds home on start.*
+3. **Step 3 of 3 — Move it.** Send a position from the app → the carriage drives there.
+   *✓ you made a robot axis!* Add a 2nd axis for X+Y (below).
+
+> 🦺 Steppers turn **off** when idle (no heat); **E-STOP** freezes motion.
+
+**👉 Next:** add Y axis + a tool (below) · [Learning Tracks](LEARNING_TRACKS.md)
+
+---
+
 ## How a gantry works
 
 ```text

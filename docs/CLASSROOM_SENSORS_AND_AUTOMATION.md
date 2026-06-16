@@ -14,6 +14,29 @@ Builds on [door + Roaming Roost](CLASSROOM_DOOR_AND_ROAMING_ROOST.md) and
 
 ---
 
+## 🧱 LEGO-style quick build (ages 7+)
+
+> Do [🐣 Your First Coop Brain](lessons/00-your-first-coop-brain.md) first. Hard words:
+> [Picture Dictionary](lessons/00-your-first-coop-brain.md#-picture-dictionary-hard-words-made-easy).
+
+```text
+ ┌──────────────────────────────────────────────┐
+ │  BAG 3 — Make the Coop SEE the Light          │
+ │  [1] 🟩 flashed board  ............ x1         │
+ │  [2] 💡 LDR light sensor  ......... x1         │
+ │  [3] 🔌 10k resistor + 3 wires  ... x1         │
+ └──────────────────────────────────────────────┘
+```
+1. **Step 1 of 3 — Wire it.** LDR + resistor make a divider: middle → **GPIO1**,
+   ends → **3V3** and **GND**. *✓ wires firm.*
+2. **Step 2 of 3 — Set it.** Setup page → **peripheral = `light`**. Save.
+3. **Step 3 of 3 — Watch.** Cover the sensor → number drops; shine light → it rises.
+   *✓ the coop can feel daytime!* Use it to auto-open the door at sunrise (below).
+
+**👉 Next:** [Feeder + Waterer](CLASSROOM_FEEDER_AND_WATERER.md) · [Learning Tracks](LEARNING_TRACKS.md)
+
+---
+
 ## What you're building
 
 ```text

@@ -12,6 +12,32 @@ binary, same safety rules, same MQTT contract.
 
 ---
 
+## 🧱 LEGO-style quick build (ages 7+)
+
+> Do [🐣 Your First Coop Brain](lessons/00-your-first-coop-brain.md) first. Hard words:
+> [Picture Dictionary](lessons/00-your-first-coop-brain.md#-picture-dictionary-hard-words-made-easy).
+
+```text
+ ┌──────────────────────────────────────────────┐
+ │  BAG 4 — Feed & Water by Itself                │
+ │  [1] 🟩 flashed board  ............ x1         │
+ │  [2] 🔁 relay module  ............. x1         │
+ │  [3] 💧 pump / 🍚 feeder motor  ... x1         │
+ │  [4] 🔋 separate 12V power + wires             │
+ └──────────────────────────────────────────────┘
+```
+1. **Step 1 of 4 — Wire the relay.** Relay IN → **GPIO5**, + → 5V, − → GND. *✓ click.*
+   (Grown-up runs the pump's 12V through the relay — never off USB.)
+2. **Step 2 of 4 — Set it.** Setup page → **peripheral = `relay`**. Save.
+3. **Step 3 of 4 — Turn on.** App → relay **on** → it runs. *✓*
+4. **Step 4 of 4 — Turn off** (always pair on+off!). *✓* 🎉
+
+> 🦺 **E-STOP** cuts it instantly — try it.
+
+**👉 Next:** [Sensors → Automation](CLASSROOM_SENSORS_AND_AUTOMATION.md) · [Learning Tracks](LEARNING_TRACKS.md)
+
+---
+
 ## What you're building
 
 ```text

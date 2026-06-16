@@ -26,6 +26,7 @@
 #include <Preferences.h>
 #include <esp_task_wdt.h>
 #include <ESP32Servo.h>   // door servo + continuous-rotation drive servos
+#include <DHT.h>          // DHT22 temp/humidity (peripheral=temp-humidity)
 
 // ── Board ──────────────────────────────────────────────────────────────────
 // XIAO ESP32-S3 user LED is on GPIO21 and is active-LOW.
@@ -56,6 +57,10 @@ static const int PIN_RELAY       = 5;   // D4 — relay (peripheral=relay)
 static const int PIN_GRBL_TX = 43;      // D6 → GRBL RX
 static const int PIN_GRBL_RX = 44;      // D7 ← GRBL TX
 #define GRBL Serial1
+// Real sensors: DHT22 data pin (peripheral=temp-humidity), LDR on an ADC pin
+// (peripheral=light). Wire DHT data→GPIO6; LDR divider mid→GPIO1.
+static const int PIN_DHT = 6;
+static const int PIN_LDR = 1;
 
 static const int DOOR_OPEN_DEG  = 90;   // matches Chicken Tender coop door
 static const int DOOR_CLOSE_DEG = 0;
@@ -111,6 +116,8 @@ String driveDir  = "stop";            // last drive direction
 bool relayOn = false;                 // relay/light state
 bool gantryEnabled = false;
 float gantryX = 0, gantryY = 0;       // last commanded gantry position (mm)
+bool dhtEnabled = false, ldrEnabled = false;
+DHT dht(PIN_DHT, DHT22);              // constructed always; begun only if enabled
 unsigned long lastDriveCmd = 0;       // for the deadman stop
 
 volatile bool eStopActive = false;
@@ -232,8 +239,23 @@ void publishHeartbeat() {
   StaticJsonDocument<192> doc;
   // Starter Node has no real sensors — report a harmless, obviously-fake set so
   // it is visibly distinguishable from a real coop while still exercising the path.
-  doc["temp"]         = 0;
-  doc["humidity"]     = 0;
+  // Real readings when a sensor peripheral is attached; 0 otherwise. Average 3
+  // samples (project rule: smooth before publishing).
+  float t = 0, h = 0;
+  if (dhtEnabled) {
+    int n = 0; float ts = 0, hs = 0;
+    for (int i = 0; i < 3; i++) {
+      float rt = dht.readTemperature(true), rh = dht.readHumidity();  // °F, %
+      if (!isnan(rt) && !isnan(rh)) { ts += rt; hs += rh; n++; }
+    }
+    if (n) { t = ts / n; h = hs / n; }
+  }
+  doc["temp"]         = t;
+  doc["humidity"]     = h;
+  if (ldrEnabled) {
+    long s = 0; for (int i = 0; i < 3; i++) s += analogRead(PIN_LDR);
+    doc["light"] = (int)(s / 3);
+  }
   doc["ammonia"]      = 0;
   doc["feedLevel"]    = 0;
   doc["waterLevel"]   = 0;
@@ -491,6 +513,14 @@ void setup() {
     grblSend("");        // wake GRBL
     grblSend("G21 G90"); // mm, absolute — no auto-home (let the OS command $H)
     Serial.printf("[ACT] GRBL gantry bridge on UART TX%d/RX%d\n", PIN_GRBL_TX, PIN_GRBL_RX);
+  } else if (peripheral == "temp-humidity") {
+    dhtEnabled = true;
+    dht.begin();
+    Serial.printf("[SENSE] DHT22 on GPIO%d\n", PIN_DHT);
+  } else if (peripheral == "light") {
+    ldrEnabled = true;
+    pinMode(PIN_LDR, INPUT);
+    Serial.printf("[SENSE] LDR on GPIO%d\n", PIN_LDR);
   }
 
   // Now arm the watchdog for the steady-state loop().

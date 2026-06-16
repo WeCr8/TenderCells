@@ -17,6 +17,8 @@ interface ScheduleDoc {
   cronExpression?: string;
   enabled?: boolean;
   amount?: number;
+  state?: "open" | "close";   // door: which way (default open)
+  on?: boolean;               // water/relay: on or off (default on)
   lastRun?: number | { toMillis?: () => number } | null;
 }
 
@@ -60,8 +62,8 @@ function fire(deviceId: string, s: ScheduleDoc): boolean {
   switch (s.action) {
     case "feed":  return MQTTController.publishCommand(deviceId, "feed",  { amount: s.amount ?? 50 });
     case "clean": return MQTTController.publishCommand(deviceId, "clean", { action: "start" });
-    case "door":  return MQTTController.publishCommand(deviceId, "door",  { state: "open" });
-    case "water": return MQTTController.publishCommand(deviceId, "light", { on: true });
+    case "door":  return MQTTController.publishCommand(deviceId, "door",  { state: s.state ?? "open" });
+    case "water": return MQTTController.publishCommand(deviceId, "light", { on: s.on ?? true });
     default: return false;
   }
 }

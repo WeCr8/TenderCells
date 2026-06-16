@@ -11,7 +11,7 @@ import {
   MenuItem, Typography, Alert, Box, Chip,
 } from '@mui/material';
 import { useHardwareControl, listUnclaimedDevices } from '../../hooks/useHardwareControl';
-import { updateDevice } from '../../services/deviceService';
+import { updateDevice, type Device } from '../../services/deviceService';
 
 const PRODUCT_TYPES = ['chicken-tender', 'roaming-roost', 'duck-dock', 'bunny-burrow',
   'goat-guardian', 'turkey-tower', 'pigeon-palace', 'watchtower', 'starter', 'custom'];
@@ -58,13 +58,12 @@ export default function DeviceConfigDialog({
     try {
       await updateDevice(deviceId, {
         nickname,
-        // productType + peripheral are validated server-side / by firmware; stored for UI.
-        productType: productType as never,
+        productType: productType as Device['productType'],
         peripheral,
         location: { x, y },
         ...(peripheral === 'camera' ? { streamUrl, cameraLabel, aim } : {}),
         unclaimed: false,
-      } as never);
+      });
       setMsg({ type: 'success', text: 'Saved' });
       onSaved?.();
     } catch (e) {

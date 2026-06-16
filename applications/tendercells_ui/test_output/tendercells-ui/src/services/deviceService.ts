@@ -21,6 +21,13 @@ export interface Device {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   mqttDeviceId: string; // e.g., "ct_001", "wr_001"
+  // Set via the device-config UI / heartbeat auto-register. Optional so older docs
+  // and partial updates stay valid.
+  peripheral?: string;        // none|door|drive|relay|gantry|camera|temp-humidity|light|...
+  streamUrl?: string;         // camera MJPEG URL (live feed)
+  cameraLabel?: string;       // camera display name
+  aim?: number;               // camera heading/aim in degrees
+  unclaimed?: boolean;        // true until claimed to an account
 }
 
 // Register new device for user

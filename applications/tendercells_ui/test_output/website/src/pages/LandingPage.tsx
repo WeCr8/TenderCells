@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "./LandingPage.css";
@@ -63,6 +63,7 @@ export default function LandingPage() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterDismissed, setNewsletterDismissed] = useState(false);
   const [heroIndex, setHeroIndex] = useState(0);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     trackPageView("/");
@@ -89,11 +90,20 @@ export default function LandingPage() {
       <main>
         {/* ── Hero ─────────────────────────────────── */}
         <section className="hero">
-          <img
+          {/* Demo video as the hero — WebGL/Three.js, in the browser. Muted autoplay
+              loop with a poster fallback; "Watch the video" unmutes + restarts. */}
+          <video
+            ref={heroVideoRef}
             className="hero-image"
-            src={HERO_IMAGES[heroIndex].src}
-            alt={HERO_IMAGES[heroIndex].alt}
-          />
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster={HERO_IMAGES[heroIndex].src}
+          >
+            <source src="/assets/videos/tendercells-threejs-demo.mp4" type="video/mp4" />
+          </video>
           <div className="hero-overlay" />
           <div className="hero-content">
             <h1>Tender Cells</h1>
@@ -109,7 +119,15 @@ export default function LandingPage() {
               <button
                 type="button"
                 className="btn-watch"
-                onClick={() => trackButtonClick("watch-video")}
+                onClick={() => {
+                  trackButtonClick("watch-video");
+                  const v = heroVideoRef.current;
+                  if (!v) return;
+                  v.muted = false;
+                  v.currentTime = 0;
+                  void v.play();
+                  v.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
               >
                 ▶ WATCH THE VIDEO
               </button>

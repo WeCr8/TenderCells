@@ -5,6 +5,8 @@
 
 import type { Request, Response } from "express";
 import mqtt from "mqtt";
+import { AUTH_ENABLED, type AuthedRequest } from "../middleware/auth.js";
+import { getFirestoreAdmin } from "../config/firebase-admin.js";
 
 interface MQTTMessage {
   [key: string]: unknown;
@@ -45,6 +47,20 @@ const KNOWN_ROUTINES = [
 
 const SCHEMAS: Record<string, Schema> = {
   door:    { state:   { type: "string", required: true, values: ["open", "close"] } },
+  // Basic Roaming Roost differential drive (classroom rover + real product share this).
+  drive:   {
+    dir:   { type: "string", required: true, values: ["forward", "back", "left", "right", "stop"] },
+    speed: { type: "number", required: false, min: 0, max: 1 },
+  },
+  // Relay/light: any farm load on/off (heat lamp, water pump, fan, grow light).
+  light:   { on:      { type: "boolean", required: true } },
+  // GRBL gantry: coordinate move {x,y,speed} or real-time control {cmd}.
+  gantry:  {
+    x:     { type: "number", required: false },
+    y:     { type: "number", required: false },
+    speed: { type: "number", required: false, min: 0, max: 1 },
+    cmd:   { type: "string", required: false, values: ["home", "unlock", "hold", "resume", "stop"] },
+  },
   feed:    { amount:  { type: "number", required: true, min: 1, max: 5000 } },
   clean:   { action:  { type: "string", required: true, values: ["start", "stop"] } },
   routine: { routine: { type: "string", required: true, values: [...KNOWN_ROUTINES] } },
@@ -105,6 +121,30 @@ export class MQTTController {
     }
   }
 
+  // Mirror live device data to Firestore so signed-in users see their devices from
+  // anywhere — not just the LAN. No-op in demo/LAN mode (no admin creds). Fire-and-
+  // forget: never blocks the MQTT path, swallows errors.
+  private static mirrorToFirestore(
+    kind: "sensors" | "state" | "alert",
+    deviceId: string,
+    payload: MQTTMessage,
+  ) {
+    if (!AUTH_ENABLED) return;
+    try {
+      const db = getFirestoreAdmin();
+      const ts = Date.now();
+      const ref = db.collection("devices").doc(deviceId);
+      if (kind === "alert") {
+        void ref.collection("alerts").add({ ...payload, ts }).catch(() => {});
+      } else {
+        const field = kind === "sensors" ? "telemetry" : "state";
+        void ref.set({ [field]: payload, [`${field}At`]: ts }, { merge: true }).catch(() => {});
+      }
+    } catch {
+      /* admin not initialized — skip silently */
+    }
+  }
+
   private static handleMessage(topic: string, message: Buffer) {
     try {
       // Constraint: reject non-JSON payloads immediately
@@ -121,14 +161,17 @@ export class MQTTController {
         const err = validatePayload(payload, SCHEMAS.sensors);
         if (err) console.warn(`[MQTT] Sensor schema warning (${deviceId}): ${err}`);
         MQTTController.telemetry.set(deviceId, payload);
+        MQTTController.mirrorToFirestore("sensors", deviceId, payload);
       } else if (topicParts[2] === "state") {
         const deviceId = topicParts[1];
         MQTTController.states.set(deviceId, payload);
+        MQTTController.mirrorToFirestore("state", deviceId, payload);
       } else if (topicParts[2] === "alert") {
         const deviceId = topicParts[1];
         const alerts = MQTTController.alerts.get(deviceId) || [];
         alerts.push(payload);
         MQTTController.alerts.set(deviceId, alerts.slice(-100)); // Keep last 100
+        MQTTController.mirrorToFirestore("alert", deviceId, payload);
       }
     } catch (error) {
       console.error("Failed to parse MQTT message:", error);
@@ -203,6 +246,104 @@ export class MQTTController {
       state,
       message: "Door command sent",
     });
+  }
+
+  sendDriveCommand(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const { dir, speed } = req.body;
+
+    const err = validatePayload(req.body, SCHEMAS.drive);
+    if (err) return res.status(400).json({ error: err });
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+
+    // Local-only motion (never cloud) — same QoS 1 contract as the door.
+    const topic = `tc/${deviceId}/cmd/drive`;
+    const payload = { dir, speed: speed ?? 0.5, timestamp: Date.now() };
+    MQTTController.client.publish(topic, JSON.stringify(payload), { qos: 1 });
+
+    res.json({
+      success: true,
+      deviceId,
+      command: "drive",
+      dir,
+      message: "Drive command sent",
+    });
+  }
+
+  // Bind a device to the signed-in account (first-claim-wins). After this, only the
+  // owner can actuate it (see requireDeviceOwner). No-op in demo/LAN mode (no auth).
+  async claimDevice(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const uid = (req as AuthedRequest).uid;
+
+    if (!AUTH_ENABLED || !uid) {
+      return res.json({
+        success: true,
+        deviceId,
+        claimed: false,
+        note: "Demo/LAN mode — no account binding required",
+      });
+    }
+
+    try {
+      const db = getFirestoreAdmin();
+      const ref = db.collection("devices").doc(deviceId);
+      const result = await db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        const existing = snap.exists ? (snap.data()?.ownerId as string | undefined) : undefined;
+        if (existing && existing !== uid) return { ok: false as const, ownerId: existing };
+        tx.set(ref, { ownerId: uid, claimedAt: Date.now() }, { merge: true });
+        return { ok: true as const, ownerId: uid };
+      });
+
+      if (!result.ok) {
+        return res.status(409).json({ error: "Device already claimed by another account" });
+      }
+      return res.json({ success: true, deviceId, claimed: true, ownerId: uid });
+    } catch {
+      return res.status(500).json({ error: "Claim failed" });
+    }
+  }
+
+  sendLightCommand(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const { on } = req.body;
+
+    const err = validatePayload(req.body, SCHEMAS.light);
+    if (err) return res.status(400).json({ error: err });
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+
+    const topic = `tc/${deviceId}/cmd/light`;
+    MQTTController.client.publish(topic, JSON.stringify({ on, timestamp: Date.now() }), { qos: 1 });
+
+    res.json({ success: true, deviceId, command: "light", on, message: "Light/relay command sent" });
+  }
+
+  sendGantryCommand(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const { x, y, speed, cmd } = req.body;
+
+    const err = validatePayload(req.body, SCHEMAS.gantry);
+    if (err) return res.status(400).json({ error: err });
+    if (cmd === undefined && x === undefined && y === undefined)
+      return res.status(400).json({ error: "Provide cmd, or x/y coordinates" });
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+
+    const topic = `tc/${deviceId}/cmd/gantry`;
+    const payload: MQTTMessage = { timestamp: Date.now() };
+    if (cmd !== undefined) payload.cmd = cmd;
+    if (x !== undefined) payload.x = x;
+    if (y !== undefined) payload.y = y;
+    if (speed !== undefined) payload.speed = speed;
+    MQTTController.client.publish(topic, JSON.stringify(payload), { qos: 1 });
+
+    res.json({ success: true, deviceId, command: "gantry", payload, message: "Gantry command sent" });
   }
 
   sendFeedCommand(req: Request, res: Response) {

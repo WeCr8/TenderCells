@@ -34,7 +34,7 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: "Tender Cells in Education",
+    label: "Education",
     to: "/education",
     children: [
       { label: "All Audience Paths",     to: "/audiences" },
@@ -89,31 +89,6 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: "Animal Health",
-    to: "/health",
-    children: [
-      { label: "Chicken Health Guide", to: "/health#chicken" },
-      { label: "Predator Prevention",  to: "/health#predators" },
-      { label: "Nutrition & Feed",     to: "/health#nutrition" },
-      { label: "Disease Monitoring",   to: "/health#disease" },
-      { label: "Vet Connect",          to: "/health#vet-connect" },
-    ],
-  },
-  {
-    label: "Local Services",
-    to: "/services",
-    children: [
-      { label: "Find an Installer",     to: "/services#installer" },
-      { label: "Local Feed Suppliers",  to: "/services#feed-suppliers" },
-      { label: "Certified Technicians", to: "/services#technicians" },
-      { label: "Community Events",      to: "/services#events" },
-    ],
-  },
-  { label: "Audiences", to: "/audiences" },
-  { label: "Guides", to: "/guides" },
-  { label: "Automation", to: "/farm-automation" },
-  { label: "Store", to: "/shop" },
-  {
     label: "Open Source",
     to: "/open-source",
     children: [
@@ -127,10 +102,18 @@ const NAV_ITEMS: NavItem[] = [
       { label: "License",              to: "/open-source#license" },
     ],
   },
-  { label: "Developers", to: "/developers" },
-  { label: "Partners", to: "/partners" },
-  { label: "Our Story", to: "/story" },
-  { label: "Blog", to: "/blog" },
+  {
+    label: "Company",
+    to: "/story",
+    children: [
+      { label: "Our Story",       to: "/story" },
+      { label: "Developers",      to: "/developers" },
+      { label: "Blog",            to: "/blog" },
+      { label: "Partners & Sponsors", to: "/partners" },
+      { label: "Animal Health",   to: "/health" },
+      { label: "Local Services",  to: "/services" },
+    ],
+  },
   {
     label: "Follow",
     children: [

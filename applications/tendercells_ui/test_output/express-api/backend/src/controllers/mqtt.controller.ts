@@ -84,6 +84,9 @@ export class MQTTController {
   private static telemetry: Map<string, MQTTMessage> = new Map();
   private static states: Map<string, MQTTMessage> = new Map();
   private static alerts: Map<string, MQTTMessage[]> = new Map();
+  // Sub-states like arm joint angles / gantry position, keyed `${deviceId}:${sub}`.
+  // Feeds the live arm/gantry UI (sliders, 3D viewport animation).
+  private static subStates: Map<string, MQTTMessage> = new Map();
 
   private static initializeClient() {
     if (MQTTController.client) return;
@@ -106,6 +109,7 @@ export class MQTTController {
         // Subscribe to all sensor topics
         MQTTController.client!.subscribe("tc/+/sensors", { qos: 0 });
         MQTTController.client!.subscribe("tc/+/state", { qos: 1 });
+        MQTTController.client!.subscribe("tc/+/state/+", { qos: 1 });  // arm/gantry sub-state
         MQTTController.client!.subscribe("tc/+/alert", { qos: 2 });
       });
 
@@ -145,6 +149,20 @@ export class MQTTController {
     }
   }
 
+  // Mirror a sub-state (arm joints, gantry position) to Firestore for the live UI.
+  private static mirrorSubState(deviceId: string, sub: string, payload: MQTTMessage) {
+    if (!AUTH_ENABLED) return;
+    try {
+      const db = getFirestoreAdmin();
+      const ts = Date.now();
+      const field = sub === "arm" ? "armState" : sub === "gantry" ? "gantryState" : `state_${sub}`;
+      void db.collection("devices").doc(deviceId)
+        .set({ [field]: payload, [`${field}At`]: ts }, { merge: true }).catch(() => {});
+    } catch {
+      /* admin not initialized — skip */
+    }
+  }
+
   private static handleMessage(topic: string, message: Buffer) {
     try {
       // Constraint: reject non-JSON payloads immediately
@@ -164,8 +182,14 @@ export class MQTTController {
         MQTTController.mirrorToFirestore("sensors", deviceId, payload);
       } else if (topicParts[2] === "state") {
         const deviceId = topicParts[1];
-        MQTTController.states.set(deviceId, payload);
-        MQTTController.mirrorToFirestore("state", deviceId, payload);
+        const sub = topicParts[3];  // "arm" | "gantry" | undefined (plain state)
+        if (sub) {
+          MQTTController.subStates.set(`${deviceId}:${sub}`, payload);
+          MQTTController.mirrorSubState(deviceId, sub, payload);
+        } else {
+          MQTTController.states.set(deviceId, payload);
+          MQTTController.mirrorToFirestore("state", deviceId, payload);
+        }
       } else if (topicParts[2] === "alert") {
         const deviceId = topicParts[1];
         const alerts = MQTTController.alerts.get(deviceId) || [];
@@ -212,6 +236,16 @@ export class MQTTController {
       timestamp: Date.now(),
       data: state,
     });
+  }
+
+  // Live arm/gantry sub-state for the UI: GET /devices/:id/state/arm | gantry.
+  getSubState(req: Request, res: Response) {
+    const { deviceId, sub } = req.params;
+    const data = MQTTController.subStates.get(`${deviceId}:${sub}`);
+    if (!data) {
+      return res.status(404).json({ error: `No ${sub} state for device`, deviceId });
+    }
+    res.json({ deviceId, sub, timestamp: Date.now(), data });
   }
 
   getAlerts(req: Request, res: Response) {

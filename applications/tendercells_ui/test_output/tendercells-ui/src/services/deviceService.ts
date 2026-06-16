@@ -70,6 +70,15 @@ export async function getUserDevices(userId: string): Promise<Device[]> {
   }
 }
 
+// Merge config changes onto a device doc (name, peripheral, placement, camera, etc.)
+export async function updateDevice(deviceId: string, updates: Partial<Device>): Promise<void> {
+  await setDoc(
+    doc(db, 'devices', deviceId),
+    { ...updates, updatedAt: Timestamp.now() },
+    { merge: true },
+  );
+}
+
 // Get single device by ID
 export async function getDevice(deviceId: string): Promise<Device | null> {
   try {

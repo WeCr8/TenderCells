@@ -17,8 +17,10 @@ import ThermostatIcon from '@mui/icons-material/Thermostat';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import { useNavigate } from 'react-router-dom';
+import SettingsRemoteIcon from '@mui/icons-material/SettingsRemote';
 import { useProducts } from '../hooks/useProducts';
 import { useAuth } from '../contexts/AuthContext';
+import DeviceConfigDialog from '../components/devices/DeviceConfigDialog';
 import type { Product } from '../types/products';
 
 const C = {
@@ -122,6 +124,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const { products, loading, refetch } = useProducts();
   const [now, setNow] = useState(new Date());
+  const [configOpen, setConfigOpen] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60000);
@@ -135,6 +138,7 @@ export default function DashboardPage() {
 
   return (
     <Box sx={{ bgcolor: C.bg, minHeight: '100dvh', p: { xs: 2, sm: 3 } }}>
+      <DeviceConfigDialog open={configOpen} onClose={() => setConfigOpen(false)} onSaved={() => void refetch()} />
       <Stack spacing={3} sx={{ maxWidth: 1200, mx: 'auto' }}>
 
         {/* Header */}
@@ -174,11 +178,14 @@ export default function DashboardPage() {
         <Stack direction="row" spacing={1.5} flexWrap="wrap">
           {[
             { label: 'Add Device', icon: <AddIcon />, path: '/products' },
+            { label: 'Configure / Claim', icon: <SettingsRemoteIcon />, path: '__config__' },
             { label: 'Property Layout', icon: <GridOnIcon />, path: '/layout' },
             { label: 'Schedules', icon: <ScheduleIcon />, path: '/schedules' },
             { label: 'Diagnostics', icon: <BugReportIcon />, path: '/diagnostics' },
           ].map(a => (
-            <Button key={a.label} startIcon={a.icon} onClick={() => navigate(a.path)} variant="outlined" size="small"
+            <Button key={a.label} startIcon={a.icon}
+              onClick={() => (a.path === '__config__' ? setConfigOpen(true) : navigate(a.path))}
+              variant="outlined" size="small"
               sx={{ borderColor: C.accent, color: C.accent, '&:hover': { bgcolor: C.accent + '22' } }}>
               {a.label}
             </Button>

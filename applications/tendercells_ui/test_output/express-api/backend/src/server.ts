@@ -12,6 +12,7 @@ import cors from 'cors';
 import os from 'node:os';
 import mqttRoutes from './routes/mqtt.routes.js';
 import productsRoutes from './routes/products.routes.js';
+import { startScheduleRunner } from './schedule.runner.js';
 
 /**
  * First non-internal IPv4 address, so we can print a URL other devices on the
@@ -57,6 +58,9 @@ console.log('Loading MQTT routes..., router:', typeof mqttRoutes);
 app.use('/api/mqtt', mqttRoutes);
 console.log('MQTT routes loaded successfully');
 app.use('/api/products', productsRoutes);
+
+// Fire device schedules at their cron time (no-op without Firebase admin).
+startScheduleRunner();
 
 // API status dashboard
 app.get('/api/status', (req, res) => {

@@ -69,9 +69,9 @@ const NAV_ITEMS: NavItem[] = [
     label: "Learn More",
     to: "/learn",
     children: [
-      { label: "🐣 Start Here — First Coop Brain (ages 7+)", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/lessons/00-your-first-coop-brain.md" },
-      { label: "🧱 Hands-on Lessons",  href: "https://github.com/WeCr8/TenderCells/tree/main/docs/lessons" },
-      { label: "🗺️ Learning Tracks (curriculum map)", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/LEARNING_TRACKS.md" },
+      { label: "🐣 Start Here — First Coop Brain (ages 7+)", to: "/lessons/your-first-coop-brain" },
+      { label: "🧱 Hands-on Lessons",  to: "/lessons" },
+      { label: "🗺️ Learning Tracks (curriculum map)", to: "/lessons/learning-tracks" },
       { label: "All Guides",         to: "/guides" },
       { label: "Farm Automation",    to: "/farm-automation" },
       { label: "Getting Started",    to: "/learn#getting-started" },

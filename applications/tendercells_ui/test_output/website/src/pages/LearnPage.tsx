@@ -18,13 +18,13 @@ const FAQS = [
 // discoverable from the site — no dead ends. Ordered as the learning path.
 const DOCS_BASE = "https://github.com/WeCr8/TenderCells/blob/main/docs";
 const LESSONS = [
-  { title: "🐣 Start Here — Your First Coop Brain", desc: "Ages 7+. Flash a board and watch it come alive. LEGO-style steps.", href: `${DOCS_BASE}/lessons/00-your-first-coop-brain.md`, tag: "Ages 7+" },
-  { title: "🚪 Build a Door + Roaming Roost", desc: "Wire a servo, open/close a door and drive a rover from the OS.", href: `${DOCS_BASE}/CLASSROOM_DOOR_AND_ROAMING_ROOST.md`, tag: "Beginner" },
-  { title: "🌡️ Sensors → Automation", desc: "Add a light sensor; auto-open the door at sunrise.", href: `${DOCS_BASE}/CLASSROOM_SENSORS_AND_AUTOMATION.md`, tag: "Beginner" },
-  { title: "🍽️ Feeder + Waterer", desc: "Relay-driven feeding and watering, on a schedule.", href: `${DOCS_BASE}/CLASSROOM_FEEDER_AND_WATERER.md`, tag: "Beginner" },
-  { title: "🦅 Build Your Own Device", desc: "Invent an animal + threat; fire a live alert. No extra wiring.", href: `${DOCS_BASE}/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md`, tag: "Beginner" },
-  { title: "🤖 Gantry + BOMs", desc: "Build an XY robot gantry (coop & duck dock) with parts lists.", href: `${DOCS_BASE}/CLASSROOM_GANTRY_AND_BOM.md`, tag: "Advanced" },
-  { title: "🧠 AI + CAD with Fusion MCP", desc: "Design parts with AI, model in Fusion 360 over MCP.", href: `${DOCS_BASE}/CLASSROOM_AI_CAD_FUSION_MCP.md`, tag: "Advanced" },
+  { title: "🐣 Start Here — Your First Coop Brain", desc: "Ages 7+. Flash a board and watch it come alive. LEGO-style steps.", href: "/lessons/your-first-coop-brain", tag: "Ages 7+" },
+  { title: "🚪 Build a Door + Roaming Roost", desc: "Wire a servo, open/close a door and drive a rover from the OS.", href: "/lessons/door-roaming-roost", tag: "Beginner" },
+  { title: "🌡️ Sensors → Automation", desc: "Add a light sensor; auto-open the door at sunrise.", href: "/lessons/sensors-automation", tag: "Beginner" },
+  { title: "🍽️ Feeder + Waterer", desc: "Relay-driven feeding and watering, on a schedule.", href: "/lessons/feeder-waterer", tag: "Beginner" },
+  { title: "🦅 Build Your Own Device", desc: "Invent an animal + threat; fire a live alert. No extra wiring.", href: "/lessons/build-your-own", tag: "Beginner" },
+  { title: "🤖 Gantry + BOMs", desc: "Build an XY robot gantry (coop & duck dock) with parts lists.", href: "/lessons/gantry-bom", tag: "Advanced" },
+  { title: "🧠 AI + CAD with Fusion MCP", desc: "Design parts with AI, model in Fusion 360 over MCP.", href: "/lessons/ai-cad-fusion", tag: "Advanced" },
 ];
 
 export default function LearnPage() {
@@ -75,8 +75,8 @@ export default function LearnPage() {
         ))}
       </div>
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
-        <a href={`${DOCS_BASE}/LEARNING_TRACKS.md`} target="_blank" rel="noopener noreferrer" className="btn-primary">🗺️ Full Learning Tracks map →</a>
-        <a href="/flash" className="btn-outline">⚡ Flash a device</a>
+        <Link to="/lessons/learning-tracks" className="btn-primary">🗺️ Full Learning Tracks map →</Link>
+        <Link to="/lessons" className="btn-outline">🧱 All lessons</Link>
       </div>
 
       <h2 className="section-title" id="how-it-works">How It Works</h2>

@@ -368,9 +368,10 @@ void provisionConfig() {
   // School/maker fields: name your animal + the threat your project detects.
   WiFiManagerParameter pSpecies("species", "Species (e.g. axolotl) — optional", species.c_str(), 24);
   WiFiManagerParameter pThreat("threat", "Threat label (button fires this)", threatLabel.c_str(), 20);
-  // What this board carries: none, camera, temp-humidity, ammonia, door, load-cell,
-  // or any free-text for a custom build. "camera" marks a remote camera node.
-  WiFiManagerParameter pPeripheral("peripheral", "Item/sensor on this board (none, camera, temp-humidity, ammonia, door, load-cell)", peripheral.c_str(), 24);
+  // What this board carries. Sensors: none, camera, temp-humidity, ammonia, load-cell.
+  // Actuators (controllable from the OS): door (servo), drive (Roaming Roost), relay
+  // (lamp/pump/fan/light), gantry (GRBL). Or any free-text for a custom build.
+  WiFiManagerParameter pPeripheral("peripheral", "Item on board: none, camera, temp-humidity, ammonia, load-cell, door, drive, relay, gantry", peripheral.c_str(), 40);
   wm.addParameter(&pBroker);
   wm.addParameter(&pPort);
   wm.addParameter(&pId);

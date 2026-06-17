@@ -109,29 +109,50 @@ function CameraViewport({
   const streamRef = useRef<MediaStream | null>(null);
   const [webcamOn, setWebcamOn] = useState(false);
   const [webcamErr, setWebcamErr] = useState<string | null>(null);
+  // 'environment' = rear camera (default for a coop view), 'user' = front/selfie.
+  const [facing, setFacing] = useState<'environment' | 'user'>('environment');
+  // A flashed ESP32/Pi camera node's MJPEG stream URL (from /flash). Renders live
+  // when set, just like a real coop camera.
+  const [flashedUrl, setFlashedUrl] = useState<string | null>(null);
+  const useFlashedCamera = () => {
+    const u = window.prompt(
+      'Flashed camera stream URL\n(from a board flashed at /flash — shown in its serial log / tc status, e.g. http://192.168.1.50:8000/stream):',
+      'http://',
+    );
+    if (u && /^https?:\/\//.test(u)) { stopWebcam(); setFlashedUrl(u.trim()); }
+  };
 
-  const startWebcam = async () => {
+  // Open the default camera at the requested facing. Falls back gracefully:
+  // video+mic → video-only at that facing → any camera. Attaches immediately so
+  // flipping front/rear while live works.
+  const openStream = async (facingMode: 'environment' | 'user') => {
     setWebcamErr(null);
-    // getUserMedia only exists in a secure context (HTTPS or localhost). Over a LAN
-    // IP / plain http (common on phones) it's undefined — say so instead of silently
-    // doing nothing.
     if (!navigator.mediaDevices?.getUserMedia) {
       setWebcamErr('Camera needs HTTPS or localhost. Open the deployed https:// site (or localhost) — a LAN IP over http blocks camera access.');
       return;
     }
+    const gum = (c: MediaStreamConstraints) => navigator.mediaDevices.getUserMedia(c);
     try {
       let stream: MediaStream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      } catch {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true }); // mic denied/absent
+      try { stream = await gum({ video: { facingMode }, audio: true }); }
+      catch {
+        try { stream = await gum({ video: { facingMode } }); }
+        catch { stream = await gum({ video: true }); } // single-camera laptop / no facing support
       }
+      streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = stream;
       setWebcamOn(true);
+      if (videoRef.current) { videoRef.current.srcObject = stream; void videoRef.current.play(); }
     } catch {
       setWebcamErr('Camera permission denied or no camera — showing the sim feed.');
       setWebcamOn(false);
     }
+  };
+  const startWebcam = () => openStream(facing);
+  const flipCamera = () => {
+    const next = facing === 'environment' ? 'user' : 'environment';
+    setFacing(next);
+    void openStream(next);
   };
   const stopWebcam = () => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -170,9 +191,18 @@ function CameraViewport({
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
           />
         )}
+        {/* flashed ESP32/Pi camera node — MJPEG renders natively in <img> */}
+        {!webcamOn && flashedUrl && (
+          <img
+            src={flashedUrl}
+            alt="Flashed camera feed"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={() => { setFlashedUrl(null); setWebcamErr('Could not reach that camera URL — check the board is on and the URL is right.'); }}
+          />
+        )}
         <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 0.5 }}>
-          {!webcamOn && <Typography sx={{ color: C.goldMuted, fontSize: 11 }}>{label}</Typography>}
-          {!webcamOn && <Typography sx={{ color: C.accent + '88', fontSize: 9 }}>SIM feed · ESP32-S3-EYE stream when flashed</Typography>}
+          {!webcamOn && !flashedUrl && <Typography sx={{ color: C.goldMuted, fontSize: 11 }}>{label}</Typography>}
+          {!webcamOn && !flashedUrl && <Typography sx={{ color: C.accent + '88', fontSize: 9 }}>SIM feed · use your camera or connect a flashed camera</Typography>}
         </Box>
         {cam.overlay && shown.map((b, i) => (
           <Box key={b.id} sx={{
@@ -212,13 +242,37 @@ function CameraViewport({
       {allowWebcam && (
         <Stack sx={{ position: 'absolute', bottom: 8, right: 8, alignItems: 'flex-end', gap: 0.5, maxWidth: '80%' }}>
           {webcamOn && (
-            <Chip size="small" label="● MY CAMERA · local only"
+            <Chip size="small" label={`● ${facing === 'environment' ? 'REAR' : 'FRONT'} · local only`}
               sx={{ bgcolor: C.danger, color: '#fff', fontSize: 9, height: 20 }} />
           )}
-          <Button size="small" variant="contained" onClick={webcamOn ? stopWebcam : startWebcam}
-            sx={{ bgcolor: webcamOn ? C.danger : C.accent, fontSize: 11, py: 0.4 }}>
-            {webcamOn ? 'Stop camera' : '📷 Use my camera'}
-          </Button>
+          {flashedUrl && (
+            <Chip size="small" label="● FLASHED CAMERA · live"
+              sx={{ bgcolor: '#4CAF50', color: '#06210f', fontSize: 9, height: 20 }} />
+          )}
+          <Stack direction="row" spacing={0.5} flexWrap="wrap" justifyContent="flex-end">
+            {webcamOn && (
+              <Button size="small" variant="outlined" onClick={flipCamera}
+                sx={{ borderColor: C.accent, color: C.gold, fontSize: 11, py: 0.4 }}>
+                🔄 {facing === 'environment' ? 'Front' : 'Rear'}
+              </Button>
+            )}
+            {!flashedUrl && (
+              <Button size="small" variant="contained" onClick={webcamOn ? stopWebcam : startWebcam}
+                sx={{ bgcolor: webcamOn ? C.danger : C.accent, fontSize: 11, py: 0.4 }}>
+                {webcamOn ? 'Stop' : '📷 Use my camera'}
+              </Button>
+            )}
+            {!webcamOn && !flashedUrl && (
+              <Button size="small" variant="outlined" onClick={useFlashedCamera}
+                sx={{ borderColor: C.accent, color: C.gold, fontSize: 11, py: 0.4 }}>
+                📡 Flashed camera
+              </Button>
+            )}
+            {flashedUrl && (
+              <Button size="small" variant="contained" onClick={() => setFlashedUrl(null)}
+                sx={{ bgcolor: C.danger, fontSize: 11, py: 0.4 }}>Stop</Button>
+            )}
+          </Stack>
           {webcamErr && (
             <Alert severity="warning" sx={{ py: 0, fontSize: 10, '& .MuiAlert-message': { py: 0.5 } }}>{webcamErr}</Alert>
           )}

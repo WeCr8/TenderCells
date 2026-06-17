@@ -8,6 +8,7 @@ import {
   Chip,
   CircularProgress,
 } from '@mui/material';
+import { Button, Alert } from '@mui/material';
 import { CameraAlt as CameraIcon, SignalCellularAlt as SignalIcon } from '@mui/icons-material';
 import { CameraFeed } from '../../types/camera';
 
@@ -24,6 +25,42 @@ export default function CameraFeedViewer({
 }: CameraFeedViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [connecting, setConnecting] = useState(false);
+
+  // Browser webcam preview — opt-in, client-side only (no upload/record/store).
+  // A "try it now" path for visitors with no hardware. getUserMedia only fires on
+  // an explicit click; denial/no-camera falls back to the stream/canvas below.
+  const webcamRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [webcamOn, setWebcamOn] = useState(false);
+  const [webcamErr, setWebcamErr] = useState<string | null>(null);
+  const webcamSupported =
+    typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
+
+  const startWebcam = async () => {
+    setWebcamErr(null);
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ video: true });
+      streamRef.current = s;
+      setWebcamOn(true);
+    } catch {
+      setWebcamErr('Camera permission denied or no camera — showing the seeded view.');
+      setWebcamOn(false);
+    }
+  };
+  const stopWebcam = () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setWebcamOn(false);
+  };
+
+  // Attach the stream once the <video> is mounted; stop tracks on unmount.
+  useEffect(() => {
+    if (webcamOn && webcamRef.current && streamRef.current) {
+      webcamRef.current.srcObject = streamRef.current;
+      void webcamRef.current.play();
+    }
+  }, [webcamOn]);
+  useEffect(() => () => { streamRef.current?.getTracks().forEach((t) => t.stop()); }, []);
 
   useEffect(() => {
     if (!camera.streamUrl || !canvasRef.current) return;
@@ -68,7 +105,15 @@ export default function CameraFeedViewer({
       {/* Real live feed: MJPEG streams render natively in <img> (works with any
           off-the-shelf ESP32-CAM/S3-EYE serving /stream). Falls back to the canvas
           status card when no streamUrl is set. */}
-      {camera.streamUrl ? (
+      {webcamOn ? (
+        <video
+          ref={webcamRef}
+          autoPlay
+          muted
+          playsInline
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      ) : camera.streamUrl ? (
         <img
           src={camera.streamUrl}
           alt={`Live feed: ${camera.name}`}
@@ -154,7 +199,22 @@ export default function CameraFeedViewer({
               sx={{ fontSize: '0.7rem' }}
             />
           )}
+          {webcamOn && (
+            <Chip label="● MY CAMERA (local only)" size="small"
+              sx={{ bgcolor: '#CC3333', color: '#fff', fontSize: '0.7rem' }} />
+          )}
+          <Box sx={{ flex: 1 }} />
+          {webcamSupported && (
+            <Button size="small" variant="contained"
+              onClick={webcamOn ? stopWebcam : startWebcam}
+              sx={{ bgcolor: webcamOn ? '#CC3333' : '#4A7C59', fontSize: '0.7rem' }}>
+              {webcamOn ? 'Stop' : '📷 Preview with my camera'}
+            </Button>
+          )}
         </Stack>
+        {webcamErr && (
+          <Alert severity="warning" sx={{ mt: 1, py: 0, fontSize: '0.72rem' }}>{webcamErr}</Alert>
+        )}
       </Box>
     </Paper>
   );

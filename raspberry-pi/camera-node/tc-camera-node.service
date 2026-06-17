@@ -1,0 +1,20 @@
+# Tender Cells — Pi Camera Node systemd unit.
+# Install:
+#   sudo cp tc-camera-node.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now tc-camera-node
+# Edit the broker IP + device id below first (or set them in /etc/default/tc-camera-node).
+[Unit]
+Description=Tender Cells Pi Camera Node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+EnvironmentFile=-/etc/default/tc-camera-node
+ExecStart=/usr/bin/python3 /home/pi/tendercells/camera_node.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

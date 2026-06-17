@@ -25,6 +25,15 @@
     "uses_live_farm_controls": false,
     "expected_data_source": "local seeded demo data"
   },
+  "browser_webcam_preview": {
+    "available": true,
+    "where": "ChickenEye coop-camera screen, main viewport — '📷 Use my camera' (front/rear flip on mobile). Also connect a flashed ESP32/Pi camera by MJPEG URL.",
+    "requires_user_permission": true,
+    "requires_https": true,
+    "data_handling": "client-side only; not uploaded, recorded, or stored",
+    "fallback_if_denied_or_unsupported": "seeded sim viewport; other camera slots show 'not connected' with a Flash-a-device CTA",
+    "ai_routing_hint": "If the visitor has a camera, the in-browser preview works with no hardware. If they want a real device, point them to the flasher at /flash."
+  },
   "recommended_test_flow": [
     {
       "step": 0,

@@ -196,6 +196,24 @@
     </div>
 
     <div class="card">
+      <h3 class="gold-h">Step 0 — What do you want to build? (auto-picks the board)</h3>
+      <p class="hint">Pick a goal. We select the right firmware card for you and tell you the
+        one setting to choose at WiFi setup. Your chip is still auto-verified on connect — if
+        the board doesn't match, the installer says so and stops.</p>
+      <div class="device-pick" id="useCasePick">
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="door">🚪<h3>Open/close a door</h3><small>Starter Node · set <code>door</code></small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="drive">🛞<h3>Drive a rover</h3><small>Starter Node · set <code>drive</code></small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="relay">💡<h3>Lamp / pump / fan</h3><small>Starter Node · set <code>relay</code></small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="temp-humidity">🌡️<h3>Temp / humidity</h3><small>Starter Node · set <code>temp-humidity</code></small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="light">☀️<h3>Light sensor</h3><small>Starter Node · set <code>light</code></small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-watchtower-cam.json" data-peripheral="camera">📷<h3>Live camera</h3><small>Camera Node · ESP32-S3-Sense</small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="none">🦅<h3>Threat demo</h3><small>Starter Node · no wiring</small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-chicken-tender.json" data-peripheral="">🐔<h3>Full coop</h3><small>Chicken Tender · ESP32-WROOM</small></div>
+      </div>
+      <div id="useCaseHint" class="callout" style="display:none"></div>
+    </div>
+
+    <div class="card">
       <h3 class="gold-h">Step 1 — Pick what to flash</h3>
       <p class="hint">New here, or using a small dev board like a <strong>Seeed XIAO ESP32-S3</strong>?
          Start with <strong>Starter Node</strong> — it needs no coop hardware and proves everything works.
@@ -325,6 +343,33 @@
       <p class="hint">Nothing secret is ever baked into the chip — you set the WiFi yourself, so it's safe to share boards.
         Teachers: see the <a href="https://github.com/WeCr8/TenderCells/blob/main/docs/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md">Build Your Own Device classroom lesson</a>.</p>
     </div>
+
+    <div class="card">
+      <h3 class="gold-h">⚙️ Expert mode — flash your own firmware (in-browser)</h3>
+      <p class="hint">Kids and first-timers: you don't need this — Steps 0–4 above are all you do.
+        This is for coders who want to compile and flash <em>custom</em> code from the browser,
+        no Arduino IDE upload step.</p>
+      <ol class="steps">
+        <li><strong>Write + compile in the browser.</strong> Build for your ESP32 in
+            <a href="https://wokwi.com" target="_blank" rel="noopener noreferrer">Wokwi</a> or the
+            <a href="https://app.arduino.cc/sketches" target="_blank" rel="noopener noreferrer">Arduino Cloud Editor</a>,
+            then export the compiled <code>.bin</code>. Or build our open-source firmware locally
+            (<code>pio run</code> or Arduino IDE) — start from the
+            <a href="https://github.com/WeCr8/TenderCells/tree/main/firmware" target="_blank" rel="noopener noreferrer">firmware source</a>.</li>
+        <li><strong>Flash it in the browser.</strong> Open
+            <a href="https://espressif.github.io/esp-launchpad/" target="_blank" rel="noopener noreferrer">ESP Launchpad</a>
+            (Espressif's official WebSerial flasher) → <strong>DIY</strong> tab → add your
+            <code>.bin</code> at the right offset (app at <code>0x10000</code>, or a merged image at
+            <code>0x0</code>) → Connect → Flash. Chrome/Edge, same as here.</li>
+        <li><strong>Or extend ours.</strong> Edit <code>firmware/starter-node/src/main.cpp</code>,
+            follow the “add your own peripheral” recipe in the
+            <a href="https://github.com/WeCr8/TenderCells/blob/main/docs/CLASSROOM_FEEDER_AND_WATERER.md#implement-your-own-peripheral-the-real-skill" target="_blank" rel="noopener noreferrer">feeder/waterer lesson</a>,
+            rebuild, and flash with ESP Launchpad. Your custom node still talks the same MQTT
+            contract, so it links into the OS like any other device.</li>
+      </ol>
+      <p class="hint">Same chip auto-detection applies everywhere — these tools refuse a binary
+        built for the wrong chip family. All open source: read and change any of it.</p>
+    </div>
   </section>
 
   <!-- ===================== LEARN MODE ===================== -->
@@ -449,6 +494,32 @@
       document.querySelectorAll('#devicePick .device').forEach(x => x.setAttribute('aria-pressed', 'false'));
       d.setAttribute('aria-pressed', 'true');
       installer.setAttribute('manifest', d.dataset.manifest);
+    };
+    d.addEventListener('click', choose);
+    d.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(); } });
+  });
+
+  // Step 0 use-case picker → auto-selects the matching device card + shows the
+  // one peripheral to set at WiFi setup. Beginners never have to know chip names.
+  function selectDeviceByManifest(manifest) {
+    document.querySelectorAll('#devicePick .device').forEach(x =>
+      x.setAttribute('aria-pressed', x.dataset.manifest === manifest ? 'true' : 'false'));
+    if (installer) installer.setAttribute('manifest', manifest);
+  }
+  const useCaseHint = document.getElementById('useCaseHint');
+  document.querySelectorAll('#useCasePick .device').forEach(d => {
+    const choose = () => {
+      document.querySelectorAll('#useCasePick .device').forEach(x => x.setAttribute('aria-pressed', 'false'));
+      d.setAttribute('aria-pressed', 'true');
+      selectDeviceByManifest(d.dataset.device);
+      const per = d.dataset.peripheral;
+      if (useCaseHint) {
+        useCaseHint.style.display = 'block';
+        useCaseHint.innerHTML = per
+          ? 'Board selected below. At WiFi setup (Step 4), set <strong>peripheral = <code>' + per + '</code></strong>. Now press <strong>Connect &amp; Install</strong>.'
+          : 'Full coop firmware selected below. Now press <strong>Connect &amp; Install</strong>.';
+      }
+      document.getElementById('installer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
     d.addEventListener('click', choose);
     d.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(); } });

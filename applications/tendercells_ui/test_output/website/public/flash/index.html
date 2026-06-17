@@ -356,11 +356,12 @@
             then export the compiled <code>.bin</code>. Or build our open-source firmware locally
             (<code>pio run</code> or Arduino IDE) — start from the
             <a href="https://github.com/WeCr8/TenderCells/tree/main/firmware" target="_blank" rel="noopener noreferrer">firmware source</a>.</li>
-        <li><strong>Flash it in the browser.</strong> Open
+        <li><strong>Flash it in the browser.</strong> Open the
+            <a href="/flash/expert">Tender Cells Expert Flasher →</a> — it auto-detects your chip,
+            takes your own <code>.bin</code> file(s) at the right offset (app at <code>0x10000</code>,
+            or a merged image at <code>0x0</code>), and flashes over WebSerial right here. (Espressif's
             <a href="https://espressif.github.io/esp-launchpad/" target="_blank" rel="noopener noreferrer">ESP Launchpad</a>
-            (Espressif's official WebSerial flasher) → <strong>DIY</strong> tab → add your
-            <code>.bin</code> at the right offset (app at <code>0x10000</code>, or a merged image at
-            <code>0x0</code>) → Connect → Flash. Chrome/Edge, same as here.</li>
+            works too.)</li>
         <li><strong>Or extend ours.</strong> Edit <code>firmware/starter-node/src/main.cpp</code>,
             follow the “add your own peripheral” recipe in the
             <a href="https://github.com/WeCr8/TenderCells/blob/main/docs/CLASSROOM_FEEDER_AND_WATERER.md#implement-your-own-peripheral-the-real-skill" target="_blank" rel="noopener noreferrer">feeder/waterer lesson</a>,

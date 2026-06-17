@@ -99,10 +99,52 @@ interface CamState {
 }
 
 function CameraViewport({
-  label, cameraId, birds, cam, flash,
-}: { label: string; cameraId: number; birds: DetectedBird[]; cam: CamState; flash: boolean }) {
+  label, cameraId, birds, cam, flash, allowWebcam = false,
+}: { label: string; cameraId: number; birds: DetectedBird[]; cam: CamState; flash: boolean; allowWebcam?: boolean }) {
   const shown = birds.slice(0, 2 + cameraId);
   const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+
+  // Live "use my camera" preview (no hardware). Opt-in; client-side only.
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [webcamOn, setWebcamOn] = useState(false);
+  const [webcamErr, setWebcamErr] = useState<string | null>(null);
+
+  const startWebcam = async () => {
+    setWebcamErr(null);
+    // getUserMedia only exists in a secure context (HTTPS or localhost). Over a LAN
+    // IP / plain http (common on phones) it's undefined — say so instead of silently
+    // doing nothing.
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setWebcamErr('Camera needs HTTPS or localhost. Open the deployed https:// site (or localhost) — a LAN IP over http blocks camera access.');
+      return;
+    }
+    try {
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      } catch {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true }); // mic denied/absent
+      }
+      streamRef.current = stream;
+      setWebcamOn(true);
+    } catch {
+      setWebcamErr('Camera permission denied or no camera — showing the sim feed.');
+      setWebcamOn(false);
+    }
+  };
+  const stopWebcam = () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setWebcamOn(false);
+  };
+  useEffect(() => {
+    if (webcamOn && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      void videoRef.current.play();
+    }
+  }, [webcamOn]);
+  useEffect(() => () => { streamRef.current?.getTracks().forEach((t) => t.stop()); }, []);
 
   return (
     <Paper elevation={0} sx={{
@@ -118,9 +160,19 @@ function CameraViewport({
       }}>
         {/* faux coop backdrop */}
         <Box sx={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 50% 40%, ${C.surface} 0%, #060E08 75%)` }} />
+        {/* live webcam layer (default system camera) — covers the sim backdrop when on */}
+        {webcamOn && (
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        )}
         <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 0.5 }}>
-          <Typography sx={{ color: C.goldMuted, fontSize: 11 }}>{label}</Typography>
-          <Typography sx={{ color: C.accent + '88', fontSize: 9 }}>SIM feed · ESP32-S3-EYE stream when flashed</Typography>
+          {!webcamOn && <Typography sx={{ color: C.goldMuted, fontSize: 11 }}>{label}</Typography>}
+          {!webcamOn && <Typography sx={{ color: C.accent + '88', fontSize: 9 }}>SIM feed · ESP32-S3-EYE stream when flashed</Typography>}
         </Box>
         {cam.overlay && shown.map((b, i) => (
           <Box key={b.id} sx={{
@@ -154,6 +206,23 @@ function CameraViewport({
       {/* crosshair when zoomed/panned */}
       {(cam.zoom > 1 || cam.panX !== 0 || cam.tiltY !== 0) && (
         <CenterFocusStrongIcon sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', color: '#ffffff22', fontSize: 40 }} />
+      )}
+
+      {/* "Use my camera" — only on the main viewport; uses the default system camera */}
+      {allowWebcam && (
+        <Stack sx={{ position: 'absolute', bottom: 8, right: 8, alignItems: 'flex-end', gap: 0.5, maxWidth: '80%' }}>
+          {webcamOn && (
+            <Chip size="small" label="● MY CAMERA · local only"
+              sx={{ bgcolor: C.danger, color: '#fff', fontSize: 9, height: 20 }} />
+          )}
+          <Button size="small" variant="contained" onClick={webcamOn ? stopWebcam : startWebcam}
+            sx={{ bgcolor: webcamOn ? C.danger : C.accent, fontSize: 11, py: 0.4 }}>
+            {webcamOn ? 'Stop camera' : '📷 Use my camera'}
+          </Button>
+          {webcamErr && (
+            <Alert severity="warning" sx={{ py: 0, fontSize: 10, '& .MuiAlert-message': { py: 0.5 } }}>{webcamErr}</Alert>
+          )}
+        </Stack>
       )}
     </Paper>
   );
@@ -481,7 +550,7 @@ export default function ChickenEyeDashboardPage() {
 
                   {/* Viewport */}
                   <Box ref={viewportRef}>
-                    <CameraViewport label={CAMERAS[activeCamera]} cameraId={activeCamera} birds={birds} cam={cam} flash={flash} />
+                    <CameraViewport label={CAMERAS[activeCamera]} cameraId={activeCamera} birds={birds} cam={cam} flash={flash} allowWebcam />
                   </Box>
 
                   {/* PTZ + zoom controls */}
@@ -507,15 +576,34 @@ export default function ChickenEyeDashboardPage() {
                     </Stack>
                   </Paper>
 
-                  {/* thumbnails */}
+                  {/* Other camera slots — not connected until you add a real device. */}
                   <Grid container spacing={1.5}>
                     {CAMERAS.map((c, i) => i !== activeCamera && (
                       <Grid item xs={6} key={c}>
-                        <Box onClick={() => setActiveCamera(i)} sx={{ cursor: 'pointer', opacity: 0.85, '&:hover': { opacity: 1 } }}>
-                          <CameraViewport label={c} cameraId={i} birds={birds} cam={{ ...cam, zoom: 1, panX: 0, tiltY: 0, recording: false }} flash={false} />
-                        </Box>
+                        <Paper elevation={0} sx={{
+                          bgcolor: C.bg, border: `1px dashed ${C.accent}66`, borderRadius: 2,
+                          aspectRatio: '16/9', display: 'flex', flexDirection: 'column',
+                          alignItems: 'center', justifyContent: 'center', gap: 0.4, p: 1, textAlign: 'center',
+                        }}>
+                          <Typography sx={{ fontSize: 20, opacity: 0.6 }}>📷</Typography>
+                          <Typography sx={{ color: C.goldMuted, fontSize: 10 }}>{c}</Typography>
+                          <Typography sx={{ color: C.danger, fontSize: 9, fontWeight: 700, letterSpacing: 0.5 }}>NOT CONNECTED</Typography>
+                          <Button size="small" href="/flash" sx={{ color: C.accent, fontSize: 9, minWidth: 0 }}>+ Connect camera</Button>
+                        </Paper>
                       </Grid>
                     ))}
+                    {/* Add more devices / cameras */}
+                    <Grid item xs={6}>
+                      <Paper elevation={0} sx={{
+                        bgcolor: C.bg, border: `1px dashed ${C.accent}66`, borderRadius: 2,
+                        aspectRatio: '16/9', display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', justifyContent: 'center', gap: 0.4, p: 1, textAlign: 'center',
+                      }}>
+                        <AddIcon sx={{ color: C.accent }} />
+                        <Typography sx={{ color: C.goldMuted, fontSize: 10 }}>Connect additional devices &amp; cameras</Typography>
+                        <Button size="small" href="/flash" sx={{ color: C.accent, fontSize: 9, minWidth: 0 }}>Flash a device →</Button>
+                      </Paper>
+                    </Grid>
                   </Grid>
                 </Stack>
               </Grid>

@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone='no'?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<!--
+  Advertise the Mosquitto broker over mDNS as _mqtt._tcp so Tender Cells boards
+  auto-discover it (the firmware does MDNS.queryService("mqtt","tcp") when the
+  broker IP is left blank at setup — no IP typing for classrooms).
+
+  Install:
+    sudo apt install -y avahi-daemon
+    sudo cp mqtt-mdns.service /etc/avahi/services/mqtt.service
+    sudo systemctl restart avahi-daemon
+-->
+<service-group>
+  <name replace-wildcards="yes">Tender Cells MQTT on %h</name>
+  <service>
+    <type>_mqtt._tcp</type>
+    <port>1883</port>
+  </service>
+</service-group>

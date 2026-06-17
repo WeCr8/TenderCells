@@ -63,6 +63,7 @@ export default function LandingPage() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterDismissed, setNewsletterDismissed] = useState(false);
   const [heroIndex, setHeroIndex] = useState(0);
+  const [videoOpen, setVideoOpen] = useState(false);
   const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -116,7 +117,8 @@ export default function LandingPage() {
             playsInline
             preload="metadata"
             poster={HERO_IMAGES[heroIndex].src}
-            onClick={() => { const v = heroVideoRef.current; if (v) void v.play(); }}
+            onClick={() => setVideoOpen(true)}
+            style={{ cursor: "pointer" }}
           >
             <source src="/assets/videos/tendercells-threejs-demo.mp4" type="video/mp4" />
           </video>
@@ -137,12 +139,7 @@ export default function LandingPage() {
                 className="btn-watch"
                 onClick={() => {
                   trackButtonClick("watch-video");
-                  const v = heroVideoRef.current;
-                  if (!v) return;
-                  v.muted = false;
-                  v.currentTime = 0;
-                  void v.play();
-                  v.scrollIntoView({ behavior: "smooth", block: "center" });
+                  setVideoOpen(true);
                 }}
               >
                 ▶ WATCH THE VIDEO
@@ -157,6 +154,35 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* ── Demo video popup player ──────────────── */}
+        {videoOpen && (
+          <div
+            className="video-modal-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label="TenderCells demo video"
+            onClick={() => setVideoOpen(false)}
+          >
+            <div className="video-modal-inner" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className="video-modal-close"
+                aria-label="Close video"
+                onClick={() => setVideoOpen(false)}
+              >
+                ✕
+              </button>
+              <video
+                className="video-modal-player"
+                src="/assets/videos/tendercells-threejs-demo.mp4"
+                controls
+                autoPlay
+                playsInline
+              />
+            </div>
+          </div>
+        )}
 
         {/* ── Products ─────────────────────────────── */}
         <section id="products" className="products">

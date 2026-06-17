@@ -841,17 +841,30 @@ export default function Viewport3D({
     camera.lookAt(focusX, focusY, focusZ);
 
     let renderer: THREE.WebGLRenderer;
+    // Try hardware WebGL first, then a relaxed retry. failIfMajorPerformanceCaveat:
+    // false lets Chrome's software renderer (SwiftShader) serve a context when the
+    // GPU is blocklisted / hardware accel is off — fixes most "WebGL unavailable"
+    // cases without real hardware. Only after BOTH fail do we show the fallback.
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    } catch (e) {
-      // WebGL unavailable (some mobiles/headless/locked-down GPUs) — degrade
-      // gracefully instead of crashing the whole demo dashboard.
-      console.warn('WebGL unavailable — 3D viewport disabled', e);
-      if (containerRef.current) {
-        containerRef.current.innerHTML =
-          '<div style="display:grid;place-items:center;height:100%;min-height:200px;color:#8A7D55;font:14px system-ui;text-align:center;padding:1rem">3D view needs WebGL (unavailable on this device/browser). Everything else in the demo still works.</div>';
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    } catch {
+      try {
+        renderer = new THREE.WebGLRenderer({
+          antialias: false, alpha: true,
+          failIfMajorPerformanceCaveat: false,
+          powerPreference: 'low-power',
+        });
+      } catch (e) {
+        console.warn('WebGL unavailable — 3D viewport disabled', e);
+        if (containerRef.current) {
+          containerRef.current.innerHTML =
+            '<div style="display:grid;place-items:center;height:100%;min-height:200px;color:#8A7D55;font:14px system-ui;text-align:center;padding:1.5rem;line-height:1.5">' +
+            '<div><strong style="color:#C8B882">3D view needs WebGL</strong><br/>' +
+            'Open in a normal Chrome/Edge tab (not an embedded/IDE preview) and turn on ' +
+            '<em>graphics acceleration</em> in settings. The rest of the demo works without it.</div></div>';
+        }
+        return;
       }
-      return;
     }
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));

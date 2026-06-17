@@ -35,6 +35,50 @@ body { margin: 0; padding: 0; }
   filter: saturate(0.98) contrast(1.04);
 }
 
+/* Demo video popup player */
+.video-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.video-modal-inner {
+  position: relative;
+  width: min(960px, 100%);
+}
+.video-modal-player {
+  width: 100%;
+  max-height: 85vh;
+  border-radius: 12px;
+  background: #000;
+  display: block;
+}
+.video-modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+@media (max-width: 600px) {
+  .video-modal-overlay { padding: 0.5rem; }
+  .video-modal-player { max-height: 70vh; }
+}
+
 .hero-overlay {
   position: absolute;
   inset: 0;

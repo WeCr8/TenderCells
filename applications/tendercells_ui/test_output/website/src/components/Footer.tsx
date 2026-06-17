@@ -29,6 +29,7 @@ const footerGroups = [
       { label: "Developers", to: "/developers" },
       { label: "Open Source", to: "/open-source" },
       { label: "Flash a Device", href: "/flash" },
+      { label: "Expert Flasher", href: "/flash/expert" },
       { label: "3D Model Viewer", href: "/viewer" },
       { label: "Hands-on Lessons", to: "/lessons" },
       { label: "Public Demo", to: "/app/demo" },

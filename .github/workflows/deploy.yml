@@ -4,9 +4,8 @@ name: Deploy (Firebase Hosting)
 # Firebase Hosting on every push to main.
 #
 # Required repo secret:
-#   FIREBASE_TOKEN  — from `firebase login:ci` (a CI deploy token).
-# Optional repo variable:
-#   FIREBASE_PROJECT — project id; falls back to the default in .firebaserc.
+#   FIREBASE_SERVICE_ACCOUNT_TENDER_CELLS — the service-account JSON (already set).
+# Project id is read from that JSON's project_id.
 #
 # Hosting target "main" (firebase.json) serves website/dist; the app is built by
 # build:with-app and copied into dist/app. The snapshot.json is generated as part
@@ -41,10 +40,12 @@ jobs:
       - name: Deploy to Firebase Hosting
         working-directory: .
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-          FIREBASE_PROJECT: ${{ vars.FIREBASE_PROJECT }}
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENDER_CELLS }}
         run: |
+          printf '%s' "$FIREBASE_SA" > "$HOME/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/sa.json"
+          PROJECT=$(node -e "console.log(require(process.env.HOME + '/sa.json').project_id)")
+          echo "Deploying to project: $PROJECT"
           npm i -g firebase-tools
-          firebase deploy --only hosting:main --non-interactive \
-            --token "$FIREBASE_TOKEN" \
-            ${FIREBASE_PROJECT:+--project "$FIREBASE_PROJECT"}
+          firebase deploy --only hosting:main --non-interactive --project "$PROJECT"
+          rm -f "$HOME/sa.json"

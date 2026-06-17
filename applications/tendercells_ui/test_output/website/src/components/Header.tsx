@@ -63,6 +63,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Developer API",           to: "/apps#api" },
       { label: "MQTT Integration Guide",  to: "/apps#mqtt" },
       { label: "⚡ Flash a Device",        href: "/flash" },
+      { label: "⚙️ Expert Flasher (custom firmware)", href: "/flash/expert" },
       { label: "🧊 3D Model Viewer",       href: "/viewer" },
     ],
   },

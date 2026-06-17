@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tender Cells — Expert Flasher (flash your own firmware)</title>
+<meta name="description" content="In-browser WebSerial flasher for custom Tender Cells firmware. Auto-detects your ESP32 chip and flashes your own .bin files. Chrome/Edge." />
+<style>
+  :root{
+    --bg:#0D2B1E; --surface:#1A3D2B; --surface2:#15331f; --accent:#4A7C59;
+    --gold:#C8B882; --goldMuted:#8A7D55; --white:#F0EDE4; --danger:#CC3333; --warn:#E8A020; --ok:#4CAF50;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--white);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.6;}
+  a{color:var(--gold);}
+  .topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;
+    padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--accent);}
+  .topbar .brand{color:var(--gold);font-weight:800;text-decoration:none;font-size:1.05rem;}
+  .topbar .links a{color:var(--white);text-decoration:none;margin-left:16px;font-size:.92rem;}
+  .topbar .links a:hover{color:var(--gold);}
+  .wrap{max-width:780px;margin:0 auto;padding:24px 20px 80px;}
+  header{text-align:center;padding:14px 0;}
+  h1{color:var(--gold);margin:0 0 4px;font-size:1.9rem;}
+  .tag{color:var(--goldMuted);margin:0;}
+  .card{background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:22px;margin:16px 0;}
+  .gold-h{color:var(--gold);margin:0 0 10px;}
+  .step-num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;
+    background:var(--gold);color:var(--bg);font-weight:800;margin-right:8px;}
+  button{font-family:inherit;cursor:pointer;border-radius:10px;border:none;font-weight:700;}
+  .btn{background:var(--gold);color:var(--bg);font-size:1.05rem;padding:13px 26px;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-sec{background:var(--surface2);color:var(--gold);border:1px solid var(--accent);padding:9px 16px;font-size:.9rem;}
+  .btn-danger{background:var(--danger);color:#fff;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .chip{display:inline-block;padding:4px 12px;border-radius:999px;font-size:.85rem;font-weight:700;}
+  .chip.ok{background:var(--ok);color:#06210f;} .chip.idle{background:var(--surface2);color:var(--goldMuted);border:1px solid var(--accent);}
+  .part{display:grid;grid-template-columns:1fr 120px 36px;gap:8px;align-items:center;margin:8px 0;}
+  .part input[type=file]{color:var(--white);font-size:.85rem;}
+  input[type=text]{background:var(--bg);border:1px solid var(--accent);border-radius:8px;color:var(--gold);
+    padding:8px;font-family:ui-monospace,Consolas,monospace;}
+  .x{background:none;border:1px solid var(--accent);color:var(--danger);border-radius:8px;height:34px;}
+  label{color:var(--goldMuted);font-size:.85rem;}
+  .bar{height:14px;background:var(--bg);border:1px solid var(--accent);border-radius:999px;overflow:hidden;margin-top:8px;}
+  .bar > i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s;}
+  .log{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;white-space:pre-wrap;background:var(--bg);
+    border:1px solid var(--accent);border-radius:10px;padding:12px;max-height:220px;overflow:auto;color:var(--white);margin-top:10px;}
+  .hint{color:var(--goldMuted);font-size:.92rem;}
+  .callout{background:#10241a;border-left:4px solid var(--gold);border-radius:8px;padding:12px 16px;margin:12px 0;}
+  .unsupported{display:none;background:#3a2410;border:1px solid var(--warn);border-radius:10px;padding:14px;}
+  .no-serial .unsupported{display:block;} .no-serial .needs-serial{display:none;}
+  code{background:var(--bg);border:1px solid var(--accent);border-radius:6px;padding:1px 6px;color:var(--gold);}
+  footer{text-align:center;color:var(--goldMuted);margin-top:40px;font-size:.85rem;}
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <a class="brand" href="/">🐔 Tender Cells</a>
+  <div class="links">
+    <a href="/flash">⚡ Easy Flasher</a>
+    <a href="/viewer">3D Viewer</a>
+    <a href="https://github.com/WeCr8/TenderCells/tree/main/firmware" target="_blank" rel="noopener noreferrer">Firmware</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header>
+    <h1>⚙️ Expert Flasher</h1>
+    <p class="tag">Flash your <em>own</em> firmware to an ESP32 — in the browser, no installs.</p>
+  </header>
+
+  <div class="callout">
+    For coders. New here? Use the <a href="/flash">one-click Easy Flasher</a> instead — it picks
+    the right firmware for you. This page flashes <strong>custom <code>.bin</code> files</strong> you
+    built (Wokwi, Arduino Cloud, Arduino IDE, or <code>pio run</code> on our
+    <a href="https://github.com/WeCr8/TenderCells/tree/main/firmware" target="_blank" rel="noopener noreferrer">open-source firmware</a>).
+  </div>
+
+  <div class="unsupported">
+    <strong>This browser can't flash.</strong> WebSerial needs <strong>Chrome</strong> or
+    <strong>Edge</strong> on a laptop/desktop. Safari, Firefox, and phones won't work.
+  </div>
+
+  <div class="needs-serial">
+    <!-- Step 1: connect + auto-detect -->
+    <div class="card">
+      <h3 class="gold-h"><span class="step-num">1</span>Connect &amp; auto-detect your chip</h3>
+      <p class="hint">Plug your board in, then connect. We read the actual chip — nothing is assumed.</p>
+      <div class="row">
+        <button class="btn-sec" id="connectBtn">🔌 Connect</button>
+        <span class="chip idle" id="chipChip">no board connected</span>
+        <button class="btn-sec" id="disconnectBtn" disabled>Disconnect</button>
+      </div>
+    </div>
+
+    <!-- Step 2: pick firmware parts (modular) -->
+    <div class="card">
+      <h3 class="gold-h"><span class="step-num">2</span>Add your firmware</h3>
+      <p class="hint">
+        <strong>Simple:</strong> one merged image at <code>0x0</code>.
+        <strong>Advanced:</strong> add bootloader / partitions / app at their offsets
+        (ESP32 bootloader <code>0x1000</code>, S3/C3 <code>0x0</code>, partitions
+        <code>0x8000</code>, app <code>0x10000</code>).
+      </p>
+      <div id="parts"></div>
+      <div class="row" style="margin-top:8px;">
+        <button class="btn-sec" id="addPartBtn">+ Add part</button>
+        <label><input type="checkbox" id="eraseAll" /> Erase whole flash first</label>
+      </div>
+    </div>
+
+    <!-- Step 3: flash -->
+    <div class="card">
+      <h3 class="gold-h"><span class="step-num">3</span>Flash</h3>
+      <div class="row">
+        <button class="btn" id="flashBtn" disabled>⚡ Flash my firmware</button>
+        <span class="hint" id="flashState"></span>
+      </div>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="log" id="log">Ready. Connect a board to begin.</div>
+    </div>
+  </div>
+
+  <footer>
+    Powered by Espressif <code>esptool-js</code> over WebSerial · open source ·
+    <a href="/flash">Easy Flasher</a> · <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </footer>
+</div>
+
+<script type="module">
+  import { ESPLoader, Transport } from "https://unpkg.com/esptool-js@0.5.6/bundle.js";
+
+  const $ = (id) => document.getElementById(id);
+  const logEl = $("log");
+  const log = (m) => { logEl.textContent += "\n" + m; logEl.scrollTop = logEl.scrollHeight; };
+  const setBar = (pct) => { $("bar").style.width = pct + "%"; };
+
+  if (!("serial" in navigator)) document.body.classList.add("no-serial");
+
+  let transport = null, esploader = null, connected = false;
+
+  // ── Modular parts UI ──────────────────────────────────────────────────────
+  const partsEl = $("parts");
+  function addPart(offset = "0x0") {
+    const row = document.createElement("div");
+    row.className = "part";
+    row.innerHTML =
+      '<input type="file" accept=".bin" />' +
+      '<input type="text" value="' + offset + '" aria-label="offset" />' +
+      '<button class="x" title="remove">✕</button>';
+    row.querySelector(".x").addEventListener("click", () => row.remove());
+    partsEl.appendChild(row);
+  }
+  addPart("0x0");
+  $("addPartBtn").addEventListener("click", () => addPart("0x10000"));
+
+  const readBinary = (file) => new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);          // binary string (what esptool-js expects)
+    r.onerror = rej;
+    r.readAsBinaryString(file);
+  });
+
+  // ── Connect + auto-detect ─────────────────────────────────────────────────
+  $("connectBtn").addEventListener("click", async () => {
+    try {
+      const port = await navigator.serial.requestPort();
+      transport = new Transport(port, true);
+      esploader = new ESPLoader({ transport, baudrate: 921600, romBaudrate: 115200,
+        terminal: { clean(){}, writeLine(d){ log(d); }, write(d){ log(d); } } });
+      log("Connecting…");
+      const chipName = await esploader.main();   // detects the chip
+      connected = true;
+      $("chipChip").className = "chip ok";
+      $("chipChip").textContent = "✓ " + chipName;
+      $("flashBtn").disabled = false;
+      $("disconnectBtn").disabled = false;
+      $("connectBtn").disabled = true;
+      log("Detected: " + chipName);
+    } catch (e) {
+      log("Connect failed: " + (e?.message || e));
+    }
+  });
+
+  $("disconnectBtn").addEventListener("click", async () => {
+    try { await transport?.disconnect(); } catch {}
+    connected = false;
+    $("chipChip").className = "chip idle"; $("chipChip").textContent = "no board connected";
+    $("flashBtn").disabled = true; $("disconnectBtn").disabled = true; $("connectBtn").disabled = false;
+    log("Disconnected.");
+  });
+
+  // ── Flash ─────────────────────────────────────────────────────────────────
+  $("flashBtn").addEventListener("click", async () => {
+    if (!connected) return;
+    const rows = [...partsEl.querySelectorAll(".part")];
+    const fileArray = [];
+    for (const row of rows) {
+      const file = row.querySelector('input[type=file]').files[0];
+      const off = parseInt(row.querySelector('input[type=text]').value, 16);
+      if (!file) continue;
+      if (Number.isNaN(off)) { log("Bad offset on a part — use hex like 0x10000."); return; }
+      fileArray.push({ data: await readBinary(file), address: off });
+    }
+    if (!fileArray.length) { log("Add at least one .bin file first."); return; }
+
+    $("flashBtn").disabled = true;
+    $("flashState").textContent = "flashing…";
+    setBar(0);
+    try {
+      await esploader.writeFlash({
+        fileArray,
+        flashSize: "keep",
+        flashMode: "keep",
+        flashFreq: "keep",
+        eraseAll: $("eraseAll").checked,
+        compress: true,
+        reportProgress: (i, written, total) => setBar(Math.round((written / total) * 100)),
+      });
+      setBar(100);
+      $("flashState").textContent = "✓ done";
+      log("✓ Flash complete. Unplug + replug the board to run it, then set WiFi (it starts a setup hotspot).");
+      try { await esploader.after(); } catch {}
+    } catch (e) {
+      $("flashState").textContent = "✗ failed";
+      log("Flash failed: " + (e?.message || e));
+    } finally {
+      $("flashBtn").disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

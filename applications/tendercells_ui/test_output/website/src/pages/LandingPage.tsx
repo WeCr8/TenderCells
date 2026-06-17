@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "./LandingPage.css";
@@ -155,8 +156,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Demo video popup player ──────────────── */}
-        {videoOpen && (
+        {/* ── Demo video popup player (portal → document.body = true top layer) ── */}
+        {videoOpen && createPortal(
           <div
             className="video-modal-overlay"
             role="dialog"
@@ -181,7 +182,8 @@ export default function LandingPage() {
                 playsInline
               />
             </div>
-          </div>
+          </div>,
+          document.body,
         )}
 
         {/* ── Products ─────────────────────────────── */}

@@ -209,9 +209,23 @@
         <div class="device" data-manifest="/flash/manifest-chicken-tender.json" role="button" aria-pressed="false" tabindex="0">
           🐔 <h3>Chicken Tender</h3><small>needs ESP32-WROOM-32 + coop hardware</small>
         </div>
-        <div class="device soon" role="button" aria-disabled="true">
-          🦅 <h3>WatchTower AI</h3><small>coming soon</small>
+        <div class="device" data-manifest="/flash/manifest-watchtower-cam.json" role="button" aria-pressed="false" tabindex="0">
+          📷 <h3>Camera Node</h3><small>ESP32-S3-Sense / ESP32-CAM · live MJPEG feed</small>
         </div>
+      </div>
+
+      <div class="callout">
+        <strong>Your chip is auto-detected — nothing is assumed.</strong> When you press
+        Connect, the flasher reads the actual chip on your board and refuses to flash if it
+        doesn't match the card you picked:
+        <ul>
+          <li><strong>Starter Node</strong> + <strong>Camera Node</strong> → expect an <code>ESP32-S3</code> (XIAO S3 / S3-Sense, dev boards).</li>
+          <li><strong>Chicken Tender</strong> → expects a classic <code>ESP32</code> (ESP32-WROOM-32).</li>
+        </ul>
+        If you pick the wrong card, the installer names the chip it actually found
+        (e.g. “This is an ESP32-S3, expected ESP32”) and stops — just pick the matching card
+        and try again. Other variants (C3/C6/S2) are detected too and will be rejected if no
+        card matches them yet.
       </div>
 
       <h3 class="gold-h">Step 2 — Plug the board into this computer</h3>

@@ -36,8 +36,9 @@ const WEB_FLASH = join(
 
 // Each target: firmware dir, PlatformIO env (build subdir), and the web dest folder.
 const TARGETS = {
-  "chicken-tender": { env: "esp32-wroom-32", dir: "chicken-tender" },
-  "starter-node":   { env: "xiao-esp32s3",   dir: "starter-node" },
+  "chicken-tender": { env: "esp32-wroom-32",      dir: "chicken-tender" },
+  "starter-node":   { env: "xiao-esp32s3",        dir: "starter-node" },
+  "watchtower-cam": { env: "xiao-esp32s3-sense",  dir: "watchtower-cam" },
 };
 
 function exportTarget(name) {

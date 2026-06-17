@@ -840,7 +840,19 @@ export default function Viewport3D({
     camera.up.set(cameraPreset === 'top' ? 0 : 0, cameraPreset === 'top' ? 0 : 1, cameraPreset === 'top' ? -1 : 0);
     camera.lookAt(focusX, focusY, focusZ);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (e) {
+      // WebGL unavailable (some mobiles/headless/locked-down GPUs) — degrade
+      // gracefully instead of crashing the whole demo dashboard.
+      console.warn('WebGL unavailable — 3D viewport disabled', e);
+      if (containerRef.current) {
+        containerRef.current.innerHTML =
+          '<div style="display:grid;place-items:center;height:100%;min-height:200px;color:#8A7D55;font:14px system-ui;text-align:center;padding:1rem">3D view needs WebGL (unavailable on this device/browser). Everything else in the demo still works.</div>';
+      }
+      return;
+    }
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;

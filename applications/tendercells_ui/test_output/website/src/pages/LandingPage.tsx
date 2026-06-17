@@ -69,6 +69,21 @@ export default function LandingPage() {
     trackPageView("/");
   }, []);
 
+  // Mobile autoplay fix: React's `muted` JSX prop doesn't reliably set the HTML
+  // attribute, and iOS Safari refuses autoplay without a real muted attribute +
+  // playsinline. Force them via the ref, then attempt play (ignore rejection —
+  // iOS Low Power Mode blocks autoplay; the tap-to-play handler covers that).
+  useEffect(() => {
+    const v = heroVideoRef.current;
+    if (!v) return;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    const p = v.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
+  }, []);
+
   useEffect(() => {
     const timer = window.setInterval(() => {
       setHeroIndex((current) => (current + 1) % HERO_IMAGES.length);
@@ -101,6 +116,7 @@ export default function LandingPage() {
             playsInline
             preload="metadata"
             poster={HERO_IMAGES[heroIndex].src}
+            onClick={() => { const v = heroVideoRef.current; if (v) void v.play(); }}
           >
             <source src="/assets/videos/tendercells-threejs-demo.mp4" type="video/mp4" />
           </video>

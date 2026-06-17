@@ -11,7 +11,8 @@
     "tc": "node scripts/tendercells-cli.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:public-demo": "tsc -b && vite build --mode public-demo",
+    "gen:snapshot": "vite-node scripts/gen-demo-snapshot.ts",
+    "build:public-demo": "vite-node scripts/gen-demo-snapshot.ts && tsc -b && vite build --mode public-demo",
     "check": "npm run quality:loop",
     "fallow": "npx --yes fallow@2.94.0 --summary",
     "lint": "eslint .",
@@ -58,6 +59,7 @@
     "@vitejs/plugin-react": "^5.2.0",
     "typescript": "~5.6.2",
     "vite": "^7.3.5",
+    "vite-node": "^6.0.0",
     "vitest": "^3.2.6"
   }
 }

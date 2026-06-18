@@ -1084,8 +1084,8 @@ export default function Viewport3D({
     <Paper
       elevation={3}
       sx={{
-        height: height || { xs: 'min(64dvh, 460px)', sm: 'min(68dvh, 520px)', lg: 560 },
-        minHeight: { xs: 340, sm: 400 },
+        height: height || { xs: 'min(72dvh, 540px)', sm: 'min(68dvh, 520px)', lg: 560 },
+        minHeight: { xs: 380, sm: 400 },
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -1095,7 +1095,7 @@ export default function Viewport3D({
       {/* Proof it's a live WebGL scene, not a static image — addresses "is the 3D real". */}
       {webglOk && (
         <Box sx={{
-          position: 'absolute', top: 8, left: 8, zIndex: 6, display: 'flex', alignItems: 'center', gap: 0.6,
+          position: 'absolute', bottom: 8, right: 8, zIndex: 6, display: 'flex', alignItems: 'center', gap: 0.6,
           px: 1, py: 0.3, borderRadius: 999, bgcolor: 'rgba(0,0,0,0.55)',
           border: '1px solid #4A7C59', pointerEvents: 'none',
         }}>
@@ -1135,7 +1135,7 @@ export default function Viewport3D({
           },
         }}
       >
-        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+        <Stack direction="row" spacing={1} useFlexGap flexWrap={{ xs: 'nowrap', sm: 'wrap' }}>
           <ToggleButtonGroup size="small" exclusive value={viewMode}
             onChange={handleViewModeChange} sx={{ bgcolor: 'rgba(0,31,22,0.9)' }}>
             <ToggleButton value="2d">2D</ToggleButton>

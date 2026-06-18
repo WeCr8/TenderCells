@@ -670,6 +670,29 @@ const createYardItem = (
       if (child instanceof THREE.Mesh) { child.receiveShadow = true; }
     });
     group.add(hw);
+
+    // Terrain-tracking robots (Roaming Roost) map/patrol an area — draw the zone
+    // they've covered as a scanned-grass disc + a boundary ring on the ground. This
+    // is driven by item.scan when a real rover reports its mapped polygon; until
+    // then it's derived from the placement (patrol radius from footprint).
+    if (item.type === 'roaming-roost') {
+      const patrolR = (item.scan?.radiusFt ?? Math.max(item.width, item.depth) * 3.5);
+      const disc = new THREE.Mesh(
+        new THREE.CircleGeometry(patrolR, 56),
+        new THREE.MeshStandardMaterial({ color: 0x3a7d4a, roughness: 0.9, transparent: true, opacity: 0.32 })
+      );
+      disc.rotation.x = -Math.PI / 2;
+      disc.position.set(x, 0.06, z);
+      disc.name = `${item.id}-scan`;
+      group.add(disc);
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(patrolR - 0.3, patrolR, 56),
+        new THREE.MeshBasicMaterial({ color: 0x8dd47a, transparent: true, opacity: 0.85, side: THREE.DoubleSide })
+      );
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(x, 0.07, z);
+      group.add(ring);
+    }
   } else {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(item.width, 0.75, item.depth), material);
     mesh.position.set(x, 0.38, z);

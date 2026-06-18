@@ -27,6 +27,33 @@ import {
   type PropertyLayoutState,
 } from '../property/propertyLayoutStore';
 
+// Procedural grass + dirt ground texture, drawn on a canvas (no image asset, so
+// it's CSP-safe and ships in-bundle). Repeat-tiled across the yard.
+function makeGroundTexture(): THREE.CanvasTexture {
+  const s = 256;
+  const c = document.createElement('canvas');
+  c.width = c.height = s;
+  const ctx = c.getContext('2d')!;
+  ctx.fillStyle = '#2d6235';            // base grass
+  ctx.fillRect(0, 0, s, s);
+  for (let i = 0; i < 2600; i++) {      // grass blade speckle
+    const g = 70 + Math.random() * 70;
+    ctx.fillStyle = `rgb(${30 + Math.random() * 30},${g},${40 + Math.random() * 25})`;
+    ctx.fillRect(Math.random() * s, Math.random() * s, 1, 1 + Math.random() * 2);
+  }
+  for (let i = 0; i < 6; i++) {         // worn dirt patches
+    const x = Math.random() * s, y = Math.random() * s, r = 12 + Math.random() * 26;
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
+    grd.addColorStop(0, 'rgba(122,82,45,0.85)');
+    grd.addColorStop(1, 'rgba(122,82,45,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
 type ViewMode = '2d' | '3d';
 type CameraPreset = 'top' | 'left' | 'right' | 'iso';
 type ControlMode = 'pan' | 'orbit';
@@ -904,9 +931,24 @@ export default function Viewport3D({
     sun.castShadow = true;
     scene.add(sun);
 
+    const groundTex = makeGroundTexture();
+    groundTex.repeat.set(
+      Math.max(2, Math.round(layout.property.widthFt / 12)),
+      Math.max(2, Math.round(layout.property.depthFt / 12)),
+    );
+    const groundGeo = new THREE.PlaneGeometry(
+      layout.property.widthFt, layout.property.depthFt, 48, 48,
+    );
+    // Gentle terrain undulation so the yard reads as real ground, not a flat slab.
+    const gpos = groundGeo.attributes.position as THREE.BufferAttribute;
+    for (let i = 0; i < gpos.count; i++) {
+      const x = gpos.getX(i), y = gpos.getY(i);
+      gpos.setZ(i, (Math.sin(x * 0.18) + Math.cos(y * 0.21)) * 0.18 + (Math.random() - 0.5) * 0.05);
+    }
+    groundGeo.computeVertexNormals();
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(layout.property.widthFt, layout.property.depthFt),
-      new THREE.MeshStandardMaterial({ color: 0x2d6235, roughness: 0.85 })
+      groundGeo,
+      new THREE.MeshStandardMaterial({ map: groundTex, roughness: 0.95 }),
     );
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;

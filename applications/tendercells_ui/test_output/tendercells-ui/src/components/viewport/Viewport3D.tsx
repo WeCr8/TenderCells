@@ -616,7 +616,49 @@ const createYardItem = (
     rock.position.set(x, 0.55, z);
     rock.name = item.name;
     group.add(rock);
-  } else if (item.type === 'pond' || item.type === 'garden' || item.type === 'no-go-zone') {
+  } else if (item.type === 'pond') {
+    // Basin rim + reflective water surface (reads as real water, not a slab).
+    const rim = new THREE.Mesh(
+      new THREE.BoxGeometry(item.width + 0.6, 0.16, item.depth + 0.6),
+      new THREE.MeshStandardMaterial({ color: 0x5a4a32, roughness: 0.95 })
+    );
+    rim.position.set(x, 0.04, z);
+    rim.receiveShadow = true;
+    group.add(rim);
+    const water = new THREE.Mesh(
+      new THREE.BoxGeometry(item.width, 0.12, item.depth),
+      new THREE.MeshStandardMaterial({ color: 0x2f7fc0, roughness: 0.08, metalness: 0.35, transparent: true, opacity: 0.85 })
+    );
+    water.position.set(x, 0.08, z);
+    water.name = item.name;
+    group.add(water);
+  } else if (item.type === 'fence') {
+    // Posts every ~6 ft along the long axis + two horizontal rails.
+    const horizontal = item.width >= item.depth;
+    const length = horizontal ? item.width : item.depth;
+    const postMat = new THREE.MeshStandardMaterial({ color: 0x8b6f47, roughness: 0.85 });
+    const railMat = new THREE.MeshStandardMaterial({ color: 0xa07d54, roughness: 0.8 });
+    const postH = 1.5;
+    const n = Math.max(2, Math.round(length / 6));
+    for (let i = 0; i <= n; i++) {
+      const t = i / n;
+      const px = horizontal ? x - item.width / 2 + t * item.width : x;
+      const pz = horizontal ? z : z - item.depth / 2 + t * item.depth;
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.18, postH, 0.18), postMat);
+      post.position.set(px, postH / 2, pz);
+      post.castShadow = true;
+      group.add(post);
+    }
+    [0.55, 1.15].forEach((ry) => {
+      const rail = new THREE.Mesh(
+        new THREE.BoxGeometry(horizontal ? item.width : 0.1, 0.1, horizontal ? 0.1 : item.depth),
+        railMat
+      );
+      rail.position.set(x, ry, z);
+      rail.castShadow = true;
+      group.add(rail);
+    });
+  } else if (item.type === 'garden' || item.type === 'no-go-zone') {
     const flat = new THREE.Mesh(new THREE.BoxGeometry(item.width, 0.08, item.depth), material);
     flat.position.set(x, 0.05, z);
     flat.name = item.name;

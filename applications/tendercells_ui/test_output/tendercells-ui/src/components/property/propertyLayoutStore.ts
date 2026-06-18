@@ -32,6 +32,10 @@ export interface PropertyItem {
   depth: number;
   productId?: string;   // Firestore product.id — set by sync, used for 1:1 matching
   deviceId?: string;    // hardware device_id label (e.g. 'ct_001')
+  // Terrain map reported by a terrain-tracking robot (e.g. Roaming Roost) from its
+  // drive/boundary/obstacle sensors. radiusFt = patrolled/mapped extent; boundary =
+  // the scanned polygon (property coords). Used to draw + adjust terrain in 3D.
+  scan?: { radiusFt?: number; boundary?: Array<{ x: number; y: number }> };
 }
 
 export type PropertyLayoutState = {

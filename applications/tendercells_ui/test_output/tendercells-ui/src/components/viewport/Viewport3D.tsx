@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Sky } from 'three/examples/jsm/objects/Sky.js';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -930,6 +931,23 @@ export default function Viewport3D({
     sun.position.set(8, 10, 8);
     sun.castShadow = true;
     scene.add(sun);
+
+    // Procedural daytime sky (three.js Sky shader) — outdoor realism, no asset.
+    // Only in 3D mode; 2D top-down keeps the clean flat background.
+    if (viewMode === '3d') {
+      const sky = new Sky();
+      sky.scale.setScalar(10000);
+      const u = sky.material.uniforms;
+      u.turbidity.value = 8;
+      u.rayleigh.value = 1.5;
+      u.mieCoefficient.value = 0.005;
+      u.mieDirectionalG.value = 0.8;
+      const skySun = new THREE.Vector3();
+      skySun.setFromSphericalCoords(1, THREE.MathUtils.degToRad(58), THREE.MathUtils.degToRad(40));
+      u.sunPosition.value.copy(skySun);
+      scene.add(sky);
+      scene.fog = new THREE.Fog(0xbcd3e0, layout.property.widthFt * 1.2, layout.property.widthFt * 3.2);
+    }
 
     const groundTex = makeGroundTexture();
     groundTex.repeat.set(

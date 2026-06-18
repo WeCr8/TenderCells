@@ -417,6 +417,203 @@ const createHardwareMesh = (
       return g;
     }
 
+    // ── Gardens (FarmBot-aligned) ──────────────────────────────────────────
+    case 'farmbot-genesis':
+    case 'farmbot-genesis-xl': {
+      // CNC gantry over a raised bed: wood bed + soil, two side track rails along
+      // the long axis (Y/depth), a cross-gantry spanning the width that rides the
+      // rails, a Z leadscrew + tool head, and rows of crops in the soil. Mirrors
+      // FarmBot Genesis (NEMA17 + GT2 belts + leadscrew Z).
+      const g = new THREE.Group();
+      const long = Math.max(W, D);          // rail axis
+      const wide = Math.min(W, D);          // gantry span
+      const alongZ = D >= W;                // true → rails run along Z (depth)
+      const bedH = 0.5;
+      const woodMat = new THREE.MeshStandardMaterial({ color: 0x7a5230, roughness: 0.85 });
+      const soilMat = new THREE.MeshStandardMaterial({ color: 0x3a2616, roughness: 1 });
+      const railMat = new THREE.MeshStandardMaterial({ color: 0xb9c2c8, metalness: 0.7, roughness: 0.35 });
+      const gantryMat = new THREE.MeshStandardMaterial({ color: 0xe0e3e6, metalness: 0.5, roughness: 0.4 });
+
+      // Raised bed walls (frame) + soil fill
+      const bed = new THREE.Mesh(new THREE.BoxGeometry(W, bedH, D), woodMat);
+      bed.position.set(x, bedH / 2, z);
+      bed.castShadow = true; bed.receiveShadow = true;
+      g.add(bed);
+      const soil = new THREE.Mesh(new THREE.BoxGeometry(W * 0.9, bedH * 0.5, D * 0.94), soilMat);
+      soil.position.set(x, bedH * 0.78, z);
+      g.add(soil);
+
+      // Side track rails along the long axis
+      const railLen = long;
+      [-1, 1].forEach((side) => {
+        const rx = alongZ ? x + side * (wide / 2) : x;
+        const rz = alongZ ? z : z + side * (wide / 2);
+        const rail = new THREE.Mesh(
+          new THREE.BoxGeometry(alongZ ? 0.12 : railLen, 0.12, alongZ ? railLen : 0.12),
+          railMat
+        );
+        rail.position.set(rx, bedH + 0.06, rz);
+        rail.castShadow = true;
+        g.add(rail);
+      });
+
+      // Cross-gantry beam spanning the width, parked ~30% along the rails
+      const beamY = bedH + 0.62;
+      const beam = new THREE.Mesh(
+        new THREE.BoxGeometry(alongZ ? wide + 0.3 : 0.16, 0.16, alongZ ? 0.16 : wide + 0.3),
+        gantryMat
+      );
+      const parkAlong = (alongZ ? z : x) - long / 2 + long * 0.32;
+      const beamX = alongZ ? x : parkAlong;
+      const beamZ = alongZ ? parkAlong : z;
+      beam.position.set(beamX, beamY, beamZ);
+      beam.castShadow = true;
+      g.add(beam);
+      // Gantry uprights at each end of the beam
+      [-1, 1].forEach((side) => {
+        const ux = alongZ ? x + side * (wide / 2) : beamX;
+        const uz = alongZ ? beamZ : z + side * (wide / 2);
+        const col = new THREE.Mesh(new THREE.BoxGeometry(0.14, beamY, 0.14), gantryMat);
+        col.position.set(ux, beamY / 2 + bedH, uz);
+        col.castShadow = true;
+        g.add(col);
+      });
+      // Z leadscrew carriage + tool head on the beam
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.5, 0.22),
+        new THREE.MeshStandardMaterial({ color: 0xc8b882, metalness: 0.4, roughness: 0.4 }));
+      const headOff = (alongZ ? wide : 0) * 0.15;
+      head.position.set(alongZ ? x + headOff : beamX, beamY - 0.18, alongZ ? beamZ : z + headOff);
+      head.castShadow = true;
+      g.add(head);
+
+      // Crop rows in the soil
+      const cropMat = new THREE.MeshStandardMaterial({ color: 0x3fa34d, roughness: 0.8 });
+      const rows = Math.max(3, Math.round(long / 1.6));
+      const perRow = Math.max(2, Math.round(wide / 1.4));
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < perRow; c++) {
+          const ta = (r + 0.5) / rows - 0.5;       // along long axis
+          const tw = (c + 0.5) / perRow - 0.5;     // across width
+          const px = x + (alongZ ? tw * wide * 0.86 : ta * long * 0.92);
+          const pz = z + (alongZ ? ta * long * 0.92 : tw * wide * 0.86);
+          const plant = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), cropMat);
+          plant.position.set(px, bedH + 0.18, pz);
+          plant.scale.y = 1.3;
+          g.add(plant);
+        }
+      }
+      return g;
+    }
+
+    case 'aquaponics': {
+      // Fish tank + raised grow bed coupled by a return pipe.
+      const g = new THREE.Group();
+      const tankR = Math.min(W, D) * 0.34;
+      const tank = new THREE.Mesh(
+        new THREE.CylinderGeometry(tankR, tankR, H * 0.9, 18),
+        new THREE.MeshStandardMaterial({ color: 0x2a5560, roughness: 0.4, metalness: 0.2 })
+      );
+      tank.position.set(x - W * 0.26, H * 0.45, z);
+      tank.castShadow = true;
+      g.add(tank);
+      const waterTop = new THREE.Mesh(
+        new THREE.CylinderGeometry(tankR * 0.92, tankR * 0.92, 0.05, 18),
+        new THREE.MeshStandardMaterial({ color: 0x2f7fc0, roughness: 0.1, metalness: 0.4, transparent: true, opacity: 0.85 })
+      );
+      waterTop.position.set(x - W * 0.26, H * 0.88, z);
+      g.add(waterTop);
+      const bed = new THREE.Mesh(
+        new THREE.BoxGeometry(W * 0.5, H * 0.4, D * 0.78),
+        new THREE.MeshStandardMaterial({ color: 0x7a5230, roughness: 0.85 })
+      );
+      bed.position.set(x + W * 0.24, H * 0.5, z);
+      bed.castShadow = true;
+      g.add(bed);
+      const grow = new THREE.Mesh(
+        new THREE.BoxGeometry(W * 0.44, 0.12, D * 0.7),
+        new THREE.MeshStandardMaterial({ color: 0x3fa34d, roughness: 0.8 })
+      );
+      grow.position.set(x + W * 0.24, H * 0.72, z);
+      g.add(grow);
+      const pipe = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.05, 0.05, W * 0.5, 8),
+        new THREE.MeshStandardMaterial({ color: 0xcfd3d6, metalness: 0.6 })
+      );
+      pipe.rotation.z = Math.PI / 2;
+      pipe.position.set(x, H * 0.78, z);
+      g.add(pipe);
+      return g;
+    }
+
+    case 'hydroponics': {
+      // Vertical NFT tower with stacked planting cups.
+      const g = new THREE.Group();
+      const towerH = H * 2.2;
+      const tower = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.22, 0.26, towerH, 12),
+        new THREE.MeshStandardMaterial({ color: 0xeceff1, roughness: 0.5 })
+      );
+      tower.position.set(x, towerH / 2, z);
+      tower.castShadow = true;
+      g.add(tower);
+      const cupMat = new THREE.MeshStandardMaterial({ color: 0x3fa34d, roughness: 0.8 });
+      const tiers = 6;
+      for (let i = 0; i < tiers; i++) {
+        const ty = (towerH * 0.18) + (towerH * 0.7) * (i / (tiers - 1));
+        const ang = (i % 2) * Math.PI;
+        [ang, ang + Math.PI].forEach((a) => {
+          const cup = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), cupMat);
+          cup.position.set(x + Math.cos(a) * 0.34, ty, z + Math.sin(a) * 0.34);
+          g.add(cup);
+        });
+      }
+      const base = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.4, 0.42, 0.2, 12),
+        new THREE.MeshStandardMaterial({ color: 0x2a5560, roughness: 0.5 })
+      );
+      base.position.set(x, 0.1, z);
+      g.add(base);
+      return g;
+    }
+
+    case 'greenhouse': {
+      // Glass-walled house with a peaked translucent roof + interior beds.
+      const g = new THREE.Group();
+      const wallH = H * 1.1;
+      const glass = new THREE.MeshStandardMaterial({ color: 0xbfe3d0, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.32 });
+      const frame = new THREE.MeshStandardMaterial({ color: 0xd8dbde, metalness: 0.5, roughness: 0.4 });
+      const walls = new THREE.Mesh(new THREE.BoxGeometry(W * 0.94, wallH, D * 0.94), glass);
+      walls.position.set(x, wallH / 2, z);
+      g.add(walls);
+      // Frame edges
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.BoxGeometry(W * 0.94, wallH, D * 0.94)),
+        new THREE.LineBasicMaterial({ color: 0xeceff1 })
+      );
+      edges.position.set(x, wallH / 2, z);
+      g.add(edges);
+      const roof = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.01, Math.max(W, D) * 0.5, H * 0.5, 4),
+        glass.clone()
+      );
+      roof.position.set(x, wallH + H * 0.25, z);
+      roof.rotation.y = Math.PI / 4;
+      g.add(roof);
+      const ridge = new THREE.Mesh(new THREE.BoxGeometry(W * 0.96, 0.06, 0.06), frame);
+      ridge.position.set(x, wallH + H * 0.46, z);
+      g.add(ridge);
+      // Two interior beds
+      [-1, 1].forEach((side) => {
+        const bed = new THREE.Mesh(
+          new THREE.BoxGeometry(W * 0.36, 0.3, D * 0.8),
+          new THREE.MeshStandardMaterial({ color: 0x3a2616, roughness: 1 })
+        );
+        bed.position.set(x + side * W * 0.26, 0.15, z);
+        g.add(bed);
+      });
+      return g;
+    }
+
     case 'rail-module': {
       const g = new THREE.Group();
       const bed = new THREE.Mesh(
@@ -608,6 +805,36 @@ const createYardItem = (
     canopy.position.set(x, 4.2, z);
     canopy.castShadow = true;
     group.add(canopy);
+  } else if (item.type === 'bush') {
+    // Cluster of small canopies — a low shrub.
+    const r = Math.max(item.width, item.depth) * 0.3;
+    [[0, 0, 1], [0.5, 0.3, 0.7], [-0.5, 0.2, 0.7], [0.2, -0.4, 0.7]].forEach(([dx, dz, s]) => {
+      const blob = new THREE.Mesh(new THREE.SphereGeometry(r * s, 12, 8), material);
+      blob.position.set(x + dx * r, r * 0.8 * s, z + dz * r);
+      blob.castShadow = true;
+      group.add(blob);
+    });
+  } else if (item.type === 'crop-row') {
+    // Tilled soil strip with rows of crops — reads as a planted garden patch.
+    const soil = new THREE.Mesh(
+      new THREE.BoxGeometry(item.width, 0.12, item.depth),
+      new THREE.MeshStandardMaterial({ color: 0x3a2616, roughness: 1 })
+    );
+    soil.position.set(x, 0.06, z);
+    soil.receiveShadow = true;
+    group.add(soil);
+    const cropMat = new THREE.MeshStandardMaterial({ color: 0x6b8e23, roughness: 0.8 });
+    const rows = Math.max(2, Math.round(item.depth / 1.2));
+    const perRow = Math.max(3, Math.round(item.width / 1.0));
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < perRow; c++) {
+        const px = x - item.width / 2 + (item.width / (perRow + 1)) * (c + 1);
+        const pz = z - item.depth / 2 + (item.depth / (rows + 1)) * (r + 1);
+        const plant = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.4, 6), cropMat);
+        plant.position.set(px, 0.28, pz);
+        group.add(plant);
+      }
+    }
   } else if (item.type === 'rock') {
     const rock = new THREE.Mesh(
       new THREE.DodecahedronGeometry(Math.max(item.width, item.depth) * 0.35),
@@ -722,8 +949,11 @@ const createYardItems = (
 ): THREE.Group => {
   const group = new THREE.Group();
   items.forEach((item) => {
-    const glbKey = item.product?.id;
-    const loadedGlb = glbKey ? glbCache.get(glbKey) : undefined;
+    // Prefer a full uploaded scene/model on the item (imported "Genesis" world),
+    // then a product's custom asset GLB. Both fit into the item footprint.
+    const loadedGlb =
+      (item.modelUrl ? glbCache.get(item.modelUrl) : undefined) ||
+      (item.product?.id ? glbCache.get(item.product.id) : undefined);
     group.add(createYardItem(item, layout, activeProduct, loadedGlb));
   });
   return group;
@@ -878,6 +1108,33 @@ export default function Viewport3D({
     });
     return () => { cancelled = true; };
   }, [products]);
+
+  // Load full-scene GLBs imported onto layout items (item.modelUrl) — e.g. a user
+  // imports a complete "Genesis" garden world. Cached by URL so each loads once.
+  useEffect(() => {
+    const loader = new GLTFLoader();
+    let cancelled = false;
+    const urls = Array.from(
+      new Set(
+        layout.items
+          .map((i) => i.modelUrl)
+          .filter((u): u is string => !!u && !glbCacheRef.current.has(u))
+      )
+    );
+    if (urls.length === 0) return;
+
+    let done = 0;
+    const finish = () => { if (++done === urls.length && !cancelled) setGlbCacheVersion((v) => v + 1); };
+    urls.forEach((url) => {
+      loader.load(
+        url,
+        (gltf) => { if (!cancelled) glbCacheRef.current.set(url, gltf.scene); finish(); },
+        undefined,
+        (err) => { console.warn('Failed to load imported model', url, err); finish(); }
+      );
+    });
+    return () => { cancelled = true; };
+  }, [layout]);
 
   // Sync layout from storage events
   useEffect(() => {

@@ -9,8 +9,29 @@ export type HardwareType =
   | 'pigeon-palace'
   | 'watchtower'
   | 'rail-module'
-  | 'sensor';
-export type ObstacleType = 'tree' | 'fence' | 'pond' | 'rock' | 'building' | 'garden' | 'no-go-zone';
+  | 'sensor'
+  // Gardens category — FarmBot-aligned automated growing systems. "Genesis" mirrors
+  // FarmBot Genesis: a CNC gantry (X/Y rails + Z leadscrew + tool head) over a raised
+  // bed. Other garden types automate growing in different ways (aquaponics, hydroponics)
+  // or shelter it (greenhouse). A garden item may carry a full uploaded 3D scene via
+  // PropertyItem.modelUrl (import a complete "genesis" world model).
+  | 'farmbot-genesis'
+  | 'farmbot-genesis-xl'
+  | 'aquaponics'
+  | 'hydroponics'
+  | 'greenhouse';
+export type ObstacleType =
+  | 'tree' | 'fence' | 'pond' | 'rock' | 'building' | 'garden' | 'no-go-zone'
+  | 'bush' | 'crop-row';
+
+// Garden-category hardware types (FarmBot-aligned). Grouped for the editor palette.
+export const GARDEN_TYPES: HardwareType[] = [
+  'farmbot-genesis',
+  'farmbot-genesis-xl',
+  'aquaponics',
+  'hydroponics',
+  'greenhouse',
+];
 export type ItemShape = 'rect' | 'circle' | 'hexagon' | 'octagon' | 'diamond' | 'rounded';
 
 export interface PropertyConfig {
@@ -32,6 +53,10 @@ export interface PropertyItem {
   depth: number;
   productId?: string;   // Firestore product.id — set by sync, used for 1:1 matching
   deviceId?: string;    // hardware device_id label (e.g. 'ct_001')
+  // Full 3D scene/model to render in place of the procedural mesh. Set when a user
+  // imports a complete model (e.g. a FarmBot "Genesis" world) as a garden device.
+  // Object URL (session) or uploaded GLB URL (persisted). GLB only — runtime-loadable.
+  modelUrl?: string;
   // Terrain map reported by a terrain-tracking robot (e.g. Roaming Roost) from its
   // drive/boundary/obstacle sensors. radiusFt = patrolled/mapped extent; boundary =
   // the scanned polygon (property coords). Used to draw + adjust terrain in 3D.
@@ -57,6 +82,7 @@ export const HARDWARE_TYPES: HardwareType[] = [
   'watchtower',
   'rail-module',
   'sensor',
+  ...GARDEN_TYPES,
 ];
 
 // Real-world footprint dimensions from product specs (CLAUDE.md)
@@ -72,13 +98,21 @@ export const PRODUCT_DIMENSIONS: Record<HardwareType, { width: number; depth: nu
   'watchtower':     { width: 3, depth: 3, shape: 'hexagon' }, // 3×3×5 ft dome
   'rail-module':    { width: 4, depth: 2, shape: 'rect'    }, // linear rail segment
   'sensor':         { width: 1, depth: 1, shape: 'circle'  }, // point sensor
+  // Gardens — FarmBot-aligned footprints (converted from FarmBot bed specs to ft)
+  'farmbot-genesis':    { width: 5,  depth: 10, shape: 'rect' }, // FarmBot Genesis ~1.5×3 m bed
+  'farmbot-genesis-xl': { width: 9,  depth: 20, shape: 'rect' }, // Genesis XL ~2.86×6 m bed
+  'aquaponics':         { width: 4,  depth: 8,  shape: 'rect' }, // tank + grow bed
+  'hydroponics':        { width: 2,  depth: 2,  shape: 'circle' }, // vertical tower
+  'greenhouse':         { width: 8,  depth: 12, shape: 'rect' }, // enclosed grow house
 };
 
-export const OBSTACLE_TYPES: ObstacleType[] = ['tree', 'fence', 'pond', 'rock', 'building', 'garden', 'no-go-zone'];
+export const OBSTACLE_TYPES: ObstacleType[] = ['tree', 'bush', 'crop-row', 'fence', 'pond', 'rock', 'building', 'garden', 'no-go-zone'];
 
 // Default shapes per obstacle type
 export const OBSTACLE_DEFAULT_SHAPES: Partial<Record<ObstacleType, ItemShape>> = {
   tree: 'circle',
+  bush: 'circle',
+  'crop-row': 'rect',
   rock: 'circle',
   pond: 'rounded',
   garden: 'rounded',
@@ -98,7 +132,15 @@ export const ITEM_COLORS: Record<string, string> = {
   watchtower:       '#8DD47A',
   'rail-module':    '#A5B1A9',
   sensor:           '#D0A34E',
+  // Gardens
+  'farmbot-genesis':    '#7CB342',
+  'farmbot-genesis-xl': '#689F38',
+  aquaponics:           '#26A69A',
+  hydroponics:          '#42A5B5',
+  greenhouse:           '#9CCC65',
   tree:             '#2F7D32',
+  bush:             '#4C9A4C',
+  'crop-row':       '#6B8E23',
   fence:            '#8B6F47',
   pond:             '#3F8FD2',
   rock:             '#777D82',
@@ -131,6 +173,7 @@ export const DEFAULT_ITEMS: PropertyItem[] = [
   { id: 'item-roaming-roost',  kind: 'hardware', name: 'Roaming Roost',  type: 'roaming-roost',  shape: 'octagon', x: 40, y: 28, width: 5,  depth: 5  },
   { id: 'item-duck-dock',      kind: 'hardware', name: 'Duck Dock',      type: 'duck-dock',      shape: 'rect',    x: 58, y: 26, width: 4,  depth: 4  },
   { id: 'item-watchtower',     kind: 'hardware', name: 'WatchTower',     type: 'watchtower',     shape: 'hexagon', x: 70, y: 6,  width: 3,  depth: 3  },
+  { id: 'item-garden-genesis', kind: 'hardware', name: 'Garden (Genesis)', type: 'farmbot-genesis', shape: 'rect',   x: 12, y: 30, width: 5,  depth: 10 },
   { id: 'item-tree',           kind: 'obstacle', name: 'Oak Tree',       type: 'tree',           shape: 'circle',  x: 28, y: 10, width: 8,  depth: 8  },
   { id: 'item-pond',           kind: 'obstacle', name: 'Pond',           type: 'pond',           shape: 'rounded', x: 52, y: 12, width: 14, depth: 10 },
   { id: 'item-fence',          kind: 'obstacle', name: 'Fence Line',     type: 'fence',          shape: 'rect',    x: 4,  y: 48, width: 60, depth: 3  },

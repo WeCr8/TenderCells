@@ -88,13 +88,25 @@ const TYPE_LABELS: Record<string, string> = {
   'turkey-tower': 'Turkey Tower™',
   'pigeon-palace': 'Pigeon Palace™',
   watchtower: 'WatchTower AI™',
+  'farmbot-genesis': 'Garden — Genesis',
+  'farmbot-genesis-xl': 'Garden — Genesis XL',
+  aquaponics: 'Garden — Aquaponics',
+  hydroponics: 'Garden — Hydroponics',
+  greenhouse: 'Garden — Greenhouse',
   tree: 'Tree',
+  bush: 'Bush',
+  'crop-row': 'Crop Row',
   rock: 'Rock',
   pond: 'Pond',
   garden: 'Garden',
   'no-go-zone': 'No-Go Zone',
   fence: 'Fence',
 };
+
+// FarmBot-aligned garden device types (a sub-group of HARDWARE_TYPES)
+const GARDEN_HW_TYPES = new Set<string>([
+  'farmbot-genesis', 'farmbot-genesis-xl', 'aquaponics', 'hydroponics', 'greenhouse',
+]);
 
 // Obstacle types that the Roaming Roost must avoid
 const ROAMING_BLOCKED_TYPES = new Set(['tree', 'rock', 'pond', 'fence', 'no-go-zone']);
@@ -249,6 +261,24 @@ export default function PropertyLayoutBuilder() {
       kind,
       name: kind === 'hardware' ? 'Chicken Tender' : 'New Obstacle',
       type,
+      shape: dims.shape,
+      x: 5,
+      y: 5,
+      width: dims.width,
+      depth: dims.depth,
+    });
+    setDialogOpen(true);
+  };
+
+  // Add a garden (FarmBot-aligned). Defaults to a Genesis bed; user can switch type
+  // or import a full 3D "Genesis" world via the model import in the dialog.
+  const openAddGarden = () => {
+    const dims = PRODUCT_DIMENSIONS['farmbot-genesis'];
+    setEditingItem({
+      id: `item-${Date.now()}`,
+      kind: 'hardware',
+      name: 'Garden (Genesis)',
+      type: 'farmbot-genesis',
       shape: dims.shape,
       x: 5,
       y: 5,
@@ -536,6 +566,13 @@ export default function PropertyLayoutBuilder() {
               sx={{ bgcolor: '#4A7C59', '&:hover': { bgcolor: '#5A9069' } }}
             >
               Add Product
+            </Button>
+            <Button
+              variant="contained" size="small" startIcon={<GrassIcon />}
+              onClick={openAddGarden}
+              sx={{ bgcolor: '#7CB342', '&:hover': { bgcolor: '#8BC34A' } }}
+            >
+              Add Garden
             </Button>
             <Button
               variant="outlined" size="small" startIcon={<GrassIcon />}
@@ -1236,6 +1273,40 @@ export default function PropertyLayoutBuilder() {
                   <Box sx={{ bgcolor: alpha('#CC3333', 0.1), border: `1px solid ${alpha('#CC3333', 0.3)}`, borderRadius: 1, p: 1.5 }}>
                     <Typography variant="caption" sx={{ color: '#EF5350', fontWeight: 600 }}>
                       ⛔ No-Go Zone — Roaming Roost will not enter this area
+                    </Typography>
+                  </Box>
+                </Grid>
+              )}
+
+              {/* Gardens: import a full 3D scene (e.g. a FarmBot "Genesis" world). GLB
+                  only — runtime-loadable. The model replaces the procedural mesh and is
+                  fitted to the item footprint; resize the item to scale the world. */}
+              {editingItem.kind === 'hardware' && GARDEN_HW_TYPES.has(editingItem.type) && (
+                <Grid item xs={12}>
+                  <Box sx={{ bgcolor: alpha('#7CB342', 0.08), border: `1px solid ${alpha('#7CB342', 0.35)}`, borderRadius: 1, p: 1.5 }}>
+                    <Typography variant="caption" sx={{ color: '#9CCC65', fontWeight: 700, display: 'block', mb: 0.75 }}>
+                      🌱 Import full 3D scene (Genesis world)
+                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                      <Button component="label" size="small" variant="outlined"
+                        sx={{ borderColor: '#4A7C59', color: '#9CCC65' }}>
+                        {editingItem.modelUrl ? 'Replace model' : 'Choose .glb'}
+                        <input hidden type="file" accept=".glb,model/gltf-binary"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            if (!/\.glb$/i.test(file.name)) { alert('GLB only. Export your scene as glTF Binary (.glb).'); return; }
+                            const url = URL.createObjectURL(file);
+                            setEditingItem((cur) => cur ? { ...cur, modelUrl: url, name: cur.name || file.name.replace(/\.glb$/i, '') } : cur);
+                          }} />
+                      </Button>
+                      {editingItem.modelUrl && (
+                        <Chip label="Model attached" size="small" onDelete={() => setEditingItem((cur) => cur ? { ...cur, modelUrl: undefined } : cur)}
+                          sx={{ bgcolor: alpha('#7CB342', 0.18), color: '#9CCC65' }} />
+                      )}
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
+                      No model = the built-in {TYPE_LABELS[editingItem.type]} is shown. Convert OBJ/FBX/USD to GLB first (Blender → Export → glTF Binary).
                     </Typography>
                   </Box>
                 </Grid>

@@ -678,6 +678,7 @@ export default function Viewport3D({
   height,
 }: Viewport3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [webglOk, setWebglOk] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('3d');
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('iso');
   const [controlMode, setControlMode] = useState<ControlMode>('orbit');
@@ -856,6 +857,7 @@ export default function Viewport3D({
         });
       } catch (e) {
         console.warn('WebGL unavailable — 3D viewport disabled', e);
+        setWebglOk(false);
         if (containerRef.current) {
           containerRef.current.innerHTML =
             '<div style="display:grid;place-items:center;height:100%;min-height:200px;color:#8A7D55;font:14px system-ui;text-align:center;padding:1.5rem;line-height:1.5">' +
@@ -881,6 +883,11 @@ export default function Viewport3D({
     controls.enableZoom = true;
     controls.screenSpacePanning = true;
     controls.target.set(focusX, focusY, focusZ);
+    // Gentle idle auto-rotate so the scene reads as live + fluid the moment it
+    // loads; stops the instant the user grabs it.
+    controls.autoRotate = viewMode === '3d';
+    controls.autoRotateSpeed = 0.5;
+    controls.addEventListener('start', () => { controls.autoRotate = false; });
     controls.mouseButtons = {
       LEFT: controlMode === 'pan' || viewMode === '2d' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
       MIDDLE: THREE.MOUSE.DOLLY,
@@ -1024,6 +1031,21 @@ export default function Viewport3D({
       }}
     >
       <Box ref={containerRef} sx={{ width: '100%', height: '100%', touchAction: 'none' }} />
+
+      {/* Proof it's a live WebGL scene, not a static image — addresses "is the 3D real". */}
+      {webglOk && (
+        <Box sx={{
+          position: 'absolute', top: 8, left: 8, zIndex: 6, display: 'flex', alignItems: 'center', gap: 0.6,
+          px: 1, py: 0.3, borderRadius: 999, bgcolor: 'rgba(0,0,0,0.55)',
+          border: '1px solid #4A7C59', pointerEvents: 'none',
+        }}>
+          <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: '#4CAF50',
+            boxShadow: '0 0 6px #4CAF50' }} />
+          <Box component="span" sx={{ color: '#C8B882', fontSize: 11, fontWeight: 700, letterSpacing: 0.4 }}>
+            LIVE 3D · WebGL
+          </Box>
+        </Box>
+      )}
 
       {loading && (
         <Box

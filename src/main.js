@@ -116,6 +116,7 @@ document.querySelector('#app').innerHTML = `
           <button class="nav-link">Tender Cells in Education <span class="dropdown-arrow">▼</span></button>
           <div class="dropdown-menu">
               <a href="#education/curriculum" class="dropdown-item">Curriculum</a>
+              <a href="#education/school-login" class="dropdown-item">School Login</a>
               <a href="#success-stories" class="dropdown-item">Case Studies</a>
               <a href="#education/resources" class="dropdown-item">Teacher Resources</a>
               <a href="#education/projects" class="dropdown-item">Student Projects</a>

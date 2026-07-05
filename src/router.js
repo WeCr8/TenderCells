@@ -24,6 +24,7 @@ import { createTeacherResourcesPage, initializeTeacherResourcesPage } from './pa
 import { createStudentProjectsPage, initializeStudentProjectsPage } from './pages/education/projects.js';
 import { createEducationalPricingPage, initializeEducationalPricingPage } from './pages/education/pricing.js';
 import { createEducationContactPage, initializeEducationContactPage } from './pages/education/contact.js';
+import { createSchoolLoginPage, initializeSchoolLoginPage } from './pages/education/school-login.js';
 import { createOpenSourcePage, initializeOpenSourcePage } from './pages/open-source.js';
 import { createBlogPage, initializeBlogPage } from './pages/blog.js';
 import { createBlogPostPage, initializeBlogPostPage } from './pages/blog-post.js';
@@ -55,6 +56,7 @@ class Router {
       'education/projects': this.renderEducationProjects,
       'education/pricing': this.renderEducationPricing,
       'education/contact': this.renderEducationContact,
+      'education/school-login': this.renderSchoolLogin,
       'open-source': this.renderOpenSource,
       'blog': this.renderBlog,
       'how-it-works': this.renderHowItWorks,
@@ -175,6 +177,12 @@ class Router {
     
     // Initialize education functionality
     setTimeout(() => initializeEducationPage(), 100);
+  }
+
+  renderSchoolLogin() {
+    this.hideMainContent();
+    this.showPageContent(createSchoolLoginPage());
+    setTimeout(() => initializeSchoolLoginPage(), 100);
   }
 
   renderEducationPrograms() {

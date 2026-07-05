@@ -57,6 +57,7 @@ import {
   type PropertyItemKind,
 } from '../components/property/propertyLayoutStore';
 import Viewport3D from '../components/viewport/Viewport3D';
+import FarmBotBridgePanel from '../components/garden/FarmBotBridgePanel';
 import { useProducts } from '../hooks/useProducts';
 import './PropertyLayoutBuilder.css';
 
@@ -1061,6 +1062,12 @@ export default function PropertyLayoutBuilder() {
                   </Button>
                 )}
               </Paper>
+            )}
+
+            {/* FarmBot bridge — control handed off to FarmBot's own web app (we do not
+                reimplement FarmBot, and do not embed their CC-BY-NC logo). */}
+            {selectedItem && (selectedItem.type === 'farmbot-genesis' || selectedItem.type === 'farmbot-genesis-xl') && (
+              <FarmBotBridgePanel item={selectedItem} />
             )}
 
             {/* Items List */}

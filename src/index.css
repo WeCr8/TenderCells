@@ -66,3 +66,18 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* ---- School Login (education/school-login) ---- */
+.school-login-body { max-width: 520px; margin: 0 auto; padding: 32px 16px 64px; }
+.sl-role-toggle { display: flex; gap: 10px; margin-bottom: 18px; }
+.sl-role { flex: 1; opacity: .55; }
+.sl-role.active { opacity: 1; outline: 2px solid var(--primary-color, #2e7d32); }
+.sl-form { display: flex; flex-direction: column; gap: 12px; }
+.sl-form label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
+.sl-form input { padding: 10px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
+.sl-actions { display: flex; gap: 10px; }
+.sl-actions .btn { flex: 1; }
+.btn-google { background: #fff; border: 1px solid #ccc; }
+.sl-msg { min-height: 18px; font-size: 14px; }
+.sl-note { color: #666; font-size: 13px; margin-top: 14px; }
+.sl-links { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0; }

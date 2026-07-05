@@ -27,6 +27,21 @@ TenderCells expands the pattern toward animal care, homesteading, mobile enclosu
 - FarmBot community forum: https://forum.farmbot.org/
 - FarmBot licensing: https://licensing.farm.bot/
 
+### Licensing split (IMPORTANT)
+
+- **FarmBot SOFTWARE** (FarmBot OS, Web App, Arduino firmware, SDKs) is **MIT-licensed** — may be copied, modified, redistributed, even sold, with the MIT notice preserved.
+- **FarmBot BRAND ASSETS** (logos, logomark, iconography, marketing media, media-kit content) are **CC-BY-NC 4.0** — attribution required and **commercial use is forbidden**.
+
+Because Tender Cells is a commercial product, we **do not embed FarmBot's logo or other brand assets**. Where we reference FarmBot in the product we use a plain **text** wordmark + text attribution + a link to FarmBot. The official logo may only be used with **written permission** from FarmBot Inc.
+
+### FarmBot Bridge (Gardens → Genesis)
+
+Genesis-type garden devices bridge to FarmBot rather than reimplementing it:
+
+- Control is handed off to FarmBot's own web app at **<https://my.farm.bot>** (opened in a new tab) — users get FarmBot's full UI and FarmBot Inc. gets the traffic/support.
+- Component: `src/components/garden/FarmBotBridgePanel.tsx`. Text wordmark only (no logo file), required "Powered by FarmBot Inc." attribution, optional account email stored locally for a future **read-only** status mirror.
+- No FarmBot code is bundled; no brand asset is embedded. Trademark "FarmBot" used for attribution/compatibility only.
+
 ### Code Reuse Policy
 
 Do not copy FarmBot code, diagrams, text, media, or CAD files into TenderCells unless:

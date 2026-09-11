@@ -23,7 +23,7 @@ import {
   alpha,
 } from '@mui/material';
 import {
-  Add as AddIcon,
+  
   Delete as DeleteIcon,
   Edit as EditIcon,
   Grass as GrassIcon,
@@ -140,7 +140,7 @@ export default function PropertyLayoutBuilder() {
   useEffect(() => {
     if (!products || products.length === 0) return;
     setItems(prev => {
-      let next = [...prev];
+      const next = [...prev];
       const claimedItemIds = new Set<string>();
 
       for (const product of products) {

@@ -47,7 +47,7 @@ export default function ConnectionSetupWizard({
   const [ssid, setSsid] = useState('');
   const [password, setPassword] = useState('');
   const [securityType, setSecurityType] = useState<'none' | 'WPA' | 'WPA2' | 'WPA3'>('WPA2');
-  const [_isConnecting, setIsConnecting] = useState(false);
+  const [, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'success' | 'error'>('idle');
 

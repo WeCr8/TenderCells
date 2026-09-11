@@ -34,7 +34,7 @@ try {
   // const { initializeFirebaseAdmin } = await import('./config/firebase-admin.js');
   // initializeFirebaseAdmin();
   console.log('Firebase skipped - MQTT primary control path');
-} catch (error) {
+} catch {
   console.warn('Firebase not available (optional for MQTT-only mode)');
 }
 

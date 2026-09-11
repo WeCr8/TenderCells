@@ -209,7 +209,7 @@ export default function CameraGrid({
               onChange={(e) =>
                 setNewCamera({
                   ...newCamera,
-                  resolution: e.target.value as any,
+                  resolution: e.target.value as '1080p' | '720p' | '480p',
                 })
               }
               fullWidth

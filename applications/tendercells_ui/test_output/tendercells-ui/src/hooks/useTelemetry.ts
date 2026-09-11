@@ -9,7 +9,7 @@ interface TelemetryData {
   chickenCount?: number;
   doorState?: string;
   systemState?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const API_BASE = import.meta.env.VITE_MQTT_API_BASE_URL as string | undefined;

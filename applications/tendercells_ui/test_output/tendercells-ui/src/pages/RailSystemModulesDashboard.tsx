@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import TrainIcon from "@mui/icons-material/Train";
+// Removed unused import
 import SettingsIcon from "@mui/icons-material/Settings";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
 import BuildIcon from "@mui/icons-material/Build";

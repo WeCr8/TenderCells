@@ -27,7 +27,7 @@ export default function SettingsPage() {
     autoRetention: 30,
   })
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string | boolean | number) => {
     setSettings((prev) => ({ ...prev, [field]: value }))
   }
 

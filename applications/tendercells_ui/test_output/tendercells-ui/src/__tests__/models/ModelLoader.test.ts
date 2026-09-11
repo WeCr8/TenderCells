@@ -34,19 +34,19 @@ describe('ModelLoader', () => {
     });
 
     it('should reject invalid URLs', async () => {
-      const invalidUrl = '/invalid/path.glb';
+      
       // expect(loader.loadModel(invalidUrl)).rejects.toThrow();
     });
 
     it('should handle DRACO-compressed models', async () => {
-      const dracoUrl = '/models/coops/presets/coop-compressed.glb';
+      
       // const model = await loader.loadModel(dracoUrl);
       // expect(model).toBeDefined();
     });
 
     it('should track loading progress', async () => {
       const mockUrl = '/models/coops/presets/coop-4x4x6.glb';
-      const progressSpy = vi.fn();
+      
       // loader.onProgress = progressSpy;
       // await loader.loadModel(mockUrl);
       // expect(progressSpy).toHaveBeenCalled();

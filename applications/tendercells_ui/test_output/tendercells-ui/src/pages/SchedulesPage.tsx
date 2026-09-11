@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Paper, Stack, Typography, Button, Dialog, DialogTitle,
   DialogContent, DialogActions, Select, MenuItem, FormControl,
-  InputLabel, Switch, Chip, IconButton, Tooltip, Divider,
+  InputLabel, Switch, Chip, IconButton, Tooltip,
   Alert, CircularProgress, ToggleButton, ToggleButtonGroup,
   FormControlLabel, TextField, Card, CardContent, CardActions,
   Snackbar,
@@ -191,7 +191,7 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
       setAmount(100);
       setEnabled(true);
     }
-  }, [open, initial]);
+  }, [open, initial, defaultCron]);
 
   const handleSave = async () => {
     setSaving(true);

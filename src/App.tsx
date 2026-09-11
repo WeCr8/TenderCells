@@ -25,8 +25,8 @@ const colors = {
 
 function App() {
   const [screen, setScreen] = useState<Screen>('login');
-  const [, setUser] = useState<any>(null);
-  const [, setProperties] = useState<any[]>([]);
+  const [, setUser] = useState<{ uid: string; email: string } | null>(null);
+  const [, setProperties] = useState<{ id: string; name: string; }[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

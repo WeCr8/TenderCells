@@ -1,7 +1,7 @@
 // example.service.ts
 interface Example {
   id: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const items: Example[] = [];

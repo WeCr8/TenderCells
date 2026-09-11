@@ -1,5 +1,5 @@
 // ModelLoader.test.ts - Unit tests for Three.js model loading
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ModelLoader } from '../../models/loaders/ModelLoader';
 
 describe('ModelLoader', () => {
@@ -53,7 +53,7 @@ describe('ModelLoader', () => {
     });
 
     it('should handle network errors gracefully', async () => {
-      const unreachableUrl = 'http://unreachable.invalid/model.glb';
+      
       // expect(loader.loadModel(unreachableUrl)).rejects.toThrow();
     });
   });

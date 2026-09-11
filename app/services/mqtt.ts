@@ -14,7 +14,7 @@ class MQTTService {
   private client: mqtt.MqttClient | null = null;
   private config: MQTTConfig;
   private connected = false;
-  private subscriptions: Map<string, (message: any) => void> = new Map();
+  private subscriptions: Map<string, (message: unknown) => void> = new Map();
 
   constructor(config: MQTTConfig) {
     this.config = config;
@@ -66,7 +66,7 @@ class MQTTService {
 
   private handleMessage(topic: string, message: Buffer) {
     try {
-      const payload = JSON.parse(message.toString());
+      const payload: unknown = JSON.parse(message.toString());
       const handler = this.subscriptions.get(topic);
       if (handler) {
         handler(payload);
@@ -76,7 +76,7 @@ class MQTTService {
     }
   }
 
-  subscribe(topic: string, handler: (message: any) => void) {
+  subscribe(topic: string, handler: (message: unknown) => void) {
     if (!this.client) return;
     this.subscriptions.set(topic, handler);
     this.client.subscribe(topic, { qos: 1 }, (error) => {
@@ -94,7 +94,7 @@ class MQTTService {
     });
   }
 
-  publish(topic: string, payload: any, qos: 0 | 1 | 2 = 1): boolean {
+  publish(topic: string, payload: unknown, qos: 0 | 1 | 2 = 1): boolean {
     if (!this.client || !this.connected) {
       console.warn('MQTT not connected');
       return false;
@@ -147,19 +147,19 @@ export const sendEstop = async (mqtt: MQTTService, deviceId: string) => {
   mqtt.publish(topic, { active: true }, 2); // QoS 2, retained
 };
 
-export const subscribeTelemetry = (mqtt: MQTTService, deviceId: string, handler: (data: any) => void) => {
+export const subscribeTelemetry = (mqtt: MQTTService, deviceId: string, handler: (data: unknown) => void) => {
   const topic = `tc/${deviceId}/sensors`;
   mqtt.subscribe(topic, handler);
   return () => mqtt.unsubscribe(topic);
 };
 
-export const subscribeState = (mqtt: MQTTService, deviceId: string, handler: (data: any) => void) => {
+export const subscribeState = (mqtt: MQTTService, deviceId: string, handler: (data: unknown) => void) => {
   const topic = `tc/${deviceId}/state`;
   mqtt.subscribe(topic, handler);
   return () => mqtt.unsubscribe(topic);
 };
 
-export const subscribeAlerts = (mqtt: MQTTService, deviceId: string, handler: (data: any) => void) => {
+export const subscribeAlerts = (mqtt: MQTTService, deviceId: string, handler: (data: unknown) => void) => {
   const topic = `tc/${deviceId}/alert`;
   mqtt.subscribe(topic, handler);
   return () => mqtt.unsubscribe(topic);

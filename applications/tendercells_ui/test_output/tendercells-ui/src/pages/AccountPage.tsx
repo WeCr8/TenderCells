@@ -56,8 +56,8 @@ export default function AccountPage() {
     setActiveTab(newValue);
   };
 
-  const handleProductRegister = async (data: any) => {
-    await registerProduct(data);
+  const handleProductRegister = async (data: { name: string; sku: string; quantity: number }) => {
+    await registerProduct(data as { name: string; sku: string; quantity: number });
     await refetch();
   };
 

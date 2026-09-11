@@ -16,7 +16,7 @@ export default function QuickActions({ deviceId }: QuickActionsProps) {
   const hardware = useHardwareControl(deviceId);
   const [confirmDialog, setConfirmDialog] = useState<string | null>(null);
 
-  const handleAction = async (action: () => Promise<any>) => {
+  const handleAction = async (action: () => Promise<void>) => {
     try {
       await action();
       setConfirmDialog(null);
@@ -25,7 +25,7 @@ export default function QuickActions({ deviceId }: QuickActionsProps) {
     }
   };
 
-  const ConfirmDialog = ({ title, action }: { title: string; action: () => Promise<any> }) => (
+  const ConfirmDialog = ({ title, action }: { title: string; action: () => Promise<void> }) => (
     <Dialog open={confirmDialog === title} onClose={() => setConfirmDialog(null)}>
       <DialogTitle>Confirm Action</DialogTitle>
       <div style={{ padding: "16px", minWidth: "300px" }}>

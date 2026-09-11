@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import MQTTService, {
-  sendArmCommand,
+
   sendDoorCommand,
   sendFeedCommand,
   sendCleanCommand,

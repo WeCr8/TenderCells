@@ -47,7 +47,7 @@ export default function ConnectionSetupWizard({
   const [ssid, setSsid] = useState('');
   const [password, setPassword] = useState('');
   const [securityType, setSecurityType] = useState<'none' | 'WPA' | 'WPA2' | 'WPA3'>('WPA2');
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [_isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'success' | 'error'>('idle');
 
@@ -142,7 +142,7 @@ export default function ConnectionSetupWizard({
               <InputLabel>Security Type</InputLabel>
               <Select
                 value={securityType}
-                onChange={(e) => setSecurityType(e.target.value as any)}
+                onChange={(e) => setSecurityType(e.target.value as 'none' | 'WPA' | 'WPA2' | 'WPA3')}
                 label="Security Type"
               >
                 <MenuItem value="none">None (Open)</MenuItem>

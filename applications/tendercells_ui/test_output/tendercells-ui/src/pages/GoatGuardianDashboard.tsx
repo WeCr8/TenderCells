@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import PetsIcon from "@mui/icons-material/Pets";
+// Removed unused import
 import FenceIcon from "@mui/icons-material/Fence";
 import SecurityIcon from "@mui/icons-material/Security";
 import GrassIcon from "@mui/icons-material/Grass";

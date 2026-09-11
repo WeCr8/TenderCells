@@ -29,7 +29,7 @@ function advertiseBroker() {
     bonjour.publish({ name: "TenderCells Broker", type: "mqtt", port: MQTT_PORT });
     console.log(`✓ mDNS: advertising broker as _mqtt._tcp on port ${MQTT_PORT}`);
     console.log("  (devices can leave Broker IP blank to auto-find it)");
-  } catch (err) {
+  } catch {
     console.log("• mDNS advertise unavailable — devices must use the broker IP directly");
   }
 }

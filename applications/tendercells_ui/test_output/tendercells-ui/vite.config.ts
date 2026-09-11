@@ -35,8 +35,8 @@ const muiBoxCreateThemePatch = () => ({
 
 const muiBoxOptimizerPatch = {
   name: 'mui-box-optimizer-patch',
-  setup(build: any) {
-    build.onLoad({ filter: /@mui[\\/]material[\\/]Box[\\/]Box\.js$/ }, async (args: any) => {
+  setup(build: unknown) {
+    build.onLoad({ filter: /@mui[\\/]material[\\/]Box[\\/]Box\.js$/ }, async (args: { path: string }) => {
       const source = await readFile(args.path, 'utf8');
 
       return {

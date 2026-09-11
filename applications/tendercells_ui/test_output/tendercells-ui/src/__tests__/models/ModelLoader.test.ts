@@ -26,7 +26,6 @@ describe('ModelLoader', () => {
 
   describe('loadModel', () => {
     it('should load a valid GLB model from URL', async () => {
-      const mockUrl = '/models/coops/presets/coop-4x4x6.glb';
       // Mock fetch or Three.js loader response
       // const model = await loader.loadModel(mockUrl);
       // expect(model).toBeDefined();
@@ -45,7 +44,6 @@ describe('ModelLoader', () => {
     });
 
     it('should track loading progress', async () => {
-      const mockUrl = '/models/coops/presets/coop-4x4x6.glb';
       
       // loader.onProgress = progressSpy;
       // await loader.loadModel(mockUrl);

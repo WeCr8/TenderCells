@@ -56,7 +56,7 @@ export default function DeviceDetailPage({
   deviceName = 'Chicken Tender #1',
 }: DeviceDetailPageProps) {
   const [activeTab, setActiveTab] = useState(0);
-  const [cameras, setCameras] = useState<any[]>([]);
+  const [cameras, setCameras] = useState<Array<{ id: string }>>([]);
 
   return (
     <Box sx={{ p: 3 }}>

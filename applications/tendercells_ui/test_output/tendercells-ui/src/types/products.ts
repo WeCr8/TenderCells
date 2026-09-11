@@ -118,7 +118,7 @@ export interface ProductMetadata {
   purchasePrice?: number;
   purchaseLocation?: string;
   notes?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Product {

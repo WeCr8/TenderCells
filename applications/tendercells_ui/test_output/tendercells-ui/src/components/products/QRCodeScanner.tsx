@@ -82,6 +82,7 @@ export default function QRCodeScanner({ isOpen, onClose, onScan }: QRCodeScanner
             },
             (errorMessage) => {
               // Ignore scanning errors (they're expected while scanning)
+              void errorMessage;
             }
           );
           setLoading(false);

@@ -201,6 +201,9 @@ export default function PropertyLayoutBuilder() {
       }
       return next;
     });
+  // FIXME(lint): the eslint-disable-next-line directive below is flagged as UNUSED - the
+  // rule it suppresses is not actually being triggered here anymore. Delete this comment
+  // and the eslint-disable line directly below it. Do not change [products] or anything else.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products]);
 

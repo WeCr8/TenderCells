@@ -94,6 +94,14 @@ export const useHardwareControl = (deviceId: string) => {
     // Feed (calibrated dispenser, grams)
     dispenseFeed: (amount: number) => sendCommand('feed', { amount }),
 
+    // Water (waterer is an optional, separately-registered product module - see
+    // ProductRegistrationModal's 'waterer' entry - so a device without one simply never
+    // has these called; the backend MQTT bridge owns the actual valve/pump safety path,
+    // same as every other control below).
+    primeWater: () => sendCommand('water', { action: 'prime' }),
+    stopWater: () => sendCommand('water', { action: 'stop' }),
+    setWaterValve: (open: boolean) => sendCommand('water', { valve: open }),
+
     // Cleaning
     startCleaning: () => sendCommand('clean', { action: 'start' }),
     stopCleaning: () => sendCommand('clean', { action: 'stop' }),

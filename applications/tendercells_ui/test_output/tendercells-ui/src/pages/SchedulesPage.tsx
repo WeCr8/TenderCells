@@ -167,7 +167,7 @@ interface ScheduleFormProps {
 }
 
 function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: ScheduleFormProps) {
-  const defaultCron: CronParts = { hour: 8, minute: 0, days: [] };
+  const defaultCron: CronParts = useMemo(() => ({ hour: 8, minute: 0, days: [] }), []);
 
   const [action, setAction] = useState<Schedule['action']>('feed');
   const [cronParts, setCronParts] = useState<CronParts>(defaultCron);

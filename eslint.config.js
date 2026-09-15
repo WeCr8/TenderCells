@@ -19,5 +19,17 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Firebase Functions v1 trigger callbacks (.onRun((_context) => ...), etc.) require a
+      // positional parameter even when the handler body never reads it - it cannot just be
+      // deleted without breaking the expected callback type. The project's own vault note
+      // already documents "prefix with _ if it must stay"; this is what actually makes that
+      // convention work rather than every _-prefixed unused symbol still being flagged.
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
+    },
   },
 ])

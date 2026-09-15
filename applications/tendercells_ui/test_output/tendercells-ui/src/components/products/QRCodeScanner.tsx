@@ -50,7 +50,7 @@ export default function QRCodeScanner({ isOpen, onClose, onScan }: QRCodeScanner
         try {
           const module = await import('html5-qrcode');
           Html5Qrcode = module.Html5Qrcode;
-        } catch (importError) {
+        } catch {
           // Package not installed, fallback to manual input
           console.warn('html5-qrcode package not found, using manual input');
           setUseManual(true);
@@ -85,12 +85,12 @@ export default function QRCodeScanner({ isOpen, onClose, onScan }: QRCodeScanner
             }
           );
           setLoading(false);
-        } catch (err) {
+        } catch {
           // Camera permission denied or not available
           setUseManual(true);
           setLoading(false);
         }
-      } catch (err) {
+      } catch {
         // Library not available, use manual input
         setUseManual(true);
         setLoading(false);

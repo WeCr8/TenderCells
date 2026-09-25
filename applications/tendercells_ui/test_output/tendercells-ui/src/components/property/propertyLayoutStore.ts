@@ -61,6 +61,12 @@ export interface PropertyItem {
   // drive/boundary/obstacle sensors. radiusFt = patrolled/mapped extent; boundary =
   // the scanned polygon (property coords). Used to draw + adjust terrain in 3D.
   scan?: { radiusFt?: number; boundary?: Array<{ x: number; y: number }> };
+  // User-authored route for a mobile robot (e.g. Roaming Roost) to follow - the
+  // opposite direction of `scan`: this is drawn BY a person FOR the robot, not
+  // reported by it. Same {x,y} property-coordinate shape as scan.boundary on
+  // purpose (one rendering/animation path can consume either), but a distinct
+  // field since the two never mean the same thing at the same time.
+  patrolPath?: Array<{ x: number; y: number }>;
 }
 
 export type PropertyLayoutState = {

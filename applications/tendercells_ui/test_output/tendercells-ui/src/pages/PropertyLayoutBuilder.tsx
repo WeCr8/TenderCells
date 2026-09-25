@@ -1374,6 +1374,40 @@ export default function PropertyLayoutBuilder() {
                   </Box>
                 </Grid>
               )}
+
+              {/* Roaming Roost: attach the robot's own model (not a whole-scene replacement
+                  like the garden block above) - same proven upload -> modelUrl -> Viewport3D
+                  GLTFLoader path. */}
+              {editingItem.kind === 'hardware' && editingItem.type === 'roaming-roost' && (
+                <Grid item xs={12}>
+                  <Box sx={{ bgcolor: alpha('#7CB342', 0.08), border: `1px solid ${alpha('#7CB342', 0.35)}`, borderRadius: 1, p: 1.5 }}>
+                    <Typography variant="caption" sx={{ color: '#9CCC65', fontWeight: 700, display: 'block', mb: 0.75 }}>
+                      🤖 Attach robot model
+                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                      <Button component="label" size="small" variant="outlined"
+                        sx={{ borderColor: '#4A7C59', color: '#9CCC65' }}>
+                        {editingItem.modelUrl ? 'Replace model' : 'Choose .glb'}
+                        <input hidden type="file" accept=".glb,model/gltf-binary"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            if (!/\.glb$/i.test(file.name)) { alert('GLB only. Export your model as glTF Binary (.glb).'); return; }
+                            const url = URL.createObjectURL(file);
+                            setEditingItem((cur) => cur ? { ...cur, modelUrl: url, name: cur.name || file.name.replace(/\.glb$/i, '') } : cur);
+                          }} />
+                      </Button>
+                      {editingItem.modelUrl && (
+                        <Chip label="Model attached" size="small" onDelete={() => setEditingItem((cur) => cur ? { ...cur, modelUrl: undefined } : cur)}
+                          sx={{ bgcolor: alpha('#7CB342', 0.18), color: '#9CCC65' }} />
+                      )}
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
+                      No model = the built-in Roaming Roost shape is shown. Convert OBJ/FBX/USD to GLB first (Blender → Export → glTF Binary).
+                    </Typography>
+                  </Box>
+                </Grid>
+              )}
             </Grid>
           )}
         </DialogContent>

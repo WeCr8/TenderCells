@@ -51,20 +51,25 @@ gaps.
       property-coordinate feet, same shape as the existing `scan.boundary`
       field for rendering-code reuse, but a separate field - `scan` is
       robot-reported, `patrolPath` is user-authored). `propertyLayoutStore.ts`.
-- [ ] **IN PROGRESS, real handoff left for the next worker/session** — draw a
-      path with your finger/mouse and the robot follows it. This is also the
-      real, well-known feature Zach was recalling (Sphero's "Draw N' Drive" -
-      confirmed via web search, not assumed; the real Sphero feature is
-      plain touchscreen drawing, not AR/VR - that's a real *later* layer, not
-      a prerequisite). Real open-source references found: TrackBot
-      (github.com/muhammadnavas/TrackBot, draws a path, drives a real robot
-      to follow it) and Hand2Robot (github.com/xlistenz/Hand2Robot, browser
-      MediaPipe hand-tracking + virtual robot - the AR-layer option if
-      wanted later). Queued as a real, scoped task in this project's own
-      TASKS.md with a full plan (search PropertyLayoutBuilder.tsx for
-      "HANDOFF NOTE" for the exact spec) - reuses the existing
-      `pointerToFt()` conversion and the existing `handlePointerMove`
-      handler (extend, do not replace - it already owns hover + item drag).
+- [x] Draw a path with your finger/mouse and the robot follows it - done
+      2026-09-25. This is also the real, well-known feature Zach was
+      recalling (Sphero's "Draw N' Drive" - confirmed via web search, not
+      assumed; the real Sphero feature is plain touchscreen drawing, not
+      AR/VR - that's a real *later* layer, not a prerequisite. Real
+      open-source references if wanted: TrackBot, github.com/muhammadnavas/
+      TrackBot; Hand2Robot, github.com/xlistenz/Hand2Robot, the AR-layer
+      option). A "Draw Path" toggle button appears next to Simulate Route
+      when a roaming-roost is selected in simulation mode; dragging across
+      the map appends feet-space points via the existing `pointerToFt()`
+      conversion, extending the existing `handlePointerMove` (not replaced -
+      it still owns hover + item drag). Releasing the pointer commits the
+      path onto `PropertyItem.patrolPath` and renders it as a persistent
+      amber dashed polyline; a gold polyline shows live feedback while
+      drawing. `PropertyLayoutBuilder.tsx`. Verified: nested project's own
+      `tsc --noEmit -p tsconfig.json` (0 errors - this is a real gap: the
+      repo's root gate only typechecks the root tsconfig.app.json/
+      tsconfig.node.json, never this nested subproject, so always verify
+      this config directly here too), 22/22 vitest, eslint clean.
 - [ ] Once path-drawing lands: animate `item.modelUrl`'s loaded mesh along
       `patrolPath` in `Viewport3D.tsx` using simple interpolation (no physics
       engine needed for "basic tasks" per Zach's own framing) and wire the

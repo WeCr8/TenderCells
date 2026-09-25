@@ -18,7 +18,7 @@ import {
 } from 'firebase/auth';
 import { FIREBASE_ENABLED, auth } from '../lib/firebase/firebaseApp';
 import { setAnalyticsUser } from '../analytics';
-import { AuthContext, type AuthContextType } from './authContext';
+import { AuthContext, type AuthContextType } from './authContextStore';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

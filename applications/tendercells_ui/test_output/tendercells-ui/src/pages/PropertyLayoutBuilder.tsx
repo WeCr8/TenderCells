@@ -23,10 +23,10 @@ import {
   alpha,
 } from '@mui/material';
 import {
-  
   Delete as DeleteIcon,
   Edit as EditIcon,
   Grass as GrassIcon,
+  Gesture as GestureIcon,
   PlayArrow as PlayArrowIcon,
   ArrowUpward as ArrowUpIcon,
   ArrowDownward as ArrowDownIcon,
@@ -128,6 +128,12 @@ export default function PropertyLayoutBuilder() {
   const [dragSnapPos, setDragSnapPos] = useState<{ x: number; y: number; width: number; depth: number } | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
   const [showRoamingLayer, setShowRoamingLayer] = useState(false);
+  // Draw-to-patrol: click "Draw Path" then drag across the map to author a roaming-roost's
+  // patrolPath by hand, the same way a person would sketch a route with a finger on a
+  // touchscreen. drawnPath is feet-space points captured while the pointer is held down;
+  // it commits onto the selected item's PropertyItem.patrolPath on pointer-up.
+  const [isDrawingPath, setIsDrawingPath] = useState(false);
+  const [drawnPath, setDrawnPath] = useState<Array<{ x: number; y: number }>>([]);
 
   const { products } = useProducts();
 
@@ -353,6 +359,14 @@ export default function PropertyLayoutBuilder() {
   const handlePointerMove = (event: React.PointerEvent<SVGSVGElement>) => {
     const pointer = getPointerPosition(event);
     setHoverPos({ x: Math.round(pointer.x * 10) / 10, y: Math.round(pointer.y * 10) / 10 });
+
+    if (isDrawingPath && event.buttons === 1) {
+      const point = { x: Math.round(pointer.x * 10) / 10, y: Math.round(pointer.y * 10) / 10 };
+      setDrawnPath((prev) => (prev.length && prev[prev.length - 1].x === point.x && prev[prev.length - 1].y === point.y
+        ? prev
+        : [...prev, point]));
+      return;
+    }
 
     if (!draggingItemId) return;
     const item = items.find((candidate) => candidate.id === draggingItemId);
@@ -656,8 +670,23 @@ export default function PropertyLayoutBuilder() {
                 aria-label={`${property.name} property layout`}
                 className="plb-canvas"
                 onPointerMove={handlePointerMove}
+                onPointerDown={(event) => {
+                  if (!isDrawingPath) return;
+                  const p = pointerToFt(event.clientX, event.clientY, event.currentTarget);
+                  setDrawnPath([{ x: Math.round(p.x * 10) / 10, y: Math.round(p.y * 10) / 10 }]);
+                }}
                 onPointerLeave={() => { setHoverPos(null); setDraggingItemId(null); setDragSnapPos(null); setDragOffset(null); }}
-                onPointerUp={() => { setDraggingItemId(null); setDragSnapPos(null); setDragOffset(null); }}
+                onPointerUp={() => {
+                  setDraggingItemId(null); setDragSnapPos(null); setDragOffset(null);
+                  if (isDrawingPath) {
+                    if (selectedItemId && drawnPath.length > 1) {
+                      setItems((current) => current.map((item) =>
+                        item.id === selectedItemId ? { ...item, patrolPath: drawnPath } : item));
+                    }
+                    setIsDrawingPath(false);
+                    setDrawnPath([]);
+                  }
+                }}
               >
                 <defs>
                   <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
@@ -802,6 +831,22 @@ export default function PropertyLayoutBuilder() {
                     <polyline points={routePoints} fill="none" stroke="#1A3D2B" strokeWidth={8} />
                     <polyline points={routePoints} fill="none" stroke="#8DD47A" strokeWidth={3} strokeDasharray="14 8" opacity={0.9} />
                   </>
+                )}
+
+                {/* Saved patrol path for the selected roaming-roost, when not actively (re)drawing */}
+                {!isDrawingPath && selectedItem?.type === 'roaming-roost' && selectedItem.patrolPath && selectedItem.patrolPath.length > 1 && (
+                  <polyline
+                    points={selectedItem.patrolPath.map((p) => `${p.x * scaleX},${p.y * scaleY}`).join(' ')}
+                    fill="none" stroke="#E8A020" strokeWidth={3} strokeDasharray="10 6" opacity={0.85}
+                  />
+                )}
+
+                {/* Draw-to-patrol: live feedback while the pointer is down authoring a path */}
+                {isDrawingPath && drawnPath.length > 1 && (
+                  <polyline
+                    points={drawnPath.map((p) => `${p.x * scaleX},${p.y * scaleY}`).join(' ')}
+                    fill="none" stroke="#FFD700" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round"
+                  />
                 )}
 
                 {/* Snap crosshair + preview rect */}
@@ -1056,9 +1101,21 @@ export default function PropertyLayoutBuilder() {
                 </Stack>
 
                 {layoutMode === 'simulation' && selectedItem.type === 'roaming-roost' && (
-                  <Button size="small" variant="contained" fullWidth startIcon={<PlayArrowIcon />} sx={{ mt: 1, bgcolor: '#4A7C59' }}>
-                    Simulate Route
-                  </Button>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                    <Button
+                      size="small" fullWidth startIcon={<GestureIcon fontSize="small" />}
+                      variant={isDrawingPath ? 'contained' : 'outlined'}
+                      onClick={() => { setIsDrawingPath((v) => !v); setDrawnPath([]); }}
+                      sx={isDrawingPath
+                        ? { bgcolor: '#E8A020', color: '#0A2118' }
+                        : { borderColor: '#2A5C3B', color: '#A5B1A9' }}
+                    >
+                      {isDrawingPath ? 'Drag on map…' : 'Draw Path'}
+                    </Button>
+                    <Button size="small" variant="contained" fullWidth startIcon={<PlayArrowIcon />} sx={{ bgcolor: '#4A7C59' }}>
+                      Simulate Route
+                    </Button>
+                  </Stack>
                 )}
               </Paper>
             )}

@@ -4,7 +4,7 @@ import Divider from "@mui/material/Divider";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { PRODUCT_PROFILES } from "./productProfiles";
+import { PRODUCT_PROFILES, type ProductProfile } from "./productProfiles";
 
 export function ProductHero({ product }: { product: string }) {
   const profile = PRODUCT_PROFILES[product];

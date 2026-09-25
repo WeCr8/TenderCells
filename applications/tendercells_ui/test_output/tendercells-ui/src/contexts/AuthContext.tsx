@@ -1,30 +1,24 @@
-// AuthContext.tsx - Firebase auth context for React
-import React, { createContext, useContext, useEffect, useState } from 'react';
+// AuthContext.tsx - Firebase auth provider for React.
+//
+// EXPORTS ONLY THE COMPONENT. The context object and its type live in ./authContext, and the
+// useAuth hook in ./useAuth, because react-refresh/only-export-components requires a file to
+// export components and nothing else - a non-component export here breaks fast refresh for
+// every consumer of the provider.
+import React, { useEffect, useState } from 'react';
 import {
   User,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
 import { FIREBASE_ENABLED, auth } from '../lib/firebase/firebaseApp';
 import { setAnalyticsUser } from '../analytics';
-
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  error: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  clearError: () => void;
-  isAuthenticated: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext, type AuthContextType } from './authContext';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -47,8 +41,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       void setAnalyticsUser(currentUser?.uid ?? null);
     });
 
+    // A popup can be blocked by browser policy or a hosted app's opener policy.
+    // Resolve a redirect started by the Google fallback on the next load.
+    void getRedirectResult(auth).catch((err) => {
+      setError(formatAuthError(err, 'Google login failed'));
+    });
+
     return unsubscribe;
   }, []);
+
+  const formatAuthError = (err: unknown, fallback: string) => {
+    const code = typeof err === 'object' && err && 'code' in err
+      ? String((err as { code?: unknown }).code)
+      : '';
+
+    if (code === 'auth/operation-not-allowed') {
+      return 'This sign-in method is not enabled in the Tender Cells Firebase project.';
+    }
+    if (code === 'auth/unauthorized-domain') {
+      return 'This website is not authorized for Tender Cells sign-in. Add its domain in Firebase Authentication settings.';
+    }
+    if (code === 'auth/invalid-credential' || code === 'auth/invalid-login-credentials') {
+      return 'The email or password is incorrect.';
+    }
+    if (code === 'auth/popup-closed-by-user') {
+      return 'Google sign-in was closed before it completed.';
+    }
+    return err instanceof Error ? err.message : fallback;
+  };
 
   const login = async (email: string, password: string) => {
     try {
@@ -58,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Login failed';
+      const message = formatAuthError(err, 'Login failed');
       setError(message);
       throw err;
     }
@@ -72,9 +92,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithPopup(auth, provider);
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        const code = typeof err === 'object' && err && 'code' in err
+          ? String((err as { code?: unknown }).code)
+          : '';
+        if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
+          await signInWithRedirect(auth, provider);
+          return;
+        }
+        throw err;
+      }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Google login failed';
+      const message = formatAuthError(err, 'Google login failed');
       setError(message);
       throw err;
     }
@@ -88,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Registration failed';
+      const message = formatAuthError(err, 'Registration failed');
       setError(message);
       throw err;
     }
@@ -124,11 +155,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Hook to use auth context
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
-}
+// useAuth moved to ./useAuth - see the header comment.

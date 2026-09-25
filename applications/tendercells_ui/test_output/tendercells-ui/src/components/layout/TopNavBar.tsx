@@ -25,7 +25,7 @@ import DialogActions from "@mui/material/DialogActions";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/useAuth";
 import { useHardwareControl } from "../../hooks/useHardwareControl";
 
 // Product icons mapping - using AgricultureIcon for poultry products

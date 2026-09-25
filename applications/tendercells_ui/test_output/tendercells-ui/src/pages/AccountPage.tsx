@@ -14,11 +14,12 @@ import {
   Chip,
 } from '@mui/material';
 import { Devices, Google as GoogleIcon, Logout as LogoutIcon } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/products/ProductCard';
 import ProductRegistrationModal from '../components/products/ProductRegistrationModal';
 import { ProductsService } from '../services/productsService';
+import type { RegisterProductData } from '../types/products';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -56,8 +57,8 @@ export default function AccountPage() {
     setActiveTab(newValue);
   };
 
-  const handleProductRegister = async (data: { name: string; sku: string; quantity: number }) => {
-    await registerProduct(data as { name: string; sku: string; quantity: number });
+  const handleProductRegister = async (data: RegisterProductData) => {
+    await registerProduct(data);
     await refetch();
   };
 

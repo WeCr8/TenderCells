@@ -19,7 +19,7 @@ import RestaurantIcon from '@mui/icons-material/Restaurant';
 import { useNavigate } from 'react-router-dom';
 import SettingsRemoteIcon from '@mui/icons-material/SettingsRemote';
 import { useProducts } from '../hooks/useProducts';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import DeviceConfigDialog from '../components/devices/DeviceConfigDialog';
 import type { Product } from '../types/products';
 
@@ -71,7 +71,7 @@ function ProductCard({ product }: { product: Product }) {
   const route = FAMILY_ROUTES[family] ?? '/products';
   const emoji = FAMILY_EMOJI[family] ?? '📦';
   const isOnline = product.connection_status === 'online';
-  const isSim = product.metadata?.hardware_setup_mode === 'sim_only' || product.metadata?.sim_only;
+  const isSim = Boolean(product.metadata?.hardware_setup_mode === 'sim_only' || product.metadata?.sim_only);
   const sc = isOnline ? '#4CAF50' : isSim ? C.warning : C.goldMuted;
   const sl = isOnline ? 'Online' : isSim ? 'Sim' : 'Offline';
 

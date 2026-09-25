@@ -18,7 +18,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import LockIcon from "@mui/icons-material/Lock";
 import ScienceIcon from "@mui/icons-material/Science";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/useAuth";
 import { settingsService, DEFAULT_SETTINGS, type UserSettings } from "../services/settingsService";
 import {
   seedDemoEnvironment,
@@ -336,7 +336,7 @@ export default function SettingsPage() {
                 <Typography variant="caption" sx={{ color: C.goldMuted, display: "block", mb: 1 }}>
                   Temperature range (°F) — alert outside this range
                 </Typography>
-                <Stack direction="row" spacing={2}>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                   <TextField
                     label="Min °F" type="number" size="small"
                     value={settings.thresholds.tempMinF}
@@ -357,7 +357,7 @@ export default function SettingsPage() {
                 <Typography variant="caption" sx={{ color: C.goldMuted, display: "block", mb: 1 }}>
                   Ammonia thresholds (ppm)
                 </Typography>
-                <Stack direction="row" spacing={2}>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                   <TextField
                     label="Warning ppm" type="number" size="small"
                     value={settings.thresholds.ammoniaWarningPpm}
@@ -378,7 +378,7 @@ export default function SettingsPage() {
                 <Typography variant="caption" sx={{ color: C.goldMuted, display: "block", mb: 1 }}>
                   Low-level alerts
                 </Typography>
-                <Stack direction="row" spacing={2}>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                   <TextField
                     label="Feed low %" type="number" size="small"
                     value={settings.thresholds.feedLowPct}

@@ -118,3 +118,11 @@ applications/web/
 .pio/
 firmware/**/.pio/
 functions/lib/
+
+# Fleet-generated survey/triage/work-order output - not source
+reports/
+WO-*-*-report.txt
+
+# Private concept packages (engineering PDFs/zips, not app source - see their own README.md)
+docs/products/
+docs/concept-packages/

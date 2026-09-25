@@ -16,6 +16,7 @@ import Viewport3D from '../components/viewport/Viewport3D';
 import TelemetryPanel from '../components/telemetry/TelemetryPanel';
 import QuickActions from '../components/toolbar/QuickActions';
 import CameraGrid from '../components/camera/CameraGrid';
+import type { CameraFeed } from '../types/camera';
 import BehaviorAnalytics from '../components/camera/BehaviorAnalytics';
 import RobotControlPanel from '../components/robot/RobotControlPanel';
 import EditIcon from '@mui/icons-material/Edit';
@@ -56,7 +57,7 @@ export default function DeviceDetailPage({
   deviceName = 'Chicken Tender #1',
 }: DeviceDetailPageProps) {
   const [activeTab, setActiveTab] = useState(0);
-  const [cameras, setCameras] = useState<Array<{ id: string }>>([]);
+  const [cameras, setCameras] = useState<CameraFeed[]>([]);
 
   return (
     <Box sx={{ p: 3 }}>

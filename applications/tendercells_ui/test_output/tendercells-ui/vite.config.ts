@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { readFile } from 'fs/promises'
+import type { PluginBuild } from 'esbuild'
 
 const publicDemoEnv = {
   'import.meta.env.VITE_FIREBASE_API_KEY': JSON.stringify(''),
@@ -35,7 +36,7 @@ const muiBoxCreateThemePatch = () => ({
 
 const muiBoxOptimizerPatch = {
   name: 'mui-box-optimizer-patch',
-  setup(build: unknown) {
+  setup(build: PluginBuild) {
     build.onLoad({ filter: /@mui[\\/]material[\\/]Box[\\/]Box\.js$/ }, async (args: { path: string }) => {
       const source = await readFile(args.path, 'utf8');
 

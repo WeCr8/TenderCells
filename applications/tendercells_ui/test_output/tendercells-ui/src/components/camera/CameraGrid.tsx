@@ -43,7 +43,7 @@ export default function CameraGrid({
   const [newCamera, setNewCamera] = useState({
     name: '',
     location: 'main-feed' as CameraLocation,
-    resolution: '1080p' as const,
+    resolution: '1080p' as '1080p' | '720p' | '480p',
     fps: 30,
     motionDetection: true,
     recording: true,

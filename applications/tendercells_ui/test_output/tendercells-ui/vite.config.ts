@@ -5,14 +5,12 @@ import path from 'path'
 import { readFile } from 'fs/promises'
 import type { PluginBuild } from 'esbuild'
 
+// FIX(2026-09-27): the public build keeps the Firebase web config (apiKey, authDomain,
+// projectId, appId, ...) so Login / Sign-up / Google work on tendercells.com/app.
+// Demo data stays sim-only via VITE_SIM_DATA_ONLY; analytics and the API stay off.
 const publicDemoEnv = {
-  'import.meta.env.VITE_FIREBASE_API_KEY': JSON.stringify(''),
-  'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN': JSON.stringify(''),
+  'import.meta.env.VITE_SIM_DATA_ONLY': JSON.stringify('true'),
   'import.meta.env.VITE_FIREBASE_DATABASE_URL': JSON.stringify(''),
-  'import.meta.env.VITE_FIREBASE_PROJECT_ID': JSON.stringify(''),
-  'import.meta.env.VITE_FIREBASE_STORAGE_BUCKET': JSON.stringify(''),
-  'import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(''),
-  'import.meta.env.VITE_FIREBASE_APP_ID': JSON.stringify(''),
   'import.meta.env.VITE_FIREBASE_MEASUREMENT_ID': JSON.stringify(''),
   'import.meta.env.VITE_API_BASE_URL': JSON.stringify(''),
 }

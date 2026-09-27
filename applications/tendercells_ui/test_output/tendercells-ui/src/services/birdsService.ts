@@ -10,7 +10,7 @@
 // firebaseApp is already eagerly initialized app-wide (AuthContext), so this
 // static import adds no bundle cost and avoids the mixed static/dynamic-import
 // warning. The firestore query SDK below stays dynamic to keep it lazy.
-import { db } from '../lib/firebase/firebaseApp';
+import { FIRESTORE_DATA_ENABLED, db } from '../lib/firebase/firebaseApp';
 
 export type Sex = 'hen' | 'rooster' | 'doe' | 'buck' | 'wether' | 'unknown';
 export type HealthStatus = 'healthy' | 'watch' | 'sick' | 'quarantine';
@@ -118,7 +118,7 @@ export function getDemoAnimalsForProduct(productFamily: string, deviceId?: strin
   }));
 }
 
-const FIREBASE_ENABLED = Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID);
+const FIREBASE_ENABLED = FIRESTORE_DATA_ENABLED;
 const STORAGE_KEY = 'tendercells_birds_v1';
 export const BIRDS_UPDATED_EVENT = 'tendercells-birds-updated';
 

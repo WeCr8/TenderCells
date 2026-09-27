@@ -20,7 +20,19 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-export const FIREBASE_ENABLED = Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID);
+// FIX(2026-09-27): Auth and the sim data backend are gated separately. The hosted
+// public build (tendercells.com/app) used to blank every Firebase key, so Login and
+// Sign-up always failed with "Authentication is disabled". It now ships the web config
+// so accounts work, while VITE_SIM_DATA_ONLY keeps demo data (birds/eggs/schedules) in
+// each visitor's localStorage sandbox instead of Firestore.
+/** True when the web config is present, so Firebase Auth (login / sign-up) is usable. */
+export const FIREBASE_ENABLED = Boolean(
+  firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId,
+);
+
+/** True when sim-data services should read/write Firestore instead of localStorage. */
+export const FIRESTORE_DATA_ENABLED =
+  FIREBASE_ENABLED && import.meta.env.VITE_SIM_DATA_ONLY !== 'true';
 
 // Initialize Firebase
 const app: FirebaseApp | undefined = FIREBASE_ENABLED ? initializeApp(firebaseConfig) : undefined;

@@ -1,5 +1,6 @@
 // SchedulesPage.tsx — Full CRUD for device schedules + Routines
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { MQTT_API_BASE, apiErrorMessage, hardwareAuthHeaders } from '../lib/api/hardwareApi';
 import {
   Box, Paper, Stack, Typography, Button, Dialog, DialogTitle,
   DialogContent, DialogActions, Select, MenuItem, FormControl,
@@ -40,7 +41,7 @@ const colors = {
   white:     '#F0EDE4',
 };
 
-const EXPRESS_API = 'http://localhost:3001/api/mqtt';
+const EXPRESS_API = MQTT_API_BASE;
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => i);
@@ -514,10 +515,10 @@ export default function SchedulesPage() {
 
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await hardwareAuthHeaders(),
         body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error(`API ${res.status}`);
+      if (!res.ok) throw new Error(await apiErrorMessage(res));
       setSnack({ msg: `${ACTION_LABELS[s.action]} command sent`, severity: 'success' });
     } catch (err) {
       setSnack({ msg: `Failed to run: ${err instanceof Error ? err.message : 'unknown error'}`, severity: 'error' });
@@ -531,10 +532,10 @@ export default function SchedulesPage() {
     try {
       const res = await fetch(`${EXPRESS_API}/devices/${deviceId}/routine`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await hardwareAuthHeaders(),
         body: JSON.stringify({ routine: routineName }),
       });
-      if (!res.ok) throw new Error(`API ${res.status}`);
+      if (!res.ok) throw new Error(await apiErrorMessage(res));
       setSnack({ msg: `Routine "${routineName}" started`, severity: 'success' });
     } catch (err) {
       setSnack({ msg: `Routine failed: ${err instanceof Error ? err.message : 'unknown error'}`, severity: 'error' });

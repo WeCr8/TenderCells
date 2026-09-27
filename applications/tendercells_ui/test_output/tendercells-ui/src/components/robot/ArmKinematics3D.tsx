@@ -38,7 +38,7 @@ export default function ArmKinematics3D({ joints, gantry, height = 320 }: Props)
     const camera = new THREE.PerspectiveCamera(50, w / height, 0.01, 100);
     camera.position.set(5, 4, 5);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(w, height);
     mount.appendChild(renderer.domElement);
 
@@ -106,13 +106,26 @@ export default function ArmKinematics3D({ joints, gantry, height = 320 }: Props)
       camera.aspect = cw / height; camera.updateProjectionMatrix();
       renderer.setSize(cw, height);
     };
+    // FIX(2026-09-27): follow the panel's size (not only the window), free every
+    // geometry/material, and release the WebGL context so remounts don't pile up
+    // contexts (browsers cap them at ~16 and then drop the oldest).
+    const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onResize) : null;
+    resizeObserver?.observe(mount);
     window.addEventListener('resize', onResize);
 
     return () => {
       cancelAnimationFrame(raf);
+      resizeObserver?.disconnect();
       window.removeEventListener('resize', onResize);
       controls.dispose();
+      scene.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          obj.geometry.dispose();
+          (Array.isArray(obj.material) ? obj.material : [obj.material]).forEach((m) => m.dispose());
+        }
+      });
       renderer.dispose();
+      renderer.forceContextLoss();
       if (renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
     };
   }, [height]);

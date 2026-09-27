@@ -13,7 +13,7 @@
 // Topics it speaks (match CLAUDE.md §4 and the MQTT bridge):
 //   publishes  tc/{id}/sensors   every interval seconds
 //   publishes  tc/{id}/state     on boot and on every state change
-//   subscribes tc/{id}/cmd/+     door | feed | clean | arm | estop
+//   subscribes tc/{id}/cmd/+     door | feed | clean | arm | motion | estop
 
 import mqtt from "mqtt";
 
@@ -45,6 +45,9 @@ function clamp(v, lo, hi) {
 function drift(v, amount, lo, hi) {
   return Number(clamp(v + (Math.random() - 0.5) * amount, lo, hi).toFixed(1));
 }
+
+const FLOCK_SIZE = device.chickenCount;
+let flockTimer;
 
 const client = mqtt.connect(brokerUrl, {
   clientId: `tc-sim-${deviceId}`,
@@ -130,6 +133,15 @@ client.on("message", (topic, buf) => {
       device.doorState = cmd.state === "open" ? "open" : "closed";
       console.log(`🚪 door → ${device.doorState}`);
       publishState();
+      // The flock walks out a few seconds after the door opens and back in after it
+      // closes, so the API's chicken-presence guard can be exercised: open the door,
+      // wait, then arm / clean / routines are allowed.
+      clearTimeout(flockTimer);
+      flockTimer = setTimeout(() => {
+        device.chickenCount = device.doorState === "open" ? 0 : FLOCK_SIZE;
+        console.log(`🐔 chickens in coop: ${device.chickenCount}`);
+        publishSensors();
+      }, 3000);
       break;
     case "feed":
       device.feedLevel = clamp(device.feedLevel + (Number(cmd.amount) || 0) / 50, 0, 100);
@@ -150,6 +162,12 @@ client.on("message", (topic, buf) => {
       console.log(`🤖 arm move joints=${JSON.stringify(cmd.joints)} speed=${cmd.speed ?? "-"}`);
       setState("running");
       setTimeout(() => setState("idle"), 2000);
+      break;
+    case "motion":
+      // Routines (egg_collection_routine, cleaning_sweep_routine) arrive on cmd/motion.
+      console.log(`🤖 routine ${cmd.routine ?? "(unnamed)"} started`);
+      setState("running");
+      setTimeout(() => setState("idle"), 6000);
       break;
     default:
       console.log(`[sim] unknown command: ${kind}`);

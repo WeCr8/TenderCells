@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { modelUrlProblem } from '../lib/three/gltfLoader';
 import {
   Alert,
   Box,
@@ -944,9 +945,11 @@ export default function ProductsPage() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Custom 3D / device asset URL"
+                label="Custom 3D / device asset URL (.glb)"
                 value={editForm.custom_device_asset_url}
                 onChange={(event) => setEditForm((form) => ({ ...form, custom_device_asset_url: event.target.value }))}
+                error={!!modelUrlProblem(editForm.custom_device_asset_url)}
+                helperText={modelUrlProblem(editForm.custom_device_asset_url) || 'Shown in the 3D yard view. glTF/GLB only.'}
               />
             </Grid>
             <Grid item xs={12} md={6}>

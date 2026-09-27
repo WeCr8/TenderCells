@@ -56,13 +56,19 @@ export const useCoopModel = (defaultSize: keyof typeof COOP_PRESETS = '4x4x6') =
   }, [loadModel]);
 
   // Update current model config
+  // FIX(2026-09-27): a newly uploaded custom model was saved but never loaded, so it
+  // did not appear until a reload (by which time its blob: URL was dead). Load it now.
+  const currentUrlRef = useRef(state.current.modelUrl);
+  currentUrlRef.current = state.current.modelUrl;
   const updateModel = useCallback((config: Partial<CoopModelConfig>) => {
+    const urlChanged = !!config.modelUrl && config.modelUrl !== currentUrlRef.current;
     setState(prev => {
       const updated = { ...prev.current, ...config };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       return { ...prev, current: updated as CoopModelConfig };
     });
-  }, []);
+    if (urlChanged && config.modelUrl) loadModel(config.modelUrl);
+  }, [loadModel]);
 
   // Load from localStorage on mount - genuinely once-only (restores saved state), so a ref
   // guard is used to satisfy exhaustive-deps with the real deps without re-running on change.

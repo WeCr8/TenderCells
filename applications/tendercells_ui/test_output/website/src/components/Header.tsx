@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { TENDERCELLS_APP_ENTRY_URL } from "../config/appLinks";
+import { TENDERCELLS_NATIVE_APP_URL, TENDERCELLS_WEB_ACCOUNT_URL } from "../config/appLinks";
 import { searchSite } from "../data/searchIndex";
 import "./Header.css";
 
@@ -59,12 +59,15 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { label: "Mobile App (iOS)",        to: "/apps#ios" },
       { label: "Mobile App (Android)",    to: "/apps#android" },
-      { label: "Web Dashboard",           href: TENDERCELLS_APP_ENTRY_URL },
+      { label: "Web Dashboard",           href: TENDERCELLS_WEB_ACCOUNT_URL },
       { label: "Developer API",           to: "/apps#api" },
       { label: "MQTT Integration Guide",  to: "/apps#mqtt" },
       { label: "⚡ Flash a Device",        href: "/flash" },
       { label: "⚙️ Expert Flasher (custom firmware)", href: "/flash/expert" },
       { label: "🧊 3D Model Viewer",       href: "/viewer" },
+      ...(TENDERCELLS_NATIVE_APP_URL
+        ? [{ label: "Open Installed App", href: TENDERCELLS_NATIVE_APP_URL }]
+        : []),
     ],
   },
   {
@@ -239,7 +242,7 @@ export default function Header() {
             </span>
           </div>
 
-          <a href={TENDERCELLS_APP_ENTRY_URL} className="header-login">
+          <a href={TENDERCELLS_WEB_ACCOUNT_URL} className="header-login">
             <span>👤</span> Login
           </a>
           <a href="/shop" className="header-cart" aria-label="Product concepts">

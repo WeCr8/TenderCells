@@ -65,6 +65,22 @@ jobs:
       - name: Build site + app + snapshot
         run: npm --prefix website run build:with-app
 
+      # Refuse to publish an app whose sign-in cannot work: the built /app bundle
+      # must contain the project's apiKey and authDomain.
+      - name: Verify app bundle has Firebase Auth config
+        working-directory: .
+        run: |
+          APP_JS=applications/tendercells_ui/test_output/website/dist/app/assets
+          echo "Root .env keys: $(cut -d= -f1 .env 2>/dev/null | tr '\n' ' ')"
+          echo "Build env has API key: $([ -n "$VITE_FIREBASE_API_KEY" ] && echo yes || echo no)"
+          if grep -lq "authDomain:\"$VITE_FIREBASE_AUTH_DOMAIN\"" $APP_JS/*.js && grep -lqF "$VITE_FIREBASE_API_KEY" $APP_JS/*.js; then
+            echo "OK: Firebase Auth config is embedded in the app bundle."
+          else
+            echo "::error::Built app bundle is missing the Firebase web config; sign-in would be broken. Not deploying."
+            grep -o 'apiKey:"[^"]*",authDomain:"[^"]*"' $APP_JS/*.js | sed 's/apiKey:"[^"]*"/apiKey:"<redacted>"/' || true
+            exit 1
+          fi
+
       - name: Deploy to Firebase Hosting
         working-directory: .
         run: |

@@ -211,6 +211,7 @@ class GrblGantry:
             serial_factory = serial.Serial
         self.conn = serial_factory(port, baud, timeout=10)
         self.feed = feed_mm_min
+        self.position = (0.0, 0.0, 0.0)  # last commanded (reported as the tool position)
         self._send("$X")  # unlock after reset
 
     def _send(self, line: str) -> None:
@@ -222,6 +223,7 @@ class GrblGantry:
     def move_to(self, x: float, y: float, z: float) -> None:
         self._send(f"G90 G1 X{x:.1f} Y{y:.1f} Z{z:.1f} F{self.feed}")
         self._send("G4 P0")  # wait until the move completes
+        self.position = (x, y, z)
 
     def stop(self) -> None:
         self.conn.write(b"!")  # feed hold (real-time command)
@@ -242,9 +244,11 @@ class FarmBotGantry:
             bot = Farmbot()
             bot.set_token(token)
         self.bot, self.speed = bot, speed
+        self.position = (0.0, 0.0, 0.0)  # last commanded (reported as the tool position)
 
     def move_to(self, x: float, y: float, z: float) -> None:
         self.bot.move(x=round(x, 1), y=round(y, 1), z=round(z, 1), speed=self.speed)  # blocks until done
+        self.position = (x, y, z)
 
     def stop(self) -> None:
         self.bot.e_stop()  # locks the Farmduino until unlocked from the FarmBot app
@@ -312,6 +316,8 @@ class LaserController:
         self.estop_active = False
         self._sleep, self._clock = sleeper, clock
         self._last_fire = -1e9
+        self.aim_on = False    # reported so the OS can draw the aiming dot / beam
+        self.laser_on = False
 
     def status(self) -> dict:
         p = self.profile
@@ -333,7 +339,8 @@ class LaserController:
             raise InterlockError("Laser is cooling down - try again in a moment")
 
     def aim(self, on: bool) -> None:
-        self._aim(bool(on) and not self.estop_active)
+        self.aim_on = bool(on) and not self.estop_active
+        self._aim(self.aim_on)
 
     def pulse_for(self, size_mm: Optional[float] = None) -> int:
         """Pulse length for a weed of this size under the active profile."""
@@ -349,6 +356,7 @@ class LaserController:
         fired = 0
         try:
             self._laser(True)
+            self.laser_on = True
             # Sleep in 50 ms slices so an E-STOP from another thread ends the pulse at once.
             while fired < ms and not self.estop_active:
                 step = min(50, ms - fired)
@@ -356,6 +364,7 @@ class LaserController:
                 fired += step
         finally:
             self._laser(False)  # always off, even if interrupted
+            self.laser_on = False
         if self.estop_active:
             raise InterlockError(f"E-STOP during pulse - laser off after {fired} ms")
         return ms
@@ -364,6 +373,7 @@ class LaserController:
         self.estop_active = True
         self._laser(False)
         self._aim(False)
+        self.aim_on = self.laser_on = False
 
 
 # ── patrol logic ──────────────────────────────────────────────────────────────

@@ -47,3 +47,57 @@ Coordinates are property feet from the top-left corner, the same as items.
 - **Seen it** in the "Needs attention" list clears the flag.
 - **Testing:** `node tools/simulate-device.mjs --id wt_001 --kind watchtower` publishes located
   test detections. The public demo generates them in the browser.
+
+## Watershed & drainage (`/watershed`)
+
+Pick **Light rain** (1/4 in in 1 h), **Heavy rain** (1 in in 1 h) or **Flood storm**
+(4 in over 2 h). The page shows three layers:
+
+- **Standing water**: puddle depth, area and gallons.
+- **Flow paths**: where runoff concentrates.
+- **Erosion risk**: moderate or high.
+
+Results are shown on a 2D map and in 3D.
+
+### How it works
+
+`components/property/watershed.ts` does four things:
+
+1. Runs a priority-flood over the terrain height model.
+2. Fills each low spot with the runoff from its own catchment. Runoff depends on the rain
+   rate minus the soak-in rate of the surface (lawn, mulch, gravel, paved or roof).
+3. Traces D8 flow accumulation.
+4. Scores erosion as erodibility × √flow × slope.
+
+The property edges, ponds, drains and rain gardens are outlets. The rates are planning-grade
+defaults for comparing options on one yard. This is not an engineered drainage design.
+
+### More accurate terrain → better answers
+
+When a robot has measured the yard (`elevationGrid`, `source: 'robot'`), the model uses that
+grid instead of the hand-drawn heights. Hand-drawn terrain misses the small dips that decide
+where puddles form. **Run robot scan (demo)** shows the difference using a simulated Roaming
+Roost scan.
+
+### Try fixes
+
+| Fix | What it does in the model |
+|---|---|
+| **Drain / dry well** | An outlet at a point. |
+| **Rain garden** | A shallow planted basin that soaks water in and is an outlet. |
+| **Grassed swale** | A channel falling 1% from start to end that cuts through rims as needed. The planner shows the deepest cut, capped at 3 ft. |
+| **Berm** | A raised strip that redirects surface water. |
+| **Fill / regrade** | Raises a low spot. |
+
+Fixes are saved as a plan on the property (`drainagePlan`). **Plan vs now** compares puddle
+area, stored water and erosion. It warns when a plan trades puddles for erosion, i.e. when more
+ground moves into a moderate or high erosion class.
+
+## WatchTower camera views
+
+- **Demo:** the 3D view renders what each of the tower's three 120° cameras sees, as
+  picture-in-picture insets. Toggle them with the **Tower cams** button; they are on by
+  default in Predator Monitor.
+- **Live:** each camera node (`firmware/watchtower-cam`) publishes its MJPEG `streamUrl`.
+  The Predator Monitor page shows `{tower}_cam1..3` together with the recent located
+  detections.

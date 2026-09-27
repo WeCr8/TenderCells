@@ -14,6 +14,7 @@ Live hardware settings: CAMERA_INDEX, WEED_DETECTOR=hsv|yolo, WEED_MODEL=hf://ow
 LASER_BURN_ENABLED=true (default false), STUDENT_MODE=false (default true = aiming dot only),
 LASER_PROFILE=fixed|diode-500mw|diode-4w (exposure by weed size; fixed uses LASER_PULSE_MS <= 1500).
 Motion: WEED_GANTRY=grbl (GRBL_PORT) | farmbot (FarmBot Genesis via farmbot-py, FARMBOT_TOKEN).
+Build shown in the OS: WEED_ROBOT=genesis-laser (default) | rover-laser | arm-laser.
 Laser pins: LASER_OUTPUT=gpio (AIM_PIN, LASER_PIN, ENCLOSURE_PIN - BCM, Pi / Jetson) |
 farmbot (FARMBOT_AIM_PIN, FARMBOT_LASER_PIN, FARMBOT_ENCLOSURE_PIN on the Farmduino).
 """
@@ -33,8 +34,9 @@ from weed_patrol import (BedConfig, InterlockError, LaserController, SimDetector
 
 class WeedPatrolService:
     def __init__(self, device_id: str, patrol: WeedPatrol, publish: Callable[[str, dict, int, bool], None],
-                 mode: str = "simulation"):
+                 mode: str = "simulation", robot_type: str = "genesis-laser"):
         self.device_id, self.patrol, self._publish, self.mode = device_id, patrol, publish, mode
+        self.robot_type = robot_type  # genesis-laser | rover-laser | arm-laser (drawn by the OS)
         self.state, self.error = "idle", None
         patrol.publish_event = lambda ev: self._publish(self.topic("event"), ev, 1, False)
         self._jobs: "queue.Queue[Callable[[], None]]" = queue.Queue()
@@ -50,9 +52,16 @@ class WeedPatrolService:
         laser = self.patrol.laser
         return {"state": "estop" if laser.estop_active else self.state, "mode": self.mode, "estop": laser.estop_active,
                 "laser": laser.status(), "pass": dict(self.patrol.progress), "error": self.error,
+                "robotType": self.robot_type, "tool": self._tool(),
                 # Gardens have no chicken headcount; the per-weed human approval (with
                 # "people and animals clear" confirmation in the UI) is the gate.
                 "animalSafetyGate": False, "ts": int(time.time() * 1000)}
+
+    def _tool(self) -> dict:
+        pos = getattr(self.patrol.gantry, "position", (0.0, 0.0, 0.0))
+        laser = self.patrol.laser
+        return {"x": round(pos[0], 1), "y": round(pos[1], 1), "z": round(pos[2], 1),
+                "aim": bool(getattr(laser, "aim_on", False)), "laser": bool(getattr(laser, "laser_on", False))}
 
     def publish_state(self) -> None:
         self._publish(self.topic("state/weed"), self.snapshot(), 1, True)
@@ -190,7 +199,8 @@ def main() -> None:  # pragma: no cover - wiring for real deployments
     broker = urlparse(env.get("MQTT_BROKER", "mqtt://localhost:1883"))
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"tc-weed-{device_id}")
     publish = lambda t, body, qos, retain: client.publish(t, json.dumps(body), qos=qos, retain=retain)  # noqa: E731
-    service = WeedPatrolService(device_id, build_patrol(env), publish, mode=env.get("WEED_MODE", "simulation"))
+    service = WeedPatrolService(device_id, build_patrol(env), publish, mode=env.get("WEED_MODE", "simulation"),
+                                robot_type=env.get("WEED_ROBOT", "genesis-laser"))
     status_topic = service.topic("status")
     client.will_set(status_topic, json.dumps({"online": False}), qos=1, retain=True)
 

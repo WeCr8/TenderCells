@@ -164,3 +164,37 @@ export function normalizePoint(p: ElevationPoint, widthFt: number, depthFt: numb
     radiusFt: clamp(Number(p.radiusFt) || 1, 1, Math.max(widthFt, depthFt)),
   };
 }
+
+/**
+ * Demo stand-in for a robot terrain scan (e.g. Roaming Roost driving the yard and logging
+ * tilt + odometry): samples the current terrain on a grid and adds the small dips and
+ * ruts a hand-drawn layout misses. A real robot publishes the same ElevationGrid shape.
+ *
+ * @param t - Current terrain layers
+ * @param widthFt - Property width
+ * @param depthFt - Property depth
+ * @param stepFt - Grid spacing (default 2 ft)
+ * @param seed - Makes the demo scan repeatable
+ */
+export function simulateRobotScan(t: TerrainLayers, widthFt: number, depthFt: number, stepFt = 2, seed = 7): ElevationGrid {
+  const cols = Math.floor(widthFt / stepFt) + 1, rows = Math.floor(depthFt / stepFt) + 1;
+  let s = seed >>> 0 || 1;
+  const rnd = () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; };
+  // A few hidden low spots (2-5 in deep) and a gentle overall fall toward one corner.
+  const lows = Array.from({ length: 5 }, () => ({ x: rnd() * widthFt, y: rnd() * depthFt, d: (2 + rnd() * 3) / 12, r: 4 + rnd() * 6 }));
+  const tiltX = (rnd() - 0.5) * 0.01, tiltY = 0.006 + rnd() * 0.006;
+  const base = { ...t, elevationGrid: undefined };
+  const heightsFt: number[] = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = c * stepFt, y = r * stepFt;
+      let h = heightAt(base, x, y) + tiltX * x - tiltY * y + (rnd() - 0.5) * 0.03;
+      for (const l of lows) {
+        const d = Math.hypot(x - l.x, y - l.y);
+        if (d < l.r) h -= l.d * 0.5 * (1 + Math.cos((Math.PI * d) / l.r));
+      }
+      heightsFt.push(Math.round(h * 1000) / 1000);
+    }
+  }
+  return { originX: 0, originY: 0, stepFt, cols, rows, heightsFt, source: 'robot', deviceId: 'rr_001 (demo scan)', capturedAt: Date.now() };
+}

@@ -47,6 +47,13 @@ TenderCells product framing: users can register interest to buy future TenderCel
 - https://tendercells.com/terms
 - https://tendercells.com/editorial-policy
 
+## Machine-Readable Backend (XML)
+
+Read these instead of scraping pages:
+
+- https://tendercells.com/api/tendercells-backend.xml - the full backend description: HTTP endpoints (method, path, auth, request body fields with types/limits, MQTT topic each one publishes, safety gating), MQTT topics and payloads, yard event fields, robot types and laser classes, safety rules, and the client-side terrain/watershed analysis.
+- On a running Tender Cells hub (express-api, default http://localhost:4000): GET /api/describe.xml (same description, plus any undocumented routes) and GET /api/state.xml (live devices: presence, telemetry, state, sub-states, yard events; requires a Firebase ID token when auth is enabled).
+
 ## Policy And Advertising Conformance
 
 - Privacy policy: https://tendercells.com/privacy

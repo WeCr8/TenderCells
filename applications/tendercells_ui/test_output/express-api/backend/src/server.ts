@@ -13,6 +13,9 @@ import os from 'node:os';
 import mqttRoutes from './routes/mqtt.routes.js';
 import productsRoutes from './routes/products.routes.js';
 import { startScheduleRunner } from './schedule.runner.js';
+import { buildBackendXml, buildStateXml } from './describe.js';
+import { MQTTController } from './controllers/mqtt.controller.js';
+import { ownedDeviceIds, requireAuth, type AuthedRequest } from './middleware/auth.js';
 
 /**
  * First non-internal IPv4 address, so we can print a URL other devices on the
@@ -62,6 +65,40 @@ app.use('/api/products', productsRoutes);
 // Fire device schedules at their cron time (no-op without Firebase admin).
 startScheduleRunner();
 
+// Machine-readable backend description for LLMs / tools (no scraping needed).
+type Layer = { route?: { path: string; methods: Record<string, boolean> }; name?: string; handle?: { stack?: Layer[] }; regexp?: RegExp };
+function registeredRoutes(): Array<{ method: string; path: string }> {
+  const out: Array<{ method: string; path: string }> = [];
+  const mounts: Array<[string, Layer[] | undefined]> = [
+    ['', (app as unknown as { _router?: { stack: Layer[] } })._router?.stack],
+    ['/api/mqtt', (mqttRoutes as unknown as { stack: Layer[] }).stack],
+    ['/api/products', (productsRoutes as unknown as { stack: Layer[] }).stack],
+  ];
+  for (const [prefix, stack] of mounts) {
+    for (const layer of stack ?? []) {
+      if (!layer.route) continue;
+      for (const m of Object.keys(layer.route.methods)) {
+        const path = (prefix + layer.route.path).replace(/\/$/, '') || '/';
+        out.push({ method: m.toUpperCase(), path });
+      }
+    }
+  }
+  return out;
+}
+
+app.get('/api/describe.xml', (_req, res) => {
+  res.type('application/xml').send(buildBackendXml({ routes: registeredRoutes() }));
+});
+
+app.get('/api/state.xml', requireAuth, async (req, res) => {
+  try {
+    const only = await ownedDeviceIds((req as AuthedRequest).uid);
+    res.type('application/xml').send(buildStateXml(MQTTController.devicesSnapshot(only)));
+  } catch {
+    res.status(500).type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?><error>state unavailable</error>');
+  }
+});
+
 // API status dashboard
 app.get('/api/status', (req, res) => {
   res.json({
@@ -75,6 +112,8 @@ app.get('/api/status', (req, res) => {
       productStats: '/api/products/stats',
       mqtt: '/api/mqtt/mqtt/status',
       devices: '/api/mqtt/devices/:deviceId/telemetry',
+      describe: '/api/describe.xml',
+      state: '/api/state.xml',
     },
   });
 });

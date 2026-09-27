@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Tender Cells backend description for LLMs and tools. Generated from express-api/backend/src/describe.ts + schemas.ts. -->
+<tendercells-backend version="1" service="tender-cells-api" site="https://tendercells.com">
+  <overview>OS (web app) -> HTTP -> express-api (LAN hub, default port 4000) -> MQTT broker -> devices (ESP32 firmware, Jetson/Pi robot services). Motion commands never go through Firebase.</overview>
+  <http base-default="http://localhost:4000" auth-header="Authorization: Bearer &lt;Firebase ID token&gt;" auth-note="When the API runs without Firebase admin, auth is not enforced (LAN/demo).">
+    <endpoint method="GET" path="/health" auth="public">
+      <summary>Liveness check.</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/status" auth="public">
+      <summary>Service name, version and main endpoints.</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/describe.xml" auth="public">
+      <summary>This machine-readable description.</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/state.xml" auth="signed-in">
+      <summary>Live snapshot of every device: presence, telemetry, state, yard events.</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/mqtt/status" auth="public">
+      <summary>Broker connection and known devices.</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/mqtt/connect" auth="public">
+      <summary>Force a broker reconnect.</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/unclaimed" auth="signed-in">
+      <summary>Devices heard on the network that no account owns yet.</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/claim" auth="signed-in">
+      <summary>Claim a device for the signed-in account.</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/devices/{deviceId}/telemetry" auth="device-owner">
+      <summary>Latest tc/{id}/sensors payload.</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/devices/{deviceId}/state" auth="device-owner">
+      <summary>Latest tc/{id}/state payload (idle | running | error | estop).</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/devices/{deviceId}/state/{sub}" auth="device-owner">
+      <summary>Latest sub-state: arm | gantry | weed (tc/{id}/state/{sub}).</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/devices/{deviceId}/alerts" auth="device-owner">
+      <summary>Last 100 alerts (predator, fault, health).</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/devices/{deviceId}/events" auth="device-owner">
+      <summary>Yard events / station flags plus presence (see &lt;yard-events&gt;).</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/devices/{deviceId}/presence" auth="device-owner">
+      <summary>Online / last seen (stale after 90 s of silence).</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/events/{eventId}/ack" auth="device-owner" waits-for-ack="true">
+      <summary>Mark a flag handled (eggs picked up, predator seen).</summary>
+      <publishes topic="tc/{id}/cmd/event" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/door" auth="device-owner">
+      <summary>Open / close the door.</summary>
+      <body schema="door">
+        <field name="state" type="string" required="true" values="open|close"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/door" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/drive" auth="device-owner">
+      <summary>Roaming Roost differential drive.</summary>
+      <body schema="drive">
+        <field name="dir" type="string" required="true" values="forward|back|left|right|stop"/>
+        <field name="speed" type="number" min="0" max="1"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/drive" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/light" auth="device-owner">
+      <summary>Relay on/off (heat lamp, pump, fan, grow light).</summary>
+      <body schema="light">
+        <field name="on" type="boolean" required="true"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/light" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/gantry" auth="device-owner">
+      <summary>GRBL gantry move or real-time command.</summary>
+      <body schema="gantry">
+        <field name="x" type="number"/>
+        <field name="y" type="number"/>
+        <field name="speed" type="number" min="0" max="1"/>
+        <field name="cmd" type="string" values="home|unlock|hold|resume|stop"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/gantry" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/feed" auth="device-owner">
+      <summary>Dispense feed (grams).</summary>
+      <body schema="feed">
+        <field name="amount" type="number" required="true" min="1" max="5000"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/feed" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/clean" auth="device-owner" gated="arm">
+      <summary>Start / stop a cleaning cycle.</summary>
+      <body schema="clean">
+        <field name="action" type="string" required="true" values="start|stop"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/clean" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/arm" auth="device-owner" gated="arm">
+      <summary>Move arm joints (degrees).</summary>
+      <body schema="arm">
+        <field name="joints" type="array" required="true"/>
+        <field name="speed" type="number" min="0" max="1"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/arm" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/routine" auth="device-owner" gated="arm">
+      <summary>Run a predefined gantry + arm routine.</summary>
+      <body schema="routine">
+        <field name="routine" type="string" required="true" values="egg_collection_routine|cleaning_sweep_routine"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/motion" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/policy" auth="device-owner" gated="arm">
+      <summary>Run a Hugging Face LeRobot policy on the arm (live) or in LeRobot sim.</summary>
+      <body schema="policy">
+        <field name="repo_id" type="string" required="true"/>
+        <field name="task" type="string"/>
+        <field name="duration_s" type="number" min="1" max="600"/>
+        <field name="sim_env" type="string" values="pusht|aloha|libero|metaworld"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/motion" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/policy/stop" auth="device-owner">
+      <summary>Stop a running policy.</summary>
+      <publishes topic="tc/{id}/cmd/motion" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/weeds/pass" auth="device-owner" gated="weed" waits-for-ack="true">
+      <summary>Run 1-10 weed detection passes (detect only).</summary>
+      <body schema="weedPass">
+        <field name="passes" type="number" min="1" max="10"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/weed" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/weeds/{eventId}/approve" auth="device-owner" gated="weed" waits-for-ack="true">
+      <summary>Human approval for ONE weed: aim (aiming dot) or burn (laser, interlocked on the robot).</summary>
+      <body schema="weedApprove">
+        <field name="mode" type="string" values="aim|burn"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/weed" qos="2"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/weeds/{eventId}/reject" auth="device-owner" waits-for-ack="true">
+      <summary>Not a weed / leave it.</summary>
+      <publishes topic="tc/{id}/cmd/weed" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/estop" auth="device-owner">
+      <summary>EMERGENCY STOP: latches on every subscriber.</summary>
+      <publishes topic="tc/{id}/cmd/estop" qos="2" retain="true"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/estop/clear" auth="device-owner">
+      <summary>Clear a latched E-STOP (replaces the retained stop).</summary>
+      <publishes topic="tc/{id}/cmd/estop" qos="2" retain="true"/>
+    </endpoint>
+    <endpoint method="GET" path="/api/products" auth="public">
+      <summary>Registered products (demo registry).</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/products/stats" auth="public">
+      <summary>Product counts.</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/products" auth="public">
+      <summary>Register a product.</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/products/{id}" auth="public">
+      <summary>One product.</summary>
+    </endpoint>
+    <endpoint method="PUT" path="/api/products/{id}" auth="public">
+      <summary>Update a product.</summary>
+    </endpoint>
+    <endpoint method="DELETE" path="/api/products/{id}" auth="public">
+      <summary>Remove a product.</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/products/{id}/connect" auth="public">
+      <summary>Mark a product connected.</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/products/{id}/disconnect" auth="public">
+      <summary>Mark a product disconnected.</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/products/{id}/link-device" auth="public">
+      <summary>Link a product to an MQTT device id.</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/products/validate" auth="public">
+      <summary>Validate a product payload.</summary>
+    </endpoint>
+    <responses>
+      <status code="200">OK (for ack endpoints: the device accepted)</status>
+      <status code="202">Sent; no device acknowledgement within 3 s (offline or older firmware)</status>
+      <status code="400">Body failed schema validation (error says which field)</status>
+      <status code="401">Missing / invalid Firebase ID token (auth enabled)</status>
+      <status code="403">Signed-in user does not own the device</status>
+      <status code="409">Refused for safety (E-STOP, animals present, stale headcount) or by the device (reason in error)</status>
+      <status code="503">MQTT broker not connected</status>
+    </responses>
+  </http>
+  <mqtt topic-prefix="tc">
+    <topic pattern="tc/{id}/sensors" direction="device-to-api" qos="0">
+      <payload>sensors</payload>
+      <note>Every 10 s. Camera nodes add streamUrl (MJPEG).</note>
+    </topic>
+    <topic pattern="tc/{id}/state" direction="device-to-api" qos="1">
+      <payload>{state: idle|running|error|estop, uptime, ts}</payload>
+    </topic>
+    <topic pattern="tc/{id}/state/{sub}" direction="device-to-api" qos="1" retain="true">
+      <payload>arm {joints, state, estop, policy} | gantry {x,y,z} | weed {state, laser{...}, pass{...}, tool{x,y,z,aim,laser}, robotType}</payload>
+    </topic>
+    <topic pattern="tc/{id}/status" direction="device-to-api" qos="1" retain="true">
+      <payload>{online: boolean}</payload>
+      <note>Retained, with an MQTT last will of {online:false}.</note>
+    </topic>
+    <topic pattern="tc/{id}/ack" direction="device-to-api" qos="1">
+      <payload>{seq, ok, error?}</payload>
+      <note>Reply to every command that carries seq.</note>
+    </topic>
+    <topic pattern="tc/{id}/event" direction="device-to-api" qos="1">
+      <payload>yard event (see &lt;yard-events&gt;)</payload>
+      <note>Upserted by id.</note>
+    </topic>
+    <topic pattern="tc/{id}/alert" direction="device-to-api" qos="2">
+      <payload>{type: predator|fault|health, label?, confidence, camera?, bearingDeg?, distanceFt?, ts}</payload>
+      <note>Predator alerts become located yard events.</note>
+    </topic>
+    <topic pattern="tc/broadcast/alert" direction="device-to-api" qos="2">
+      <payload>alert</payload>
+      <note>WatchTower broadcast to every device (not stored as an event).</note>
+    </topic>
+    <topic pattern="tc/{id}/cmd/{command}" direction="api-to-device" qos="1">
+      <payload>command body + {seq, timestamp}</payload>
+      <note>door, feed, clean, arm, motion, drive, light, gantry, weed, event</note>
+    </topic>
+    <topic pattern="tc/{id}/cmd/estop" direction="api-to-device" qos="2" retain="true">
+      <payload>{active: boolean, source, ts}</payload>
+    </topic>
+    <payload-schema name="sensors">
+      <field name="temp" type="number"/>
+      <field name="humidity" type="number" min="0" max="100"/>
+      <field name="ammonia" type="number" min="0"/>
+      <field name="feedLevel" type="number" min="0" max="100"/>
+      <field name="waterLevel" type="number" min="0" max="100"/>
+      <field name="chickenCount" type="number" min="0"/>
+    </payload-schema>
+  </mqtt>
+  <yard-events source="tc/{id}/event, tc/{id}/alert">
+    <field name="id" type="string" required="true" pattern="[A-Za-z0-9_.:-]{1,64}"/>
+    <field name="type" type="string" required="true" values="egg_ready|pickup_ready|weed_detected|headcount|alert"/>
+    <field name="status" type="string" values="active|pending_review|approved|rejected|treated|cleared"/>
+    <field name="title" type="string"/>
+    <field name="detail" type="string"/>
+    <field name="station" type="string"/>
+    <field name="label" type="string"/>
+    <field name="itemId" type="string"/>
+    <field name="count" type="number"/>
+    <field name="confidence" type="number"/>
+    <field name="bearingDeg" type="number"/>
+    <field name="distanceFt" type="number"/>
+    <field name="ts" type="number"/>
+    <field name="bedMm" type="object" note="{x (along the bed), y (across)} in mm from the bed origin corner"/>
+  </yard-events>
+  <robots>
+    <routines values="egg_collection_routine|cleaning_sweep_routine"/>
+    <arm-platforms values="sim|ur|lerobot" service="firmware/jetson-nano/arm_service.py"/>
+    <weed-robots service="firmware/jetson-nano/weed_patrol_service.py">
+      <robot-type id="genesis-laser" motion="gantry" basis="FarmBot Genesis + laser module (Project Cyclops, CC0)">
+        <laser profile="diode-500mw" power-w="0.5" wavelength-nm="405" laser-class="3B" exposure-ms="2000-8000"/>
+      </robot-type>
+      <robot-type id="rover-laser" motion="rover" basis="LiteWeed-style stop-and-align rover">
+        <laser profile="diode-4w" power-w="4" wavelength-nm="450" laser-class="4" exposure-ms="500-3000"/>
+      </robot-type>
+      <robot-type id="arm-laser" motion="arm" basis="Arm service (sim / Universal Robots / LeRobot) carrying the laser module">
+        <laser profile="diode-500mw" power-w="0.5" wavelength-nm="405" laser-class="3B" exposure-ms="2000-8000"/>
+      </robot-type>
+    </weed-robots>
+  </robots>
+  <safety>
+    <rule>E-STOP (QoS 2, retained) latches on every subscriber; motion is refused until cleared.</rule>
+    <rule>Arm / clean / routine / policy are refused in animal areas while chickens are detected or the headcount is older than 60 s.</rule>
+    <rule>Weed treatment needs a human approval per weed; the laser fires only with burn enabled, student mode off, enclosure closed and no E-STOP.</rule>
+    <rule>Every hardware action in the UI goes through a confirmation dialog.</rule>
+  </safety>
+  <client-analysis>
+    <watershed module="tendercells-ui/src/components/property/watershed.ts" scenarios="light:0.25in/h*1h|heavy:1in/h*1h|storm:2in/h*2h" fixes="drain|rain-garden|swale|berm|fill">Priority-flood depressions, D8 flow accumulation, puddle fill by catchment volume, erosion = erodibility * sqrt(flow) * slope. Uses a robot-measured elevation grid when present.</watershed>
+    <terrain module="tendercells-ui/src/components/property/terrain.ts" zone-kinds="lawn|pasture|dry|snow|garden-soil|mulch|gravel|sand|paved|woods|wetland"/>
+  </client-analysis>
+</tendercells-backend>

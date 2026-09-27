@@ -13,6 +13,11 @@ import {
 import { buildScenery, sceneHeightFn, TERRAIN_PRESETS, type SceneHeightFn, type TerrainPreset } from './scenery';
 import { makeTextSprite } from './labels';
 import { animateYardFlags, buildYardFlags, disposeYardFlags } from './yardFlags';
+import { buildHydrologyLayer } from './hydrologyLayer';
+import { createWeedRobot, placeWeedRobot } from './weedRobotMarker';
+import { getSimRobot } from '../../lib/yard/weedSim';
+import { WEED_BED_TYPES, YARD_LIVE, type WeedRobotState } from '../../lib/yard/yardTypes';
+import type { HydrologyResult } from '../property/watershed';
 import { useYardEvents } from '../../hooks/useYardEvents';
 import YardAttentionPanel from '../yard/YardAttentionPanel';
 import Paper from '@mui/material/Paper';
@@ -58,7 +63,15 @@ type Viewport3DProps = {
   showYardFlags?: boolean;
   /** The in-map "Needs attention" list (off when the page shows its own). Default true. */
   showAttentionPanel?: boolean;
+  /** Watershed result to draw: standing water + erosion risk (Watershed & Drainage page). */
+  hydrology?: HydrologyResult | null;
+  /** Picture-in-picture views from the WatchTower's three cameras (default: on for predator-monitor). */
+  towerCameras?: boolean;
 };
+
+const TOWER_CAM_ASPECT = 4 / 3;
+// 120° horizontal lens → vertical FOV for a 4:3 frame.
+const TOWER_CAM_VFOV = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(60)) / TOWER_CAM_ASPECT));
 
 const FAMILY_TO_ITEM_TYPE: Record<string, string> = {
   'chicken-tender': 'chicken-tender',
@@ -1064,9 +1077,13 @@ export default function Viewport3D({
   focusItemId,
   showYardFlags = true,
   showAttentionPanel = true,
+  hydrology = null,
+  towerCameras,
 }: Viewport3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [webglOk, setWebglOk] = useState(true);
+  const [camsOn, setCamsOn] = useState(towerCameras ?? product === 'predator-monitor');
+  const [hasTower, setHasTower] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('3d');
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('iso');
   const [controlMode, setControlMode] = useState<ControlMode>('orbit');
@@ -1257,7 +1274,9 @@ export default function Viewport3D({
 
   // Station flags (eggs ready, weeds to review, roost headcount). Drawn into their own
   // group so a poll update swaps just the flags, not the whole scene.
-  const { flags: yardFlags, act: yardAct } = useYardEvents(showYardFlags ? enrichedItems : []);
+  const { flags: yardFlags, act: yardAct, robots: liveRobots } = useYardEvents(showYardFlags ? enrichedItems : []);
+  const liveRobotsRef = useRef<Record<string, WeedRobotState>>({});
+  liveRobotsRef.current = liveRobots;
   const flagsHolderRef = useRef<THREE.Group | null>(null);
   const [sceneVersion, setSceneVersion] = useState(0);
   useEffect(() => {
@@ -1270,6 +1289,14 @@ export default function Viewport3D({
       sceneHeightFn(layout.property, layout.property.widthFt, layout.property.depthFt)));
   }, [yardFlags, enrichedItems, layout, workspaceMode, showYardFlags, sceneVersion]);
 
+  // Standing water + erosion from the watershed model, swapped without a scene rebuild.
+  useEffect(() => {
+    const holder = flagsHolderRef.current?.parent?.getObjectByName('hydrology-holder') as THREE.Group | undefined;
+    if (!holder) return;
+    holder.children.slice().forEach((c) => { holder.remove(c); disposeYardFlags(c); });
+    if (hydrology) holder.add(buildHydrologyLayer(hydrology, layout.property.widthFt, layout.property.depthFt));
+  }, [hydrology, layout, sceneVersion]);
+
   // Three.js scene
   useEffect(() => {
     if (!containerRef.current) return;
@@ -1280,8 +1307,13 @@ export default function Viewport3D({
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x123d25);
+    // Dev builds only: expose the scene for debugging / browser tests.
+    if (import.meta.env.DEV) (window as unknown as { __tcScene?: THREE.Scene }).__tcScene = scene;
 
-    const cameraSpan = Math.max(layout.property.widthFt, layout.property.depthFt) * 0.58;
+    // A page focused on one item (e.g. Weed Patrol's bed) frames that item, not the whole yard.
+    const cameraSpan = focusItemId && activeItem && workspaceMode !== 'property'
+      ? Math.max(activeItem.width, activeItem.depth) * 1.1 + 4
+      : Math.max(layout.property.widthFt, layout.property.depthFt) * 0.58;
     const camera =
       viewMode === '2d'
         ? new THREE.OrthographicCamera(-cameraSpan * aspect, cameraSpan * aspect, cameraSpan, -cameraSpan, 0.1, 1000)
@@ -1425,14 +1457,68 @@ export default function Viewport3D({
 
     const flagsHolder = new THREE.Group();
     scene.add(flagsHolder);
+    const hydroHolder = new THREE.Group();
+    hydroHolder.name = 'hydrology-holder';
+    scene.add(hydroHolder);
     flagsHolderRef.current = flagsHolder;
     setSceneVersion((v) => v + 1); // (re)build flags into the new scene
     const clock = new THREE.Clock();
 
+    // WatchTower camera views: three 120° cameras at the dome, 0/120/240° from map north,
+    // tilted down a little - rendered as insets so the demo shows what the tower sees.
+    const towerItem = workspaceMode === 'property'
+      ? (product === 'predator-monitor' ? { x: 0, z: 0 } : null)
+      : (() => { const t = enrichedItems.find((i) => i.type === 'watchtower'); return t ? propertyToScenePosition(t, layout) : null; })();
+    setHasTower(!!towerItem);
+    const towerCams: THREE.PerspectiveCamera[] = [];
+    if (towerItem && camsOn && viewMode === '3d') {
+      const eyeY = groundH(towerItem.x, towerItem.z) + 1.3 * 2.4 + 0.1; // pole top (see createYardItem)
+      for (let i = 0; i < 3; i++) {
+        const cam = new THREE.PerspectiveCamera(TOWER_CAM_VFOV, TOWER_CAM_ASPECT, 0.3, camera.far);
+        const b = THREE.MathUtils.degToRad(i * 120);
+        cam.position.set(towerItem.x + Math.sin(b) * 0.5, eyeY, towerItem.z - Math.cos(b) * 0.5);
+        cam.lookAt(towerItem.x + Math.sin(b) * 20, eyeY - 4.5, towerItem.z - Math.cos(b) * 20);
+        towerCams.push(cam);
+      }
+    }
+    const renderTowerCams = () => {
+      if (!towerCams.length) return;
+      const cw = renderer.domElement.clientWidth, ch = renderer.domElement.clientHeight;
+      const w = Math.round(cw * 0.2), h = Math.round(w / TOWER_CAM_ASPECT);
+      if (w < 60 || h + 60 > ch) return;
+      renderer.setScissorTest(true);
+      towerCams.forEach((cam, i) => {
+        const x = 8 + i * (w + 6);
+        renderer.setViewport(x, 56, w, h);
+        renderer.setScissor(x, 56, w, h);
+        renderer.render(scene, cam);
+      });
+      renderer.setScissorTest(false);
+      renderer.setViewport(0, 0, cw, ch);
+    };
+
+    // Weed robots on their garden beds (demo: simulated robot; live: state/weed).
+    const weedRobots = workspaceMode === 'property' || !showYardFlags ? [] : enrichedItems
+      .filter((i) => i.kind === 'hardware' && WEED_BED_TYPES.has(i.type))
+      .map((item) => ({ item, marker: null as THREE.Group | null }));
+
     let animationId: number;
     const animate = () => {
       animationId = requestAnimationFrame(animate);
-      animateYardFlags(flagsHolder, clock.getElapsedTime());
+      const t = clock.getElapsedTime();
+      animateYardFlags(flagsHolder, t);
+      weedRobots.forEach((r) => {
+        const st = YARD_LIVE ? liveRobotsRef.current[r.item.id] : getSimRobot(r.item.id);
+        const type = st?.robotType ?? 'genesis-laser';
+        if (!st || !st.tool) { if (r.marker) r.marker.visible = false; return; }
+        if (!r.marker || r.marker.userData.type !== type) {
+          if (r.marker) { scene.remove(r.marker); disposeYardFlags(r.marker); }
+          r.marker = createWeedRobot(type, r.item);
+          scene.add(r.marker);
+        }
+        r.marker.visible = true;
+        placeWeedRobot(r.marker, r.item, layout, st, groundH, t);
+      });
       farmbotMarkers.forEach(({ item, marker }) => {
         const pos = farmbotPosRef.current.get(item.id);
         marker.visible = !!pos;
@@ -1440,6 +1526,7 @@ export default function Viewport3D({
       });
       controls.update();
       renderer.render(scene, camera);
+      renderTowerCams();
     };
     animate();
 
@@ -1481,7 +1568,7 @@ export default function Viewport3D({
     };
   }, [
     loadedScene, model, viewMode, cameraPreset, controlMode,
-    workspaceMode, layout, product, enrichedItems, glbCacheVersion, activeItem,
+    workspaceMode, layout, product, enrichedItems, glbCacheVersion, activeItem, camsOn, showYardFlags, focusItemId,
   ]);
 
   const deviceCount = products.length;
@@ -1566,6 +1653,19 @@ export default function Viewport3D({
           <Typography variant="caption" color="white">Loading model...</Typography>
         </Box>
       )}
+
+      {/* Labels for the WatchTower camera insets drawn in the WebGL canvas (same layout math). */}
+      {hasTower && camsOn && viewMode === '3d' && webglOk && [0, 1, 2].map((i) => (
+        <Box key={i} data-testid="tower-cam-label" sx={{
+          position: 'absolute', bottom: 56, left: `calc(8px + ${i} * (20% + 6px))`, width: '20%', aspectRatio: '4 / 3',
+          border: '1px solid rgba(204,51,51,0.8)', borderRadius: '2px', pointerEvents: 'none', zIndex: 5,
+        }}>
+          <Box component="span" sx={{ position: 'absolute', top: 2, left: 4, fontSize: 10, fontWeight: 700, color: '#F0EDE4',
+            bgcolor: 'rgba(0,0,0,0.55)', px: 0.5, borderRadius: '2px', fontFamily: 'monospace' }}>
+            CAM {i + 1} · {['N', 'SE', 'SW'][i]} · SIM
+          </Box>
+        </Box>
+      ))}
 
       {showYardFlags && showAttentionPanel && (
         <Box sx={{ position: 'absolute', top: { xs: 60, sm: 64 }, right: 12, zIndex: 9, width: 'min(360px, calc(100% - 24px))',
@@ -1686,6 +1786,12 @@ export default function Viewport3D({
                 }
               }}
             />
+          )}
+          {hasTower && viewMode === '3d' && (
+            <Button size="small" variant={camsOn ? 'contained' : 'outlined'} onClick={() => setCamsOn((v) => !v)}
+              sx={camsOn ? { bgcolor: '#CC3333', '&:hover': { bgcolor: '#A82828' } } : undefined}>
+              Tower cams
+            </Button>
           )}
           <Button size="small" variant="outlined" onClick={() => { setCameraPreset('iso'); setViewMode('3d'); setControlMode('orbit'); }}>
             Reset View

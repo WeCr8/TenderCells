@@ -1,4 +1,5 @@
 import type { TerrainLayers } from './terrain';
+import type { DrainageFix } from './watershed';
 
 export type PropertyItemKind = 'hardware' | 'obstacle';
 export type HardwareType =
@@ -46,6 +47,8 @@ export interface PropertyConfig extends TerrainLayers {
   // Base ground look in the 3D view (lawn | pasture | dry | snow) wherever no terrain
   // zone covers the ground. Optional: older saved layouts default to lawn.
   terrain?: 'lawn' | 'pasture' | 'dry' | 'snow';
+  // Drainage changes the user is trying in Watershed & Drainage (planned, not built).
+  drainagePlan?: DrainageFix[];
 }
 
 export interface PropertyItem {

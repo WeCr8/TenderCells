@@ -126,6 +126,7 @@ const SHARED_ITEMS: MenuItem[] = [
   { id: "ai", label: "TenderAI Chat", icon: <SmartToyIcon />, path: "/ai" },
   { id: "schedules", label: "Schedules", icon: <ScheduleIcon />, path: "/schedules" },
   { id: "weed-patrol", label: "Weed Patrol", icon: <GrassIcon />, path: "/weed-patrol" },
+  { id: "watershed", label: "Watershed", icon: <WaterIcon />, path: "/watershed" },
   { id: "products", label: "Products", icon: <DevicesIcon />, path: "/products" },
   { id: "specs", label: "Product Specs", icon: <DescriptionIcon />, path: "/specs" },
   { id: "layout", label: "Property Layout", icon: <GridOnIcon />, path: "/layout" },

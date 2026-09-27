@@ -98,6 +98,7 @@ describe('TenderCells OS contracts', () => {
     expect(dashboard).toContain('<CameraFeedViewer');
     expect(dashboard).toContain('Board Controls');
     expect(dashboard).toContain('Not available on the registered board.');
+    expect(dashboard).toContain('hardware.configureCamera(next)');
     expect(flasher).toContain('/flash/manifest-camera-node.json');
     expect(manifest).toContain('firmware/camera-node/firmware.bin');
     [registration, products, dashboard, flasher, manifest].forEach((source) => {

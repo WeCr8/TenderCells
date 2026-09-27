@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import Viewport3D from '../components/viewport/Viewport3D';
 import CameraFeedViewer from '../components/camera/CameraFeedViewer';
+import { useHardwareControl } from '../hooks/useHardwareControl';
 
 export default function ProductDashboardPage() {
   const { productId = '' } = useParams();
@@ -15,6 +16,7 @@ export default function ProductDashboardPage() {
   const [savingCapability, setSavingCapability] = useState<string | null>(null);
   const [capabilityError, setCapabilityError] = useState<string | null>(null);
   const product = products.find((item) => item.id === productId);
+  const hardware = useHardwareControl(product?.device_id || 'unassigned');
 
   if (loading) return <Box sx={{ minHeight: 360, display: 'grid', placeItems: 'center' }}><CircularProgress /></Box>;
   if (!product) return <Navigate to="/products" replace />;
@@ -46,6 +48,9 @@ export default function ProductDashboardPage() {
       await updateProduct(product.id, {
         metadata: { ...product.metadata, enabled_capabilities: next, capability_profile: 'custom' },
       });
+      if (product.device_id && product.connection_status === 'online') {
+        await hardware.configureCamera(next);
+      }
     } catch (error) {
       setCapabilityError(error instanceof Error ? error.message : 'Could not update this board feature.');
     } finally {
@@ -139,9 +144,9 @@ export default function ProductDashboardPage() {
           <Grid container spacing={1.5}>
             {[
               ['camera', 'Live camera', 'Show the live camera feed on this dashboard.'],
-              ['microphone', 'Sound events', 'Enable onboard microphone events and sound-level telemetry.'],
-              ['microsd', 'Local recording', 'Allow captures to use the onboard microSD card.'],
-              ['gpio', 'Developer GPIO', 'Expose the board GPIO for custom sensors and code controls.'],
+              ['microphone', 'Sound events', 'Make the onboard microphone available to compatible firmware routines.'],
+              ['microsd', 'Local recording', 'Make the onboard microSD slot available to compatible firmware routines.'],
+              ['gpio', 'Developer GPIO', 'Make board GPIO available to registered custom code and sensors.'],
             ].map(([capability, label, description]) => {
               const available = hardwareCapabilities.includes(capability);
               return (

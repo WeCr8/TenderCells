@@ -55,6 +55,10 @@ router.post("/devices/:deviceId/light", ...owns, (req: Request, res: Response) =
   controller.sendLightCommand(req, res);
 });
 
+router.post("/devices/:deviceId/camera/config", ...owns, (req: Request, res: Response) => {
+  controller.sendCameraConfig(req, res);
+});
+
 router.post("/devices/:deviceId/gantry", ...owns, (req: Request, res: Response) => {
   controller.sendGantryCommand(req, res);
 });

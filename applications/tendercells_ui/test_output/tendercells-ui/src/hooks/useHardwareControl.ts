@@ -75,6 +75,10 @@ export const useHardwareControl = (deviceId: string) => {
     // Relay / load (heat lamp, water pump, fan, grow light, valve)
     setRelay: (on: boolean) => sendCommand('light', { on }),
 
+    // Camera-node feature configuration. The API validates and publishes this to
+    // tc/{deviceId}/cmd/camera/config; unsupported board features never reach here.
+    configureCamera: (enabled: string[]) => sendCommand('camera/config', { enabled }),
+
     // Feed (calibrated dispenser, grams)
     dispenseFeed: (amount: number) => sendCommand('feed', { amount }),
 

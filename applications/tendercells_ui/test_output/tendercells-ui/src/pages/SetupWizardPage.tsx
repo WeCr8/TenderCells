@@ -1,5 +1,6 @@
 // SetupWizardPage.tsx — Step-by-step new device setup: select product → name → connect → verify
 import { useState } from 'react';
+import { MQTT_API_BASE, HARDWARE_API_ORIGIN } from '../lib/api/hardwareApi';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Paper, Stack, Typography, Button, TextField, Stepper,
@@ -97,7 +98,7 @@ function StepConnect({ simOnly, onToggleSim }: { simOnly: boolean; onToggleSim: 
   const testConnection = async () => {
     setTesting(true);
     try {
-      const res = await fetch('http://localhost:3001/api/mqtt/status');
+      const res = await fetch(`${MQTT_API_BASE}/mqtt/status`);
       setMqttResult(res.ok ? 'ok' : 'fail');
     } catch {
       setMqttResult('fail');
@@ -150,7 +151,7 @@ function StepConnect({ simOnly, onToggleSim }: { simOnly: boolean; onToggleSim: 
           </Stack>
           <Typography sx={{ color: C.goldMuted, fontSize: 12, mb: 1.5 }}>
             Default broker: <Box component="code" sx={{ color: C.accent }}>mqtt://localhost:1883</Box>
-            {' '}via Express API at <Box component="code" sx={{ color: C.accent }}>http://localhost:3001</Box>
+            {' '}via Express API at <Box component="code" sx={{ color: C.accent }}>{HARDWARE_API_ORIGIN}</Box>
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center">
             <Button size="small" variant="outlined" onClick={() => void testConnection()} disabled={testing}

@@ -45,6 +45,9 @@ const KNOWN_ROUTINES = [
   "cleaning_sweep_routine",
 ] as const;
 
+// Headcount older than this cannot clear robot motion (sensors publish every 10s).
+const MOTION_TELEMETRY_MAX_AGE_MS = 60_000;
+
 const SCHEMAS: Record<string, Schema> = {
   door:    { state:   { type: "string", required: true, values: ["open", "close"] } },
   // Basic Roaming Roost differential drive (classroom rover + real product share this).
@@ -87,6 +90,41 @@ export class MQTTController {
   // Sub-states like arm joint angles / gantry position, keyed `${deviceId}:${sub}`.
   // Feeds the live arm/gantry UI (sliders, 3D viewport animation).
   private static subStates: Map<string, MQTTMessage> = new Map();
+  // When each device's last sensor packet arrived (server clock) - used to refuse
+  // motion on a stale headcount.
+  private static telemetryAt: Map<string, number> = new Map();
+
+  /**
+   * Safety gate for robot motion inside the coop (arm, cleaning, routines).
+   *
+   * FIX(2026-09-27): these commands were published with no checks, although the
+   * UI promised "chickens must be clear (verified via live headcount sensor)" and
+   * CLAUDE.md requires an E-STOP check and a chicken-presence check before any arm
+   * motion. Refuses when E-STOP is active, when the headcount is missing or stale,
+   * or when chickens are detected.
+   *
+   * @param deviceId - Target device
+   * @returns A user-facing reason to refuse, or null when motion is allowed
+   */
+  static motionBlockedReason(deviceId: string): string | null {
+    const state = MQTTController.states.get(deviceId);
+    if (state?.state === "estop" || state?.systemState === "estop") {
+      return "E-STOP is active on this device. Clear it before running robot motion.";
+    }
+    const telemetry = MQTTController.telemetry.get(deviceId);
+    const at = MQTTController.telemetryAt.get(deviceId) ?? 0;
+    if (!telemetry || typeof telemetry.chickenCount !== "number") {
+      return "Cannot verify the work area is clear: no chicken headcount from this device yet.";
+    }
+    if (Date.now() - at > MOTION_TELEMETRY_MAX_AGE_MS) {
+      return "Cannot verify the work area is clear: the chicken headcount is out of date (no sensor data in the last minute).";
+    }
+    if (telemetry.chickenCount > 0) {
+      const n = telemetry.chickenCount;
+      return `${n} chicken${n === 1 ? "" : "s"} detected in the coop. Let them out (open the door) and wait for the work area to clear before running robot motion.`;
+    }
+    return null;
+  }
 
   private static initializeClient() {
     if (MQTTController.client) return;
@@ -209,6 +247,7 @@ export class MQTTController {
         const err = validatePayload(payload, SCHEMAS.sensors);
         if (err) console.warn(`[MQTT] Sensor schema warning (${deviceId}): ${err}`);
         MQTTController.telemetry.set(deviceId, payload);
+        MQTTController.telemetryAt.set(deviceId, Date.now());
         MQTTController.mirrorToFirestore("sensors", deviceId, payload);
         MQTTController.autoRegister(deviceId, payload);
       } else if (topicParts[2] === "state") {
@@ -456,6 +495,9 @@ export class MQTTController {
 
     const err = validatePayload(req.body, SCHEMAS.clean);
     if (err) return res.status(400).json({ error: err });
+    // Stopping is always allowed; starting moves the scraper through the coop.
+    const blocked = action === "start" ? MQTTController.motionBlockedReason(deviceId) : null;
+    if (blocked) return res.status(409).json({ error: blocked });
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }
@@ -482,6 +524,8 @@ export class MQTTController {
     if (err) return res.status(400).json({ error: err });
     if (!Array.isArray(joints) || joints.length !== 6)
       return res.status(400).json({ error: "joints must be an array of 6 angles" });
+    const blocked = MQTTController.motionBlockedReason(deviceId);
+    if (blocked) return res.status(409).json({ error: blocked });
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }
@@ -511,6 +555,8 @@ export class MQTTController {
 
     const err = validatePayload(req.body, SCHEMAS.routine);
     if (err) return res.status(400).json({ error: err });
+    const blocked = MQTTController.motionBlockedReason(deviceId);
+    if (blocked) return res.status(409).json({ error: blocked });
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { modelUrlProblem } from '../../lib/three/gltfLoader';
 import {
   Dialog,
   DialogTitle,
@@ -1053,10 +1054,12 @@ export default function ProductRegistrationModal({
                     <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Custom Device Asset URL"
+                        label="Custom Device Asset URL (.glb)"
                         value={customDeviceAssetUrl}
                         onChange={(e) => setCustomDeviceAssetUrl(e.target.value)}
-                        placeholder="e.g., assets/devices/my-waterer.usd"
+                        placeholder="e.g., https://raw.githubusercontent.com/you/robot/main/robot.glb"
+                        error={!!modelUrlProblem(customDeviceAssetUrl)}
+                        helperText={modelUrlProblem(customDeviceAssetUrl) || 'Shown in the 3D yard view. glTF/GLB only.'}
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>

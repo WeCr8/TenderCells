@@ -16,12 +16,18 @@ import {
 } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import type { PropertyItem } from '../property/propertyLayoutStore';
+import { normalizeFarmBotUrl } from './farmbotLinks';
 
 const FARMBOT_APP_URL = 'https://my.farm.bot';
+// Genesis / Genesis XL are FarmBot kits; any other garden can still be driven by a
+// FarmBot, so the bridge is offered for every garden item (FIX 2026-09-27: it only
+// appeared for the two Genesis types, so most gardens had no way into FarmBot).
+const FARMBOT_NATIVE_TYPES = new Set(['farmbot-genesis', 'farmbot-genesis-xl']);
 const FARMBOT_SITE_URL = 'https://farm.bot';
 const FARMBOT_GREEN = '#61B833';
 
-type FarmBotLink = { email?: string; linkedAt?: string };
+// serverUrl: self-hosted FarmBot Web App (default my.farm.bot).
+type FarmBotLink = { email?: string; linkedAt?: string; serverUrl?: string };
 
 const linkKey = (itemId: string) => `tc_farmbot_link_${itemId}`;
 
@@ -31,23 +37,36 @@ const loadLink = (itemId: string): FarmBotLink => {
 };
 
 /**
- * Bridge card for a FarmBot Genesis-type garden device.
+ * Bridge card that opens FarmBot's own web app for a garden item.
  *
- * @param item - the Genesis/Genesis-XL garden PropertyItem being bridged
+ * @param item - the garden PropertyItem (Genesis kit, other garden device, or garden plot)
  */
 export default function FarmBotBridgePanel({ item }: { item: PropertyItem }) {
   const [link, setLink] = useState<FarmBotLink>(() => loadLink(item.id));
   const [email, setEmail] = useState(link.email || '');
+  const [serverInput, setServerInput] = useState(link.serverUrl || '');
+  const [serverError, setServerError] = useState<string | null>(null);
+  const isNative = FARMBOT_NATIVE_TYPES.has(item.type);
+  const appUrl = link.serverUrl || FARMBOT_APP_URL;
 
-  const saveLink = () => {
-    const next: FarmBotLink = { email: email.trim() || undefined, linkedAt: new Date().toISOString() };
-    localStorage.setItem(linkKey(item.id), JSON.stringify(next));
+  const persist = (next: FarmBotLink) => {
+    try { localStorage.setItem(linkKey(item.id), JSON.stringify(next)); } catch { /* storage off */ }
     setLink(next);
   };
+  const saveLink = () => {
+    persist({ ...link, email: email.trim() || undefined, linkedAt: new Date().toISOString() });
+  };
   const clearLink = () => {
-    localStorage.removeItem(linkKey(item.id));
-    setLink({});
+    persist({ serverUrl: link.serverUrl });
     setEmail('');
+  };
+  const saveServer = () => {
+    if (!serverInput.trim()) { persist({ ...link, serverUrl: undefined }); setServerError(null); return; }
+    const url = normalizeFarmBotUrl(serverInput);
+    if (!url) { setServerError('Enter an http(s) address, e.g. https://my.farm.bot or 192.168.1.20:3000'); return; }
+    setServerError(null);
+    setServerInput(url);
+    persist({ ...link, serverUrl: url });
   };
 
   return (
@@ -67,18 +86,39 @@ export default function FarmBotBridgePanel({ item }: { item: PropertyItem }) {
       </Stack>
 
       <Typography variant="body2" sx={{ color: '#C8D6CC', mb: 1.5 }}>
-        <strong style={{ color: '#E4E7E5' }}>{item.name}</strong> is a Genesis-type garden.
-        Tender Cells doesn't reinvent FarmBot — control runs in FarmBot's own web app so
-        you get their full toolset and they get the support.
+        {isNative ? (
+          <><strong style={{ color: '#E4E7E5' }}>{item.name}</strong> is a Genesis-type garden.</>
+        ) : (
+          <>Automate <strong style={{ color: '#E4E7E5' }}>{item.name}</strong> with a FarmBot.</>
+        )}{' '}
+        Tender Cells doesn't reinvent FarmBot — planting, watering and sequences run in
+        FarmBot's own web app so you get their full toolset and they get the support.
       </Typography>
 
       <Button
         fullWidth variant="contained" endIcon={<OpenInNewIcon />}
-        href={FARMBOT_APP_URL} target="_blank" rel="noopener noreferrer"
+        href={appUrl} target="_blank" rel="noopener noreferrer"
         sx={{ bgcolor: FARMBOT_GREEN, color: '#06210a', fontWeight: 700, '&:hover': { bgcolor: '#6FCB3C' } }}
       >
         Open FarmBot Web App
       </Button>
+      <Typography variant="caption" sx={{ color: '#8A7D55', display: 'block', mt: 0.5, wordBreak: 'break-all' }}>
+        Opens {appUrl.replace(/^https?:\/\//, '')} in a new tab
+      </Typography>
+
+      {/* Self-hosted FarmBot servers (LAN installs) - per garden. */}
+      <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+        <TextField
+          size="small" fullWidth placeholder="FarmBot server (default my.farm.bot)"
+          value={serverInput} onChange={(e) => setServerInput(e.target.value)}
+          error={!!serverError} helperText={serverError || undefined}
+          inputProps={{ 'aria-label': 'FarmBot server address' }}
+        />
+        <Button variant="outlined" size="small" onClick={saveServer}
+          sx={{ borderColor: '#4A7C59', color: '#9CCC65', whiteSpace: 'nowrap', alignSelf: 'flex-start' }}>
+          Save
+        </Button>
+      </Stack>
 
       <Divider sx={{ borderColor: '#1A3D2B', my: 1.5 }} />
 

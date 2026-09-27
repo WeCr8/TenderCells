@@ -2,7 +2,8 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { createGltfLoader, describeModelLoadError } from '../../lib/three/gltfLoader';
+import { resolveModelUrl, saveModelFile } from '../../lib/three/modelStore';
 import { Sky } from 'three/examples/jsm/objects/Sky.js';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
@@ -1012,6 +1013,18 @@ export default function Viewport3D({
   const { products } = useProducts();
   const glbCacheRef = useRef<Map<string, THREE.Group>>(new Map());
   const [glbCacheVersion, setGlbCacheVersion] = useState(0);
+  // FIX(2026-09-27): model load failures were only console.warn'd, so a broken robot
+  // import silently showed the built-in shape. Track them (and skip retrying) and
+  // show them in the viewport. Keyed by model URL/ref -> "Name: reason".
+  const failedModelsRef = useRef<Map<string, string>>(new Map());
+  const [modelErrors, setModelErrors] = useState<string[]>([]);
+  const recordModelError = (key: string, label: string, err: unknown) => {
+    const reason = err instanceof Error && /attach the \.glb again/.test(err.message)
+      ? err.message
+      : describeModelLoadError(err);
+    failedModelsRef.current.set(key, `${label}: ${reason}`);
+    setModelErrors(Array.from(failedModelsRef.current.values()));
+  };
 
   // Resolve layout items → matched Firestore products.
   // Match priority: 1) item.productId === product.id (stable 1:1 from layout sync)
@@ -1086,10 +1099,11 @@ export default function Viewport3D({
 
   // Load custom GLBs from product metadata
   useEffect(() => {
-    const loader = new GLTFLoader();
+    const loader = createGltfLoader();
     let cancelled = false;
     const toLoad = products.filter(
       (p) => p.metadata?.custom_device_asset_url && !glbCacheRef.current.has(p.id)
+        && !failedModelsRef.current.has(p.id)
     );
     if (toLoad.length === 0) return;
 
@@ -1103,7 +1117,10 @@ export default function Viewport3D({
           if (++done === toLoad.length) setGlbCacheVersion((v) => v + 1);
         },
         undefined,
-        () => { if (++done === toLoad.length && !cancelled) setGlbCacheVersion((v) => v + 1); }
+        (err) => {
+          if (!cancelled) recordModelError(p.id, p.product_name || 'Device model', err);
+          if (++done === toLoad.length && !cancelled) setGlbCacheVersion((v) => v + 1);
+        }
       );
     });
     return () => { cancelled = true; };
@@ -1112,26 +1129,24 @@ export default function Viewport3D({
   // Load full-scene GLBs imported onto layout items (item.modelUrl) — e.g. a user
   // imports a complete "Genesis" garden world. Cached by URL so each loads once.
   useEffect(() => {
-    const loader = new GLTFLoader();
+    const loader = createGltfLoader();
     let cancelled = false;
-    const urls = Array.from(
-      new Set(
-        layout.items
-          .map((i) => i.modelUrl)
-          .filter((u): u is string => !!u && !glbCacheRef.current.has(u))
-      )
+    const pending = layout.items.filter(
+      (i): i is PropertyItem & { modelUrl: string } =>
+        !!i.modelUrl && !glbCacheRef.current.has(i.modelUrl) && !failedModelsRef.current.has(i.modelUrl)
     );
-    if (urls.length === 0) return;
+    const byUrl = new Map(pending.map((i) => [i.modelUrl, i.name] as const));
+    if (byUrl.size === 0) return;
 
     let done = 0;
-    const finish = () => { if (++done === urls.length && !cancelled) setGlbCacheVersion((v) => v + 1); };
-    urls.forEach((url) => {
-      loader.load(
-        url,
-        (gltf) => { if (!cancelled) glbCacheRef.current.set(url, gltf.scene); finish(); },
-        undefined,
-        (err) => { console.warn('Failed to load imported model', url, err); finish(); }
-      );
+    const finish = () => { if (++done === byUrl.size && !cancelled) setGlbCacheVersion((v) => v + 1); };
+    byUrl.forEach((name, ref) => {
+      // Stored refs (idb-model:) resolve to an object URL; cache stays keyed by the ref.
+      resolveModelUrl(ref)
+        .then((src) => loader.loadAsync(src))
+        .then((gltf) => { if (!cancelled) glbCacheRef.current.set(ref, gltf.scene); })
+        .catch((err) => { if (!cancelled) recordModelError(ref, name, err); })
+        .finally(finish);
     });
     return () => { cancelled = true; };
   }, [layout]);
@@ -1283,7 +1298,8 @@ export default function Viewport3D({
     const gpos = groundGeo.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < gpos.count; i++) {
       const x = gpos.getX(i), y = gpos.getY(i);
-      gpos.setZ(i, (Math.sin(x * 0.18) + Math.cos(y * 0.21)) * 0.18 + (Math.random() - 0.5) * 0.05);
+      // Deterministic jitter (was Math.random) so the ground does not reshuffle on every rebuild.
+      gpos.setZ(i, (Math.sin(x * 0.18) + Math.cos(y * 0.21)) * 0.18 + (Math.sin(x * 12.9898 + y * 78.233) * 43758.5453 % 1) * 0.05);
     }
     groundGeo.computeVertexNormals();
     const ground = new THREE.Mesh(
@@ -1347,6 +1363,7 @@ export default function Viewport3D({
       if (!containerRef.current) return;
       const nw = containerRef.current.clientWidth;
       const nh = containerRef.current.clientHeight;
+      if (!nw || !nh) return; // hidden/collapsed panel - avoid an Infinity aspect
       if (camera instanceof THREE.PerspectiveCamera) {
         camera.aspect = nw / nh;
       } else {
@@ -1359,9 +1376,14 @@ export default function Viewport3D({
       camera.updateProjectionMatrix();
       renderer.setSize(nw, nh);
     };
+    // FIX(2026-09-27): follow the container, not just the window, so the canvas
+    // resizes when side panels / tabs change its size.
+    const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(handleResize) : null;
+    resizeObserver?.observe(container);
     window.addEventListener('resize', handleResize);
 
     return () => {
+      resizeObserver?.disconnect();
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationId);
       controls.dispose();
@@ -1413,6 +1435,23 @@ export default function Viewport3D({
       }}
     >
       <Box ref={containerRef} sx={{ width: '100%', height: '100%', touchAction: 'none' }} />
+
+      {modelErrors.length > 0 && (
+        <Box role="alert" sx={{
+          position: 'absolute', top: 8, left: 8, right: 8, zIndex: 7, p: 1, borderRadius: 1,
+          bgcolor: 'rgba(204, 51, 51, 0.92)', color: '#F0EDE4', fontSize: 12, lineHeight: 1.4,
+        }}>
+          <Stack direction="row" alignItems="flex-start" spacing={1}>
+            <Box sx={{ flex: 1 }}>
+              <strong>Some 3D models could not be shown</strong> (the built-in shape is used instead):
+              {modelErrors.map((m) => <Box key={m}>• {m}</Box>)}
+            </Box>
+            <Button size="small" onClick={() => setModelErrors([])} sx={{ color: '#F0EDE4', minWidth: 0 }}>
+              Dismiss
+            </Button>
+          </Stack>
+        </Box>
+      )}
 
       {/* Proof it's a live WebGL scene, not a static image — addresses "is the 3D real". */}
       {webglOk && (
@@ -1518,12 +1557,14 @@ export default function Viewport3D({
                 updateModel(m);
               }}
               onUploadCustom={async (file) => {
+                // Saved to IndexedDB so the model survives a reload when not signed in.
+                const localUrl = await saveModelFile(file).catch(() => URL.createObjectURL(file));
                 const localModel: CoopModelConfig = {
                   id: `custom-${Date.now()}`,
                   name: file.name.replace(/\.(glb|gltf)$/i, ''),
                   size: 'custom',
                   dimensions: model.dimensions,
-                  modelUrl: URL.createObjectURL(file),
+                  modelUrl: localUrl,
                   isCustom: true,
                 };
                 const userId = auth.currentUser?.uid;

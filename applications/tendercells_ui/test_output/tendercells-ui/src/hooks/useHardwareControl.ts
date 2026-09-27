@@ -8,28 +8,12 @@
 // - Exposes live arm/gantry sub-state getters for sliders + 3D viewport.
 
 import { useCallback, useState } from 'react';
-import { auth } from '../lib/firebase/firebaseApp';
+import { MQTT_API_BASE as API_BASE, hardwareAuthHeaders as authHeaders } from '../lib/api/hardwareApi';
 
 interface HardwareControlState {
   isLoading: boolean;
   error: string | null;
   success: boolean;
-}
-
-// Default matches the API server (PORT 4000; 4100 on Windows). Override via env.
-const API_BASE = import.meta.env.VITE_MQTT_API_BASE_URL || 'http://localhost:4000/api/mqtt';
-
-// Attach the Firebase ID token when a user is signed in. Returns base headers in
-// demo/LAN mode (no current user) so offline classroom flows keep working.
-async function authHeaders(): Promise<Record<string, string>> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  try {
-    const token = await auth.currentUser?.getIdToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
-  } catch {
-    /* no auth available — demo mode */
-  }
-  return headers;
 }
 
 export const useHardwareControl = (deviceId: string) => {

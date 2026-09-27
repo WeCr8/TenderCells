@@ -1,5 +1,6 @@
 // DiagnosticsPage.tsx — Fault codes reference, MQTT status, device health
 import { useEffect, useState } from 'react';
+import { MQTT_API_BASE } from '../lib/api/hardwareApi';
 import {
   Box, Paper, Grid, Stack, Typography, Chip, Accordion,
   AccordionSummary, AccordionDetails, CircularProgress, Alert,
@@ -80,7 +81,7 @@ export default function DiagnosticsPage() {
   const [mqttStatus, setMqttStatus] = useState<'checking' | 'connected' | 'offline'>('checking');
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/mqtt/status')
+    fetch(`${MQTT_API_BASE}/mqtt/status`)
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(() => setMqttStatus('connected'))
       .catch(() => setMqttStatus('offline'));
@@ -110,7 +111,7 @@ export default function DiagnosticsPage() {
           </Stack>
           <Grid container spacing={2}>
             {[
-              { label: 'Express API', url: 'http://localhost:3001/api/mqtt', status: mqttStatus },
+              { label: 'Express API', url: MQTT_API_BASE, status: mqttStatus },
               { label: 'MQTT Broker', url: 'mqtt://localhost:1883', status: mqttStatus },
             ].map(item => (
               <Grid item xs={12} sm={6} key={item.label}>

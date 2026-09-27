@@ -1,5 +1,6 @@
 // AnalyticsPage.tsx — Telemetry history, usage stats, trend charts (simulated)
 import { useState, useMemo } from 'react';
+import { HARDWARE_API_ORIGIN } from '../lib/api/hardwareApi';
 import {
   Box, Paper, Grid, Stack, Typography, Chip, ToggleButtonGroup,
   ToggleButton, Select, MenuItem, FormControl, InputLabel,
@@ -235,7 +236,7 @@ export default function AnalyticsPage() {
         <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2 }}>
           <Typography sx={{ color: C.goldMuted, fontSize: 12 }}>
             📊 Charts show simulated data. Live telemetry requires the Express API running at{' '}
-            <Box component="code" sx={{ color: C.accent }}>http://localhost:3001</Box> and an MQTT-connected device.
+            <Box component="code" sx={{ color: C.accent }}>{HARDWARE_API_ORIGIN}</Box> and an MQTT-connected device.
             Data will auto-populate once hardware is online.
           </Typography>
         </Paper>

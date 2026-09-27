@@ -58,6 +58,7 @@ import {
 } from '../components/property/propertyLayoutStore';
 import Viewport3D from '../components/viewport/Viewport3D';
 import FarmBotBridgePanel from '../components/garden/FarmBotBridgePanel';
+import { saveModelFile } from '../lib/three/modelStore';
 import { useProducts } from '../hooks/useProducts';
 import './PropertyLayoutBuilder.css';
 
@@ -108,6 +109,21 @@ const TYPE_LABELS: Record<string, string> = {
 const GARDEN_HW_TYPES = new Set<string>([
   'farmbot-genesis', 'farmbot-genesis-xl', 'aquaponics', 'hydroponics', 'greenhouse',
 ]);
+
+// Any garden on the map can be handed to FarmBot: garden devices plus plain
+// garden plots / crop rows drawn as obstacles.
+const isGardenItem = (item: { type: string }) =>
+  GARDEN_HW_TYPES.has(item.type) || item.type === 'garden' || item.type === 'crop-row';
+
+// Above this, warn before attaching: big GLBs are slow to parse on phones.
+const MAX_MODEL_BYTES = 60 * 1024 * 1024;
+
+/** Type-specific copy for the "attach a 3D model" block in the item editor. */
+function modelAttachCopy(type: string, label: string): { title: string; fallback: string } {
+  if (GARDEN_HW_TYPES.has(type)) return { title: '🌱 Import full 3D scene (Genesis world)', fallback: `the built-in ${label}` };
+  if (type === 'roaming-roost') return { title: '🤖 Attach robot model', fallback: 'the built-in Roaming Roost shape' };
+  return { title: `📦 Attach ${label} 3D model`, fallback: `the built-in ${label} shape` };
+}
 
 // Obstacle types that the Roaming Roost must avoid
 const ROAMING_BLOCKED_TYPES = new Set(['tree', 'rock', 'pond', 'fence', 'no-go-zone']);
@@ -1112,9 +1128,15 @@ export default function PropertyLayoutBuilder() {
                     >
                       {isDrawingPath ? 'Drag on map…' : 'Draw Path'}
                     </Button>
-                    <Button size="small" variant="contained" fullWidth startIcon={<PlayArrowIcon />} sx={{ bgcolor: '#4A7C59' }}>
-                      Simulate Route
-                    </Button>
+                    {/* Disabled until the patrol animation lands (TASKS.md: Robot OS Milestone 1
+                        step 3 wires this onClick) - it was a clickable no-op before. */}
+                    <Tooltip title="Route playback is coming in the next Robot OS milestone">
+                      <span style={{ flex: 1, display: 'flex' }}>
+                        <Button size="small" variant="contained" fullWidth startIcon={<PlayArrowIcon />} disabled sx={{ bgcolor: '#4A7C59' }}>
+                          Simulate Route
+                        </Button>
+                      </span>
+                    </Tooltip>
                   </Stack>
                 )}
               </Paper>
@@ -1122,8 +1144,8 @@ export default function PropertyLayoutBuilder() {
 
             {/* FarmBot bridge — control handed off to FarmBot's own web app (we do not
                 reimplement FarmBot, and do not embed their CC-BY-NC logo). */}
-            {selectedItem && (selectedItem.type === 'farmbot-genesis' || selectedItem.type === 'farmbot-genesis-xl') && (
-              <FarmBotBridgePanel item={selectedItem} />
+            {selectedItem && isGardenItem(selectedItem) && (
+              <FarmBotBridgePanel key={selectedItem.id} item={selectedItem} />
             )}
 
             {/* Items List */}
@@ -1341,73 +1363,54 @@ export default function PropertyLayoutBuilder() {
                 </Grid>
               )}
 
-              {/* Gardens: import a full 3D scene (e.g. a FarmBot "Genesis" world). GLB
-                  only — runtime-loadable. The model replaces the procedural mesh and is
-                  fitted to the item footprint; resize the item to scale the world. */}
-              {editingItem.kind === 'hardware' && GARDEN_HW_TYPES.has(editingItem.type) && (
-                <Grid item xs={12}>
-                  <Box sx={{ bgcolor: alpha('#7CB342', 0.08), border: `1px solid ${alpha('#7CB342', 0.35)}`, borderRadius: 1, p: 1.5 }}>
-                    <Typography variant="caption" sx={{ color: '#9CCC65', fontWeight: 700, display: 'block', mb: 0.75 }}>
-                      🌱 Import full 3D scene (Genesis world)
-                    </Typography>
-                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                      <Button component="label" size="small" variant="outlined"
-                        sx={{ borderColor: '#4A7C59', color: '#9CCC65' }}>
-                        {editingItem.modelUrl ? 'Replace model' : 'Choose .glb'}
-                        <input hidden type="file" accept=".glb,model/gltf-binary"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            if (!/\.glb$/i.test(file.name)) { alert('GLB only. Export your scene as glTF Binary (.glb).'); return; }
-                            const url = URL.createObjectURL(file);
-                            setEditingItem((cur) => cur ? { ...cur, modelUrl: url, name: cur.name || file.name.replace(/\.glb$/i, '') } : cur);
-                          }} />
-                      </Button>
-                      {editingItem.modelUrl && (
-                        <Chip label="Model attached" size="small" onDelete={() => setEditingItem((cur) => cur ? { ...cur, modelUrl: undefined } : cur)}
-                          sx={{ bgcolor: alpha('#7CB342', 0.18), color: '#9CCC65' }} />
-                      )}
-                    </Stack>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
-                      No model = the built-in {TYPE_LABELS[editingItem.type]} is shown. Convert OBJ/FBX/USD to GLB first (Blender → Export → glTF Binary).
-                    </Typography>
-                  </Box>
-                </Grid>
-              )}
-
-              {/* Roaming Roost: attach the robot's own model (not a whole-scene replacement
-                  like the garden block above) - same proven upload -> modelUrl -> Viewport3D
-                  GLTFLoader path. */}
-              {editingItem.kind === 'hardware' && editingItem.type === 'roaming-roost' && (
-                <Grid item xs={12}>
-                  <Box sx={{ bgcolor: alpha('#7CB342', 0.08), border: `1px solid ${alpha('#7CB342', 0.35)}`, borderRadius: 1, p: 1.5 }}>
-                    <Typography variant="caption" sx={{ color: '#9CCC65', fontWeight: 700, display: 'block', mb: 0.75 }}>
-                      🤖 Attach robot model
-                    </Typography>
-                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                      <Button component="label" size="small" variant="outlined"
-                        sx={{ borderColor: '#4A7C59', color: '#9CCC65' }}>
-                        {editingItem.modelUrl ? 'Replace model' : 'Choose .glb'}
-                        <input hidden type="file" accept=".glb,model/gltf-binary"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            if (!/\.glb$/i.test(file.name)) { alert('GLB only. Export your model as glTF Binary (.glb).'); return; }
-                            const url = URL.createObjectURL(file);
-                            setEditingItem((cur) => cur ? { ...cur, modelUrl: url, name: cur.name || file.name.replace(/\.glb$/i, '') } : cur);
-                          }} />
-                      </Button>
-                      {editingItem.modelUrl && (
-                        <Chip label="Model attached" size="small" onDelete={() => setEditingItem((cur) => cur ? { ...cur, modelUrl: undefined } : cur)}
-                          sx={{ bgcolor: alpha('#7CB342', 0.18), color: '#9CCC65' }} />
-                      )}
-                    </Stack>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
-                      No model = the built-in Roaming Roost shape is shown. Convert OBJ/FBX/USD to GLB first (Blender → Export → glTF Binary).
-                    </Typography>
-                  </Box>
-                </Grid>
-              )}
+              {/* Attach a GLB to any hardware item, labelled by type: gardens import a
+                  whole scene (e.g. a FarmBot "Genesis" world), Roaming Roost attaches its
+                  robot body, everything else its device model. Same upload -> modelUrl ->
+                  Viewport3D GLTFLoader path. FIX(2026-09-27): the file is saved to
+                  IndexedDB (modelStore) - the old blob: URL was lost on every reload -
+                  and every hardware type can attach a model, not just gardens/Roost. */}
+              {editingItem.kind === 'hardware' && (() => {
+                const copy = modelAttachCopy(editingItem.type, TYPE_LABELS[editingItem.type] || editingItem.type);
+                return (
+                  <Grid item xs={12}>
+                    <Box sx={{ bgcolor: alpha('#7CB342', 0.08), border: `1px solid ${alpha('#7CB342', 0.35)}`, borderRadius: 1, p: 1.5 }}>
+                      <Typography variant="caption" sx={{ color: '#9CCC65', fontWeight: 700, display: 'block', mb: 0.75 }}>
+                        {copy.title}
+                      </Typography>
+                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                        <Button component="label" size="small" variant="outlined"
+                          sx={{ borderColor: '#4A7C59', color: '#9CCC65' }}>
+                          {editingItem.modelUrl ? 'Replace model' : 'Choose .glb'}
+                          <input hidden type="file" accept=".glb,model/gltf-binary"
+                            onChange={async (e) => {
+                              const input = e.currentTarget;
+                              const file = input.files?.[0];
+                              input.value = ''; // allow re-choosing the same file
+                              if (!file) return;
+                              if (!/\.glb$/i.test(file.name)) { alert('GLB only. Export your model as glTF Binary (.glb).'); return; }
+                              if (file.size > MAX_MODEL_BYTES && !confirm(`${(file.size / 1048576).toFixed(0)} MB is a large model and may be slow on phones. Attach anyway?`)) return;
+                              let ref: string;
+                              try {
+                                ref = await saveModelFile(file);
+                              } catch {
+                                alert('This browser could not save the model (private mode or storage full). It will show until you reload.');
+                                ref = URL.createObjectURL(file);
+                              }
+                              setEditingItem((cur) => cur ? { ...cur, modelUrl: ref, name: cur.name || file.name.replace(/\.glb$/i, '') } : cur);
+                            }} />
+                        </Button>
+                        {editingItem.modelUrl && (
+                          <Chip label="Model attached" size="small" onDelete={() => setEditingItem((cur) => cur ? { ...cur, modelUrl: undefined } : cur)}
+                            sx={{ bgcolor: alpha('#7CB342', 0.18), color: '#9CCC65' }} />
+                        )}
+                      </Stack>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
+                        No model = {copy.fallback} is shown. Draco/Meshopt-compressed GLBs are supported. Convert OBJ/FBX/USD to GLB first (Blender → Export → glTF Binary).
+                      </Typography>
+                    </Box>
+                  </Grid>
+                );
+              })()}
             </Grid>
           )}
         </DialogContent>

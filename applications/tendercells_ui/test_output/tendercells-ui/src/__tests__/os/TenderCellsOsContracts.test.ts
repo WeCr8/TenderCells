@@ -134,4 +134,11 @@ describe('TenderCells OS contracts', () => {
     expect(audit).toContain('android');
     expect(audit).toContain('ios');
   });
+
+  it('keeps non-commercial weed datasets out of production guidance', () => {
+    const weedDocs = readProjectFile('../../../../docs/WEED_PATROL.md');
+    expect(weedDocs).toContain('CottonWeedDet12');
+    expect(weedDocs).toContain('CC BY-NC 4.0 prohibits commercial use');
+    expect(weedDocs).toContain('do not bundle it or train production TenderCells models from it');
+  });
 });

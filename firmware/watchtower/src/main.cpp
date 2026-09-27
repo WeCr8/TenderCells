@@ -60,6 +60,22 @@ static const int CAMERA_COUNT = WATCHTOWER_CAMERAS;
 // 1 cam → forward only; 2 → 180° apart; 3 → 120° apart (full perimeter).
 static const int CAMERA_BEARINGS_3[3] = {0, 120, 240};
 static const int CAMERA_BEARINGS_2[2] = {0, 180};
+// Where camera 0 points on the property map (degrees clockwise from map north / "up"),
+// set per install with -DTOWER_HEADING_DEG=... so alerts can be placed on the 3D map.
+#ifndef TOWER_HEADING_DEG
+#define TOWER_HEADING_DEG 0
+#endif
+static const float CAMERA_HFOV_DEG = 120.0f;  // wide-angle lens (CLAUDE.md coverage calc)
+
+// Map bearing of a detection: tower heading + camera mount bearing + the object's
+// horizontal offset in the frame (bboxCenterX 0..1, 0.5 = straight ahead).
+static float detectionBearing(int cam, float bboxCenterX) {
+  int mount = CAMERA_COUNT == 3 ? CAMERA_BEARINGS_3[cam] : CAMERA_COUNT == 2 ? CAMERA_BEARINGS_2[cam] : 0;
+  float b = TOWER_HEADING_DEG + mount + (bboxCenterX - 0.5f) * CAMERA_HFOV_DEG;
+  while (b < 0) b += 360.0f;
+  while (b >= 360.0f) b -= 360.0f;
+  return b;
+}
 
 // — State machine —
 enum class SystemState { BOOT, CONNECTING, IDLE, RUNNING, ERROR, ESTOP };
@@ -190,10 +206,12 @@ void handleRunning() {
   // Capture and run inference on each installed camera (1..CAMERA_COUNT).
   // Stub: replace with actual camera_capture(i) + model inference per frame.
   float maxConfidence = 0.0f;
+  int maxCam = 0;
+  float maxBboxX = 0.5f;  // detection's horizontal centre in the frame, 0..1
   if (modelAvailable) {
     for (int cam = 0; cam < CAMERA_COUNT; cam++) {
-      // float c = runInference(frameBuffer[cam], frameLen[cam]);
-      // if (c > maxConfidence) maxConfidence = c;
+      // float c = runInference(frameBuffer[cam], frameLen[cam], &bboxX);
+      // if (c > maxConfidence) { maxConfidence = c; maxCam = cam; maxBboxX = bboxX; }
       // Stub returns 0 until real camera integration
     }
   }
@@ -210,6 +228,8 @@ void handleRunning() {
     doc["type"]       = "predator";
     doc["confidence"] = maxConfidence;
     doc["deviceId"]   = DEVICE_ID;
+    doc["camera"]     = maxCam;
+    doc["bearingDeg"] = detectionBearing(maxCam, maxBboxX);  // placed on the 3D map
     doc["ts"]         = millis();
     char buf[256];
     serializeJson(doc, buf, sizeof(buf));

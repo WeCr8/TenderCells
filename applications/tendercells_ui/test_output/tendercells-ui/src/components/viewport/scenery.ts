@@ -7,6 +7,7 @@
 // and the yard gets terrain presets, a surrounding field, grass tufts and a tree line
 // instead of a flat green slab.
 import * as THREE from 'three';
+import { heightAt, TERRAIN_KINDS, zoneAt, type TerrainKind, type TerrainLayers, type TerrainZone } from '../property/terrain';
 
 export type TerrainPreset = 'lawn' | 'pasture' | 'dry' | 'snow';
 
@@ -115,6 +116,76 @@ interface SceneryOptions {
   viewMode: '2d' | '3d';
   preset: TerrainPreset;
   cameraFar: number;
+  /** Terrain zones + elevation (property coords); omitted = flat single-preset yard. */
+  terrain?: TerrainLayers;
+}
+
+/** Scene-space ground height function: (sceneX, sceneZ) -> y, feet. */
+export type SceneHeightFn = (x: number, z: number) => number;
+
+/**
+ * Ground height in scene coordinates (the scene is centred on the property).
+ *
+ * @param terrain - Zones / elevation points / grid in property feet
+ * @param widthFt - Property width
+ * @param depthFt - Property depth
+ */
+export function sceneHeightFn(terrain: TerrainLayers | undefined, widthFt: number, depthFt: number): SceneHeightFn {
+  if (!terrain) return () => 0;
+  return (x, z) => heightAt(terrain, x + widthFt / 2, z + depthFt / 2);
+}
+
+const GRASSY: ReadonlySet<TerrainKind> = new Set(['lawn', 'pasture', 'woods', 'wetland']);
+
+function zoneTexture(kind: TerrainKind): THREE.CanvasTexture {
+  const rnd = seeded(kind.length * 97 + kind.charCodeAt(0));
+  const s = 128;
+  const c = document.createElement('canvas');
+  c.width = c.height = s;
+  const ctx = c.getContext('2d')!;
+  const base = new THREE.Color(TERRAIN_KINDS[kind].color);
+  ctx.fillStyle = `#${base.getHexString()}`;
+  ctx.fillRect(0, 0, s, s);
+  const coarse = kind === 'gravel' || kind === 'mulch' || kind === 'woods';
+  for (let i = 0; i < (coarse ? 1400 : 2200); i++) {
+    const k = 0.75 + rnd() * 0.5;
+    ctx.fillStyle = `rgb(${Math.min(255, base.r * 255 * k)},${Math.min(255, base.g * 255 * k)},${Math.min(255, base.b * 255 * k)})`;
+    const w = coarse ? 1 + rnd() * (kind === 'mulch' ? 5 : 2.5) : 1;
+    ctx.fillRect(rnd() * s, rnd() * s, w, coarse ? 1 + rnd() * 2 : 1 + rnd() * 1.5);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+/** One zone draped over the terrain, slightly above the ground to avoid z-fighting. */
+function zoneMesh(zone: TerrainZone, W: number, D: number, h: SceneHeightFn): THREE.Mesh {
+  let geo: THREE.BufferGeometry;
+  if (zone.polygon && zone.polygon.length >= 3) {
+    // Shape in the plane's local XY (local y = -scene z).
+    const shape = new THREE.Shape(zone.polygon.map((p) => new THREE.Vector2(p.x - W / 2, -(p.y - D / 2))));
+    geo = new THREE.ShapeGeometry(shape);
+  } else {
+    const segX = Math.max(2, Math.min(64, Math.round(zone.width))), segY = Math.max(2, Math.min(64, Math.round(zone.depth)));
+    geo = new THREE.PlaneGeometry(zone.width, zone.depth, segX, segY);
+    geo.translate(zone.x + zone.width / 2 - W / 2, -(zone.y + zone.depth / 2 - D / 2), 0);
+  }
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < pos.count; i++) pos.setZ(i, h(pos.getX(i), -pos.getY(i)) + 0.05);
+  // World-scale UVs so texture density matches across zones of any size.
+  const uv = new Float32Array(pos.count * 2);
+  for (let i = 0; i < pos.count; i++) { uv[i * 2] = pos.getX(i) / 6; uv[i * 2 + 1] = pos.getY(i) / 6; }
+  geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  geo.computeVertexNormals();
+  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+    map: zoneTexture(zone.kind), roughness: zone.kind === 'paved' ? 0.8 : 1,
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+  }));
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.receiveShadow = true;
+  mesh.name = `terrain-zone-${zone.id}`;
+  return mesh;
 }
 
 /**
@@ -126,9 +197,11 @@ interface SceneryOptions {
  * @returns The yard ground mesh (items sit on it)
  */
 export function buildScenery(scene: THREE.Scene, renderer: THREE.WebGLRenderer, opts: SceneryOptions): THREE.Mesh {
-  const { widthFt: W, depthFt: D, viewMode, preset } = opts;
+  const { widthFt: W, depthFt: D, viewMode, preset, terrain } = opts;
   const p = TERRAIN_PRESETS[preset];
   const span = Math.max(W, D);
+  const h = sceneHeightFn(terrain, W, D);
+  const detailed = !!terrain && !!(terrain.elevationPoints?.length || terrain.elevationGrid || terrain.terrainZones?.some((z) => z.elevationFt));
 
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = viewMode === '3d' ? THREE.ACESFilmicToneMapping : THREE.NoToneMapping;
@@ -162,20 +235,24 @@ export function buildScenery(scene: THREE.Scene, renderer: THREE.WebGLRenderer, 
   surround.receiveShadow = true;
   scene.add(surround);
 
-  // The property itself (textured, gently undulating).
+  // The property itself (textured, gently undulating, plus any elevation).
   const tex = groundTexture(preset);
   tex.repeat.set(Math.max(2, Math.round(W / 12)), Math.max(2, Math.round(D / 12)));
-  const geo = new THREE.PlaneGeometry(W, D, 48, 48);
+  const seg = detailed ? Math.min(160, Math.max(48, Math.round(span))) : 48;
+  const geo = new THREE.PlaneGeometry(W, D, seg, seg);
   const pos = geo.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), y = pos.getY(i);
-    pos.setZ(i, (Math.sin(x * 0.18) + Math.cos(y * 0.21)) * 0.12);
+    pos.setZ(i, (Math.sin(x * 0.18) + Math.cos(y * 0.21)) * 0.12 + h(x, -y));
   }
   geo.computeVertexNormals();
   const ground = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 }));
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   scene.add(ground);
+
+  // Terrain zones (garden soil, mulch, gravel ...) draped over the ground.
+  (terrain?.terrainZones ?? []).forEach((z) => scene.add(zoneMesh(z, W, D, h)));
 
   if (viewMode === '2d') return ground;
 
@@ -190,15 +267,21 @@ export function buildScenery(scene: THREE.Scene, renderer: THREE.WebGLRenderer, 
       tuftCount,
     );
     const m = new THREE.Matrix4();
+    let placed = 0;
     for (let i = 0; i < tuftCount; i++) {
       const s = 0.6 + rnd() * 0.9;
+      const tx = (rnd() - 0.5) * W, tz = (rnd() - 0.5) * D;
+      // No grass tufts on gravel, mulch, soil, sand or paving.
+      const zone = terrain ? zoneAt(terrain, tx + W / 2, tz + D / 2) : undefined;
+      if (zone && !GRASSY.has(zone.kind)) continue;
       m.compose(
-        new THREE.Vector3((rnd() - 0.5) * W, 0.18 * s, (rnd() - 0.5) * D),
+        new THREE.Vector3(tx, 0.18 * s + h(tx, tz), tz),
         new THREE.Quaternion().setFromEuler(new THREE.Euler(0, rnd() * Math.PI, (rnd() - 0.5) * 0.4)),
         new THREE.Vector3(s, s, s),
       );
-      tufts.setMatrixAt(i, m);
+      tufts.setMatrixAt(placed++, m);
     }
+    tufts.count = placed;
     tufts.receiveShadow = true;
     scene.add(tufts);
   }

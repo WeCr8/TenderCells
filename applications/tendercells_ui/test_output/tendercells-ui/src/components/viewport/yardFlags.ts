@@ -8,7 +8,7 @@
 // rebuild); animateYardFlags() bobs pennants, pulses pending weeds and walks birds.
 import * as THREE from 'three';
 import { makeTextSprite } from './labels';
-import { FLAG_COLORS, STATUS_COLORS, roamingFrom, type YardFlag } from '../../lib/yard/yardTypes';
+import { FLAG_COLORS, STATUS_COLORS, WATCHTOWER_RANGE_FT, roamingFrom, type YardFlag } from '../../lib/yard/yardTypes';
 
 const MM_PER_FT = 304.8;
 
@@ -125,12 +125,13 @@ function makeBird(): THREE.Group {
   return bird;
 }
 
-function roostHeadcount(flag: YardFlag, item: FlagItem, layout: FlagLayout): THREE.Group {
+function roostHeadcount(flag: YardFlag, item: FlagItem, layout: FlagLayout, groundAt: (x: number, z: number) => number): THREE.Group {
   const g = new THREE.Group();
   const { x, z } = center(item, layout);
   const label = makeTextSprite({ title: flag.title, subtitle: flag.detail, accent: FLAG_COLORS.headcount, screenSize: 0.055 });
-  label.position.set(x, 6.2, z);
-  label.userData.bob = { base: 6.2, phase: 0 };
+  const base = 6.2 + groundAt(x, z);
+  label.position.set(x, base, z);
+  label.userData.bob = { base, phase: 0 };
   g.add(label);
   // Roaming birds wander inside the patrol ring, outside the roost footprint.
   const patrolR = item.scan?.radiusFt ?? Math.max(item.width, item.depth) * 3.5;
@@ -144,9 +145,85 @@ function roostHeadcount(flag: YardFlag, item: FlagItem, layout: FlagLayout): THR
       radius: inner + (patrolR - inner) * (0.3 + ((i * 37) % 60) / 100),
       speed: 0.05 + ((i * 13) % 10) / 200,
       phase: i * 1.3,
+      groundAt,
     };
     g.add(bird);
   }
+  return g;
+}
+
+/** Scene direction for a map bearing (0 = north / up on the 2D map = scene -z, clockwise). */
+const bearingDir = (deg: number) => {
+  const r = THREE.MathUtils.degToRad(deg);
+  return { x: Math.sin(r), z: -Math.cos(r) };
+};
+
+/** Camera coverage sectors around a WatchTower (3 cameras × 120°, heading 0 = camera 1 north). */
+function watchtowerCoverage(item: FlagItem, layout: FlagLayout, groundAt: (x: number, z: number) => number): THREE.Group {
+  const g = new THREE.Group();
+  const { x, z } = center(item, layout);
+  const range = item.scan?.radiusFt ?? WATCHTOWER_RANGE_FT;
+  const tints = [0xcc3333, 0xe8a020, 0xc8b882];
+  for (let cam = 0; cam < 3; cam++) {
+    const c = cam * 120;
+    // CircleGeometry angles run counter-clockwise from +x in the plane's local XY; after
+    // rotating flat, local angle θ points along bearing 90° - θ.
+    const sector = new THREE.Mesh(
+      new THREE.CircleGeometry(range, 40, THREE.MathUtils.degToRad(90 - (c + 60)), THREE.MathUtils.degToRad(120)),
+      new THREE.MeshBasicMaterial({ color: tints[cam], transparent: true, opacity: 0.08, depthWrite: false, side: THREE.DoubleSide }),
+    );
+    sector.rotation.x = -Math.PI / 2;
+    sector.position.set(x, groundAt(x, z) + 0.15, z);
+    g.add(sector);
+    const edge = bearingDir(c + 60);
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, groundAt(x, z) + 0.2, z),
+        new THREE.Vector3(x + edge.x * range, groundAt(x + edge.x * range, z + edge.z * range) + 0.2, z + edge.z * range)]),
+      new THREE.LineBasicMaterial({ color: 0xcc3333, transparent: true, opacity: 0.35 }),
+    );
+    g.add(line);
+  }
+  g.name = 'watchtower-coverage';
+  return g;
+}
+
+/** A predator detection placed by bearing (and distance) from its tower. */
+function predatorMarker(flag: YardFlag, item: FlagItem, layout: FlagLayout, groundAt: (x: number, z: number) => number): THREE.Group {
+  const g = new THREE.Group();
+  const { x, z } = center(item, layout);
+  const range = item.scan?.radiusFt ?? WATCHTOWER_RANGE_FT;
+  const d = flag.distanceFt ?? range * 0.6;
+  const dir = bearingDir(flag.bearingDeg ?? 0);
+  const px = x + dir.x * d, pz = z + dir.z * d, py = groundAt(px, pz);
+  const active = flag.status === 'active';
+  const color = new THREE.Color(active ? FLAG_COLORS.alert : '#8A7D55');
+  // Sight line from the tower (distance is an estimate when the camera has no range).
+  g.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, groundAt(x, z) + 4, z), new THREE.Vector3(px, py + 0.6, pz)]),
+    new THREE.LineDashedMaterial({ color, dashSize: 1, gapSize: 0.6, transparent: true, opacity: active ? 0.8 : 0.3 }),
+  ).computeLineDistances());
+  const body = new THREE.Mesh(new THREE.SphereGeometry(active ? 0.7 : 0.35, 16, 12),
+    new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: active ? 0.6 : 0.1 }));
+  body.position.set(px, py + 0.7, pz);
+  g.add(body);
+  if (active) {
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.2, 32),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.set(px, py + 0.08, pz);
+    ring.userData.pulse = true;
+    g.add(ring);
+    const mins = Math.max(0, Math.round((Date.now() - flag.ts) / 60000));
+    const label = makeTextSprite({
+      title: `${flag.label ?? 'Predator'}${flag.confidence != null ? ` ${Math.round(flag.confidence * 100)}%` : ''}`,
+      subtitle: `${mins ? `${mins} min ago` : 'just now'}${flag.distanceFt != null ? ` · ~${Math.round(flag.distanceFt)} ft` : ''}`,
+      accent: FLAG_COLORS.alert, screenSize: 0.045,
+    });
+    label.position.set(px, py + 2.4, pz);
+    label.userData.bob = { base: py + 2.4, phase: 1 };
+    g.add(label);
+  }
+  g.userData.flagId = `${flag.deviceId}:${flag.id}`;
   return g;
 }
 
@@ -157,18 +234,31 @@ function roostHeadcount(flag: YardFlag, item: FlagItem, layout: FlagLayout): THR
  * @param items  - Items as placed on the map (feet)
  * @param layout - Property size
  */
-export function buildYardFlags(flags: YardFlag[], items: FlagItem[], layout: FlagLayout): THREE.Group {
+export function buildYardFlags(flags: YardFlag[], items: FlagItem[], layout: FlagLayout,
+  groundAt: (x: number, z: number) => number = () => 0): THREE.Group {
   const group = new THREE.Group();
   group.name = 'yard-flags';
   const byId = new Map(items.map((i) => [i.id, i]));
+  // WatchTower camera coverage is always shown so detections have context.
+  items.filter((i) => i.type === 'watchtower').forEach((i) => group.add(watchtowerCoverage(i, layout, groundAt)));
   for (const flag of flags) {
     const item = byId.get(flag.itemId);
     if (!item) continue;
     let obj: THREE.Object3D | null = null;
+    if (flag.type === 'alert' && flag.bearingDeg != null && item.type === 'watchtower') {
+      group.add(predatorMarker(flag, item, layout, groundAt)); // placed in scene coords already
+      continue;
+    }
     if (flag.type === 'weed_detected') obj = weedPin(flag, item, layout);
-    else if (flag.type === 'headcount') obj = roostHeadcount(flag, item, layout);
+    else if (flag.type === 'headcount') obj = roostHeadcount(flag, item, layout, groundAt);
     else if (flag.status === 'active' || flag.status === 'pending_review') obj = stationFlag(flag, item, layout);
-    if (obj) group.add(obj);
+    if (!obj) continue;
+    // Stand on the terrain: station flags / pins at their own spot, gardens level at the bed centre.
+    if (flag.type !== 'headcount') {
+      const c = center(item, layout);
+      obj.position.y = flag.type === 'weed_detected' ? groundAt(c.x, c.z) : groundAt(obj.position.x, obj.position.z);
+    }
+    group.add(obj);
   }
   return group;
 }
@@ -184,7 +274,8 @@ export function animateYardFlags(group: THREE.Object3D, tSec: number): void {
       const w = d.wander;
       const angle = w.angle + tSec * w.speed;
       const r = Math.min(w.outer, Math.max(w.inner, w.radius + Math.sin(tSec * 0.4 + w.phase) * 1.5));
-      o.position.set(w.cx + Math.cos(angle) * r, 0, w.cz + Math.sin(angle) * r);
+      const bx = w.cx + Math.cos(angle) * r, bz = w.cz + Math.sin(angle) * r;
+      o.position.set(bx, w.groundAt ? w.groundAt(bx, bz) : 0, bz);
       // Face the direction of travel; peck now and then.
       o.rotation.y = -angle - Math.PI / 2;
       const head = o.children[1];

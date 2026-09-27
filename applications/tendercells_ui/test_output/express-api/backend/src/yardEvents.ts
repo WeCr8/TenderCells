@@ -25,6 +25,9 @@ export interface YardEvent {
   itemId?: string;           // property-layout item the flag belongs to
   bedMm?: { x: number; y: number }; // position inside the item footprint (weeds)
   station?: string;          // e.g. "nest box 2"
+  label?: string;            // what was seen, e.g. "fox" (predator alerts)
+  bearingDeg?: number;       // from the reporting device, 0 = map north (up), clockwise
+  distanceFt?: number;       // estimated range from the device, when known
   ts: number;
   updatedAt: number;
 }
@@ -71,6 +74,9 @@ export function ingestEvent(deviceId: string, payload: Record<string, unknown>):
     itemId: str(payload.itemId, 64) ?? prev?.itemId,
     bedMm: bedMm ?? prev?.bedMm,
     station: str(payload.station) ?? prev?.station,
+    label: str(payload.label, 40) ?? prev?.label,
+    bearingDeg: num(payload.bearingDeg) !== undefined ? (((payload.bearingDeg as number) % 360) + 360) % 360 : prev?.bearingDeg,
+    distanceFt: num(payload.distanceFt) !== undefined ? Math.max(0, payload.distanceFt as number) : prev?.distanceFt,
     ts: prev?.ts ?? (num(payload.ts) ?? now),
     updatedAt: now,
   });
@@ -103,6 +109,32 @@ export function setEventStatus(deviceId: string, id: string, status: YardEventSt
   const e = getEvent(deviceId, id);
   if (e) { e.status = status; e.updatedAt = Date.now(); }
   return e;
+}
+
+/**
+ * Turn a WatchTower predator alert (tc/{id}/alert) into a map event so the 3D view can
+ * place it: bearing (and distance, when the camera can estimate it) from the tower.
+ *
+ * @returns An error string when the alert is not a predator detection, otherwise null
+ */
+export function ingestPredatorAlert(deviceId: string, payload: Record<string, unknown>): string | null {
+  if (payload.type !== "predator") return "not a predator alert";
+  const label = str(payload.label, 40) ?? str(payload.species, 40) ?? "Predator";
+  const conf = num(payload.confidence);
+  return ingestEvent(deviceId, {
+    id: `predator-${Date.now()}`,
+    type: "alert",
+    status: "active",
+    title: `${label[0].toUpperCase()}${label.slice(1)} detected`,
+    detail: [num(payload.camera) !== undefined ? `camera ${(payload.camera as number) + 1}` : undefined,
+      num(payload.distanceFt) !== undefined ? `~${Math.round(payload.distanceFt as number)} ft away` : undefined]
+      .filter(Boolean).join(" · ") || undefined,
+    label,
+    confidence: conf,
+    bearingDeg: payload.bearingDeg,
+    distanceFt: payload.distanceFt,
+    station: "WatchTower",
+  });
 }
 
 // ── command acknowledgements ──────────────────────────────────────────────────

@@ -38,6 +38,8 @@ import {
   Agriculture as AgricultureIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
+  Terrain as TerrainIcon,
+  Security as SecurityIcon,
 } from '@mui/icons-material';
 import {
   ALL_SHAPES,
@@ -49,6 +51,8 @@ import {
   SHAPE_LABELS,
   loadPropertyLayout,
   savePropertyLayout,
+  PROPERTY_LAYOUT_EVENT,
+  type PropertyLayoutState,
   type HardwareType,
   type ItemShape,
   type ObstacleType,
@@ -57,6 +61,9 @@ import {
   type PropertyItemKind,
 } from '../components/property/propertyLayoutStore';
 import Viewport3D from '../components/viewport/Viewport3D';
+import { TerrainEditorPanel, TerrainSvgLayer } from '../components/property/TerrainLayer';
+import WatchTowerSvgLayer from '../components/property/WatchTowerLayer';
+import { useYardEvents } from '../hooks/useYardEvents';
 import FarmBotBridgePanel from '../components/garden/FarmBotBridgePanel';
 import { saveModelFile } from '../lib/three/modelStore';
 import { hfModelUrl } from '../lib/three/huggingFace';
@@ -147,6 +154,8 @@ export default function PropertyLayoutBuilder() {
   const [dragSnapPos, setDragSnapPos] = useState<{ x: number; y: number; width: number; depth: number } | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
   const [showRoamingLayer, setShowRoamingLayer] = useState(false);
+  const [showTerrainLayer, setShowTerrainLayer] = useState(true);
+  const [showPredatorLayer, setShowPredatorLayer] = useState(true);
   // Draw-to-patrol: click "Draw Path" then drag across the map to author a roaming-roost's
   // patrolPath by hand, the same way a person would sketch a route with a finger on a
   // touchscreen. drawnPath is feet-space points captured while the pointer is held down;
@@ -155,6 +164,9 @@ export default function PropertyLayoutBuilder() {
   const [drawnPath, setDrawnPath] = useState<Array<{ x: number; y: number }>>([]);
 
   const { products } = useProducts();
+  // Predator detections for the WatchTower layer (only polled while the layer is on).
+  const watchtowerItems = useMemo(() => (showPredatorLayer ? items.filter((i) => i.type === 'watchtower') : []), [items, showPredatorLayer]);
+  const { flags: towerFlags } = useYardEvents(watchtowerItems);
 
   // Sync layout items to registered Firestore products.
   // Match priority: 1) existing item with matching productId (stable 1:1 link)
@@ -239,6 +251,18 @@ export default function PropertyLayoutBuilder() {
   useEffect(() => {
     savePropertyLayout({ property, items });
   }, [property, items]);
+
+  // FIX(2026-09-27): the 3D view's Terrain menu saves the layout too, but this editor
+  // never listened, so its next save overwrote the choice. Adopt the base terrain from
+  // other views (only that field, and only when it differs - no save loop).
+  useEffect(() => {
+    const onLayout = (event: Event) => {
+      const next = (event as CustomEvent<PropertyLayoutState>).detail?.property?.terrain;
+      setProperty((p) => (next && p.terrain !== next ? { ...p, terrain: next } : p));
+    };
+    window.addEventListener(PROPERTY_LAYOUT_EVENT, onLayout);
+    return () => window.removeEventListener(PROPERTY_LAYOUT_EVENT, onLayout);
+  }, []);
 
   // Keyboard arrow nudge for selected item
   useEffect(() => {
@@ -593,6 +617,40 @@ export default function PropertyLayoutBuilder() {
               </ToggleButton>
             </Tooltip>
 
+            <Tooltip title={showTerrainLayer ? 'Hide terrain zones and elevation' : 'Show terrain zones and elevation'}>
+              <ToggleButton
+                value="terrain" selected={showTerrainLayer}
+                onChange={() => setShowTerrainLayer((v) => !v)}
+                size="small"
+                sx={{
+                  px: 1.5, border: '1px solid',
+                  borderColor: showTerrainLayer ? '#C8B882' : '#2A5C3B',
+                  color: showTerrainLayer ? '#C8B882' : 'text.secondary',
+                  '&.Mui-selected': { bgcolor: alpha('#C8B882', 0.12), color: '#C8B882' },
+                }}
+              >
+                <TerrainIcon fontSize="small" sx={{ mr: 0.5 }} />
+                Terrain
+              </ToggleButton>
+            </Tooltip>
+
+            <Tooltip title={showPredatorLayer ? 'Hide WatchTower coverage and detections' : 'Show WatchTower coverage and predator detections'}>
+              <ToggleButton
+                value="predators" selected={showPredatorLayer}
+                onChange={() => setShowPredatorLayer((v) => !v)}
+                size="small"
+                sx={{
+                  px: 1.5, border: '1px solid',
+                  borderColor: showPredatorLayer ? '#CC3333' : '#2A5C3B',
+                  color: showPredatorLayer ? '#CC3333' : 'text.secondary',
+                  '&.Mui-selected': { bgcolor: alpha('#CC3333', 0.12), color: '#CC3333' },
+                }}
+              >
+                <SecurityIcon fontSize="small" sx={{ mr: 0.5 }} />
+                Predators
+              </ToggleButton>
+            </Tooltip>
+
             <Button
               variant="contained" size="small" startIcon={<AgricultureIcon />}
               onClick={() => openAddDialog('hardware')}
@@ -780,6 +838,10 @@ export default function PropertyLayoutBuilder() {
                     </text>
                   ) : null
                 )}
+
+                {/* Terrain zones + elevation contours (under the items) */}
+                {showTerrainLayer && <TerrainSvgLayer property={property} scaleX={scaleX} scaleY={scaleY} />}
+                {showPredatorLayer && <WatchTowerSvgLayer items={items} flags={towerFlags} scaleX={scaleX} scaleY={scaleY} />}
 
                 {/* Border */}
                 <rect x={0} y={0} width={mapWidth} height={mapHeight} fill="none" stroke="#2A5C3B" strokeWidth={2} />
@@ -1025,6 +1087,8 @@ export default function PropertyLayoutBuilder() {
                 </Stack>
               </Box>
             </Paper>
+
+            <TerrainEditorPanel property={property} onChange={(updates) => setProperty((p) => ({ ...p, ...updates }))} />
 
             {/* Selected Item Panel */}
             {selectedItem && (

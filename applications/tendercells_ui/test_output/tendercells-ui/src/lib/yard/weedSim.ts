@@ -65,7 +65,8 @@ export function simBed(item: { id: string; width: number; depth: number }, devic
     lastFire: 0,
     robot: {
       state: 'idle', mode: 'simulation', estop: false, error: null, ts: Date.now(),
-      laser: { ...safety, pulseMs: 800, estop: false },
+      // Demo robot = Project Cyclops-style FarmBot Genesis laser head (500 mW 405 nm, Class 3B).
+      laser: { ...safety, pulseMs: 8000, estop: false, profile: 'diode-500mw', laserClass: '3B', wavelengthNm: 405, powerW: 0.5 },
       pass: { running: false, pass: 0, passes: 0, waypoint: 0, waypoints: 0 },
     },
   };
@@ -168,7 +169,10 @@ export function decideSimWeed(itemId: string, eventId: string, decision: 'aim' |
   if (!laser.enclosureClosed) throw new Error('Laser enclosure is open');
   if (now - bed.lastFire < COOLDOWN_MS) throw new Error('Laser cooling down - try again in a moment');
   bed.lastFire = now;
-  Object.assign(weed, { status: 'treated', detail: `Treated (${laser.pulseMs} ms pulse, simulated)`, updatedAt: now });
+  const sizeMm = Number(/(\d+) mm/.exec(weed.detail ?? '')?.[1] ?? 20);
+  // Exposure scales with weed size (2-8 s for a 500 mW diode), like the robot's laser profile.
+  const ms = Math.round(2000 + Math.min(1, Math.max(0, (sizeMm - 10) / 50)) * (laser.pulseMs - 2000));
+  Object.assign(weed, { status: 'treated', detail: `Treated (${ms} ms exposure, simulated)`, updatedAt: now });
   save();
   return 'Weed treated (simulated)';
 }

@@ -167,3 +167,60 @@ def test_service_estop_latches_until_cleared():
     send(svc, "cmd/weed", {"seq": 7, "action": "pass"})
     svc.wait_idle()
     assert pub.acks()[-1] == {"seq": 7, "ok": True}
+
+
+# ── laser profiles + FarmBot Genesis (Project Cyclops) ─────────────────────────
+from weed_patrol import LASER_PROFILES, FarmBotGantry  # noqa: E402
+
+
+def test_profile_exposure_scales_with_weed_size_and_is_bounded():
+    p = LASER_PROFILES["diode-4w"]
+    assert p.exposure_ms(5) == p.min_ms and p.exposure_ms(500) == p.max_ms
+    assert p.min_ms < p.exposure_ms(35) < p.max_ms
+    laser, log = make_laser(student_mode=False, burn_enabled=True, profile="diode-500mw")
+    assert laser.burn(60) == LASER_PROFILES["diode-500mw"].max_ms
+    assert log["laser"] == [True, False]
+    assert laser.status()["laserClass"] == "3B"
+    with pytest.raises(ValueError):
+        make_laser(profile="co2-150w")
+
+
+def test_estop_during_a_long_pulse_cuts_the_laser():
+    holder = {}
+
+    def sleeper(_s):  # E-STOP arrives from another thread mid-pulse
+        holder["laser"].estop()
+
+    laser, log = make_laser(student_mode=False, burn_enabled=True, profile="diode-4w")
+    laser._sleep = sleeper
+    holder["laser"] = laser
+    with pytest.raises(InterlockError, match="E-STOP during pulse"):
+        laser.burn(40)
+    assert log["laser"][-1] is False
+
+
+class FakeFarmBot:
+    def __init__(self):
+        self.calls, self.pins = [], {"7": {"mode": 0, "value": 0}}
+
+    def move(self, **kw):
+        self.calls.append(("move", kw))
+
+    def e_stop(self):
+        self.calls.append(("e_stop",))
+
+    def read_pin(self, pin):
+        self.calls.append(("read_pin", pin))
+
+    def read_status(self, path=None):
+        return self.pins if path == "pins" else {"pins": self.pins}
+
+
+def test_farmbot_gantry_moves_estops_and_reads_pins():
+    bot = FakeFarmBot()
+    g = FarmBotGantry(token=None, bot=bot)
+    g.move_to(120.04, 50, -150)
+    g.stop()
+    assert bot.calls[0] == ("move", {"x": 120.0, "y": 50, "z": -150, "speed": 100})
+    assert ("e_stop",) in bot.calls
+    assert g.pin_value(7) == 0 and g.pin_value(9) is None  # unknown pin -> None (treated as open)

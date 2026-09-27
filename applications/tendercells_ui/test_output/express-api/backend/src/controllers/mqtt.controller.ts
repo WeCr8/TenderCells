@@ -5,7 +5,8 @@
 
 import type { Request, Response } from "express";
 import {
-  getEvent, getPresence, ingestAck, ingestEvent, ingestStatus, listEvents, nextSeq, setEventStatus, touch, waitForAck,
+  getEvent, getPresence, ingestAck, ingestEvent, ingestPredatorAlert, ingestStatus, listEvents, nextSeq, setEventStatus, touch,
+  waitForAck,
 } from "../yardEvents.js";
 import mqtt from "mqtt";
 import { AUTH_ENABLED, type AuthedRequest } from "../middleware/auth.js";
@@ -297,6 +298,8 @@ export class MQTTController {
         alerts.push(payload);
         MQTTController.alerts.set(deviceId, alerts.slice(-100)); // Keep last 100
         MQTTController.mirrorToFirestore("alert", deviceId, payload);
+        // Predator detections also become located map events (not the broadcast echo).
+        if (deviceId !== "broadcast") ingestPredatorAlert(deviceId, payload);
       }
     } catch (error) {
       console.error("Failed to parse MQTT message:", error);

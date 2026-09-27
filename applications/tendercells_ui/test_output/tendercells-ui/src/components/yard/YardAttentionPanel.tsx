@@ -1,7 +1,7 @@
 // YardAttentionPanel.tsx - "Needs attention" list for the station flags on the 3D map.
 //
 // Usage: <YardAttentionPanel flags={flags} act={act} onFocus={...} />
-// Eggs / pickups: "Picked up" clears the flag. Weeds (human in the loop): each
+// Eggs / pickups: "Picked up" clears the flag; WatchTower predator alerts: "Seen it". Weeds (human in the loop): each
 // detection waits for a person - Aim (aiming dot only), Burn (laser, interlocked
 // on the robot) or Not a weed. Aim and Burn move hardware, so they confirm first.
 import { useState } from 'react';
@@ -129,7 +129,7 @@ export default function YardAttentionPanel({ flags, act, onFocus, maxRows = 6, f
                   </>
                 ) : (
                   <Button size="small" variant="outlined" disabled={busy === key} onClick={() => void run(f, 'ack')}
-                    sx={{ color: colors.gold, borderColor: colors.accent }}>Picked up</Button>
+                    sx={{ color: colors.gold, borderColor: colors.accent }}>{f.type === 'alert' ? 'Seen it' : 'Picked up'}</Button>
                 )}
               </Stack>
             </Box>

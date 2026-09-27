@@ -22,7 +22,7 @@ import PageLayout from "../components/PageLayout";
 import { TENDERCELLS_OS_URL } from "../config/appLinks";
 import { useAuthUser } from "../hooks/useAuthUser";
 import { AUTH_CONFIGURED, auth } from "../lib/firebase";
-import { ACCOUNT_TYPES, SCHOOL_FEATURES, SSO_PROVIDERS } from "../lib/sso";
+import { SSO_PROVIDERS } from "../lib/sso";
 import "./AccountPage.css";
 
 type Mode = "login" | "register";
@@ -51,36 +51,28 @@ function SchoolSignIn() {
   );
 }
 
-/** Account type + school features, prepared for educator / student / admin accounts. */
-function AccountTypesAndSchool() {
+function WorkspaceActions() {
   return (
-    <>
-      <div className="account-section">
-        <h2>Account type</h2>
-        <ul className="account-types">
-          {ACCOUNT_TYPES.map((t) => (
-            <li key={t.id} className={t.id === "personal" ? "current" : undefined}>
-              <div>
-                <strong>{t.label}</strong>
-                <span>{t.description}</span>
-              </div>
-              {t.id === "personal" ? <span className="account-badge">Current</span> : <span className="account-soon">Coming soon</span>}
-            </li>
-          ))}
-        </ul>
+    <div className="account-section">
+      <h2>Workspace</h2>
+      <div className="account-workspace-links">
+        <a href="/app/dashboard">
+          <strong>Open workspace</strong>
+          <span>Continue to your dashboard and connected products.</span>
+        </a>
+        <a href="/app/products?register=1">
+          <strong>Add or import a device</strong>
+          <span>Start from a Tender Cells template, local file, or Hugging Face source.</span>
+        </a>
+        <a href="/app/account">
+          <strong>Profile &amp; security</strong>
+          <span>Update your name, verify email, reset your password, or prepare a fresh test workspace.</span>
+        </a>
       </div>
-      <div className="account-section">
-        <h2>School &amp; classroom</h2>
-        <div className="account-school">
-          {SCHOOL_FEATURES.map((f) => (
-            <button key={f.id} type="button" className="account-school-btn" disabled aria-disabled="true" title={`${f.detail} Coming soon.`}>
-              <span><strong>{f.label}</strong><small>{f.detail}</small></span>
-              <span className="account-soon">Coming soon</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </>
+      <p className="account-storage-note">
+        Your sign-in is shared between the website and OS. Workspace products and settings are stored by the OS in this browser unless a connected service says otherwise.
+      </p>
+    </div>
   );
 }
 
@@ -223,10 +215,10 @@ function AccountDetails({ user }: { user: User }) {
         </button>
       </div>
       <p className="account-hint">
-        The OS opens with this account already signed in. Your devices, flocks and schedules live there.
+        The OS opens with this account already signed in.
       </p>
 
-      <AccountTypesAndSchool />
+      <WorkspaceActions />
     </section>
   );
 }

@@ -198,10 +198,14 @@ export default function WeedPatrolPage() {
                       <SafetyChip ok={robot.laser.studentMode} label={robot.laser.studentMode ? 'Student mode (aim only)' : 'Burn mode'} />
                       <SafetyChip ok={!robot.laser.burnEnabled || robot.laser.enclosureClosed} label={robot.laser.enclosureClosed ? 'Enclosure closed' : 'Enclosure open'} />
                       <Chip size="small" label={`Pulse ≤ ${robot.laser.pulseMs} ms`} sx={{ color: C.white, border: `1px solid ${C.accent}` }} />
+                      {robot.laser.laserClass && robot.laser.laserClass !== 'unknown' && (
+                        <Chip size="small" label={`Class ${robot.laser.laserClass}${robot.laser.wavelengthNm ? ` · ${robot.laser.wavelengthNm} nm` : ''}${robot.laser.powerW ? ` · ${robot.laser.powerW} W` : ''}`}
+                          sx={{ color: C.warning, border: `1px solid ${C.warning}` }} />
+                      )}
                     </Stack>
                     <Typography variant="caption" sx={{ color: C.goldMuted }}>
                       The laser fires only when burn is enabled on the robot, student mode is off, the enclosure is closed, E-STOP is clear
-                      and a person approves that exact weed. Class 4 lasers need eye protection and supervision.
+                      and a person approves that exact weed. Class 3B and 4 lasers need wavelength-rated eye protection and supervision.
                     </Typography>
                     {!YARD_LIVE && (
                       <Box sx={{ bgcolor: C.bg, borderRadius: 1, p: 1 }}>

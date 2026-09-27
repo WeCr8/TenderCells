@@ -13,7 +13,10 @@ import {
   Stack,
   Chip,
 } from '@mui/material';
-import { Devices, Google as GoogleIcon, Logout as LogoutIcon } from '@mui/icons-material';
+import { Devices, Google as GoogleIcon, Logout as LogoutIcon, School as SchoolIcon } from '@mui/icons-material';
+
+// The website's account page (same origin in production: tendercells.com/account; the OS is /app).
+const WEBSITE_ACCOUNT_URL = '/account';
 import { useAuth } from '../contexts/useAuth';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/products/ProductCard';
@@ -141,6 +144,22 @@ export default function AccountPage() {
             >
               Continue with Google
             </Button>
+
+            {/* School / district SSO is prepared on the website account page but not live yet. */}
+            <Button
+              fullWidth
+              variant="outlined"
+              disabled
+              startIcon={<SchoolIcon />}
+              sx={{ mb: 1, justifyContent: 'space-between', '&.Mui-disabled': { borderColor: '#4A7C59', color: '#8A7D55' } }}
+              endIcon={<Chip label="Coming soon" size="small" sx={{ height: 20, fontSize: 10, bgcolor: '#0D2B1E', color: '#C8B882' }} />}
+            >
+              School or district sign-in
+            </Button>
+            <Typography variant="caption" sx={{ display: 'block', mb: 1, color: '#8A7D55' }}>
+              Account settings, school rosters and class access live on your{' '}
+              <Box component="a" href={WEBSITE_ACCOUNT_URL} sx={{ color: '#C8B882' }}>Tender Cells account page</Box>.
+            </Typography>
 
             <Divider sx={{ my: 2, borderColor: '#4A7C59' }}>
               <Typography variant="caption" sx={{ color: '#8A7D55' }}>

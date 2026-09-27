@@ -1,3 +1,5 @@
+import type { TerrainLayers } from './terrain';
+
 export type PropertyItemKind = 'hardware' | 'obstacle';
 export type HardwareType =
   | 'chicken-tender'
@@ -34,13 +36,15 @@ export const GARDEN_TYPES: HardwareType[] = [
 ];
 export type ItemShape = 'rect' | 'circle' | 'hexagon' | 'octagon' | 'diamond' | 'rounded';
 
-export interface PropertyConfig {
+// Terrain zones, elevation points and a robot-mapped elevation grid (see terrain.ts)
+// ride on the property config; all optional so older saved layouts still load.
+export interface PropertyConfig extends TerrainLayers {
   name: string;
   widthFt: number;
   depthFt: number;
   gridStepFt: number;
-  // Ground look in the 3D view (lawn | pasture | dry | snow). Optional: older
-  // saved layouts default to lawn.
+  // Base ground look in the 3D view (lawn | pasture | dry | snow) wherever no terrain
+  // zone covers the ground. Optional: older saved layouts default to lawn.
   terrain?: 'lawn' | 'pasture' | 'dry' | 'snow';
 }
 
@@ -174,6 +178,16 @@ export const DEFAULT_PROPERTY: PropertyConfig = {
   widthFt: 80,
   depthFt: 60,
   gridStepFt: 1,
+  // A starter set so the demo shows varied ground; users edit these in Property Layout → Terrain.
+  terrainZones: [
+    { id: 'zone-garden', name: 'Garden soil', kind: 'garden-soil', x: 9, y: 27, width: 11, depth: 16, source: 'user' },
+    { id: 'zone-path', name: 'Gravel path', kind: 'gravel', x: 20, y: 34, width: 36, depth: 3, source: 'user' },
+    { id: 'zone-coop', name: 'Coop run mulch', kind: 'mulch', x: 7, y: 5, width: 11, depth: 10, source: 'user' },
+  ],
+  elevationPoints: [
+    { id: 'elev-knoll', x: 72, y: 44, heightFt: 3, radiusFt: 14, label: 'Back knoll', source: 'user' },
+    { id: 'elev-swale', x: 46, y: 20, heightFt: -1, radiusFt: 8, label: 'Swale by the pond', source: 'user' },
+  ],
 };
 
 export const DEFAULT_ITEMS: PropertyItem[] = [

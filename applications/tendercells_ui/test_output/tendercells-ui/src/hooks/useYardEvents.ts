@@ -19,6 +19,50 @@ import {
 const POLL_MS = 5000;
 const EGG_TYPES = new Set(['chicken-tender', 'duck-dock', 'turkey-tower', 'pigeon-palace']);
 const DEMO_ROOST_FLOCK = 6;
+const PREDATOR_SLOT_MS = 150_000; // demo: at most one detection per 2.5 min per tower
+const PREDATORS = ['Fox', 'Raccoon', 'Coyote', 'Hawk', 'Opossum'];
+const ACKED_KEY = 'tendercells_predator_acked_v1';
+
+function readAcked(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(ACKED_KEY) || '[]') as string[]); } catch { return new Set(); }
+}
+function writeAcked(ids: Set<string>): void {
+  try { localStorage.setItem(ACKED_KEY, JSON.stringify([...ids].slice(-200))); } catch { /* private mode */ }
+}
+
+/** Deterministic 0..1 values from a string (stable across refreshes). */
+function rand(seed: string): () => number {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
+  return () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+}
+
+/**
+ * Demo WatchTower detections for the last ~10 minutes, located by bearing/distance
+ * from the tower (the same fields a real tower's alert carries).
+ */
+function demoPredators(deviceId: string, itemId: string, now: number): YardFlag[] {
+  const acked = readAcked();
+  const out: YardFlag[] = [];
+  const slot = Math.floor(now / PREDATOR_SLOT_MS);
+  for (let s = slot - 3; s <= slot; s++) {
+    const r = rand(`${deviceId}:${s}`);
+    if (r() > 0.55) continue;
+    const ts = s * PREDATOR_SLOT_MS + Math.floor(r() * PREDATOR_SLOT_MS * 0.5);
+    if (ts > now) continue;
+    const id = `predator-${ts}`;
+    const label = PREDATORS[Math.floor(r() * PREDATORS.length)];
+    const camera = Math.floor(r() * 3);
+    const distanceFt = Math.round(8 + r() * 30); // inside the default 40 ft camera range
+    out.push({
+      id, deviceId, itemId, source: 'demo', type: 'alert', status: acked.has(`${deviceId}:${id}`) ? 'cleared' : 'active',
+      title: `${label} detected`, label, confidence: Math.round((0.76 + r() * 0.22) * 100) / 100,
+      bearingDeg: Math.round((camera * 120 + (r() - 0.5) * 120 + 360) % 360), distanceFt,
+      detail: `camera ${camera + 1} · ~${distanceFt} ft away`, station: 'WatchTower', ts, updatedAt: ts,
+    });
+  }
+  return out;
+}
 
 export type YardAction = 'ack' | 'aim' | 'burn' | 'reject';
 
@@ -58,6 +102,8 @@ async function demoFlags(items: PropertyItem[]): Promise<YardFlag[]> {
         title: `${total - roaming} of ${total} in roost`, count: total - roaming,
         detail: roaming ? `${roaming} roaming outside` : 'All birds inside', ts: now, updatedAt: now,
       });
+    } else if (item.type === 'watchtower') {
+      flags.push(...demoPredators(deviceId, item.id, now));
     } else if (WEED_BED_TYPES.has(item.type)) {
       simBed(item, deviceId);
       simWeeds(item.id).forEach((w) => flags.push({ ...w, itemId: item.id, source: 'demo' }));
@@ -129,7 +175,12 @@ export function useYardEvents(items: PropertyItem[]) {
   const act = useCallback(async (flag: YardFlag, action: YardAction): Promise<string> => {
     let message: string;
     if (flag.source === 'demo') {
-      if (action === 'ack') {
+      if (action === 'ack' && flag.type === 'alert') {
+        const acked = readAcked();
+        acked.add(`${flag.deviceId}:${flag.id}`);
+        writeAcked(acked);
+        message = 'Marked as seen';
+      } else if (action === 'ack') {
         const day = await eggService.getDay(flag.deviceId, todayKey());
         await Promise.all(day.nestBoxes.filter((b) => b.hasEgg && b.collectedAt == null).map((b) => eggService.collectEgg(flag.deviceId, b.id)));
         message = 'Marked as picked up';

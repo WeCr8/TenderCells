@@ -227,21 +227,86 @@ class GrblGantry:
         self.conn.write(b"!")  # feed hold (real-time command)
 
 
+class FarmBotGantry:
+    """A FarmBot Genesis driven through FarmBot's official farmbot-py (MIT, `pip install farmbot`).
+
+    This is the Project Cyclops build (CC0): a small diode laser module on the Genesis
+    UTM, with the FarmBot moving the head. Auth uses a FarmBot API token (FARMBOT_TOKEN),
+    never the account password. X runs along the bed, Y across it, Z down (negative).
+    """
+
+    def __init__(self, token: object, bot: object = None, speed: int = 100):
+        if bot is None:
+            from farmbot import Farmbot  # type: ignore
+
+            bot = Farmbot()
+            bot.set_token(token)
+        self.bot, self.speed = bot, speed
+
+    def move_to(self, x: float, y: float, z: float) -> None:
+        self.bot.move(x=round(x, 1), y=round(y, 1), z=round(z, 1), speed=self.speed)  # blocks until done
+
+    def stop(self) -> None:
+        self.bot.e_stop()  # locks the Farmduino until unlocked from the FarmBot app
+
+    def pin_value(self, pin: int) -> Optional[int]:
+        """Current value of a Farmduino pin from the status tree, or None if unknown."""
+        self.bot.read_pin(pin)
+        pins = self.bot.read_status("pins") or {}
+        value = (pins.get(str(pin)) or {}).get("value")
+        return int(value) if isinstance(value, (int, float)) else None
+
+
 class InterlockError(RuntimeError):
     """The laser refused to fire; message says which interlock."""
+
+
+@dataclass(frozen=True)
+class LaserProfile:
+    """A weeding laser class. Exposure scales with weed size between min_ms and max_ms
+    (LiteWeed tunes exposure by weed size and species the same way). The ms values
+    are STARTING POINTS - calibrate on test weeds for your module, focus and height."""
+
+    name: str
+    power_w: float
+    wavelength_nm: int
+    laser_class: str
+    min_ms: int
+    max_ms: int
+    small_mm: float = 10.0  # weeds this size or smaller get min_ms
+    large_mm: float = 60.0  # this size or larger get max_ms
+
+    def exposure_ms(self, size_mm: Optional[float]) -> int:
+        if size_mm is None:
+            return self.min_ms
+        t = min(1.0, max(0.0, (size_mm - self.small_mm) / (self.large_mm - self.small_mm)))
+        return int(round(self.min_ms + t * (self.max_ms - self.min_ms)))
+
+
+LASER_PROFILES: Dict[str, LaserProfile] = {
+    # Fixed pulse from LASER_PULSE_MS (legacy behaviour), capped at 1500 ms.
+    "fixed": LaserProfile("fixed", 0.0, 0, "unknown", 600, 1500),
+    # Project Cyclops on FarmBot Genesis: 500 mW 405 nm dot module (FB03-500). Class 3B.
+    "diode-500mw": LaserProfile("diode-500mw", 0.5, 405, "3B", 2000, 8000),
+    # LiteWeed / research rovers: 4 W 450 nm blue diode. Class 4.
+    "diode-4w": LaserProfile("diode-4w", 4.0, 450, "4", 500, 3000),
+}
 
 
 class LaserController:
     """Aiming dot + weeding laser with interlocks. Pin writers are injected."""
 
-    MAX_PULSE_MS = 1500
+    MAX_PULSE_MS = 1500  # cap for the "fixed" profile
 
     def __init__(self, set_aim: Callable[[bool], None], set_laser: Callable[[bool], None],
                  enclosure_closed: Callable[[], bool], burn_enabled: bool = False, student_mode: bool = True,
                  pulse_ms: int = 600, cooldown_s: float = 2.0, sleeper: Callable[[float], None] = time.sleep,
-                 clock: Callable[[], float] = time.monotonic):
+                 clock: Callable[[], float] = time.monotonic, profile: str = "fixed"):
         self._aim, self._laser, self._enclosure = set_aim, set_laser, enclosure_closed
         self.burn_enabled, self.student_mode = burn_enabled, student_mode
+        if profile not in LASER_PROFILES:
+            raise ValueError(f"Unknown laser profile '{profile}' (one of {', '.join(LASER_PROFILES)})")
+        self.profile = LASER_PROFILES[profile]
         self.pulse_ms = min(int(pulse_ms), self.MAX_PULSE_MS)
         self.cooldown_s = cooldown_s
         self.estop_active = False
@@ -249,8 +314,11 @@ class LaserController:
         self._last_fire = -1e9
 
     def status(self) -> dict:
+        p = self.profile
         return {"burnEnabled": self.burn_enabled, "studentMode": self.student_mode,
-                "enclosureClosed": bool(self._enclosure()), "pulseMs": self.pulse_ms, "estop": self.estop_active}
+                "enclosureClosed": bool(self._enclosure()), "estop": self.estop_active,
+                "pulseMs": self.pulse_ms if p.name == "fixed" else p.max_ms,
+                "profile": p.name, "laserClass": p.laser_class, "wavelengthNm": p.wavelength_nm, "powerW": p.power_w}
 
     def check_burn_allowed(self) -> None:
         if self.estop_active:
@@ -267,16 +335,30 @@ class LaserController:
     def aim(self, on: bool) -> None:
         self._aim(bool(on) and not self.estop_active)
 
-    def burn(self) -> int:
-        """Fire one bounded pulse. Returns the pulse length in ms."""
+    def pulse_for(self, size_mm: Optional[float] = None) -> int:
+        """Pulse length for a weed of this size under the active profile."""
+        if self.profile.name == "fixed":
+            return self.pulse_ms
+        return self.profile.exposure_ms(size_mm)
+
+    def burn(self, size_mm: Optional[float] = None) -> int:
+        """Fire one bounded pulse. Returns the pulse length in ms (shorter if E-STOP cut it)."""
         self.check_burn_allowed()
+        ms = self.pulse_for(size_mm)
         self._last_fire = self._clock()
+        fired = 0
         try:
             self._laser(True)
-            self._sleep(self.pulse_ms / 1000.0)
+            # Sleep in 50 ms slices so an E-STOP from another thread ends the pulse at once.
+            while fired < ms and not self.estop_active:
+                step = min(50, ms - fired)
+                self._sleep(step / 1000.0)
+                fired += step
         finally:
             self._laser(False)  # always off, even if interrupted
-        return self.pulse_ms
+        if self.estop_active:
+            raise InterlockError(f"E-STOP during pulse - laser off after {fired} ms")
+        return ms
 
     def estop(self) -> None:
         self.estop_active = True
@@ -356,7 +438,7 @@ class WeedPatrol:
         try:
             if mode == "burn":
                 try:
-                    ms = self.laser.burn()
+                    ms = self.laser.burn(weed.get("size_mm"))
                 except InterlockError as err:
                     weed["status"], weed["detail"] = "pending_review", f"Burn blocked: {err}"
                     self._event(weed)

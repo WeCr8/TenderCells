@@ -21,6 +21,12 @@ export interface YardEvent {
   /** Position inside the item footprint (weeds): x along the long side, y across. */
   bedMm?: { x: number; y: number };
   station?: string;
+  /** What was seen, e.g. "fox" (WatchTower predator alerts). */
+  label?: string;
+  /** Bearing from the reporting device, degrees clockwise from map north (up). */
+  bearingDeg?: number;
+  /** Estimated range from the device, feet (when the camera can estimate it). */
+  distanceFt?: number;
   ts: number;
   updatedAt: number;
 }
@@ -56,7 +62,11 @@ export interface WeedRobotState {
   state: 'idle' | 'scanning' | 'treating' | 'estop' | 'error' | string;
   mode: 'simulation' | 'live' | string;
   estop: boolean;
-  laser: { burnEnabled: boolean; studentMode: boolean; enclosureClosed: boolean; pulseMs: number; estop: boolean };
+  laser: {
+    burnEnabled: boolean; studentMode: boolean; enclosureClosed: boolean; pulseMs: number; estop: boolean;
+    /** Laser profile (fixed | diode-500mw | diode-4w), class and wavelength - newer robots only. */
+    profile?: string; laserClass?: string; wavelengthNm?: number; powerW?: number;
+  };
   pass: { running: boolean; pass: number; passes: number; waypoint: number; waypoints: number };
   error: string | null;
   ts: number;
@@ -72,7 +82,11 @@ export const DEFAULT_DEVICE_BY_TYPE: Record<string, string> = {
   'roaming-roost': 'rr_001',
   'turkey-tower': 'tt_001',
   'pigeon-palace': 'pp_001',
+  watchtower: 'wt_001',
 };
+
+/** Detection radius drawn for a WatchTower when its item has no mapped radius (ft). */
+export const WATCHTOWER_RANGE_FT = 40;
 
 /** Layout item types a weed-patrol robot (FarmBot-style gantry) works over. */
 export const WEED_BED_TYPES = new Set(['farmbot-genesis', 'farmbot-genesis-xl', 'greenhouse', 'aquaponics', 'hydroponics']);

@@ -22,9 +22,67 @@ import PageLayout from "../components/PageLayout";
 import { TENDERCELLS_OS_URL } from "../config/appLinks";
 import { useAuthUser } from "../hooks/useAuthUser";
 import { AUTH_CONFIGURED, auth } from "../lib/firebase";
+import { ACCOUNT_TYPES, SCHOOL_FEATURES, SSO_PROVIDERS } from "../lib/sso";
 import "./AccountPage.css";
 
 type Mode = "login" | "register";
+
+/** School / district sign-in options - shown, but not live until the SSO backend is set up. */
+function SchoolSignIn() {
+  return (
+    <details className="account-sso">
+      <summary className="account-sso-title">
+        School or district account <span className="account-soon">Coming soon</span>
+      </summary>
+      <div className="account-sso-grid">
+        {SSO_PROVIDERS.map((p) => (
+          <button key={p.id} type="button" className="account-sso-btn" disabled aria-disabled="true"
+            title={`${p.label} - ${p.audience}. Coming soon.`}>
+            <span>{p.label}</span>
+            <span className="account-soon">Coming soon</span>
+          </button>
+        ))}
+      </div>
+      <p className="account-hint">
+        Students and teachers will sign in with their school account; rosters and class access come from the school.
+        Until then, teachers can use a personal account.
+      </p>
+    </details>
+  );
+}
+
+/** Account type + school features, prepared for educator / student / admin accounts. */
+function AccountTypesAndSchool() {
+  return (
+    <>
+      <div className="account-section">
+        <h2>Account type</h2>
+        <ul className="account-types">
+          {ACCOUNT_TYPES.map((t) => (
+            <li key={t.id} className={t.id === "personal" ? "current" : undefined}>
+              <div>
+                <strong>{t.label}</strong>
+                <span>{t.description}</span>
+              </div>
+              {t.id === "personal" ? <span className="account-badge">Current</span> : <span className="account-soon">Coming soon</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="account-section">
+        <h2>School &amp; classroom</h2>
+        <div className="account-school">
+          {SCHOOL_FEATURES.map((f) => (
+            <button key={f.id} type="button" className="account-school-btn" disabled aria-disabled="true" title={`${f.detail} Coming soon.`}>
+              <span><strong>{f.label}</strong><small>{f.detail}</small></span>
+              <span className="account-soon">Coming soon</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
 
 function errorCode(err: unknown): string {
   return typeof err === "object" && err && "code" in err ? String((err as { code?: unknown }).code) : "";
@@ -167,6 +225,8 @@ function AccountDetails({ user }: { user: User }) {
       <p className="account-hint">
         The OS opens with this account already signed in. Your devices, flocks and schedules live there.
       </p>
+
+      <AccountTypesAndSchool />
     </section>
   );
 }
@@ -267,6 +327,8 @@ function SignInForm() {
       <button type="button" className="account-google" onClick={handleGoogle} disabled={busy}>
         <span aria-hidden="true" className="account-google-g">G</span> Continue with Google
       </button>
+
+      <SchoolSignIn />
 
       <div className="account-divider"><span>or use email</span></div>
 

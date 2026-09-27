@@ -10,7 +10,7 @@ import {
   type FarmBotPosition,
   type FarmBotPositionDetail,
 } from '../../lib/farmbot/farmbotCloud';
-import { buildScenery, TERRAIN_PRESETS, type TerrainPreset } from './scenery';
+import { buildScenery, sceneHeightFn, TERRAIN_PRESETS, type SceneHeightFn, type TerrainPreset } from './scenery';
 import { makeTextSprite } from './labels';
 import { animateYardFlags, buildYardFlags, disposeYardFlags } from './yardFlags';
 import { useYardEvents } from '../../hooks/useYardEvents';
@@ -776,7 +776,7 @@ const createFarmBotMarker = (): THREE.Group => {
  * side and Y across it, both from the bed's origin corner; Z is 0 at the top of
  * travel and negative going down.
  */
-const placeFarmBotMarker = (marker: THREE.Group, item: PropertyItem, layout: PropertyLayoutState, pos: FarmBotPosition) => {
+const placeFarmBotMarker = (marker: THREE.Group, item: PropertyItem, layout: PropertyLayoutState, pos: FarmBotPosition, h: SceneHeightFn = () => 0) => {
   const { x, z } = propertyToScenePosition(item, layout);
   const alongZ = item.depth >= item.width;
   const long = Math.max(item.width, item.depth);
@@ -790,7 +790,7 @@ const placeFarmBotMarker = (marker: THREE.Group, item: PropertyItem, layout: Pro
   const sceneZ = alongZ ? cornerZ + xFt : cornerZ + yFt;
   const topY = 1.3; // gantry beam height above the bed
   const headY = clamp(topY + (pos.z ?? 0) / MM_PER_FT, 0.6, topY);
-  marker.position.set(sceneX, 0, sceneZ);
+  marker.position.set(sceneX, h(x, z), sceneZ); // bed sits level at its centre height
   const head = marker.getObjectByName('farmbot-head');
   const drop = marker.getObjectByName('farmbot-drop');
   if (head) head.position.y = headY;
@@ -988,6 +988,7 @@ const createYardItem = (
   }
 
   group.name = item.product?.device_id || item.product?.id || item.id;
+  group.userData.sceneCenter = { x, z }; // settleOnTerrain() lifts the item onto the ground
   return group;
 };
 
@@ -1009,13 +1010,24 @@ const createYardItems = (
   return group;
 };
 
-const createSimulationOverlay = (layout: PropertyLayoutState): THREE.Group => {
+/** Lift each item group (built at y=0) onto the terrain height at its centre. */
+const settleOnTerrain = (root: THREE.Object3D, h: SceneHeightFn): THREE.Object3D => {
+  const settle = (o: THREE.Object3D) => {
+    const c = o.userData.sceneCenter as { x: number; z: number } | undefined;
+    if (c) o.position.y = h(c.x, c.z);
+  };
+  settle(root);
+  root.children.forEach(settle);
+  return root;
+};
+
+const createSimulationOverlay = (layout: PropertyLayoutState, h: SceneHeightFn = () => 0): THREE.Group => {
   const group = new THREE.Group();
   const hardwarePoints = layout.items
     .filter((item) => item.kind === 'hardware' && item.type !== 'watchtower')
     .map((item) => {
       const { x, z } = propertyToScenePosition(item, layout);
-      return new THREE.Vector3(x, 0.18, z);
+      return new THREE.Vector3(x, 0.18 + h(x, z), z);
     });
 
   const fallbackPoints = [
@@ -1254,7 +1266,8 @@ export default function Viewport3D({
     holder.children.slice().forEach((c) => { holder.remove(c); disposeYardFlags(c); });
     // Item positions are only drawn in the Products / Simulation views.
     if (workspaceMode === 'property' || !showYardFlags) return;
-    holder.add(buildYardFlags(yardFlags, enrichedItems, layout));
+    holder.add(buildYardFlags(yardFlags, enrichedItems, layout,
+      sceneHeightFn(layout.property, layout.property.widthFt, layout.property.depthFt)));
   }, [yardFlags, enrichedItems, layout, workspaceMode, showYardFlags, sceneVersion]);
 
   // Three.js scene
@@ -1352,7 +1365,9 @@ export default function Viewport3D({
       viewMode,
       preset: layout.property.terrain ?? 'lawn',
       cameraFar: camera.far,
+      terrain: layout.property,
     });
+    const groundH = sceneHeightFn(layout.property, layout.property.widthFt, layout.property.depthFt);
     scene.add(createPropertyGrid(layout));
 
     const glbCache = glbCacheRef.current;
@@ -1360,14 +1375,17 @@ export default function Viewport3D({
     if (workspaceMode === 'property') {
       // Obstacles only + featured product model centered
       const obstacleItems = enrichedItems.filter((i) => i.kind === 'obstacle') as EnrichedItem[];
-      scene.add(createYardItems(obstacleItems, layout, product, glbCache));
+      scene.add(settleOnTerrain(createYardItems(obstacleItems, layout, product, glbCache), groundH));
 
       if (product === 'chicken-tender') {
         if (loadedScene) {
           loadedScene.traverse((c) => { if (c instanceof THREE.Mesh) { c.castShadow = true; c.receiveShadow = true; } });
+          loadedScene.position.y = groundH(0, 0);
           scene.add(loadedScene);
         } else {
-          scene.add(createPlaceholderCoop(model));
+          const coop = createPlaceholderCoop(model);
+          coop.position.y = groundH(0, 0);
+          scene.add(coop);
         }
       } else {
         // Featured product placeholder centered at origin
@@ -1384,15 +1402,15 @@ export default function Viewport3D({
           product: activeItem?.product,
         };
         const featuredGlb = activeItem?.product?.id ? glbCache.get(activeItem.product.id) : undefined;
-        scene.add(createYardItem(featuredItem, layout, product, featuredGlb));
+        scene.add(settleOnTerrain(createYardItem(featuredItem, layout, product, featuredGlb), groundH));
       }
     } else {
       // Products / simulation: all items with product-specific geometry
-      scene.add(createYardItems(enrichedItems, layout, product, glbCache));
+      scene.add(settleOnTerrain(createYardItems(enrichedItems, layout, product, glbCache), groundH));
     }
 
     if (workspaceMode === 'simulation') {
-      scene.add(createSimulationOverlay(layout));
+      scene.add(createSimulationOverlay(layout, groundH));
     }
 
     // Live FarmBot tool-head markers over garden beds (hidden until a position arrives).
@@ -1418,7 +1436,7 @@ export default function Viewport3D({
       farmbotMarkers.forEach(({ item, marker }) => {
         const pos = farmbotPosRef.current.get(item.id);
         marker.visible = !!pos;
-        if (pos) placeFarmBotMarker(marker, item, layout, pos);
+        if (pos) placeFarmBotMarker(marker, item, layout, pos, groundH);
       });
       controls.update();
       renderer.render(scene, camera);

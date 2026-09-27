@@ -26,6 +26,47 @@ Code:
   # OS with VITE_MQTT_API_BASE_URL=http://localhost:4000/api/mqtt → Weed Patrol
   ```
 
+## Our robot types
+
+| Type | Build | Laser | Why |
+|---|---|---|---|
+| **1. Genesis laser head (start here)** | FarmBot Genesis with a laser module on the UTM, driven through FarmBot's official `farmbot-py` (`WEED_GANTRY=farmbot`). This is the [Project Cyclops](https://github.com/rahularepaka/Project-Cyclops) design (CC0). | 500 mW 405 nm dot module, **Class 3B** (`LASER_PROFILE=diode-500mw`) | Matches the Genesis beds already on the property map. Cheapest path, well suited to students. |
+| **2. Rover (next)** | A LiteWeed-style stop-and-align rover with a 2-DOF arm, running on-board detection. | 4 W 450 nm blue diode, **Class 4** (`LASER_PROFILE=diode-4w`) | For rows and open ground a gantry can't span. [LiteWeed](https://www.sciencedirect.com/science/article/pii/S2772375526005654) (Simon Fraser University, 2026) is about $500 CAD and reported 96–97% weed removal in field trials. |
+| GRBL gantry | Any GRBL CNC-style gantry (`WEED_GANTRY=grbl`) | either profile | For DIY and classroom gantries |
+
+Commercial references:
+- [Carbon Robotics LaserWeeder G2](https://carbonrobotics.com/) is field-scale, CO₂-class lasers, and priced for large farms.
+- WeedBot and Escarda make row-crop machines.
+- [Tertill](https://tertill.com/) was the home-garden robot (mechanical, not laser) and has been discontinued. That leaves home and school garden laser weeding open.
+
+### Laser profiles
+
+Exposure scales with weed size between the profile's minimum and maximum, the same approach
+LiteWeed takes (it tunes exposure by weed size and species). The pulse runs in 50 ms slices so
+an E-STOP ends it immediately.
+
+| Profile | Power / wavelength | Class | Exposure (starting values) |
+|---|---|---|---|
+| `fixed` (default) | module-specific | — | `LASER_PULSE_MS`, capped at 1500 ms |
+| `diode-500mw` | 0.5 W / 405 nm | 3B | 2–8 s |
+| `diode-4w` | 4 W / 450 nm | 4 | 0.5–3 s |
+
+The exposure values are **starting points**. Calibrate them on test weeds for your module,
+focus and working height.
+
+### Genesis laser head wiring
+
+```bash
+WEED_MODE=live WEED_GANTRY=farmbot FARMBOT_TOKEN=<token from my.farm.bot> \
+LASER_OUTPUT=farmbot FARMBOT_AIM_PIN=7 FARMBOT_LASER_PIN=8 FARMBOT_ENCLOSURE_PIN=9 \
+LASER_PROFILE=diode-500mw STUDENT_MODE=true python3 weed_patrol_service.py
+```
+
+- Use a FarmBot **API token**, never the account password.
+- The pin numbers above are examples. Use the Farmduino peripheral pins your laser relay and
+  enclosure switch are wired to.
+- An enclosure pin that reads unknown counts as **open**.
+
 ## Passes on a schedule
 
 In **Schedules**, add a **Weed pass** action for the robot's device id (e.g. dawn and dusk, 1–10
@@ -44,19 +85,20 @@ latched. Passes only *detect*. Treatment always waits for a person in the review
 | `AIM_PIN`, `LASER_PIN`, `ENCLOSURE_PIN` | BCM GPIO numbers; the enclosure switch reads *closed* when low |
 | `STUDENT_MODE=false` | Allow burning (default **true** = aiming dot only) |
 | `LASER_BURN_ENABLED=true` | Second, separate opt-in to burn (default false) |
-| `LASER_PULSE_MS` | Pulse length, hard-capped at 1500 ms, with a cooldown between pulses |
+| `LASER_PROFILE` | `fixed` (default), `diode-500mw` or `diode-4w`. Sets exposure by weed size; see Laser profiles |
+| `LASER_PULSE_MS` | Pulse for the `fixed` profile, hard-capped at 1500 ms, with a cooldown between pulses |
 | `BED_LENGTH_MM`, `BED_WIDTH_MM`, `ITEM_ID` | Bed size and the property-layout item the pins belong to |
 
 ## Laser safety (read before enabling burn)
 
-Weeding lasers are **Class 4**: they cause instant eye damage (including from reflections)
+Weeding lasers are **Class 3B** (the 500 mW module) or **Class 4** (the 4 W diode and up): they cause instant eye damage (including from reflections)
 and are a fire risk in dry mulch. A burn requires **all** of the following:
 
 1. `LASER_BURN_ENABLED=true` **and** `STUDENT_MODE=false` on the robot. These are env settings on the robot, not UI switches.
 2. A closed enclosure / shroud interlock switch (the beam path is blocked otherwise).
 3. No E-STOP. E-STOP latches (QoS 2, retained), stops the pass immediately and turns the laser off.
 4. A person approves that single weed in the UI and confirms "no people or animals near the bed".
-5. A bounded pulse (≤ 1500 ms) and a cooldown.
+5. A bounded pulse (at most the profile's maximum, and an E-STOP cuts it) and a cooldown.
 
 If any check fails, the robot refuses and the API returns **409** with the reason. The weed then
 goes back into the review queue. Wear laser-safety eyewear rated for the wavelength, never

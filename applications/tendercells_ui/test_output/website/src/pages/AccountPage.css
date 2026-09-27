@@ -198,3 +198,81 @@ button:disabled { opacity: 0.6; cursor: default; }
   .account-facts { grid-template-columns: 1fr; }
   .account-actions > * { flex: 1 1 100%; text-align: center; }
 }
+
+/* School / district SSO + account types (prepared; everything here is "Coming soon"). */
+.account-soon {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #8a6d1f;
+  background: #fbf3dc;
+  border: 1px solid #ecd9a1;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  white-space: nowrap;
+}
+.account-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #2f6b3f;
+  background: #e5f3e8;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+}
+.account-sso { margin-top: 1.1rem; }
+.account-sso-title {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.7rem 0.8rem;
+  border: 1px dashed #cfd6d2;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #15201b;
+  margin-bottom: 0.6rem;
+}
+.account-sso-title::-webkit-details-marker { display: none; }
+.account-sso-title::after { content: "▸"; margin-left: auto; color: #7a857f; }
+.account-sso[open] .account-sso-title::after { content: "▾"; }
+.account-sso-grid { display: grid; gap: 0.5rem; }
+.account-sso-btn,
+.account-school-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px dashed #cfd6d2;
+  border-radius: 8px;
+  background: #f8faf9;
+  color: #5b6760;
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: not-allowed;
+}
+.account-section { margin-top: 1.5rem; }
+.account-section h2 { font-size: 1rem; margin-bottom: 0.6rem; color: #15201b; }
+.account-types { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.45rem; }
+.account-types li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #e3e7e4;
+  border-radius: 8px;
+}
+.account-types li.current { border-color: #7fb58e; background: #f3faf5; }
+.account-types li div { display: grid; gap: 0.1rem; }
+.account-types li span:not(.account-soon):not(.account-badge),
+.account-school-btn small { font-size: 0.8rem; color: #6b766f; }
+.account-school { display: grid; gap: 0.5rem; }
+.account-school-btn span:first-child { display: grid; gap: 0.1rem; }
+.account-school-btn strong { color: #33403a; font-size: 0.9rem; }

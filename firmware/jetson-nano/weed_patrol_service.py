@@ -10,10 +10,12 @@ Publishes:   tc/{id}/event      weed_detected flags (pending_review -> approved 
              tc/{id}/ack        {"seq", "ok", "error"}  for every command with a seq
              tc/{id}/status     {"online": true} retained; last will {"online": false}
 
-Live hardware settings: GRBL_PORT (gantry), CAMERA_INDEX, WEED_DETECTOR=hsv|yolo,
-WEED_MODEL=hf://owner/repo/best.pt, AIM_PIN, LASER_PIN, ENCLOSURE_PIN (BCM numbers,
-Raspberry Pi / Jetson GPIO), LASER_BURN_ENABLED=true (default false), STUDENT_MODE=false
-(default true = aiming dot only), LASER_PULSE_MS (<= 1500).
+Live hardware settings: CAMERA_INDEX, WEED_DETECTOR=hsv|yolo, WEED_MODEL=hf://owner/repo/best.pt,
+LASER_BURN_ENABLED=true (default false), STUDENT_MODE=false (default true = aiming dot only),
+LASER_PROFILE=fixed|diode-500mw|diode-4w (exposure by weed size; fixed uses LASER_PULSE_MS <= 1500).
+Motion: WEED_GANTRY=grbl (GRBL_PORT) | farmbot (FarmBot Genesis via farmbot-py, FARMBOT_TOKEN).
+Laser pins: LASER_OUTPUT=gpio (AIM_PIN, LASER_PIN, ENCLOSURE_PIN - BCM, Pi / Jetson) |
+farmbot (FARMBOT_AIM_PIN, FARMBOT_LASER_PIN, FARMBOT_ENCLOSURE_PIN on the Farmduino).
 """
 
 from __future__ import annotations
@@ -147,23 +149,37 @@ def build_patrol(env: Dict[str, str]) -> WeedPatrol:  # pragma: no cover - hardw
     if env.get("WEED_MODE", "simulation") == "simulation":
         laser = LaserController(lambda on: None, lambda on: print(f"[sim] LASER {'ON' if on else 'off'}"),
                                 lambda: True, burn_enabled=burn, student_mode=student,
-                                pulse_ms=int(env.get("LASER_PULSE_MS", 600)))
+                                pulse_ms=int(env.get("LASER_PULSE_MS", 600)), profile=env.get("LASER_PROFILE", "fixed"))
         return WeedPatrol(bed, SimDetector(bed, seed=int(env.get("SIM_SEED", 42))), SimGantry(), laser, lambda e: None)
 
     import cv2  # type: ignore
-    from gpiozero import DigitalInputDevice, DigitalOutputDevice  # type: ignore
-    from weed_patrol import GrblGantry, HsvDetector, YoloDetector
+    from weed_patrol import FarmBotGantry, GrblGantry, HsvDetector, YoloDetector
 
     cam = cv2.VideoCapture(int(env.get("CAMERA_INDEX", 0)))
     capture = lambda: cam.read()[1]  # noqa: E731
     detector = (YoloDetector(capture, env["WEED_MODEL"]) if env.get("WEED_DETECTOR") == "yolo"
                 else HsvDetector(capture, mm_per_px=float(env.get("MM_PER_PX", 0.5))))
-    aim, laser_out = DigitalOutputDevice(int(env["AIM_PIN"])), DigitalOutputDevice(int(env["LASER_PIN"]))
-    enclosure = DigitalInputDevice(int(env["ENCLOSURE_PIN"]), pull_up=True)  # closed switch -> low
-    laser = LaserController(lambda on: aim.on() if on else aim.off(), lambda on: laser_out.on() if on else laser_out.off(),
-                            lambda: not enclosure.value, burn_enabled=burn, student_mode=student,
-                            pulse_ms=int(env.get("LASER_PULSE_MS", 600)))
-    return WeedPatrol(bed, detector, GrblGantry(env["GRBL_PORT"]), laser, lambda e: None)
+    gantry = (FarmBotGantry(env["FARMBOT_TOKEN"]) if env.get("WEED_GANTRY") == "farmbot"
+              else GrblGantry(env["GRBL_PORT"]))
+    if env.get("LASER_OUTPUT") == "farmbot":
+        fb = gantry if isinstance(gantry, FarmBotGantry) else FarmBotGantry(env["FARMBOT_TOKEN"])
+        bot = fb.bot
+        aim_pin, laser_pin = int(env["FARMBOT_AIM_PIN"]), int(env["FARMBOT_LASER_PIN"])
+        enc_pin = int(env["FARMBOT_ENCLOSURE_PIN"])
+        set_aim = lambda on: bot.write_pin(aim_pin, 1 if on else 0)  # noqa: E731
+        set_laser = lambda on: bot.write_pin(laser_pin, 1 if on else 0)  # noqa: E731
+        enclosure_closed = lambda: fb.pin_value(enc_pin) == 0  # noqa: E731  closed pulls low; unknown = open
+    else:
+        from gpiozero import DigitalInputDevice, DigitalOutputDevice  # type: ignore
+
+        aim, laser_out = DigitalOutputDevice(int(env["AIM_PIN"])), DigitalOutputDevice(int(env["LASER_PIN"]))
+        enclosure = DigitalInputDevice(int(env["ENCLOSURE_PIN"]), pull_up=True)  # closed switch -> low
+        set_aim = lambda on: aim.on() if on else aim.off()  # noqa: E731
+        set_laser = lambda on: laser_out.on() if on else laser_out.off()  # noqa: E731
+        enclosure_closed = lambda: not enclosure.value  # noqa: E731
+    laser = LaserController(set_aim, set_laser, enclosure_closed, burn_enabled=burn, student_mode=student,
+                            pulse_ms=int(env.get("LASER_PULSE_MS", 600)), profile=env.get("LASER_PROFILE", "fixed"))
+    return WeedPatrol(bed, detector, gantry, laser, lambda e: None)
 
 
 def main() -> None:  # pragma: no cover - wiring for real deployments

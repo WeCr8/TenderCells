@@ -9,10 +9,12 @@
 //   node tools/simulate-device.mjs --id coop_demo        # custom id
 //   node tools/simulate-device.mjs --id dd_001 --kind duck
 //   node tools/simulate-device.mjs --id rr_001 --kind roost
+//   node tools/simulate-device.mjs --id wt_001 --kind watchtower --alert-every 30
 //   node tools/simulate-device.mjs --id ct_42 --interval 3 --egg-every 20
 //   MQTT_BROKER=mqtt://192.168.1.50:1883 node tools/simulate-device.mjs
 //
 // Kinds:  coop (Chicken Tender, default) | duck (Duck Dock) | roost (Roaming Roost)
+//         | watchtower (predator monitor: located predator alerts)
 //
 // Topics it speaks (match CLAUDE.md §4 and the MQTT bridge):
 //   publishes  tc/{id}/sensors   every interval seconds
@@ -20,6 +22,7 @@
 //   publishes  tc/{id}/status    {"online":true} retained; last will {"online":false}
 //   publishes  tc/{id}/ack       {"seq","ok","error"} for every command carrying a seq
 //   publishes  tc/{id}/event     station flags: egg_ready (coop/duck), headcount (roost)
+//   publishes  tc/{id}/alert     watchtower: {"type":"predator","label","confidence","camera","bearingDeg","distanceFt"}
 //   subscribes tc/{id}/cmd/+     door | feed | clean | arm | motion | event | estop
 
 import mqtt from "mqtt";
@@ -32,12 +35,13 @@ function arg(name, fallback) {
 }
 const deviceId = arg("id", "sim_001");
 const kind = arg("kind", "coop");
-if (!["coop", "duck", "roost"].includes(kind)) {
-  console.error(`--kind must be coop | duck | roost (got "${kind}")`);
+if (!["coop", "duck", "roost", "watchtower"].includes(kind)) {
+  console.error(`--kind must be coop | duck | roost | watchtower (got "${kind}")`);
   process.exit(1);
 }
 const intervalSec = Number(arg("interval", "10"));
 const eggEverySec = Number(arg("egg-every", "45"));
+const alertEverySec = Number(arg("alert-every", "60"));
 const brokerUrl = process.env.MQTT_BROKER || "mqtt://localhost:1883";
 
 // ── simulated device state ──────────────────────────────────────────────────
@@ -158,7 +162,7 @@ client.on("connect", () => {
   publishState();
   publishSensors();
   if (kind === "roost") publishHeadcount();
-  else publishEggs();
+  else if (kind !== "watchtower") publishEggs();
 });
 
 client.on("message", (topic, buf) => {
@@ -266,7 +270,26 @@ client.on("error", (e) => console.error("MQTT error:", e.message));
 
 setInterval(publishSensors, intervalSec * 1000);
 
-if (kind === "roost") {
+if (kind === "watchtower") {
+  // A located predator detection now and then: camera i points at 120° * i; the object's
+  // offset in the frame shifts the bearing within the camera's 120° field of view.
+  const PREDATORS = ["fox", "raccoon", "coyote", "hawk", "opossum"];
+  setInterval(() => {
+    if (device.systemState === "estop") return;
+    const camera = Math.floor(Math.random() * 3);
+    const bearingDeg = Math.round((camera * 120 + (Math.random() - 0.5) * 120 + 360) % 360);
+    const alert = {
+      type: "predator",
+      label: PREDATORS[Math.floor(Math.random() * PREDATORS.length)],
+      confidence: Math.round((0.76 + Math.random() * 0.22) * 100) / 100,
+      camera, bearingDeg,
+      distanceFt: Math.round(8 + Math.random() * 30),
+      deviceId, ts: Date.now(),
+    };
+    client.publish(T("alert"), JSON.stringify(alert), { qos: 2 });
+    console.log(`🦊 ${alert.label} ${Math.round(alert.confidence * 100)}% cam ${camera + 1} bearing ${bearingDeg}° ~${alert.distanceFt} ft`);
+  }, alertEverySec * 1000);
+} else if (kind === "roost") {
   // Birds wander in and out of the dome while the door is open.
   setInterval(() => {
     if (device.doorState !== "open" || device.systemState === "estop") return;

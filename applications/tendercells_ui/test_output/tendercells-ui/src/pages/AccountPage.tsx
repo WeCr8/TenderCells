@@ -12,9 +12,11 @@ import {
   Divider,
   Stack,
   Chip,
+  Grid,
 } from '@mui/material';
-import { DeleteSweep, Devices, Google as GoogleIcon, Logout as LogoutIcon, School as SchoolIcon } from '@mui/icons-material';
+import { DeleteSweep, Devices, Google as GoogleIcon, Logout as LogoutIcon, School as SchoolIcon, VerifiedUser } from '@mui/icons-material';
 import { doc, setDoc } from 'firebase/firestore';
+import { sendEmailVerification, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 
 // The website's account page (same origin in production: tendercells.com/account; the OS is /app).
 const WEBSITE_ACCOUNT_URL = '/account';
@@ -22,9 +24,8 @@ import { useAuth } from '../contexts/useAuth';
 import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/products/ProductCard';
 import ProductRegistrationModal from '../components/products/ProductRegistrationModal';
-import { ProductsService } from '../services/productsService';
 import type { RegisterProductData } from '../types/products';
-import { db } from '../lib/firebase/firebaseApp';
+import { auth, db } from '../lib/firebase/firebaseApp';
 import { clearTenderCellsWorkspace } from '../services/workspaceReset';
 
 interface TabPanelProps {
@@ -50,7 +51,7 @@ function TabPanel(props: TabPanelProps) {
 
 export default function AccountPage() {
   const { user, isAuthenticated, login, loginWithGoogle, register, logout, error, loading, clearError } = useAuth();
-  const { products, loading: productsLoading, refetch, registerProduct, seedFirstGarageCoop, resetFirstGarageCoop } = useProducts();
+  const { products, loading: productsLoading, refetch, registerProduct } = useProducts();
   const [activeTab, setActiveTab] = useState(0);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -59,6 +60,8 @@ export default function AccountPage() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
   const [isResettingWorkspace, setIsResettingWorkspace] = useState(false);
+  const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [accountMessage, setAccountMessage] = useState<{ severity: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -121,6 +124,36 @@ export default function AccountPage() {
     } catch (resetError) {
       console.error('Workspace reset failed:', resetError);
       setIsResettingWorkspace(false);
+    }
+  };
+
+  const saveProfile = async () => {
+    if (!user) return;
+    try {
+      await updateProfile(user, { displayName: displayName.trim() || null });
+      setAccountMessage({ severity: 'success', text: 'Profile updated.' });
+    } catch (profileError) {
+      setAccountMessage({ severity: 'error', text: profileError instanceof Error ? profileError.message : 'Profile update failed.' });
+    }
+  };
+
+  const sendVerification = async () => {
+    if (!user) return;
+    try {
+      await sendEmailVerification(user);
+      setAccountMessage({ severity: 'success', text: 'Verification email sent.' });
+    } catch (verificationError) {
+      setAccountMessage({ severity: 'error', text: verificationError instanceof Error ? verificationError.message : 'Could not send verification email.' });
+    }
+  };
+
+  const sendPasswordReset = async () => {
+    if (!user?.email) return;
+    try {
+      await sendPasswordResetEmail(auth, user.email);
+      setAccountMessage({ severity: 'success', text: 'Password reset email sent.' });
+    } catch (passwordError) {
+      setAccountMessage({ severity: 'error', text: passwordError instanceof Error ? passwordError.message : 'Could not send password reset email.' });
     }
   };
 
@@ -285,24 +318,47 @@ export default function AccountPage() {
         </Tabs>
       </Box>
 
+      {accountMessage && <Alert severity={accountMessage.severity} onClose={() => setAccountMessage(null)} sx={{ mt: 2 }}>{accountMessage.text}</Alert>}
+
       <TabPanel value={activeTab} index={0}>
         <Typography variant="h5" gutterBottom sx={{ color: '#C8B882' }}>
           Account Profile
         </Typography>
-        <TextField label="Email" fullWidth margin="normal" value={user?.email || ''} disabled />
-        <TextField label="User ID" fullWidth margin="normal" value={user?.uid || ''} disabled size="small" />
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
-          Account created: {user?.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown'}
-        </Typography>
+        <Grid container spacing={2} sx={{ maxWidth: 760 }}>
+          <Grid item xs={12} sm={6}><TextField label="Display name" fullWidth value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></Grid>
+          <Grid item xs={12} sm={6}><TextField label="Email" fullWidth value={user?.email || ''} disabled /></Grid>
+          <Grid item xs={12}><Button variant="contained" onClick={() => void saveProfile()}>Save Profile</Button></Grid>
+        </Grid>
+        <Divider sx={{ my: 3 }} />
+        <Stack spacing={1}>
+          <Typography variant="body2"><strong>Firebase user ID:</strong> {user?.uid}</Typography>
+          <Typography variant="body2"><strong>Created:</strong> {user?.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleString() : 'Unknown'}</Typography>
+          <Typography variant="body2"><strong>Last sign-in:</strong> {user?.metadata.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleString() : 'Unknown'}</Typography>
+        </Stack>
       </TabPanel>
 
       <TabPanel value={activeTab} index={1}>
         <Typography variant="h5" gutterBottom sx={{ color: '#C8B882' }}>
           Security Settings
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Password reset and security settings are managed through Firebase. Use "Logout" to sign out.
-        </Typography>
+        <Stack spacing={2} sx={{ maxWidth: 760 }}>
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+            <VerifiedUser color={user?.emailVerified ? 'success' : 'disabled'} />
+            <Typography>Email</Typography>
+            <Chip size="small" label={user?.emailVerified ? 'Verified' : 'Not verified'} color={user?.emailVerified ? 'success' : 'warning'} />
+          </Stack>
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>Sign-in providers</Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {user?.providerData.map((provider) => <Chip key={provider.providerId} label={provider.providerId === 'password' ? 'Email and password' : provider.providerId === 'google.com' ? 'Google' : provider.providerId} variant="outlined" />)}
+            </Stack>
+          </Box>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+            {!user?.emailVerified && <Button variant="outlined" onClick={() => void sendVerification()}>Send Verification Email</Button>}
+            {user?.providerData.some((provider) => provider.providerId === 'password') && <Button variant="outlined" onClick={() => void sendPasswordReset()}>Reset Password</Button>}
+            <Button variant="outlined" color="error" startIcon={<LogoutIcon />} onClick={() => void handleLogout()}>Sign Out</Button>
+          </Stack>
+        </Stack>
         <Divider sx={{ my: 3 }} />
         <Typography variant="h6" gutterBottom>Fresh-user testing</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -325,25 +381,6 @@ export default function AccountPage() {
           </Box>
           <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
             <Button
-              variant="outlined"
-              onClick={async () => {
-                await seedFirstGarageCoop();
-                await refetch();
-              }}
-            >
-              Register Garage Coop
-            </Button>
-            <Button
-              variant="outlined"
-              color="warning"
-              onClick={async () => {
-                await resetFirstGarageCoop();
-                await refetch();
-              }}
-            >
-              Reset Garage Coop
-            </Button>
-            <Button
               variant="contained"
               onClick={() => setIsRegistrationModalOpen(true)}
               sx={{ bgcolor: '#4A7C59' }}
@@ -352,10 +389,6 @@ export default function AccountPage() {
             </Button>
           </Stack>
         </Box>
-
-        <Alert severity="info" sx={{ mb: 2 }}>
-          Demo coop target: {ProductsService.FIRST_COOP_SERIAL} / {ProductsService.FIRST_COOP_DEVICE_ID}.
-        </Alert>
 
         {productsLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>

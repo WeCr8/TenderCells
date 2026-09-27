@@ -118,6 +118,7 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/health': {
     title: 'Animal Health Knowledge Base - TenderCells',
     description: 'Animal health resources for chickens, ducks, goats, rabbits, stress monitoring, unusual behavior alerts, sensor trends, and human-review smart care systems.',
+    image: 'https://tendercells.com/assets/images/health/free-range-flock.jpg',
   },
   '/services': {
     title: 'TenderCells Services - Installers and Local Support',

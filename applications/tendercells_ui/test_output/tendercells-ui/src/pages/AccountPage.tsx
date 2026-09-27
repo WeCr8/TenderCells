@@ -14,7 +14,7 @@ import {
   Chip,
   Grid,
 } from '@mui/material';
-import { DeleteSweep, Devices, Google as GoogleIcon, Logout as LogoutIcon, School as SchoolIcon, VerifiedUser } from '@mui/icons-material';
+import { CreditCard, DeleteSweep, Devices, Google as GoogleIcon, Logout as LogoutIcon, School as SchoolIcon, VerifiedUser } from '@mui/icons-material';
 import { doc, setDoc } from 'firebase/firestore';
 import { sendEmailVerification, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 
@@ -314,6 +314,7 @@ export default function AccountPage() {
         <Tabs value={activeTab} onChange={handleTabChange}>
           <Tab label="Profile" />
           <Tab label="Security" />
+          <Tab label="Billing" icon={<CreditCard />} iconPosition="start" />
           <Tab label="Products" icon={<Devices/>} iconPosition="start" />
         </Tabs>
       </Box>
@@ -358,6 +359,16 @@ export default function AccountPage() {
             {user?.providerData.some((provider) => provider.providerId === 'password') && <Button variant="outlined" onClick={() => void sendPasswordReset()}>Reset Password</Button>}
             <Button variant="outlined" color="error" startIcon={<LogoutIcon />} onClick={() => void handleLogout()}>Sign Out</Button>
           </Stack>
+          <Box sx={{ opacity: 0.55, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <SchoolIcon />
+              <Box>
+                <Typography variant="subtitle2">School or district SSO</Typography>
+                <Typography variant="body2" color="text.secondary">Not connected. Google Workspace Education, Microsoft Education, Clever, and ClassLink require district setup.</Typography>
+              </Box>
+            </Stack>
+            <Button disabled variant="outlined" sx={{ mt: 1.5 }}>Connect SSO</Button>
+          </Box>
         </Stack>
         <Divider sx={{ my: 3 }} />
         <Typography variant="h6" gutterBottom>Fresh-user testing</Typography>
@@ -370,6 +381,26 @@ export default function AccountPage() {
       </TabPanel>
 
       <TabPanel value={activeTab} index={2}>
+        <Typography variant="h5" gutterBottom sx={{ color: '#C8B882' }}>Billing</Typography>
+        <Stack spacing={2} sx={{ maxWidth: 760 }}>
+          <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1}>
+              <Box>
+                <Typography variant="subtitle1" fontWeight={700}>Local / open-source plan</Typography>
+                <Typography variant="body2" color="text.secondary">No active subscription or payment method is attached to this Firebase account.</Typography>
+              </Box>
+              <Chip label="Current" color="success" size="small" />
+            </Stack>
+          </Box>
+          <Box sx={{ opacity: 0.55, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+            <Typography variant="subtitle1" fontWeight={700}>Cloud billing</Typography>
+            <Typography variant="body2" color="text.secondary">Hosted plans, invoices, payment methods, and organization billing are not connected yet.</Typography>
+            <Button disabled variant="contained" startIcon={<CreditCard />} sx={{ mt: 1.5 }}>Manage Billing</Button>
+          </Box>
+        </Stack>
+      </TabPanel>
+
+      <TabPanel value={activeTab} index={3}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'stretch', md: 'center' }, gap: 2, mb: 3, flexDirection: { xs: 'column', md: 'row' } }}>
           <Box>
             <Typography variant="h5" gutterBottom sx={{ color: '#C8B882' }}>

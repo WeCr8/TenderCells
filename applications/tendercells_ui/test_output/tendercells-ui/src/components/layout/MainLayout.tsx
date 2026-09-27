@@ -15,11 +15,10 @@ const DRAWER_WIDTH = 240;
 type MainLayoutProps = {
   title?: string;
   product?: string;
-  onProductChange?: (product: string) => void;
   children: React.ReactNode;
 };
 
-export default function MainLayout({ title, product, onProductChange, children }: MainLayoutProps) {
+export default function MainLayout({ title, product, children }: MainLayoutProps) {
   const location = useLocation();
   const { products } = useProducts();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,7 +35,7 @@ export default function MainLayout({ title, product, onProductChange, children }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
-      <TopNavBar title={products.length > 0 ? title : "Workspace"} product={product || "chicken-tender"} onProductChange={onProductChange || (() => {})} />
+      <TopNavBar title={products.length > 0 ? title : "Workspace"} product={product || ""} products={products} />
       <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Tooltip title="Open navigation">
           <IconButton

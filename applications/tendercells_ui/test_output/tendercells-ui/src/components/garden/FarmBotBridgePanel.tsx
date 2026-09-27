@@ -17,6 +17,7 @@ import {
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import type { PropertyItem } from '../property/propertyLayoutStore';
 import { normalizeFarmBotUrl } from './farmbotLinks';
+import FarmBotLivePanel from './FarmBotLivePanel';
 
 const FARMBOT_APP_URL = 'https://my.farm.bot';
 // Genesis / Genesis XL are FarmBot kits; any other garden can still be driven by a
@@ -30,7 +31,8 @@ const FARMBOT_GETTING_STARTED_URL = 'https://software.farm.bot/docs/getting-star
 const FARMBOT_SELF_HOST_URL = 'https://github.com/FarmBot/Farmbot-Web-App/blob/main/local_setup_instructions.sh';
 const FARMBOT_GREEN = '#61B833';
 
-// serverUrl: self-hosted FarmBot Web App (default my.farm.bot).
+// serverUrl: self-hosted FarmBot Web App (default my.farm.bot). email/linkedAt were an
+// earlier placeholder for status mirroring, now done live by FarmBotLivePanel.
 type FarmBotLink = { email?: string; linkedAt?: string; serverUrl?: string };
 
 const linkKey = (itemId: string) => `tc_farmbot_link_${itemId}`;
@@ -47,7 +49,6 @@ const loadLink = (itemId: string): FarmBotLink => {
  */
 export default function FarmBotBridgePanel({ item }: { item: PropertyItem }) {
   const [link, setLink] = useState<FarmBotLink>(() => loadLink(item.id));
-  const [email, setEmail] = useState(link.email || '');
   const [serverInput, setServerInput] = useState(link.serverUrl || '');
   const [serverError, setServerError] = useState<string | null>(null);
   const isNative = FARMBOT_NATIVE_TYPES.has(item.type);
@@ -56,13 +57,6 @@ export default function FarmBotBridgePanel({ item }: { item: PropertyItem }) {
   const persist = (next: FarmBotLink) => {
     try { localStorage.setItem(linkKey(item.id), JSON.stringify(next)); } catch { /* storage off */ }
     setLink(next);
-  };
-  const saveLink = () => {
-    persist({ ...link, email: email.trim() || undefined, linkedAt: new Date().toISOString() });
-  };
-  const clearLink = () => {
-    persist({ serverUrl: link.serverUrl });
-    setEmail('');
   };
   const saveServer = () => {
     if (!serverInput.trim()) { persist({ ...link, serverUrl: undefined }); setServerError(null); return; }
@@ -136,33 +130,16 @@ export default function FarmBotBridgePanel({ item }: { item: PropertyItem }) {
 
       <Divider sx={{ borderColor: '#1A3D2B', my: 1.5 }} />
 
-      {/* Optional: remember the FarmBot account so we can mirror read-only status into
-          the 3D twin later. No control here, no token stored without the user. */}
-      <Typography variant="caption" sx={{ color: '#8A7D55', display: 'block', mb: 0.75 }}>
-        Link your FarmBot account (optional — for status mirroring)
-      </Typography>
-      {link.linkedAt ? (
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-          <Chip
-            label={link.email ? `Linked: ${link.email}` : 'Linked'}
-            size="small" onDelete={clearLink}
-            sx={{ bgcolor: `${FARMBOT_GREEN}22`, color: FARMBOT_GREEN }}
-          />
-          <Typography variant="caption" color="text.secondary">
-            Read-only status mirror to the 3D twin — coming next.
-          </Typography>
-        </Stack>
+      {/* Live link to my.farm.bot (FarmBot's own client + hosted service). Self-hosted
+          servers open in a new tab only: the site's security policy cannot allow
+          arbitrary servers, and http LAN servers are blocked from an https page. */}
+      {link.serverUrl && link.serverUrl !== FARMBOT_APP_URL ? (
+        <Typography variant="caption" sx={{ color: '#8A7D55', display: 'block' }}>
+          Live status, E-STOP and sequences here work with my.farm.bot accounts. For a
+          self-hosted server, use the button above to open its web app.
+        </Typography>
       ) : (
-        <Stack direction="row" spacing={1}>
-          <TextField
-            size="small" fullWidth placeholder="you@example.com"
-            value={email} onChange={(e) => setEmail(e.target.value)}
-          />
-          <Button variant="outlined" size="small" onClick={saveLink}
-            sx={{ borderColor: '#4A7C59', color: '#9CCC65', whiteSpace: 'nowrap' }}>
-            Link
-          </Button>
-        </Stack>
+        <FarmBotLivePanel item={item} />
       )}
 
       <Box sx={{ mt: 1.5 }}>

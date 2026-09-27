@@ -1,7 +1,9 @@
 name: Deploy (Firebase Hosting)
 
 # Builds the marketing site + the app (and the AI snapshot) and publishes to
-# Firebase Hosting on every push to main.
+# Firebase Hosting after the CI workflow passes on main. This is the ONLY
+# workflow that deploys Hosting (ci.yml's duplicate deploy job was removed: it
+# built without the Firebase config and overwrote this one's releases).
 #
 # Required repo secret:
 #   FIREBASE_SERVICE_ACCOUNT_TENDER_CELLS — the service-account JSON (already set).
@@ -15,18 +17,30 @@ name: Deploy (Firebase Hosting)
 # of build:public-demo.
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch: {}
 
+# One Hosting release at a time, in order.
+concurrency:
+  group: firebase-hosting-live
+  cancel-in-progress: false
+
 jobs:
   deploy:
+    # Deploy only commits whose CI passed (or a manual run).
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: applications/tendercells_ui/test_output
     steps:
       - uses: actions/checkout@v4
+        with:
+          # workflow_run runs on the default branch; build the commit CI tested.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: "20"

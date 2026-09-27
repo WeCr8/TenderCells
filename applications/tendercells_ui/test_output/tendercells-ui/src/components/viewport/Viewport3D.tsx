@@ -4,6 +4,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { createGltfLoader, describeModelLoadError } from '../../lib/three/gltfLoader';
 import { resolveModelUrl, saveModelFile } from '../../lib/three/modelStore';
+import {
+  FARMBOT_POSITION_EVENT,
+  latestFarmBotPositions,
+  type FarmBotPosition,
+  type FarmBotPositionDetail,
+} from '../../lib/farmbot/farmbotCloud';
 import { Sky } from 'three/examples/jsm/objects/Sky.js';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
@@ -752,6 +758,56 @@ const propertyToScenePosition = (item: PropertyItem, layout: PropertyLayoutState
   z: item.y + item.depth / 2 - layout.property.depthFt / 2,
 });
 
+// Gardens a FarmBot can be linked to (see FarmBotBridgePanel).
+const FARMBOT_GARDEN_TYPES = new Set(['farmbot-genesis', 'farmbot-genesis-xl', 'aquaponics', 'hydroponics', 'greenhouse']);
+const MM_PER_FT = 304.8;
+
+/** Bright tool head + drop line marking a FarmBot's live position. */
+const createFarmBotMarker = (): THREE.Group => {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({ color: 0x61b833, emissive: 0x2f6b12, roughness: 0.4 });
+  // Sized to read at yard scale (a real tool head is ~4 in; this is exaggerated).
+  const head = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.14, 0.6, 20), mat);
+  head.name = 'farmbot-head';
+  g.add(head);
+  // Ring on the soil directly below the tool, so the X/Y position reads from above.
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.07, 8, 32), new THREE.MeshBasicMaterial({ color: 0x9ccc65 }));
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.52;
+  g.add(ring);
+  const drop = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1, 6), new THREE.MeshBasicMaterial({ color: 0x61b833, transparent: true, opacity: 0.5 }));
+  drop.name = 'farmbot-drop';
+  g.add(drop);
+  g.name = 'farmbot-live-marker';
+  return g;
+};
+
+/**
+ * Place a FarmBot marker over its garden bed. FarmBot X runs along the bed's long
+ * side and Y across it, both from the bed's origin corner; Z is 0 at the top of
+ * travel and negative going down.
+ */
+const placeFarmBotMarker = (marker: THREE.Group, item: PropertyItem, layout: PropertyLayoutState, pos: FarmBotPosition) => {
+  const { x, z } = propertyToScenePosition(item, layout);
+  const alongZ = item.depth >= item.width;
+  const long = Math.max(item.width, item.depth);
+  const wide = Math.min(item.width, item.depth);
+  const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+  const xFt = clamp((pos.x ?? 0) / MM_PER_FT, 0, long);
+  const yFt = clamp((pos.y ?? 0) / MM_PER_FT, 0, wide);
+  const cornerX = x - item.width / 2;
+  const cornerZ = z - item.depth / 2;
+  const sceneX = alongZ ? cornerX + yFt : cornerX + xFt;
+  const sceneZ = alongZ ? cornerZ + xFt : cornerZ + yFt;
+  const topY = 1.3; // gantry beam height above the bed
+  const headY = clamp(topY + (pos.z ?? 0) / MM_PER_FT, 0.6, topY);
+  marker.position.set(sceneX, 0, sceneZ);
+  const head = marker.getObjectByName('farmbot-head');
+  const drop = marker.getObjectByName('farmbot-drop');
+  if (head) head.position.y = headY;
+  if (drop) { drop.scale.y = Math.max(0.01, topY + 0.3 - headY); drop.position.y = headY + drop.scale.y / 2; }
+};
+
 const createYardItem = (
   item: EnrichedItem,
   layout: PropertyLayoutState,
@@ -1017,6 +1073,18 @@ export default function Viewport3D({
   // import silently showed the built-in shape. Track them (and skip retrying) and
   // show them in the viewport. Keyed by model URL/ref -> "Name: reason".
   const failedModelsRef = useRef<Map<string, string>>(new Map());
+  // Live FarmBot tool positions (mm) per garden item, from FarmBotLivePanel.
+  // Kept in a ref and applied in the render loop so updates don't rebuild the scene.
+  const farmbotPosRef = useRef<Map<string, FarmBotPosition>>(new Map(latestFarmBotPositions));
+  useEffect(() => {
+    const onPosition = (event: Event) => {
+      const { itemId, position } = (event as CustomEvent<FarmBotPositionDetail>).detail;
+      if (position) farmbotPosRef.current.set(itemId, position);
+      else farmbotPosRef.current.delete(itemId);
+    };
+    window.addEventListener(FARMBOT_POSITION_EVENT, onPosition);
+    return () => window.removeEventListener(FARMBOT_POSITION_EVENT, onPosition);
+  }, []);
   const [modelErrors, setModelErrors] = useState<string[]>([]);
   const recordModelError = (key: string, label: string, err: unknown) => {
     const reason = err instanceof Error && /attach the \.glb again/.test(err.message)
@@ -1351,9 +1419,24 @@ export default function Viewport3D({
       scene.add(createSimulationOverlay(layout));
     }
 
+    // Live FarmBot tool-head markers over garden beds (hidden until a position arrives).
+    const farmbotMarkers = workspaceMode === 'property' ? [] : layout.items
+      .filter((i) => i.kind === 'hardware' && FARMBOT_GARDEN_TYPES.has(i.type))
+      .map((item) => {
+        const marker = createFarmBotMarker();
+        marker.visible = false;
+        scene.add(marker);
+        return { item, marker };
+      });
+
     let animationId: number;
     const animate = () => {
       animationId = requestAnimationFrame(animate);
+      farmbotMarkers.forEach(({ item, marker }) => {
+        const pos = farmbotPosRef.current.get(item.id);
+        marker.visible = !!pos;
+        if (pos) placeFarmBotMarker(marker, item, layout, pos);
+      });
       controls.update();
       renderer.render(scene, camera);
     };

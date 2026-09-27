@@ -56,9 +56,13 @@ export default defineConfig(({ mode }) => ({
   envDir: path.resolve(__dirname, '../../../..'),
   define: mode === 'public-demo' ? publicDemoEnv : undefined,
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
+    alias: [
+      { find: '@', replacement: path.resolve(__dirname, './src') },
+      // farmbot-js (CommonJS) needs MQTT.js's default export to carry connect();
+      // see src/lib/farmbot/mqttCompat.ts. Exact match only - the shim itself
+      // imports 'mqtt/dist/mqtt.esm'.
+      { find: /^mqtt$/, replacement: path.resolve(__dirname, './src/lib/farmbot/mqttCompat.ts') },
+    ],
   },
   optimizeDeps: {
     include: [

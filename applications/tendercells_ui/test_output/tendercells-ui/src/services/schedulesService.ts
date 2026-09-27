@@ -18,11 +18,12 @@ export interface Timestampish {
 export interface Schedule {
   id: string;
   deviceId: string;
-  action: 'feed' | 'clean' | 'door' | 'water';
+  action: 'feed' | 'clean' | 'door' | 'water' | 'weed_pass';
   cronExpression: string;
   enabled: boolean;
   label?: string;
   amount?: number; // grams (feed) or ml (water)
+  passes?: number; // weed_pass: detection passes per run (1-10)
   lastRun?: Timestampish | null;
   createdAt?: Timestampish;
 }
@@ -226,6 +227,7 @@ export const ACTION_LABELS: Record<Schedule['action'], string> = {
   water: 'Water',
   door: 'Door',
   clean: 'Clean',
+  weed_pass: 'Weed pass',
 };
 
 export const ACTION_COLORS: Record<Schedule['action'], string> = {
@@ -233,4 +235,5 @@ export const ACTION_COLORS: Record<Schedule['action'], string> = {
   water: '#2196F3',
   door:  '#4A7C59',
   clean: '#9C27B0',
+  weed_pass: '#6BBF59',
 };

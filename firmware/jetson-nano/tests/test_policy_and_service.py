@@ -183,3 +183,19 @@ def test_unknown_routine_and_missing_coordinator():
     assert "Unknown routine" in pub.last_state()["error"]
     send(svc, "cmd/motion", {"routine": "egg_collection_routine"})
     assert "coordinator" in pub.last_state()["error"]
+
+
+def test_arm_commands_with_seq_get_exactly_one_ack():
+    svc, pub, _ = service(animal_area=False)
+    send(svc, "cmd/arm", {"seq": 41, "joints": [1] * 6, "speed": 1})
+    send(svc, "cmd/arm", {"seq": 42, "joints": [1, 2]})  # wrong count -> refused later by the driver? no: queued
+    send(svc, "cmd/motion", {"seq": 43, "routine": "dance"})
+    send(svc, "cmd/estop", {"seq": 44, "active": True})
+    send(svc, "cmd/arm", {"seq": 45, "joints": [0] * 6})
+    svc.wait_idle()
+    acks = {b["seq"]: b for t, b, *_ in pub if t.endswith("/ack")}
+    assert acks[41]["ok"] is True
+    assert acks[43]["ok"] is False and "Unknown routine" in acks[43]["error"]
+    assert acks[44]["ok"] is True
+    assert acks[45]["ok"] is False and "E-STOP" in acks[45]["error"]
+    assert sum(1 for t, b, *_ in pub if t.endswith("/ack") and b["seq"] == 41) == 1

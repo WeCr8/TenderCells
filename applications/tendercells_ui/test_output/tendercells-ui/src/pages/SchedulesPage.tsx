@@ -174,6 +174,7 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
   const [cronParts, setCronParts] = useState<CronParts>(defaultCron);
   const [label, setLabel] = useState('');
   const [amount, setAmount] = useState<number>(100);
+  const [passes, setPasses] = useState<number>(1);
   const [enabled, setEnabled] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -184,12 +185,14 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
       setCronParts(parseCron(initial.cronExpression) ?? defaultCron);
       setLabel(initial.label ?? '');
       setAmount(initial.amount ?? 100);
+      setPasses(initial.passes ?? 1);
       setEnabled(initial.enabled);
     } else {
       setAction('feed');
       setCronParts(defaultCron);
       setLabel('');
       setAmount(100);
+      setPasses(1);
       setEnabled(true);
     }
   }, [open, initial, defaultCron]);
@@ -204,6 +207,7 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
         enabled,
         label: label.trim() || undefined,
         amount: action === 'feed' || action === 'water' ? amount : undefined,
+        passes: action === 'weed_pass' ? passes : undefined,
       });
       onClose();
     } finally {
@@ -236,6 +240,7 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
               <MenuItem value="water">Water</MenuItem>
               <MenuItem value="door">Door Open</MenuItem>
               <MenuItem value="clean">Clean</MenuItem>
+              <MenuItem value="weed_pass">Weed pass (garden robot)</MenuItem>
             </Select>
           </FormControl>
 
@@ -250,6 +255,24 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
               sx={{
                 '& label': { color: colors.goldMuted },
                 '& input': { color: colors.white },
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent },
+              }}
+            />
+          )}
+
+          {action === 'weed_pass' && (
+            <TextField
+              label="Passes per run (1-10)"
+              type="number"
+              size="small"
+              value={passes}
+              onChange={(e) => setPasses(Math.min(10, Math.max(1, Math.round(Number(e.target.value) || 1))))}
+              inputProps={{ min: 1, max: 10 }}
+              helperText="Detection only - each weed still waits for your approval in Weed Patrol."
+              sx={{
+                '& label': { color: colors.goldMuted },
+                '& input': { color: colors.white },
+                '& .MuiFormHelperText-root': { color: colors.goldMuted },
                 '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent },
               }}
             />
@@ -465,6 +488,7 @@ export default function SchedulesPage() {
         enabled: data.enabled,
         label: data.label,
         amount: data.amount,
+        passes: data.passes,
       });
       setSnack({ msg: 'Schedule updated', severity: 'success' });
     } else {
@@ -510,6 +534,10 @@ export default function SchedulesPage() {
         case 'clean':
           endpoint = `${EXPRESS_API}/devices/${s.deviceId}/clean`;
           body = { action: 'start' };
+          break;
+        case 'weed_pass':
+          endpoint = `${EXPRESS_API}/devices/${s.deviceId}/weeds/pass`;
+          body = { passes: s.passes ?? 1 };
           break;
       }
 

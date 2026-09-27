@@ -67,12 +67,19 @@ jobs:
 
       # Refuse to publish an app whose sign-in cannot work: the built /app bundle
       # must contain the project's apiKey and authDomain.
-      - name: Verify app bundle has Firebase Auth config
+      - name: Verify website + app bundles have Firebase Auth config
         working-directory: .
         run: |
           APP_JS=applications/tendercells_ui/test_output/website/dist/app/assets
           echo "Root .env keys: $(cut -d= -f1 .env 2>/dev/null | tr '\n' ' ')"
           echo "Build env has API key: $([ -n "$VITE_FIREBASE_API_KEY" ] && echo yes || echo no)"
+          SITE_JS=applications/tendercells_ui/test_output/website/dist/assets
+          if grep -lqF "$VITE_FIREBASE_API_KEY" $SITE_JS/*.js; then
+            echo "OK: website /account sign-in has the Firebase config."
+          else
+            echo "::error::Website bundle is missing the Firebase web config; /account sign-in would be broken. Not deploying."
+            exit 1
+          fi
           if grep -lq "authDomain:\"$VITE_FIREBASE_AUTH_DOMAIN\"" $APP_JS/*.js && grep -lqF "$VITE_FIREBASE_API_KEY" $APP_JS/*.js; then
             echo "OK: Firebase Auth config is embedded in the app bundle."
           else

@@ -1,6 +1,7 @@
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
-import { TENDERCELLS_APP_ENTRY_URL } from "../config/appLinks";
+import { TENDERCELLS_OS_URL } from "../config/appLinks";
+import { Link } from "react-router-dom";
 
 export default function ApplicationsPage() {
   return (
@@ -56,9 +57,12 @@ export default function ApplicationsPage() {
       </div>
 
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
-        <a href={TENDERCELLS_APP_ENTRY_URL} className="btn-primary">
-          Login / Launch Web Dashboard
+        <a href={TENDERCELLS_OS_URL} className="btn-primary">
+          Launch Tender Cells OS
         </a>
+        <Link to="/account" className="btn-outline">
+          Log in / My account
+        </Link>
       </div>
 
       <h2 className="section-title" id="api">Developer API</h2>

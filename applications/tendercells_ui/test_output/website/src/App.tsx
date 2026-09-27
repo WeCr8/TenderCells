@@ -30,9 +30,12 @@ import NotFoundPage from "./pages/NotFoundPage";
 import CookieConsent from "./components/CookieConsent";
 import { usePageTracking } from "./hooks/usePageTracking";
 import { useMarketingTelemetry } from "./hooks/useMarketingTelemetry";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { getConsentChoice } from "./utils/consent";
 import { identifyVisitor } from "./utils/analytics";
+
+// Lazy so the Firebase Auth SDK only loads for visitors who open /account.
+const AccountPage = lazy(() => import("./pages/AccountPage"));
 
 // Fires GA4 page_view on every route change — must be inside <BrowserRouter>
 function PageTracker() {
@@ -111,6 +114,9 @@ function App() {
 
         {/* Blog */}
         <Route path="/blog" element={<BlogPage />} />
+
+        {/* Account (website sign-in; the OS launches only from its button) */}
+        <Route path="/account" element={<Suspense fallback={null}><AccountPage /></Suspense>} />
 
         {/* Search */}
         <Route path="/search" element={<SearchPage />} />

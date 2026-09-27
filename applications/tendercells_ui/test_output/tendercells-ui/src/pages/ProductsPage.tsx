@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { modelUrlProblem } from '../lib/three/gltfLoader';
 import {
   Alert,
@@ -60,6 +61,7 @@ import type {
   UpdateProductData,
 } from '../types/products';
 import { ProductsService } from '../services/productsService';
+import { useAuth } from '../contexts/useAuth';
 
 type EditableProduct = {
   product_name: string;
@@ -217,6 +219,8 @@ const productToForm = (product: Product): EditableProduct => ({
 });
 
 export default function ProductsPage() {
+  const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
     products,
     stats,
@@ -237,6 +241,12 @@ export default function ProductsPage() {
   const [editForm, setEditForm] = useState<EditableProduct>(emptyEditForm);
   const [filter, setFilter] = useState<ProductFilter>({});
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    if (searchParams.get('register') !== '1') return;
+    setIsRegistrationModalOpen(true);
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -396,7 +406,7 @@ export default function ProductsPage() {
         </Alert>
       )}
 
-      <Paper sx={{ p: 2, mb: 2, border: '1px solid #4A7C59' }}>
+      {!user && <Paper sx={{ p: 2, mb: 2, border: '1px solid #4A7C59' }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} justifyContent="space-between">
           <Box>
             <Typography variant="subtitle2" sx={{ color: '#C8B882' }}>
@@ -408,7 +418,7 @@ export default function ProductsPage() {
           </Box>
           <Chip label={`MQTT tc/${ProductsService.FIRST_COOP_DEVICE_ID}/...`} color="success" variant="outlined" />
         </Stack>
-      </Paper>
+      </Paper>}
 
       <Grid container spacing={1.5} sx={{ mb: 2 }}>
         {summaryItems.map((item) => (
@@ -1136,11 +1146,11 @@ export default function ProductsPage() {
         isOpen={isRegistrationModalOpen}
         onClose={() => setIsRegistrationModalOpen(false)}
         onRegister={handleRegister}
-        onRegisterFirstChickenTender={async () => {
+        onRegisterFirstChickenTender={!user ? async () => {
           const product = await seedFirstGarageCoop();
           await refetch(filter);
           return product;
-        }}
+        } : undefined}
       />
 
       {connectionProduct && (

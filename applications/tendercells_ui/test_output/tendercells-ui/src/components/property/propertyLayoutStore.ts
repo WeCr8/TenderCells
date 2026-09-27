@@ -1,5 +1,6 @@
 import type { TerrainLayers } from './terrain';
 import type { DrainageFix } from './watershed';
+import { auth } from '../../lib/firebase/firebaseApp';
 
 export type PropertyItemKind = 'hardware' | 'obstacle';
 export type HardwareType =
@@ -205,21 +206,40 @@ export const DEFAULT_ITEMS: PropertyItem[] = [
   { id: 'item-fence',          kind: 'obstacle', name: 'Fence Line',     type: 'fence',          shape: 'rect',    x: 4,  y: 48, width: 60, depth: 3  },
 ];
 
+const getPropertyLayoutStorageKey = () => {
+  const uid = auth.currentUser?.uid;
+  return uid ? `${PROPERTY_LAYOUT_STORAGE_KEY}:${uid}` : `${PROPERTY_LAYOUT_STORAGE_KEY}:demo`;
+};
+
+const emptyAccountLayout = (): PropertyLayoutState => ({
+  property: {
+    name: 'My Property',
+    widthFt: 80,
+    depthFt: 60,
+    gridStepFt: 1,
+    terrainZones: [],
+    elevationPoints: [],
+  },
+  items: [],
+});
+
 export const loadPropertyLayout = (): PropertyLayoutState => {
   try {
-    const saved = localStorage.getItem(PROPERTY_LAYOUT_STORAGE_KEY);
-    if (!saved) return { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
+    const signedIn = Boolean(auth.currentUser?.uid);
+    const fallback = signedIn ? emptyAccountLayout() : { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
+    const saved = localStorage.getItem(getPropertyLayoutStorageKey());
+    if (!saved) return fallback;
     const parsed = JSON.parse(saved) as Partial<PropertyLayoutState>;
     return {
-      property: parsed.property || DEFAULT_PROPERTY,
-      items: Array.isArray(parsed.items) ? parsed.items : DEFAULT_ITEMS,
+      property: parsed.property || fallback.property,
+      items: Array.isArray(parsed.items) ? parsed.items : fallback.items,
     };
   } catch {
-    return { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
+    return auth.currentUser?.uid ? emptyAccountLayout() : { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
   }
 };
 
 export const savePropertyLayout = (state: PropertyLayoutState) => {
-  localStorage.setItem(PROPERTY_LAYOUT_STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(getPropertyLayoutStorageKey(), JSON.stringify(state));
   window.dispatchEvent(new CustomEvent<PropertyLayoutState>(PROPERTY_LAYOUT_EVENT, { detail: state }));
 };

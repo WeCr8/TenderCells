@@ -1170,7 +1170,11 @@ export default function Viewport3D({
       const family = p.metadata?.product_family as string | undefined;
       if (!family) return;
       const itemType = FAMILY_TO_ITEM_TYPE[family] || family;
-      const size = DEFAULT_SIZE_BY_TYPE[itemType] || { width: 3, depth: 3 };
+      const defaultSize = DEFAULT_SIZE_BY_TYPE[itemType] || { width: 3, depth: 3 };
+      const size = {
+        width: Number(p.metadata?.enclosure_width_ft) || defaultSize.width,
+        depth: Number(p.metadata?.enclosure_depth_ft) || defaultSize.depth,
+      };
       const existingVirtual = enriched.filter(e => !layout.items.some(li => li.id === e.id)).length;
       enriched.push({
         id: `virtual-${p.id}`,
@@ -1462,7 +1466,7 @@ export default function Viewport3D({
     scene.add(hydroHolder);
     flagsHolderRef.current = flagsHolder;
     setSceneVersion((v) => v + 1); // (re)build flags into the new scene
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
 
     // WatchTower camera views: three 120° cameras at the dome, 0/120/240° from map north,
     // tilted down a little - rendered as insets so the demo shows what the tower sees.
@@ -1505,7 +1509,8 @@ export default function Viewport3D({
     let animationId: number;
     const animate = () => {
       animationId = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
+      timer.update();
+      const t = timer.getElapsed();
       animateYardFlags(flagsHolder, t);
       weedRobots.forEach((r) => {
         const st = YARD_LIVE ? liveRobotsRef.current[r.item.id] : getSimRobot(r.item.id);
@@ -1557,6 +1562,7 @@ export default function Viewport3D({
       resizeObserver?.disconnect();
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationId);
+      timer.dispose();
       flagsHolder.children.slice().forEach((c) => disposeYardFlags(c));
       if (flagsHolderRef.current === flagsHolder) flagsHolderRef.current = null;
       controls.dispose();

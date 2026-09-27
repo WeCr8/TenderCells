@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { modelUrlProblem } from '../../lib/three/gltfLoader';
+import { hfModelUrl } from '../../lib/three/huggingFace';
 import {
   Dialog,
   DialogTitle,
@@ -45,6 +46,8 @@ import PrecisionManufacturingOutlinedIcon from '@mui/icons-material/PrecisionMan
 import RestaurantOutlinedIcon from '@mui/icons-material/RestaurantOutlined';
 import SensorsOutlinedIcon from '@mui/icons-material/SensorsOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import WaterDropOutlinedIcon from '@mui/icons-material/WaterDropOutlined';
 import { useTheme, useMediaQuery } from '@mui/material';
 import QRCodeScanner from './QRCodeScanner';
@@ -74,6 +77,12 @@ export default function ProductRegistrationModal({
   const [productFamily, setProductFamily] = useState<ProductFamily>('chicken-tender');
   const [buildSource, setBuildSource] = useState<BuildSource>('tendercells-kit');
   const [selectedTemplateId, setSelectedTemplateId] = useState('chicken-tender-kit');
+  const [connectionType, setConnectionType] = useState<'tendercells-template' | 'local-import' | 'huggingface'>('tendercells-template');
+  const [sourceUrl, setSourceUrl] = useState('');
+  const [controllerBoard, setControllerBoard] = useState('');
+  const [powerSource, setPowerSource] = useState('');
+  const [batteryCapacity, setBatteryCapacity] = useState('');
+  const [cameraModule, setCameraModule] = useState('');
   const [customProductName, setCustomProductName] = useState('');
   const [model, setModel] = useState('');
   const [location, setLocation] = useState('');
@@ -112,6 +121,7 @@ export default function ProductRegistrationModal({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [registeredProduct, setRegisteredProduct] = useState<Product | null>(null);
   const [isConnectionWizardOpen, setIsConnectionWizardOpen] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const productTemplates = [
     {
@@ -340,16 +350,21 @@ export default function ProductRegistrationModal({
     },
     {
       id: 'camera-kit',
-      title: 'Camera Kit',
-      subtitle: 'Camera, enclosure, and AI vision accessory.',
-      description: 'Register camera kits, IR modules, printed mounts, detection zones, and stream hardware.',
+      title: 'DIY ESP32 Camera Node',
+      subtitle: 'Camera, battery, enclosure, and programmable starter device.',
+      description: 'Build a named home camera or viewing node, flash it in the browser, and add its live view to a custom dashboard.',
       icon: <CameraAltOutlinedIcon />,
       productType: 'automation_device' as ProductType,
       productFamily: 'camera-kit' as ProductFamily,
-      buildSource: 'prototype' as BuildSource,
-      productName: 'Camera Kit',
-      model: 'TenderCells Camera Kit',
-      firmwareTarget: 'firmware/camera-kit',
+      buildSource: 'open-source-diy' as BuildSource,
+      productName: 'My Camera Node',
+      model: 'ESP32-S3 Camera + Battery',
+      firmwareTarget: 'firmware/watchtower-cam',
+      hardwareSetupMode: 'connect_now' as HardwareSetupMode,
+      controllerBoard: 'ESP32-S3 Sense / ESP32-S3 camera board',
+      powerSource: 'Rechargeable battery',
+      batteryCapacity: '2000',
+      cameraModule: 'OV2640 / compatible camera',
       activeTab: 3,
     },
     {
@@ -445,6 +460,8 @@ export default function ProductRegistrationModal({
   ];
 
   const applyTemplate = (template: typeof productTemplates[number]) => {
+    setConnectionType('tendercells-template');
+    setSourceUrl('');
     setSelectedTemplateId(template.id);
     setProductType(template.productType);
     setProductFamily(template.productFamily);
@@ -471,6 +488,10 @@ export default function ProductRegistrationModal({
     setHardwareRevision(template.hardwareRevision || '');
     setFirmwareTarget(template.firmwareTarget || '');
     setFirmwareVersion('');
+    setControllerBoard('controllerBoard' in template ? String(template.controllerBoard || '') : '');
+    setPowerSource('powerSource' in template ? String(template.powerSource || '') : '');
+    setBatteryCapacity('batteryCapacity' in template ? String(template.batteryCapacity || '') : '');
+    setCameraModule('cameraModule' in template ? String(template.cameraModule || '') : '');
     setMqttBaseTopic(template.mqttBaseTopic || '');
     setRepoUrl('');
     setSchematicUrl('');
@@ -484,6 +505,35 @@ export default function ProductRegistrationModal({
     setActiveTab(template.activeTab ?? 0);
     setErrors({});
     setSubmitError(null);
+  };
+
+  const importLocalTemplate = async (file: File) => {
+    try {
+      const data = JSON.parse(await file.text()) as RegisterProductData;
+      setConnectionType('local-import');
+      setSourceUrl(file.name);
+      setProductType(data.product_type || 'custom_product');
+      setProductFamily((data.metadata?.product_family as ProductFamily) || 'community-custom');
+      setBuildSource((data.metadata?.build_source as BuildSource) || 'open-source-diy');
+      setProductName(data.product_name || '');
+      setCustomProductName(String(data.metadata?.custom_product_name || data.product_name || ''));
+      setModel(data.model || '');
+      setLocation(data.location || '');
+      setSerialNumber(data.serial_number || '');
+      setActivationCode(data.activation_code || '');
+      setDeviceId(data.device_id || '');
+      setFirmwareTarget(String(data.metadata?.firmware_target || ''));
+      setMqttBaseTopic(String(data.metadata?.mqtt_base_topic || ''));
+      setCustomDeviceAssetUrl(String(data.metadata?.custom_device_asset_url || ''));
+      setRepoUrl(String(data.metadata?.repo_url || ''));
+      setNotes(String(data.metadata?.notes || ''));
+      setActiveTab(3);
+      setErrors({});
+    } catch {
+      setSubmitError('Could not import this product JSON template.');
+    } finally {
+      if (importInputRef.current) importInputRef.current.value = '';
+    }
   };
 
   const handleRegisterFirstChickenTender = async () => {
@@ -517,6 +567,12 @@ export default function ProductRegistrationModal({
       setProductFamily('chicken-tender');
       setBuildSource('tendercells-kit');
       setSelectedTemplateId('chicken-tender-kit');
+      setConnectionType('tendercells-template');
+      setSourceUrl('');
+      setControllerBoard('');
+      setPowerSource('');
+      setBatteryCapacity('');
+      setCameraModule('');
       setCustomProductName('');
       setProductName('');
       setModel('');
@@ -619,6 +675,13 @@ export default function ProductRegistrationModal({
           owner_email: ownerEmail.trim() || undefined,
           product_family: productFamily,
           build_source: buildSource,
+          connection_type: connectionType,
+          source_url: sourceUrl.trim() || undefined,
+          huggingface_repo: connectionType === 'huggingface' ? sourceUrl.trim() || undefined : undefined,
+          controller_board: controllerBoard.trim() || undefined,
+          power_source: powerSource.trim() || undefined,
+          battery_capacity_mah: batteryCapacity ? Number(batteryCapacity) : undefined,
+          camera_module: cameraModule.trim() || undefined,
           custom_product_name: customProductName.trim() || undefined,
           hardware_revision: hardwareRevision.trim() || undefined,
           firmware_target: firmwareTarget.trim() || undefined,
@@ -644,7 +707,9 @@ export default function ProductRegistrationModal({
           terrain_source: terrainSource,
           terrain_capture_device_id: terrainCaptureDeviceId.trim() || undefined,
           terrain_detail_status: propertySimulationEnabled ? 'manual' : 'not_started',
-          custom_device_asset_url: customDeviceAssetUrl.trim() || undefined,
+          custom_device_asset_url: connectionType === 'huggingface' && customDeviceAssetUrl.trim()
+            ? hfModelUrl(customDeviceAssetUrl.trim()).url
+            : customDeviceAssetUrl.trim() || undefined,
           telemetry_learning_enabled: telemetryLearningEnabled,
           notes: notes.trim() || undefined,
         },
@@ -665,6 +730,21 @@ export default function ProductRegistrationModal({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const openRegistrationFlasher = () => {
+    const target = productFamily === 'camera-kit' || firmwareTarget.includes('watchtower-cam')
+      ? 'watchtower-cam'
+      : productFamily === 'chicken-tender' || firmwareTarget.includes('chicken-tender')
+        ? 'chicken-tender'
+        : 'starter-node';
+    const params = new URLSearchParams({
+      target,
+      product: productFamily,
+      name: productName.trim() || customProductName.trim() || 'My Tender Cells Device',
+    });
+    if (deviceId.trim()) params.set('deviceId', deviceId.trim());
+    window.open(`/flash/?${params.toString()}`, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -791,6 +871,50 @@ export default function ProductRegistrationModal({
               </Stack>
             </Paper>
 
+            <Grid container spacing={2} alignItems="flex-start">
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Registration Source</InputLabel>
+                  <Select
+                    value={connectionType}
+                    label="Registration Source"
+                    onChange={(event) => {
+                      const next = event.target.value as typeof connectionType;
+                      setConnectionType(next);
+                      if (next === 'huggingface') {
+                        setProductType('custom_product');
+                        setBuildSource('open-source-diy');
+                      }
+                    }}
+                  >
+                    <MenuItem value="tendercells-template">TenderCells Template</MenuItem>
+                    <MenuItem value="local-import">Local Product Template</MenuItem>
+                    <MenuItem value="huggingface">Hugging Face</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                {connectionType === 'local-import' ? (
+                  <>
+                    <input ref={importInputRef} type="file" accept="application/json,.json" hidden onChange={(event) => event.target.files?.[0] && void importLocalTemplate(event.target.files[0])} />
+                    <Button fullWidth variant="outlined" startIcon={<UploadFileIcon />} onClick={() => importInputRef.current?.click()} sx={{ minHeight: 56 }}>
+                      Choose Product JSON
+                    </Button>
+                  </>
+                ) : connectionType === 'huggingface' ? (
+                  <TextField
+                    fullWidth
+                    label="Hugging Face Repository"
+                    value={sourceUrl}
+                    onChange={(event) => setSourceUrl(event.target.value)}
+                    placeholder="https://huggingface.co/owner/repository"
+                  />
+                ) : (
+                  <TextField fullWidth label="Template" value={selectedTemplateId} disabled />
+                )}
+              </Grid>
+            </Grid>
+
             {/* Product Type Selection */}
             <FormControl fullWidth required>
               <InputLabel>Product Type</InputLabel>
@@ -807,6 +931,18 @@ export default function ProductRegistrationModal({
             </FormControl>
 
             <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth label="Controller Board" value={controllerBoard} onChange={(event) => setControllerBoard(event.target.value)} placeholder="ESP32-S3 Sense" />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth label="Camera Module" value={cameraModule} onChange={(event) => setCameraModule(event.target.value)} placeholder="OV2640" />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth label="Power Source" value={powerSource} onChange={(event) => setPowerSource(event.target.value)} placeholder="Rechargeable battery + USB-C" />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth type="number" label="Battery Capacity (mAh)" value={batteryCapacity} onChange={(event) => setBatteryCapacity(event.target.value)} />
+              </Grid>
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth required>
                   <InputLabel>Product Family</InputLabel>
@@ -1301,9 +1437,12 @@ export default function ProductRegistrationModal({
             )}
           </Box>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ flexWrap: 'wrap', gap: 1 }}>
           <Button onClick={onClose} disabled={isSubmitting}>
             Cancel
+          </Button>
+          <Button onClick={openRegistrationFlasher} variant="outlined" startIcon={<SystemUpdateAltIcon />} disabled={isSubmitting}>
+            Flash Firmware
           </Button>
           <Button
             onClick={handleSubmit}

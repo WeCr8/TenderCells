@@ -8,6 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useLocation } from "react-router-dom";
+import { useProducts } from "../../hooks/useProducts";
 
 const DRAWER_WIDTH = 240;
 
@@ -20,6 +21,7 @@ type MainLayoutProps = {
 
 export default function MainLayout({ title, product, onProductChange, children }: MainLayoutProps) {
   const location = useLocation();
+  const { products } = useProducts();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Extract active section from path
@@ -34,7 +36,7 @@ export default function MainLayout({ title, product, onProductChange, children }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
-      <TopNavBar title={title} product={product || "chicken-tender"} onProductChange={onProductChange || (() => {})} />
+      <TopNavBar title={products.length > 0 ? title : "Workspace"} product={product || "chicken-tender"} onProductChange={onProductChange || (() => {})} />
       <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Tooltip title="Open navigation">
           <IconButton

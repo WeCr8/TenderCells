@@ -23,6 +23,7 @@ import {
 import type { Product, ProductStatus, ConnectionStatus } from '../../types/products';
 import { useProducts } from '../../hooks/useProducts';
 import ConnectionSetupWizard from './ConnectionSetupWizard';
+import { useNavigate } from 'react-router-dom';
 
 interface ProductCardProps {
   product: Product;
@@ -31,6 +32,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, onUpdate }: ProductCardProps) {
   const { deleteProduct, disconnectProduct } = useProducts();
+  const navigate = useNavigate();
   const [isConnectionWizardOpen, setIsConnectionWizardOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -180,6 +182,9 @@ export default function ProductCard({ product, onUpdate }: ProductCardProps) {
           </Box>
         </CardContent>
         <CardActions sx={{ gap: 1, flexWrap: 'wrap' }}>
+          <Button variant="outlined" size="small" onClick={() => navigate(`/product/${encodeURIComponent(product.id)}`)}>
+            Open Dashboard
+          </Button>
           <Button
             variant="contained"
             size="small"

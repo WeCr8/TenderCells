@@ -33,6 +33,7 @@ import ChickenEyeBirdPage from "../pages/ChickenEyeBirdPage";
 import DemoLandingPage from "../pages/DemoLandingPage";
 import WeedPatrolPage from "../pages/WeedPatrolPage";
 import WatershedPage from "../pages/WatershedPage";
+import ProductDashboardPage from "../pages/ProductDashboardPage";
 
 // Fires a page_view on every route change. No-op when analytics is disabled.
 function RouteAnalytics() {
@@ -86,6 +87,7 @@ export default function AppRoutes() {
       <Route path="/watershed" element={<WatershedPage />} />
       <Route path="/specs" element={<ProductSpecsPage />} />
       <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
+      <Route path="/product/:productId" element={<ProductDashboardPage />} />
       <Route path="/analytics" element={<AnalyticsPage />} />
       <Route path="/diagnostics" element={<DiagnosticsPage />} />
       <Route path="/birds" element={<BirdManagementPage />} />

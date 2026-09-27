@@ -118,7 +118,7 @@ function buildMenuGroups(products: Product[], currentProduct: string): MenuGroup
       id: `product-${item.id}`,
       label: item.product_name,
       icon: <BuildIcon />,
-      path: `/products?product=${encodeURIComponent(item.id)}`,
+      path: `/product/${encodeURIComponent(item.id)}`,
     }));
   if (diyItems.length) groups.push({ label: "DIY Modules", items: diyItems });
 

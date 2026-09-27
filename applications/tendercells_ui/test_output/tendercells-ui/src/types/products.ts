@@ -56,6 +56,13 @@ export interface NetworkConfig {
 }
 
 export interface ProductMetadata {
+  connection_type?: 'tendercells-template' | 'local-import' | 'huggingface' | string;
+  source_url?: string;
+  huggingface_repo?: string;
+  controller_board?: string;
+  power_source?: string;
+  battery_capacity_mah?: number;
+  camera_module?: string;
   owner_email?: string;
   product_family?: ProductFamily | string;
   build_source?: BuildSource | string;

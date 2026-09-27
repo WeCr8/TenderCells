@@ -58,6 +58,12 @@ unsigned long lastHeartbeat = 0, lastReconnect = 0;
 String topicSensors() { return "tc/" + deviceId + "/sensors"; }
 String topicState()   { return "tc/" + deviceId + "/state"; }
 String topicEstop()   { return "tc/" + deviceId + "/cmd/estop"; }
+String topicConfig()  { return "tc/" + deviceId + "/cmd/camera/config"; }
+
+bool cameraEnabled = true;
+bool microphoneEnabled = false;
+bool microSdEnabled = false;
+bool gpioEnabled = false;
 
 // ── MJPEG stream handler (multipart/x-mixed-replace) ─────────────────────────
 #define PART_BOUNDARY "123456789000000000000987654321"
@@ -66,6 +72,10 @@ static const char* STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
 static const char* STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
 
 static esp_err_t streamHandler(httpd_req_t* req) {
+  if (!cameraEnabled) {
+    httpd_resp_set_status(req, "503 Service Unavailable");
+    return httpd_resp_sendstr(req, "Camera disabled in TenderCells");
+  }
   esp_err_t res = httpd_resp_set_type(req, STREAM_CONTENT_TYPE);
   if (res != ESP_OK) return res;
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
@@ -117,14 +127,18 @@ bool initCamera() {
 }
 
 void publishHeartbeat() {
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<384> doc;
   doc["node"]        = "camera";
   doc["productType"] = productType;
   doc["peripheral"]  = "camera";
   doc["streamUrl"]   = "http://" + WiFi.localIP().toString() + "/stream";
+  doc["cameraEnabled"] = cameraEnabled;
+  doc["microphoneEnabled"] = microphoneEnabled;
+  doc["microSdEnabled"] = microSdEnabled;
+  doc["gpioEnabled"] = gpioEnabled;
   doc["rssi"]        = WiFi.RSSI();
   doc["ts"]          = millis();
-  char buf[256];
+  char buf[384];
   size_t n = serializeJson(doc, buf);
   mqtt.publish(topicSensors().c_str(), (const uint8_t*)buf, n);
 }
@@ -137,11 +151,33 @@ void publishState(const char* s) {
 }
 
 void onMqtt(char* topic, byte* payload, unsigned int len) {
-  StaticJsonDocument<128> doc;
+  StaticJsonDocument<384> doc;
   if (deserializeJson(doc, payload, len)) return;
   if (String(topic) == topicEstop()) {
     eStopActive = doc["active"] | false;
     publishState(eStopActive ? "estop" : "idle");
+  } else if (String(topic) == topicConfig()) {
+    JsonArray enabled = doc["enabled"].as<JsonArray>();
+    cameraEnabled = false;
+    microphoneEnabled = false;
+    microSdEnabled = false;
+    gpioEnabled = false;
+    for (JsonVariant value : enabled) {
+      const char* capability = value.as<const char*>();
+      if (!capability) continue;
+      if (strcmp(capability, "camera") == 0) cameraEnabled = true;
+      else if (strcmp(capability, "microphone") == 0) microphoneEnabled = true;
+      else if (strcmp(capability, "microsd") == 0) microSdEnabled = true;
+      else if (strcmp(capability, "gpio") == 0) gpioEnabled = true;
+    }
+    prefs.begin("tccam", false);
+    prefs.putBool("camera", cameraEnabled);
+    prefs.putBool("microphone", microphoneEnabled);
+    prefs.putBool("microsd", microSdEnabled);
+    prefs.putBool("gpio", gpioEnabled);
+    prefs.end();
+    publishHeartbeat();
+    publishState("configured");
   }
 }
 
@@ -149,6 +185,7 @@ bool reconnect() {
   String id = "tc-cam-" + deviceId + "-" + String((uint32_t)esp_random(), HEX);
   if (mqtt.connect(id.c_str())) {
     mqtt.subscribe(topicEstop().c_str(), 1);
+    mqtt.subscribe(topicConfig().c_str(), 1);
     publishState("idle");
     return true;
   }
@@ -161,6 +198,10 @@ void provision() {
   brokerPort  = prefs.getString("brokerPort", "1883");
   deviceId    = prefs.getString("deviceId", "");
   productType = prefs.getString("product", "camera-kit");
+  cameraEnabled = prefs.getBool("camera", true);
+  microphoneEnabled = prefs.getBool("microphone", false);
+  microSdEnabled = prefs.getBool("microsd", false);
+  gpioEnabled = prefs.getBool("gpio", false);
   if (deviceId.isEmpty()) {
     uint64_t mac = ESP.getEfuseMac();
     char b[24]; snprintf(b, sizeof(b), "cam_%04X", (uint16_t)(mac & 0xFFFF));

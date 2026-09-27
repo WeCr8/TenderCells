@@ -71,6 +71,13 @@
       </body>
       <publishes topic="tc/{id}/cmd/light" qos="1"/>
     </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/camera/config" auth="device-owner">
+      <summary>Apply enabled features to a camera node.</summary>
+      <body schema="cameraConfig">
+        <field name="enabled" type="array" required="true"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/camera/config" qos="1"/>
+    </endpoint>
     <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/gantry" auth="device-owner">
       <summary>GRBL gantry move or real-time command.</summary>
       <body schema="gantry">
@@ -223,7 +230,7 @@
     </topic>
     <topic pattern="tc/{id}/cmd/{command}" direction="api-to-device" qos="1">
       <payload>command body + {seq, timestamp}</payload>
-      <note>door, feed, clean, arm, motion, drive, light, gantry, weed, event</note>
+      <note>door, feed, clean, arm, motion, drive, light, camera/config, gantry, weed, event</note>
     </topic>
     <topic pattern="tc/{id}/cmd/estop" direction="api-to-device" qos="2" retain="true">
       <payload>{active: boolean, source, ts}</payload>

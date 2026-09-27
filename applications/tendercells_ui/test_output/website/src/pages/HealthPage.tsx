@@ -1,170 +1,137 @@
+import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
+import "./ReferenceLibrary.css";
+
+const urgentSigns = [
+  "Sudden or unexplained death, or several birds becoming ill together",
+  "Gasping, open-mouth breathing at rest, nasal discharge, or marked swelling",
+  "Purple discoloration of the comb, wattles, or legs",
+  "Stumbling, twisted neck, inability to stand, or severe weakness",
+  "A sharp flock-wide drop in eating, drinking, or egg production",
+];
+
+const concerns = [
+  ["Heat stress", "Panting, wings held away, lethargy", "Provide shade, abundant cool water, and more air movement. Reduce handling. Judge the bird, humidity, airflow, and exposure together."],
+  ["Cold or frostbite risk", "Persistent huddling, lethargy, pale or dark comb tips", "Keep birds dry and protected from drafts while maintaining ventilation. Avoid improvised heat lamps and other fire hazards."],
+  ["Poor air or wet litter", "Strong odor, eye irritation, damp bedding, coughing", "Correct leaks and improve ventilation. A sensor can flag a trend, but it does not replace checking litter and birds."],
+  ["Parasites", "Feather damage, pale comb, weight loss, restless roosting", "Identify the parasite before treatment. Ask a veterinarian or extension specialist for an approved product and withdrawal guidance."],
+  ["Reproductive emergency", "Repeated straining, penguin-like posture, weakness", "Move the hen to a quiet, safe area and contact a poultry veterinarian promptly. Do not attempt invasive home treatment."],
+  ["Respiratory disease", "Sneezing, discharge, facial swelling, breathing difficulty", "Separate affected birds when safe, tighten biosecurity, and call a veterinarian. Multiple cases or deaths require rapid reporting."],
+];
 
 export default function HealthPage() {
   return (
     <PageLayout>
       <PageHero
-        variant="red"
+        variant="green"
+        kicker="Practical flock care"
         title="Animal Health"
-        subtitle="Evidence-based guides for keeping your flock healthy — powered by live sensor data."
-        image="/assets/images/products/animal-health-stress-monitoring-concept.png"
-        imageAlt="TenderCells animal stress and health monitoring concept"
+        subtitle="Observe the animal first. Use records and sensors to notice change sooner, then bring a qualified veterinarian into diagnosis and treatment."
+        image="/assets/images/health/free-range-flock.jpg"
+        imageAlt="A free-range flock of hens near their coop"
       />
 
-      <div className="prose">
-        <p>
-          Tender Cells monitors the environmental conditions most predictive of flock health.
-          This guide explains what the numbers mean and when to act.
-        </p>
-      </div>
+      <nav className="reference-jumps" aria-label="Animal health topics">
+        <a href="#urgent">Urgent signs</a><a href="#daily">Daily check</a>
+        <a href="#environment">Environment</a><a href="#concerns">Common concerns</a>
+        <a href="#biosecurity">Biosecurity</a><a href="#technology">Sensors</a>
+      </nav>
 
-      <div className="product-visual">
-        <img
-          src="/assets/images/products/animal-health-stress-monitoring-concept.png"
-          alt="TenderCells concept view of animal stress, health, behavior, and sensor monitoring"
-        />
+      <section className="urgent-panel" id="urgent">
         <div>
-          <h2>How We Plan To Monitor Stress And Health</h2>
-          <ul>
-            <li>Environmental stress: temperature, humidity, light, air quality, ammonia risk, and ventilation context.</li>
-            <li>Resource changes: feed intake, water level, nest-box activity, egg count, and sudden changes from recent baselines.</li>
-            <li>Behavior patterns: low activity, isolation, unusual roosting, missed routines, repeated nest time, and flock separation.</li>
-            <li>Camera review: ChickenEye and WatchTower-style overlays can help point a caretaker toward what changed.</li>
-            <li>Human-first alerts: the system should recommend review, manual checks, and veterinary help when needed, not claim a diagnosis.</li>
-          </ul>
+          <p className="reference-eyebrow">Act now</p>
+          <h2>Signs that need prompt professional help</h2>
+          <p>Call a poultry veterinarian, state veterinarian, or animal-health official when illness is sudden, severe, or affects multiple birds.</p>
         </div>
-        <div className="product-component-map" aria-label="TenderCells health monitoring component map">
-          <h3>Real Component Match</h3>
-          <div>
-            <article>
-              <strong>BehaviorAnalytics</strong>
-              <p>Flock-level scores, feeding, water, activity, egg-laying, and per-bird watch states.</p>
-            </article>
-            <article>
-              <strong>Animal roster</strong>
-              <p>Named animals, health labels, notes, and history make alerts explainable.</p>
-            </article>
-            <article>
-              <strong>Settings alerts</strong>
-              <p>Temperature, feed, water, predator, and health notices can be adjusted instead of hard-coded.</p>
-            </article>
-            <article>
-              <strong>TenderAI review</strong>
-              <p>Sensor explanations should guide next checks while keeping care decisions with the human caretaker.</p>
-            </article>
-          </div>
-        </div>
-      </div>
+        <ul>{urgentSigns.map((sign) => <li key={sign}>{sign}</li>)}</ul>
+        <p className="urgent-contact">In the United States, report sick or dying birds to USDA APHIS at <a href="tel:+18665367593">1-866-536-7593</a>.</p>
+      </section>
 
-      <h2 className="section-title" id="chicken">Chicken Health Guide</h2>
-      <table className="info-table">
-        <thead>
-          <tr><th>Indicator</th><th>Normal Range</th><th>Warning</th><th>Critical</th></tr>
-        </thead>
-        <tbody>
+      <section className="reference-section" id="chicken">
+        <span id="daily" className="anchor-target" aria-hidden="true" />
+        <div className="reference-intro">
+          <p className="reference-eyebrow">Five-minute routine</p>
+          <h2>Know what normal looks like</h2>
+          <p>Check at roughly the same times each day. Count every animal, watch posture and movement, listen to breathing, inspect droppings and housing, and record meaningful changes.</p>
+        </div>
+        <div className="reference-grid four">
           {[
-            ["Temperature", "45–80°F", "35–44°F or 81–85°F", "<35°F or >85°F"],
-            ["Humidity", "40–70%", "30–39% or 71–80%", "<30% or >80%"],
-            ["Ammonia (NH₃)", "<5 ppm", "5–10 ppm", ">25 ppm"],
-            ["Daily Egg Count", "Breed avg ±10%", "Drop >15% (3 days)", "Drop >30%"],
-            ["Feed Consumption", "Breed avg ±15%", "Drop >20%", "Drop >35%"],
-          ].map(([i, n, w, c]) => (
-            <tr key={i}><td><strong>{i}</strong></td><td style={{ color: "#2a7a2a" }}>{n}</td>
-              <td style={{ color: "#e07b00" }}>{w}</td><td style={{ color: "#cc3333" }}>{c}</td></tr>
+            ["Look", "Posture, gait, eyes, comb color, isolation, injuries, and droppings."],
+            ["Listen", "Sneezing, coughing, wheezing, distress calls, or unusual silence."],
+            ["Measure", "Feed, water, eggs, temperature, humidity, and unusual events."],
+            ["Inspect", "Water flow, feed condition, litter, ventilation, locks, fencing, and pests."],
+          ].map(([title, body]) => <article key={title}><h3>{title}</h3><p>{body}</p></article>)}
+        </div>
+      </section>
+
+      <section className="reference-photo-band" id="environment">
+        <figure>
+          <img src="/assets/images/health/hen-drinking.jpg" alt="A hen drinking clean water" loading="lazy" />
+          <figcaption>Water access and consumption are useful daily checks.</figcaption>
+        </figure>
+        <div>
+          <p className="reference-eyebrow">Housing and resources</p>
+          <h2>Read conditions in context</h2>
+          <p>There is no single safe temperature or humidity number for every animal. Species, breed, age, acclimation, airflow, sunlight, stocking density, and humidity all change risk.</p>
+          <dl>
+            <div><dt>Water</dt><dd>Keep it clean, cool in hot weather, unfrozen in cold weather, and accessible without competition.</dd></div>
+            <div><dt>Feed</dt><dd>Use a complete ration for the species and life stage. Store it dry and protected from rodents and wild birds.</dd></div>
+            <div><dt>Air</dt><dd>Ventilate without a direct draft at roost height. Investigate odor, condensation, dust, or wet litter.</dd></div>
+            <div><dt>Trend</dt><dd>Compare with this flock's baseline. Sustained changes matter more than a generic percentage.</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section className="reference-section" id="concerns">
+        <div className="reference-intro"><p className="reference-eyebrow">Observe, separate, call</p><h2>Common concerns and the next safe step</h2></div>
+        <div className="reference-grid three">
+          {concerns.map(([title, signs, action]) => (
+            <article key={title}><h3>{title}</h3><p><strong>Watch for:</strong> {signs}</p><p><strong>Next step:</strong> {action}</p></article>
           ))}
-        </tbody>
-      </table>
+        </div>
+      </section>
 
-      <h2 className="section-title">Common Health Conditions</h2>
-      <div className="card-grid">
-        {[
-          { title: "Heat Stress", tag: "Temp >85°F", desc: "Symptoms: panting, wings held away from body, reduced egg production, lethargy. Action: increase ventilation, provide cool water, add shade. Mortality risk above 95°F." },
-          { title: "Cold Stress", tag: "Temp <35°F", desc: "Symptoms: huddling, reduced activity, frostbite on combs/wattles. Action: add supplemental heat (heat lamp on relay), increase bedding depth. Ensure water doesn't freeze." },
-          { title: "Ammonia Toxicity", tag: "NH₃ >10 ppm", desc: "Symptoms: eye irritation, respiratory issues, reduced feed intake. Chronic exposure increases susceptibility to respiratory disease. Action: improve ventilation, clean litter more frequently." },
-          { title: "Respiratory Illness", tag: "Multiple signals", desc: "Often correlated with high ammonia + high humidity. Symptoms: nasal discharge, coughing, sneezing. Action: isolate affected birds, consult vet, review ventilation." },
-          { title: "Egg Binding", tag: "Missing egg + behavior", desc: "A hen unable to pass an egg. Sensor alert: hen in nest box >4 hours. Action: check the hen manually, warm bath, calcium supplement, vet if unresolved in 24 hours." },
-          { title: "Mites & Lice", tag: "Night behavior change", desc: "Chickens reluctant to roost, increased grooming. Arm camera can detect unusual behavior patterns. Action: inspect roosts, treat with diatomaceous earth or approved miticide." },
-        ].map((c) => (
-          <div key={c.title} className="card">
-            <h3>{c.title}</h3>
-            <p style={{ fontSize: "0.78rem", color: "#cc3333", fontWeight: 600, margin: "0 0 0.4rem" }}>{c.tag}</p>
-            <p>{c.desc}</p>
-          </div>
-        ))}
-      </div>
+      <section className="reference-split" id="biosecurity">
+        <div><p className="reference-eyebrow">Prevent spread</p><h2>Biosecurity is daily care</h2><ul>
+          <li>Quarantine new or returning animals away from residents.</li>
+          <li>Use dedicated footwear and tools; clean hands before and after contact.</li>
+          <li>Keep feed and water protected from wild birds, rodents, and runoff.</li>
+          <li>Limit visitors and clean shared equipment between groups.</li>
+        </ul></div>
+        <div id="predators"><p className="reference-eyebrow">Layered protection</p><h2>Predator prevention</h2><ul>
+          <li>Use 1/2-inch hardware cloth on openings and animal-resistant latches.</li>
+          <li>Secure edges against digging and cover vulnerable runs.</li>
+          <li>Use cameras as an additional warning layer, never as the physical barrier.</li>
+        </ul></div>
+      </section>
 
-      <h2 className="section-title" id="predators">Predator Prevention</h2>
-      <div className="prose">
-        <p>
-          Predator loss is one of the biggest risks to a backyard flock. Tender Cells is designed
-          for a layered defense:
-        </p>
-        <ul>
-          <li><strong>WatchTower AI:</strong> 3-camera 360° AI detection. Classifies predators (raccoon, fox, hawk, dog) vs false positives (cats, squirrels). Alert with photo to your phone.</li>
-          <li><strong>Automatic door:</strong> Door closes at dusk and when headcount confirms all birds inside. Cannot be manually opened after E-STOP from predator alert.</li>
-          <li><strong>LoRa mesh:</strong> WatchTower alerts broadcast to all Tender Cells devices on your property within 500m. Roaming Roost auto-returns to dock on alert.</li>
-          <li><strong>Hardware barrier:</strong> 1/2" hardware cloth, buried apron, solid floor — mechanical deterrents remain the first line of defense.</li>
-        </ul>
-      </div>
-      <div className="card-grid">
-        {[
-          { animal: "🦝 Raccoon", method: "Locks doors with dexterous paws. Nocturnal. WatchTower AI detects and alerts. Ensure door latches require two motions to open." },
-          { animal: "🦊 Fox", method: "Digs under enclosures. Attacks at dawn/dusk. Buried apron + motion alert combination. Roaming Roost boundary fence triggers if approached." },
-          { animal: "🦅 Hawk/Owl", method: "Aerial attack. Cover top of run with hardware cloth or overhead netting. WatchTower AI includes sky-view camera for aerial threat detection." },
-          { animal: "🐍 Snake", method: "Eats eggs and chicks. 1/2\" hardware cloth on all gaps. Egg collection automation removes the attractant (eggs) quickly each morning." },
-        ].map((c) => (
-          <div key={c.animal} className="card">
-            <h3>{c.animal}</h3>
-            <p>{c.method}</p>
-          </div>
-        ))}
-      </div>
+      <section className="sensor-panel" id="technology">
+        <p className="reference-eyebrow">TenderCells monitoring</p>
+        <h2>What sensors can and cannot do</h2>
+        <p>Temperature, humidity, air-quality, feed, water, egg, camera, and headcount data can reveal a change worth checking. They cannot diagnose disease or prove an animal is healthy.</p>
+        <div><span>Measure</span><span>Compare with baseline</span><span>Inspect the animal</span><span>Escalate to a professional</span></div>
+      </section>
 
-      <h2 className="section-title" id="nutrition">Nutrition &amp; Feed</h2>
-      <div className="prose">
-        <p>
-          The Tender Cells feed dispenser tracks daily consumption per flock. Here are the baseline
-          targets the app uses to calibrate alerts:
-        </p>
-        <ul>
-          <li><strong>Laying hens:</strong> 100–130g feed/day per bird</li>
-          <li><strong>Broilers:</strong> 150–200g/day per bird</li>
-          <li><strong>Chicks (0–8 weeks):</strong> 30–80g/day, gradually increasing</li>
-          <li><strong>Water:</strong> 2× feed volume (~200–260mL/day per hen)</li>
-        </ul>
-        <p>
-          The load cell weight system alerts when daily consumption drops &gt;20% from rolling 7-day average —
-          often the first indicator of illness, feed quality issues, or social disruption in the flock.
-        </p>
-      </div>
+      <section className="library-links">
+        <h2>Explore animal-care systems</h2>
+        <Link to="/shop/chicken-tender">Chicken Tender</Link>
+        <Link to="/shop/duck-dock">Duck Dock</Link>
+        <Link to="/shop/bunny-burrow">Bunny Burrow</Link>
+        <Link to="/shop/goat-guardian">Goat Guardian</Link>
+        <Link to="/shop/turkey-tower">Turkey Tower</Link>
+        <Link to="/shop/pigeon-palace">Pigeon Palace</Link>
+      </section>
 
-      <h2 className="section-title" id="disease">Disease Monitoring</h2>
-      <div className="prose">
-        <p>
-          TenderAI analyzes sensor trends to flag patterns associated with common flock diseases.
-          It doesn't replace a veterinarian — it tells you when to call one sooner.
-        </p>
-        <ul>
-          <li>3+ days declining egg production + elevated ammonia → possible respiratory illness</li>
-          <li>Feed drop + temp normal → possible intestinal issue or parasite load</li>
-          <li>Single nest box unused for 5+ days → possible mite infestation in that box</li>
-          <li>Headcount short at dusk 2 nights running → predator access or escape point</li>
-        </ul>
-      </div>
+      <section className="source-list">
+        <h2>Trusted next stops</h2>
+        <a href="https://www.aphis.usda.gov/livestock-poultry-disease/avian/defend-the-flock/how-to-spot-sickness" target="_blank" rel="noopener noreferrer">USDA: How to spot sickness</a>
+        <a href="https://www.aphis.usda.gov/livestock-poultry-disease/avian/defend-the-flock/resources/how-protect-your-flock-avian-influenza" target="_blank" rel="noopener noreferrer">USDA: Protect your flock</a>
+        <a href="https://extension.umn.edu/agriculture/animals-and-livestock/poultry/preventing-heat-stress-in-poultry" target="_blank" rel="noopener noreferrer">University of Minnesota: Heat stress</a>
+        <p>This page is educational and is not a diagnosis or treatment plan. Local reporting rules apply.</p>
+      </section>
 
-      <h2 className="section-title" id="vet-connect">Vet Connect</h2>
-      <div className="prose">
-        <p>
-          The app can generate a health export — a PDF summary of sensor history, consumption trends,
-          and behavioral observations — to share with a poultry veterinarian.
-          This gives your vet context that would normally require days of observation.
-        </p>
-        <p>
-          Finding a poultry vet: <a href="https://www.avma.org/resources-tools/avma-policies/avma-guidelines-euthanasia-animals" target="_blank" rel="noopener noreferrer">AVMA</a> member search,
-          your state extension service, or local farm supply stores often have referral lists.
-        </p>
-      </div>
+      <footer className="photo-credits">Photography: <a href="https://commons.wikimedia.org/wiki/File:Free_range_chicken_flock.jpg" target="_blank" rel="noopener noreferrer">woodley wonderworks, CC BY 2.0</a>; <a href="https://commons.wikimedia.org/wiki/File:Hen_drinking.jpg" target="_blank" rel="noopener noreferrer">ILABORI CHIN MICHAEL, CC0</a>.</footer>
     </PageLayout>
   );
 }

@@ -23,7 +23,12 @@ function AppContent() {
   // Update product state based on current route
   useEffect(() => {
     const pathProduct = location.pathname.split('/')[1];
-    if (pathProduct && pathProduct !== 'settings' && pathProduct !== 'account' && pathProduct !== 'schedules') {
+    const productRoutes = new Set([
+      'chicken-tender', 'roaming-roost', 'duck-dock', 'goat-guardian',
+      'bunny-burrow', 'turkey-tower', 'predator-monitor',
+      'rail-system-modules', 'tender-cells-cloud', 'pigeon-palace',
+    ]);
+    if (productRoutes.has(pathProduct)) {
       setProduct(pathProduct);
     }
   }, [location.pathname]);

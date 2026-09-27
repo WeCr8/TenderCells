@@ -7,12 +7,14 @@ import type {
   ProductFilter,
   RegistrationMethod,
 } from '../types/products';
+import { auth } from '../lib/firebase/firebaseApp';
 
 /**
  * Service for managing products
  * Uses Supabase client or API endpoints
  */
 export class ProductsService {
+  static readonly PRODUCTS_UPDATED_EVENT = 'tendercells-products-updated';
   private static readonly API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || 'http://localhost:4000/api';
   private static readonly API_ENABLED = Boolean(import.meta.env?.VITE_API_BASE_URL);
   private static readonly DEV_PRODUCTS_KEY = 'tendercells_dev_products';
@@ -20,6 +22,12 @@ export class ProductsService {
   static readonly FIRST_COOP_PRODUCT_ID = 'demo-chicken-tender-001';
   static readonly FIRST_COOP_DEVICE_ID = 'ct_001';
   static readonly FIRST_COOP_SERIAL = 'TC-CT-DEMO-0001';
+
+  // Firebase UID is stable across password and SSO providers linked to an account.
+  private static getDevProductsKey(): string {
+    const uid = auth.currentUser?.uid;
+    return uid ? `${this.DEV_PRODUCTS_KEY}:${uid}` : `${this.DEV_PRODUCTS_KEY}:demo`;
+  }
 
   private static readonly ENDPOINTS = {
     PRODUCTS: '/products',
@@ -79,7 +87,7 @@ export class ProductsService {
 
   private static getDevProducts(): Product[] {
     try {
-      const parsed = JSON.parse(localStorage.getItem(this.DEV_PRODUCTS_KEY) || '[]') as Product[];
+      const parsed = JSON.parse(localStorage.getItem(this.getDevProductsKey()) || '[]') as Product[];
       const sanitized = parsed.map((product) => this.sanitizeDevProduct(product));
       if (JSON.stringify(parsed) !== JSON.stringify(sanitized)) {
         this.setDevProducts(sanitized);
@@ -91,7 +99,8 @@ export class ProductsService {
   }
 
   private static setDevProducts(products: Product[]) {
-    localStorage.setItem(this.DEV_PRODUCTS_KEY, JSON.stringify(products));
+    localStorage.setItem(this.getDevProductsKey(), JSON.stringify(products));
+    window.dispatchEvent(new CustomEvent(this.PRODUCTS_UPDATED_EVENT));
   }
 
   private static createFirstCoopProduct(): Product {

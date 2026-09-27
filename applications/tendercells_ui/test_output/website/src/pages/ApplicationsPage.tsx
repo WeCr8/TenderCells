@@ -33,7 +33,7 @@ export default function ApplicationsPage() {
         </ul>
       </div>
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
-        <a href="#ios-waitlist" className="btn-primary">Join iOS Waitlist</a>
+        <Link to="/contact" className="btn-primary">Join iOS Waitlist</Link>
       </div>
 
       <h2 className="section-title" id="android">Mobile App — Android</h2>
@@ -44,7 +44,7 @@ export default function ApplicationsPage() {
         </p>
       </div>
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
-        <a href="#android-waitlist" className="btn-primary">Join Android Waitlist</a>
+        <Link to="/contact" className="btn-primary">Join Android Waitlist</Link>
       </div>
 
       <h2 className="section-title" id="dashboard">Web Dashboard</h2>

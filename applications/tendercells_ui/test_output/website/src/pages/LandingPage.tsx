@@ -265,6 +265,7 @@ export default function LandingPage() {
 
         {/* ── Contact ──────────────────────────────── */}
         <section id="contact" className="contact">
+          <span id="newsletter" aria-hidden="true" />
           <div className="section-inner">
             <h2>Contact</h2>
             <p>Email: <a href="mailto:hello@wecr8.info">hello@wecr8.info</a></p>

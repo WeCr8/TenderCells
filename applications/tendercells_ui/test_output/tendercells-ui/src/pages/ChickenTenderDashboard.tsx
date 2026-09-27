@@ -18,11 +18,15 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import AgricultureIcon from "@mui/icons-material/Agriculture";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
+import RouterIcon from "@mui/icons-material/Router";
+import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
 import { ProductDetailsPanel, ProductHero } from "../components/products/ProductOverview";
 import type { CameraFeed } from "../types/camera";
+import { useProducts } from "../hooks/useProducts";
 
 const DEFAULT_CAMERAS: CameraFeed[] = [
   {
@@ -63,6 +67,8 @@ const DEFAULT_CAMERAS: CameraFeed[] = [
 
 export default function ChickenTenderDashboard() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { products, loading } = useProducts();
   const section = new URLSearchParams(location.search).get("section") || "coop";
   const [deviceId, setDeviceId] = useState("ct_001"); // Default device ID
   const [apiStatus, setApiStatus] = useState<"ok" | "error" | "loading">("loading");
@@ -71,6 +77,10 @@ export default function ChickenTenderDashboard() {
   const [selectedCameraId, setSelectedCameraId] = useState(DEFAULT_CAMERAS[0].id);
 
   const selectedCamera = cameras.find((camera) => camera.id === selectedCameraId) || cameras[0];
+  const chickenTender = products.find((product) =>
+    product.metadata?.product_family === "chicken-tender" ||
+    product.device_id?.toLowerCase().startsWith("ct_")
+  );
 
   useEffect(() => {
     const shouldProbeLocalApi =
@@ -87,6 +97,52 @@ export default function ChickenTenderDashboard() {
       .then((res) => setApiStatus(res.ok ? "ok" : "error"))
       .catch(() => setApiStatus("error"));
   }, []);
+
+  if (loading) {
+    return <Box sx={{ minHeight: 360, display: "grid", placeItems: "center" }}><CircularProgress /></Box>;
+  }
+
+  if (!chickenTender) {
+    return (
+      <Box sx={{ maxWidth: 1080, mx: "auto", py: { xs: 2, md: 4 } }}>
+        <Stack spacing={1} sx={{ mb: 3 }}>
+          <Typography variant="h4">Start your Chicken Tender workspace</Typography>
+          <Typography color="text.secondary">
+            This account has no products or property items yet. Add only what belongs to your setup.
+          </Typography>
+        </Stack>
+        <Paper
+          variant="outlined"
+          sx={{
+            minHeight: { xs: 360, md: 520 },
+            p: { xs: 3, md: 5 },
+            display: "grid",
+            placeItems: "center",
+            borderStyle: "dashed",
+            bgcolor: "background.default",
+          }}
+        >
+          <Stack spacing={3} alignItems="center" sx={{ maxWidth: 520, textAlign: "center" }}>
+            <AgricultureIcon sx={{ fontSize: 56, color: "primary.main" }} />
+            <Box>
+              <Typography variant="h5" gutterBottom>Your canvas is empty</Typography>
+              <Typography color="text.secondary">
+                Map your property first, or connect a Tender Cells controller and IoT sensors.
+              </Typography>
+            </Box>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ width: { xs: "100%", sm: "auto" } }}>
+              <Button variant="outlined" startIcon={<AddLocationAltIcon />} onClick={() => navigate("/layout")}>
+                Set up property
+              </Button>
+              <Button variant="contained" startIcon={<RouterIcon />} onClick={() => navigate("/products?register=1")}>
+                Connect IoT device
+              </Button>
+            </Stack>
+          </Stack>
+        </Paper>
+      </Box>
+    );
+  }
 
   return (
     <Box>

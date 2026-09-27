@@ -108,6 +108,16 @@ export default function AccountPage() {
       <Box sx={{ maxWidth: 400, mx: 'auto', mt: 4, p: 3 }}>
         <Card sx={{ bgcolor: '#1A3D2B' }}>
           <CardContent>
+            <Box
+              component="img"
+              src="/assets/images/tender-cells-logo.svg"
+              alt="Tender Cells"
+              onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/assets/images/tender_cells_logo.png';
+              }}
+              sx={{ display: 'block', width: 72, height: 72, mx: 'auto', mb: 2, borderRadius: 2, objectFit: 'contain' }}
+            />
             <Typography variant="h5" gutterBottom sx={{ color: '#C8B882' }}>
               {authMode === 'login' ? 'Login' : 'Register'}
             </Typography>

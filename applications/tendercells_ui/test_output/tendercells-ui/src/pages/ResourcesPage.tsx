@@ -21,8 +21,10 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PetsIcon from '@mui/icons-material/Pets';
 import SearchIcon from '@mui/icons-material/Search';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import { RESOURCE_LIBRARIES } from '../data/resourceLibraries';
 
-type Category = 'animals' | 'plants' | 'rodents' | 'wildlife' | 'health';
+type Category = 'animals' | 'plants' | 'rodents' | 'wildlife' | 'health' | 'libraries';
 type ResourceEntry = {
   category: Category;
   title: string;
@@ -38,6 +40,7 @@ const categories: Array<{ id: Category; label: string; icon: React.ReactElement 
   { id: 'rodents', label: 'Rodents', icon: <PetsIcon /> },
   { id: 'wildlife', label: 'Wildlife', icon: <TravelExploreIcon /> },
   { id: 'health', label: 'Health & safety', icon: <HealthAndSafetyIcon /> },
+  { id: 'libraries', label: 'Data libraries', icon: <AccountTreeIcon /> },
 ];
 
 const entries: ResourceEntry[] = [
@@ -166,7 +169,34 @@ export default function ResourcesPage() {
         </Alert>
       )}
 
-      <Stack spacing={1} sx={{ maxWidth: 900 }}>
+      {category === 'libraries' && (
+        <Box sx={{ maxWidth: 900 }}>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Tender Cells uses stable ontology identifiers and source provenance when correlating imported records. OWL/RDF sources describe concepts; they do not replace veterinary, toxicology, or local extension guidance.
+          </Alert>
+          <Stack spacing={1}>
+            {RESOURCE_LIBRARIES.map((library) => (
+              <Box key={library.id} sx={{ border: `1px solid ${C.border}`, borderRadius: '6px', bgcolor: C.surface, p: 2 }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1}>
+                  <Box>
+                    <Typography sx={{ color: C.gold, fontWeight: 700 }}>{library.name}</Typography>
+                    <Typography sx={{ color: C.muted, mt: 0.5 }}>{library.scope}</Typography>
+                    <Stack direction="row" spacing={0.5} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
+                      {library.formats.map((format) => <Chip key={format} label={format} size="small" variant="outlined" sx={{ color: C.muted, borderColor: C.border }} />)}
+                    </Stack>
+                  </Box>
+                  <Stack direction="row" spacing={1} alignItems="flex-start">
+                    <Button href={library.homepage} target="_blank" rel="noopener noreferrer" endIcon={<OpenInNewIcon />} sx={{ color: C.gold }}>Catalog</Button>
+                    {library.machineReadable && <Button href={library.machineReadable} target="_blank" rel="noopener noreferrer" endIcon={<OpenInNewIcon />} sx={{ color: C.gold }}>OWL</Button>}
+                  </Stack>
+                </Stack>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
+      )}
+
+      {category !== 'libraries' && <Stack spacing={1} sx={{ maxWidth: 900 }}>
         {visibleEntries.map((entry) => (
           <Accordion key={entry.title} disableGutters sx={{ bgcolor: C.surface, color: C.text, border: `1px solid ${C.border}`, borderRadius: '6px !important', '&:before': { display: 'none' } }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: C.gold }} />}>
@@ -191,7 +221,7 @@ export default function ResourcesPage() {
           </Accordion>
         ))}
         {!visibleEntries.length && <Typography sx={{ color: C.muted, py: 3 }}>No matching resources in this category.</Typography>}
-      </Stack>
+      </Stack>}
     </Box>
   );
 }

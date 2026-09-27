@@ -1,5 +1,6 @@
 // PredatorMonitorDashboard.tsx - WatchTower AI predator detection system
 import WatchTowerMonitor from "../components/watchtower/WatchTowerMonitor";
+import WatchTowerCameraPanel from "../components/watchtower/WatchTowerCameraPanel";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import SecurityIcon from "@mui/icons-material/Security";
@@ -20,6 +21,7 @@ export default function PredatorMonitorDashboard() {
         <Typography variant="h4" sx={{ color: '#E4E7E5' }}>WatchTower AI™ Predator Monitor</Typography>
       </Box>
       <ProductViewportPanel product="predator-monitor" title="WatchTower Property View" />
+      <WatchTowerCameraPanel />
       <WatchTowerMonitor battery={85} solarCharge={65} connected={true} lastSeen="2 minutes ago" />
       <ProductDetailsPanel product="predator-monitor" />
       <ProductSectionPanel product="predator-monitor" section={section} />

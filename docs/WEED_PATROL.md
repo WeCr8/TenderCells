@@ -67,6 +67,21 @@ LASER_PROFILE=diode-500mw STUDENT_MODE=true python3 weed_patrol_service.py
   enclosure switch are wired to.
 - An enclosure pin that reads unknown counts as **open**.
 
+### In the demo and in 3D
+
+**Weed Patrol → Robot build** switches the demo robot between three builds. The laser class,
+exposure range and 3D model follow the choice:
+
+- the Genesis laser head (gantry bridge and tool head);
+- the laser rover (rover with a 2-DOF arm);
+- the arm-mounted laser (an arm reaching over the bed).
+
+The 3D map shows the tool moving during a pass, the red aiming dot, and a violet (405 nm) or
+blue (450 nm) beam when a burn fires.
+
+Live robots report the same fields in `tc/{id}/state/weed`: `robotType` (from the `WEED_ROBOT`
+setting) and `tool {x, y, z, aim, laser}`.
+
 ## Passes on a schedule
 
 In **Schedules**, add a **Weed pass** action for the robot's device id (e.g. dawn and dusk, 1–10

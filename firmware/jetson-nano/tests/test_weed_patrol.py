@@ -224,3 +224,18 @@ def test_farmbot_gantry_moves_estops_and_reads_pins():
     assert bot.calls[0] == ("move", {"x": 120.0, "y": 50, "z": -150, "speed": 100})
     assert ("e_stop",) in bot.calls
     assert g.pin_value(7) == 0 and g.pin_value(9) is None  # unknown pin -> None (treated as open)
+
+
+def test_state_reports_tool_position_aim_and_laser_for_the_3d_view():
+    published = []
+    patrol, _events, _log = make_patrol(student_mode=False, burn_enabled=True)
+    svc = WeedPatrolService("garden_weeder", patrol, lambda t, b, q, r: published.append((t, b)), robot_type="rover-laser")
+    patrol.run_passes(1)
+    weed = next(iter(patrol.weeds.values()))
+    patrol.approve(weed["id"], "aim")
+    snap = svc.snapshot()
+    assert snap["robotType"] == "rover-laser"
+    assert snap["tool"]["aim"] is True and snap["tool"]["laser"] is False
+    assert (snap["tool"]["x"], snap["tool"]["y"]) == (round(weed["x"], 1), round(weed["y"], 1))
+    patrol.estop()
+    assert svc.snapshot()["tool"]["aim"] is False

@@ -88,3 +88,16 @@ export async function requireDeviceOwner(req: Request, res: Response, next: Next
     return res.status(500).json({ error: "Ownership check failed" });
   }
 }
+
+/**
+ * Device ids owned by a user (for listings such as /api/state.xml).
+ *
+ * @returns null when auth is disabled (every device is visible on a LAN/demo hub)
+ */
+export async function ownedDeviceIds(uid: string | undefined): Promise<Set<string> | null> {
+  if (!AUTH_ENABLED) return null;
+  if (!uid) return new Set();
+  ensureAdmin();
+  const snap = await getFirestoreAdmin().collection("devices").where("ownerId", "==", uid).get();
+  return new Set(snap.docs.map((d) => d.id));
+}

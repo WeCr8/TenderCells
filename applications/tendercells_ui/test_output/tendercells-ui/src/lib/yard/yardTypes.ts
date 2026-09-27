@@ -57,6 +57,9 @@ export const STATUS_COLORS: Partial<Record<YardEventStatus, string>> = {
   cleared: '#8A7D55',
 };
 
+/** Weed robot builds: FarmBot Genesis laser head, LiteWeed-style rover, arm-mounted laser. */
+export type WeedRobotType = 'genesis-laser' | 'rover-laser' | 'arm-laser';
+
 /** Weed-patrol robot state published on tc/{id}/state/weed. */
 export interface WeedRobotState {
   state: 'idle' | 'scanning' | 'treating' | 'estop' | 'error' | string;
@@ -68,6 +71,10 @@ export interface WeedRobotState {
     profile?: string; laserClass?: string; wavelengthNm?: number; powerW?: number;
   };
   pass: { running: boolean; pass: number; passes: number; waypoint: number; waypoints: number };
+  /** Tool head position in bed mm (x along, y across, z down) + aiming dot / laser output. */
+  tool?: { x: number; y: number; z: number; aim: boolean; laser: boolean };
+  /** Robot build (demo robots; live robots may report it too). */
+  robotType?: WeedRobotType;
   error: string | null;
   ts: number;
 }

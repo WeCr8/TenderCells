@@ -9,11 +9,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PropertyItem } from '../components/property/propertyLayoutStore';
 import { eggService, EGGS_UPDATED_EVENT, todayKey } from '../services/eggService';
 import { birdsService, BIRDS_UPDATED_EVENT } from '../services/birdsService';
-import { ackYardEvent, approveWeed, fetchYardEvents, rejectWeed, type Presence } from '../lib/yard/yardApi';
+import { ackYardEvent, approveWeed, fetchWeedState, fetchYardEvents, rejectWeed, type Presence } from '../lib/yard/yardApi';
 import { decideSimWeed, simBed, simWeeds, WEED_SIM_EVENT } from '../lib/yard/weedSim';
 import {
   DEFAULT_DEVICE_BY_TYPE, WEED_BED_TYPES, YARD_LIVE, weedDeviceFor,
-  type YardFlag,
+  type WeedRobotState, type YardFlag,
 } from '../lib/yard/yardTypes';
 
 const POLL_MS = 5000;
@@ -122,6 +122,8 @@ export function useYardEvents(items: PropertyItem[]) {
   const [flags, setFlags] = useState<YardFlag[]>([]);
   const [presence, setPresence] = useState<Record<string, Presence>>({});
   const [error, setError] = useState<string | null>(null);
+  // Live weed robot states per garden item (tool position, laser) - demo reads weedSim directly.
+  const [robots, setRobots] = useState<Record<string, WeedRobotState>>({});
   const itemsKey = useMemo(() => JSON.stringify(items.map((i) => [i.id, i.type, i.kind, i.deviceId, i.width, i.depth])), [items]);
   const itemsRef = useRef(items);
   itemsRef.current = items;
@@ -149,8 +151,14 @@ export function useYardEvents(items: PropertyItem[]) {
         firstError ??= err instanceof Error ? err.message : String(err);
       }
     }));
+    const bots: Record<string, WeedRobotState> = {};
+    await Promise.all(list.filter((i) => i.kind === 'hardware' && WEED_BED_TYPES.has(i.type)).map(async (i) => {
+      const st = await fetchWeedState(weedDeviceFor(i)).catch(() => null);
+      if (st) bots[i.id] = st;
+    }));
     setFlags(next);
     setPresence(pres);
+    setRobots(bots);
     setError(firstError);
   }, []);
 
@@ -197,5 +205,5 @@ export function useYardEvents(items: PropertyItem[]) {
     return message;
   }, [refresh]);
 
-  return { flags, presence, error, live: YARD_LIVE, refresh, act };
+  return { flags, presence, robots, error, live: YARD_LIVE, refresh, act };
 }

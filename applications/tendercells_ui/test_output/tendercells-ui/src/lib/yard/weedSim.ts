@@ -5,7 +5,7 @@
 // "pending_review", and a person approves each one (aim dot or laser burn) or
 // rejects it. Burn goes through the same interlocks as the real robot: E-STOP,
 // student mode (aim only), burn enabled, enclosure closed, cooldown.
-import type { WeedRobotState, YardEvent } from './yardTypes';
+import type { WeedRobotState, WeedRobotType, YardEvent } from './yardTypes';
 
 export const WEED_SIM_EVENT = 'tendercells-weed-sim';
 const STORAGE_KEY = 'tendercells_weed_sim_v1';
@@ -15,6 +15,25 @@ const TICK_MS = 450;
 const COOLDOWN_MS = 2000;
 
 export interface WeedSimSafety { studentMode: boolean; burnEnabled: boolean; enclosureClosed: boolean }
+
+/** Weed robot builds the demo can simulate (same profiles as firmware/jetson-nano/weed_patrol.py). */
+export const WEED_ROBOT_TYPES: Record<WeedRobotType, {
+  label: string; motion: 'gantry' | 'rover' | 'arm'; note: string;
+  laser: { profile: string; laserClass: string; wavelengthNm: number; powerW: number; minMs: number; maxMs: number };
+}> = {
+  'genesis-laser': {
+    label: 'Genesis laser head', motion: 'gantry', note: 'FarmBot Genesis + 500 mW module (Project Cyclops, CC0)',
+    laser: { profile: 'diode-500mw', laserClass: '3B', wavelengthNm: 405, powerW: 0.5, minMs: 2000, maxMs: 8000 },
+  },
+  'rover-laser': {
+    label: 'Laser rover', motion: 'rover', note: 'LiteWeed-style stop-and-align rover, 2-DOF arm, 4 W blue diode',
+    laser: { profile: 'diode-4w', laserClass: '4', wavelengthNm: 450, powerW: 4, minMs: 500, maxMs: 3000 },
+  },
+  'arm-laser': {
+    label: 'Arm-mounted laser', motion: 'arm', note: 'Arm service (sim / UR / LeRobot) carrying the 500 mW module',
+    laser: { profile: 'diode-500mw', laserClass: '3B', wavelengthNm: 405, powerW: 0.5, minMs: 2000, maxMs: 8000 },
+  },
+};
 
 interface SimBed {
   itemId: string;
@@ -28,17 +47,18 @@ interface SimBed {
 }
 
 const beds = new Map<string, SimBed>();
+const weedSizes = new Map<string, number>(); // weed id -> size mm (for exposure)
 const timers = new Map<string, ReturnType<typeof setInterval>>();
 
-function load(): Record<string, { weeds: YardEvent[]; next: number; safety?: WeedSimSafety }> {
+function load(): Record<string, { weeds: YardEvent[]; next: number; safety?: WeedSimSafety; robotType?: WeedRobotType }> {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
 }
 
 function save(): void {
-  const out: Record<string, { weeds: YardEvent[]; next: number; safety: WeedSimSafety }> = {};
+  const out: Record<string, { weeds: YardEvent[]; next: number; safety: WeedSimSafety; robotType?: WeedRobotType }> = {};
   beds.forEach((b, id) => {
     const { studentMode, burnEnabled, enclosureClosed } = b.robot.laser;
-    out[id] = { weeds: b.weeds, next: b.next, safety: { studentMode, burnEnabled, enclosureClosed } };
+    out[id] = { weeds: b.weeds, next: b.next, safety: { studentMode, burnEnabled, enclosureClosed }, robotType: b.robot.robotType };
   });
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(out)); } catch { /* private mode */ }
   window.dispatchEvent(new CustomEvent(WEED_SIM_EVENT));
@@ -55,6 +75,8 @@ export function simBed(item: { id: string; width: number; depth: number }, devic
   if (bed) return bed;
   const saved = load()[item.id];
   const safety = saved?.safety ?? { studentMode: true, burnEnabled: false, enclosureClosed: true };
+  const robotType: WeedRobotType = saved?.robotType && saved.robotType in WEED_ROBOT_TYPES ? saved.robotType : 'genesis-laser';
+  const t = WEED_ROBOT_TYPES[robotType].laser;
   bed = {
     itemId: item.id,
     deviceId,
@@ -65,9 +87,10 @@ export function simBed(item: { id: string; width: number; depth: number }, devic
     lastFire: 0,
     robot: {
       state: 'idle', mode: 'simulation', estop: false, error: null, ts: Date.now(),
-      // Demo robot = Project Cyclops-style FarmBot Genesis laser head (500 mW 405 nm, Class 3B).
-      laser: { ...safety, pulseMs: 8000, estop: false, profile: 'diode-500mw', laserClass: '3B', wavelengthNm: 405, powerW: 0.5 },
+      robotType,
+      laser: { ...safety, pulseMs: t.maxMs, estop: false, profile: t.profile, laserClass: t.laserClass, wavelengthNm: t.wavelengthNm, powerW: t.powerW },
       pass: { running: false, pass: 0, passes: 0, waypoint: 0, waypoints: 0 },
+      tool: { x: 0, y: 0, z: 0, aim: false, laser: false },
     },
   };
   beds.set(item.id, bed);
@@ -112,6 +135,7 @@ export function startSimPass(itemId: string, passes: number): void {
   const timer = setInterval(() => {
     if (bed.robot.estop) { clearInterval(timer); timers.delete(itemId); return; }
     const wp = waypoints[i];
+    if (wp) bed.robot = { ...bed.robot, tool: { x: wp.x, y: wp.y, z: 0, aim: false, laser: false } };
     // A detection roughly every ~6 frames; later passes find fewer (already found / regrowth).
     if (wp && Math.random() < 0.16 / pass) {
       const x = Math.min(bed.lengthMm - 40, Math.max(40, wp.x + (Math.random() - 0.5) * FOV_MM.x));
@@ -120,9 +144,12 @@ export function startSimPass(itemId: string, passes: number): void {
       if (!dup) {
         const now = Date.now();
         const confidence = Math.round((0.55 + Math.random() * 0.42) * 100) / 100;
+        const size = Math.round(18 + Math.random() * 40);
+        const id = `weed-${bed.next++}`;
+        weedSizes.set(`${itemId}:${id}`, size);
         bed.weeds.push({
-          id: `weed-${bed.next++}`, deviceId: bed.deviceId, itemId, type: 'weed_detected', status: 'pending_review',
-          title: 'Weed', detail: `${Math.round(18 + Math.random() * 40)} mm · pass ${pass}`, confidence,
+          id, deviceId: bed.deviceId, itemId, type: 'weed_detected', status: 'pending_review',
+          title: 'Weed', detail: `${size} mm · pass ${pass}`, confidence,
           bedMm: { x: Math.round(x), y: Math.round(y) }, ts: now, updatedAt: now,
         });
       }
@@ -152,13 +179,17 @@ export function decideSimWeed(itemId: string, eventId: string, decision: 'aim' |
   if (!bed || !weed) throw new Error('No such weed detection');
   if (weed.status !== 'pending_review') throw new Error(`Weed is already ${weed.status}`);
   const now = Date.now();
+  const at = weed.bedMm ?? { x: 0, y: 0 };
   if (decision === 'reject') {
+    bed.robot = { ...bed.robot, tool: { ...(bed.robot.tool ?? { x: 0, y: 0, z: 0 }), aim: false, laser: false } };
     Object.assign(weed, { status: 'rejected', detail: 'Rejected by reviewer', updatedAt: now });
     save();
     return 'Marked as not a weed';
   }
   const { laser } = bed.robot;
   if (bed.robot.estop) throw new Error('E-STOP is active');
+  // The tool moves over the weed and the aiming dot turns on for both aim and burn.
+  bed.robot = { ...bed.robot, tool: { x: at.x, y: at.y, z: -150, aim: true, laser: false } };
   if (decision === 'aim') {
     Object.assign(weed, { detail: 'Aimed - aiming dot on target, awaiting decision', updatedAt: now });
     save();
@@ -169,10 +200,17 @@ export function decideSimWeed(itemId: string, eventId: string, decision: 'aim' |
   if (!laser.enclosureClosed) throw new Error('Laser enclosure is open');
   if (now - bed.lastFire < COOLDOWN_MS) throw new Error('Laser cooling down - try again in a moment');
   bed.lastFire = now;
-  const sizeMm = Number(/(\d+) mm/.exec(weed.detail ?? '')?.[1] ?? 20);
-  // Exposure scales with weed size (2-8 s for a 500 mW diode), like the robot's laser profile.
-  const ms = Math.round(2000 + Math.min(1, Math.max(0, (sizeMm - 10) / 50)) * (laser.pulseMs - 2000));
-  Object.assign(weed, { status: 'treated', detail: `Treated (${ms} ms exposure, simulated)`, updatedAt: now });
+  const sizeMm = weedSizes.get(`${itemId}:${eventId}`) ?? Number(/(\d+) mm/.exec(weed.detail ?? '')?.[1] ?? 20);
+  // Exposure scales with weed size between the profile's min and max, like weed_patrol.py.
+  const prof = WEED_ROBOT_TYPES[bed.robot.robotType ?? 'genesis-laser'].laser;
+  const ms = Math.round(prof.minMs + Math.min(1, Math.max(0, (sizeMm - 10) / 50)) * (prof.maxMs - prof.minMs));
+  Object.assign(weed, { status: 'treated', detail: `Treated (${ms} ms exposure at ${prof.powerW} W, simulated)`, updatedAt: now });
+  // Show the beam briefly (the demo compresses the real exposure time).
+  bed.robot = { ...bed.robot, tool: { x: at.x, y: at.y, z: -150, aim: true, laser: true } };
+  setTimeout(() => {
+    const b = beds.get(itemId);
+    if (b?.robot.tool) { b.robot = { ...b.robot, tool: { ...b.robot.tool, aim: false, laser: false } }; save(); }
+  }, 1400);
   save();
   return 'Weed treated (simulated)';
 }
@@ -185,6 +223,23 @@ export function setSimSafety(itemId: string, patch: Partial<WeedSimSafety>): voi
   save();
 }
 
+/** Current simulated robot state for a bed (read every frame by the 3D view). */
+export function getSimRobot(itemId: string): WeedRobotState | undefined {
+  return beds.get(itemId)?.robot;
+}
+
+/** Switch the demo robot build (motion + laser profile). */
+export function setSimRobotType(itemId: string, type: WeedRobotType): void {
+  const bed = beds.get(itemId);
+  if (!bed || !(type in WEED_ROBOT_TYPES)) return;
+  const t = WEED_ROBOT_TYPES[type].laser;
+  bed.robot = {
+    ...bed.robot, robotType: type,
+    laser: { ...bed.robot.laser, pulseMs: t.maxMs, profile: t.profile, laserClass: t.laserClass, wavelengthNm: t.wavelengthNm, powerW: t.powerW },
+  };
+  save();
+}
+
 /** Latch or clear the simulated E-STOP. Latching stops the pass immediately. */
 export function setSimEstop(itemId: string, active: boolean): void {
   const bed = beds.get(itemId);
@@ -193,6 +248,7 @@ export function setSimEstop(itemId: string, active: boolean): void {
   bed.robot = {
     ...bed.robot, estop: active, state: active ? 'estop' : 'idle',
     laser: { ...bed.robot.laser, estop: active },
+    tool: active && bed.robot.tool ? { ...bed.robot.tool, aim: false, laser: false } : bed.robot.tool,
     pass: active ? { ...bed.robot.pass, running: false } : bed.robot.pass,
   };
   save();

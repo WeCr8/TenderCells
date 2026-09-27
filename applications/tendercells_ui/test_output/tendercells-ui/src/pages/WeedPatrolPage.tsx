@@ -32,8 +32,8 @@ import YardAttentionPanel from '../components/yard/YardAttentionPanel';
 import { loadPropertyLayout, PROPERTY_LAYOUT_EVENT, type PropertyItem } from '../components/property/propertyLayoutStore';
 import { useYardEvents } from '../hooks/useYardEvents';
 import { fetchWeedState, sendEstop, startWeedPass } from '../lib/yard/yardApi';
-import { setSimEstop, setSimSafety, simBed, startSimPass, clearSimHistory, WEED_SIM_EVENT } from '../lib/yard/weedSim';
-import { WEED_BED_TYPES, YARD_LIVE, weedDeviceFor, type WeedRobotState } from '../lib/yard/yardTypes';
+import { setSimEstop, setSimRobotType, setSimSafety, simBed, startSimPass, clearSimHistory, WEED_ROBOT_TYPES, WEED_SIM_EVENT } from '../lib/yard/weedSim';
+import { WEED_BED_TYPES, YARD_LIVE, weedDeviceFor, type WeedRobotState, type WeedRobotType } from '../lib/yard/yardTypes';
 
 const C = {
   bg: '#0D2B1E',
@@ -164,6 +164,19 @@ export default function WeedPatrolPage() {
                     {gardens.map((g) => <MenuItem key={g.id} value={g.id}>{g.name} ({g.width}×{g.depth} ft)</MenuItem>)}
                   </TextField>
                   <Typography variant="caption" sx={{ color: C.goldMuted }}>Device: {deviceId}</Typography>
+                  {!YARD_LIVE && robot && (
+                    <TextField select size="small" label="Robot build (demo)" value={robot.robotType ?? 'genesis-laser'}
+                      data-testid="robot-build"
+                      onChange={(e) => setSimRobotType(item.id, e.target.value as WeedRobotType)}
+                      helperText={WEED_ROBOT_TYPES[robot.robotType ?? 'genesis-laser'].note}
+                      sx={{ '& .MuiInputBase-root': { color: C.white }, '& label': { color: C.goldMuted }, '& .MuiFormHelperText-root': { color: C.goldMuted } }}>
+                      {(Object.keys(WEED_ROBOT_TYPES) as WeedRobotType[]).map((k) => (
+                        <MenuItem key={k} value={k}>
+                          {WEED_ROBOT_TYPES[k].label} · Class {WEED_ROBOT_TYPES[k].laser.laserClass} · {WEED_ROBOT_TYPES[k].laser.powerW} W
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
                   <TextField size="small" type="number" label="Passes (1-10)" value={passes}
                     onChange={(e) => setPasses(Math.min(10, Math.max(1, Math.round(Number(e.target.value) || 1))))}
                     inputProps={{ min: 1, max: 10 }}

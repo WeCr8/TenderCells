@@ -18,7 +18,7 @@
 // cannot work is worse than failing the deploy.
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { appendFileSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -105,4 +105,12 @@ const lines = Object.entries(KEY_MAP)
   .map(([field, envKey]) => `${envKey}=${config[field]}`);
 
 writeFileSync(envPath, [...kept.filter(Boolean), ...lines, ''].join('\n'));
+
+// Also export to later CI steps as process env: Vite gives VITE_* process env
+// priority over .env files, so the build gets the config even if envDir lookup
+// ever misses the file.
+if (process.env.GITHUB_ENV) {
+  appendFileSync(process.env.GITHUB_ENV, `${lines.join('\n')}\n`);
+  console.log('Exported Firebase web config keys to GITHUB_ENV for the build step.');
+}
 console.log(`Wrote ${lines.length} Firebase web config keys to .env (project ${config.projectId}, authDomain ${config.authDomain}).`);

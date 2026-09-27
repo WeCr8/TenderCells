@@ -82,6 +82,28 @@ router.post("/devices/:deviceId/routine", ...owns, (req: Request, res: Response)
   controller.sendRoutineCommand(req, res);
 });
 
+// Station flags (eggs ready, pickup ready, weed detected, roost headcount) + presence.
+router.get("/devices/:deviceId/events", ...owns, (req: Request, res: Response) => {
+  controller.getEvents(req, res);
+});
+router.post("/devices/:deviceId/events/:eventId/ack", ...owns, (req: Request, res: Response) => {
+  void controller.ackEvent(req, res);
+});
+router.get("/devices/:deviceId/presence", ...owns, (req: Request, res: Response) => {
+  controller.getPresence(req, res);
+});
+
+// Weed patrol - detection passes + human-in-the-loop laser treatment.
+router.post("/devices/:deviceId/weeds/pass", ...owns, (req: Request, res: Response) => {
+  void controller.startWeedPass(req, res);
+});
+router.post("/devices/:deviceId/weeds/:eventId/approve", ...owns, (req: Request, res: Response) => {
+  void controller.approveWeed(req, res);
+});
+router.post("/devices/:deviceId/weeds/:eventId/reject", ...owns, (req: Request, res: Response) => {
+  void controller.rejectWeed(req, res);
+});
+
 // Hugging Face LeRobot policies (arm service runs lerobot-rollout / lerobot-eval).
 router.post("/devices/:deviceId/policy", ...owns, (req: Request, res: Response) => {
   controller.sendPolicyCommand(req, res);

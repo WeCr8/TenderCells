@@ -89,6 +89,14 @@ ARM_TYPE=ur UR_HOST=192.168.1.60 DEVICE_ID=ct_001 MQTT_BROKER=mqtt://192.168.1.5
 | `POST /devices/:id/estop` / `estop/clear` | `tc/{id}/cmd/estop {active}` QoS 2 retained | never |
 | `GET /devices/:id/state/arm` | ← `tc/{id}/state/arm` | — |
 
+Every command carries a `seq`; the service answers on `tc/{id}/ack {seq, ok, error?}` and
+express-api waits up to 3 s for it: **200** = the robot accepted, **409** = the robot refused
+(with its reason, e.g. E-STOP), **202** = sent but no ack yet (offline / older firmware).
+Presence: the service publishes `tc/{id}/status {"online": true}` retained with an MQTT last
+will of `{"online": false}`; `GET /devices/:id/presence` also marks a device stale after 90 s
+of silence. The service keeps retrying the broker, so it can boot before express-api.
+Weed-finding / laser robots: see [WEED_PATROL.md](WEED_PATROL.md).
+
 ## Troubleshooting
 
 | Symptom | Fix |

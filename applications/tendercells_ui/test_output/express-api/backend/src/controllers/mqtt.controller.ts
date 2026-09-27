@@ -4,6 +4,9 @@
 // CONSTRAINT: All MQTT payloads MUST be JSON strings — no binary, no plain text.
 
 import type { Request, Response } from "express";
+import {
+  getEvent, getPresence, ingestAck, ingestEvent, ingestStatus, listEvents, nextSeq, setEventStatus, touch, waitForAck,
+} from "../yardEvents.js";
 import mqtt from "mqtt";
 import { AUTH_ENABLED, type AuthedRequest } from "../middleware/auth.js";
 import { getFirestoreAdmin } from "../config/firebase-admin.js";
@@ -116,9 +119,9 @@ export class MQTTController {
    * @param deviceId - Target device
    * @returns A user-facing reason to refuse, or null when motion is allowed
    */
-  static motionBlockedReason(deviceId: string): string | null {
+  static motionBlockedReason(deviceId: string, service: "arm" | "weed" = "arm"): string | null {
     const state = MQTTController.states.get(deviceId);
-    const arm = MQTTController.subStates.get(`${deviceId}:arm`);
+    const arm = MQTTController.subStates.get(`${deviceId}:${service}`);
     if (state?.state === "estop" || state?.systemState === "estop" || arm?.estop === true) {
       return "E-STOP is active on this device. Clear it before running robot motion.";
     }
@@ -163,6 +166,10 @@ export class MQTTController {
         MQTTController.client!.subscribe("tc/+/state", { qos: 1 });
         MQTTController.client!.subscribe("tc/+/state/+", { qos: 1 });  // arm/gantry sub-state
         MQTTController.client!.subscribe("tc/+/alert", { qos: 2 });
+        // Station flags, command acks and presence (see yardEvents.ts).
+        MQTTController.client!.subscribe("tc/+/event", { qos: 1 });
+        MQTTController.client!.subscribe("tc/+/ack", { qos: 1 });
+        MQTTController.client!.subscribe("tc/+/status", { qos: 1 });
       });
 
       MQTTController.client.on("message", (topic, message) => {
@@ -255,6 +262,16 @@ export class MQTTController {
       }
       const payload = JSON.parse(raw) as MQTTMessage;
       const topicParts = topic.split("/");
+      // Commands are published by us; everything else proves the device is alive.
+      if (topicParts[0] === "tc" && topicParts[1] && topicParts[2] !== "cmd") touch(topicParts[1]);
+
+      if (topicParts[2] === "event") {
+        const err = ingestEvent(topicParts[1], payload as Record<string, unknown>);
+        if (err) console.warn(`[MQTT] Event rejected (${topicParts[1]}): ${err}`);
+        return;
+      }
+      if (topicParts[2] === "ack") { ingestAck(topicParts[1], payload as Record<string, unknown>); return; }
+      if (topicParts[2] === "status") { ingestStatus(topicParts[1], payload as Record<string, unknown>); return; }
 
       if (topicParts[2] === "sensors") {
         const deviceId = topicParts[1];
@@ -672,6 +689,98 @@ export class MQTTController {
 
   // Publish a command from server-side code (e.g. the schedule runner). Returns
   // false if the broker isn't connected. Local MQTT only, same as the HTTP handlers.
+  /**
+   * Publish a command stamped with a seq the device echoes on tc/{id}/ack.
+   *
+   * @returns The seq, or null when the broker is not connected
+   */
+  static publishWithSeq(deviceId: string, suffix: string, payload: Record<string, unknown>, qos: 0 | 1 | 2 = 1): number | null {
+    if (!MQTTController.client?.connected) return null;
+    const seq = nextSeq();
+    MQTTController.client.publish(`tc/${deviceId}/cmd/${suffix}`, JSON.stringify({ ...payload, seq, timestamp: Date.now() }), { qos });
+    return seq;
+  }
+
+  /** Reply helper: wait briefly for the device ack so the UI can say "accepted". */
+  private static async respondWithAck(res: Response, deviceId: string, seq: number, body: Record<string, unknown>,
+    waitMs = 3000, onRefused?: () => void) {
+    const ack = await waitForAck(deviceId, seq, waitMs);
+    if (ack && !ack.ok) onRefused?.();
+    if (ack && !ack.ok) return res.status(409).json({ ...body, success: false, seq, acked: true, ok: false, error: ack.error ?? "Device refused the command" });
+    res.status(ack ? 200 : 202).json({ ...body, seq, acked: !!ack, ok: ack?.ok ?? null,
+      ...(ack ? {} : { message: "Sent - no acknowledgement yet (device offline or busy)" }) });
+  }
+
+  // ── yard events / station flags ─────────────────────────────────────────────
+  getEvents(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    res.json({ deviceId, presence: getPresence(deviceId), events: listEvents(deviceId) });
+  }
+
+  /** Mark a station flag handled (e.g. eggs collected). Device clears it for real. */
+  async ackEvent(req: Request, res: Response) {
+    const { deviceId, eventId } = req.params;
+    if (!getEvent(deviceId, eventId)) return res.status(404).json({ error: "No such event" });
+    const seq = MQTTController.publishWithSeq(deviceId, "event", { action: "ack", eventId });
+    if (seq === null) return res.status(503).json({ error: "MQTT not connected" });
+    setEventStatus(deviceId, eventId, "cleared");
+    return MQTTController.respondWithAck(res, deviceId, seq, { success: true, deviceId, eventId, command: "event_ack" });
+  }
+
+  // ── weed patrol (human in the loop) ─────────────────────────────────────────
+  /** Start detection passes over the bed. Motion - gated. */
+  async startWeedPass(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const passes = req.body?.passes ?? 1;
+    if (typeof passes !== "number" || !Number.isInteger(passes) || passes < 1 || passes > 10) {
+      return res.status(400).json({ error: "passes must be an integer 1-10" });
+    }
+    const blocked = MQTTController.motionBlockedReason(deviceId, "weed");
+    if (blocked) return res.status(409).json({ error: blocked });
+    const seq = MQTTController.publishWithSeq(deviceId, "weed", { action: "pass", passes });
+    if (seq === null) return res.status(503).json({ error: "MQTT not connected" });
+    return MQTTController.respondWithAck(res, deviceId, seq, { success: true, deviceId, command: "weed_pass", passes });
+  }
+
+  /**
+   * A person approved one detected weed for treatment. mode "aim" only points the
+   * low-power aiming dot (student / verify); "burn" fires the laser - the robot
+   * re-checks its interlocks (enclosure, burn enable, E-STOP) before firing.
+   */
+  async approveWeed(req: Request, res: Response) {
+    const { deviceId, eventId } = req.params;
+    const mode = req.body?.mode ?? "aim";
+    if (mode !== "aim" && mode !== "burn") return res.status(400).json({ error: "mode must be aim or burn" });
+    const ev = getEvent(deviceId, eventId);
+    if (!ev || ev.type !== "weed_detected") return res.status(404).json({ error: "No such weed detection" });
+    if (ev.status !== "pending_review") return res.status(409).json({ error: `Weed is already ${ev.status}` });
+    const blocked = MQTTController.motionBlockedReason(deviceId, "weed");
+    if (blocked) return res.status(409).json({ error: blocked });
+    const seq = MQTTController.publishWithSeq(deviceId, "weed", { action: "approve", eventId, mode }, 2);
+    if (seq === null) return res.status(503).json({ error: "MQTT not connected" });
+    setEventStatus(deviceId, eventId, "approved");
+    // FIX(2026-09-27): a refused approval (student mode, interlock open) left the weed
+    // "approved" and it vanished from the review queue - put it back for a decision.
+    return MQTTController.respondWithAck(res, deviceId, seq, { success: true, deviceId, eventId, command: "weed_approve", mode },
+      3000, () => setEventStatus(deviceId, eventId, "pending_review"));
+  }
+
+  /** Not a weed (or leave it). Never gated. */
+  async rejectWeed(req: Request, res: Response) {
+    const { deviceId, eventId } = req.params;
+    const ev = getEvent(deviceId, eventId);
+    if (!ev || ev.type !== "weed_detected") return res.status(404).json({ error: "No such weed detection" });
+    const seq = MQTTController.publishWithSeq(deviceId, "weed", { action: "reject", eventId });
+    if (seq === null) return res.status(503).json({ error: "MQTT not connected" });
+    setEventStatus(deviceId, eventId, "rejected");
+    return MQTTController.respondWithAck(res, deviceId, seq, { success: true, deviceId, eventId, command: "weed_reject" },
+      3000, () => setEventStatus(deviceId, eventId, "pending_review"));
+  }
+
+  getPresence(req: Request, res: Response) {
+    res.json({ deviceId: req.params.deviceId, ...getPresence(req.params.deviceId) });
+  }
+
   static publishCommand(deviceId: string, suffix: string, payload: Record<string, unknown>): boolean {
     if (!MQTTController.client?.connected) return false;
     MQTTController.client.publish(

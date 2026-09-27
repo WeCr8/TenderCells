@@ -31,6 +31,7 @@ import SetupWizardPage from "../pages/SetupWizardPage";
 import ChickenEyeDashboardPage from "../pages/ChickenEyeDashboardPage";
 import ChickenEyeBirdPage from "../pages/ChickenEyeBirdPage";
 import DemoLandingPage from "../pages/DemoLandingPage";
+import WeedPatrolPage from "../pages/WeedPatrolPage";
 
 // Fires a page_view on every route change. No-op when analytics is disabled.
 function RouteAnalytics() {
@@ -80,6 +81,7 @@ export default function AppRoutes() {
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/layout" element={<PropertyLayoutBuilder />} />
       <Route path="/schedules" element={<SchedulesPage />} />
+      <Route path="/weed-patrol" element={<WeedPatrolPage />} />
       <Route path="/specs" element={<ProductSpecsPage />} />
       <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
       <Route path="/analytics" element={<AnalyticsPage />} />

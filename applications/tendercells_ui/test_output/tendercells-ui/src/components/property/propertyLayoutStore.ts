@@ -39,6 +39,9 @@ export interface PropertyConfig {
   widthFt: number;
   depthFt: number;
   gridStepFt: number;
+  // Ground look in the 3D view (lawn | pasture | dry | snow). Optional: older
+  // saved layouts default to lawn.
+  terrain?: 'lawn' | 'pasture' | 'dry' | 'snow';
 }
 
 export interface PropertyItem {

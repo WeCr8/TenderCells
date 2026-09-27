@@ -11,6 +11,7 @@ import SensorsIcon from "@mui/icons-material/Sensors";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 import EggIcon from "@mui/icons-material/Egg";
+import GrassIcon from "@mui/icons-material/Grass";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import TuneIcon from "@mui/icons-material/Tune";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -124,6 +125,7 @@ const SHARED_ITEMS: MenuItem[] = [
   { id: "chicken-eye", label: "ChickenEye™ AI", icon: <VisibilityIcon />, path: "/chicken-eye" },
   { id: "ai", label: "TenderAI Chat", icon: <SmartToyIcon />, path: "/ai" },
   { id: "schedules", label: "Schedules", icon: <ScheduleIcon />, path: "/schedules" },
+  { id: "weed-patrol", label: "Weed Patrol", icon: <GrassIcon />, path: "/weed-patrol" },
   { id: "products", label: "Products", icon: <DevicesIcon />, path: "/products" },
   { id: "specs", label: "Product Specs", icon: <DescriptionIcon />, path: "/specs" },
   { id: "layout", label: "Property Layout", icon: <GridOnIcon />, path: "/layout" },

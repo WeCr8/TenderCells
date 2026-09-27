@@ -10,7 +10,11 @@ import {
   type FarmBotPosition,
   type FarmBotPositionDetail,
 } from '../../lib/farmbot/farmbotCloud';
-import { Sky } from 'three/examples/jsm/objects/Sky.js';
+import { buildScenery, TERRAIN_PRESETS, type TerrainPreset } from './scenery';
+import { makeTextSprite } from './labels';
+import { animateYardFlags, buildYardFlags, disposeYardFlags } from './yardFlags';
+import { useYardEvents } from '../../hooks/useYardEvents';
+import YardAttentionPanel from '../yard/YardAttentionPanel';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -19,6 +23,8 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
 import { useCoopModel } from '../../hooks/useCoopModel';
 import CoopModelSelector from './CoopModelSelector';
 import { getPresetModel } from '../../models/presets/coopPresets';
@@ -31,36 +37,10 @@ import {
   ITEM_COLORS,
   PROPERTY_LAYOUT_EVENT,
   loadPropertyLayout,
+  savePropertyLayout,
   type PropertyItem,
   type PropertyLayoutState,
 } from '../property/propertyLayoutStore';
-
-// Procedural grass + dirt ground texture, drawn on a canvas (no image asset, so
-// it's CSP-safe and ships in-bundle). Repeat-tiled across the yard.
-function makeGroundTexture(): THREE.CanvasTexture {
-  const s = 256;
-  const c = document.createElement('canvas');
-  c.width = c.height = s;
-  const ctx = c.getContext('2d')!;
-  ctx.fillStyle = '#2d6235';            // base grass
-  ctx.fillRect(0, 0, s, s);
-  for (let i = 0; i < 2600; i++) {      // grass blade speckle
-    const g = 70 + Math.random() * 70;
-    ctx.fillStyle = `rgb(${30 + Math.random() * 30},${g},${40 + Math.random() * 25})`;
-    ctx.fillRect(Math.random() * s, Math.random() * s, 1, 1 + Math.random() * 2);
-  }
-  for (let i = 0; i < 6; i++) {         // worn dirt patches
-    const x = Math.random() * s, y = Math.random() * s, r = 12 + Math.random() * 26;
-    const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
-    grd.addColorStop(0, 'rgba(122,82,45,0.85)');
-    grd.addColorStop(1, 'rgba(122,82,45,0)');
-    ctx.fillStyle = grd;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
-  }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  return tex;
-}
 
 type ViewMode = '2d' | '3d';
 type CameraPreset = 'top' | 'left' | 'right' | 'iso';
@@ -72,6 +52,12 @@ type Viewport3DProps = {
   title?: string;
   initialWorkspaceMode?: WorkspaceMode;
   height?: string | number | Record<string, string | number>;
+  /** Focus the camera on this layout item (default: first item of `product`'s type). */
+  focusItemId?: string;
+  /** Pop-up station flags + "Needs attention" list (eggs, weeds, roost headcount). Default true. */
+  showYardFlags?: boolean;
+  /** The in-map "Needs attention" list (off when the page shows its own). Default true. */
+  showAttentionPanel?: boolean;
 };
 
 const FAMILY_TO_ITEM_TYPE: Record<string, string> = {
@@ -778,6 +764,9 @@ const createFarmBotMarker = (): THREE.Group => {
   const drop = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1, 6), new THREE.MeshBasicMaterial({ color: 0x61b833, transparent: true, opacity: 0.5 }));
   drop.name = 'farmbot-drop';
   g.add(drop);
+  const label = makeTextSprite({ title: 'FarmBot', subtitle: 'live tool position', accent: '#61B833', height: 0.9 });
+  label.position.y = 2.3;
+  g.add(label);
   g.name = 'farmbot-live-marker';
   return g;
 };
@@ -976,6 +965,10 @@ const createYardItem = (
       ring.rotation.x = -Math.PI / 2;
       ring.position.set(x, 0.07, z);
       group.add(ring);
+      // Label it - an unlabelled ring was easy to mistake for other markers.
+      const areaLabel = makeTextSprite({ title: `${item.name} patrol area`, subtitle: `${Math.round(patrolR)} ft radius`, height: 1.3 });
+      areaLabel.position.set(x, 1.2, z + patrolR);
+      group.add(areaLabel);
     }
   } else {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(item.width, 0.75, item.depth), material);
@@ -1056,6 +1049,9 @@ export default function Viewport3D({
   title,
   initialWorkspaceMode = 'property',
   height,
+  focusItemId,
+  showYardFlags = true,
+  showAttentionPanel = true,
 }: Viewport3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [webglOk, setWebglOk] = useState(true);
@@ -1240,8 +1236,26 @@ export default function Viewport3D({
       product === 'predator-monitor' ? 'watchtower' :
       product === 'rail-system-modules' ? 'rail-module' :
       product;
+    if (focusItemId) {
+      const focused = enrichedItems.find((item) => item.id === focusItemId);
+      if (focused) return focused;
+    }
     return enrichedItems.find((item) => item.type === itemType && item.kind === 'hardware');
-  }, [enrichedItems, product]);
+  }, [enrichedItems, product, focusItemId]);
+
+  // Station flags (eggs ready, weeds to review, roost headcount). Drawn into their own
+  // group so a poll update swaps just the flags, not the whole scene.
+  const { flags: yardFlags, act: yardAct } = useYardEvents(showYardFlags ? enrichedItems : []);
+  const flagsHolderRef = useRef<THREE.Group | null>(null);
+  const [sceneVersion, setSceneVersion] = useState(0);
+  useEffect(() => {
+    const holder = flagsHolderRef.current;
+    if (!holder) return;
+    holder.children.slice().forEach((c) => { holder.remove(c); disposeYardFlags(c); });
+    // Item positions are only drawn in the Products / Simulation views.
+    if (workspaceMode === 'property' || !showYardFlags) return;
+    holder.add(buildYardFlags(yardFlags, enrichedItems, layout));
+  }, [yardFlags, enrichedItems, layout, workspaceMode, showYardFlags, sceneVersion]);
 
   // Three.js scene
   useEffect(() => {
@@ -1258,7 +1272,7 @@ export default function Viewport3D({
     const camera =
       viewMode === '2d'
         ? new THREE.OrthographicCamera(-cameraSpan * aspect, cameraSpan * aspect, cameraSpan, -cameraSpan, 0.1, 1000)
-        : new THREE.PerspectiveCamera(55, aspect, 0.1, 1000);
+        : new THREE.PerspectiveCamera(55, aspect, 0.1, Math.max(1000, Math.max(layout.property.widthFt, layout.property.depthFt) * 8));
 
     // Camera target: focused on active product when in products/simulation mode
     const focusX = activeItem && workspaceMode !== 'property'
@@ -1331,52 +1345,14 @@ export default function Viewport3D({
       TWO: THREE.TOUCH.DOLLY_PAN,
     };
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.62));
-    const sun = new THREE.DirectionalLight(0xffffff, 0.82);
-    sun.position.set(8, 10, 8);
-    sun.castShadow = true;
-    scene.add(sun);
-
-    // Procedural daytime sky (three.js Sky shader) — outdoor realism, no asset.
-    // Only in 3D mode; 2D top-down keeps the clean flat background.
-    if (viewMode === '3d') {
-      const sky = new Sky();
-      sky.scale.setScalar(10000);
-      const u = sky.material.uniforms;
-      u.turbidity.value = 8;
-      u.rayleigh.value = 1.5;
-      u.mieCoefficient.value = 0.005;
-      u.mieDirectionalG.value = 0.8;
-      const skySun = new THREE.Vector3();
-      skySun.setFromSphericalCoords(1, THREE.MathUtils.degToRad(58), THREE.MathUtils.degToRad(40));
-      u.sunPosition.value.copy(skySun);
-      scene.add(sky);
-      scene.fog = new THREE.Fog(0xbcd3e0, layout.property.widthFt * 1.2, layout.property.widthFt * 3.2);
-    }
-
-    const groundTex = makeGroundTexture();
-    groundTex.repeat.set(
-      Math.max(2, Math.round(layout.property.widthFt / 12)),
-      Math.max(2, Math.round(layout.property.depthFt / 12)),
-    );
-    const groundGeo = new THREE.PlaneGeometry(
-      layout.property.widthFt, layout.property.depthFt, 48, 48,
-    );
-    // Gentle terrain undulation so the yard reads as real ground, not a flat slab.
-    const gpos = groundGeo.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < gpos.count; i++) {
-      const x = gpos.getX(i), y = gpos.getY(i);
-      // Deterministic jitter (was Math.random) so the ground does not reshuffle on every rebuild.
-      gpos.setZ(i, (Math.sin(x * 0.18) + Math.cos(y * 0.21)) * 0.18 + (Math.sin(x * 12.9898 + y * 78.233) * 43758.5453 % 1) * 0.05);
-    }
-    groundGeo.computeVertexNormals();
-    const ground = new THREE.Mesh(
-      groundGeo,
-      new THREE.MeshStandardMaterial({ map: groundTex, roughness: 0.95 }),
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
+    // Sky, light, terrain preset, surrounding field, tree line (see scenery.ts).
+    buildScenery(scene, renderer, {
+      widthFt: layout.property.widthFt,
+      depthFt: layout.property.depthFt,
+      viewMode,
+      preset: layout.property.terrain ?? 'lawn',
+      cameraFar: camera.far,
+    });
     scene.add(createPropertyGrid(layout));
 
     const glbCache = glbCacheRef.current;
@@ -1429,9 +1405,16 @@ export default function Viewport3D({
         return { item, marker };
       });
 
+    const flagsHolder = new THREE.Group();
+    scene.add(flagsHolder);
+    flagsHolderRef.current = flagsHolder;
+    setSceneVersion((v) => v + 1); // (re)build flags into the new scene
+    const clock = new THREE.Clock();
+
     let animationId: number;
     const animate = () => {
       animationId = requestAnimationFrame(animate);
+      animateYardFlags(flagsHolder, clock.getElapsedTime());
       farmbotMarkers.forEach(({ item, marker }) => {
         const pos = farmbotPosRef.current.get(item.id);
         marker.visible = !!pos;
@@ -1469,6 +1452,8 @@ export default function Viewport3D({
       resizeObserver?.disconnect();
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationId);
+      flagsHolder.children.slice().forEach((c) => disposeYardFlags(c));
+      if (flagsHolderRef.current === flagsHolder) flagsHolderRef.current = null;
       controls.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -1564,6 +1549,18 @@ export default function Viewport3D({
         </Box>
       )}
 
+      {showYardFlags && showAttentionPanel && (
+        <Box sx={{ position: 'absolute', top: { xs: 60, sm: 64 }, right: 12, zIndex: 9, width: 'min(360px, calc(100% - 24px))',
+          display: 'flex', justifyContent: 'flex-end' }}>
+          <YardAttentionPanel
+            flags={yardFlags}
+            act={yardAct}
+            maxRows={3}
+            onFocus={() => { if (workspaceMode === 'property') setWorkspaceMode('products'); }}
+          />
+        </Box>
+      )}
+
       {/* Top controls */}
       <Box
         sx={{
@@ -1604,6 +1601,17 @@ export default function Viewport3D({
           <ToggleButton value="products">Products</ToggleButton>
           <ToggleButton value="simulation">Simulation</ToggleButton>
         </ToggleButtonGroup>
+        <TextField select size="small" value={layout.property.terrain ?? 'lawn'} aria-label="Terrain"
+          onChange={(e) => {
+            const next = { ...layout, property: { ...layout.property, terrain: e.target.value as TerrainPreset } };
+            savePropertyLayout(next); // syncs the 2D editor + other views via PROPERTY_LAYOUT_EVENT
+            setLayout(next);
+          }}
+          sx={{ minWidth: 110, bgcolor: 'rgba(0,31,22,0.9)', '& .MuiSelect-select': { py: '5px', fontSize: 13 } }}>
+          {(Object.keys(TERRAIN_PRESETS) as TerrainPreset[]).map((k) => (
+            <MenuItem key={k} value={k}>{TERRAIN_PRESETS[k].label}</MenuItem>
+          ))}
+        </TextField>
       </Box>
 
       {/* Bottom bar */}

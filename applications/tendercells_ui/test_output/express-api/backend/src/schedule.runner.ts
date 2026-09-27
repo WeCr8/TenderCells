@@ -13,7 +13,8 @@ import { MQTTController } from "./controllers/mqtt.controller.js";
 
 interface ScheduleDoc {
   deviceId?: string;
-  action?: "feed" | "clean" | "door" | "water";
+  action?: "feed" | "clean" | "door" | "water" | "weed_pass";
+  passes?: number;            // weed_pass: detection passes per run (1-10)
   cronExpression?: string;
   enabled?: boolean;
   amount?: number;
@@ -59,11 +60,21 @@ function toMs(v: ScheduleDoc["lastRun"]): number {
 
 // Map a schedule action to a command publish.
 function fire(deviceId: string, s: ScheduleDoc): boolean {
+  // Scheduled motion obeys the same safety gate as a button press (E-STOP,
+  // chicken presence). FIX(2026-09-27): scheduled cleaning ignored it.
+  const motion = s.action === "clean" || s.action === "weed_pass";
+  const blocked = motion ? MQTTController.motionBlockedReason(deviceId, s.action === "weed_pass" ? "weed" : "arm") : null;
+  if (blocked) {
+    console.warn(`[SCHED] skipped ${s.action} on ${deviceId}: ${blocked}`);
+    return false;
+  }
   switch (s.action) {
     case "feed":  return MQTTController.publishCommand(deviceId, "feed",  { amount: s.amount ?? 50 });
     case "clean": return MQTTController.publishCommand(deviceId, "clean", { action: "start" });
     case "door":  return MQTTController.publishCommand(deviceId, "door",  { state: s.state ?? "open" });
     case "water": return MQTTController.publishCommand(deviceId, "light", { on: s.on ?? true });
+    case "weed_pass":
+      return MQTTController.publishWithSeq(deviceId, "weed", { action: "pass", passes: Math.min(10, Math.max(1, s.passes ?? 1)) }) !== null;
     default: return false;
   }
 }

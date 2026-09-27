@@ -92,7 +92,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install test deps
-        run: pip install pytest
+        run: pip install pytest numpy opencv-python-headless
       - name: Run arm service tests
         run: python -m pytest -q firmware/jetson-nano/tests
 

@@ -13,6 +13,8 @@ Subscribes (commands, as published by express-api):
     tc/{id}/cmd/estop    {"active": true|false}  (QoS 2, retained - latched here too)
     tc/{id}/sensors      chickenCount (local presence guard when ANIMAL_AREA=true)
 Publishes:
+    tc/{id}/ack          {"seq", "ok", "error"} for every command carrying a seq
+    tc/{id}/status       {"online": true} retained; last will {"online": false}
     tc/{id}/state/arm    {"joints", "state", "platform", "mode", "estop", "policy",
                           "animalSafetyGate", "error", "ts"}  (QoS 1, retained)
 
@@ -105,6 +107,9 @@ class ArmService:
         if not isinstance(payload, dict):
             return
         kind = topic[len(self.topic("")):]
+        # Commands carrying a seq get exactly one ack (accepted or refused + why).
+        self._seq = payload.get("seq") if kind.startswith("cmd/") else None
+        self._acked = False
         if kind == "cmd/estop":
             self._on_estop(bool(payload.get("active", True)))
         elif kind == "sensors":
@@ -115,9 +120,15 @@ class ArmService:
         elif kind == "cmd/motion":
             self._on_motion(payload)
 
+    def _ack(self, ok: bool, error: Optional[str] = None) -> None:
+        if getattr(self, "_seq", None) is not None and not getattr(self, "_acked", False):
+            self._acked = True
+            self._publish(self.topic("ack"), {"seq": self._seq, "ok": ok, **({"error": error} if error else {})}, 1, False)
+
     def _refuse(self, why: str) -> None:
         self.error = why
         print(f"⛔ refused: {why}")
+        self._ack(False, why)
         self.publish_state()
 
     def _on_estop(self, active: bool) -> None:
@@ -132,6 +143,7 @@ class ArmService:
             if self.coordinator is not None:
                 self.coordinator.gantry.estop_active = False
             self.state = "idle"
+        self._ack(True)
         self.publish_state()
 
     def _on_arm(self, payload: dict) -> None:
@@ -144,11 +156,13 @@ class ArmService:
         if self.policy.running:
             return self._refuse("A policy is running - stop it before sending joint moves")
         speed = float(payload.get("speed", 0.5))
+        self._ack(True)
         self._jobs.put(lambda: self.arm.move_joints(joints, speed))
 
     def _on_motion(self, payload: dict) -> None:
         if payload.get("policy_stop"):
             self.policy.stop()
+            self._ack(True)
             return self.publish_state()
         if "policy" in payload:
             return self._start_policy(payload["policy"] or {})
@@ -160,6 +174,7 @@ class ArmService:
             return self._refuse(blocked)
         if self.coordinator is None:
             return self._refuse("Routines need the gantry + arm coordinator on this controller")
+        self._ack(True)
         self._jobs.put(lambda: getattr(self.coordinator, routine)())
 
     def _start_policy(self, spec: dict) -> None:
@@ -180,6 +195,7 @@ class ArmService:
             self.error = None
         except (PolicyError, ValueError, TypeError) as err:
             return self._refuse(str(err))
+        self._ack(True)
         self.publish_state()
 
     def _reconnect(self) -> None:
@@ -237,13 +253,17 @@ def main() -> None:  # pragma: no cover - wiring for real deployments
 
     def on_connect(c, _userdata, _flags, _reason, _props=None):
         c.subscribe(service.subscriptions())
+        c.publish(service.topic("status"), json.dumps({"online": True}), qos=1, retain=True)
         service.publish_state()
         print(f"✅ arm service {device_id}: {arm.describe()} on {broker.hostname}:{broker.port or 1883}")
 
     client.on_connect = on_connect
     client.on_message = lambda _c, _u, msg: service.handle(msg.topic, msg.payload)
-    client.will_set(service.topic("state/arm"), json.dumps({"state": "offline", "connected": False}), qos=1, retain=True)
-    client.connect(broker.hostname or "localhost", broker.port or 1883)
+    client.will_set(service.topic("status"), json.dumps({"online": False}), qos=1, retain=True)
+    # connect_async + loop_start keeps retrying, so the service survives booting before
+    # the broker (or a broker restart) instead of exiting with "connection refused".
+    client.reconnect_delay_set(min_delay=1, max_delay=30)
+    client.connect_async(broker.hostname or "localhost", broker.port or 1883)
     client.loop_start()
     try:
         while True:

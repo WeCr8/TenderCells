@@ -103,7 +103,7 @@ export default function OpenSourcePage() {
       </div>
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
         <a href="https://farm.bot/" target="_blank" rel="noopener noreferrer" className="btn-outline">Visit FarmBot</a>
-        <a href="https://developer.farm.bot/v15/docs/farmbot-software-development" target="_blank" rel="noopener noreferrer" className="btn-outline">FarmBot Developer Docs</a>
+        <a href="https://developer.farm.bot/" target="_blank" rel="noopener noreferrer" className="btn-outline">FarmBot Developer Docs</a>
         <a href="https://github.com/FarmBot" target="_blank" rel="noopener noreferrer" className="btn-outline">FarmBot GitHub</a>
       </div>
 

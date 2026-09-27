@@ -22,7 +22,10 @@ TenderCells expands the pattern toward animal care, homesteading, mobile enclosu
 
 - FarmBot website: https://farm.bot/
 - FarmBot open-source page: https://farm.bot/pages/open-source
-- FarmBot developer documentation: https://developer.farm.bot/v15/docs/farmbot-software-development
+- FarmBot developer documentation: https://developer.farm.bot/ (canonical, as linked from the Web App README; v15 pages: https://developer.farm.bot/v15/docs/farmbot-software-development)
+- FarmBot getting started: https://software.farm.bot/docs/getting-started
+- FarmBot hosted web app: https://my.farm.bot/ ("free-to-use instance" per the Web App README)
+- FarmBot self-hosting: https://github.com/FarmBot/Farmbot-Web-App/blob/main/local_setup_instructions.sh
 - FarmBot GitHub: https://github.com/FarmBot
 - FarmBot community forum: https://forum.farmbot.org/
 - FarmBot licensing: https://licensing.farm.bot/
@@ -52,3 +55,18 @@ Do not copy FarmBot code, diagrams, text, media, or CAD files into TenderCells u
 4. The code is adapted for TenderCells safety requirements, especially animal proximity, doors/latches, water, motors, E-stop, and unattended operation.
 
 Architecture ideas and product patterns may be referenced freely, but actual source code must follow the license of the specific FarmBot repository or asset.
+
+## FarmBot version check (2026-09-27)
+
+Checked against FarmBot's GitHub. Tender Cells embeds **no FarmBot code or packages**; it
+links out, so there is nothing to upgrade - only the links above to keep current.
+
+| Component | Latest | Notes |
+|---|---|---|
+| FarmBot Web App (`FarmBot/Farmbot-Web-App`) | v15.30.6 (2026-09-17) | MIT (`Copyright (c) 2018 Farmbot.io`); hosted at my.farm.bot |
+| FarmBot OS (`FarmBot/farmbot_os`) | v15.5.2 stable; v15.5.3-rc2 pre-release (2026-09-22) | rc adds Genesis v1.9 firmware |
+| Web App 3D stack | three 0.185.1, @react-three/fiber 9.7.0, drei 10.7.8 | Tender Cells OS is on three 0.160 (independent) |
+
+Brand-asset terms (CC-BY-NC 4.0) were not re-verified: licensing.farm.bot was not
+reachable from the review environment. Re-check before using any FarmBot logo.
+

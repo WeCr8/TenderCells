@@ -50,6 +50,10 @@ CLAUDE.md → Engineering & CAD skill, and the [AI/CAD lesson](CLASSROOM_AI_CAD_
 ### Backend — what exists
 - `POST /devices/:id/arm` → `cmd/arm {seq, joints[6], speed}` (owner-gated, QoS 1). ✅
 - `POST /devices/:id/routine` → `cmd/motion {routine}` for canned sequences. ✅
+- **Arm service + Hugging Face (2026-09-27)** — `firmware/jetson-nano/arm_service.py` drives
+  sim / Universal Robots / any LeRobot arm; `POST /policy` runs Hugging Face policies
+  (`lerobot-rollout` live, `lerobot-eval` sim); `POST /estop/clear` clears a latched stop.
+  See [ARM_SERVICE.md](ARM_SERVICE.md). ✅
 - **Motion safety gate (2026-09-27)** — `POST /arm`, `POST /routine` and
   `POST /clean {action:"start"}` return **409** with a readable `error` when E-STOP is
   active, when the device's chicken headcount (`sensors.chickenCount`) is missing or

@@ -101,8 +101,16 @@ export const useHardwareControl = (deviceId: string) => {
     // 6DOF arm — joints must be an array of 6 angles (matches the backend schema)
     controlArm: (joints: number[], speed = 0.5) => sendCommand('arm', { joints, speed }),
 
+    // Hugging Face LeRobot policy on the arm (arm service runs lerobot-rollout live,
+    // lerobot-eval in simulation). Same safety gate as arm motion; stop is never gated.
+    runPolicy: (repoId: string, task: string, durationS = 30, simEnv?: string) =>
+      sendCommand('policy', { repo_id: repoId, task, duration_s: durationS, ...(simEnv ? { sim_env: simEnv } : {}) }),
+    stopPolicy: () => sendCommand('policy/stop'),
+
     // Emergency stop — the dedicated estop endpoint (QoS 2, retained)
     emergencyStop: () => sendCommand('estop'),
+    // Clear a latched E-STOP (replaces the retained stop). UI must confirm first.
+    clearEmergencyStop: () => sendCommand('estop/clear'),
 
     // Live state for sliders / 3D viewport
     getArmState: () => getSubState('arm'),

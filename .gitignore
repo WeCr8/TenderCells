@@ -126,3 +126,7 @@ WO-*-*-report.txt
 # Private concept packages (engineering PDFs/zips, not app source - see their own README.md)
 docs/products/
 docs/concept-packages/
+
+# Python
+__pycache__/
+.pytest_cache/

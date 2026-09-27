@@ -32,7 +32,10 @@ describe('TenderCells OS contracts', () => {
     expect(routes).toContain('path="/resources"');
     expect(menu).toContain('label: "Resources"');
     expect(menu).toContain('path: "/resources"');
-    ['Animals', 'Plants', 'Rodents', 'Wildlife', 'Health & safety'].forEach((section) => expect(resources).toContain(section));
+    ['Animals', 'Plants', 'Rodents', 'Wildlife', 'Health & safety', 'Data libraries'].forEach((section) => expect(resources).toContain(section));
+    const libraries = readProjectFile('src/data/resourceLibraries.ts');
+    ['ENVO', 'Plant Ontology', 'PECO', 'AgrO', 'NCBI Taxonomy', 'AGROVOC', 'GBIF'].forEach((library) => expect(libraries).toContain(library));
+    expect(libraries).toContain("formats: ['OWL'");
   });
 
   it('keeps fresh accounts free of simulated products and alerts', () => {

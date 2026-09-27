@@ -74,9 +74,20 @@ router.post("/devices/:deviceId/arm", ...owns, (req: Request, res: Response) => 
 router.post("/devices/:deviceId/estop", ...owns, (req: Request, res: Response) => {
   controller.sendEstop(req, res);
 });
+router.post("/devices/:deviceId/estop/clear", ...owns, (req: Request, res: Response) => {
+  controller.clearEstop(req, res);
+});
 
 router.post("/devices/:deviceId/routine", ...owns, (req: Request, res: Response) => {
   controller.sendRoutineCommand(req, res);
+});
+
+// Hugging Face LeRobot policies (arm service runs lerobot-rollout / lerobot-eval).
+router.post("/devices/:deviceId/policy", ...owns, (req: Request, res: Response) => {
+  controller.sendPolicyCommand(req, res);
+});
+router.post("/devices/:deviceId/policy/stop", ...owns, (req: Request, res: Response) => {
+  controller.sendPolicyStop(req, res);
 });
 
 // MQTT broker status

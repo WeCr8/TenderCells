@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import CameraFeedViewer from '../camera/CameraFeedViewer';
 import ArmKinematics3D from './ArmKinematics3D';
+import HuggingFacePolicyCard, { type PolicyStatus } from './HuggingFacePolicyCard';
 import { useHardwareControl } from '../../hooks/useHardwareControl';
 import { useGamepad, type GamepadFrame } from '../../hooks/useGamepad';
 
@@ -34,6 +35,9 @@ export default function RobotControlPanel({ deviceId = 'ct_001' }: { deviceId?: 
   const [showCamera, setShowCamera] = useState(false);
   const [useController, setUseController] = useState(false);
   const [selJoint, setSelJoint] = useState(0);
+  const [confirmClear, setConfirmClear] = useState(false);
+  // What the arm service reports it is driving (simulator / UR / LeRobot, sim or live).
+  const [armInfo, setArmInfo] = useState<{ platform?: string; mode?: string; jointNames?: string[]; policy?: PolicyStatus; error?: string | null }>({});
 
   // Refs for the gamepad loop (avoids stale closures + re-subscribes).
   const jointsRef = useRef(joints);  jointsRef.current = joints;
@@ -50,8 +54,10 @@ export default function RobotControlPanel({ deviceId = 'ct_001' }: { deviceId?: 
         if (!alive) return;
         if (arm) {
           setConnected(true);
-          if (Array.isArray(arm.joints)) setJoints(arm.joints.slice(0, 6) as Joints);
-          if (arm.state === 'estop') setStatus('estop');
+          if (Array.isArray(arm.joints) && arm.joints.length) setJoints(arm.joints.slice(0, 6) as Joints);
+          if (arm.state === 'estop' || arm.estop === true) setStatus('estop');
+          else setStatus((s) => (s === 'estop' ? 'idle' : s));
+          setArmInfo({ platform: arm.platform, mode: arm.mode, jointNames: arm.jointNames, policy: arm.policy, error: arm.error });
         }
         if (gan && typeof gan.gantryX === 'number') setGantry({ x: gan.gantryX, y: gan.gantryY });
         if (!arm && !gan) setConnected(false);
@@ -137,6 +143,16 @@ export default function RobotControlPanel({ deviceId = 'ct_001' }: { deviceId?: 
             <Typography variant="subtitle2" color="text.secondary">Connection</Typography>
             <Chip label={connected ? 'LIVE' : 'OFFLINE'} color={connected ? 'success' : 'error'} variant="outlined" />
           </Grid>
+          {armInfo.platform && (
+            <Grid item xs={12} sm={6}>
+              <Typography variant="subtitle2" color="text.secondary">Arm platform</Typography>
+              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                <Typography sx={{ color: '#F0EDE4' }}>{armInfo.platform}</Typography>
+                <Chip size="small" label={armInfo.mode === 'simulation' ? 'SIMULATION' : 'LIVE'}
+                  sx={{ bgcolor: armInfo.mode === 'simulation' ? '#E8A020' : '#4A7C59', color: '#0D2B1E', fontWeight: 700 }} />
+              </Stack>
+            </Grid>
+          )}
           <Grid item xs={12} sm={6}>
             <FormControlLabel
               control={<Switch checked={useController} onChange={(e) => setUseController(e.target.checked)} />}
@@ -149,6 +165,7 @@ export default function RobotControlPanel({ deviceId = 'ct_001' }: { deviceId?: 
             />
           </Grid>
         </Grid>
+        {armInfo.error && <Alert severity="warning" sx={{ mt: 1 }}>Arm: {armInfo.error}</Alert>}
         {useController && !pad.supported && (
           <Alert severity="warning" sx={{ mt: 1 }}>This browser has no Gamepad API — use Chrome or Edge.</Alert>
         )}
@@ -190,10 +207,14 @@ export default function RobotControlPanel({ deviceId = 'ct_001' }: { deviceId?: 
               <CardContent>
                 <Stack spacing={1}>
                   <Typography variant="subtitle2" sx={{ color: '#C8B882' }}>
-                    Joint {idx + 1} {selJoint === idx && '•'}
+                    {armInfo.jointNames?.[idx]?.replace(/_/g, ' ') ?? `Joint ${idx + 1}`} {selJoint === idx && '•'}
                   </Typography>
-                  <Typography variant="h6" sx={{ color: '#F0EDE4' }}>{angle.toFixed(1)}°</Typography>
-                  <Slider value={angle} min={-180} max={180} step={1} valueLabelDisplay="auto"
+                  <Typography variant="h6" sx={{ color: '#F0EDE4' }}>
+                    {angle.toFixed(1)}{armInfo.jointNames?.[idx]?.includes('gripper') ? '% open' : '°'}
+                  </Typography>
+                  <Slider value={angle} valueLabelDisplay="auto" step={1}
+                    min={armInfo.jointNames?.[idx]?.includes('gripper') ? 0 : -180}
+                    max={armInfo.jointNames?.[idx]?.includes('gripper') ? 100 : 180}
                     onChange={(_, v) => { const j = [...joints] as Joints; j[idx] = v as number; setJoints(j); }}
                     sx={{ '& .MuiSlider-thumb': { backgroundColor: '#4A7C59' }, '& .MuiSlider-track': { backgroundColor: '#4A7C59' } }} />
                 </Stack>
@@ -207,6 +228,15 @@ export default function RobotControlPanel({ deviceId = 'ct_001' }: { deviceId?: 
         sx={{ mb: 4, bgcolor: '#4A7C59', '&:hover': { bgcolor: '#5a8c69' } }}>
         Apply Joints {chickenPresent && '(blocked — chicken present)'}
       </Button>
+
+      {/* Hugging Face LeRobot policies (simulation: lerobot-eval, live: lerobot-rollout) */}
+      <HuggingFacePolicyCard
+        mode={armInfo.mode ?? 'live'}
+        status={armInfo.policy}
+        disabled={chickenPresent || status === 'estop' || !connected}
+        onRun={(repoId, task, durationS, simEnv) => hw.runPolicy(repoId, task, durationS, simEnv)}
+        onStop={() => hw.stopPolicy()}
+      />
 
       {/* Gantry controls */}
       <Typography variant="h6" sx={{ color: '#C8B882', mb: 2 }}>Gantry (GRBL) — X/Y mm</Typography>
@@ -251,6 +281,27 @@ export default function RobotControlPanel({ deviceId = 'ct_001' }: { deviceId?: 
       </Paper>
 
       {hw.error && <Alert severity="error" sx={{ mb: 2 }}>{hw.error}</Alert>}
+
+      {/* Clearing a latched E-STOP re-enables motion, so it is confirmed. */}
+      {status === 'estop' && (
+        <Button variant="outlined" fullWidth onClick={() => setConfirmClear(true)}
+          sx={{ mb: 1.5, borderColor: '#E8A020', color: '#E8A020' }}>
+          Clear E-STOP
+        </Button>
+      )}
+      <Dialog open={confirmClear} onClose={() => setConfirmClear(false)} PaperProps={{ sx: { bgcolor: '#1A3D2B', color: '#F0EDE4' } }}>
+        <DialogTitle sx={{ color: '#C8B882' }}>Clear E-STOP</DialogTitle>
+        <DialogContent>
+          <Typography>Clear the emergency stop? The arm can move again after this. Check the work area is clear first.</Typography>
+          <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 2 }}>
+            <Button onClick={() => setConfirmClear(false)} sx={{ color: '#8A7D55' }}>Cancel</Button>
+            <Button variant="contained" sx={{ bgcolor: '#4A7C59' }} onClick={async () => {
+              setConfirmClear(false);
+              try { await hw.clearEmergencyStop(); setStatus('idle'); } catch { setStatus('error'); }
+            }}>Confirm</Button>
+          </Stack>
+        </DialogContent>
+      </Dialog>
 
       {/* E-STOP — dedicated endpoint */}
       <Button variant="contained" fullWidth startIcon={<StopIcon />} onClick={eStop}

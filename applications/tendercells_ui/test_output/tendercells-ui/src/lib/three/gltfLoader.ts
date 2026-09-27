@@ -53,7 +53,7 @@ export function describeModelLoadError(err: unknown): string {
 
 // Hosts the live site's Content-Security-Policy lets the viewport download models
 // from (firebase.json connect-src). Anything else is blocked by the browser.
-const ALLOWED_MODEL_HOSTS = [/(^|\.)tendercells\.com$/, /\.web\.app$/, /\.googleapis\.com$/, /^raw\.githubusercontent\.com$/, /^media\.githubusercontent\.com$/];
+const ALLOWED_MODEL_HOSTS = [/(^|\.)tendercells\.com$/, /\.web\.app$/, /\.googleapis\.com$/, /^raw\.githubusercontent\.com$/, /^media\.githubusercontent\.com$/, /^huggingface\.co$/, /\.hf\.co$/];
 
 /**
  * Check a device/robot model URL before saving it, so problems show in the form
@@ -81,7 +81,7 @@ export function modelUrlProblem(
   }
   const sameSite = parsed.origin === new URL(siteOrigin).origin;
   if (!sameSite && !ALLOWED_MODEL_HOSTS.some((re) => re.test(parsed.hostname))) {
-    return `The live site cannot download models from ${parsed.hostname}. Host the .glb on GitHub (raw link), Firebase Storage, or attach it in Property Layout.`;
+    return `The live site cannot download models from ${parsed.hostname}. Host the .glb on Hugging Face, GitHub (raw link) or Firebase Storage, or attach it in Property Layout.`;
   }
   return null;
 }

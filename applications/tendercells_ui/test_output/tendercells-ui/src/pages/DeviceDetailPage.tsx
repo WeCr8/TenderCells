@@ -1,5 +1,6 @@
 // DeviceDetailPage.tsx - Individual device detail view
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   Box,
   Paper,
@@ -53,9 +54,14 @@ interface DeviceDetailPageProps {
 }
 
 export default function DeviceDetailPage({
-  deviceId = 'ct_001',
-  deviceName = 'Chicken Tender #1',
+  deviceId: deviceIdProp,
+  deviceName: deviceNameProp,
 }: DeviceDetailPageProps) {
+  // FIX(2026-09-27): the /device/:deviceId route renders this page without props, so
+  // every device page (telemetry, robot arm, quick actions) silently drove ct_001.
+  const params = useParams<{ deviceId?: string }>();
+  const deviceId = deviceIdProp ?? params.deviceId ?? 'ct_001';
+  const deviceName = deviceNameProp ?? (deviceId === 'ct_001' ? 'Chicken Tender #1' : deviceId);
   const [activeTab, setActiveTab] = useState(0);
   const [cameras, setCameras] = useState<CameraFeed[]>([]);
 

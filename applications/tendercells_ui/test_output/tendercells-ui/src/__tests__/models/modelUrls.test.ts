@@ -50,3 +50,25 @@ describe('normalizeFarmBotUrl', () => {
     expect(normalizeFarmBotUrl('ftp://farm.local')).toBeNull();
   });
 });
+
+describe('hfModelUrl (Hugging Face Hub robot models)', () => {
+  it('turns file pages, download links and shorthand into resolve URLs', async () => {
+    const { hfModelUrl } = await import('../../lib/three/huggingFace');
+    expect(hfModelUrl('https://huggingface.co/acme/farm-robots/blob/main/arms/so101.glb').url)
+      .toBe('https://huggingface.co/acme/farm-robots/resolve/main/arms/so101.glb');
+    expect(hfModelUrl('https://huggingface.co/datasets/acme/yard/resolve/v2/scene.gltf?download=true').url)
+      .toBe('https://huggingface.co/datasets/acme/yard/resolve/v2/scene.gltf');
+    expect(hfModelUrl('acme/farm-robots/so101 arm.glb')).toEqual({
+      url: 'https://huggingface.co/acme/farm-robots/resolve/main/so101%20arm.glb', repo: 'acme/farm-robots', path: 'so101 arm.glb',
+    });
+    expect(modelUrlProblem(hfModelUrl('acme/farm-robots/so101.glb').url)).toBeNull();
+  });
+
+  it('rejects non-glTF files, traversal and other hosts', async () => {
+    const { hfModelUrl } = await import('../../lib/three/huggingFace');
+    expect(() => hfModelUrl('acme/robots/so101.urdf')).toThrow(/glTF only/);
+    expect(() => hfModelUrl('acme/robots/../secrets/x.glb')).toThrow(/not valid/);
+    expect(() => hfModelUrl('https://evil.example/acme/robots/blob/main/x.glb')).toThrow(/Hugging Face/);
+    expect(() => hfModelUrl('so101.glb')).toThrow(/Hugging Face/);
+  });
+});

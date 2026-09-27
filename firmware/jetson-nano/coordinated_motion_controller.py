@@ -1,13 +1,17 @@
 import json
+import os
 import time
 import threading
-from gantry_controller import GantryController
+from gantry_controller import create_gantry
 from arm_factory import ArmFactory
 
 class CoordinatedMotionController:
-    def __init__(self, arm_type='stepper_6dof', mqtt_client=None):
-        self.gantry = GantryController()
-        self.arm = ArmFactory.create(arm_type)
+    def __init__(self, arm_type=None, mqtt_client=None, arm=None, gantry=None):
+        # FIX(2026-09-27): arm_factory/arm_interface did not exist, so this module
+        # could not even import. Arm + gantry are now injectable (sim or live).
+        simulated = os.environ.get('ARM_MODE', 'live').lower() == 'simulation'
+        self.gantry = gantry or create_gantry(simulated)
+        self.arm = arm or ArmFactory.create(arm_type)
         self.mqtt = mqtt_client
         self.is_moving = False
 

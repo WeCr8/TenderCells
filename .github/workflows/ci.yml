@@ -83,6 +83,19 @@ jobs:
             echo "Warning: Firmware exceeds 3.75MB flash limit"
           fi
 
+  arm-service:
+    name: "Arm service — pytest (sim, UR, LeRobot, Hugging Face policies)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test deps
+        run: pip install pytest
+      - name: Run arm service tests
+        run: python -m pytest -q firmware/jetson-nano/tests
+
   security:
     name: "Security — secret scan"
     runs-on: ubuntu-latest

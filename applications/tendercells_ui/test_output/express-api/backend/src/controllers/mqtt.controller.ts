@@ -45,6 +45,9 @@ const KNOWN_ROUTINES = [
   "cleaning_sweep_routine",
 ] as const;
 
+// Hugging Face model id: <owner>/<name>.
+const HF_REPO_ID = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,95}\/[A-Za-z0-9][A-Za-z0-9_.-]{0,95}$/;
+
 // Headcount older than this cannot clear robot motion (sensors publish every 10s).
 const MOTION_TELEMETRY_MAX_AGE_MS = 60_000;
 
@@ -67,6 +70,13 @@ const SCHEMAS: Record<string, Schema> = {
   feed:    { amount:  { type: "number", required: true, min: 1, max: 5000 } },
   clean:   { action:  { type: "string", required: true, values: ["start", "stop"] } },
   routine: { routine: { type: "string", required: true, values: [...KNOWN_ROUTINES] } },
+  // Hugging Face LeRobot policy run (arm service runs lerobot-rollout / lerobot-eval).
+  policy: {
+    repo_id:    { type: "string", required: true },
+    task:       { type: "string", required: false },
+    duration_s: { type: "number", required: false, min: 1, max: 600 },
+    sim_env:    { type: "string", required: false, values: ["pusht", "aloha", "libero", "metaworld"] },
+  },
   arm: {
     joints: { type: "array",  required: true },
     speed:  { type: "number", required: false, min: 0, max: 1 },
@@ -108,9 +118,13 @@ export class MQTTController {
    */
   static motionBlockedReason(deviceId: string): string | null {
     const state = MQTTController.states.get(deviceId);
-    if (state?.state === "estop" || state?.systemState === "estop") {
+    const arm = MQTTController.subStates.get(`${deviceId}:arm`);
+    if (state?.state === "estop" || state?.systemState === "estop" || arm?.estop === true) {
       return "E-STOP is active on this device. Clear it before running robot motion.";
     }
+    // Arms outside animal areas (e.g. a garden/FarmBot-style arm) declare this in
+    // their state/arm (arm service ANIMAL_AREA=false). Default is to enforce.
+    if (arm?.animalSafetyGate === false) return null;
     const telemetry = MQTTController.telemetry.get(deviceId);
     const at = MQTTController.telemetryAt.get(deviceId) ?? 0;
     if (!telemetry || typeof telemetry.chickenCount !== "number") {
@@ -580,6 +594,41 @@ export class MQTTController {
     });
   }
 
+  /**
+   * Run a Hugging Face policy on the device's arm (publishes cmd/motion {policy}).
+   * Same safety gate as arm motion; the arm service re-checks before starting.
+   */
+  sendPolicyCommand(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const err = validatePayload(req.body, SCHEMAS.policy);
+    if (err) return res.status(400).json({ error: err });
+    const { repo_id, task, duration_s, sim_env } = req.body;
+    if (!HF_REPO_ID.test(repo_id)) {
+      return res.status(400).json({ error: "repo_id must be a Hugging Face model id like 'lerobot/smolvla_base'" });
+    }
+    if (task !== undefined && (task.length > 200 || /[\r\n\0]/.test(task))) {
+      return res.status(400).json({ error: "task must be one line of at most 200 characters" });
+    }
+    const blocked = MQTTController.motionBlockedReason(deviceId);
+    if (blocked) return res.status(409).json({ error: blocked });
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+    const policy = { repo_id, task: task ?? "", duration_s: duration_s ?? 30, ...(sim_env ? { sim_env } : {}) };
+    MQTTController.client.publish(`tc/${deviceId}/cmd/motion`, JSON.stringify({ seq: Date.now(), policy }), { qos: 1 });
+    res.json({ success: true, deviceId, command: "policy", policy, message: `Policy '${repo_id}' dispatched` });
+  }
+
+  /** Stop a running policy. Never gated - stopping is always allowed. */
+  sendPolicyStop(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+    MQTTController.client.publish(`tc/${deviceId}/cmd/motion`, JSON.stringify({ seq: Date.now(), policy_stop: true }), { qos: 1 });
+    res.json({ success: true, deviceId, command: "policy_stop" });
+  }
+
   sendEstop(req: Request, res: Response) {
     const { deviceId } = req.params;
 
@@ -602,6 +651,23 @@ export class MQTTController {
       command: "estop",
       message: "E-STOP activated",
     });
+  }
+
+  /**
+   * Clear a latched E-STOP (manual clear from the app, CLAUDE.md). Replaces the
+   * retained {active:true} so devices that reconnect are not re-latched forever.
+   * Owner-gated; the UI asks for confirmation first.
+   */
+  clearEstop(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+    MQTTController.client.publish(`tc/${deviceId}/cmd/estop`, JSON.stringify({ active: false, timestamp: Date.now() }), {
+      qos: 2,
+      retain: true,
+    });
+    res.json({ success: true, deviceId, command: "estop_clear", message: "E-STOP cleared" });
   }
 
   // Publish a command from server-side code (e.g. the schedule runner). Returns

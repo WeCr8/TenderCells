@@ -59,6 +59,7 @@ import {
 import Viewport3D from '../components/viewport/Viewport3D';
 import FarmBotBridgePanel from '../components/garden/FarmBotBridgePanel';
 import { saveModelFile } from '../lib/three/modelStore';
+import { hfModelUrl } from '../lib/three/huggingFace';
 import { useProducts } from '../hooks/useProducts';
 import './PropertyLayoutBuilder.css';
 
@@ -136,6 +137,8 @@ export default function PropertyLayoutBuilder() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<PropertyItem | null>(null);
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('edit');
+  const [hfModelInput, setHfModelInput] = useState('');
+  const [hfModelError, setHfModelError] = useState<string | null>(null);
   const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
   // Grab offset (feet) between pointer and item origin at drag start —
   // keeps the cursor locked to the exact point that was clicked on the item.
@@ -1400,9 +1403,29 @@ export default function PropertyLayoutBuilder() {
                             }} />
                         </Button>
                         {editingItem.modelUrl && (
-                          <Chip label="Model attached" size="small" onDelete={() => setEditingItem((cur) => cur ? { ...cur, modelUrl: undefined } : cur)}
+                          <Chip label={editingItem.modelUrl.startsWith('https://huggingface.co/') ? 'Hugging Face model' : 'Model attached'}
+                            size="small" onDelete={() => setEditingItem((cur) => cur ? { ...cur, modelUrl: undefined } : cur)}
                             sx={{ bgcolor: alpha('#7CB342', 0.18), color: '#9CCC65' }} />
                         )}
+                      </Stack>
+                      {/* Or link a robot model hosted on the Hugging Face Hub. */}
+                      <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mt: 1 }}>
+                        <TextField size="small" fullWidth placeholder="🤗 Hugging Face: owner/repo/model.glb or file link"
+                          value={hfModelInput} onChange={(e) => { setHfModelInput(e.target.value); setHfModelError(null); }}
+                          error={!!hfModelError} helperText={hfModelError || undefined}
+                          inputProps={{ 'aria-label': 'Hugging Face model' }} />
+                        <Button size="small" variant="outlined" sx={{ borderColor: '#4A7C59', color: '#9CCC65', whiteSpace: 'nowrap', mt: '4px' }}
+                          onClick={() => {
+                            try {
+                              const ref = hfModelUrl(hfModelInput);
+                              setEditingItem((cur) => cur ? { ...cur, modelUrl: ref.url, name: cur.name || ref.path.split('/').pop()!.replace(/\.(glb|gltf)$/i, '') } : cur);
+                              setHfModelInput('');
+                            } catch (err) {
+                              setHfModelError(err instanceof Error ? err.message : String(err));
+                            }
+                          }}>
+                          Link
+                        </Button>
                       </Stack>
                       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
                         No model = {copy.fallback} is shown. Draco/Meshopt-compressed GLBs are supported. Convert OBJ/FBX/USD to GLB first (Blender → Export → glTF Binary).

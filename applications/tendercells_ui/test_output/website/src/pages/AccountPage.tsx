@@ -17,6 +17,7 @@ import {
   signOut,
   type User,
 } from "firebase/auth";
+import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import { TENDERCELLS_OS_URL } from "../config/appLinks";
 import { useAuthUser } from "../hooks/useAuthUser";
@@ -70,6 +71,22 @@ const PROVIDER_LABELS: Record<string, string> = {
   "google.com": "Google",
 };
 
+/** Site brand logo (same asset as the header), with the PNG as a fallback. */
+function BrandLogo() {
+  return (
+    <Link to="/" className="account-logo" aria-label="Tender Cells home">
+      <img
+        src="/assets/images/tender-cells-logo.svg"
+        alt="Tender Cells"
+        onError={(e) => {
+          e.currentTarget.onerror = null;
+          e.currentTarget.src = "/assets/images/tender_cells_logo.png";
+        }}
+      />
+    </Link>
+  );
+}
+
 function AccountDetails({ user }: { user: User }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -100,6 +117,7 @@ function AccountDetails({ user }: { user: User }) {
 
   return (
     <section className="account-card" aria-labelledby="account-title">
+      <BrandLogo />
       <div className="account-identity">
         {user.photoURL ? (
           <img className="account-avatar" src={user.photoURL} alt="" referrerPolicy="no-referrer" />
@@ -228,6 +246,7 @@ function SignInForm() {
 
   return (
     <section className="account-card" aria-labelledby="signin-title">
+      <BrandLogo />
       <h1 id="signin-title">{mode === "login" ? "Log in to Tender Cells" : "Create your Tender Cells account"}</h1>
       <p className="account-sub">
         One account for the website and the Tender Cells OS.

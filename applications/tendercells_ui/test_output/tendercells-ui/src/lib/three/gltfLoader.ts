@@ -5,7 +5,7 @@
 // Meshopt-compressed GLBs (Blender's "Compression" export option, most
 // downloadable robot models) silently failed to load.
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { DRACOLoader, DRACO_GLTF_CONFIG } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
 let draco: DRACOLoader | null = null;
@@ -13,9 +13,10 @@ let draco: DRACOLoader | null = null;
 /**
  * Create a GLTFLoader that can decode Draco and Meshopt compressed models.
  *
- * The Draco decoder is served from `<base>/draco/` (public/draco) so it works
- * both standalone and under the website's /app/ path. One shared DRACOLoader
- * keeps a single decoder worker pool for the whole app.
+ * Uses three's own glTF Draco decoder (DRACO_GLTF_CONFIG, three >= r18x): Vite
+ * emits it as a hashed asset, so it always matches the installed three version
+ * and works under the website's /app/ path. One shared DRACOLoader keeps a
+ * single decoder worker pool for the whole app.
  *
  * @returns A configured GLTFLoader
  * @example
@@ -24,7 +25,7 @@ let draco: DRACOLoader | null = null;
 export function createGltfLoader(): GLTFLoader {
   if (!draco) {
     draco = new DRACOLoader();
-    draco.setDecoderPath(`${import.meta.env.BASE_URL}draco/`);
+    draco.setDecoderPath(DRACO_GLTF_CONFIG);
   }
   const loader = new GLTFLoader();
   loader.setDRACOLoader(draco);

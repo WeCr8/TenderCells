@@ -70,3 +70,16 @@ links out, so there is nothing to upgrade - only the links above to keep current
 Brand-asset terms (CC-BY-NC 4.0) were not re-verified: licensing.farm.bot was not
 reachable from the review environment. Re-check before using any FarmBot logo.
 
+## FarmBot client library in use (2026-09-27)
+
+| Package | Version | License | Used for |
+|---|---|---|---|
+| [`farmbot`](https://github.com/FarmBot/farmbot-js) (farmbot-js) | 15.10.1 | MIT | Live link from a garden to the user's FarmBot on my.farm.bot (`src/components/garden/FarmBotLivePanel.tsx`, loaded on demand) |
+
+Unmodified npm dependency; its MIT notice ships in `node_modules/farmbot/LICENSE`.
+Tender Cells talks to FarmBot Inc's hosted instance (my.farm.bot) - no fork, no
+FarmBot brand assets. Sign-in uses `POST /api/tokens`; the password is sent to
+FarmBot only and never stored, and the 60-day token is kept in sessionStorage.
+`src/lib/farmbot/mqttCompat.ts` adapts MQTT.js's browser build to farmbot-js's
+CommonJS import (see the Vite alias).
+

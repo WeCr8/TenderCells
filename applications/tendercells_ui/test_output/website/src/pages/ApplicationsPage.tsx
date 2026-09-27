@@ -1,6 +1,6 @@
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
-import { TENDERCELLS_APP_ENTRY_URL } from "../config/appLinks";
+import { TENDERCELLS_NATIVE_APP_URL, TENDERCELLS_WEB_ACCOUNT_URL } from "../config/appLinks";
 
 export default function ApplicationsPage() {
   return (
@@ -50,15 +50,21 @@ export default function ApplicationsPage() {
       <div className="prose">
         <p>
           Full-featured web dashboard at <strong>app.tendercells.com</strong> (coming at launch).
-          Runs in any modern browser — no app installation needed. Same data as mobile with
-          larger 3D viewport for monitoring coop layout and arm position.
+          Runs in any modern browser — no app installation needed. Login opens the browser
+          account flow at <code>/app/account</code> unless you explicitly choose to open an installed app.
+          Same data as mobile with larger 3D viewport for monitoring coop layout and arm position.
         </p>
       </div>
 
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
-        <a href={TENDERCELLS_APP_ENTRY_URL} className="btn-primary">
-          Login / Launch Web Dashboard
+        <a href={TENDERCELLS_WEB_ACCOUNT_URL} className="btn-primary">
+          Login / Open Web Dashboard
         </a>
+        {TENDERCELLS_NATIVE_APP_URL && (
+          <a href={TENDERCELLS_NATIVE_APP_URL} className="btn-secondary">
+            Open Installed App
+          </a>
+        )}
       </div>
 
       <h2 className="section-title" id="api">Developer API</h2>

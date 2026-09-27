@@ -62,6 +62,27 @@ interface ProductRegistrationModalProps {
   showConnectionWizardAfterRegister?: boolean;
 }
 
+const capabilityLabels: Record<string, string> = {
+  camera: 'Camera',
+  microphone: 'Digital microphone',
+  microsd: 'microSD storage',
+  wifi: 'Wi-Fi',
+  ble: 'Bluetooth LE',
+  gpio: 'GPIO / I2C / SPI',
+  battery_power: 'Battery power + USB charging',
+};
+
+const senseCapabilities = Object.keys(capabilityLabels);
+const genericCameraCapabilities = ['camera', 'wifi', 'ble', 'gpio'];
+const defaultCameraCapabilities = ['camera', 'wifi', 'ble', 'battery_power'];
+const capabilityPresets: Record<string, string[]> = {
+  camera_only: defaultCameraCapabilities,
+  camera_sound: [...defaultCameraCapabilities, 'microphone'],
+  local_recording: [...defaultCameraCapabilities, 'microsd'],
+  full_sense: senseCapabilities,
+  custom: [],
+};
+
 export default function ProductRegistrationModal({
   isOpen,
   onClose,
@@ -71,23 +92,26 @@ export default function ProductRegistrationModal({
 }: ProductRegistrationModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [activeTab, setActiveTab] = useState<number>(0);
-  const [productType, setProductType] = useState<ProductType>('hardware_unit');
-  const [productName, setProductName] = useState('');
-  const [productFamily, setProductFamily] = useState<ProductFamily>('chicken-tender');
-  const [buildSource, setBuildSource] = useState<BuildSource>('tendercells-kit');
-  const [selectedTemplateId, setSelectedTemplateId] = useState('chicken-tender-kit');
+  const [activeTab, setActiveTab] = useState<number>(3);
+  const [productType, setProductType] = useState<ProductType>('automation_device');
+  const [productName, setProductName] = useState('My Camera Node');
+  const [productFamily, setProductFamily] = useState<ProductFamily>('camera-kit');
+  const [buildSource, setBuildSource] = useState<BuildSource>('open-source-diy');
+  const [selectedTemplateId, setSelectedTemplateId] = useState('camera-kit');
   const [connectionType, setConnectionType] = useState<'tendercells-template' | 'local-import' | 'huggingface'>('tendercells-template');
   const [sourceUrl, setSourceUrl] = useState('');
-  const [controllerBoard, setControllerBoard] = useState('');
-  const [powerSource, setPowerSource] = useState('');
-  const [batteryCapacity, setBatteryCapacity] = useState('');
-  const [cameraModule, setCameraModule] = useState('');
+  const [controllerBoard, setControllerBoard] = useState('Seeed XIAO ESP32-S3 Sense');
+  const [powerSource, setPowerSource] = useState('Rechargeable battery');
+  const [batteryCapacity, setBatteryCapacity] = useState('2000');
+  const [cameraModule, setCameraModule] = useState('OV2640 / compatible camera');
+  const [cameraStreamUrl, setCameraStreamUrl] = useState('');
+  const [enabledCapabilities, setEnabledCapabilities] = useState<string[]>(defaultCameraCapabilities);
+  const [capabilityProfile, setCapabilityProfile] = useState('camera_only');
   const [customProductName, setCustomProductName] = useState('');
   const [model, setModel] = useState('');
   const [location, setLocation] = useState('');
   const [animalCount, setAnimalCount] = useState('4');
-  const [hardwareSetupMode, setHardwareSetupMode] = useState<HardwareSetupMode>('sim_only');
+  const [hardwareSetupMode, setHardwareSetupMode] = useState<HardwareSetupMode>('connect_now');
   const [simulationBackend, setSimulationBackend] = useState<SimulationBackend>('browser_threejs');
   const [simulationProfile, setSimulationProfile] = useState('layout-and-axis-preview');
   const [roboticsMiddleware, setRoboticsMiddleware] = useState('mqtt_bridge');
@@ -103,7 +127,7 @@ export default function ProductRegistrationModal({
   const [ownerEmail, setOwnerEmail] = useState('');
   const [deviceId, setDeviceId] = useState('');
   const [hardwareRevision, setHardwareRevision] = useState('');
-  const [firmwareTarget, setFirmwareTarget] = useState('');
+  const [firmwareTarget, setFirmwareTarget] = useState('firmware/camera-node');
   const [firmwareVersion, setFirmwareVersion] = useState('');
   const [mqttBaseTopic, setMqttBaseTopic] = useState('');
   const [repoUrl, setRepoUrl] = useState('');
@@ -359,12 +383,13 @@ export default function ProductRegistrationModal({
       buildSource: 'open-source-diy' as BuildSource,
       productName: 'My Camera Node',
       model: 'ESP32-S3 Camera + Battery',
-      firmwareTarget: 'firmware/watchtower-cam',
+      firmwareTarget: 'firmware/camera-node',
       hardwareSetupMode: 'connect_now' as HardwareSetupMode,
-      controllerBoard: 'ESP32-S3 Sense / ESP32-S3 camera board',
+      controllerBoard: 'Seeed XIAO ESP32-S3 Sense',
       powerSource: 'Rechargeable battery',
       batteryCapacity: '2000',
       cameraModule: 'OV2640 / compatible camera',
+      enabledCapabilities: defaultCameraCapabilities,
       activeTab: 3,
     },
     {
@@ -492,6 +517,9 @@ export default function ProductRegistrationModal({
     setPowerSource('powerSource' in template ? String(template.powerSource || '') : '');
     setBatteryCapacity('batteryCapacity' in template ? String(template.batteryCapacity || '') : '');
     setCameraModule('cameraModule' in template ? String(template.cameraModule || '') : '');
+    setEnabledCapabilities('enabledCapabilities' in template && Array.isArray(template.enabledCapabilities) ? [...template.enabledCapabilities] : []);
+    setCapabilityProfile('enabledCapabilities' in template && Array.isArray(template.enabledCapabilities) ? 'camera_only' : 'custom');
+    setCameraStreamUrl('');
     setMqttBaseTopic(template.mqttBaseTopic || '');
     setRepoUrl('');
     setSchematicUrl('');
@@ -525,6 +553,9 @@ export default function ProductRegistrationModal({
       setFirmwareTarget(String(data.metadata?.firmware_target || ''));
       setMqttBaseTopic(String(data.metadata?.mqtt_base_topic || ''));
       setCustomDeviceAssetUrl(String(data.metadata?.custom_device_asset_url || ''));
+      setCameraStreamUrl(String(data.metadata?.camera_stream_url || ''));
+      setEnabledCapabilities(Array.isArray(data.metadata?.enabled_capabilities) ? data.metadata.enabled_capabilities : []);
+      setCapabilityProfile(String(data.metadata?.capability_profile || 'custom'));
       setRepoUrl(String(data.metadata?.repo_url || ''));
       setNotes(String(data.metadata?.notes || ''));
       setActiveTab(3);
@@ -562,23 +593,26 @@ export default function ProductRegistrationModal({
   // Reset form when modal opens/closes
   useEffect(() => {
     if (!isOpen) {
-      setActiveTab(0);
-      setProductType('hardware_unit');
-      setProductFamily('chicken-tender');
-      setBuildSource('tendercells-kit');
-      setSelectedTemplateId('chicken-tender-kit');
+      setActiveTab(3);
+      setProductType('automation_device');
+      setProductFamily('camera-kit');
+      setBuildSource('open-source-diy');
+      setSelectedTemplateId('camera-kit');
       setConnectionType('tendercells-template');
       setSourceUrl('');
-      setControllerBoard('');
-      setPowerSource('');
-      setBatteryCapacity('');
-      setCameraModule('');
+      setControllerBoard('Seeed XIAO ESP32-S3 Sense');
+      setPowerSource('Rechargeable battery');
+      setBatteryCapacity('2000');
+      setCameraModule('OV2640 / compatible camera');
+      setCameraStreamUrl('');
+      setEnabledCapabilities(defaultCameraCapabilities);
+      setCapabilityProfile('camera_only');
       setCustomProductName('');
-      setProductName('');
-      setModel('');
+      setProductName('My Camera Node');
+      setModel('ESP32-S3 Camera + Battery');
       setLocation('');
       setAnimalCount('4');
-      setHardwareSetupMode('sim_only');
+      setHardwareSetupMode('connect_now');
       setSimulationBackend('browser_threejs');
       setSimulationProfile('layout-and-axis-preview');
       setRoboticsMiddleware('mqtt_bridge');
@@ -594,7 +628,7 @@ export default function ProductRegistrationModal({
       setOwnerEmail('');
       setDeviceId('');
       setHardwareRevision('');
-      setFirmwareTarget('');
+      setFirmwareTarget('firmware/camera-node');
       setFirmwareVersion('');
       setMqttBaseTopic('');
       setRepoUrl('');
@@ -682,6 +716,12 @@ export default function ProductRegistrationModal({
           power_source: powerSource.trim() || undefined,
           battery_capacity_mah: batteryCapacity ? Number(batteryCapacity) : undefined,
           camera_module: cameraModule.trim() || undefined,
+          camera_stream_url: cameraStreamUrl.trim() || undefined,
+          hardware_capabilities: controllerBoard === 'Seeed XIAO ESP32-S3 Sense'
+            ? senseCapabilities
+            : genericCameraCapabilities,
+          enabled_capabilities: enabledCapabilities,
+          capability_profile: capabilityProfile,
           custom_product_name: customProductName.trim() || undefined,
           hardware_revision: hardwareRevision.trim() || undefined,
           firmware_target: firmwareTarget.trim() || undefined,
@@ -733,8 +773,8 @@ export default function ProductRegistrationModal({
   };
 
   const openRegistrationFlasher = () => {
-    const target = productFamily === 'camera-kit' || firmwareTarget.includes('watchtower-cam')
-      ? 'watchtower-cam'
+    const target = productFamily === 'camera-kit' || firmwareTarget.includes('camera-node')
+      ? 'camera-node'
       : productFamily === 'chicken-tender' || firmwareTarget.includes('chicken-tender')
         ? 'chicken-tender'
         : 'starter-node';
@@ -795,7 +835,7 @@ export default function ProductRegistrationModal({
 
             <Box>
               <Grid container spacing={1.5}>
-                {productTemplates.map((template) => (
+                {[...productTemplates].sort((a, b) => Number(b.id === 'camera-kit') - Number(a.id === 'camera-kit')).map((template) => (
                   <Grid item xs={12} sm={6} key={template.id}>
                     <Paper
                       component="button"
@@ -932,7 +972,24 @@ export default function ProductRegistrationModal({
 
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
-                <TextField fullWidth label="Controller Board" value={controllerBoard} onChange={(event) => setControllerBoard(event.target.value)} placeholder="ESP32-S3 Sense" />
+                <FormControl fullWidth>
+                  <InputLabel>Controller Board</InputLabel>
+                  <Select
+                    label="Controller Board"
+                    value={controllerBoard}
+                    onChange={(event) => {
+                      const board = event.target.value;
+                      setControllerBoard(board);
+                      setCapabilityProfile('camera_only');
+                      setEnabledCapabilities(board === 'Seeed XIAO ESP32-S3 Sense'
+                        ? defaultCameraCapabilities
+                        : ['camera', 'wifi', 'ble']);
+                    }}
+                  >
+                    <MenuItem value="Seeed XIAO ESP32-S3 Sense">Seeed XIAO ESP32-S3 Sense</MenuItem>
+                    <MenuItem value="Generic ESP32-S3 camera board">Generic ESP32-S3 camera board</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} md={6}>
                 <TextField fullWidth label="Camera Module" value={cameraModule} onChange={(event) => setCameraModule(event.target.value)} placeholder="OV2640" />
@@ -943,6 +1000,67 @@ export default function ProductRegistrationModal({
               <Grid item xs={12} md={6}>
                 <TextField fullWidth type="number" label="Battery Capacity (mAh)" value={batteryCapacity} onChange={(event) => setBatteryCapacity(event.target.value)} />
               </Grid>
+              {productFamily === 'camera-kit' && (
+                <>
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" gutterBottom>Use available board features</Typography>
+                    <FormControl fullWidth sx={{ mb: 1 }}>
+                      <InputLabel>Starter setup</InputLabel>
+                      <Select
+                        label="Starter setup"
+                        value={capabilityProfile}
+                        onChange={(event) => {
+                          const profile = event.target.value;
+                          setCapabilityProfile(profile);
+                          if (profile !== 'custom') setEnabledCapabilities(capabilityPresets[profile]);
+                        }}
+                      >
+                        <MenuItem value="camera_only">Camera only</MenuItem>
+                        <MenuItem value="camera_sound" disabled={controllerBoard !== 'Seeed XIAO ESP32-S3 Sense'}>Camera + sound events</MenuItem>
+                        <MenuItem value="local_recording" disabled={controllerBoard !== 'Seeed XIAO ESP32-S3 Sense'}>Camera + microSD recording</MenuItem>
+                        <MenuItem value="full_sense" disabled={controllerBoard !== 'Seeed XIAO ESP32-S3 Sense'}>Full Sense board</MenuItem>
+                        <MenuItem value="custom">Custom selection</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                      {Object.entries(capabilityLabels).map(([capability, label]) => {
+                        const supported = (controllerBoard === 'Seeed XIAO ESP32-S3 Sense'
+                          ? senseCapabilities
+                          : genericCameraCapabilities).includes(capability);
+                        return (
+                          <FormControlLabel
+                            key={capability}
+                            disabled={!supported}
+                            control={<Checkbox
+                              checked={supported && enabledCapabilities.includes(capability)}
+                              onChange={(event) => {
+                                setCapabilityProfile('custom');
+                                setEnabledCapabilities((current) => event.target.checked
+                                  ? [...new Set([...current, capability])]
+                                  : current.filter((item) => item !== capability));
+                              }}
+                            />}
+                            label={label}
+                          />
+                        );
+                      })}
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary">
+                      Unavailable features are disabled for this board profile. External modules must be registered separately.
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Camera Stream URL (optional)"
+                      value={cameraStreamUrl}
+                      onChange={(event) => setCameraStreamUrl(event.target.value)}
+                      placeholder="http://192.168.1.50/stream"
+                      helperText="Add this after WiFi setup if the camera reports a stream address. You can also add it later."
+                    />
+                  </Grid>
+                </>
+              )}
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth required>
                   <InputLabel>Product Family</InputLabel>
@@ -1442,14 +1560,14 @@ export default function ProductRegistrationModal({
             Cancel
           </Button>
           <Button onClick={openRegistrationFlasher} variant="outlined" startIcon={<SystemUpdateAltIcon />} disabled={isSubmitting}>
-            Flash Firmware
+            {productFamily === 'camera-kit' ? '1. Flash Camera' : 'Flash Firmware'}
           </Button>
           <Button
             onClick={handleSubmit}
             variant="contained"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Registering...' : 'Register Product'}
+            {isSubmitting ? 'Registering...' : productFamily === 'camera-kit' ? '2. Register Camera' : 'Register Product'}
           </Button>
         </DialogActions>
       </Dialog>

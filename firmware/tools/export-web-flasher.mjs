@@ -38,7 +38,7 @@ const WEB_FLASH = join(
 const TARGETS = {
   "chicken-tender": { env: "esp32-wroom-32",      dir: "chicken-tender" },
   "starter-node":   { env: "xiao-esp32s3",        dir: "starter-node" },
-  "watchtower-cam": { env: "xiao-esp32s3-sense",  dir: "watchtower-cam" },
+  "camera-node": { env: "xiao-esp32s3-sense",  dir: "camera-node" },
 };
 
 function exportTarget(name) {

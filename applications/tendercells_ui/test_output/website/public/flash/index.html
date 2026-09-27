@@ -124,6 +124,7 @@
     <h1>🐔 Tender Cells Flasher</h1>
     <p class="tag">Put the brain into your coop — right from this page. No installs.</p>
     <p class="url-pill">Bookmark this: <strong>tender-cells.web.app/flash</strong></p>
+    <p id="productContext" class="callout" style="display:none"></p>
   </header>
 
   <div class="tabs" role="tablist">
@@ -490,6 +491,12 @@
 
   // Device picker → swaps the installer manifest
   const installer = document.getElementById('installer');
+  const params = new URLSearchParams(window.location.search);
+  const manifests = {
+    'starter-node': '/flash/manifest-starter-node.json',
+    'chicken-tender': '/flash/manifest-chicken-tender.json',
+    'watchtower-cam': '/flash/manifest-watchtower-cam.json'
+  };
   document.querySelectorAll('#devicePick .device:not(.soon)').forEach(d => {
     const choose = () => {
       document.querySelectorAll('#devicePick .device').forEach(x => x.setAttribute('aria-pressed', 'false'));
@@ -506,6 +513,16 @@
     document.querySelectorAll('#devicePick .device').forEach(x =>
       x.setAttribute('aria-pressed', x.dataset.manifest === manifest ? 'true' : 'false'));
     if (installer) installer.setAttribute('manifest', manifest);
+  }
+  const requestedManifest = manifests[params.get('target')];
+  if (requestedManifest) selectDeviceByManifest(requestedManifest);
+  const productContext = document.getElementById('productContext');
+  if (productContext && params.get('name')) {
+    const name = document.createElement('strong');
+    name.textContent = params.get('name');
+    const details = [params.get('product'), params.get('deviceId')].filter(Boolean).join(' / ');
+    productContext.append('Preparing firmware for ', name, details ? ` (${details})` : '');
+    productContext.style.display = 'block';
   }
   const useCaseHint = document.getElementById('useCaseHint');
   document.querySelectorAll('#useCasePick .device').forEach(d => {

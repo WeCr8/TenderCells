@@ -14,6 +14,7 @@ import { auth } from '../lib/firebase/firebaseApp';
  * Uses Supabase client or API endpoints
  */
 export class ProductsService {
+  static readonly PRODUCTS_UPDATED_EVENT = 'tendercells-products-updated';
   private static readonly API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || 'http://localhost:4000/api';
   private static readonly API_ENABLED = Boolean(import.meta.env?.VITE_API_BASE_URL);
   private static readonly DEV_PRODUCTS_KEY = 'tendercells_dev_products';
@@ -99,6 +100,7 @@ export class ProductsService {
 
   private static setDevProducts(products: Product[]) {
     localStorage.setItem(this.getDevProductsKey(), JSON.stringify(products));
+    window.dispatchEvent(new CustomEvent(this.PRODUCTS_UPDATED_EVENT));
   }
 
   private static createFirstCoopProduct(): Product {

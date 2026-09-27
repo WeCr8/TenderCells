@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { modelUrlProblem } from '../lib/three/gltfLoader';
 import {
@@ -42,6 +42,8 @@ import {
   Link as LinkIcon,
   Refresh as RefreshIcon,
   Router as RouterIcon,
+  SystemUpdateAlt as FlashIcon,
+  UploadFile as ImportIcon,
   Visibility as VisibilityIcon,
   Wifi as WifiIcon,
   WifiOff as WifiOffIcon,
@@ -218,6 +220,24 @@ const productToForm = (product: Product): EditableProduct => ({
   notes: String(product.metadata?.notes || ''),
 });
 
+const flashProfileFor = (product: Product) => {
+  const family = String(product.metadata?.product_family || '');
+  const target = String(product.metadata?.firmware_target || '');
+  if (family === 'chicken-tender' || target.includes('chicken-tender')) return 'chicken-tender';
+  if (family === 'camera-kit' || target.includes('watchtower-cam')) return 'watchtower-cam';
+  return 'starter-node';
+};
+
+const openFlasher = (product: Product) => {
+  const params = new URLSearchParams({
+    target: flashProfileFor(product),
+    product: String(product.metadata?.product_family || 'community-custom'),
+    name: product.product_name,
+  });
+  if (product.device_id) params.set('deviceId', product.device_id);
+  window.open(`/flash/?${params.toString()}`, '_blank', 'noopener,noreferrer');
+};
+
 export default function ProductsPage() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -241,12 +261,19 @@ export default function ProductsPage() {
   const [editForm, setEditForm] = useState<EditableProduct>(emptyEditForm);
   const [filter, setFilter] = useState<ProductFilter>({});
   const [search, setSearch] = useState('');
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (searchParams.get('register') !== '1') return;
-    setIsRegistrationModalOpen(true);
-    setSearchParams({}, { replace: true });
-  }, [searchParams, setSearchParams]);
+    if (searchParams.get('register') === '1') {
+      setIsRegistrationModalOpen(true);
+      setSearchParams({}, { replace: true });
+      return;
+    }
+    const requestedProduct = searchParams.get('product');
+    if (!requestedProduct || products.length === 0) return;
+    const match = products.find((item) => item.id === requestedProduct);
+    if (match) setDetailProduct(match);
+  }, [products, searchParams, setSearchParams]);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -285,6 +312,22 @@ export default function ProductsPage() {
   const handleRegister = async (data: RegisterProductData) => {
     await registerProduct(data);
     await refetch(filter);
+  };
+
+  const handleImport = async (file: File) => {
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+      const entries = (Array.isArray(parsed) ? parsed : [parsed]) as Array<Partial<RegisterProductData>>;
+      if (entries.length === 0 || entries.some((item) => !item.product_name || !item.product_type)) {
+        throw new Error('Each imported product needs product_name and product_type.');
+      }
+      for (const item of entries) await registerProduct(item as RegisterProductData);
+      await refetch(filter);
+    } catch (importError) {
+      window.alert(importError instanceof Error ? importError.message : 'Product import failed.');
+    } finally {
+      if (importInputRef.current) importInputRef.current.value = '';
+    }
   };
 
   const handleFilterChange = async (newFilter: ProductFilter) => {
@@ -391,6 +434,16 @@ export default function ProductsPage() {
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={(event) => event.target.files?.[0] && void handleImport(event.target.files[0])}
+          />
+          <Button variant="outlined" startIcon={<ImportIcon />} onClick={() => importInputRef.current?.click()}>
+            Import
+          </Button>
           <Button variant="outlined" startIcon={<RefreshIcon />} onClick={() => refetch(filter)}>
             Refresh
           </Button>
@@ -629,6 +682,11 @@ export default function ProductsPage() {
                         <Tooltip title="Connection wizard">
                           <IconButton onClick={() => setConnectionProduct(product)} aria-label={`Setup ${product.product_name}`}>
                             <RouterIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Flash firmware">
+                          <IconButton onClick={() => openFlasher(product)} aria-label={`Flash firmware for ${product.product_name}`}>
+                            <FlashIcon />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Remove">

@@ -1,165 +1,150 @@
-// SideMenu.tsx
 import React from "react";
-import List from "@mui/material/List";
-import SideMenuItem from "./SideMenuItem";
+import { Divider, List, ListSubheader } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import BugReportIcon from "@mui/icons-material/BugReport";
+import BuildIcon from "@mui/icons-material/Build";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import DevicesIcon from "@mui/icons-material/Devices";
+import EggIcon from "@mui/icons-material/Egg";
+import ExploreIcon from "@mui/icons-material/Explore";
+import FenceIcon from "@mui/icons-material/Fence";
+import GrassIcon from "@mui/icons-material/Grass";
+import GridOnIcon from "@mui/icons-material/GridOn";
 import HomeIcon from "@mui/icons-material/Home";
 import LockIcon from "@mui/icons-material/Lock";
-import BuildIcon from "@mui/icons-material/Build";
-import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
-import SensorsIcon from "@mui/icons-material/Sensors";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
-import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
-import EggIcon from "@mui/icons-material/Egg";
-import GrassIcon from "@mui/icons-material/Grass";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import TuneIcon from "@mui/icons-material/Tune";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import DevicesIcon from "@mui/icons-material/Devices";
-import GridOnIcon from "@mui/icons-material/GridOn";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PoolIcon from "@mui/icons-material/Pool";
-import FenceIcon from "@mui/icons-material/Fence";
-import ExploreIcon from "@mui/icons-material/Explore";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import WaterIcon from "@mui/icons-material/Water";
-import TrainIcon from "@mui/icons-material/Train";
-import SecurityIcon from "@mui/icons-material/Security";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import BugReportIcon from "@mui/icons-material/BugReport";
 import PetsIcon from "@mui/icons-material/Pets";
+import PoolIcon from "@mui/icons-material/Pool";
+import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import SecurityIcon from "@mui/icons-material/Security";
+import SensorsIcon from "@mui/icons-material/Sensors";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import TrainIcon from "@mui/icons-material/Train";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import TuneIcon from "@mui/icons-material/Tune";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import WaterIcon from "@mui/icons-material/Water";
+import SideMenuItem from "./SideMenuItem";
+import { useProducts } from "../../hooks/useProducts";
+import type { Product } from "../../types/products";
 
-type SideMenuProps = {
-  activeSection?: string;
-  product?: string;
-};
-
-type MenuItem = {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  path?: string;
-};
+type SideMenuProps = { activeSection?: string; product?: string };
+type MenuItem = { id: string; label: string; icon: React.ReactNode; path?: string };
+export type MenuGroup = { label: string; items: MenuItem[] };
 
 const PRODUCT_ITEMS: Record<string, MenuItem[]> = {
   "chicken-tender": [
-  { id: "coop", label: "Coop Settings", icon: <HomeIcon />, path: "/chicken-tender" },
-  { id: "doors", label: "Doors & Latches", icon: <LockIcon />, path: "/chicken-tender" },
-  { id: "motors", label: "Motors & Rails", icon: <BuildIcon />, path: "/chicken-tender" },
-  { id: "robot", label: "Robot Arm", icon: <PrecisionManufacturingIcon />, path: "/chicken-tender" },
-  { id: "sensors", label: "Sensors", icon: <SensorsIcon />, path: "/chicken-tender" },
-  { id: "feed", label: "Feeding & Water", icon: <RestaurantIcon />, path: "/chicken-tender" },
-  { id: "waste", label: "Waste Cleaning", icon: <CleaningServicesIcon />, path: "/chicken-tender" },
-  { id: "eggs", label: "Egg Map", icon: <EggIcon />, path: "/chicken-tender" },
-  ],
+    ["coop", "Coop Settings", <HomeIcon />], ["doors", "Doors & Latches", <LockIcon />],
+    ["motors", "Motors & Rails", <BuildIcon />], ["robot", "Robot Arm", <PrecisionManufacturingIcon />],
+    ["sensors", "Sensors", <SensorsIcon />], ["feed", "Feeding & Water", <RestaurantIcon />],
+    ["waste", "Waste Cleaning", <CleaningServicesIcon />], ["eggs", "Egg Map", <EggIcon />],
+  ].map(([id, label, icon]) => ({ id: String(id), label: String(label), icon, path: "/chicken-tender" })),
   "roaming-roost": [
-    { id: "mobile-coop", label: "Mobile Coop", icon: <HomeIcon /> },
-    { id: "route", label: "Route Planning", icon: <ExploreIcon /> },
-    { id: "doors", label: "Doors & Latches", icon: <LockIcon /> },
-    { id: "sensors", label: "Sensors", icon: <SensorsIcon /> },
-    { id: "feed", label: "Feeding & Water", icon: <RestaurantIcon /> },
-  ],
+    ["mobile-coop", "Mobile Coop", <HomeIcon />], ["route", "Route Planning", <ExploreIcon />],
+    ["doors", "Doors & Latches", <LockIcon />], ["sensors", "Sensors", <SensorsIcon />],
+    ["feed", "Feeding & Water", <RestaurantIcon />],
+  ].map(([id, label, icon]) => ({ id: String(id), label: String(label), icon })),
   "duck-dock": [
-    { id: "dock", label: "Dock Settings", icon: <HomeIcon /> },
-    { id: "pond", label: "Pond Level", icon: <PoolIcon /> },
-    { id: "water", label: "Water Quality", icon: <WaterIcon /> },
-    { id: "feed", label: "Feeding", icon: <RestaurantIcon /> },
-    { id: "eggs", label: "Nest Map", icon: <EggIcon /> },
-  ],
+    ["dock", "Dock Settings", <HomeIcon />], ["pond", "Pond Level", <PoolIcon />],
+    ["water", "Water Quality", <WaterIcon />], ["feed", "Feeding", <RestaurantIcon />],
+    ["eggs", "Nest Map", <EggIcon />],
+  ].map(([id, label, icon]) => ({ id: String(id), label: String(label), icon })),
   "goat-guardian": [
-    { id: "shelter", label: "Shelter", icon: <HomeIcon /> },
-    { id: "fence", label: "Fence Status", icon: <FenceIcon /> },
-    { id: "pasture", label: "Grazing Area", icon: <GridOnIcon /> },
-    { id: "security", label: "Predator Alert", icon: <SecurityIcon /> },
-    { id: "feed", label: "Feeding & Water", icon: <RestaurantIcon /> },
-  ],
+    ["shelter", "Shelter", <HomeIcon />], ["fence", "Fence Status", <FenceIcon />],
+    ["pasture", "Grazing Area", <GridOnIcon />], ["security", "Predator Alert", <SecurityIcon />],
+    ["feed", "Feeding & Water", <RestaurantIcon />],
+  ].map(([id, label, icon]) => ({ id: String(id), label: String(label), icon })),
   "bunny-burrow": [
-    { id: "shelter", label: "Burrow Housing", icon: <HomeIcon /> },
-    { id: "feed", label: "Feeding & Water", icon: <RestaurantIcon /> },
-    { id: "sensors", label: "Climate Sensors", icon: <SensorsIcon /> },
-    { id: "security", label: "Safety Alerts", icon: <SecurityIcon /> },
-  ],
+    ["shelter", "Burrow Housing", <HomeIcon />], ["feed", "Feeding & Water", <RestaurantIcon />],
+    ["sensors", "Climate Sensors", <SensorsIcon />], ["security", "Safety Alerts", <SecurityIcon />],
+  ].map(([id, label, icon]) => ({ id: String(id), label: String(label), icon })),
   "turkey-tower": [
-    { id: "shelter", label: "Tower Housing", icon: <HomeIcon /> },
-    { id: "doors", label: "Doors & Latches", icon: <LockIcon /> },
-    { id: "feed", label: "Feeding & Water", icon: <RestaurantIcon /> },
-    { id: "sensors", label: "Sensors", icon: <SensorsIcon /> },
-    { id: "security", label: "Predator Alert", icon: <SecurityIcon /> },
-  ],
+    ["shelter", "Tower Housing", <HomeIcon />], ["doors", "Doors & Latches", <LockIcon />],
+    ["feed", "Feeding & Water", <RestaurantIcon />], ["sensors", "Sensors", <SensorsIcon />],
+    ["security", "Predator Alert", <SecurityIcon />],
+  ].map(([id, label, icon]) => ({ id: String(id), label: String(label), icon })),
   "predator-monitor": [
-    { id: "watchtower", label: "WatchTower", icon: <SecurityIcon /> },
-    { id: "cameras", label: "Cameras", icon: <CameraAltIcon /> },
-    { id: "detections", label: "Detections", icon: <SensorsIcon /> },
-    { id: "alerts", label: "Alerts", icon: <LockIcon /> },
-  ],
+    ["watchtower", "WatchTower", <SecurityIcon />], ["cameras", "Cameras", <CameraAltIcon />],
+    ["detections", "Detections", <SensorsIcon />], ["alerts", "Alerts", <LockIcon />],
+  ].map(([id, label, icon]) => ({ id: String(id), label: String(label), icon })),
   "rail-system-modules": [
-    { id: "rails", label: "Rails", icon: <TrainIcon /> },
-    { id: "motors", label: "Motors", icon: <BuildIcon /> },
-    { id: "robot", label: "Robot Arm", icon: <PrecisionManufacturingIcon /> },
-    { id: "sensors", label: "Sensors", icon: <SensorsIcon /> },
-  ],
+    ["rails", "Rails", <TrainIcon />], ["motors", "Motors", <BuildIcon />],
+    ["robot", "Robot Arm", <PrecisionManufacturingIcon />], ["sensors", "Sensors", <SensorsIcon />],
+  ].map(([id, label, icon]) => ({ id: String(id), label: String(label), icon })),
   "tender-cells-cloud": [
-    { id: "alerts", label: "Alerts", icon: <LockIcon /> },
-    { id: "detections", label: "Models & Data", icon: <SensorsIcon /> },
-    { id: "cameras", label: "Remote Streams", icon: <CameraAltIcon /> },
-    { id: "sensors", label: "Telemetry", icon: <SensorsIcon /> },
-  ],
+    ["alerts", "Alerts", <LockIcon />], ["detections", "Models & Data", <SensorsIcon />],
+    ["cameras", "Remote Streams", <CameraAltIcon />], ["sensors", "Telemetry", <SensorsIcon />],
+  ].map(([id, label, icon]) => ({ id: String(id), label: String(label), icon })),
   "pigeon-palace": [
-    { id: "coop", label: "Loft Settings", icon: <HomeIcon /> },
-    { id: "doors", label: "Access Doors", icon: <LockIcon /> },
-    { id: "feed", label: "Feeding & Water", icon: <RestaurantIcon /> },
-    { id: "eggs", label: "Nest Map", icon: <EggIcon /> },
-    { id: "sensors", label: "Sensors", icon: <SensorsIcon /> },
-  ],
+    ["coop", "Loft Settings", <HomeIcon />], ["doors", "Access Doors", <LockIcon />],
+    ["feed", "Feeding & Water", <RestaurantIcon />], ["eggs", "Nest Map", <EggIcon />],
+    ["sensors", "Sensors", <SensorsIcon />],
+  ].map(([id, label, icon]) => ({ id: String(id), label: String(label), icon })),
 };
 
-const SHARED_ITEMS: MenuItem[] = [
+const CORE: MenuItem[] = [
   { id: "dashboard", label: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
+  { id: "products", label: "Products & Devices", icon: <DevicesIcon />, path: "/products" },
+  { id: "layout", label: "Property Layout", icon: <GridOnIcon />, path: "/layout" },
+  { id: "setup", label: "Add Device", icon: <AddCircleOutlineIcon />, path: "/products?register=1" },
+];
+const OPERATIONS: MenuItem[] = [
   { id: "analytics", label: "Analytics", icon: <TrendingUpIcon />, path: "/analytics" },
   { id: "diagnostics", label: "Diagnostics", icon: <BugReportIcon />, path: "/diagnostics" },
-  { id: "birds", label: "Flock Roster", icon: <PetsIcon />, path: "/birds" },
-  { id: "chicken-eye", label: "ChickenEye™ AI", icon: <VisibilityIcon />, path: "/chicken-eye" },
-  { id: "ai", label: "TenderAI Chat", icon: <SmartToyIcon />, path: "/ai" },
   { id: "schedules", label: "Schedules", icon: <ScheduleIcon />, path: "/schedules" },
-  { id: "weed-patrol", label: "Weed Patrol", icon: <GrassIcon />, path: "/weed-patrol" },
-  { id: "watershed", label: "Watershed", icon: <WaterIcon />, path: "/watershed" },
-  { id: "products", label: "Products", icon: <DevicesIcon />, path: "/products" },
-  { id: "specs", label: "Product Specs", icon: <DescriptionIcon />, path: "/specs" },
-  { id: "layout", label: "Property Layout", icon: <GridOnIcon />, path: "/layout" },
-  { id: "setup", label: "Add Device", icon: <AddCircleOutlineIcon />, path: "/setup" },
-  { id: "custom", label: "Custom Settings", icon: <TuneIcon />, path: "/settings" },
+];
+const ACCOUNT: MenuItem[] = [
+  { id: "custom", label: "Settings", icon: <TuneIcon />, path: "/settings" },
   { id: "account", label: "Account", icon: <AccountCircleIcon />, path: "/account" },
 ];
+const ANIMAL_FAMILIES = new Set(["chicken-tender", "roaming-roost", "duck-dock", "goat-guardian", "bunny-burrow", "turkey-tower", "pigeon-palace"]);
+const familyOf = (product: Product) => String(product.metadata?.product_family || "");
+
+function buildMenuGroups(products: Product[], currentProduct: string): MenuGroup[] {
+  const families = new Set(products.map(familyOf).filter(Boolean));
+  const hasProducts = products.length > 0;
+  const groups: MenuGroup[] = [{ label: "Workspace", items: CORE }];
+  if (families.has(currentProduct) && PRODUCT_ITEMS[currentProduct]) groups.push({ label: "Current Product", items: PRODUCT_ITEMS[currentProduct] });
+  if (hasProducts) groups.push({ label: "Operations", items: OPERATIONS });
+
+  const diyItems = products
+    .filter((item) => item.product_type === "custom_product" || item.metadata?.build_source === "open-source-diy")
+    .map((item) => ({
+      id: `product-${item.id}`,
+      label: item.product_name,
+      icon: <BuildIcon />,
+      path: `/products?product=${encodeURIComponent(item.id)}`,
+    }));
+  if (diyItems.length) groups.push({ label: "DIY Modules", items: diyItems });
+
+  const care: MenuItem[] = [];
+  if ([...families].some((family) => ANIMAL_FAMILIES.has(family))) care.push({ id: "birds", label: "Animal Roster", icon: <PetsIcon />, path: "/birds" });
+  if (families.has("chicken-tender")) care.push({ id: "chicken-eye", label: "ChickenEye AI", icon: <VisibilityIcon />, path: "/chicken-eye" });
+  if (hasProducts) care.push({ id: "ai", label: "TenderAI", icon: <SmartToyIcon />, path: "/ai" });
+  if (families.has("roaming-roost") || families.has("rail-system-modules")) care.push({ id: "weed-patrol", label: "Weed Patrol", icon: <GrassIcon />, path: "/weed-patrol" });
+  if (care.length) groups.push({ label: "Care & Automation", items: care });
+  groups.push({ label: "Account", items: ACCOUNT });
+  return groups;
+}
 
 export default function SideMenu({ activeSection, product = "chicken-tender" }: SideMenuProps) {
   const navigate = useNavigate();
-
-  // Update paths based on current product
-  const items = [...(PRODUCT_ITEMS[product] || PRODUCT_ITEMS["chicken-tender"]), ...SHARED_ITEMS];
-
-  const getPath = (item: MenuItem) => {
-    if (item.path && item.path !== `/${product}`) {
-      return item.path;
-    }
-
-    return `/${product}?section=${item.id}`;
-  };
-
+  const { products } = useProducts();
+  const getPath = (item: MenuItem) => item.path && item.path !== `/${product}` ? item.path : `/${product}?section=${item.id}`;
   return (
-    <nav>
-      <List dense>
-        {items.map((item) => (
-          <SideMenuItem
-            key={item.id}
-            label={item.label}
-            icon={item.icon}
-            active={activeSection === item.id}
-            onClick={() => navigate(getPath(item))}
-          />
+    <nav aria-label="Application navigation">
+      <List dense disablePadding>
+        {buildMenuGroups(products, product).map((group, index) => (
+          <React.Fragment key={group.label}>
+            {index > 0 && <Divider sx={{ mx: 2, my: 1, borderColor: "#1F5C3B" }} />}
+            <ListSubheader disableSticky sx={{ bgcolor: "transparent", color: "#6F8E82", fontSize: 11, lineHeight: "28px", textTransform: "uppercase" }}>{group.label}</ListSubheader>
+            {group.items.map((item) => <SideMenuItem key={item.id} label={item.label} icon={item.icon} active={activeSection === item.id} onClick={() => navigate(getPath(item))} />)}
+          </React.Fragment>
         ))}
       </List>
     </nav>

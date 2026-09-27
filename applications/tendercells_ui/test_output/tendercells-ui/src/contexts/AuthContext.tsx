@@ -19,6 +19,7 @@ import {
 import { FIREBASE_ENABLED, auth } from '../lib/firebase/firebaseApp';
 import { setAnalyticsUser } from '../analytics';
 import { AuthContext, type AuthContextType } from './authContextStore';
+import { applyPendingWorkspaceReset } from '../services/workspaceReset';
 
 // FIX(2026-09-27): the old "disabled in the public demo" text hid a build that shipped
 // without Firebase config; name the real cause so a broken deploy is obvious.
@@ -39,8 +40,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
+      const finishAuthChange = async () => {
+        if (currentUser) {
+          try {
+            await applyPendingWorkspaceReset(currentUser.uid);
+          } catch (resetError) {
+            console.error('Workspace reset check failed:', resetError);
+          }
+        }
+        setUser(currentUser);
+        setLoading(false);
+      };
+      void finishAuthChange();
       // Attribute analytics events to the signed-in user (uid only, not PII);
       // clears attribution on sign-out. No-op if analytics is disabled.
       void setAnalyticsUser(currentUser?.uid ?? null);

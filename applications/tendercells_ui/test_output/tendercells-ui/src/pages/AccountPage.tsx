@@ -13,7 +13,8 @@ import {
   Stack,
   Chip,
 } from '@mui/material';
-import { Devices, Google as GoogleIcon, Logout as LogoutIcon, School as SchoolIcon } from '@mui/icons-material';
+import { DeleteSweep, Devices, Google as GoogleIcon, Logout as LogoutIcon, School as SchoolIcon } from '@mui/icons-material';
+import { doc, setDoc } from 'firebase/firestore';
 
 // The website's account page (same origin in production: tendercells.com/account; the OS is /app).
 const WEBSITE_ACCOUNT_URL = '/account';
@@ -23,6 +24,8 @@ import ProductCard from '../components/products/ProductCard';
 import ProductRegistrationModal from '../components/products/ProductRegistrationModal';
 import { ProductsService } from '../services/productsService';
 import type { RegisterProductData } from '../types/products';
+import { db } from '../lib/firebase/firebaseApp';
+import { clearTenderCellsWorkspace } from '../services/workspaceReset';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -55,6 +58,7 @@ export default function AccountPage() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
+  const [isResettingWorkspace, setIsResettingWorkspace] = useState(false);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -103,6 +107,20 @@ export default function AccountPage() {
       console.error('Logout error:', err);
     } finally {
       setIsLoggingOut(false);
+    }
+  };
+
+  const handleFreshUserReset = async () => {
+    if (!user || !window.confirm('Clear this account workspace on this browser and start onboarding again? Your Firebase login will be preserved.')) return;
+    setIsResettingWorkspace(true);
+    try {
+      const resetAt = Date.now();
+      await setDoc(doc(db, 'users', user.uid), { userId: user.uid, workspaceResetAt: resetAt }, { merge: true });
+      clearTenderCellsWorkspace(user.uid, resetAt);
+      window.location.assign(`${import.meta.env.BASE_URL}dashboard`);
+    } catch (resetError) {
+      console.error('Workspace reset failed:', resetError);
+      setIsResettingWorkspace(false);
     }
   };
 
@@ -285,6 +303,14 @@ export default function AccountPage() {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           Password reset and security settings are managed through Firebase. Use "Logout" to sign out.
         </Typography>
+        <Divider sx={{ my: 3 }} />
+        <Typography variant="h6" gutterBottom>Fresh-user testing</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Clear products, property layout, animals, schedules, and onboarding state while keeping this Firebase account and its SSO login.
+        </Typography>
+        <Button color="warning" variant="outlined" startIcon={<DeleteSweep />} onClick={() => void handleFreshUserReset()} disabled={isResettingWorkspace}>
+          {isResettingWorkspace ? 'Preparing fresh workspace...' : 'Start Fresh User Test'}
+        </Button>
       </TabPanel>
 
       <TabPanel value={activeTab} index={2}>

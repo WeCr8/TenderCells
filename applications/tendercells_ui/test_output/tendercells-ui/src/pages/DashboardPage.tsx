@@ -34,20 +34,6 @@ const C = {
   white: '#F0EDE4',
 };
 
-const FAMILY_ROUTES: Record<string, string> = {
-  'chicken-tender': '/chicken-tender',
-  'roaming-roost': '/roaming-roost',
-  'duck-dock': '/duck-dock',
-  'goat-guardian': '/goat-guardian',
-  'bunny-burrow': '/bunny-burrow',
-  'turkey-tower': '/turkey-tower',
-  'pigeon-palace': '/pigeon-palace',
-  'predator-monitor': '/predator-monitor',
-  'rail-system': '/rail-system-modules',
-  'rail-system-modules': '/rail-system-modules',
-  'tendercells-cloud': '/tender-cells-cloud',
-};
-
 const FAMILY_EMOJI: Record<string, string> = {
   'chicken-tender': '🐔', 'roaming-roost': '🏕️', 'duck-dock': '🦆',
   'goat-guardian': '🐐', 'bunny-burrow': '🐇', 'turkey-tower': '🦃',
@@ -68,7 +54,7 @@ const SIM_ALERTS: SimAlert[] = [
 function ProductCard({ product }: { product: Product }) {
   const navigate = useNavigate();
   const family = (product.metadata?.product_family as string) ?? '';
-  const route = FAMILY_ROUTES[family] ?? '/products';
+  const route = `/product/${encodeURIComponent(product.id)}`;
   const emoji = FAMILY_EMOJI[family] ?? '📦';
   const isOnline = product.connection_status === 'online';
   const isSim = Boolean(product.metadata?.hardware_setup_mode === 'sim_only' || product.metadata?.sim_only);

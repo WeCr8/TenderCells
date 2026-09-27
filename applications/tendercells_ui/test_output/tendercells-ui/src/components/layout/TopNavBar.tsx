@@ -7,13 +7,7 @@ import Button from "@mui/material/Button";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
-import AgricultureIcon from "@mui/icons-material/Agriculture";
-import WaterIcon from "@mui/icons-material/Water";
-import PetsIcon from "@mui/icons-material/Pets";
-import FlightIcon from "@mui/icons-material/Flight";
-import SecurityIcon from "@mui/icons-material/Security";
-import TrainIcon from "@mui/icons-material/Train";
-import CloudIcon from "@mui/icons-material/Cloud";
+import DevicesIcon from "@mui/icons-material/Devices";
 import StopIcon from "@mui/icons-material/Stop";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -24,36 +18,29 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/useAuth";
 import { useHardwareControl } from "../../hooks/useHardwareControl";
-
-// Product icons mapping - using AgricultureIcon for poultry products
-const PRODUCT_ICONS: Record<string, React.ReactNode> = {
-  "chicken-tender": <AgricultureIcon />,
-  "roaming-roost": <AgricultureIcon />,
-  "duck-dock": <WaterIcon />,
-  "goat-guardian": <PetsIcon />,
-  "bunny-burrow": <PetsIcon />,
-  "turkey-tower": <AgricultureIcon />,
-  "predator-monitor": <SecurityIcon />,
-  "rail-system-modules": <TrainIcon />,
-  "tender-cells-cloud": <CloudIcon />,
-  "pigeon-palace": <FlightIcon />,
-};
+import type { Product } from "../../types/products";
 
 type TopNavBarProps = {
   title?: string;
   product: string;
-  onProductChange: (product: string) => void;
+  products: Product[];
 };
 
-export default function TopNavBar({ title, product, onProductChange }: TopNavBarProps) {
+export default function TopNavBar({ title, product, products }: TopNavBarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
   // Global E-STOP broadcasts to all devices via the MQTT bridge.
   const hardware = useHardwareControl("broadcast");
   const [estopOpen, setEstopOpen] = React.useState(false);
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const routeProductId = pathParts[0] === 'product' ? decodeURIComponent(pathParts[1] || '') : '';
+  const selectedProductId = products.some((item) => item.id === routeProductId)
+    ? routeProductId
+    : products.find((item) => item.metadata?.product_family === product)?.id || '';
 
   const handleEstop = async () => {
     try {
@@ -92,9 +79,9 @@ export default function TopNavBar({ title, product, onProductChange }: TopNavBar
             alt="Tender Cells"
             sx={{ width: { xs: 32, sm: 36 }, height: { xs: 32, sm: 36 }, objectFit: 'contain', mr: 1, borderRadius: 1, flexShrink: 0 }}
           />
-          {PRODUCT_ICONS[product] && (
+          {selectedProductId && (
             <Box sx={{ mr: 1, display: 'flex', alignItems: 'center', color: '#8DD47A' }}>
-              {PRODUCT_ICONS[product]}
+              <DevicesIcon />
             </Box>
           )}
           <Typography
@@ -115,8 +102,11 @@ export default function TopNavBar({ title, product, onProductChange }: TopNavBar
           </Typography>
         </Box>
         <Select
-          value={product}
-          onChange={(e) => onProductChange(e.target.value)}
+          value={selectedProductId}
+          displayEmpty
+          disabled={products.length === 0}
+          onChange={(e) => navigate(`/product/${encodeURIComponent(e.target.value)}`)}
+          renderValue={(value) => value ? products.find((item) => item.id === value)?.product_name || 'Registered product' : 'No products registered'}
           sx={{
             mr: { xs: 0, sm: 1 },
             minWidth: { xs: 0, sm: 220 },
@@ -127,66 +117,14 @@ export default function TopNavBar({ title, product, onProductChange }: TopNavBar
             '.MuiSvgIcon-root': { color: '#E4E7E5' },
           }}
         >
-          <MenuItem value="chicken-tender">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <AgricultureIcon sx={{ mr: 1, fontSize: 20 }} />
-              Chicken Tender
-            </Box>
-          </MenuItem>
-          <MenuItem value="roaming-roost">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <AgricultureIcon sx={{ mr: 1, fontSize: 20 }} />
-              Roaming Roost
-            </Box>
-          </MenuItem>
-          <MenuItem value="duck-dock">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <WaterIcon sx={{ mr: 1, fontSize: 20 }} />
-              Duck Dock
-            </Box>
-          </MenuItem>
-          <MenuItem value="goat-guardian">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <PetsIcon sx={{ mr: 1, fontSize: 20 }} />
-              Goat Guardian
-            </Box>
-          </MenuItem>
-          <MenuItem value="bunny-burrow">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <PetsIcon sx={{ mr: 1, fontSize: 20 }} />
-              Bunny Burrow
-            </Box>
-          </MenuItem>
-          <MenuItem value="turkey-tower">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <AgricultureIcon sx={{ mr: 1, fontSize: 20 }} />
-              Turkey Tower
-            </Box>
-          </MenuItem>
-          <MenuItem value="predator-monitor">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <SecurityIcon sx={{ mr: 1, fontSize: 20 }} />
-              Predator Monitor
-            </Box>
-          </MenuItem>
-          <MenuItem value="rail-system-modules">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <TrainIcon sx={{ mr: 1, fontSize: 20 }} />
-              Rail System Modules
-            </Box>
-          </MenuItem>
-          <MenuItem value="tender-cells-cloud">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <CloudIcon sx={{ mr: 1, fontSize: 20 }} />
-              TenderCells Cloud
-            </Box>
-          </MenuItem>
-          <MenuItem value="pigeon-palace">
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <FlightIcon sx={{ mr: 1, fontSize: 20 }} />
-              Pigeon Palace
-            </Box>
-          </MenuItem>
+          {products.map((item) => (
+            <MenuItem key={item.id} value={item.id}>
+              <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                <DevicesIcon sx={{ mr: 1, fontSize: 20, flexShrink: 0 }} />
+                <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.product_name}</Box>
+              </Box>
+            </MenuItem>
+          ))}
         </Select>
         <Button
           variant="outlined"

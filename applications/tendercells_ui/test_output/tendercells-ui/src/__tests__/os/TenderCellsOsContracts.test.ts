@@ -35,6 +35,24 @@ describe('TenderCells OS contracts', () => {
     ['Animals', 'Plants', 'Rodents', 'Wildlife', 'Health & safety'].forEach((section) => expect(resources).toContain(section));
   });
 
+  it('keeps fresh accounts free of simulated products and alerts', () => {
+    const topNav = readProjectFile('src/components/layout/TopNavBar.tsx');
+    const dashboard = readProjectFile('src/pages/DashboardPage.tsx');
+    expect(topNav).toContain('No products registered');
+    expect(topNav).toContain('products.map');
+    expect(topNav).not.toContain('<MenuItem value="chicken-tender">');
+    expect(dashboard).not.toContain('SIM_ALERTS');
+    expect(dashboard).toContain('No active alerts');
+  });
+
+  it('shows account and billing status while unavailable SSO stays disabled', () => {
+    const account = readProjectFile('src/pages/AccountPage.tsx');
+    expect(account).toContain('<Tab label="Billing"');
+    expect(account).toContain('No active subscription or payment method');
+    expect(account).toContain('School or district SSO');
+    expect(account).toContain('<Button disabled variant="outlined"');
+  });
+
   it('keeps product registration open to full products, modules, and custom builds', () => {
     const registration = readProjectFile('src/components/products/ProductRegistrationModal.tsx');
     [

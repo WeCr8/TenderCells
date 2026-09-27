@@ -15,6 +15,7 @@ import {
   ProductsPage,
   PropertyLayoutBuilder,
   RailSystemModulesDashboard,
+  ResourcesPage,
   RoamingRoostDashboard,
   SchedulesPage,
   SettingsPage,
@@ -69,6 +70,7 @@ export default function AppRoutes() {
 
       {/* Global pages */}
       <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/resources" element={<ResourcesPage />} />
       <Route path="/coop" element={<Navigate to="/chicken-tender" replace />} />
       <Route path="/sensors" element={<Navigate to="/chicken-tender?section=sensors" replace />} />
       <Route path="/egg-map" element={<Navigate to="/chicken-tender?section=eggs" replace />} />

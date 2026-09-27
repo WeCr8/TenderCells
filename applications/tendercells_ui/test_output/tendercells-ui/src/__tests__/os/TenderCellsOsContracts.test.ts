@@ -25,6 +25,16 @@ describe('TenderCells OS contracts', () => {
     ].forEach((route) => expect(routes).toContain(route));
   });
 
+  it('keeps the in-app resource library available without registered products', () => {
+    const routes = readProjectFile('src/routes/AppRoutes.tsx');
+    const menu = readProjectFile('src/components/navigation/SideMenu.tsx');
+    const resources = readProjectFile('src/pages/ResourcesPage.tsx');
+    expect(routes).toContain('path="/resources"');
+    expect(menu).toContain('label: "Resources"');
+    expect(menu).toContain('path: "/resources"');
+    ['Animals', 'Plants', 'Rodents', 'Wildlife', 'Health & safety'].forEach((section) => expect(resources).toContain(section));
+  });
+
   it('keeps product registration open to full products, modules, and custom builds', () => {
     const registration = readProjectFile('src/components/products/ProductRegistrationModal.tsx');
     [

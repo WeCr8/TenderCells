@@ -23,5 +23,6 @@ export { default as BirdManagementPage } from './BirdManagementPage';
 export { default as BirdEditPage } from './BirdEditPage';
 export { default as TenderAIPage } from './TenderAIPage';
 export { default as SetupWizardPage } from './SetupWizardPage';
+export { default as ResourcesPage } from './ResourcesPage';
 export { default as ChickenEyeDashboardPage } from './ChickenEyeDashboardPage';
 export { default as ChickenEyeBirdPage } from './ChickenEyeBirdPage';

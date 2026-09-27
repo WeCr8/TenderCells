@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /node_modules/
+Disallow: /account
 
 Sitemap: https://tendercells.com/sitemap.xml

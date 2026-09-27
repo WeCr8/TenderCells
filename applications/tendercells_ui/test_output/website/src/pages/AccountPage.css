@@ -1,0 +1,187 @@
+/* AccountPage.css - website sign-in / account view (/account) */
+.account-page {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 2rem;
+}
+
+.account-card {
+  width: 100%;
+  max-width: 460px;
+  background: #fff;
+  border: 1px solid #e3e7e4;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(21, 32, 27, 0.08);
+  padding: 2rem 1.75rem;
+}
+
+.account-card h1 {
+  font-size: 1.5rem;
+  color: #15201b;
+  margin-bottom: 0.35rem;
+}
+
+.account-sub {
+  color: #5b6660;
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+}
+
+.account-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #d5dbd7;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+.account-tabs button {
+  padding: 0.6rem;
+  border: none;
+  background: #f4f6f5;
+  color: #3d4842;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.account-tabs button.active {
+  background: #4a90d9;
+  color: #fff;
+}
+
+.account-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  border: 1px solid #c9d0cc;
+  border-radius: 4px;
+  background: #fff;
+  color: #222;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.account-google:hover { background: #f7f8f7; }
+.account-google-g {
+  font-weight: 800;
+  color: #4285f4;
+  font-size: 1.1rem;
+}
+
+.account-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #7a857f;
+  font-size: 0.85rem;
+  margin: 1.25rem 0;
+}
+.account-divider::before,
+.account-divider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #e0e5e2;
+}
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.account-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #3d4842;
+}
+.account-form input {
+  padding: 0.7rem 0.75rem;
+  border: 1px solid #c9d0cc;
+  border-radius: 4px;
+  font-size: 1rem; /* 16px keeps iOS from zooming on focus */
+}
+.account-form input:focus {
+  outline: 2px solid #4a90d9;
+  outline-offset: 1px;
+}
+.account-submit { width: 100%; }
+
+.account-link {
+  margin-top: 0.9rem;
+  background: none;
+  border: none;
+  color: #357abd;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+button:disabled { opacity: 0.6; cursor: default; }
+
+.account-error,
+.account-notice {
+  border-radius: 4px;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+.account-error { background: #fdecec; color: #9b1c1c; border: 1px solid #f5c2c2; }
+.account-notice { background: #edf6ee; color: #1f5a2c; border: 1px solid #c3e2c8; }
+
+.account-identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.account-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.account-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #15201b;
+  color: #f5f7f4;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.account-email { color: #5b6660; word-break: break-all; }
+
+.account-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid #e8ece9;
+  border-bottom: 1px solid #e8ece9;
+  margin-bottom: 1.25rem;
+}
+.account-facts dt { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: #7a857f; }
+.account-facts dd { font-size: 0.95rem; color: #15201b; margin-top: 0.15rem; }
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.account-hint {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #6b7670;
+}
+
+@media (max-width: 480px) {
+  .account-card { padding: 1.5rem 1.1rem; border-radius: 0; border-left: none; border-right: none; }
+  .account-facts { grid-template-columns: 1fr; }
+  .account-actions > * { flex: 1 1 100%; text-align: center; }
+}

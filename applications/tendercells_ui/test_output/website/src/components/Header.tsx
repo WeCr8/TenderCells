@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { TENDERCELLS_APP_ENTRY_URL } from "../config/appLinks";
+import { TENDERCELLS_OS_URL } from "../config/appLinks";
+import { useAuthUser } from "../hooks/useAuthUser";
 import { searchSite } from "../data/searchIndex";
 import "./Header.css";
 
@@ -59,7 +60,7 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { label: "Mobile App (iOS)",        to: "/apps#ios" },
       { label: "Mobile App (Android)",    to: "/apps#android" },
-      { label: "Web Dashboard",           href: TENDERCELLS_APP_ENTRY_URL },
+      { label: "Web Dashboard (OS)",      href: TENDERCELLS_OS_URL },
       { label: "Developer API",           to: "/apps#api" },
       { label: "MQTT Integration Guide",  to: "/apps#mqtt" },
       { label: "⚡ Flash a Device",        href: "/flash" },
@@ -132,6 +133,7 @@ const NAV_ITEMS: NavItem[] = [
 export default function Header() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useAuthUser();
   const [searchValue, setSearchValue] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -239,9 +241,11 @@ export default function Header() {
             </span>
           </div>
 
-          <a href={TENDERCELLS_APP_ENTRY_URL} className="header-login">
-            <span>👤</span> Login
-          </a>
+          {/* FIX(2026-09-27): Login goes to the website's own account page; it no
+              longer launches the Tender Cells OS (that is an explicit button there). */}
+          <Link to="/account" className="header-login">
+            <span>👤</span> {user ? "My Account" : "Login"}
+          </Link>
           <a href="/shop" className="header-cart" aria-label="Product concepts">
             ☆
           </a>

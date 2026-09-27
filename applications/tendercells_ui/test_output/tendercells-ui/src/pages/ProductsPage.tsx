@@ -94,6 +94,7 @@ type EditableProduct = {
   pinout_revision: string;
   hardware_revision: string;
   firmware_target: string;
+  camera_stream_url: string;
   firmware_version: string;
   mqtt_base_topic: string;
   repo_url: string;
@@ -130,6 +131,7 @@ const emptyEditForm: EditableProduct = {
   pinout_revision: '',
   hardware_revision: '',
   firmware_target: '',
+  camera_stream_url: '',
   firmware_version: '',
   mqtt_base_topic: '',
   repo_url: '',
@@ -213,6 +215,7 @@ const productToForm = (product: Product): EditableProduct => ({
   pinout_revision: String(product.metadata?.pinout_revision || ''),
   hardware_revision: String(product.metadata?.hardware_revision || ''),
   firmware_target: String(product.metadata?.firmware_target || ''),
+  camera_stream_url: String(product.metadata?.camera_stream_url || ''),
   firmware_version: String(product.metadata?.firmware_version || ''),
   mqtt_base_topic: String(product.metadata?.mqtt_base_topic || ''),
   repo_url: String(product.metadata?.repo_url || ''),
@@ -224,7 +227,7 @@ const flashProfileFor = (product: Product) => {
   const family = String(product.metadata?.product_family || '');
   const target = String(product.metadata?.firmware_target || '');
   if (family === 'chicken-tender' || target.includes('chicken-tender')) return 'chicken-tender';
-  if (family === 'camera-kit' || target.includes('watchtower-cam')) return 'watchtower-cam';
+  if (family === 'camera-kit' || target.includes('camera-node')) return 'camera-node';
   return 'starter-node';
 };
 
@@ -379,6 +382,7 @@ export default function ProductsPage() {
         pinout_revision: editForm.pinout_revision,
         hardware_revision: editForm.hardware_revision,
         firmware_target: editForm.firmware_target,
+        camera_stream_url: editForm.camera_stream_url,
         firmware_version: editForm.firmware_version,
         mqtt_base_topic: editForm.mqtt_base_topic,
         repo_url: editForm.repo_url,
@@ -579,10 +583,10 @@ export default function ProductsPage() {
               {products.length === 0 ? 'No products registered' : 'No products match your filters'}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Register the demo coop or add a product manually to begin local testing.
+              Start with a battery-powered ESP32 camera, or register another product or custom device.
             </Typography>
             <Button variant="contained" startIcon={<AddIcon />} onClick={() => setIsRegistrationModalOpen(true)}>
-              Register Product
+              Add Your First Device
             </Button>
           </Box>
         ) : (
@@ -1156,6 +1160,18 @@ export default function ProductsPage() {
                 onChange={(event) => setEditForm((form) => ({ ...form, firmware_version: event.target.value }))}
               />
             </Grid>
+            {editForm.product_family === 'camera-kit' && (
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Camera stream URL"
+                  placeholder="http://camera-node.local/stream"
+                  value={editForm.camera_stream_url}
+                  onChange={(event) => setEditForm((form) => ({ ...form, camera_stream_url: event.target.value }))}
+                  helperText="Use the camera node's local /stream address."
+                />
+              </Grid>
+            )}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth

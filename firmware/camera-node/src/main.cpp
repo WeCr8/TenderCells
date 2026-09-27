@@ -1,5 +1,5 @@
 /**
- * Tender Cells — Camera Node (WatchTower / ChickenEye eye)
+ * Tender Cells - single-camera, battery-powered Camera Node
  *
  * Seeed XIAO ESP32-S3 Sense (OV2640). Two jobs:
  *   1) Serve a live MJPEG stream at  http://<lan-ip>/stream
@@ -160,7 +160,7 @@ void provision() {
   brokerIp    = prefs.getString("brokerIp", "");
   brokerPort  = prefs.getString("brokerPort", "1883");
   deviceId    = prefs.getString("deviceId", "");
-  productType = prefs.getString("product", "watchtower");
+  productType = prefs.getString("product", "camera-kit");
   if (deviceId.isEmpty()) {
     uint64_t mac = ESP.getEfuseMac();
     char b[24]; snprintf(b, sizeof(b), "cam_%04X", (uint16_t)(mac & 0xFFFF));
@@ -176,7 +176,7 @@ void provision() {
   wm.autoConnect("TenderCam-Setup");
   brokerIp = pB.getValue(); brokerPort = pP.getValue();
   deviceId = pI.getValue(); productType = pT.getValue();
-  if (productType.isEmpty()) productType = "watchtower";
+  if (productType.isEmpty()) productType = "camera-kit";
   prefs.putString("brokerIp", brokerIp); prefs.putString("brokerPort", brokerPort);
   prefs.putString("deviceId", deviceId); prefs.putString("product", productType);
   prefs.end();

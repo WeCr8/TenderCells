@@ -63,6 +63,10 @@ export interface ProductMetadata {
   power_source?: string;
   battery_capacity_mah?: number;
   camera_module?: string;
+  camera_stream_url?: string;
+  hardware_capabilities?: string[];
+  enabled_capabilities?: string[];
+  capability_profile?: string;
   owner_email?: string;
   product_family?: ProductFamily | string;
   build_source?: BuildSource | string;

@@ -1,15 +1,19 @@
-import { Box, Button, Chip, CircularProgress, Grid, Paper, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, Chip, CircularProgress, FormControlLabel, Grid, Paper, Stack, Switch, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SettingsRemoteIcon from '@mui/icons-material/SettingsRemote';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import Viewport3D from '../components/viewport/Viewport3D';
+import CameraFeedViewer from '../components/camera/CameraFeedViewer';
 
 export default function ProductDashboardPage() {
   const { productId = '' } = useParams();
   const navigate = useNavigate();
-  const { products, loading } = useProducts();
+  const { products, loading, updateProduct } = useProducts();
+  const [savingCapability, setSavingCapability] = useState<string | null>(null);
+  const [capabilityError, setCapabilityError] = useState<string | null>(null);
   const product = products.find((item) => item.id === productId);
 
   if (loading) return <Box sx={{ minHeight: 360, display: 'grid', placeItems: 'center' }}><CircularProgress /></Box>;
@@ -19,13 +23,34 @@ export default function ProductDashboardPage() {
   const dimensions = [product.metadata?.enclosure_width_ft, product.metadata?.enclosure_depth_ft, product.metadata?.enclosure_height_ft]
     .filter((value) => Number(value) > 0)
     .join(' x ');
-  const flashTarget = family === 'camera-kit' || String(product.metadata?.firmware_target || '').includes('watchtower-cam')
-    ? 'watchtower-cam'
+  const flashTarget = family === 'camera-kit' || String(product.metadata?.firmware_target || '').includes('camera-node')
+    ? 'camera-node'
     : family === 'chicken-tender' ? 'chicken-tender' : 'starter-node';
   const openFlasher = () => {
     const params = new URLSearchParams({ target: flashTarget, product: family, name: product.product_name });
     if (product.device_id) params.set('deviceId', product.device_id);
     window.open(`/flash/?${params.toString()}`, '_blank', 'noopener,noreferrer');
+  };
+  const isCameraNode = family === 'camera-kit';
+  const streamUrl = String(product.metadata?.camera_stream_url || '');
+  const hardwareCapabilities = Array.isArray(product.metadata?.hardware_capabilities) ? product.metadata.hardware_capabilities : [];
+  const enabledCapabilities = Array.isArray(product.metadata?.enabled_capabilities) ? product.metadata.enabled_capabilities : [];
+  const setCapabilityEnabled = async (capability: string, enabled: boolean) => {
+    if (!hardwareCapabilities.includes(capability)) return;
+    setSavingCapability(capability);
+    setCapabilityError(null);
+    const next = enabled
+      ? [...new Set([...enabledCapabilities, capability])]
+      : enabledCapabilities.filter((item) => item !== capability);
+    try {
+      await updateProduct(product.id, {
+        metadata: { ...product.metadata, enabled_capabilities: next, capability_profile: 'custom' },
+      });
+    } catch (error) {
+      setCapabilityError(error instanceof Error ? error.message : 'Could not update this board feature.');
+    } finally {
+      setSavingCapability(null);
+    }
   };
 
   return (
@@ -48,12 +73,28 @@ export default function ProductDashboardPage() {
 
       <Grid container spacing={2.5}>
         <Grid item xs={12} lg={8}>
-          <Viewport3D
-            product={family}
-            focusItemId={`virtual-${product.id}`}
-            title={`${product.product_name} View`}
-            initialWorkspaceMode="products"
-          />
+          {isCameraNode ? (
+            <Stack spacing={1.5}>
+              <CameraFeedViewer camera={{
+                id: product.id,
+                deviceId: product.device_id || product.id,
+                name: product.product_name,
+                location: 'main-feed',
+                streamUrl: streamUrl || undefined,
+                resolution: '720p',
+                fps: 15,
+                connected: product.connection_status === 'online' && Boolean(streamUrl),
+              }} height={480} />
+              {!streamUrl && <Typography variant="body2" color="text.secondary">Flash the camera, complete its WiFi setup, then add the reported <code>/stream</code> address in Configure.</Typography>}
+            </Stack>
+          ) : (
+            <Viewport3D
+              product={family}
+              focusItemId={`virtual-${product.id}`}
+              title={`${product.product_name} View`}
+              initialWorkspaceMode="products"
+            />
+          )}
         </Grid>
         <Grid item xs={12} lg={4}>
           <Paper variant="outlined" sx={{ p: 2.5 }}>
@@ -67,12 +108,61 @@ export default function ProductDashboardPage() {
               <Typography variant="body2"><strong>Controller:</strong> {String(product.metadata?.controller_board || 'Not specified')}</Typography>
               <Typography variant="body2"><strong>Camera:</strong> {String(product.metadata?.camera_module || 'Not attached')}</Typography>
               <Typography variant="body2"><strong>Power:</strong> {String(product.metadata?.power_source || 'Not specified')}{product.metadata?.battery_capacity_mah ? ` / ${product.metadata.battery_capacity_mah} mAh` : ''}</Typography>
+              {isCameraNode && <Typography variant="body2"><strong>Setup:</strong> {String(product.metadata?.capability_profile || 'custom').replace(/_/g, ' ')}</Typography>}
+              {isCameraNode && (
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 0.75 }}><strong>Enabled board features:</strong></Typography>
+                  <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                    {hardwareCapabilities.map((capability) => (
+                      <Chip
+                        key={capability}
+                        size="small"
+                        variant={enabledCapabilities.includes(capability) ? 'filled' : 'outlined'}
+                        color={enabledCapabilities.includes(capability) ? 'success' : 'default'}
+                        label={capability.replace(/_/g, ' ')}
+                      />
+                    ))}
+                  </Stack>
+                </Box>
+              )}
               <Typography variant="body2"><strong>3D asset:</strong> {product.metadata?.custom_device_asset_url ? 'Custom variation model' : 'Family model'}</Typography>
               {product.metadata?.source_url && <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}><strong>Source:</strong> {String(product.metadata.source_url)}</Typography>}
             </Stack>
           </Paper>
         </Grid>
       </Grid>
+
+      {isCameraNode && (
+        <Box>
+          <Typography variant="h6" gutterBottom>Board Controls</Typography>
+          {capabilityError && <Alert severity="error" sx={{ mb: 1.5 }}>{capabilityError}</Alert>}
+          <Grid container spacing={1.5}>
+            {[
+              ['camera', 'Live camera', 'Show the live camera feed on this dashboard.'],
+              ['microphone', 'Sound events', 'Enable onboard microphone events and sound-level telemetry.'],
+              ['microsd', 'Local recording', 'Allow captures to use the onboard microSD card.'],
+              ['gpio', 'Developer GPIO', 'Expose the board GPIO for custom sensors and code controls.'],
+            ].map(([capability, label, description]) => {
+              const available = hardwareCapabilities.includes(capability);
+              return (
+                <Grid item xs={12} sm={6} key={capability}>
+                  <Paper variant="outlined" sx={{ p: 1.75, height: '100%' }}>
+                    <FormControlLabel
+                      control={<Switch
+                        checked={available && enabledCapabilities.includes(capability)}
+                        disabled={!available || savingCapability === capability}
+                        onChange={(event) => void setCapabilityEnabled(capability, event.target.checked)}
+                      />}
+                      label={label}
+                    />
+                    <Typography variant="body2" color="text.secondary">{available ? description : 'Not available on the registered board.'}</Typography>
+                  </Paper>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </Box>
+      )}
     </Stack>
   );
 }

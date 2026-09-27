@@ -207,7 +207,7 @@
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="relay">💡<h3>Lamp / pump / fan</h3><small>Starter Node · set <code>relay</code></small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="temp-humidity">🌡️<h3>Temp / humidity</h3><small>Starter Node · set <code>temp-humidity</code></small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="light">☀️<h3>Light sensor</h3><small>Starter Node · set <code>light</code></small></div>
-        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-watchtower-cam.json" data-peripheral="camera">📷<h3>Live camera</h3><small>Camera Node · ESP32-S3-Sense</small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-camera-node.json" data-peripheral="camera">📷<h3>Live camera</h3><small>Single Camera Node · ESP32-S3-Sense</small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="none">🦅<h3>Threat demo</h3><small>Starter Node · no wiring</small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-chicken-tender.json" data-peripheral="">🐔<h3>Full coop</h3><small>Chicken Tender · ESP32-WROOM</small></div>
       </div>
@@ -228,8 +228,8 @@
         <div class="device" data-manifest="/flash/manifest-chicken-tender.json" role="button" aria-pressed="false" tabindex="0">
           🐔 <h3>Chicken Tender</h3><small>needs ESP32-WROOM-32 + coop hardware</small>
         </div>
-        <div class="device" data-manifest="/flash/manifest-watchtower-cam.json" role="button" aria-pressed="false" tabindex="0">
-          📷 <h3>Camera Node</h3><small>ESP32-S3-Sense / ESP32-CAM · live MJPEG feed</small>
+        <div class="device" data-manifest="/flash/manifest-camera-node.json" role="button" aria-pressed="false" tabindex="0">
+          📷 <h3>Single Camera Node</h3><small>Battery-powered ESP32-S3-Sense · one live MJPEG feed</small>
         </div>
       </div>
 
@@ -495,7 +495,7 @@
   const manifests = {
     'starter-node': '/flash/manifest-starter-node.json',
     'chicken-tender': '/flash/manifest-chicken-tender.json',
-    'watchtower-cam': '/flash/manifest-watchtower-cam.json'
+    'camera-node': '/flash/manifest-camera-node.json'
   };
   document.querySelectorAll('#devicePick .device:not(.soon)').forEach(d => {
     const choose = () => {

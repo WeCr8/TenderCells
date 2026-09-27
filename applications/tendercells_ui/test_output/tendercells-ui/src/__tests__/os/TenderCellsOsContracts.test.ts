@@ -75,6 +75,36 @@ describe('TenderCells OS contracts', () => {
     ].forEach((marker) => expect(registration).toContain(marker));
   });
 
+  it('keeps the basic camera independent from the multi-camera WatchTower product', () => {
+    const registration = readProjectFile('src/components/products/ProductRegistrationModal.tsx');
+    const products = readProjectFile('src/pages/ProductsPage.tsx');
+    const dashboard = readProjectFile('src/pages/ProductDashboardPage.tsx');
+    const flasher = readProjectFile('../website/public/flash/index.html');
+    const manifest = readProjectFile('../website/public/flash/manifest-camera-node.json');
+
+    expect(registration).toContain("useState('firmware/camera-node')");
+    expect(registration).toContain('1. Flash Camera');
+    expect(registration).toContain('2. Register Camera');
+    expect(registration).toContain('Use available board features');
+    expect(registration).toContain('Unavailable features are disabled for this board profile');
+    ['Camera only', 'Camera + sound events', 'Camera + microSD recording', 'Full Sense board'].forEach((preset) => {
+      expect(registration).toContain(preset);
+    });
+    ['camera', 'microphone', 'microsd', 'wifi', 'ble', 'gpio', 'battery_power'].forEach((capability) => {
+      expect(registration).toContain(capability);
+    });
+    expect(products).toContain("return 'camera-node'");
+    expect(products).toContain('camera_stream_url');
+    expect(dashboard).toContain('<CameraFeedViewer');
+    expect(dashboard).toContain('Board Controls');
+    expect(dashboard).toContain('Not available on the registered board.');
+    expect(flasher).toContain('/flash/manifest-camera-node.json');
+    expect(manifest).toContain('firmware/camera-node/firmware.bin');
+    [registration, products, dashboard, flasher, manifest].forEach((source) => {
+      expect(source).not.toContain('watchtower-cam');
+    });
+  });
+
   it('keeps FarmBot attribution and reuse policy visible in repo docs', () => {
     const attribution = readProjectFile('docs/third-party-attribution.md');
     expect(attribution).toContain('FarmBot');

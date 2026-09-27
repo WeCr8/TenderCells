@@ -24,6 +24,10 @@ const FARMBOT_APP_URL = 'https://my.farm.bot';
 // appeared for the two Genesis types, so most gardens had no way into FarmBot).
 const FARMBOT_NATIVE_TYPES = new Set(['farmbot-genesis', 'farmbot-genesis-xl']);
 const FARMBOT_SITE_URL = 'https://farm.bot';
+// Canonical links from the FarmBot Web App README (checked 2026-09-27 against
+// FarmBot/Farmbot-Web-App v15.30.6 / FarmBot OS v15.5.2).
+const FARMBOT_GETTING_STARTED_URL = 'https://software.farm.bot/docs/getting-started';
+const FARMBOT_SELF_HOST_URL = 'https://github.com/FarmBot/Farmbot-Web-App/blob/main/local_setup_instructions.sh';
 const FARMBOT_GREEN = '#61B833';
 
 // serverUrl: self-hosted FarmBot Web App (default my.farm.bot).
@@ -119,6 +123,16 @@ export default function FarmBotBridgePanel({ item }: { item: PropertyItem }) {
           Save
         </Button>
       </Stack>
+      <Typography variant="caption" sx={{ color: '#8A7D55', display: 'block', mt: 0.5 }}>
+        New to FarmBot?{' '}
+        <Link href={FARMBOT_GETTING_STARTED_URL} target="_blank" rel="noopener noreferrer" sx={{ color: FARMBOT_GREEN }}>
+          Getting started
+        </Link>
+        {' · '}Running your own server?{' '}
+        <Link href={FARMBOT_SELF_HOST_URL} target="_blank" rel="noopener noreferrer" sx={{ color: FARMBOT_GREEN }}>
+          Self-hosting guide
+        </Link>
+      </Typography>
 
       <Divider sx={{ borderColor: '#1A3D2B', my: 1.5 }} />
 

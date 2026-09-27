@@ -150,7 +150,7 @@ Events are upserted by `id`. `tools/simulate-device.mjs --kind coop|duck|roost` 
 | [Autonomous laser weed removal](https://github.com/RishiKrishnah/Autonomous-laser-weed-removal) | Student project: YOLO + galvo laser | Reference for aiming |
 | [FarmBot weed detection](https://software.farm.bot/v4/Additional-Information/weed-detection.html) / [plant-detection](https://github.com/FarmBot-Labs/plant-detection) | FarmBot's camera weed detection (HSV + known plants) | Our gantry convention and the HSV approach. We wrote our own implementation because the plant-detection licence could not be confirmed |
 | [YOLO weed detection Space](https://huggingface.co/spaces/Rohankumar31/Yolo-weed-detection), [another](https://huggingface.co/spaces/blurerjr/yolo-weed-detection) | Hugging Face demos of YOLO weed models | Try models in the browser, then point `WEED_MODEL` at compatible weights |
-| [CottonWeedDet12](https://docs.voxel51.com/dataset_zoo/datasets_hf/cottonweeddet12.html) | 12-class weed detection dataset | Training / fine-tuning data |
+| [CottonWeedDet12](https://huggingface.co/datasets/Voxel51/CottonWeedDet12) | 12-class weed detection dataset for southern U.S. cotton research | **Research reference only.** CC BY-NC 4.0 prohibits commercial use without separate permission; do not bundle it or train production TenderCells models from it. It also ships without official train/validation/test splits and is not validated outside its documented cotton-field conditions. |
 | [WeedStemDetection](https://github.com/InternScience/WeedStemDetection) | Stem-point detection (AAAI 2025) | Better aim point than a box centre, for later |
 
 Check each model's and dataset's licence before commercial use.

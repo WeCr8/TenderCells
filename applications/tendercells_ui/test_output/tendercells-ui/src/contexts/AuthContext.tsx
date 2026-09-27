@@ -20,6 +20,11 @@ import { FIREBASE_ENABLED, auth } from '../lib/firebase/firebaseApp';
 import { setAnalyticsUser } from '../analytics';
 import { AuthContext, type AuthContextType } from './authContextStore';
 
+// FIX(2026-09-27): the old "disabled in the public demo" text hid a build that shipped
+// without Firebase config; name the real cause so a broken deploy is obvious.
+const AUTH_UNCONFIGURED_MESSAGE =
+  'Sign-in is unavailable: this build was published without Firebase configuration.';
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,6 +69,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (code === 'auth/invalid-credential' || code === 'auth/invalid-login-credentials') {
       return 'The email or password is incorrect.';
     }
+    if (code === 'auth/email-already-in-use') {
+      return 'An account with this email already exists. Use Login instead.';
+    }
+    if (code === 'auth/weak-password') {
+      return 'Password must be at least 6 characters.';
+    }
+    if (code === 'auth/invalid-email') {
+      return 'Enter a valid email address.';
+    }
+    if (code === 'auth/network-request-failed' || code === 'auth/internal-error') {
+      return 'Could not reach Tender Cells sign-in. Check your connection and try again.';
+    }
     if (code === 'auth/popup-closed-by-user') {
       return 'Google sign-in was closed before it completed.';
     }
@@ -74,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setError(null);
       if (!FIREBASE_ENABLED) {
-        throw new Error('Authentication is disabled in the public demo.');
+        throw new Error(AUTH_UNCONFIGURED_MESSAGE);
       }
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
@@ -88,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setError(null);
       if (!FIREBASE_ENABLED) {
-        throw new Error('Authentication is disabled in the public demo.');
+        throw new Error(AUTH_UNCONFIGURED_MESSAGE);
       }
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
@@ -115,7 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setError(null);
       if (!FIREBASE_ENABLED) {
-        throw new Error('Authentication is disabled in the public demo.');
+        throw new Error(AUTH_UNCONFIGURED_MESSAGE);
       }
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (err) {

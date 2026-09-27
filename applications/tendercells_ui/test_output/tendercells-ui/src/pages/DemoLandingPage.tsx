@@ -11,9 +11,10 @@
 //
 // Deployment note: a PUBLIC demo must run sim-only (localStorage) so each visitor
 // gets a private, isolated sandbox and no unauthenticated writes hit Firestore.
-// Deploy the public demo build with VITE_FIREBASE_PROJECT_ID UNSET. If the build
-// is Firebase-backed, an unauthenticated seed will fail (PERMISSION_DENIED); we
-// surface that here rather than spinning forever.
+// The public-demo build sets VITE_SIM_DATA_ONLY=true for that (Firebase Auth stays
+// configured so accounts still work). If the data backend is Firestore, an
+// unauthenticated seed will fail (PERMISSION_DENIED); we surface that here rather
+// than spinning forever.
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";

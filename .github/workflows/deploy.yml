@@ -6,6 +6,9 @@ name: Deploy (Firebase Hosting)
 # Required repo secret:
 #   FIREBASE_SERVICE_ACCOUNT_TENDER_CELLS — the service-account JSON (already set).
 # Project id is read from that JSON's project_id.
+# Optional repo variable:
+#   FIREBASE_WEB_APP_ID — which Firebase web app's config to build with (defaults
+#   to the project's first web app).
 #
 # Hosting target "main" (firebase.json) serves website/dist; the app is built by
 # build:with-app and copied into dist/app. The snapshot.json is generated as part
@@ -34,18 +37,41 @@ jobs:
       - name: Install website deps
         run: npm ci --prefix website || npm install --prefix website
 
+      # FIX(2026-09-27): the app used to be built with NO Firebase config, so sign-in
+      # and sign-up on tendercells.com/app always failed. Write the project's web
+      # config to the repo-root .env (the app's envDir) before building.
+      - name: Prepare Firebase credentials + web config
+        working-directory: .
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENDER_CELLS }}
+          FIREBASE_WEB_APP_ID: ${{ vars.FIREBASE_WEB_APP_ID }}
+        run: |
+          printf '%s' "$FIREBASE_SA" > "$HOME/sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/sa.json" >> "$GITHUB_ENV"
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/sa.json"
+          PROJECT=$(node -e "console.log(require(process.env.HOME + '/sa.json').project_id)")
+          echo "FIREBASE_PROJECT=$PROJECT" >> "$GITHUB_ENV"
+          npm i -g firebase-tools
+          node scripts/firebase-web-env.mjs --project "$PROJECT"
+
+      - name: Check Firebase Auth settings (providers + authorized domains)
+        working-directory: .
+        continue-on-error: true
+        run: |
+          gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS" --quiet
+          ACCESS_TOKEN=$(gcloud auth print-access-token) \
+            node scripts/firebase-auth-check.mjs --project "$FIREBASE_PROJECT"
+
       - name: Build site + app + snapshot
         run: npm --prefix website run build:with-app
 
       - name: Deploy to Firebase Hosting
         working-directory: .
-        env:
-          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENDER_CELLS }}
         run: |
-          printf '%s' "$FIREBASE_SA" > "$HOME/sa.json"
-          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/sa.json"
-          PROJECT=$(node -e "console.log(require(process.env.HOME + '/sa.json').project_id)")
-          echo "Deploying to project: $PROJECT"
-          npm i -g firebase-tools
-          firebase deploy --only hosting:main --non-interactive --project "$PROJECT"
-          rm -f "$HOME/sa.json"
+          echo "Deploying to project: $FIREBASE_PROJECT"
+          firebase deploy --only hosting:main --non-interactive --project "$FIREBASE_PROJECT"
+
+      - name: Remove credentials
+        if: always()
+        working-directory: .
+        run: rm -f "$HOME/sa.json" .env

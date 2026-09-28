@@ -18,12 +18,14 @@ interface CameraFeedViewerProps {
   camera: CameraFeed;
   width?: string | number;
   height?: string | number;
+  allowBrowserCamera?: boolean;
 }
 
 export default function CameraFeedViewer({
   camera,
   width = '100%',
   height = 360,
+  allowBrowserCamera = true,
 }: CameraFeedViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [connecting, setConnecting] = useState(false);
@@ -225,7 +227,7 @@ export default function CameraFeedViewer({
               sx={{ bgcolor: '#CC3333', color: '#fff', fontSize: '0.7rem' }} />
           )}
           <Box sx={{ flex: 1 }} />
-          {webcamSupported && (
+          {allowBrowserCamera && webcamSupported && (
             <Button size="small" variant="contained"
               onClick={webcamOn ? stopWebcam : startWebcam}
               sx={{ bgcolor: webcamOn ? '#CC3333' : '#4A7C59', fontSize: '0.7rem' }}>

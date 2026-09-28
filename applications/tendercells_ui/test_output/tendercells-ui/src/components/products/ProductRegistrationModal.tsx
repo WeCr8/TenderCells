@@ -593,7 +593,22 @@ export default function ProductRegistrationModal({
 
   // Reset form when modal opens/closes
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      const params = new URLSearchParams(window.location.search);
+      const requestedName = params.get('name')?.trim();
+      const requestedDeviceId = params.get('deviceId')?.trim();
+      if (params.get('template') === 'camera-kit') {
+        setSelectedTemplateId('camera-kit');
+        setProductFamily('camera-kit');
+        setFirmwareTarget('firmware/camera-node');
+      }
+      if (requestedName) setProductName(requestedName);
+      if (requestedDeviceId) {
+        setDeviceId(requestedDeviceId);
+        setMqttBaseTopic(`tc/${requestedDeviceId}`);
+        setCameraStreamUrl(`http://${requestedDeviceId}.local/stream`);
+      }
+    } else {
       setActiveTab(3);
       setProductType('automation_device');
       setProductFamily('camera-kit');

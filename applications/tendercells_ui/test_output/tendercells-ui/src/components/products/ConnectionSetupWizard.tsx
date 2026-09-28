@@ -16,13 +16,14 @@ import {
   StepLabel,
   Typography,
   Alert,
-  CircularProgress,
+  Checkbox,
+  FormControlLabel,
   IconButton,
+  Paper,
 } from '@mui/material';
 import {
   Close as CloseIcon,
   CheckCircle,
-  Wifi,
 } from '@mui/icons-material';
 import type { Product, NetworkConfig } from '../../types/products';
 import { useProducts } from '../../hooks/useProducts';
@@ -34,7 +35,7 @@ interface ConnectionSetupWizardProps {
   onComplete?: () => void;
 }
 
-const steps = ['Network', 'Credentials', 'Pairing', 'Verification'];
+const steps = ['Find Node', 'Home Wi-Fi', 'Verify Camera', 'Ready'];
 
 export default function ConnectionSetupWizard({
   isOpen,
@@ -42,11 +43,21 @@ export default function ConnectionSetupWizard({
   product,
   onComplete,
 }: ConnectionSetupWizardProps) {
-  const { connectProduct } = useProducts();
+  const { connectProduct, updateProduct } = useProducts();
+  const productFamily = String(product.metadata?.product_family || '');
+  const isCamera = productFamily === 'camera-kit' || String(product.metadata?.firmware_target || '').includes('camera-node');
+  const setupNetwork = isCamera
+    ? 'TenderCam-Setup'
+    : productFamily === 'chicken-tender'
+      ? 'ChickenTender-Setup'
+      : 'TenderNode-Setup';
+  const suggestedStreamUrl = product.device_id ? `http://${product.device_id}.local/stream` : '';
   const [activeStep, setActiveStep] = useState(0);
   const [ssid, setSsid] = useState('');
-  const [password, setPassword] = useState('');
   const [securityType, setSecurityType] = useState<'none' | 'WPA' | 'WPA2' | 'WPA3'>('WPA2');
+  const [portalComplete, setPortalComplete] = useState(false);
+  const [streamUrl, setStreamUrl] = useState(String(product.metadata?.camera_stream_url || suggestedStreamUrl));
+  const [cameraVerified, setCameraVerified] = useState(false);
   const [, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'success' | 'error'>('idle');
@@ -57,9 +68,7 @@ export default function ConnectionSetupWizard({
       return;
     }
 
-    if (activeStep === 1) {
-      // Move to pairing and start connection
-      setActiveStep(2);
+    if (activeStep === 2) {
       await handlePairing();
     } else {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -76,25 +85,22 @@ export default function ConnectionSetupWizard({
     setConnectionStatus('connecting');
 
     try {
-      // Simulate pairing process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
       const networkConfig: NetworkConfig = {
         ssid: ssid.trim(),
-        password: password.trim() || undefined,
         securityType,
         connected: true,
         lastConnected: new Date().toISOString(),
       };
 
+      if (isCamera) {
+        await updateProduct(product.id, {
+          metadata: { ...product.metadata, camera_stream_url: streamUrl.trim() },
+        });
+      }
       await connectProduct(product.id, { network_config: networkConfig });
       setConnectionStatus('success');
-
-      // Move to verification after a short delay
-      setTimeout(() => {
-        setActiveStep(3);
-        setIsConnecting(false);
-      }, 1000);
+      setActiveStep(3);
+      setIsConnecting(false);
     } catch (error) {
       setConnectionStatus('error');
       setConnectionError(error instanceof Error ? error.message : 'Connection failed');
@@ -112,8 +118,10 @@ export default function ConnectionSetupWizard({
   const handleReset = () => {
     setActiveStep(0);
     setSsid('');
-    setPassword('');
     setSecurityType('WPA2');
+    setPortalComplete(false);
+    setStreamUrl(String(product.metadata?.camera_stream_url || suggestedStreamUrl));
+    setCameraVerified(false);
     setConnectionError(null);
     setConnectionStatus('idle');
   };
@@ -128,66 +136,64 @@ export default function ConnectionSetupWizard({
       case 0:
         return (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="WiFi Network (SSID)"
-              value={ssid}
-              onChange={(e) => setSsid(e.target.value)}
-              placeholder="Enter network name"
-              InputProps={{
-                startAdornment: <Wifi sx={{ mr: 1, color: 'text.secondary' }} />,
-              }}
-            />
-            <FormControl fullWidth>
-              <InputLabel>Security Type</InputLabel>
-              <Select
-                value={securityType}
-                onChange={(e) => setSecurityType(e.target.value as 'none' | 'WPA' | 'WPA2' | 'WPA3')}
-                label="Security Type"
-              >
-                <MenuItem value="none">None (Open)</MenuItem>
-                <MenuItem value="WPA">WPA</MenuItem>
-                <MenuItem value="WPA2">WPA2</MenuItem>
-                <MenuItem value="WPA3">WPA3</MenuItem>
-              </Select>
-            </FormControl>
+            <Alert severity="info">
+              After flashing, this device creates <strong>{setupNetwork}</strong>. Join it from the Wi-Fi menu; no password is required.
+            </Alert>
+            <Typography variant="body2" color="text.secondary">
+              Web browsers cannot scan or change your computer's Wi-Fi network. The camera node performs the nearby-network scan on its private setup page.
+            </Typography>
+            <Paper variant="outlined" sx={{ p: 1.5 }}>
+              <Typography variant="body2"><strong>Windows:</strong> select the network icon on the taskbar, then choose {setupNetwork}.</Typography>
+              <Typography variant="body2" sx={{ mt: 1 }}><strong>macOS:</strong> select Wi-Fi in Control Center or the menu bar, then choose {setupNetwork}.</Typography>
+            </Paper>
           </Box>
         );
       case 1:
         return (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Alert severity="warning">
+              Use a 2.4 GHz network. ESP32-S3 cannot join a 5 GHz-only SSID.
+            </Alert>
+            <Button variant="contained" onClick={() => window.open('http://192.168.4.1', 'tendercells-device-setup', 'noopener,noreferrer')}>
+              Open Camera Node Wi-Fi Setup
+            </Button>
+            <Typography variant="body2" color="text.secondary">
+              The node scans nearby networks on that page. Select your main Wi-Fi and enter its password there; TenderCells never receives or stores it.
+            </Typography>
+            <Alert severity="info">
+              In the portal, set Device ID to <strong>{product.device_id || 'the ID shown on the registry card'}</strong>. Keep that value identical so discovery, MQTT, and the dashboard agree.
+            </Alert>
             <TextField
               fullWidth
-              label="Network Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={securityType === 'none' ? 'No password required' : 'Enter WiFi password'}
-              disabled={securityType === 'none'}
+              label="Selected home network"
+              value={ssid}
+              onChange={(e) => setSsid(e.target.value)}
+              placeholder="2.4 GHz SSID shown in the node portal"
             />
-            <Typography variant="body2" color="text.secondary">
-              Connecting to: <strong>{ssid}</strong>
-            </Typography>
+            <FormControl fullWidth>
+              <InputLabel>Security Type</InputLabel>
+              <Select value={securityType} onChange={(e) => setSecurityType(e.target.value as 'none' | 'WPA' | 'WPA2' | 'WPA3')} label="Security Type">
+                <MenuItem value="none">None (Open)</MenuItem><MenuItem value="WPA">WPA</MenuItem><MenuItem value="WPA2">WPA2</MenuItem><MenuItem value="WPA3">WPA3</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControlLabel control={<Checkbox checked={portalComplete} onChange={(e) => setPortalComplete(e.target.checked)} />} label="The node portal confirmed Wi-Fi was saved" />
           </Box>
         );
       case 2:
         return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', py: 4 }}>
-            {connectionStatus === 'connecting' && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {isCamera ? (
               <>
-                <CircularProgress size={48} />
-                <Typography variant="body1">Connecting to device...</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Make sure the device is in pairing mode
-                </Typography>
+                <TextField fullWidth label="Camera stream URL" value={streamUrl} onChange={(e) => { setStreamUrl(e.target.value); setCameraVerified(false); }} placeholder="http://192.168.1.50/stream" />
+                <Button variant="outlined" disabled={!/^http:\/\/[^/]+\/stream$/i.test(streamUrl.trim())} onClick={() => window.open(streamUrl.trim(), 'tendercells-camera-test', 'noopener,noreferrer')}>
+                  Open Live Camera Test
+                </Button>
+                <FormControlLabel control={<Checkbox checked={cameraVerified} onChange={(e) => setCameraVerified(e.target.checked)} />} label="I can see the live camera image" />
               </>
-            )}
-            {connectionStatus === 'success' && (
+            ) : (
               <>
-                <CheckCircle color="success" sx={{ fontSize: 48 }} />
-                <Typography variant="body1" fontWeight="medium">
-                  Connection successful!
-                </Typography>
+                <Alert severity="info">Confirm the device restarted on <strong>{ssid}</strong> and reports device ID <strong>{product.device_id || 'the registered device ID'}</strong>.</Alert>
+                <FormControlLabel control={<Checkbox checked={cameraVerified} onChange={(e) => setCameraVerified(e.target.checked)} />} label="The node reports that it joined the home network" />
               </>
             )}
             {connectionStatus === 'error' && connectionError && (
@@ -201,7 +207,7 @@ export default function ConnectionSetupWizard({
                   onClick={() => {
                     setConnectionStatus('idle');
                     setConnectionError(null);
-                    setActiveStep(1);
+                    setActiveStep(2);
                   }}
                 >
                   Try Again
@@ -242,7 +248,7 @@ export default function ConnectionSetupWizard({
           </IconButton>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Setup WiFi and pairing
+          Connect the real camera node without sharing its Wi-Fi password
         </Typography>
       </DialogTitle>
       <DialogContent>
@@ -260,16 +266,16 @@ export default function ConnectionSetupWizard({
         </Box>
       </DialogContent>
       <DialogActions>
-        {activeStep > 0 && activeStep < 2 && (
+        {activeStep > 0 && activeStep < 3 && (
           <Button onClick={handleBack}>Back</Button>
         )}
-        {activeStep < 2 && (
+        {activeStep < 3 && (
           <Button
             variant="contained"
             onClick={handleNext}
             disabled={
-              (activeStep === 0 && !ssid.trim()) ||
-              (activeStep === 1 && securityType !== 'none' && !password.trim())
+              (activeStep === 1 && (!ssid.trim() || !portalComplete)) ||
+              (activeStep === 2 && ((isCamera && !/^http:\/\/[^/]+\/stream$/i.test(streamUrl.trim())) || !cameraVerified || connectionStatus === 'connecting'))
             }
           >
             Next

@@ -99,9 +99,12 @@ export class ProductsService {
     }
   }
 
-  private static setDevProducts(products: Product[]) {
-    localStorage.setItem(this.getDevProductsKey(), JSON.stringify(products));
-    window.dispatchEvent(new CustomEvent(this.PRODUCTS_UPDATED_EVENT));
+  private static setDevProducts(products: Product[], notify = true) {
+    const key = this.getDevProductsKey();
+    const serialized = JSON.stringify(products);
+    if (localStorage.getItem(key) === serialized) return;
+    localStorage.setItem(key, serialized);
+    if (notify) window.dispatchEvent(new CustomEvent(this.PRODUCTS_UPDATED_EVENT));
   }
 
   private static isRealUserProduct(product: Product): boolean {
@@ -366,7 +369,7 @@ export class ProductsService {
         const cloudProducts = await this.getCloudProducts();
         await Promise.all(localProducts.filter((product) => this.isRealUserProduct(product)).map((product) => this.syncProductToCloud(product)));
         const merged = this.mergeProducts(localProducts, cloudProducts);
-        this.setDevProducts(merged);
+        this.setDevProducts(merged, false);
         return merged;
       } catch (error) {
         console.error('Product account sync failed:', error);

@@ -10,9 +10,11 @@ import GridOnIcon from '@mui/icons-material/GridOn';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import PetsIcon from '@mui/icons-material/Pets';
 import { useNavigate } from 'react-router-dom';
 import SettingsRemoteIcon from '@mui/icons-material/SettingsRemote';
 import { useProducts } from '../hooks/useProducts';
+import { useBirds } from '../hooks/useBirds';
 import { useAuth } from '../contexts/useAuth';
 import DeviceConfigDialog from '../components/devices/DeviceConfigDialog';
 import type { Product } from '../types/products';
@@ -60,9 +62,6 @@ function ProductCard({ product }: { product: Product }) {
       <Stack spacing={0.5} sx={{ flex: 1 }}>
         {isSim && <Typography sx={{ color: C.goldMuted, fontSize: 11, fontStyle: 'italic' }}>Simulation mode</Typography>}
         {product.location && <Typography sx={{ color: C.goldMuted, fontSize: 11 }}>📍 {product.location}</Typography>}
-        {product.metadata?.animal_count != null && (
-          <Typography sx={{ color: C.white, fontSize: 12 }}>🐾 {String(product.metadata.animal_count)} animals</Typography>
-        )}
         {product.device_id && <Typography sx={{ color: C.goldMuted, fontSize: 11 }}>ID: {product.device_id}</Typography>}
       </Stack>
       <Button size="small" onClick={() => navigate(route)}
@@ -77,6 +76,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { products, loading, refetch } = useProducts();
+  const { birds: animals, loading: animalsLoading, refresh: refreshAnimals } = useBirds();
   const [now, setNow] = useState(new Date());
   const [configOpen, setConfigOpen] = useState(false);
 
@@ -105,7 +105,7 @@ export default function DashboardPage() {
             <Typography sx={{ color: C.goldMuted, fontSize: 13 }}>{dateStr} · {timeStr}</Typography>
           </Box>
           <Tooltip title="Refresh">
-            <IconButton onClick={() => void refetch()} sx={{ color: C.goldMuted }}><RefreshIcon /></IconButton>
+            <IconButton onClick={() => { void refetch(); void refreshAnimals(); }} sx={{ color: C.goldMuted }}><RefreshIcon /></IconButton>
           </Tooltip>
         </Stack>
 
@@ -114,11 +114,12 @@ export default function DashboardPage() {
           <Grid container spacing={2}>
             {[
               { label: 'Total Devices', value: products.length, color: C.gold },
+              { label: 'Animal Roster', value: animalsLoading ? '...' : animals.length, color: C.accent },
               { label: 'Online', value: online, color: '#4CAF50' },
               { label: 'Offline / Sim', value: products.length - online, color: C.goldMuted },
               { label: 'Active Alerts', value: 0, color: C.warning },
             ].map(s => (
-              <Grid item xs={6} sm={3} key={s.label}>
+              <Grid item xs={6} sm={4} md={2.4} key={s.label}>
                 <Box>
                   <Typography sx={{ color: s.color, fontWeight: 700, fontSize: 26, lineHeight: 1 }}>{s.value}</Typography>
                   <Typography sx={{ color: C.goldMuted, fontSize: 11 }}>{s.label}</Typography>
@@ -134,6 +135,7 @@ export default function DashboardPage() {
             { label: 'Add Device', icon: <AddIcon />, path: '/products' },
             { label: 'Configure / Claim', icon: <SettingsRemoteIcon />, path: '__config__' },
             { label: 'Property Layout', icon: <GridOnIcon />, path: '/layout' },
+            { label: 'Animal Roster', icon: <PetsIcon />, path: '/animals' },
             { label: 'Schedules', icon: <ScheduleIcon />, path: '/schedules' },
             { label: 'Diagnostics', icon: <BugReportIcon />, path: '/diagnostics' },
           ].map(a => (

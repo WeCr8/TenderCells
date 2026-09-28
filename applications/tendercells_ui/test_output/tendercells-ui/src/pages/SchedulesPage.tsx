@@ -449,13 +449,18 @@ export default function SchedulesPage() {
 
   // Select first device by default
   useEffect(() => {
-    if (products.length > 0 && !selectedDeviceId) {
-      setSelectedDeviceId(products[0].id);
+    const selectedStillExists = products.some((product) => product.id === selectedDeviceId);
+    if (!selectedStillExists) {
+      setSelectedDeviceId(products[0]?.id ?? '');
+      setSchedules([]);
     }
   }, [products, selectedDeviceId]);
 
   const loadSchedules = useCallback(async (deviceId: string) => {
-    if (!deviceId) return;
+    if (!deviceId) {
+      setSchedules([]);
+      return;
+    }
     setLoadingSchedules(true);
     try {
       const data = await schedulesService.getSchedules(deviceId);
@@ -574,6 +579,11 @@ export default function SchedulesPage() {
   const selectedProduct = products.find((p) => p.id === selectedDeviceId);
   const isChickenTender = selectedProduct?.metadata?.product_family === 'chicken-tender' ||
     selectedProduct?.metadata?.product_family?.includes('chicken');
+  const canRunChickenRoutines = Boolean(
+    isChickenTender &&
+    selectedProduct?.device_id &&
+    selectedProduct.connection_status === 'online',
+  );
 
   return (
     <Box sx={{ bgcolor: colors.bg, minHeight: '100dvh', p: { xs: 2, sm: 3 } }}>
@@ -604,6 +614,11 @@ export default function SchedulesPage() {
 
         {/* Device selector */}
         <Paper sx={{ bgcolor: colors.surface, p: 2, borderRadius: 2 }}>
+          {!productsLoading && products.length === 0 && (
+            <Alert severity="info" sx={{ mb: 2, bgcolor: colors.accent + '22', color: colors.white }}>
+              No registered products. Register a device before creating schedules or running routines.
+            </Alert>
+          )}
           <FormControl size="small" sx={{ minWidth: 260 }}>
             <InputLabel sx={{ color: colors.goldMuted }}>Device</InputLabel>
             <Select
@@ -663,6 +678,7 @@ export default function SchedulesPage() {
         </Paper>
 
         {/* Routines section */}
+        {selectedProduct && (
         <Paper sx={{ bgcolor: colors.surface, p: 2, borderRadius: 2 }}>
           <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
             <CleaningServicesIcon sx={{ color: colors.accent }} />
@@ -676,7 +692,7 @@ export default function SchedulesPage() {
             />
           </Stack>
           <Typography variant="caption" sx={{ color: colors.goldMuted, display: 'block', mb: 2 }}>
-            Predefined multi-step robot arm sequences. Requires Chicken Tender with arm online.
+            Available only for a registered Chicken Tender with its controller online.
           </Typography>
 
           {!isChickenTender && selectedDeviceId && (
@@ -685,23 +701,32 @@ export default function SchedulesPage() {
             </Alert>
           )}
 
+          {isChickenTender && !canRunChickenRoutines && (
+            <Alert severity="warning" sx={{ mb: 2, bgcolor: colors.warning + '18', color: colors.white }}>
+              Connect this registered Chicken Tender to its controller before running a hardware routine.
+            </Alert>
+          )}
+
+          {isChickenTender && (
           <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
             <RoutineCard
               name="egg_collection_routine"
               description="Move to nest boxes → grip each egg → transfer to basket"
               icon={<EggIcon />}
-              deviceId={isChickenTender ? selectedDeviceId : ''}
+              deviceId={canRunChickenRoutines ? selectedDeviceId : ''}
               onRun={setRoutineTarget}
             />
             <RoutineCard
               name="cleaning_sweep_routine"
               description="XY sweep with scraper attachment — full floor coverage"
               icon={<CleaningServicesIcon />}
-              deviceId={isChickenTender ? selectedDeviceId : ''}
+              deviceId={canRunChickenRoutines ? selectedDeviceId : ''}
               onRun={setRoutineTarget}
             />
           </Stack>
+          )}
         </Paper>
+        )}
 
         {/* Safety notice */}
         <Alert
@@ -709,7 +734,7 @@ export default function SchedulesPage() {
           sx={{ bgcolor: colors.warning + '18', color: colors.white, '& .MuiAlert-icon': { color: colors.warning } }}
         >
           <strong>Safety:</strong> All scheduled commands are blocked if device is in E-STOP or error state.
-          Clean and routine commands require chickens to be clear of the work area (verified via live headcount sensor).
+          Before every moving-hardware command, an adult operator must verify that people and animals are clear of the work area.
         </Alert>
 
       </Stack>

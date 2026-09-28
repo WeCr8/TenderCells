@@ -50,6 +50,12 @@ interface SerialNavigator extends Navigator {
   };
 }
 
+interface ScannedNetwork {
+  ssid: string;
+  rssi: number;
+  secure: boolean;
+}
+
 const steps = ['Find Node', 'Home Wi-Fi', 'Verify Camera', 'Ready'];
 
 export default function ConnectionSetupWizard({
@@ -69,6 +75,9 @@ export default function ConnectionSetupWizard({
   const suggestedStreamUrl = product.device_id ? `http://${product.device_id}.local/stream` : '';
   const [activeStep, setActiveStep] = useState(0);
   const [ssid, setSsid] = useState('');
+  const [networks, setNetworks] = useState<ScannedNetwork[]>([]);
+  const [networkScanStatus, setNetworkScanStatus] = useState<'idle' | 'scanning' | 'success' | 'error'>('idle');
+  const [showManualSsid, setShowManualSsid] = useState(false);
   const [securityType, setSecurityType] = useState<'none' | 'WPA' | 'WPA2' | 'WPA3'>('WPA2');
   const [portalComplete, setPortalComplete] = useState(false);
   const [wifiPassword, setWifiPassword] = useState('');
@@ -94,6 +103,64 @@ export default function ConnectionSetupWizard({
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const scanNetworksOverUsb = async () => {
+    const serialApi = (navigator as SerialNavigator).serial;
+    if (!serialApi) {
+      setConnectionError('Network scanning requires Chrome or Edge on Windows or macOS.');
+      setNetworkScanStatus('error');
+      return;
+    }
+    setConnectionError(null);
+    setNetworkScanStatus('scanning');
+    let port: SerialPortLike | null = null;
+    let writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
+    let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+    try {
+      port = await serialApi.requestPort({ filters: [{ usbVendorId: 0x303a }] });
+      await port.open({ baudRate: 115200 });
+      if (!port.writable || !port.readable) throw new Error('The serial connection did not open correctly.');
+      if (port.setSignals) {
+        await port.setSignals({ dataTerminalReady: false, requestToSend: true });
+        await new Promise((resolve) => setTimeout(resolve, 120));
+        await port.setSignals({ dataTerminalReady: false, requestToSend: false });
+      }
+      writer = port.writable.getWriter();
+      reader = port.readable.getReader();
+      const request = new TextEncoder().encode('TC_SCAN\n');
+      const decoder = new TextDecoder();
+      const sendTimer = window.setInterval(() => { void writer?.write(request); }, 500);
+      window.setTimeout(() => window.clearInterval(sendTimer), 5000);
+      await writer.write(request);
+      let response = '';
+      const result = await Promise.race([
+        (async () => {
+          while (true) {
+            const chunk = await reader?.read();
+            if (!chunk || chunk.done) throw new Error('The camera disconnected during the network scan.');
+            response += decoder.decode(chunk.value, { stream: true });
+            const match = response.match(/\[USB\] NETWORKS:(\[[^\r\n]*\])/);
+            if (match) return JSON.parse(match[1]) as ScannedNetwork[];
+          }
+        })(),
+        new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('The node did not return a network list. Reset it and retry.')), 20000)),
+      ]);
+      window.clearInterval(sendTimer);
+      const unique = [...new Map(result.map((network) => [network.ssid, network])).values()]
+        .sort((a, b) => b.rssi - a.rssi);
+      setNetworks(unique);
+      if (unique.length === 1) setSsid(unique[0].ssid);
+      setNetworkScanStatus('success');
+    } catch (error) {
+      setNetworkScanStatus('error');
+      setConnectionError(error instanceof Error ? error.message : 'Could not scan nearby networks.');
+    } finally {
+      try { await reader?.cancel(); } catch { /* Port may already be closed. */ }
+      try { reader?.releaseLock(); } catch { /* Lock may already be released. */ }
+      try { writer?.releaseLock(); } catch { /* Lock may already be released. */ }
+      try { await port?.close(); } catch { /* Device resets after scanning. */ }
+    }
   };
 
   const provisionOverUsb = async () => {
@@ -202,6 +269,9 @@ export default function ConnectionSetupWizard({
   const handleReset = () => {
     setActiveStep(0);
     setSsid('');
+    setNetworks([]);
+    setNetworkScanStatus('idle');
+    setShowManualSsid(false);
     setSecurityType('WPA2');
     setPortalComplete(false);
     setWifiPassword('');
@@ -241,7 +311,31 @@ export default function ConnectionSetupWizard({
               Use a 2.4 GHz network. ESP32-S3 cannot join a 5 GHz-only SSID.
             </Alert>
             <Typography variant="subtitle2">Recommended: provision over USB</Typography>
-            <TextField fullWidth label="2.4 GHz network name" value={ssid} onChange={(e) => { setSsid(e.target.value); setPortalComplete(false); setUsbStatus('idle'); }} />
+            <Button variant="outlined" disabled={networkScanStatus === 'scanning'} onClick={() => void scanNetworksOverUsb()}>
+              {networkScanStatus === 'scanning' ? 'Scanning with Camera...' : 'Scan Nearby Networks'}
+            </Button>
+            {networks.length > 0 ? (
+              <FormControl fullWidth>
+                <InputLabel>2.4 GHz network</InputLabel>
+                <Select value={showManualSsid ? '__hidden__' : ssid} label="2.4 GHz network" onChange={(e) => {
+                  const value = e.target.value;
+                  setShowManualSsid(value === '__hidden__');
+                  setSsid(value === '__hidden__' ? '' : value);
+                  setPortalComplete(false);
+                  setUsbStatus('idle');
+                }}>
+                  {networks.map((network) => (
+                    <MenuItem key={network.ssid} value={network.ssid}>
+                      {network.ssid} ({network.rssi >= -55 ? 'Strong' : network.rssi >= -70 ? 'Good' : 'Weak'}){network.secure ? '' : ' - Open'}
+                    </MenuItem>
+                  ))}
+                  <MenuItem value="__hidden__">Hidden network...</MenuItem>
+                </Select>
+              </FormControl>
+            ) : (
+              <TextField fullWidth label="2.4 GHz network name" value={ssid} onChange={(e) => { setSsid(e.target.value); setPortalComplete(false); setUsbStatus('idle'); }} helperText="Scan with the camera, or type the name for a hidden network." />
+            )}
+            {showManualSsid && <TextField fullWidth label="Hidden network name" value={ssid} onChange={(e) => setSsid(e.target.value)} />}
             <TextField fullWidth type="password" autoComplete="new-password" label="Wi-Fi password" value={wifiPassword} onChange={(e) => setWifiPassword(e.target.value)} helperText="Sent directly to the ESP32-S3 over USB; never saved by TenderCells." />
             <Button variant="contained" disabled={!ssid.trim() || (securityType !== 'none' && !wifiPassword) || usbStatus === 'connecting'} onClick={() => void provisionOverUsb()}>
               {usbStatus === 'connecting' ? 'Connecting over USB...' : usbStatus === 'success' ? 'Wi-Fi Saved on Device' : 'Connect Device over USB'}

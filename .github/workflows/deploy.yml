@@ -51,6 +51,12 @@ jobs:
       - name: Install website deps
         run: npm ci --prefix website || npm install --prefix website
 
+      - name: Install and build Cloud Functions
+        working-directory: .
+        run: |
+          npm ci --prefix functions
+          npm --prefix functions run build
+
       # FIX(2026-09-27): the app used to be built with NO Firebase config, so sign-in
       # and sign-up on tendercells.com/app always failed. Write the project's web
       # config to the repo-root .env (the app's envDir) before building.

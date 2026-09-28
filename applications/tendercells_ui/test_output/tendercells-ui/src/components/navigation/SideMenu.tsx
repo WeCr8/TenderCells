@@ -104,7 +104,6 @@ const ACCOUNT: MenuItem[] = [
   { id: "custom", label: "Settings", icon: <TuneIcon />, path: "/settings" },
   { id: "account", label: "Account", icon: <AccountCircleIcon />, path: "/account" },
 ];
-const ANIMAL_FAMILIES = new Set(["chicken-tender", "roaming-roost", "duck-dock", "goat-guardian", "bunny-burrow", "turkey-tower", "pigeon-palace"]);
 const familyOf = (product: Product) => String(product.metadata?.product_family || "");
 
 function buildMenuGroups(products: Product[], currentProduct: string): MenuGroup[] {
@@ -124,8 +123,9 @@ function buildMenuGroups(products: Product[], currentProduct: string): MenuGroup
     }));
   if (diyItems.length) groups.push({ label: "DIY Modules", items: diyItems });
 
-  const care: MenuItem[] = [];
-  if ([...families].some((family) => ANIMAL_FAMILIES.has(family))) care.push({ id: "birds", label: "Animal Roster", icon: <PetsIcon />, path: "/birds" });
+  const care: MenuItem[] = [
+    { id: "birds", label: "Animal Roster", icon: <PetsIcon />, path: "/birds" },
+  ];
   if (families.has("chicken-tender")) care.push({ id: "chicken-eye", label: "ChickenEye AI", icon: <VisibilityIcon />, path: "/chicken-eye" });
   if (hasProducts) care.push({ id: "ai", label: "TenderAI", icon: <SmartToyIcon />, path: "/ai" });
   if (families.has("roaming-roost") || families.has("rail-system-modules")) care.push({ id: "weed-patrol", label: "Weed Patrol", icon: <GrassIcon />, path: "/weed-patrol" });

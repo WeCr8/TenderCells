@@ -90,6 +90,9 @@ function resolveConfig() {
 }
 
 const config = resolveConfig();
+if (process.env.FIREBASE_AUTH_DOMAIN) {
+  config.authDomain = process.env.FIREBASE_AUTH_DOMAIN;
+}
 if (!config.apiKey || !config.authDomain || !config.projectId) {
   console.error('Firebase web config is missing apiKey/authDomain/projectId; refusing to build without sign-in.');
   process.exit(1);

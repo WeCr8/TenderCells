@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
+  Divider,
   DialogContent,
   DialogActions,
   Button,
@@ -35,6 +36,20 @@ interface ConnectionSetupWizardProps {
   onComplete?: () => void;
 }
 
+interface SerialPortLike {
+  readable: ReadableStream<Uint8Array> | null;
+  writable: WritableStream<Uint8Array> | null;
+  open(options: { baudRate: number }): Promise<void>;
+  close(): Promise<void>;
+  setSignals?(signals: { dataTerminalReady?: boolean; requestToSend?: boolean }): Promise<void>;
+}
+
+interface SerialNavigator extends Navigator {
+  serial?: {
+    requestPort(options?: { filters?: Array<{ usbVendorId: number }> }): Promise<SerialPortLike>;
+  };
+}
+
 const steps = ['Find Node', 'Home Wi-Fi', 'Verify Camera', 'Ready'];
 
 export default function ConnectionSetupWizard({
@@ -56,6 +71,8 @@ export default function ConnectionSetupWizard({
   const [ssid, setSsid] = useState('');
   const [securityType, setSecurityType] = useState<'none' | 'WPA' | 'WPA2' | 'WPA3'>('WPA2');
   const [portalComplete, setPortalComplete] = useState(false);
+  const [wifiPassword, setWifiPassword] = useState('');
+  const [usbStatus, setUsbStatus] = useState<'idle' | 'connecting' | 'success' | 'error'>('idle');
   const [streamUrl, setStreamUrl] = useState(String(product.metadata?.camera_stream_url || suggestedStreamUrl));
   const [cameraVerified, setCameraVerified] = useState(false);
   const [, setIsConnecting] = useState(false);
@@ -77,6 +94,73 @@ export default function ConnectionSetupWizard({
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const provisionOverUsb = async () => {
+    const serialApi = (navigator as SerialNavigator).serial;
+    if (!serialApi) {
+      setConnectionError('USB setup requires Chrome or Edge on Windows or macOS. Use the camera portal fallback below.');
+      setUsbStatus('error');
+      return;
+    }
+    setConnectionError(null);
+    setUsbStatus('connecting');
+    let port: SerialPortLike | null = null;
+    let writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
+    let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+    try {
+      port = await serialApi.requestPort({ filters: [{ usbVendorId: 0x303a }] });
+      await port.open({ baudRate: 115200 });
+      if (!port.writable || !port.readable) throw new Error('The serial connection did not open correctly.');
+      if (port.setSignals) {
+        await port.setSignals({ dataTerminalReady: false, requestToSend: true });
+        await new Promise((resolve) => setTimeout(resolve, 120));
+        await port.setSignals({ dataTerminalReady: false, requestToSend: false });
+      }
+
+      writer = port.writable.getWriter();
+      reader = port.readable.getReader();
+      const message = new TextEncoder().encode(`TC_PROVISION:${JSON.stringify({
+        ssid: ssid.trim(),
+        password: wifiPassword,
+        deviceId: product.device_id || '',
+        broker: '',
+      })}\n`);
+      const decoder = new TextDecoder();
+      const sendTimer = window.setInterval(() => { void writer?.write(message); }, 500);
+      window.setTimeout(() => window.clearInterval(sendTimer), 5000);
+      await writer.write(message);
+      const confirmation = (async () => {
+        let response = '';
+        while (true) {
+          const result = await reader.read();
+          if (result.done) throw new Error('The camera disconnected during Wi-Fi setup.');
+          response += decoder.decode(result.value, { stream: true });
+          if (response.includes('[USB] ERROR')) throw new Error('The node could not join that network. Check the 2.4 GHz SSID and password.');
+          if (response.includes('[USB] CONNECTED')) return;
+        }
+      })();
+      try {
+        await Promise.race([
+          confirmation,
+          new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('The node did not confirm Wi-Fi before the setup timeout. Reset it and retry.')), 32000)),
+        ]);
+      } finally {
+        window.clearInterval(sendTimer);
+      }
+      setWifiPassword('');
+      setPortalComplete(true);
+      setUsbStatus('success');
+    } catch (error) {
+      setWifiPassword('');
+      setUsbStatus('error');
+      setConnectionError(error instanceof Error ? error.message : 'USB Wi-Fi setup failed.');
+    } finally {
+      try { await reader?.cancel(); } catch { /* Port may already be closed. */ }
+      try { reader?.releaseLock(); } catch { /* Lock may already be released. */ }
+      try { writer?.releaseLock(); } catch { /* Lock may already be released. */ }
+      try { await port?.close(); } catch { /* Device resets after provisioning. */ }
+    }
   };
 
   const handlePairing = async () => {
@@ -120,6 +204,8 @@ export default function ConnectionSetupWizard({
     setSsid('');
     setSecurityType('WPA2');
     setPortalComplete(false);
+    setWifiPassword('');
+    setUsbStatus('idle');
     setStreamUrl(String(product.metadata?.camera_stream_url || suggestedStreamUrl));
     setCameraVerified(false);
     setConnectionError(null);
@@ -137,10 +223,10 @@ export default function ConnectionSetupWizard({
         return (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Alert severity="info">
-              After flashing, this device creates <strong>{setupNetwork}</strong>. Join it from the Wi-Fi menu; no password is required.
+              Keep this computer on its normal Wi-Fi and connect the registered device by USB. Chrome or Edge can send network credentials directly to the board in the next step.
             </Alert>
             <Typography variant="body2" color="text.secondary">
-              Web browsers cannot scan or change your computer's Wi-Fi network. The camera node performs the nearby-network scan on its private setup page.
+              If USB setup is unavailable, the device also creates <strong>{setupNetwork}</strong> for captive-portal setup.
             </Typography>
             <Paper variant="outlined" sx={{ p: 1.5 }}>
               <Typography variant="body2"><strong>Windows:</strong> select the network icon on the taskbar, then choose {setupNetwork}.</Typography>
@@ -154,6 +240,15 @@ export default function ConnectionSetupWizard({
             <Alert severity="warning">
               Use a 2.4 GHz network. ESP32-S3 cannot join a 5 GHz-only SSID.
             </Alert>
+            <Typography variant="subtitle2">Recommended: provision over USB</Typography>
+            <TextField fullWidth label="2.4 GHz network name" value={ssid} onChange={(e) => { setSsid(e.target.value); setPortalComplete(false); setUsbStatus('idle'); }} />
+            <TextField fullWidth type="password" autoComplete="new-password" label="Wi-Fi password" value={wifiPassword} onChange={(e) => setWifiPassword(e.target.value)} helperText="Sent directly to the ESP32-S3 over USB; never saved by TenderCells." />
+            <Button variant="contained" disabled={!ssid.trim() || (securityType !== 'none' && !wifiPassword) || usbStatus === 'connecting'} onClick={() => void provisionOverUsb()}>
+              {usbStatus === 'connecting' ? 'Connecting over USB...' : usbStatus === 'success' ? 'Wi-Fi Saved on Device' : 'Connect Device over USB'}
+            </Button>
+            {usbStatus === 'success' && <Alert severity="success">The node joined {ssid}. This computer stayed on its current network.</Alert>}
+            {connectionError && usbStatus === 'error' && <Alert severity="error">{connectionError}</Alert>}
+            <Divider>Captive portal fallback</Divider>
             <Button variant="contained" onClick={() => window.open('http://192.168.4.1', 'tendercells-device-setup', 'noopener,noreferrer')}>
               Open Camera Node Wi-Fi Setup
             </Button>
@@ -163,13 +258,6 @@ export default function ConnectionSetupWizard({
             <Alert severity="info">
               In the portal, set Device ID to <strong>{product.device_id || 'the ID shown on the registry card'}</strong>. Keep that value identical so discovery, MQTT, and the dashboard agree.
             </Alert>
-            <TextField
-              fullWidth
-              label="Selected home network"
-              value={ssid}
-              onChange={(e) => setSsid(e.target.value)}
-              placeholder="2.4 GHz SSID shown in the node portal"
-            />
             <FormControl fullWidth>
               <InputLabel>Security Type</InputLabel>
               <Select value={securityType} onChange={(e) => setSecurityType(e.target.value as 'none' | 'WPA' | 'WPA2' | 'WPA3')} label="Security Type">

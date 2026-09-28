@@ -192,6 +192,51 @@ bool reconnect() {
   return false;
 }
 
+bool tryUsbProvision() {
+  Serial.println("[USB] Send TC_PROVISION JSON within 10 seconds, or use TenderCam-Setup");
+  unsigned long deadline = millis() + 10000;
+  while (millis() < deadline) {
+    if (!Serial.available()) { delay(25); continue; }
+    String line = Serial.readStringUntil('\n');
+    line.trim();
+    if (!line.startsWith("TC_PROVISION:")) continue;
+
+    JsonDocument doc;
+    if (deserializeJson(doc, line.substring(13)) != DeserializationError::Ok) {
+      Serial.println("[USB] ERROR invalid provisioning message");
+      continue;
+    }
+    line = "";
+    String ssid = doc["ssid"] | "";
+    String password = doc["password"] | "";
+    String requestedDeviceId = doc["deviceId"] | "";
+    String requestedBroker = doc["broker"] | "";
+    if (ssid.isEmpty()) {
+      Serial.println("[USB] ERROR SSID is required");
+      continue;
+    }
+
+    Serial.printf("[USB] Connecting to %s (password not logged)\n", ssid.c_str());
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid.c_str(), password.c_str());
+    unsigned long connectDeadline = millis() + 20000;
+    while (WiFi.status() != WL_CONNECTED && millis() < connectDeadline) delay(250);
+    password = "";
+    doc.clear();
+    if (WiFi.status() != WL_CONNECTED) {
+      Serial.println("[USB] ERROR Wi-Fi connection failed");
+      return false;
+    }
+    if (!requestedDeviceId.isEmpty()) deviceId = requestedDeviceId;
+    if (!requestedBroker.isEmpty()) brokerIp = requestedBroker;
+    prefs.putString("deviceId", deviceId);
+    prefs.putString("brokerIp", brokerIp);
+    Serial.printf("[USB] CONNECTED ip=%s deviceId=%s\n", WiFi.localIP().toString().c_str(), deviceId.c_str());
+    return true;
+  }
+  return false;
+}
+
 void provision() {
   prefs.begin("tccam", false);
   brokerIp    = prefs.getString("brokerIp", "");
@@ -207,16 +252,19 @@ void provision() {
     char b[24]; snprintf(b, sizeof(b), "cam_%04X", (uint16_t)(mac & 0xFFFF));
     deviceId = b;
   }
+  bool usbConnected = tryUsbProvision();
   WiFiManager wm;
   WiFiManagerParameter pB("broker", "Broker IP (blank = auto)", brokerIp.c_str(), 40);
   WiFiManagerParameter pP("port", "Broker port", brokerPort.c_str(), 6);
   WiFiManagerParameter pI("devid", "Device ID", deviceId.c_str(), 22);
   WiFiManagerParameter pT("product", "Product type", productType.c_str(), 20);
   wm.addParameter(&pB); wm.addParameter(&pP); wm.addParameter(&pI); wm.addParameter(&pT);
-  wm.setConfigPortalTimeout(0);
-  wm.autoConnect("TenderCam-Setup");
-  brokerIp = pB.getValue(); brokerPort = pP.getValue();
-  deviceId = pI.getValue(); productType = pT.getValue();
+  if (!usbConnected) {
+    wm.setConfigPortalTimeout(0);
+    wm.autoConnect("TenderCam-Setup");
+    brokerIp = pB.getValue(); brokerPort = pP.getValue();
+    deviceId = pI.getValue(); productType = pT.getValue();
+  }
   if (productType.isEmpty()) productType = "camera-kit";
   prefs.putString("brokerIp", brokerIp); prefs.putString("brokerPort", brokerPort);
   prefs.putString("deviceId", deviceId); prefs.putString("product", productType);

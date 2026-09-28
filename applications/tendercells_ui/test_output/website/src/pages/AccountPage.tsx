@@ -5,10 +5,13 @@
 // account and see their account on the website itself; the OS opens only from
 // the explicit "Launch Tender Cells OS" button. Both share one Firebase session
 // (same origin + project), so the OS opens already signed in.
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
   GoogleAuthProvider,
+  OAuthProvider,
+  SAMLAuthProvider,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -17,35 +20,110 @@ import {
   signOut,
   type User,
 } from "firebase/auth";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import { TENDERCELLS_OS_URL } from "../config/appLinks";
 import { useAuthUser } from "../hooks/useAuthUser";
-import { AUTH_CONFIGURED, auth } from "../lib/firebase";
-import { SSO_PROVIDERS } from "../lib/sso";
+import { AUTH_CONFIGURED, app, auth } from "../lib/firebase";
 import "./AccountPage.css";
 
 type Mode = "login" | "register";
 
-/** School / district sign-in options - shown, but not live until the SSO backend is set up. */
+interface SchoolLoginOption {
+  kind: string;
+  label: string;
+  providerId: string;
+  tenantId: string;
+}
+
+interface SchoolLoginOptions {
+  organizationId: string;
+  displayName: string;
+  providers: SchoolLoginOption[];
+}
+
 function SchoolSignIn() {
+  const [organizationCode, setOrganizationCode] = useState("");
+  const [options, setOptions] = useState<SchoolLoginOptions | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const findSchool = async () => {
+    if (!app || !organizationCode.trim()) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await httpsCallable<{ organizationCode: string }, SchoolLoginOptions>(getFunctions(app), "getSchoolLoginOptions")({
+        organizationCode: organizationCode.trim().toUpperCase(),
+      });
+      setOptions(result.data);
+      if (!result.data.providers.length) setError("This school has no active sign-in provider yet. Ask the district administrator.");
+    } catch (reason) {
+      setOptions(null);
+      setError(reason instanceof Error ? reason.message : "School sign-in could not be loaded.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const signInToSchool = async (provider: SchoolLoginOption) => {
+    if (!app || !auth || !options) return;
+    setBusy(true);
+    setError("");
+    auth.tenantId = provider.tenantId;
+    const authProvider = provider.providerId === "google.com"
+      ? new GoogleAuthProvider()
+      : provider.providerId.startsWith("saml.")
+        ? new SAMLAuthProvider(provider.providerId)
+        : new OAuthProvider(provider.providerId);
+    try {
+      try {
+        await signInWithPopup(auth, authProvider);
+      } catch (reason) {
+        const code = errorCode(reason);
+        if (["auth/popup-blocked", "auth/cancelled-popup-request", "auth/operation-not-supported-in-this-environment"].includes(code)) {
+          sessionStorage.setItem("tendercells_school_org", options.organizationId);
+          await signInWithRedirect(auth, authProvider);
+          return;
+        }
+        throw reason;
+      }
+      await httpsCallable(getFunctions(app), "claimSchoolMembership")({ organizationId: options.organizationId });
+      await auth.currentUser?.getIdToken(true);
+      window.location.assign("/app/dashboard");
+    } catch (reason) {
+      auth.tenantId = null;
+      setError(reason instanceof Error ? reason.message : "School sign-in failed.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <details className="account-sso">
+    <details className="account-sso" id="school-sign-in">
       <summary className="account-sso-title">
-        School or district account <span className="account-soon">Coming soon</span>
+        School or district account
       </summary>
-      <div className="account-sso-grid">
-        {SSO_PROVIDERS.map((p) => (
-          <button key={p.id} type="button" className="account-sso-btn" disabled aria-disabled="true"
-            title={`${p.label} - ${p.audience}. Coming soon.`}>
-            <span>{p.label}</span>
-            <span className="account-soon">Coming soon</span>
+      <label className="account-field">
+        <span>School code</span>
+        <input value={organizationCode} onChange={(event) => setOrganizationCode(event.target.value)} autoComplete="organization" placeholder="Provided by your school" />
+      </label>
+      <button type="button" className="btn-secondary account-submit" disabled={busy || !organizationCode.trim()} onClick={() => void findSchool()}>
+        {busy ? "Checking..." : "Find my school"}
+      </button>
+      {options && <p className="account-hint"><strong>{options.displayName}</strong></p>}
+      {options && <div className="account-sso-grid">
+        {options.providers.map((provider) => (
+          <button key={`${provider.tenantId}:${provider.providerId}`} type="button" className="account-sso-btn" disabled={busy}
+            onClick={() => void signInToSchool(provider)}>
+            <span>{provider.label}</span>
           </button>
         ))}
-      </div>
+      </div>}
+      {error && <p className="account-error" role="alert">{error}</p>}
       <p className="account-hint">
-        Students and teachers will sign in with their school account; rosters and class access come from the school.
-        Until then, teachers can use a personal account.
+        Use the code issued by your school. Only district-configured providers appear, and roster access is verified after sign-in.
       </p>
     </details>
   );
@@ -356,6 +434,21 @@ function SignInForm() {
 
 export default function AccountPage() {
   const { user, loading } = useAuthUser();
+
+  useEffect(() => {
+    if (!app || !auth) return;
+    void getRedirectResult(auth).then(async (result) => {
+      if (!result?.user) return;
+      const organizationId = sessionStorage.getItem("tendercells_school_org");
+      if (!organizationId) return;
+      sessionStorage.removeItem("tendercells_school_org");
+      await httpsCallable(getFunctions(app), "claimSchoolMembership")({ organizationId });
+      await result.user.getIdToken(true);
+      window.location.assign("/app/dashboard");
+    }).catch(() => {
+      sessionStorage.removeItem("tendercells_school_org");
+    });
+  }, []);
 
   let body: ReactNode;
   if (!AUTH_CONFIGURED) {

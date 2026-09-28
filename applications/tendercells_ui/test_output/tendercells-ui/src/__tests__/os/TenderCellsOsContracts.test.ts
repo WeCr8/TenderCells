@@ -48,12 +48,29 @@ describe('TenderCells OS contracts', () => {
     expect(dashboard).toContain('No active alerts');
   });
 
-  it('shows account and billing status while unavailable SSO stays disabled', () => {
+  it('shows truthful account billing and links to configured school sign-in', () => {
     const account = readProjectFile('src/pages/AccountPage.tsx');
     expect(account).toContain('<Tab label="Billing"');
     expect(account).toContain('No active subscription or payment method');
     expect(account).toContain('School or district SSO');
-    expect(account).toContain('<Button disabled variant="outlined"');
+    expect(account).toContain('Connect School Account');
+    expect(account).toContain('Submit Purchase Order');
+  });
+
+  it('keeps school roles, roster, billing, and camera sessions server-authoritative', () => {
+    const backend = readProjectFile('../../../../functions/src/schoolPlatform.ts');
+    const functionsIndex = readProjectFile('../../../../functions/src/index.ts');
+    const rules = readProjectFile('../../../../firestore.rules');
+    const websiteAccount = readProjectFile('../website/src/pages/AccountPage.tsx');
+    ['getSchoolLoginOptions', 'syncSchoolRoster', 'claimSchoolMembership', 'configureSchoolOrganization',
+      'createPurchaseOrder', 'createOrganizationInvoice', 'createCameraRelaySession', 'cameraRelaySignal']
+      .forEach((marker) => expect(backend).toContain(marker));
+    expect(functionsIndex).not.toContain('door-open-morning');
+    expect(rules).toContain('schoolDeviceAccess');
+    expect(rules).toContain('match /organizations/{organizationId}');
+    expect(rules).toContain('match /cameraRelaySessions/{sessionId}');
+    expect(websiteAccount).toContain('Find my school');
+    expect(websiteAccount).toContain('auth.tenantId = provider.tenantId');
   });
 
   it('keeps product registration open to full products, modules, and custom builds', () => {

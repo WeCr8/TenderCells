@@ -33,10 +33,41 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/devices/$(deviceId));
     }
 
+    function schoolRole() {
+      return isAuthenticated() && request.auth.token.schoolRole != null
+        ? request.auth.token.schoolRole
+        : "";
+    }
+
+    function schoolOrganizationId() {
+      return isAuthenticated() && request.auth.token.organizationId != null
+        ? request.auth.token.organizationId
+        : "";
+    }
+
+    function isSchoolAdmin(organizationId) {
+      return schoolOrganizationId() == organizationId &&
+             schoolRole() in ["district-admin", "school-admin"];
+    }
+
+    function isSchoolStaff(organizationId) {
+      return schoolOrganizationId() == organizationId &&
+             schoolRole() in ["district-admin", "school-admin", "teacher"];
+    }
+
+    function schoolDeviceAccess(data) {
+      return isAuthenticated() && data.organizationId != null &&
+             schoolOrganizationId() == data.organizationId &&
+             (isSchoolStaff(data.organizationId) ||
+              (data.classIds != null && request.auth.token.classIds != null &&
+               request.auth.token.classIds.hasAny(data.classIds)));
+    }
+
     function ownsDevice(deviceId) {
       return isAuthenticated() &&
              exists(/databases/$(database)/documents/devices/$(deviceId)) &&
-             deviceDoc(deviceId).data.userId == request.auth.uid;
+             (deviceDoc(deviceId).data.userId == request.auth.uid ||
+              schoolDeviceAccess(deviceDoc(deviceId).data));
     }
 
     function deviceItemCreateMatches(deviceId) {
@@ -130,13 +161,16 @@ service cloud.firestore {
     // Devices collection (if stored in Firestore)
     // Users can manage their own devices
     match /devices/{deviceId} {
-      allow read: if isOwnedResource();
+      allow read: if isOwnedResource() || schoolDeviceAccess(resource.data);
       
       // Allow create if user sets their own userId
       allow create: if isCreatingOwnData();
       
       // Allow update if user owns the device
-      allow update: if keepsOwner();
+      allow update: if keepsOwner() ||
+                       (schoolDeviceAccess(resource.data) &&
+                        request.resource.data.organizationId == resource.data.organizationId &&
+                        request.resource.data.userId == resource.data.userId);
       
       // Allow delete if user owns the device
       allow delete: if isOwnedResource();
@@ -190,6 +224,49 @@ service cloud.firestore {
       allow read, delete: if ownsDevice(deviceId);
       allow create: if deviceItemCreateMatches(deviceId);
       allow update: if deviceItemKeepsDevice(deviceId);
+    }
+
+    // School organizations are provisioned by trusted backend functions.
+    match /organizations/{organizationId} {
+      allow read: if schoolOrganizationId() == organizationId;
+      allow write: if false;
+
+      match /members/{userId} {
+        allow read: if (isAuthenticated() && request.auth.uid == userId) || isSchoolAdmin(organizationId);
+        allow write: if false;
+      }
+
+      match /roster/{externalId} {
+        allow read: if isSchoolStaff(organizationId);
+        allow write: if false;
+      }
+
+      match /classes/{classId} {
+        allow read: if schoolOrganizationId() == organizationId &&
+                       (isSchoolStaff(organizationId) ||
+                        (request.auth.token.classIds != null && classId in request.auth.token.classIds));
+        allow write: if false;
+      }
+
+      match /purchaseOrders/{purchaseOrderId} {
+        allow read: if isSchoolAdmin(organizationId);
+        allow write: if false;
+      }
+
+      match /invoices/{invoiceId} {
+        allow read: if isSchoolAdmin(organizationId);
+        allow write: if false;
+      }
+
+      match /audit/{eventId} {
+        allow read: if isSchoolAdmin(organizationId);
+        allow write: if false;
+      }
+    }
+
+    // Session tokens and relay signaling are backend-only.
+    match /cameraRelaySessions/{sessionId} {
+      allow read, write: if false;
     }
 
     // Fallback: Deny access to any other collections by default

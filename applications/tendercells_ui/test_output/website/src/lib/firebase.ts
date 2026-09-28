@@ -23,7 +23,7 @@ export const AUTH_CONFIGURED = Boolean(
   firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId,
 );
 
-const app: FirebaseApp | undefined = AUTH_CONFIGURED ? initializeApp(firebaseConfig) : undefined;
+export const app: FirebaseApp | undefined = AUTH_CONFIGURED ? initializeApp(firebaseConfig) : undefined;
 
 /** Firebase Auth instance, or undefined when the build has no Firebase config. */
 export const auth: Auth | undefined = app ? getAuth(app) : undefined;

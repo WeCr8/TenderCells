@@ -59,6 +59,8 @@ jobs:
         env:
           FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENDER_CELLS }}
           FIREBASE_WEB_APP_ID: ${{ vars.FIREBASE_WEB_APP_ID }}
+          TURN_URLS: ${{ secrets.TURN_URLS }}
+          TURN_SHARED_SECRET: ${{ secrets.TURN_SHARED_SECRET }}
           # Keep popup/redirect helpers first-party on the Firebase Hosting domain.
           FIREBASE_AUTH_DOMAIN: tendercells.com
         run: |
@@ -69,6 +71,7 @@ jobs:
           echo "FIREBASE_PROJECT=$PROJECT" >> "$GITHUB_ENV"
           npm i -g firebase-tools
           node scripts/firebase-web-env.mjs --project "$PROJECT"
+          printf 'TURN_URLS=%s\nTURN_SHARED_SECRET=%s\n' "$TURN_URLS" "$TURN_SHARED_SECRET" > functions/.env
 
       - name: Check Firebase Auth settings (providers + authorized domains)
         working-directory: .
@@ -108,13 +111,13 @@ jobs:
             exit 1
           fi
 
-      - name: Deploy to Firebase Hosting
+      - name: Deploy Hosting, Functions, and Firestore policy
         working-directory: .
         run: |
           echo "Deploying to project: $FIREBASE_PROJECT"
-          firebase deploy --only hosting:main --non-interactive --project "$FIREBASE_PROJECT"
+          firebase deploy --only hosting:main,functions,firestore:rules,firestore:indexes --non-interactive --project "$FIREBASE_PROJECT"
 
       - name: Remove credentials
         if: always()
         working-directory: .
-        run: rm -f "$HOME/sa.json" .env
+        run: rm -f "$HOME/sa.json" .env functions/.env

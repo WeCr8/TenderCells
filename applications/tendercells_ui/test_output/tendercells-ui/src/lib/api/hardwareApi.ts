@@ -6,6 +6,8 @@
 // Firebase token, so an auth-enabled API rejected them with 401.
 import { auth } from '../firebase/firebaseApp';
 
+export const HARDWARE_API_CONFIGURED = Boolean(import.meta.env.VITE_MQTT_API_BASE_URL);
+
 /** express-api MQTT routes base, e.g. http://192.168.1.50:4000/api/mqtt. */
 export const MQTT_API_BASE: string =
   import.meta.env.VITE_MQTT_API_BASE_URL || 'http://localhost:4000/api/mqtt';

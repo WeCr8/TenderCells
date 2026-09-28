@@ -75,8 +75,8 @@ export default function AppRoutes() {
       <Route path="/sensors" element={<Navigate to="/chicken-tender?section=sensors" replace />} />
       <Route path="/egg-map" element={<Navigate to="/chicken-tender?section=eggs" replace />} />
       <Route path="/eggs" element={<Navigate to="/chicken-tender?section=eggs" replace />} />
-      <Route path="/flock" element={<Navigate to="/birds" replace />} />
-      <Route path="/flock-roster" element={<Navigate to="/birds" replace />} />
+      <Route path="/flock" element={<Navigate to="/animals" replace />} />
+      <Route path="/flock-roster" element={<Navigate to="/animals" replace />} />
       <Route path="/tenderai" element={<Navigate to="/ai" replace />} />
       <Route path="/tender-ai" element={<Navigate to="/ai" replace />} />
       <Route path="/tender-ai-chat" element={<Navigate to="/ai" replace />} />
@@ -92,8 +92,10 @@ export default function AppRoutes() {
       <Route path="/product/:productId" element={<ProductDashboardPage />} />
       <Route path="/analytics" element={<AnalyticsPage />} />
       <Route path="/diagnostics" element={<DiagnosticsPage />} />
-      <Route path="/birds" element={<BirdManagementPage />} />
-      <Route path="/birds/:birdId" element={<BirdEditPage />} />
+      <Route path="/animals" element={<BirdManagementPage />} />
+      <Route path="/animals/:birdId" element={<BirdEditPage />} />
+      <Route path="/birds" element={<Navigate to="/animals" replace />} />
+      <Route path="/birds/:birdId" element={<Navigate to="/animals" replace />} />
       <Route path="/ai" element={<TenderAIPage />} />
       <Route path="/setup" element={<SetupWizardPage />} />
       <Route path="/chicken-eye" element={<ChickenEyeDashboardPage />} />

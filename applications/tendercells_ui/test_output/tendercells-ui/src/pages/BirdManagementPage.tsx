@@ -42,7 +42,9 @@ function BirdCard({ bird, onEdit, onDelete }: { bird: Bird; onEdit: () => void; 
     <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${hc}44`, borderRadius: 2, p: 2 }}>
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Avatar src={bird.profileImage || undefined} alt={`${bird.name} profile`} sx={{ bgcolor: C.bg, fontSize: 11, width: 52, height: 52 }}>{speciesMark}</Avatar>
+          <Avatar src={bird.profileImage || undefined} alt={`${bird.name} profile`} sx={{ bgcolor: C.bg, fontSize: 11, width: 52, height: 52 }}>
+            {bird.profileIcon === 'paw' ? <PetsIcon /> : bird.profileIcon === 'id' ? 'ID' : speciesMark}
+          </Avatar>
           <Box>
             <Stack direction="row" spacing={0.75} alignItems="center">
               <Typography sx={{ color: C.gold, fontWeight: 700, fontSize: 15 }}>{bird.name}</Typography>
@@ -72,6 +74,7 @@ function BirdCard({ bird, onEdit, onDelete }: { bird: Bird; onEdit: () => void; 
         )}
         {bird.bandId && <Chip label={`ID: ${bird.bandId}`} size="small" sx={{ bgcolor: C.bg, color: C.goldMuted, fontSize: 10 }} />}
         {bird.cameraTracking && <Chip icon={<PhotoCameraIcon sx={{ fontSize: 12 }} />} label="Camera ID enrolled" size="small" sx={{ bgcolor: C.bg, color: '#90CAF9', fontSize: 10 }} />}
+        {bird.trackingMethod && bird.trackingMethod !== 'none' && <Chip label={`Tracking: ${bird.trackingMethod.replace('_', ' + ')}`} size="small" sx={{ bgcolor: C.bg, color: C.goldMuted, fontSize: 10 }} />}
         {age != null && <Chip label={`${age} mo`} size="small" sx={{ bgcolor: C.bg, color: C.goldMuted, fontSize: 10 }} />}
       </Stack>
 
@@ -209,10 +212,35 @@ function EditDialog({ open, bird, onClose, onSave }: EditDialogProps) {
               {form.profileImage && <Avatar src={form.profileImage} alt="Profile preview" />}
               <Button component="label" variant="outlined" startIcon={<PhotoCameraIcon />} fullWidth sx={{ borderColor: C.accent, color: C.gold }}>
                 {form.profileImage ? 'Replace photo' : 'Add profile photo'}
-                <input hidden type="file" accept="image/*" capture="environment" onChange={e => handlePhoto(e.target.files?.[0])} />
+                <input hidden type="file" accept="image/*" onChange={e => handlePhoto(e.target.files?.[0])} />
               </Button>
             </Stack>
           </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth size="small">
+              <InputLabel sx={{ color: C.goldMuted }}>Profile tile</InputLabel>
+              <Select value={form.profileIcon || 'species'} label="Profile tile" onChange={e => set('profileIcon', e.target.value)} sx={{ color: C.white }}>
+                <MenuItem value="species">Species label</MenuItem>
+                <MenuItem value="paw">Animal icon</MenuItem>
+                <MenuItem value="id">ID badge</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth size="small">
+              <InputLabel sx={{ color: C.goldMuted }}>Tracking method</InputLabel>
+              <Select value={form.trackingMethod || 'none'} label="Tracking method" onChange={e => set('trackingMethod', e.target.value)} sx={{ color: C.white }}>
+                <MenuItem value="none">Roster only</MenuItem>
+                <MenuItem value="visual">Camera-assisted</MenuItem>
+                <MenuItem value="rfid">RFID tag</MenuItem>
+                <MenuItem value="microchip">Microchip record</MenuItem>
+                <MenuItem value="visual_rfid">Camera + RFID</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          {['rfid', 'microchip', 'visual_rfid'].includes(form.trackingMethod || '') && <Grid item xs={12} sm={6}>
+            <TextField label="RFID / microchip number" value={form.rfidId || ''} onChange={e => set('rfidId', e.target.value)} fullWidth size="small" sx={inputSx} />
+          </Grid>}
           <Grid item xs={12}>
             <FormControlLabel
               control={<Switch checked={Boolean(form.cameraTracking)} onChange={e => set('cameraTracking', e.target.checked)} />}

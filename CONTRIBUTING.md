@@ -34,6 +34,19 @@ Every product or major hardware module should include:
 - API/MQTT topic documentation.
 - Safety validation notes before moving hardware is enabled.
 
+## Young Builder Usability Rule
+
+Setup, flashing, registration, and everyday controls must be usable by a child as young as seven with an adult present.
+
+- Use one clear action per step and plain, concrete labels.
+- Keep primary Next, Back, Retry, and Stop actions visible without long-page searching.
+- Use touch targets at least 44 by 44 pixels and test phone and tablet layouts.
+- Hide expert logs, raw pins, firmware offsets, and destructive actions behind an Advanced disclosure.
+- Never present unsupported sensors or controls as working; say "Not installed" or "Not reporting."
+- Mark wiring, batteries, mains power, pumps, motors, heaters, and moving mechanisms as adult-required at the action point.
+- Preserve a safe way back from every view, dialog, connection failure, and permission denial.
+- Add a focused regression test for the beginner path when changing setup or hardware controls.
+
 ## Pull Request Checklist
 
 - The change is scoped to one product, module, or workflow when possible.

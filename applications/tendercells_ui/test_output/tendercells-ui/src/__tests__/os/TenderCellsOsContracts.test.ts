@@ -184,9 +184,55 @@ describe('TenderCells OS contracts', () => {
 
   it('reconnects a suspended camera stream when its tab becomes visible', () => {
     const viewer = readProjectFile('src/components/camera/CameraFeedViewer.tsx');
+    const chickenEye = readProjectFile('src/pages/ChickenEyeDashboardPage.tsx');
     expect(viewer).toContain("document.addEventListener('visibilitychange', reconnect)");
     expect(viewer).toContain("window.addEventListener('focus', reconnect)");
     expect(viewer).toContain('setStreamAttempt((value) => value + 1)');
+    expect(chickenEye).toContain('camera_stream_url');
+    expect(chickenEye).toContain("classifyCameraStream(registeredStream || flashedUrl || '')");
+    expect(chickenEye).toContain("document.addEventListener('visibilitychange', reconnect)");
+    expect(chickenEye).toContain('Registered camera - live video');
+  });
+
+  it('keeps camera controls, transport labels, and telemetry truthful', () => {
+    const viewer = readProjectFile('src/components/camera/CameraFeedViewer.tsx');
+    const dashboard = readProjectFile('src/pages/ProductDashboardPage.tsx');
+    const telemetry = readProjectFile('src/hooks/useTelemetry.ts');
+    ['Refresh camera stream', 'Rotate camera clockwise', 'Flip camera horizontally', 'Flip camera vertically', 'LOCAL ONLY', 'Remote unencrypted video was blocked']
+      .forEach((marker) => expect(viewer).toContain(marker));
+    ['No temperature sensor registered', 'Battery configured; level is not reporting', 'No microphone registered']
+      .forEach((marker) => expect(dashboard).toContain(marker));
+    expect(telemetry).toContain("localStorage.getItem('tendercells_demo_seeded_v1') != null");
+  });
+
+  it('keeps setup and support tools discoverable from settings', () => {
+    const settings = readProjectFile('src/pages/SettingsPage.tsx');
+    ['Flash a Device', 'Register Devices', 'Diagnostics', 'Build Guides']
+      .forEach((marker) => expect(settings).toContain(marker));
+  });
+
+  it('uses an account-level animal roster with legacy route redirects', () => {
+    const animals = readProjectFile('src/services/birdsService.ts');
+    const routes = readProjectFile('src/routes/AppRoutes.tsx');
+    expect(animals).toContain("collection(db, 'animals')");
+    expect(animals).toContain("where('userId', '==', uid)");
+    expect(animals).toContain('subscribe(onChange');
+    expect(routes).toContain('path="/animals"');
+    expect(routes).toContain('path="/birds" element={<Navigate to="/animals"');
+  });
+
+  it('ships low-cost waterer, feeder, RC vehicle, and drone monitor profiles', () => {
+    const registration = readProjectFile('src/components/products/ProductRegistrationModal.tsx');
+    ['DIY ESP32 Waterer', 'DIY ESP32 Feeder', 'DIY RC Vehicle', 'Drone Monitor', 'route_monitoring', 'task_schedules']
+      .forEach((marker) => expect(registration).toContain(marker));
+  });
+
+  it('does not present simulated analytics or yard events outside Demo Mode', () => {
+    const analytics = readProjectFile('src/pages/AnalyticsPage.tsx');
+    const yard = readProjectFile('src/hooks/useYardEvents.ts');
+    expect(analytics).toContain('if (!demoMode) return []');
+    expect(analytics).toContain('No recorded telemetry yet');
+    expect(yard).toContain("localStorage.getItem('tendercells_demo_seeded_v1') != null");
   });
 
   it('ships a TenderCells CLI for terminal-first contributors', () => {

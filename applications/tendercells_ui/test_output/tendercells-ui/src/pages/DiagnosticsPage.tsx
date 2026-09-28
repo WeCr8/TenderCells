@@ -1,6 +1,6 @@
 // DiagnosticsPage.tsx — Fault codes reference, MQTT status, device health
 import { useEffect, useState } from 'react';
-import { MQTT_API_BASE } from '../lib/api/hardwareApi';
+import { HARDWARE_API_CONFIGURED, HARDWARE_API_ORIGIN, MQTT_API_BASE } from '../lib/api/hardwareApi';
 import {
   Box, Paper, Grid, Stack, Typography, Chip, Accordion,
   AccordionSummary, AccordionDetails, CircularProgress, Alert,
@@ -78,9 +78,10 @@ const categories = [...new Set(FAULT_CODES.map(f => f.category))];
 
 export default function DiagnosticsPage() {
   const { products, loading } = useProducts();
-  const [mqttStatus, setMqttStatus] = useState<'checking' | 'connected' | 'offline'>('checking');
+  const [mqttStatus, setMqttStatus] = useState<'checking' | 'connected' | 'offline' | 'unconfigured'>(HARDWARE_API_CONFIGURED ? 'checking' : 'unconfigured');
 
   useEffect(() => {
+    if (!HARDWARE_API_CONFIGURED) return;
     fetch(`${MQTT_API_BASE}/mqtt/status`)
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(() => setMqttStatus('connected'))
@@ -111,8 +112,8 @@ export default function DiagnosticsPage() {
           </Stack>
           <Grid container spacing={2}>
             {[
-              { label: 'Express API', url: MQTT_API_BASE, status: mqttStatus },
-              { label: 'MQTT Broker', url: 'mqtt://localhost:1883', status: mqttStatus },
+              { label: 'Hardware API', url: HARDWARE_API_CONFIGURED ? HARDWARE_API_ORIGIN : 'Not configured', status: mqttStatus },
+              { label: 'MQTT Bridge', url: HARDWARE_API_CONFIGURED ? 'Reported by hardware API' : 'Not configured', status: mqttStatus },
             ].map(item => (
               <Grid item xs={12} sm={6} key={item.label}>
                 <Paper elevation={0} sx={{ bgcolor: C.bg, borderRadius: 1.5, p: 1.5 }}>
@@ -123,7 +124,7 @@ export default function DiagnosticsPage() {
                     </Box>
                     {item.status === 'checking'
                       ? <CircularProgress size={16} sx={{ color: C.goldMuted }} />
-                      : <Chip label={item.status === 'connected' ? 'Connected' : 'Offline'} size="small"
+                      : <Chip label={item.status === 'connected' ? 'Connected' : item.status === 'unconfigured' ? 'Not configured' : 'Offline'} size="small"
                           sx={{ bgcolor: (item.status === 'connected' ? '#4CAF50' : C.danger) + '22',
                                 color: item.status === 'connected' ? '#4CAF50' : C.danger,
                                 border: `1px solid ${item.status === 'connected' ? '#4CAF50' : C.danger}55`,
@@ -133,9 +134,9 @@ export default function DiagnosticsPage() {
               </Grid>
             ))}
           </Grid>
-          {mqttStatus === 'offline' && (
+          {(mqttStatus === 'offline' || mqttStatus === 'unconfigured') && (
             <Alert severity="warning" sx={{ mt: 1.5, bgcolor: C.warning + '22', color: C.warning, '& .MuiAlert-icon': { color: C.warning } }}>
-              Express API offline. Hardware control unavailable. Start with: <code>cd express-api && npm run dev</code>
+              {mqttStatus === 'unconfigured' ? 'Live diagnostics are not configured for this deployment. Local devices can still stream directly, but controls and telemetry require the TenderCells hardware bridge.' : 'Hardware API offline. Confirm the bridge is running and reachable from this device.'}
             </Alert>
           )}
         </Paper>
@@ -180,8 +181,9 @@ export default function DiagnosticsPage() {
         <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2 }}>
           <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
             <TuneIcon sx={{ color: C.accent, fontSize: 20 }} />
-            <Typography sx={{ color: C.gold, fontWeight: 700 }}>Alert Thresholds</Typography>
+            <Typography sx={{ color: C.gold, fontWeight: 700 }}>Reference Thresholds</Typography>
           </Stack>
+          <Typography sx={{ color: C.goldMuted, fontSize: 12, mb: 1.5 }}>Documentation defaults only. These are not active alerts until saved for a reporting sensor.</Typography>
           <Grid container spacing={1}>
             {THRESHOLDS.map(t => (
               <Grid item xs={12} sm={6} md={4} key={t.label}>

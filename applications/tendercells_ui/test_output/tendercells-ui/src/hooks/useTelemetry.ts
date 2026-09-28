@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-interface TelemetryData {
+export interface TelemetryData {
   temperature?: number;
   humidity?: number;
   ammonia?: number;
@@ -9,6 +9,13 @@ interface TelemetryData {
   chickenCount?: number;
   doorState?: string;
   systemState?: string;
+  batteryPercent?: number;
+  batteryVoltage?: number;
+  soundLevelDb?: number;
+  storageFreeMb?: number;
+  wifiRssi?: number;
+  uptimeSeconds?: number;
+  lastSeen?: string;
   [key: string]: unknown;
 }
 
@@ -39,8 +46,9 @@ export const useTelemetry = (deviceId: string, pollIntervalMs = 5000) => {
   useEffect(() => {
     const fetchTelemetry = async () => {
       if (!API_BASE) {
-        setData(buildSimTelemetry(deviceId));
-        setError(null);
+        const demoEnabled = localStorage.getItem('tendercells_demo_seeded_v1') != null;
+        setData(demoEnabled ? buildSimTelemetry(deviceId) : null);
+        setError(demoEnabled ? null : 'No telemetry service is configured.');
         setLoading(false);
         return;
       }

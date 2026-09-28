@@ -124,7 +124,7 @@ function buildMenuGroups(products: Product[], currentProduct: string): MenuGroup
   if (diyItems.length) groups.push({ label: "DIY Modules", items: diyItems });
 
   const care: MenuItem[] = [
-    { id: "birds", label: "Animal Roster", icon: <PetsIcon />, path: "/birds" },
+    { id: "birds", label: "Animal Roster", icon: <PetsIcon />, path: "/animals" },
   ];
   if (families.has("chicken-tender")) care.push({ id: "chicken-eye", label: "ChickenEye AI", icon: <VisibilityIcon />, path: "/chicken-eye" });
   if (hasProducts) care.push({ id: "ai", label: "TenderAI", icon: <SmartToyIcon />, path: "/ai" });

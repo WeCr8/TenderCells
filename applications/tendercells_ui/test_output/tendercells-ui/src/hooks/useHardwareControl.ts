@@ -8,7 +8,7 @@
 // - Exposes live arm/gantry sub-state getters for sliders + 3D viewport.
 
 import { useCallback, useState } from 'react';
-import { MQTT_API_BASE as API_BASE, hardwareAuthHeaders as authHeaders } from '../lib/api/hardwareApi';
+import { HARDWARE_API_CONFIGURED, MQTT_API_BASE as API_BASE, hardwareAuthHeaders as authHeaders } from '../lib/api/hardwareApi';
 
 interface HardwareControlState {
   isLoading: boolean;
@@ -27,6 +27,7 @@ export const useHardwareControl = (deviceId: string) => {
     async (endpoint: string, body: Record<string, unknown> = {}) => {
       setState({ isLoading: true, error: null, success: false });
       try {
+        if (!HARDWARE_API_CONFIGURED) throw new Error('Hardware controls are not connected. Configure the TenderCells hardware API for this network.');
         const response = await fetch(`${API_BASE}/devices/${deviceId}/${endpoint}`, {
           method: 'POST',
           headers: await authHeaders(),
@@ -40,7 +41,9 @@ export const useHardwareControl = (deviceId: string) => {
         setState({ isLoading: false, error: null, success: true });
         return data;
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        const errorMsg = error instanceof TypeError
+          ? 'The hardware service could not be reached. Confirm this device is on the same network and the TenderCells bridge is running.'
+          : error instanceof Error ? error.message : 'Unknown error';
         setState({ isLoading: false, error: errorMsg, success: false });
         throw error;
       }

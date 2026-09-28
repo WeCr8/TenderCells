@@ -10,7 +10,7 @@
 // firebaseApp is already eagerly initialized app-wide (AuthContext), so this
 // static import adds no bundle cost and avoids the mixed static/dynamic-import
 // warning. The firestore query SDK below stays dynamic to keep it lazy.
-import { FIRESTORE_DATA_ENABLED, db } from '../lib/firebase/firebaseApp';
+import { FIREBASE_ENABLED, auth, db } from '../lib/firebase/firebaseApp';
 
 export type Sex = 'female' | 'male' | 'spayed_female' | 'neutered_male' | 'hen' | 'rooster' | 'doe' | 'buck' | 'wether' | 'unknown';
 export type HealthStatus = 'healthy' | 'watch' | 'sick' | 'quarantine';
@@ -32,7 +32,10 @@ export interface Bird {
   bandId: string;
   device: string;
   profileImage?: string;
+  profileIcon?: 'species' | 'paw' | 'id';
   cameraTracking?: boolean;
+  trackingMethod?: 'none' | 'visual' | 'rfid' | 'microchip' | 'visual_rfid';
+  rfidId?: string;
 }
 
 export type CreateBirdData = Omit<Bird, 'id'>;
@@ -40,7 +43,7 @@ export type CreateBirdData = Omit<Bird, 'id'>;
 export const EMPTY_BIRD: CreateBirdData = {
   name: '', species: 'chicken', breed: '', sex: 'hen', hatchDate: '',
   color: '', weight: '', health: 'healthy', notes: '',
-  eggColor: '', avgEggsPerWeek: 0, bandId: '', device: 'ct_001',
+  eggColor: '', avgEggsPerWeek: 0, bandId: '', device: '',
 };
 
 export const SPECIES_EMOJI: Partial<Record<Species, string>> = {
@@ -136,8 +139,8 @@ export function getDemoAnimalsForProduct(productFamily: string, deviceId?: strin
   }));
 }
 
-const FIREBASE_ENABLED = FIRESTORE_DATA_ENABLED;
 const STORAGE_KEY = 'tendercells_birds_v1';
+const MIGRATION_KEY = 'tendercells_animals_cloud_migrated_v1';
 export const BIRDS_UPDATED_EVENT = 'tendercells-birds-updated';
 
 // ── localStorage backend (sim mode) ───────────────────────────────────────────
@@ -196,53 +199,64 @@ const localBackend = {
 
 // ── Firestore backend (loaded only when configured) ───────────────────────────
 async function firestoreBackend() {
-  const { collection, doc, addDoc, getDoc, getDocs, updateDoc, deleteDoc, setDoc } =
+  const { collection, doc, addDoc, getDoc, getDocs, query, where, updateDoc, deleteDoc, setDoc } =
     await import('firebase/firestore');
-
-  const itemsRef = (deviceId: string) => collection(db, `birds/${deviceId}/items`);
-  // Roster lives per-device; default device used when none is specified.
-  const DEFAULT_DEVICE = 'ct_001';
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error('Sign in to sync the animal roster.');
+  const animalsRef = collection(db, 'animals');
+  const clean = (id: string, data: Record<string, unknown>): Bird => {
+    const { userId: _owner, ...animal } = data;
+    return { ...animal, id } as Bird;
+  };
 
   return {
     async getBirds(deviceId?: string): Promise<Bird[]> {
-      const snap = await getDocs(itemsRef(deviceId ?? DEFAULT_DEVICE));
-      return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Bird));
+      const migrationId = `${MIGRATION_KEY}:${uid}`;
+      if (!localStorage.getItem(migrationId)) {
+        const demoIds = new Set(DEMO_ANIMALS.map((animal) => animal.id));
+        const ownedAnimals = readAll().filter((animal) => !demoIds.has(animal.id));
+        await Promise.all(ownedAnimals.map((animal) => setDoc(doc(db, 'animals', animal.id), { ...animal, userId: uid }, { merge: true })));
+        localStorage.setItem(migrationId, new Date().toISOString());
+      }
+      const snap = await getDocs(query(animalsRef, where('userId', '==', uid)));
+      const animals = snap.docs.map((item) => clean(item.id, item.data()));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(animals));
+      return deviceId ? animals.filter((animal) => animal.device === deviceId) : animals;
     },
     async createBird(data: CreateBirdData): Promise<Bird> {
-      const ref = await addDoc(itemsRef(data.device || DEFAULT_DEVICE), data);
-      return { id: ref.id, ...data };
+      const ref = await addDoc(animalsRef, { ...data, userId: uid });
+      const animal = { id: ref.id, ...data };
+      writeAll([...readAll(), animal]);
+      return animal;
     },
     async updateBird(id: string, data: CreateBirdData): Promise<void> {
-      await updateDoc(doc(db, `birds/${data.device || DEFAULT_DEVICE}/items/${id}`), { ...data });
+      await updateDoc(doc(db, 'animals', id), { ...data, userId: uid });
+      await localBackend.updateBird(id, data);
     },
-    async deleteBird(id: string, deviceId = DEFAULT_DEVICE): Promise<void> {
-      await deleteDoc(doc(db, `birds/${deviceId}/items/${id}`));
+    async deleteBird(id: string): Promise<void> {
+      await deleteDoc(doc(db, 'animals', id));
+      await localBackend.deleteBird(id);
     },
-    async getBird(id: string, deviceId = DEFAULT_DEVICE): Promise<Bird | null> {
-      const snap = await getDoc(doc(db, `birds/${deviceId}/items/${id}`));
-      return snap.exists() ? ({ id: snap.id, ...snap.data() } as Bird) : null;
+    async getBird(id: string): Promise<Bird | null> {
+      const snap = await getDoc(doc(db, 'animals', id));
+      return snap.exists() && snap.data().userId === uid ? clean(snap.id, snap.data()) : null;
     },
     async seedDemoFlock(): Promise<Bird[]> {
-      const existing = await getDocs(itemsRef(DEFAULT_DEVICE));
-      if (!existing.empty) return existing.docs.map((d) => ({ id: d.id, ...d.data() } as Bird));
-      await Promise.all(
-        DEMO_BIRDS.map((b) => setDoc(doc(db, `birds/${DEFAULT_DEVICE}/items/${b.id}`), b)),
-      );
-      return DEMO_BIRDS;
+      return localBackend.seedDemoFlock();
     },
     async seedFlock(birds: Bird[]): Promise<Bird[]> {
-      // Upsert by fixed demo id under each bird's own device collection.
-      await Promise.all(
-        birds.map((b) => setDoc(doc(db, `birds/${b.device || DEFAULT_DEVICE}/items/${b.id}`), b)),
-      );
-      return birds;
+      return localBackend.seedFlock(birds);
     },
   };
 }
 
+function canUseCloud(): boolean {
+  return FIREBASE_ENABLED && Boolean(auth.currentUser);
+}
+
 export const birdsService = {
   async getBirds(deviceId?: string): Promise<Bird[]> {
-    if (!FIREBASE_ENABLED) return localBackend.getBirds(deviceId);
+    if (!canUseCloud()) return localBackend.getBirds(deviceId);
     try {
       return await (await firestoreBackend()).getBirds(deviceId);
     } catch {
@@ -250,7 +264,7 @@ export const birdsService = {
     }
   },
   async createBird(data: CreateBirdData): Promise<Bird> {
-    if (!FIREBASE_ENABLED) return localBackend.createBird(data);
+    if (!canUseCloud()) return localBackend.createBird(data);
     try {
       return await (await firestoreBackend()).createBird(data);
     } catch {
@@ -258,7 +272,7 @@ export const birdsService = {
     }
   },
   async updateBird(id: string, data: CreateBirdData): Promise<void> {
-    if (!FIREBASE_ENABLED) return localBackend.updateBird(id, data);
+    if (!canUseCloud()) return localBackend.updateBird(id, data);
     try {
       return await (await firestoreBackend()).updateBird(id, data);
     } catch {
@@ -266,23 +280,23 @@ export const birdsService = {
     }
   },
   async deleteBird(id: string, deviceId?: string): Promise<void> {
-    if (!FIREBASE_ENABLED) return localBackend.deleteBird(id);
+    if (!canUseCloud()) return localBackend.deleteBird(id);
     try {
-      return await (await firestoreBackend()).deleteBird(id, deviceId);
+      return await (await firestoreBackend()).deleteBird(id);
     } catch {
       return localBackend.deleteBird(id);
     }
   },
   async getBird(id: string, deviceId?: string): Promise<Bird | null> {
-    if (!FIREBASE_ENABLED) return localBackend.getBird(id);
+    if (!canUseCloud()) return localBackend.getBird(id);
     try {
-      return await (await firestoreBackend()).getBird(id, deviceId);
+      return await (await firestoreBackend()).getBird(id);
     } catch {
       return localBackend.getBird(id);
     }
   },
   async seedDemoFlock(): Promise<Bird[]> {
-    if (!FIREBASE_ENABLED) return localBackend.seedDemoFlock();
+    if (!canUseCloud()) return localBackend.seedDemoFlock();
     try {
       return await (await firestoreBackend()).seedDemoFlock();
     } catch {
@@ -290,7 +304,7 @@ export const birdsService = {
     }
   },
   async seedFlock(birds: Bird[]): Promise<Bird[]> {
-    if (!FIREBASE_ENABLED) return localBackend.seedFlock(birds);
+    if (!canUseCloud()) return localBackend.seedFlock(birds);
     try {
       return await (await firestoreBackend()).seedFlock(birds);
     } catch {
@@ -299,6 +313,27 @@ export const birdsService = {
   },
   async seedDemoAnimalsForProduct(productFamily: string, deviceId?: string): Promise<Bird[]> {
     return this.seedFlock(getDemoAnimalsForProduct(productFamily, deviceId));
+  },
+  subscribe(onChange: (animals: Bird[]) => void): () => void {
+    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+    const uid = auth.currentUser?.uid;
+    if (!FIREBASE_ENABLED || !uid) return () => undefined;
+    void import('firebase/firestore').then(({ collection, onSnapshot, query, where }) => {
+      if (cancelled) return;
+      unsubscribe = onSnapshot(query(collection(db, 'animals'), where('userId', '==', uid)), (snapshot) => {
+        const animals = snapshot.docs.map((item) => {
+          const { userId: _owner, ...animal } = item.data();
+          return { ...animal, id: item.id } as Bird;
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(animals));
+        onChange(animals);
+      });
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
   },
 };
 

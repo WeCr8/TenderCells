@@ -117,6 +117,18 @@ describe('TenderCells OS contracts', () => {
     expect(firebaseConfig).toContain("frame-ancestors 'self'");
   });
 
+  it('uses the real cross-platform device provisioning flow', () => {
+    const wizard = readProjectFile('src/components/products/ConnectionSetupWizard.tsx');
+
+    ['TenderCam-Setup', 'ChickenTender-Setup', 'TenderNode-Setup', 'Windows:', 'macOS:'].forEach((marker) => {
+      expect(wizard).toContain(marker);
+    });
+    expect(wizard).toContain("window.open('http://192.168.4.1'");
+    expect(wizard).toContain('camera_stream_url: streamUrl.trim()');
+    expect(wizard).not.toContain('password: password.trim()');
+    expect(wizard).not.toContain('Simulate pairing process');
+  });
+
   it('keeps FarmBot attribution and reuse policy visible in repo docs', () => {
     const attribution = readProjectFile('docs/third-party-attribution.md');
     expect(attribution).toContain('FarmBot');

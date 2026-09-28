@@ -340,16 +340,12 @@ function SignInForm() {
     if (!auth) return;
     setBusy(true);
     setError(null);
+    auth.tenantId = null;
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
     try {
-      await signInWithPopup(auth, provider);
+      await signInWithRedirect(auth, provider);
     } catch (err) {
-      const code = errorCode(err);
-      if (code === "auth/popup-blocked" || code === "auth/cancelled-popup-request" || code === "auth/operation-not-supported-in-this-environment") {
-        await signInWithRedirect(auth, provider);
-        return;
-      }
       setError(describeAuthError(err));
     } finally {
       setBusy(false);

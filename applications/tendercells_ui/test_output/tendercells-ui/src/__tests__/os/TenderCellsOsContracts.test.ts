@@ -171,6 +171,17 @@ describe('TenderCells OS contracts', () => {
     ].forEach((marker) => expect(birds).toContain(marker));
   });
 
+  it('supports general animal profiles and camera identity enrollment', () => {
+    const animals = readProjectFile('src/services/birdsService.ts');
+    const roster = readProjectFile('src/pages/BirdManagementPage.tsx');
+    const menu = readProjectFile('src/components/navigation/SideMenu.tsx');
+    ['Great Pyrenees', 'Pygmy', "'dog'", "'goat'", "'chicken'", 'profileImage', 'cameraTracking']
+      .forEach((marker) => expect(animals).toContain(marker));
+    expect(roster).toContain('Tag / band / microchip ID');
+    expect(roster).toContain('Use this profile as a camera identity reference');
+    expect(menu).toContain('label: "Animal Roster"');
+  });
+
   it('ships a TenderCells CLI for terminal-first contributors', () => {
     const pkg = readProjectFile('package.json');
     const cli = readProjectFile('scripts/tendercells-cli.mjs');

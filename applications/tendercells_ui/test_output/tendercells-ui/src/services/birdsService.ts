@@ -12,9 +12,9 @@
 // warning. The firestore query SDK below stays dynamic to keep it lazy.
 import { FIRESTORE_DATA_ENABLED, db } from '../lib/firebase/firebaseApp';
 
-export type Sex = 'hen' | 'rooster' | 'doe' | 'buck' | 'wether' | 'unknown';
+export type Sex = 'female' | 'male' | 'spayed_female' | 'neutered_male' | 'hen' | 'rooster' | 'doe' | 'buck' | 'wether' | 'unknown';
 export type HealthStatus = 'healthy' | 'watch' | 'sick' | 'quarantine';
-export type Species = 'chicken' | 'duck' | 'turkey' | 'goose' | 'quail' | 'pigeon' | 'rabbit' | 'goat';
+export type Species = 'dog' | 'cat' | 'goat' | 'sheep' | 'pig' | 'cow' | 'horse' | 'alpaca' | 'rabbit' | 'chicken' | 'duck' | 'turkey' | 'goose' | 'quail' | 'pigeon' | 'other';
 
 export interface Bird {
   id: string;
@@ -31,6 +31,8 @@ export interface Bird {
   avgEggsPerWeek: number;
   bandId: string;
   device: string;
+  profileImage?: string;
+  cameraTracking?: boolean;
 }
 
 export type CreateBirdData = Omit<Bird, 'id'>;
@@ -41,12 +43,27 @@ export const EMPTY_BIRD: CreateBirdData = {
   eggColor: '', avgEggsPerWeek: 0, bandId: '', device: 'ct_001',
 };
 
-export const SPECIES_EMOJI: Record<Species, string> = {
+export const SPECIES_EMOJI: Partial<Record<Species, string>> = {
   chicken: '🐔', duck: '🦆', turkey: '🦃', goose: '🪿',
   quail: '🐦', pigeon: '🕊️', rabbit: '🐇', goat: '🐐',
 };
 
+export const SPECIES_GROUPS: { label: string; species: Species[] }[] = [
+  { label: 'Companion animals', species: ['dog', 'cat'] },
+  { label: 'Livestock', species: ['goat', 'sheep', 'pig', 'cow', 'horse', 'alpaca'] },
+  { label: 'Small animals', species: ['rabbit'] },
+  { label: 'Poultry and birds', species: ['chicken', 'duck', 'turkey', 'goose', 'quail', 'pigeon'] },
+  { label: 'Other', species: ['other'] },
+];
+
 export const BREEDS_BY_SPECIES: Record<Species, string[]> = {
+  dog: ['Great Pyrenees', 'Labrador Retriever', 'German Shepherd', 'Border Collie', 'Australian Shepherd', 'Mixed Breed', 'Other'],
+  cat: ['Domestic Shorthair', 'Domestic Longhair', 'Maine Coon', 'Siamese', 'Barn Cat', 'Mixed Breed', 'Other'],
+  sheep: ['Dorper', 'Katahdin', 'Suffolk', 'Hampshire', 'Merino', 'Other'],
+  pig: ['Pygmy', 'Kunekune', 'Pot-bellied', 'American Guinea Hog', 'Yorkshire', 'Other'],
+  cow: ['Angus', 'Hereford', 'Holstein', 'Jersey', 'Highland', 'Other'],
+  horse: ['Quarter Horse', 'Thoroughbred', 'Arabian', 'Appaloosa', 'Pony', 'Other'],
+  alpaca: ['Huacaya', 'Suri', 'Other'],
   chicken: ['Rhode Island Red', 'Barred Rock', 'Buff Orpington', 'Leghorn', 'Easter Egger', 'Silkie', 'Australorp', 'Plymouth Rock', 'Other'],
   duck: ['Pekin', 'Khaki Campbell', 'Muscovy', 'Runner', 'Rouen', 'Other'],
   turkey: ['Broad Breasted White', 'Heritage', 'Narragansett', 'Bronze', 'Other'],
@@ -54,7 +71,8 @@ export const BREEDS_BY_SPECIES: Record<Species, string[]> = {
   quail: ['Coturnix', 'Bobwhite', 'Button', 'Other'],
   pigeon: ['Racing Homer', 'King', 'Fantail', 'Roller', 'Other'],
   rabbit: ['Rex', 'Holland Lop', 'Flemish Giant', 'New Zealand', 'Other'],
-  goat: ['Boer', 'Nubian', 'LaMancha', 'Nigerian Dwarf', 'Other'],
+  goat: ['Pygmy', 'Nigerian Dwarf', 'Boer', 'Nubian', 'LaMancha', 'Alpine', 'Other'],
+  other: ['Mixed / Unknown', 'Other'],
 };
 
 // Demo flock — written to storage ONLY when the user opts in (seedDemoFlock),

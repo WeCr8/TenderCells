@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760" role="img" aria-labelledby="title desc">
+  <title id="title">TenderCells device registration and MQTT control path</title>
+  <desc id="desc">A device is flashed, provisioned, discovered, claimed, registered, and controlled through the TenderCells UI and MQTT API bridge.</desc>
+  <rect width="1600" height="760" fill="#f5f7f4"/>
+  <text x="70" y="70" font-family="Arial, sans-serif" font-size="38" font-weight="700" fill="#12372a">How any device joins TenderCells</text>
+  <text x="70" y="110" font-family="Arial, sans-serif" font-size="21" fill="#385548">One registry identity, one MQTT namespace, capability-driven controls</text>
+
+  <g font-family="Arial, sans-serif">
+    <g transform="translate(60 180)"><rect width="260" height="170" rx="8" fill="#fff" stroke="#3273dc" stroke-width="3"/><text x="130" y="48" text-anchor="middle" font-size="25" font-weight="700" fill="#153f75">1. Flash</text><text x="130" y="90" text-anchor="middle" font-size="18" fill="#394b5e">Web Serial installs</text><text x="130" y="120" text-anchor="middle" font-size="18" fill="#394b5e">camera-node firmware</text></g>
+    <g transform="translate(370 180)"><rect width="260" height="170" rx="8" fill="#fff" stroke="#2f8f5b" stroke-width="3"/><text x="130" y="48" text-anchor="middle" font-size="25" font-weight="700" fill="#1f6540">2. Provision</text><text x="130" y="90" text-anchor="middle" font-size="18" fill="#394b5e">Wi-Fi, broker IP,</text><text x="130" y="120" text-anchor="middle" font-size="18" fill="#394b5e">device ID and family</text></g>
+    <g transform="translate(680 180)"><rect width="260" height="170" rx="8" fill="#fff" stroke="#aa7a16" stroke-width="3"/><text x="130" y="48" text-anchor="middle" font-size="25" font-weight="700" fill="#76530c">3. Discover</text><text x="130" y="90" text-anchor="middle" font-size="18" fill="#394b5e">Heartbeat publishes to</text><text x="130" y="120" text-anchor="middle" font-size="18" fill="#394b5e">tc/{id}/sensors</text></g>
+    <g transform="translate(990 180)"><rect width="260" height="170" rx="8" fill="#fff" stroke="#7b4aa8" stroke-width="3"/><text x="130" y="48" text-anchor="middle" font-size="25" font-weight="700" fill="#563275">4. Claim</text><text x="130" y="90" text-anchor="middle" font-size="18" fill="#394b5e">Signed-in owner claims</text><text x="130" y="120" text-anchor="middle" font-size="18" fill="#394b5e">the unclaimed device</text></g>
+    <g transform="translate(1300 180)"><rect width="240" height="170" rx="8" fill="#fff" stroke="#c14d3a" stroke-width="3"/><text x="120" y="48" text-anchor="middle" font-size="25" font-weight="700" fill="#833326">5. Control</text><text x="120" y="90" text-anchor="middle" font-size="18" fill="#394b5e">UI → REST API</text><text x="120" y="120" text-anchor="middle" font-size="18" fill="#394b5e">→ MQTT cmd/*</text></g>
+    <g stroke="#6f8379" stroke-width="6" fill="none"><path d="M320 265H370"/><path d="M630 265H680"/><path d="M940 265H990"/><path d="M1250 265H1300"/></g>
+    <g fill="#6f8379"><path d="M370 265l-16-10v20z"/><path d="M680 265l-16-10v20z"/><path d="M990 265l-16-10v20z"/><path d="M1300 265l-16-10v20z"/></g>
+  </g>
+
+  <rect x="90" y="430" width="1420" height="230" rx="8" fill="#12372a"/>
+  <text x="125" y="478" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#fff">Minimum open device contract</text>
+  <text x="125" y="525" font-family="monospace" font-size="20" fill="#cfe5da">identity: deviceId + productType + peripheral + capabilities</text>
+  <text x="125" y="563" font-family="monospace" font-size="20" fill="#cfe5da">publish:  tc/{id}/sensors   tc/{id}/state   tc/{id}/status</text>
+  <text x="125" y="601" font-family="monospace" font-size="20" fill="#cfe5da">listen:   tc/{id}/cmd/&lt;feature&gt;   tc/{id}/cmd/estop</text>
+  <text x="125" y="639" font-family="monospace" font-size="20" fill="#cfe5da">security: claim once → owner-gated API → JSON validation → MQTT</text>
+</svg>

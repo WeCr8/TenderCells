@@ -1,0 +1,27 @@
+.camera-guide-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.25rem 0 2.5rem; }
+.camera-guide-actions .button-link { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: .65rem 1rem; border: 1px solid #39785b; border-radius: 6px; color: #174d35; font-weight: 700; text-decoration: none; }
+.camera-guide-actions .button-link.primary { background: #174d35; color: #fff; }
+.camera-guide-section { margin: 0 0 3rem; }
+.camera-guide-section h2 { margin-bottom: .75rem; }
+.camera-guide-lede { max-width: 760px; }
+.camera-step-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem; margin-top: 1.25rem; }
+.camera-step { display: grid; grid-template-columns: 34px 1fr; gap: .65rem; align-items: start; border: 1px solid #bfd0c6; border-radius: 6px; padding: 1rem; background: #fff; min-width: 0; }
+.camera-step-number { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #174d35; color: #fff; font-weight: 800; }
+.camera-step h3 { margin: .2rem 0 .45rem; font-size: 1rem; }
+.camera-step p { margin: 0; font-size: .92rem; line-height: 1.5; }
+.camera-visual-section { display: grid; grid-template-columns: minmax(220px, .42fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+.camera-diagram-scroll { overflow-x: auto; border: 1px solid #bfd0c6; background: #f5f7f4; border-radius: 6px; }
+.camera-diagram-scroll img { display: block; width: 100%; min-width: 720px; height: auto; }
+.camera-pin-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #bfd0c6; border-radius: 6px; }
+.camera-pin-table { width: 100%; min-width: 640px; border-collapse: collapse; background: #fff; }
+.camera-pin-table th, .camera-pin-table td { padding: .8rem 1rem; border-bottom: 1px solid #dbe5df; text-align: left; }
+.camera-pin-table th { background: #174d35; color: #fff; }
+.camera-warning-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; margin-top: 1rem; }
+.camera-warning-grid article { border-left: 4px solid #b34735; background: #fff8f5; padding: 1rem; }
+.camera-warning-grid h3 { margin: 0 0 .45rem; font-size: 1rem; }
+.camera-warning-grid p { margin: 0; line-height: 1.5; }
+.camera-source-note { border-top: 1px solid #bfd0c6; padding-top: 1.5rem; }
+.camera-source-links { display: flex; flex-wrap: wrap; gap: 1rem; }
+.camera-source-links a { color: #174d35; font-weight: 700; }
+@media (max-width: 1050px) { .camera-step-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .camera-warning-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .camera-visual-section { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .camera-guide-actions { display: grid; grid-template-columns: 1fr; } .camera-step-grid, .camera-warning-grid { grid-template-columns: 1fr; } .camera-step { grid-template-columns: 32px minmax(0, 1fr); } .camera-diagram-scroll { margin-inline: -1rem; border-left: 0; border-right: 0; border-radius: 0; } .camera-diagram-scroll img { min-width: 760px; } .camera-pin-table-wrap { margin-inline: -1rem; width: calc(100% + 2rem); border-left: 0; border-right: 0; border-radius: 0; } }

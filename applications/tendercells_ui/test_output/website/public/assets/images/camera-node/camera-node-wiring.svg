@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">TenderCells XIAO ESP32-S3 Sense starter wiring</title>
+  <desc id="desc">Pin-accurate wiring overview for USB, battery, I2C sensor, digital sensor, and isolated load driver.</desc>
+  <rect width="1600" height="980" fill="#f5f7f4"/>
+  <text x="70" y="72" font-family="Arial, sans-serif" font-size="38" font-weight="700" fill="#12372a">Single Camera Node: first wiring</text>
+  <text x="70" y="112" font-family="Arial, sans-serif" font-size="21" fill="#385548">Seeed Studio XIAO ESP32-S3 Sense • 3.3 V logic • power off before changing wires</text>
+
+  <rect x="525" y="170" width="550" height="560" rx="8" fill="#ffffff" stroke="#a9b9b1" stroke-width="3"/>
+  <image href="seeed-xiao-esp32s3-sense.jpg" x="555" y="205" width="490" height="490" preserveAspectRatio="xMidYMid meet"/>
+  <text x="800" y="708" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#12372a">XIAO ESP32-S3 Sense</text>
+
+  <rect x="70" y="170" width="360" height="150" rx="8" fill="#ffffff" stroke="#3273dc" stroke-width="3"/>
+  <text x="95" y="210" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#153f75">1. Flash and charge</text>
+  <text x="95" y="250" font-family="Arial, sans-serif" font-size="20" fill="#263b52">USB-C data cable → computer</text>
+  <text x="95" y="282" font-family="Arial, sans-serif" font-size="18" fill="#526273">Use Chrome/Edge Web Serial</text>
+  <path d="M430 250 C485 250 505 310 555 330" fill="none" stroke="#3273dc" stroke-width="8"/>
+
+  <rect x="70" y="370" width="360" height="190" rx="8" fill="#ffffff" stroke="#d03d3d" stroke-width="3"/>
+  <text x="95" y="410" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#8e2525">2. Battery power</text>
+  <text x="95" y="450" font-family="Arial, sans-serif" font-size="20" fill="#263b52">Qualified 3.7 V rechargeable LiPo</text>
+  <text x="95" y="483" font-family="Arial, sans-serif" font-size="18" fill="#526273">BAT− pad: closest to USB-C</text>
+  <text x="95" y="513" font-family="Arial, sans-serif" font-size="18" fill="#526273">BAT+ pad: away from USB-C</text>
+  <text x="95" y="543" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#8e2525">Never connect LiPo to 5V/VBUS.</text>
+  <path d="M430 470 C500 470 505 540 565 555" fill="none" stroke="#d03d3d" stroke-width="8" stroke-dasharray="14 10"/>
+
+  <rect x="1170" y="170" width="360" height="210" rx="8" fill="#ffffff" stroke="#2f8f5b" stroke-width="3"/>
+  <text x="1195" y="210" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1f6540">3. I2C sensor</text>
+  <text x="1195" y="250" font-family="Arial, sans-serif" font-size="19" fill="#263b52">3V3 → sensor VIN (3.3 V)</text>
+  <text x="1195" y="282" font-family="Arial, sans-serif" font-size="19" fill="#263b52">GND → sensor GND</text>
+  <text x="1195" y="314" font-family="Arial, sans-serif" font-size="19" fill="#263b52">D4 / GPIO5 → SDA</text>
+  <text x="1195" y="346" font-family="Arial, sans-serif" font-size="19" fill="#263b52">D5 / GPIO6 → SCL</text>
+  <path d="M1170 295 C1120 295 1110 360 1040 390" fill="none" stroke="#2f8f5b" stroke-width="8"/>
+
+  <rect x="1170" y="430" width="360" height="155" rx="8" fill="#ffffff" stroke="#aa7a16" stroke-width="3"/>
+  <text x="1195" y="470" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#76530c">4. Digital input</text>
+  <text x="1195" y="510" font-family="Arial, sans-serif" font-size="19" fill="#263b52">D1 / GPIO2 → 3.3 V sensor OUT</text>
+  <text x="1195" y="542" font-family="Arial, sans-serif" font-size="18" fill="#526273">Share GND. Never feed 5 V to GPIO.</text>
+  <path d="M1170 520 C1115 520 1100 500 1040 490" fill="none" stroke="#aa7a16" stroke-width="8"/>
+
+  <rect x="1170" y="635" width="360" height="175" rx="8" fill="#ffffff" stroke="#7b4aa8" stroke-width="3"/>
+  <text x="1195" y="675" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#563275">5. External load</text>
+  <text x="1195" y="715" font-family="Arial, sans-serif" font-size="19" fill="#263b52">D0 / GPIO1 → driver signal</text>
+  <text x="1195" y="747" font-family="Arial, sans-serif" font-size="18" fill="#526273">Use isolated relay/MOSFET driver.</text>
+  <text x="1195" y="779" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#8e2525">Load uses its own fused supply.</text>
+  <path d="M1170 725 C1110 725 1095 630 1035 605" fill="none" stroke="#7b4aa8" stroke-width="8"/>
+
+  <rect x="70" y="850" width="1460" height="80" rx="8" fill="#12372a"/>
+  <text x="95" y="885" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#ffffff">Sense-board conflicts:</text>
+  <text x="310" y="885" font-family="Arial, sans-serif" font-size="18" fill="#e7f1ec">camera uses GPIO10–18, 38–40, 47, 48; microphone uses GPIO41–42; microSD uses GPIO3, 7–9.</text>
+  <text x="95" y="914" font-family="Arial, sans-serif" font-size="17" fill="#bcd2c6">Do not assign auxiliary functions to those pins while their onboard feature is enabled. Verify every module is 3.3 V logic compatible.</text>
+</svg>

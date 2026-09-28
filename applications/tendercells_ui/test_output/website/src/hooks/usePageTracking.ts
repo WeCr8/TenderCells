@@ -111,6 +111,10 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: 'Mobile Coop and Pasture Rotation Guide - TenderCells',
     description: 'Study mobile coop design, route planning, docking, safety, and pasture rotation ideas for students and homesteaders.',
   },
+  '/guides/camera-node-first-build': {
+    title: 'ESP32-S3 Camera Node Build Guide | TenderCells',
+    description: 'Electrical wiring, browser flashing, device registration, MQTT onboarding, and responsive build instructions for a Seeed XIAO ESP32-S3 Sense camera node.',
+  },
   '/farm-automation': {
     title: 'Farm Automation Software and Smart Farm Routines - TenderCells',
     description: 'TenderCells Farm Automation and Routines is a Home Assistant for agriculture, IFTTT for animal care, and Node-RED for homesteaders.',

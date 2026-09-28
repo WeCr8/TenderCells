@@ -835,50 +835,93 @@ export default function ProductRegistrationModal({
 
             <Box>
               <Grid container spacing={1.5}>
-                {[...productTemplates].sort((a, b) => Number(b.id === 'camera-kit') - Number(a.id === 'camera-kit')).map((template) => (
-                  <Grid item xs={12} sm={6} key={template.id}>
-                    <Paper
-                      component="button"
-                      type="button"
-                      onClick={() => applyTemplate(template)}
-                      sx={{
-                        p: 2,
-                        height: '100%',
-                        width: '100%',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        bgcolor: selectedTemplateId === template.id ? 'rgba(107, 191, 89, 0.13)' : 'rgba(0, 43, 31, 0.64)',
-                        border: `1px solid ${selectedTemplateId === template.id ? '#C8E6A0' : 'rgba(159, 176, 141, 0.28)'}`,
-                        borderRadius: 1,
-                        color: 'text.primary',
-                        '&:hover': {
-                          borderColor: '#C8E6A0',
-                          bgcolor: 'rgba(107, 191, 89, 0.10)',
-                        },
-                      }}
-                    >
-                      <Stack direction="row" spacing={2} alignItems="flex-start">
-                        <Box sx={{ color: '#DDF2B1', '& svg': { fontSize: 48 } }}>
-                          {template.icon}
-                        </Box>
-                        <Box>
-                          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-                            <Typography variant="h6" sx={{ color: '#F0F2DA' }}>
-                              {template.title}
-                            </Typography>
-                            {template.id === 'first-chicken-tender' && <Chip size="small" label="Garage" color="success" />}
+                {[...productTemplates].sort((a, b) => Number(b.id === 'camera-kit') - Number(a.id === 'camera-kit')).map((template) => {
+                  const isSelected = selectedTemplateId === template.id;
+                  return (
+                    <Grid item xs={12} sm={6} key={template.id}>
+                      <Paper
+                        sx={{
+                          height: '100%',
+                          overflow: 'hidden',
+                          bgcolor: isSelected ? 'rgba(107, 191, 89, 0.13)' : 'rgba(0, 43, 31, 0.64)',
+                          border: `1px solid ${isSelected ? '#C8E6A0' : 'rgba(159, 176, 141, 0.28)'}`,
+                          borderRadius: 1,
+                          color: 'text.primary',
+                        }}
+                      >
+                        <Box
+                          component="button"
+                          type="button"
+                          onClick={() => applyTemplate(template)}
+                          aria-pressed={isSelected}
+                          sx={{
+                            p: 2,
+                            width: '100%',
+                            minHeight: 148,
+                            border: 0,
+                            bgcolor: 'transparent',
+                            color: 'inherit',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            '&:hover': { bgcolor: 'rgba(107, 191, 89, 0.10)' },
+                            '&:focus-visible': { outline: '2px solid #C8E6A0', outlineOffset: -2 },
+                          }}
+                        >
+                          <Stack direction="row" spacing={2} alignItems="flex-start">
+                            <Box sx={{ color: '#DDF2B1', '& svg': { fontSize: 48 } }}>
+                              {template.icon}
+                            </Box>
+                            <Box>
+                              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                                <Typography variant="h6" sx={{ color: '#F0F2DA' }}>
+                                  {template.title}
+                                </Typography>
+                                {template.id === 'first-chicken-tender' && <Chip size="small" label="Garage" color="success" />}
+                              </Stack>
+                              <Typography variant="body2" sx={{ color: '#C8E6A0', mb: 0.75 }}>
+                                {template.subtitle}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {template.description}
+                              </Typography>
+                            </Box>
                           </Stack>
-                          <Typography variant="body2" sx={{ color: '#C8E6A0', mb: 0.75 }}>
-                            {template.subtitle}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {template.description}
-                          </Typography>
                         </Box>
-                      </Stack>
-                    </Paper>
-                  </Grid>
-                ))}
+                        {isSelected && (
+                          <Stack
+                            direction={{ xs: 'column', sm: 'row' }}
+                            spacing={1}
+                            sx={{ p: 1.5, pt: 1, borderTop: '1px solid rgba(200, 230, 160, 0.22)' }}
+                          >
+                            <Button
+                              fullWidth
+                              onClick={openRegistrationFlasher}
+                              variant="outlined"
+                              startIcon={<SystemUpdateAltIcon />}
+                              disabled={isSubmitting}
+                            >
+                              {productFamily === 'camera-kit' ? '1. Flash Camera' : 'Flash Firmware'}
+                            </Button>
+                            <Button
+                              fullWidth
+                              onClick={template.id === 'first-chicken-tender' ? handleRegisterFirstChickenTender : handleSubmit}
+                              variant="contained"
+                              disabled={isSubmitting}
+                            >
+                              {isSubmitting
+                                ? 'Registering...'
+                                : productFamily === 'camera-kit'
+                                  ? '2. Register Camera'
+                                  : template.id === 'first-chicken-tender'
+                                    ? 'Register First Device'
+                                    : 'Register Product'}
+                            </Button>
+                          </Stack>
+                        )}
+                      </Paper>
+                    </Grid>
+                  );
+                })}
               </Grid>
             </Box>
 
@@ -903,11 +946,6 @@ export default function ProductRegistrationModal({
                     Confirm the product name, location, animal count, and hardware setup before registering.
                   </Typography>
                 </Box>
-                {selectedTemplateId === 'first-chicken-tender' && (
-                  <Button variant="contained" onClick={handleRegisterFirstChickenTender} disabled={isSubmitting}>
-                    Register First Device
-                  </Button>
-                )}
               </Stack>
             </Paper>
 
@@ -1555,19 +1593,9 @@ export default function ProductRegistrationModal({
             )}
           </Box>
         </DialogContent>
-        <DialogActions sx={{ flexWrap: 'wrap', gap: 1 }}>
+        <DialogActions>
           <Button onClick={onClose} disabled={isSubmitting}>
             Cancel
-          </Button>
-          <Button onClick={openRegistrationFlasher} variant="outlined" startIcon={<SystemUpdateAltIcon />} disabled={isSubmitting}>
-            {productFamily === 'camera-kit' ? '1. Flash Camera' : 'Flash Firmware'}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Registering...' : productFamily === 'camera-kit' ? '2. Register Camera' : 'Register Product'}
           </Button>
         </DialogActions>
       </Dialog>

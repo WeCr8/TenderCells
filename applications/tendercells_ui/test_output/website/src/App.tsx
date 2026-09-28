@@ -18,6 +18,7 @@ import TenderCellsOverviewPage from "./pages/TenderCellsOverviewPage";
 import AudienceProgramPage from "./pages/AudienceProgramPage";
 import TrustPage from "./pages/TrustPage";
 import GuidePage from "./pages/GuidePage";
+import CameraNodeGuidePage from "./pages/CameraNodeGuidePage";
 import SeoHubPage from "./pages/SeoHubPage";
 import LLMDemoTestPage from "./pages/LLMDemoTestPage";
 import FarmAutomationPage from "./pages/FarmAutomationPage";
@@ -86,6 +87,7 @@ function App() {
         <Route path="/guides/smart-chicken-coop" element={<GuidePage slug="smart-chicken-coop" />} />
         <Route path="/guides/predator-monitoring" element={<GuidePage slug="predator-monitoring" />} />
         <Route path="/guides/pasture-rotation" element={<GuidePage slug="pasture-rotation" />} />
+        <Route path="/guides/camera-node-first-build" element={<CameraNodeGuidePage />} />
         <Route path="/farm-automation" element={<FarmAutomationPage />} />
 
         {/* Animal Health */}

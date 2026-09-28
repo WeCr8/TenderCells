@@ -145,6 +145,7 @@ export default function ProductRegistrationModal({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [registeredProduct, setRegisteredProduct] = useState<Product | null>(null);
   const [isConnectionWizardOpen, setIsConnectionWizardOpen] = useState(false);
+  const [flasherUrl, setFlasherUrl] = useState<string | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
 
   const productTemplates = [
@@ -784,7 +785,7 @@ export default function ProductRegistrationModal({
       name: productName.trim() || customProductName.trim() || 'My Tender Cells Device',
     });
     if (deviceId.trim()) params.set('deviceId', deviceId.trim());
-    window.open(`/flash/?${params.toString()}`, '_blank', 'noopener,noreferrer');
+    setFlasherUrl(`/flash/?${params.toString()}`);
   };
 
   return (
@@ -1598,6 +1599,36 @@ export default function ProductRegistrationModal({
             Cancel
           </Button>
         </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(flasherUrl)}
+        onClose={() => setFlasherUrl(null)}
+        fullScreen
+        PaperProps={{ sx: { bgcolor: '#001F17' } }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1 }}>
+          <Box>
+            <Typography variant="subtitle1" sx={{ color: '#E6E8D8', fontWeight: 700 }}>
+              Flash {productName.trim() || customProductName.trim() || 'Device'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Close this window after flashing to continue registration.
+            </Typography>
+          </Box>
+          <IconButton aria-label="Close flasher and return to registration" onClick={() => setFlasherUrl(null)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        {flasherUrl && (
+          <Box
+            component="iframe"
+            src={flasherUrl}
+            title="Tender Cells device flasher"
+            allow="serial; usb"
+            sx={{ width: '100%', flex: 1, border: 0, bgcolor: '#fff' }}
+          />
+        )}
       </Dialog>
 
       {/* QR Code Scanner Modal */}

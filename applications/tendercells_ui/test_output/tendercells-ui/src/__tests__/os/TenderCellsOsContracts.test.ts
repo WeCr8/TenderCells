@@ -211,6 +211,23 @@ describe('TenderCells OS contracts', () => {
       .forEach((marker) => expect(settings).toContain(marker));
   });
 
+  it('does not show or run routines for unregistered products', () => {
+    const schedules = readProjectFile('src/pages/SchedulesPage.tsx');
+    expect(schedules).toContain('No registered products. Register a device before creating schedules or running routines.');
+    expect(schedules).toContain('products.some((product) => product.id === selectedDeviceId)');
+    expect(schedules).toContain('selectedProduct.connection_status === \'online\'');
+    expect(schedules).toContain('{selectedProduct && (');
+    expect(schedules).not.toContain('verified via live headcount sensor');
+  });
+
+  it('shows the account animal roster count on the main dashboard', () => {
+    const dashboard = readProjectFile('src/pages/DashboardPage.tsx');
+    expect(dashboard).toContain('useBirds()');
+    expect(dashboard).toContain("label: 'Animal Roster', value: animalsLoading ? '...' : animals.length");
+    expect(dashboard).toContain("path: '/animals'");
+    expect(dashboard).not.toContain('product.metadata?.animal_count');
+  });
+
   it('uses an account-level animal roster with legacy route redirects', () => {
     const animals = readProjectFile('src/services/birdsService.ts');
     const routes = readProjectFile('src/routes/AppRoutes.tsx');

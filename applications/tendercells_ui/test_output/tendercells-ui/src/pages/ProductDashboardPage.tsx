@@ -2,6 +2,12 @@ import { Alert, Box, Button, Chip, CircularProgress, FormControlLabel, Grid, Pap
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SettingsRemoteIcon from '@mui/icons-material/SettingsRemote';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
+import MicIcon from '@mui/icons-material/Mic';
+import SdStorageIcon from '@mui/icons-material/SdStorage';
+import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
+import DeveloperBoardIcon from '@mui/icons-material/DeveloperBoard';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
@@ -161,6 +167,45 @@ export default function ProductDashboardPage() {
                       label={label}
                     />
                     <Typography variant="body2" color="text.secondary">{available ? description : 'Not available on the registered board.'}</Typography>
+                  </Paper>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </Box>
+      )}
+
+      {isCameraNode && (
+        <Box>
+          <Typography variant="h6" gutterBottom>Help & Documentation</Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+            <Button startIcon={<MenuBookIcon />} variant="outlined" onClick={() => navigate('/resources?category=guides')}>Camera Build Guide</Button>
+            <Button startIcon={<MenuBookIcon />} variant="outlined" onClick={() => navigate('/resources')}>Animal, Plant & Health Resources</Button>
+            <Button startIcon={<HealthAndSafetyIcon />} variant="outlined" onClick={() => navigate('/diagnostics')}>Device Diagnostics</Button>
+          </Stack>
+        </Box>
+      )}
+
+      {isCameraNode && (
+        <Box>
+          <Typography variant="h6" gutterBottom>Device Functions</Typography>
+          <Grid container spacing={1.5}>
+            {[
+              { capability: 'microphone', title: 'Sound', icon: <MicIcon />, detail: 'Sound-event telemetry will appear when microphone firmware reports a real level.' },
+              { capability: 'microsd', title: 'Storage', icon: <SdStorageIcon />, detail: 'Recording and free-space controls require a detected microSD card.' },
+              { capability: 'battery_power', title: 'Battery', icon: <BatteryChargingFullIcon />, detail: 'Charge and voltage require a connected battery monitor or supported board reading.' },
+              { capability: 'gpio', title: 'GPIO', icon: <DeveloperBoardIcon />, detail: 'Pin controls appear only after a pin map is registered for this device.' },
+            ].filter(({ capability }) => hardwareCapabilities.includes(capability)).map(({ capability, title, icon, detail }) => {
+              const enabled = enabledCapabilities.includes(capability);
+              return (
+                <Grid item xs={12} sm={6} lg={3} key={capability}>
+                  <Paper variant="outlined" sx={{ p: 1.75, height: '100%' }}>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                      {icon}
+                      <Typography fontWeight={600}>{title}</Typography>
+                      <Chip size="small" label={enabled ? 'Enabled' : 'Off'} color={enabled ? 'success' : 'default'} />
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary">{enabled ? detail : `Enable ${title.toLowerCase()} in Board Controls to configure it.`}</Typography>
                   </Paper>
                 </Grid>
               );

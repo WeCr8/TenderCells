@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogTitle,
@@ -64,6 +65,7 @@ export default function ConnectionSetupWizard({
   product,
   onComplete,
 }: ConnectionSetupWizardProps) {
+  const navigate = useNavigate();
   const { connectProduct, updateProduct } = useProducts();
   const productFamily = String(product.metadata?.product_family || '');
   const isCamera = productFamily === 'camera-kit' || String(product.metadata?.firmware_target || '').includes('camera-node');
@@ -84,6 +86,7 @@ export default function ConnectionSetupWizard({
   const [usbStatus, setUsbStatus] = useState<'idle' | 'connecting' | 'success' | 'error'>('idle');
   const [streamUrl, setStreamUrl] = useState(String(product.metadata?.camera_stream_url || suggestedStreamUrl));
   const [cameraVerified, setCameraVerified] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
   const [, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'success' | 'error'>('idle');
@@ -264,6 +267,7 @@ export default function ConnectionSetupWizard({
       onComplete();
     }
     handleReset();
+    navigate(`/product/${encodeURIComponent(product.id)}`);
   };
 
   const handleReset = () => {
@@ -278,6 +282,7 @@ export default function ConnectionSetupWizard({
     setUsbStatus('idle');
     setStreamUrl(String(product.metadata?.camera_stream_url || suggestedStreamUrl));
     setCameraVerified(false);
+    setPreviewError(false);
     setConnectionError(null);
     setConnectionStatus('idle');
   };
@@ -367,8 +372,12 @@ export default function ConnectionSetupWizard({
             {isCamera ? (
               <>
                 <TextField fullWidth label="Camera stream URL" value={streamUrl} onChange={(e) => { setStreamUrl(e.target.value); setCameraVerified(false); }} placeholder="http://192.168.1.50/stream" />
+                {/^(https?:)\/\/[^/]+\/stream$/i.test(streamUrl.trim()) && !previewError && (
+                  <Box component="img" src={streamUrl.trim()} alt="Live camera verification" onLoad={() => setPreviewError(false)} onError={() => setPreviewError(true)} sx={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover', bgcolor: '#0D2B1E', border: '1px solid', borderColor: 'divider' }} />
+                )}
+                {previewError && <Alert severity="warning">The stream opens directly but could not be embedded. Retry after refreshing TenderCells, or use the direct test below.</Alert>}
                 <Button variant="outlined" disabled={!/^http:\/\/[^/]+\/stream$/i.test(streamUrl.trim())} onClick={() => window.open(streamUrl.trim(), 'tendercells-camera-test', 'noopener,noreferrer')}>
-                  Open Live Camera Test
+                  Open Direct Stream Test
                 </Button>
                 <FormControlLabel control={<Checkbox checked={cameraVerified} onChange={(e) => setCameraVerified(e.target.checked)} />} label="I can see the live camera image" />
               </>

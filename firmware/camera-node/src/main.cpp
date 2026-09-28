@@ -193,12 +193,31 @@ bool reconnect() {
 }
 
 bool tryUsbProvision() {
-  Serial.println("[USB] Send TC_PROVISION JSON within 10 seconds, or use TenderCam-Setup");
+  Serial.println("[USB] Send TC_SCAN or TC_PROVISION JSON within 10 seconds, or use TenderCam-Setup");
   unsigned long deadline = millis() + 10000;
   while (millis() < deadline) {
     if (!Serial.available()) { delay(25); continue; }
     String line = Serial.readStringUntil('\n');
     line.trim();
+    if (line == "TC_SCAN") {
+      WiFi.mode(WIFI_STA);
+      int count = WiFi.scanNetworks(false, true, false, 300, 0);
+      JsonDocument networks;
+      JsonArray results = networks.to<JsonArray>();
+      for (int i = 0; i < count; i++) {
+        if (WiFi.SSID(i).isEmpty()) continue;
+        JsonObject network = results.add<JsonObject>();
+        network["ssid"] = WiFi.SSID(i);
+        network["rssi"] = WiFi.RSSI(i);
+        network["secure"] = WiFi.encryptionType(i) != WIFI_AUTH_OPEN;
+      }
+      Serial.print("[USB] NETWORKS:");
+      serializeJson(networks, Serial);
+      Serial.println();
+      WiFi.scanDelete();
+      deadline = millis() + 10000;
+      continue;
+    }
     if (!line.startsWith("TC_PROVISION:")) continue;
 
     JsonDocument doc;

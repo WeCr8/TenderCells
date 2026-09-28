@@ -8,6 +8,8 @@ For **adults and kids alike**: middle-school and up with an instructor; older
 students / clubs can run it solo. Pairs with the no-hardware
 [Classroom Quickstart](CLASSROOM_QUICKSTART.md) (do that first if you have no boards).
 
+For the camera-first hardware path, use the [Single Camera Node build and registry guide](CAMERA_NODE_FIRST_BUILD.md). It shows the real Seeed Studio board, battery polarity, safe auxiliary pins, browser flashing, and how the device appears in the TenderCells UI.
+
 > **Open-source goal:** this is a platform for builders, techies, and kids to
 > invent on. Students don't just run a demo — they define a *new* device (any
 > species, any threat) and make the software treat it like a real one.

@@ -180,6 +180,8 @@ uses whatever broker is already running there.
 
 ## Bring your own ESP32
 
+For the supported first physical build, follow [Single Camera Node: First Build and Device Registry Guide](CAMERA_NODE_FIRST_BUILD.md). It includes real Seeed Studio imagery, pin-accurate auxiliary wiring, browser flashing, claim/ownership, and the reusable registry contract.
+
 Your firmware is a "device" the moment it speaks these topics. Match the schemas
 exactly (see `CLAUDE.md §4` for the firmware-side contract and safety rules).
 

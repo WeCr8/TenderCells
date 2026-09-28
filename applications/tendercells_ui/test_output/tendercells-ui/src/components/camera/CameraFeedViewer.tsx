@@ -31,6 +31,7 @@ export default function CameraFeedViewer({
   const [connecting, setConnecting] = useState(false);
   const [streamError, setStreamError] = useState(false);
   const [streamAttempt, setStreamAttempt] = useState(0);
+  const lastResumeRef = useRef(0);
 
   // Browser webcam preview — opt-in, client-side only (no upload/record/store).
   // A "try it now" path for visitors with no hardware. getUserMedia only fires on
@@ -90,6 +91,24 @@ export default function CameraFeedViewer({
   }, [camera]);
 
   useEffect(() => setStreamError(false), [camera.streamUrl, streamAttempt]);
+
+  useEffect(() => {
+    if (!camera.streamUrl) return;
+    const reconnect = () => {
+      if (document.visibilityState !== 'visible') return;
+      const now = Date.now();
+      if (now - lastResumeRef.current < 750) return;
+      lastResumeRef.current = now;
+      setStreamError(false);
+      setStreamAttempt((value) => value + 1);
+    };
+    document.addEventListener('visibilitychange', reconnect);
+    window.addEventListener('focus', reconnect);
+    return () => {
+      document.removeEventListener('visibilitychange', reconnect);
+      window.removeEventListener('focus', reconnect);
+    };
+  }, [camera.streamUrl]);
 
   const getSignalColor = (signal?: number) => {
     if (!signal) return 'default';

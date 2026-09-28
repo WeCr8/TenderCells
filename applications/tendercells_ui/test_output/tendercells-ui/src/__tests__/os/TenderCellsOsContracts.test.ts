@@ -182,6 +182,13 @@ describe('TenderCells OS contracts', () => {
     expect(menu).toContain('label: "Animal Roster"');
   });
 
+  it('reconnects a suspended camera stream when its tab becomes visible', () => {
+    const viewer = readProjectFile('src/components/camera/CameraFeedViewer.tsx');
+    expect(viewer).toContain("document.addEventListener('visibilitychange', reconnect)");
+    expect(viewer).toContain("window.addEventListener('focus', reconnect)");
+    expect(viewer).toContain('setStreamAttempt((value) => value + 1)');
+  });
+
   it('ships a TenderCells CLI for terminal-first contributors', () => {
     const pkg = readProjectFile('package.json');
     const cli = readProjectFile('scripts/tendercells-cli.mjs');

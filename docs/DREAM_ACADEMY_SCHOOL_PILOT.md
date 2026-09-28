@@ -35,7 +35,7 @@ Motor, pump, heater, flight, firmware erase, Wi-Fi credential, account administr
 Google sign-in already uses Firebase Authentication. Before a school pilot:
 
 1. Confirm `tendercells.com` is a Firebase Hosting custom domain for the production Firebase project.
-2. Set the Firebase web `authDomain` to the hosted custom domain when using redirect sign-in.
+2. The production deployment sets the Firebase web `authDomain` to `tendercells.com`; keep the deploy guard enabled so redirect sign-in remains first-party.
 3. Add `tendercells.com` to Firebase Authentication authorized domains.
 4. Add `https://tendercells.com/__/auth/handler` as the provider redirect URI when required.
 5. Enable Google as an Authentication provider and configure the support email and consent branding.

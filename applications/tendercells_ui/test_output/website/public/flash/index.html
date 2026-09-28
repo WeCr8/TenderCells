@@ -60,7 +60,11 @@
     .device.soon { opacity: .5; cursor: not-allowed; }
     .device h3 { margin: 6px 0 2px; color: var(--gold); font-size: 1.05rem; }
     .device small { color: var(--goldMuted); }
-    .install-row { text-align: center; margin: 8px 0 4px; }
+    .install-row {
+      text-align: center; margin: 8px 0 4px; position: sticky; bottom: 10px;
+      z-index: 20; padding: 12px; background: var(--surface);
+      border: 1px solid var(--accent); border-radius: 10px;
+    }
     esp-web-install-button { --esp-tools-button-color: var(--bg); }
     esp-web-install-button[install-unsupported] { display: none; }
     .btn-fallback {
@@ -101,6 +105,20 @@
       cursor: pointer; color: var(--gold); font-weight: 600; padding: 6px 0;
     }
     .trouble[open] summary { margin-bottom: 8px; }
+    details.card > summary { cursor: pointer; color: var(--gold); font-weight: 700; font-size: 1.05rem; }
+    .adult { border-left-color: var(--warning); }
+    button, .device, a { touch-action: manipulation; }
+    @media (max-width: 640px) {
+      .wrap { padding: 12px 12px 72px; }
+      .topbar { padding: 10px 12px; }
+      .toplinks { display: none !important; }
+      h1 { font-size: 1.45rem; }
+      .tabs { position: sticky; top: 0; z-index: 30; background: var(--bg); padding: 8px 0; margin: 8px 0; }
+      .tab { min-height: 44px; padding: 8px 14px; }
+      .card { padding: 16px; margin: 10px 0; border-radius: 8px; }
+      .device { flex-basis: 46%; min-height: 96px; padding: 10px; }
+      .btn-fallback { width: 100%; min-height: 52px; }
+    }
     .footnote { text-align: center; }
     footer { text-align: center; color: var(--goldMuted); margin-top: 40px; font-size: .85rem; }
   </style>
@@ -135,8 +153,13 @@
   <!-- ===================== EASY MODE ===================== -->
   <section id="easy" class="panel active" role="tabpanel">
 
-    <div class="card">
-      <h3 class="gold-h">What can I build right now? (pick a use case)</h3>
+    <div class="callout adult">
+      <strong>Build with an adult.</strong> An adult handles wiring, batteries, pumps,
+      motors, and powered equipment. Choose a project and follow each screen together.
+    </div>
+
+    <details class="card">
+      <summary>What can I build?</summary>
       <p class="hint">One Starter Node board + this flasher gets you a real, live device on the
         Tender Cells open-source stack in minutes. At WiFi setup (Step 4) set <strong>peripheral</strong>
         to match — that's all that changes between these:</p>
@@ -153,10 +176,10 @@
             live alert into the dashboard. Zero extra wiring — great for classrooms.</li>
       </ul>
       <p class="hint">All open source — read and change the code anytime (see 📚 Learn mode).</p>
-    </div>
+    </details>
 
-    <div class="card">
-      <h3 class="gold-h">Prerequisites</h3>
+    <details class="card">
+      <summary>What do I need?</summary>
 
       <div class="callout">
         <strong>To flash right now — that's all you need:</strong>
@@ -194,33 +217,37 @@
         <p class="hint">Don't have the backend yet? You can still flash now and set up WiFi later —
         the board just waits.</p>
       </details>
-    </div>
+    </details>
 
     <div class="card">
-      <h3 class="gold-h">Step 0 — What do you want to build? (auto-picks the board)</h3>
+      <h3 class="gold-h">Step 1 — What do you want to build?</h3>
       <p class="hint">Pick a goal. We select the right firmware card for you and tell you the
         one setting to choose at WiFi setup. Your chip is still auto-verified on connect — if
         the board doesn't match, the installer says so and stops.</p>
       <div class="device-pick" id="useCasePick">
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="door">🚪<h3>Open/close a door</h3><small>Starter Node · set <code>door</code></small></div>
-        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="drive">🛞<h3>Drive a rover</h3><small>Starter Node · set <code>drive</code></small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="drive">🛞<h3>Motorized RC vehicle</h3><small>Starter Node · motor driver + steering</small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="relay">💡<h3>Lamp / pump / fan</h3><small>Starter Node · set <code>relay</code></small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="temp-humidity">🌡️<h3>Temp / humidity</h3><small>Starter Node · set <code>temp-humidity</code></small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="light">☀️<h3>Light sensor</h3><small>Starter Node · set <code>light</code></small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-camera-node.json" data-peripheral="camera">📷<h3>Live camera</h3><small>Single Camera Node · ESP32-S3-Sense</small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="none">🦅<h3>Threat demo</h3><small>Starter Node · no wiring</small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-chicken-tender.json" data-peripheral="">🐔<h3>Full coop</h3><small>Chicken Tender · ESP32-WROOM</small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="water-level"><h3>Watering node</h3><small>XIAO ESP32-C3/S3 - water level first</small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="feed-level"><h3>Feeding node</h3><small>XIAO ESP32-C3/S3 - hopper level first</small></div>
       </div>
       <div id="useCaseHint" class="callout" style="display:none"></div>
     </div>
 
     <div class="card">
-      <h3 class="gold-h">Step 1 — Pick what to flash</h3>
+      <h3 class="gold-h">Your matching firmware is ready</h3>
       <p class="hint">New here, or using a small dev board like a <strong>Seeed XIAO ESP32-S3</strong>?
          Start with <strong>Starter Node</strong> — it needs no coop hardware and proves everything works.
          <strong>One Starter Node binary works for <em>any</em> product</strong> (Chicken Tender, Roaming Roost,
          Duck Dock, WatchTower, …) — you pick which product it represents during WiFi setup (Step 4).
          The flasher checks your chip on connect and won't let you flash the wrong one.</p>
+      <details class="trouble">
+      <summary>Board details (optional)</summary>
       <div class="device-pick" id="devicePick">
         <div class="device" data-manifest="/flash/manifest-starter-node.json" role="button" aria-pressed="true" tabindex="0">
           🌱 <h3>Starter Node</h3><small>ESP32-S3 (XIAO &amp; dev boards) · works for <em>any</em> product · start here</small>
@@ -246,6 +273,8 @@
         and try again. Other variants (C3/C6/S2) are detected too and will be rejected if no
         card matches them yet.
       </div>
+
+      </details>
 
       <h3 class="gold-h">Step 2 — Plug the board into this computer</h3>
       <p>Use the USB cable. A light on the board should turn on.</p>
@@ -314,8 +343,8 @@
       </div>
     </div>
 
-    <div class="card">
-      <h3 class="gold-h">Step 4 — Tell the coop your WiFi</h3>
+    <details class="card">
+      <summary>After install: connect home Wi-Fi</summary>
       <ol class="steps">
         <li>After flashing, the board makes its own WiFi network —
             <code>TenderNode-Setup</code> for the Starter Node, or <code>ChickenTender-Setup</code> for a coop.</li>
@@ -343,10 +372,10 @@
       </ol>
       <p class="hint">Nothing secret is ever baked into the chip — you set the WiFi yourself, so it's safe to share boards.
         Teachers: see the <a href="https://github.com/WeCr8/TenderCells/blob/main/docs/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md">Build Your Own Device classroom lesson</a>.</p>
-    </div>
+    </details>
 
-    <div class="card">
-      <h3 class="gold-h">⚙️ Expert mode — flash your own firmware (in-browser)</h3>
+    <details class="card">
+      <summary>Advanced: flash your own firmware</summary>
       <p class="hint">Kids and first-timers: you don't need this — Steps 0–4 above are all you do.
         This is for coders who want to compile and flash <em>custom</em> code from the browser,
         no Arduino IDE upload step.</p>
@@ -371,7 +400,7 @@
       </ol>
       <p class="hint">Same chip auto-detection applies everywhere — these tools refuse a binary
         built for the wrong chip family. All open source: read and change any of it.</p>
-    </div>
+    </details>
   </section>
 
   <!-- ===================== LEARN MODE ===================== -->

@@ -18,7 +18,14 @@ export function useBirds(deviceId?: string) {
     void refresh();
     const onUpdate = () => void refresh();
     window.addEventListener(BIRDS_UPDATED_EVENT, onUpdate);
-    return () => window.removeEventListener(BIRDS_UPDATED_EVENT, onUpdate);
+    const unsubscribe = birdsService.subscribe((animals) => {
+      setBirds(deviceId ? animals.filter((animal) => animal.device === deviceId) : animals);
+      setLoading(false);
+    });
+    return () => {
+      window.removeEventListener(BIRDS_UPDATED_EVENT, onUpdate);
+      unsubscribe();
+    };
   }, [refresh]);
 
   const createBird = useCallback(async (data: CreateBirdData) => {

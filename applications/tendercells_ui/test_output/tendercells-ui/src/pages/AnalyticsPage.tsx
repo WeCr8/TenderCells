@@ -1,5 +1,5 @@
 // AnalyticsPage.tsx — Telemetry history, usage stats, trend charts (simulated)
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { HARDWARE_API_ORIGIN } from '../lib/api/hardwareApi';
 import {
   Box, Paper, Grid, Stack, Typography, Chip, ToggleButtonGroup,
@@ -12,6 +12,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import EggIcon from '@mui/icons-material/Egg';
 import { useProducts } from '../hooks/useProducts';
+import { isDemoSeeded } from '../services/demo/demoEnvironment';
 
 const C = {
   bg: '#0D2B1E', surface: '#1A3D2B', accent: '#4A7C59',
@@ -140,27 +141,34 @@ function MetricPanel({ metric, values }: { metric: MetricCard; values: number[] 
 export default function AnalyticsPage() {
   const { products } = useProducts();
   const [range, setRange] = useState<Range>('24h');
-  const [selectedDevice, setSelectedDevice] = useState('ct_001');
+  const [selectedDevice, setSelectedDevice] = useState('');
+  const demoMode = isDemoSeeded();
+
+  useEffect(() => {
+    if (!selectedDevice && products[0]) setSelectedDevice(products[0].device_id ?? products[0].id);
+  }, [products, selectedDevice]);
 
   const points = RANGE_POINTS[range];
 
-  const metricData = useMemo(() =>
-    METRICS.map(m => ({ metric: m, values: genHistory(`${selectedDevice}:${range}:${m.label}`, points, m.base, m.variance) })),
-    [range, selectedDevice, points]
+  const metricData = useMemo(() => demoMode
+    ? METRICS.map(m => ({ metric: m, values: genHistory(`${selectedDevice}:${range}:${m.label}`, points, m.base, m.variance) }))
+    : [],
+    [demoMode, range, selectedDevice, points]
   );
 
   const deviceOptions = products.length > 0
     ? products.map(p => ({ id: p.device_id ?? p.id, name: p.product_name }))
-    : [{ id: 'ct_001', name: 'Chicken Tender (sim)' }];
+    : [{ id: '', name: 'No registered device' }];
 
   // Egg collection this week (simulated, seeded — stable per device)
   const weeklyEggs = useMemo(() => {
+    if (!demoMode) return [];
     const rng = seededRng(seedFrom(`${selectedDevice}:eggs`));
     return Array.from({ length: 7 }, (_, i) => ({
       day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i],
       count: Math.floor(rng() * 4) + 2,
     }));
-  }, [selectedDevice]);
+  }, [demoMode, selectedDevice]);
   const totalEggs = weeklyEggs.reduce((a, b) => a + b.count, 0);
 
   return (
@@ -199,17 +207,24 @@ export default function AnalyticsPage() {
 
         <Typography sx={{ color: C.goldMuted, fontSize: 12 }}>{RANGE_LABELS[range]} — {selectedDevice}</Typography>
 
+        {!demoMode && (
+          <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 3 }}>
+            <Typography sx={{ color: C.gold, fontWeight: 700 }}>No recorded telemetry yet</Typography>
+            <Typography sx={{ color: C.goldMuted, mt: 0.5 }}>Charts will appear after this device publishes real sensor history. Demo values are hidden unless Demo Mode is explicitly loaded in Settings.</Typography>
+          </Paper>
+        )}
+
         {/* Metric grid */}
-        <Grid container spacing={2}>
+        {demoMode && <Grid container spacing={2}>
           {metricData.map(({ metric, values }) => (
             <Grid item xs={12} sm={6} md={4} key={metric.label}>
               <MetricPanel metric={metric} values={values} />
             </Grid>
           ))}
-        </Grid>
+        </Grid>}
 
         {/* Weekly egg collection */}
-        <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2 }}>
+        {demoMode && <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2 }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
             <Stack direction="row" spacing={1} alignItems="center">
               <EggIcon sx={{ color: '#D4A574' }} />
@@ -230,16 +245,16 @@ export default function AnalyticsPage() {
               );
             })}
           </Stack>
-        </Paper>
+        </Paper>}
 
         {/* Info notice */}
-        <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2 }}>
+        {demoMode && <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2 }}>
           <Typography sx={{ color: C.goldMuted, fontSize: 12 }}>
             📊 Charts show simulated data. Live telemetry requires the Express API running at{' '}
             <Box component="code" sx={{ color: C.accent }}>{HARDWARE_API_ORIGIN}</Box> and an MQTT-connected device.
             Data will auto-populate once hardware is online.
           </Typography>
-        </Paper>
+        </Paper>}
       </Stack>
     </Box>
   );

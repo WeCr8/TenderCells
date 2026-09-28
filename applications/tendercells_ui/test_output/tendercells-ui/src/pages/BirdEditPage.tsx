@@ -16,7 +16,7 @@ export default function BirdEditPage() {
       <Stack spacing={2} alignItems="center">
         <Typography sx={{ color: C.gold, fontSize: 18 }}>Bird record: {birdId ?? 'unknown'}</Typography>
         <Typography sx={{ color: C.goldMuted }}>Manage individual bird records from the Flock Roster.</Typography>
-        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={() => navigate('/birds')}
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={() => navigate('/animals')}
           sx={{ borderColor: C.accent, color: C.accent }}>
           Go to Flock Roster
         </Button>

@@ -8,12 +8,16 @@ import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
 import DeveloperBoardIcon from '@mui/icons-material/DeveloperBoard';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import ThermostatIcon from '@mui/icons-material/Thermostat';
+import WifiIcon from '@mui/icons-material/Wifi';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import Viewport3D from '../components/viewport/Viewport3D';
 import CameraFeedViewer from '../components/camera/CameraFeedViewer';
 import { useHardwareControl } from '../hooks/useHardwareControl';
+import { useTelemetry } from '../hooks/useTelemetry';
+import { classifyCameraStream } from '../lib/camera/cameraStream';
 
 export default function ProductDashboardPage() {
   const { productId = '' } = useParams();
@@ -23,6 +27,7 @@ export default function ProductDashboardPage() {
   const [capabilityError, setCapabilityError] = useState<string | null>(null);
   const product = products.find((item) => item.id === productId);
   const hardware = useHardwareControl(product?.device_id || 'unassigned');
+  const telemetry = useTelemetry(product?.device_id || 'unassigned');
 
   if (loading) return <Box sx={{ minHeight: 360, display: 'grid', placeItems: 'center' }}><CircularProgress /></Box>;
   if (!product) return <Navigate to="/products" replace />;
@@ -41,6 +46,7 @@ export default function ProductDashboardPage() {
   };
   const isCameraNode = family === 'camera-kit';
   const streamUrl = String(product.metadata?.camera_stream_url || '');
+  const streamSecurity = classifyCameraStream(streamUrl);
   const hardwareCapabilities = Array.isArray(product.metadata?.hardware_capabilities) ? product.metadata.hardware_capabilities : [];
   const enabledCapabilities = Array.isArray(product.metadata?.enabled_capabilities) ? product.metadata.enabled_capabilities : [];
   const setCapabilityEnabled = async (capability: string, enabled: boolean) => {
@@ -95,8 +101,10 @@ export default function ProductDashboardPage() {
                 resolution: '720p',
                 fps: 15,
                 connected: product.connection_status === 'online' && Boolean(streamUrl),
-              }} height={480} allowBrowserCamera={false} />
+              }} height="min(62dvh, 480px)" allowBrowserCamera={false} />
               {!streamUrl && <Typography variant="body2" color="text.secondary">Flash the camera, complete its WiFi setup, then add the reported <code>/stream</code> address in Configure.</Typography>}
+              {streamSecurity === 'local' && <Alert severity="info">Local-network stream: video stays on this Wi-Fi, but HTTP MJPEG is not encrypted. Authenticated remote viewing requires the TenderCells HTTPS relay.</Alert>}
+              {streamSecurity === 'insecure-remote' && <Alert severity="error">This remote HTTP stream is not secure. Use a local address or an authenticated HTTPS relay URL.</Alert>}
             </Stack>
           ) : (
             <Viewport3D
@@ -171,6 +179,45 @@ export default function ProductDashboardPage() {
                 </Grid>
               );
             })}
+          </Grid>
+        </Box>
+      )}
+
+      {isCameraNode && (
+        <Box>
+          <Typography variant="h6" gutterBottom>Live Device Status</Typography>
+          {telemetry.error && <Alert severity="info" sx={{ mb: 1.5 }}>{telemetry.error} Registered hardware remains available, but no live readings are being shown.</Alert>}
+          <Grid container spacing={1.5}>
+            {[
+              {
+                title: 'Power', icon: <BatteryChargingFullIcon />,
+                value: telemetry.data?.batteryPercent != null ? `${telemetry.data.batteryPercent}%` : String(product.metadata?.power_source || 'Not specified'),
+                detail: telemetry.data?.batteryVoltage != null ? `${telemetry.data.batteryVoltage.toFixed(2)} V reported by device` : hardwareCapabilities.includes('battery_power') ? 'Battery configured; level is not reporting.' : 'No battery monitor registered.',
+              },
+              {
+                title: 'Temperature', icon: <ThermostatIcon />,
+                value: telemetry.data?.temperature != null ? `${telemetry.data.temperature.toFixed(1)}°` : 'Not reporting',
+                detail: hardwareCapabilities.includes('temperature') ? 'Temperature sensor is registered but has no current reading.' : 'No temperature sensor registered on this node.',
+              },
+              {
+                title: 'Network', icon: <WifiIcon />,
+                value: telemetry.data?.wifiRssi != null ? `${telemetry.data.wifiRssi} dBm` : product.connection_status,
+                detail: telemetry.data?.lastSeen ? `Last telemetry ${telemetry.data.lastSeen}` : 'No telemetry heartbeat received.',
+              },
+              {
+                title: 'Sound', icon: <MicIcon />,
+                value: telemetry.data?.soundLevelDb != null ? `${telemetry.data.soundLevelDb.toFixed(1)} dB` : 'Not reporting',
+                detail: hardwareCapabilities.includes('microphone') ? 'Microphone level appears only when enabled firmware publishes it.' : 'No microphone registered on this node.',
+              },
+            ].map(item => (
+              <Grid item xs={12} sm={6} lg={3} key={item.title}>
+                <Paper variant="outlined" sx={{ p: 1.75, height: '100%' }}>
+                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.75 }}>{item.icon}<Typography fontWeight={600}>{item.title}</Typography></Stack>
+                  <Typography variant="h6">{item.value}</Typography>
+                  <Typography variant="body2" color="text.secondary">{item.detail}</Typography>
+                </Paper>
+              </Grid>
+            ))}
           </Grid>
         </Box>
       )}

@@ -38,6 +38,7 @@ import { useEggs } from '../hooks/useEggs';
 import { useProducts } from '../hooks/useProducts';
 import { deriveVision, type Bird } from '../services/birdsService';
 import type { NestBox } from '../services/eggService';
+import { classifyCameraStream } from '../lib/camera/cameraStream';
 
 const C = {
   bg: '#0D2B1E', surface: '#1A3D2B', accent: '#4A7C59',
@@ -99,8 +100,8 @@ interface CamState {
 }
 
 function CameraViewport({
-  label, cameraId, birds, cam, flash, allowWebcam = false,
-}: { label: string; cameraId: number; birds: DetectedBird[]; cam: CamState; flash: boolean; allowWebcam?: boolean }) {
+  label, cameraId, birds, cam, flash, streamUrl, allowWebcam = false,
+}: { label: string; cameraId: number; birds: DetectedBird[]; cam: CamState; flash: boolean; streamUrl?: string; allowWebcam?: boolean }) {
   const shown = birds.slice(0, 2 + cameraId);
   const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
@@ -114,6 +115,13 @@ function CameraViewport({
   // A flashed ESP32/Pi camera node's MJPEG stream URL (from /flash). Renders live
   // when set, just like a real coop camera.
   const [flashedUrl, setFlashedUrl] = useState<string | null>(null);
+  const [streamFailed, setStreamFailed] = useState(false);
+  const [streamKey, setStreamKey] = useState(0);
+  const registeredStream = streamUrl?.trim() || null;
+  const streamSecurity = classifyCameraStream(registeredStream || flashedUrl || '');
+  const activeNodeStream = streamSecurity === 'insecure-remote' || streamFailed
+    ? null
+    : registeredStream || flashedUrl;
   const useFlashedCamera = () => {
     const u = window.prompt(
       'Flashed camera stream URL\n(from a board flashed at /flash — shown in its serial log / tc status, e.g. http://192.168.1.50:8000/stream):',
@@ -165,6 +173,24 @@ function CameraViewport({
       void videoRef.current.play();
     }
   }, [webcamOn]);
+  useEffect(() => {
+    setStreamFailed(false);
+    setStreamKey(key => key + 1);
+  }, [registeredStream]);
+  useEffect(() => {
+    const reconnect = () => {
+      if (document.visibilityState === 'visible') {
+        setStreamFailed(false);
+        setStreamKey(key => key + 1);
+      }
+    };
+    document.addEventListener('visibilitychange', reconnect);
+    window.addEventListener('focus', reconnect);
+    return () => {
+      document.removeEventListener('visibilitychange', reconnect);
+      window.removeEventListener('focus', reconnect);
+    };
+  }, []);
   useEffect(() => () => { streamRef.current?.getTracks().forEach((t) => t.stop()); }, []);
 
   return (
@@ -192,17 +218,18 @@ function CameraViewport({
           />
         )}
         {/* flashed ESP32/Pi camera node — MJPEG renders natively in <img> */}
-        {!webcamOn && flashedUrl && (
+        {!webcamOn && activeNodeStream && (
           <img
-            src={flashedUrl}
-            alt="Flashed camera feed"
+            key={streamKey}
+            src={activeNodeStream}
+            alt="Registered camera feed"
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-            onError={() => { setFlashedUrl(null); setWebcamErr('Could not reach that camera URL — check the board is on and the URL is right.'); }}
+            onError={() => { setStreamFailed(true); setWebcamErr('Could not reach this camera. Confirm this device is on the same network, then return to the device dashboard to retry.'); }}
           />
         )}
         <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 0.5 }}>
-          {!webcamOn && !flashedUrl && <Typography sx={{ color: C.goldMuted, fontSize: 11 }}>{label}</Typography>}
-          {!webcamOn && !flashedUrl && <Typography sx={{ color: C.accent + '88', fontSize: 9 }}>SIM feed · use your camera or connect a flashed camera</Typography>}
+          {!webcamOn && !activeNodeStream && <Typography sx={{ color: C.goldMuted, fontSize: 11 }}>{label}</Typography>}
+          {!webcamOn && !activeNodeStream && <Typography sx={{ color: C.accent + '88', fontSize: 9 }}>{streamSecurity === 'insecure-remote' ? 'Public HTTP streams are blocked. Use HTTPS or a secure relay.' : 'Preview only - choose a registered camera or use this device camera'}</Typography>}
         </Box>
         {cam.overlay && shown.map((b, i) => (
           <Box key={b.id} sx={{
@@ -245,8 +272,8 @@ function CameraViewport({
             <Chip size="small" label={`● ${facing === 'environment' ? 'REAR' : 'FRONT'} · local only`}
               sx={{ bgcolor: C.danger, color: '#fff', fontSize: 9, height: 20 }} />
           )}
-          {flashedUrl && (
-            <Chip size="small" label="● FLASHED CAMERA · live"
+          {activeNodeStream && (
+            <Chip size="small" label={`${streamSecurity === 'local' ? 'LOCAL' : 'SECURE'} CAMERA - live`}
               sx={{ bgcolor: '#4CAF50', color: '#06210f', fontSize: 9, height: 20 }} />
           )}
           <Stack direction="row" spacing={0.5} flexWrap="wrap" justifyContent="flex-end">
@@ -256,19 +283,19 @@ function CameraViewport({
                 🔄 {facing === 'environment' ? 'Front' : 'Rear'}
               </Button>
             )}
-            {!flashedUrl && (
+            {!activeNodeStream && !registeredStream && (
               <Button size="small" variant="contained" onClick={webcamOn ? stopWebcam : startWebcam}
                 sx={{ bgcolor: webcamOn ? C.danger : C.accent, fontSize: 11, py: 0.4 }}>
                 {webcamOn ? 'Stop' : '📷 Use my camera'}
               </Button>
             )}
-            {!webcamOn && !flashedUrl && (
+            {!webcamOn && !activeNodeStream && !registeredStream && (
               <Button size="small" variant="outlined" onClick={useFlashedCamera}
                 sx={{ borderColor: C.accent, color: C.gold, fontSize: 11, py: 0.4 }}>
                 📡 Flashed camera
               </Button>
             )}
-            {flashedUrl && (
+            {flashedUrl && !registeredStream && (
               <Button size="small" variant="contained" onClick={() => setFlashedUrl(null)}
                 sx={{ bgcolor: C.danger, fontSize: 11, py: 0.4 }}>Stop</Button>
             )}
@@ -485,9 +512,14 @@ export default function ChickenEyeDashboardPage() {
   const navigate = useNavigate();
   const { products } = useProducts();
   const deviceOptions = products.length > 0
-    ? products.map(p => ({ id: p.device_id ?? p.id, name: p.product_name }))
-    : [{ id: 'ct_001', name: 'Chicken Tender (sim)' }];
+    ? products.map(p => ({ id: p.device_id ?? p.id, name: p.product_name, streamUrl: String(p.metadata?.camera_stream_url || '') }))
+    : [{ id: 'preview', name: 'Recognition preview', streamUrl: '' }];
   const [deviceId, setDeviceId] = useState(deviceOptions[0].id);
+  useEffect(() => {
+    if (!deviceOptions.some(device => device.id === deviceId)) setDeviceId(deviceOptions[0].id);
+  }, [deviceId, deviceOptions]);
+  const selectedDevice = deviceOptions.find(device => device.id === deviceId) ?? deviceOptions[0];
+  const registeredStreamUrl = selectedDevice.streamUrl;
 
   const { birds: roster, loading, seedDemoFlock } = useBirds();
   const eggColors = useMemo(() => Array.from(new Set(roster.map(b => b.eggColor).filter(Boolean))) as string[], [roster]);
@@ -549,7 +581,7 @@ export default function ChickenEyeDashboardPage() {
               </Select>
             </FormControl>
             <Tooltip title="Manage flock roster">
-              <IconButton onClick={() => navigate('/birds')} sx={{ color: C.accent }}><RefreshIcon /></IconButton>
+              <IconButton onClick={() => navigate('/animals')} sx={{ color: C.accent }}><RefreshIcon /></IconButton>
             </Tooltip>
           </Stack>
         </Stack>
@@ -566,7 +598,7 @@ export default function ChickenEyeDashboardPage() {
               ChickenEye watches the birds in your flock roster. Add birds in Bird Management, or load a sample flock to explore.
             </Typography>
             <Stack direction="row" spacing={1.5} justifyContent="center">
-              <Button variant="contained" onClick={() => navigate('/birds')} sx={{ bgcolor: C.accent }}>Manage Flock</Button>
+              <Button variant="contained" onClick={() => navigate('/animals')} sx={{ bgcolor: C.accent }}>Manage Animals</Button>
               <Button variant="outlined" onClick={() => void seedDemoFlock()} sx={{ borderColor: C.accent, color: C.accent }}>Load Demo Flock</Button>
             </Stack>
           </Paper>
@@ -578,7 +610,7 @@ export default function ChickenEyeDashboardPage() {
               <Chip label={`Avg health: ${avgHealth}%`} sx={{ bgcolor: avgHealth > 85 ? '#4CAF50' + '22' : C.warning + '22', color: avgHealth > 85 ? '#4CAF50' : C.warning, fontWeight: 700 }} />
               {flaggedCount > 0 && <Chip icon={<WarningIcon />} label={`${flaggedCount} flagged`} sx={{ bgcolor: C.danger + '22', color: C.danger, fontWeight: 700 }} />}
               {eggsReady > 0 && <Chip icon={<EggIcon sx={{ color: '#D4A574 !important' }} />} label={`${eggsReady} egg${eggsReady > 1 ? 's' : ''} ready`} sx={{ bgcolor: '#D4A574' + '22', color: '#D4A574', fontWeight: 700 }} />}
-              <Chip label="3 cameras · SIM mode" sx={{ bgcolor: C.bg, color: C.goldMuted, border: `1px solid ${C.accent}44` }} />
+              <Chip label={registeredStreamUrl ? 'Registered camera - live video' : 'Recognition preview - no live stream'} sx={{ bgcolor: C.bg, color: C.goldMuted, border: `1px solid ${C.accent}44` }} />
             </Stack>
 
             <Grid container spacing={2.5}>
@@ -604,7 +636,7 @@ export default function ChickenEyeDashboardPage() {
 
                   {/* Viewport */}
                   <Box ref={viewportRef}>
-                    <CameraViewport label={CAMERAS[activeCamera]} cameraId={activeCamera} birds={birds} cam={cam} flash={flash} allowWebcam />
+                    <CameraViewport label={CAMERAS[activeCamera]} cameraId={activeCamera} birds={birds} cam={cam} flash={flash} streamUrl={registeredStreamUrl} allowWebcam />
                   </Box>
 
                   {/* PTZ + zoom controls */}

@@ -12,7 +12,11 @@ import { Button, Alert } from '@mui/material';
 import { CameraAlt as CameraIcon, SignalCellularAlt as SignalIcon } from '@mui/icons-material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import RotateRightIcon from '@mui/icons-material/RotateRight';
+import FlipIcon from '@mui/icons-material/Flip';
+import SecurityIcon from '@mui/icons-material/Security';
 import { CameraFeed } from '../../types/camera';
+import { cameraTransform, classifyCameraStream } from '../../lib/camera/cameraStream';
 
 interface CameraFeedViewerProps {
   camera: CameraFeed;
@@ -32,6 +36,16 @@ export default function CameraFeedViewer({
   const [streamError, setStreamError] = useState(false);
   const [streamAttempt, setStreamAttempt] = useState(0);
   const lastResumeRef = useRef(0);
+  const [pageVisible, setPageVisible] = useState(() => document.visibilityState === 'visible');
+  const orientationKey = `tendercells-camera-orientation:${camera.deviceId}`;
+  const [orientation, setOrientation] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(orientationKey) || '') as { rotation: number; flipX: boolean; flipY: boolean };
+    } catch {
+      return { rotation: 0, flipX: false, flipY: false };
+    }
+  });
+  const streamSecurity = classifyCameraStream(camera.streamUrl);
 
   // Browser webcam preview — opt-in, client-side only (no upload/record/store).
   // A "try it now" path for visitors with no hardware. getUserMedia only fires on
@@ -95,7 +109,9 @@ export default function CameraFeedViewer({
   useEffect(() => {
     if (!camera.streamUrl) return;
     const reconnect = () => {
-      if (document.visibilityState !== 'visible') return;
+      const visible = document.visibilityState === 'visible';
+      setPageVisible(visible);
+      if (!visible) return;
       const now = Date.now();
       if (now - lastResumeRef.current < 750) return;
       lastResumeRef.current = now;
@@ -109,6 +125,15 @@ export default function CameraFeedViewer({
       window.removeEventListener('focus', reconnect);
     };
   }, [camera.streamUrl]);
+
+  useEffect(() => {
+    localStorage.setItem(orientationKey, JSON.stringify(orientation));
+  }, [orientation, orientationKey]);
+
+  const refreshStream = () => {
+    setStreamError(false);
+    setStreamAttempt((value) => value + 1);
+  };
 
   const getSignalColor = (signal?: number) => {
     if (!signal) return 'default';
@@ -140,11 +165,12 @@ export default function CameraFeedViewer({
           playsInline
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
-      ) : camera.streamUrl && !streamError ? (
+      ) : camera.streamUrl && streamSecurity !== 'insecure-remote' && !streamError && pageVisible ? (
         <img
+          key={`${camera.deviceId}-${streamAttempt}`}
           src={`${camera.streamUrl}${camera.streamUrl.includes('?') ? '&' : '?'}attempt=${streamAttempt}`}
           alt={`Live feed: ${camera.name}`}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: cameraTransform(orientation.rotation, orientation.flipX, orientation.flipY) }}
           onLoad={() => setStreamError(false)}
           onError={() => setStreamError(true)}
         />
@@ -167,6 +193,16 @@ export default function CameraFeedViewer({
               <Button startIcon={<RefreshIcon />} variant="contained" onClick={() => setStreamAttempt((value) => value + 1)}>Retry</Button>
               <Button startIcon={<OpenInNewIcon />} variant="outlined" onClick={() => window.open(camera.streamUrl, 'tendercells-camera-stream', 'noopener,noreferrer')}>Open Stream</Button>
             </Stack>
+          </Stack>
+        </Box>
+      )}
+
+      {streamSecurity === 'insecure-remote' && !webcamOn && (
+        <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', p: 3, bgcolor: '#0D2B1E' }}>
+          <Stack spacing={1.5} alignItems="center" sx={{ maxWidth: 440, textAlign: 'center' }}>
+            <SecurityIcon sx={{ color: '#E8A020', fontSize: 38 }} />
+            <Typography color="#F0EDE4" fontWeight={600}>Remote unencrypted video was blocked.</Typography>
+            <Typography variant="body2" color="#B8C8BF">Use the camera on its private local network or configure an authenticated HTTPS TenderCells relay.</Typography>
           </Stack>
         </Box>
       )}
@@ -197,9 +233,9 @@ export default function CameraFeedViewer({
           zIndex: 5,
         }}
       >
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
           <CameraIcon sx={{ color: '#C8B882', fontSize: 18 }} />
-          <Typography variant="subtitle2" sx={{ color: '#C8B882', flex: 1 }}>
+          <Typography variant="subtitle2" sx={{ color: '#C8B882', flex: 1, minWidth: 120 }}>
             {camera.name}
           </Typography>
           <Chip
@@ -212,8 +248,24 @@ export default function CameraFeedViewer({
               color: camera.connected ? '#4A7C59' : '#CC3333',
             }}
           />
+          <Chip
+            icon={<SecurityIcon />}
+            label={streamSecurity === 'secure' ? 'SECURE' : streamSecurity === 'local' ? 'LOCAL ONLY' : 'UNSECURED'}
+            size="small"
+            color={streamSecurity === 'secure' ? 'success' : streamSecurity === 'local' ? 'warning' : 'error'}
+            variant="outlined"
+          />
         </Stack>
       </Box>
+
+      {camera.streamUrl && !streamError && (
+        <Stack direction="column" spacing={0.5} sx={{ position: 'absolute', right: 8, top: 52, zIndex: 6 }}>
+          <Button aria-label="Refresh camera stream" title="Refresh stream" variant="contained" size="small" onClick={refreshStream} sx={{ minWidth: 44, minHeight: 44, p: 0.75 }}><RefreshIcon fontSize="small" /></Button>
+          <Button aria-label="Rotate camera clockwise" title="Rotate 90 degrees" variant="contained" size="small" onClick={() => setOrientation(value => ({ ...value, rotation: (value.rotation + 90) % 360 }))} sx={{ minWidth: 44, minHeight: 44, p: 0.75 }}><RotateRightIcon fontSize="small" /></Button>
+          <Button aria-label="Flip camera horizontally" title="Flip horizontally" variant="contained" size="small" onClick={() => setOrientation(value => ({ ...value, flipX: !value.flipX }))} sx={{ minWidth: 44, minHeight: 44, p: 0.75 }}><FlipIcon fontSize="small" /></Button>
+          <Button aria-label="Flip camera vertically" title="Flip vertically" variant="contained" size="small" onClick={() => setOrientation(value => ({ ...value, flipY: !value.flipY }))} sx={{ minWidth: 44, minHeight: 44, p: 0.75, transform: 'rotate(90deg)' }}><FlipIcon fontSize="small" /></Button>
+        </Stack>
+      )}
 
       {/* Stats overlay (bottom) */}
       <Box

@@ -4,7 +4,7 @@ const routes = [
   { path: '/dashboard', text: /dashboard|tender cells/i },
   { path: '/products', text: /product|registry|register/i },
   { path: '/layout', text: /property|layout|yard/i },
-  { path: '/birds', text: /bird|flock|chicken|duck/i },
+  { path: '/animals', text: /animal|roster|chicken|dog|goat/i },
   { path: '/chicken-tender', text: /chicken|tender|coop/i },
   { path: '/roaming-roost', text: /roaming|roost/i },
   { path: '/predator-monitor', text: /predator|watchtower|monitor/i },
@@ -47,15 +47,17 @@ test.describe('TenderCells browser smoke', () => {
     });
   }
 
-  test('birds page supports demo flock entry point', async ({ page }) => {
+  test('animal roster supports real entry and redirects the legacy path', async ({ page }) => {
     const errors = await collectRuntimeErrors(page);
     await page.goto('/birds');
     await waitForApp(page);
 
+    await expect(page).toHaveURL(/\/animals$/);
+
     const demoButton = page.getByRole('button', { name: /load demo flock/i });
     const addButton = page.getByRole('button', { name: /add bird|add animal/i });
     await expect(demoButton.or(addButton).first()).toBeVisible();
-    await expect(page.locator('body')).toContainText(/bird|flock/i);
+    await expect(page.locator('body')).toContainText(/animal|roster/i);
     expect(errors, errors.join('\n')).toEqual([]);
   });
 

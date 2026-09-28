@@ -10,6 +10,8 @@ import {
 } from '@mui/material';
 import { Button, Alert } from '@mui/material';
 import { CameraAlt as CameraIcon, SignalCellularAlt as SignalIcon } from '@mui/icons-material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { CameraFeed } from '../../types/camera';
 
 interface CameraFeedViewerProps {
@@ -25,6 +27,8 @@ export default function CameraFeedViewer({
 }: CameraFeedViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [connecting, setConnecting] = useState(false);
+  const [streamError, setStreamError] = useState(false);
+  const [streamAttempt, setStreamAttempt] = useState(0);
 
   // Browser webcam preview — opt-in, client-side only (no upload/record/store).
   // A "try it now" path for visitors with no hardware. getUserMedia only fires on
@@ -83,6 +87,8 @@ export default function CameraFeedViewer({
     setConnecting(false);
   }, [camera]);
 
+  useEffect(() => setStreamError(false), [camera.streamUrl, streamAttempt]);
+
   const getSignalColor = (signal?: number) => {
     if (!signal) return 'default';
     if (signal > -50) return 'success';
@@ -113,12 +119,13 @@ export default function CameraFeedViewer({
           playsInline
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
-      ) : camera.streamUrl ? (
+      ) : camera.streamUrl && !streamError ? (
         <img
-          src={camera.streamUrl}
+          src={`${camera.streamUrl}${camera.streamUrl.includes('?') ? '&' : '?'}attempt=${streamAttempt}`}
           alt={`Live feed: ${camera.name}`}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+          onLoad={() => setStreamError(false)}
+          onError={() => setStreamError(true)}
         />
       ) : (
         <canvas
@@ -127,6 +134,20 @@ export default function CameraFeedViewer({
           height={typeof height === 'number' ? height : 360}
           style={{ width: '100%', height: '100%', display: 'block' }}
         />
+      )}
+
+      {streamError && camera.streamUrl && !webcamOn && (
+        <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', p: 3, bgcolor: '#0D2B1E' }}>
+          <Stack spacing={1.5} alignItems="center" sx={{ maxWidth: 420, textAlign: 'center' }}>
+            <CameraIcon sx={{ color: '#C8B882', fontSize: 38 }} />
+            <Typography color="#F0EDE4" fontWeight={600}>The local camera stream could not load in the dashboard.</Typography>
+            <Typography variant="body2" color="#B8C8BF">Confirm this browser can open the device on the same local network, then retry.</Typography>
+            <Stack direction="row" spacing={1}>
+              <Button startIcon={<RefreshIcon />} variant="contained" onClick={() => setStreamAttempt((value) => value + 1)}>Retry</Button>
+              <Button startIcon={<OpenInNewIcon />} variant="outlined" onClick={() => window.open(camera.streamUrl, 'tendercells-camera-stream', 'noopener,noreferrer')}>Open Stream</Button>
+            </Stack>
+          </Stack>
+        </Box>
       )}
 
       {connecting && (

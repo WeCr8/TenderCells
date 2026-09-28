@@ -106,6 +106,17 @@ describe('TenderCells OS contracts', () => {
     });
   });
 
+  it('keeps device flashing inside the registration workflow', () => {
+    const registration = readProjectFile('src/components/products/ProductRegistrationModal.tsx');
+    const firebaseConfig = readProjectFile('../../../../firebase.json');
+
+    expect(registration).toContain('setFlasherUrl(`/flash/?${params.toString()}`)');
+    expect(registration).toContain('title="Tender Cells device flasher"');
+    expect(registration).toContain('allow="serial; usb"');
+    expect(registration).not.toContain("window.open(`/flash/");
+    expect(firebaseConfig).toContain("frame-ancestors 'self'");
+  });
+
   it('keeps FarmBot attribution and reuse policy visible in repo docs', () => {
     const attribution = readProjectFile('docs/third-party-attribution.md');
     expect(attribution).toContain('FarmBot');

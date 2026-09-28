@@ -125,6 +125,8 @@ describe('TenderCells OS contracts', () => {
     });
     expect(wizard).toContain("window.open('http://192.168.4.1'");
     expect(wizard).toContain('camera_stream_url: streamUrl.trim()');
+    expect(wizard).toContain('TC_PROVISION:');
+    expect(wizard).toContain('never saved by TenderCells');
     expect(wizard).not.toContain('password: password.trim()');
     expect(wizard).not.toContain('Simulate pairing process');
   });

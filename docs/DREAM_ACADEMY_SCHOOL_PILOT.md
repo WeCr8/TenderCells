@@ -88,3 +88,5 @@ Clever is not a drop-in Firebase web provider. Use its OAuth 2.0 authorization-c
 - Managed Chromebook browser restrictions and allowlisted domains.
 - Network policy for `.local`, private HTTP camera streams, WebSerial, MQTT/WebSocket, and HTTPS relay traffic.
 - Required privacy agreement, data-retention period, accessibility review, and incident process.
+
+Use [School IT Network and Device Enrollment](SCHOOL_IT_NETWORK_AND_DEVICE_ENROLLMENT.md) for the credential-free student workflow, VLAN/firewall intake, billing ownership, inventory, and device retirement checklist.

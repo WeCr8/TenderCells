@@ -82,6 +82,7 @@ export default function ConnectionSetupWizard({
   const [showManualSsid, setShowManualSsid] = useState(false);
   const [securityType, setSecurityType] = useState<'none' | 'WPA' | 'WPA2' | 'WPA3'>('WPA2');
   const [portalComplete, setPortalComplete] = useState(false);
+  const [managedNetwork, setManagedNetwork] = useState(false);
   const [wifiPassword, setWifiPassword] = useState('');
   const [usbStatus, setUsbStatus] = useState<'idle' | 'connecting' | 'success' | 'error'>('idle');
   const [streamUrl, setStreamUrl] = useState(String(product.metadata?.camera_stream_url || suggestedStreamUrl));
@@ -240,7 +241,7 @@ export default function ConnectionSetupWizard({
 
     try {
       const networkConfig: NetworkConfig = {
-        ssid: ssid.trim(),
+        ssid: managedNetwork ? product.network_config?.ssid : ssid.trim(),
         securityType,
         connected: true,
         lastConnected: new Date().toISOString(),
@@ -248,8 +249,10 @@ export default function ConnectionSetupWizard({
 
       if (isCamera) {
         await updateProduct(product.id, {
-          metadata: { ...product.metadata, camera_stream_url: streamUrl.trim() },
+          metadata: { ...product.metadata, camera_stream_url: streamUrl.trim(), network_managed_by_it: managedNetwork },
         });
+      } else if (managedNetwork) {
+        await updateProduct(product.id, { metadata: { ...product.metadata, network_managed_by_it: true } });
       }
       await connectProduct(product.id, { network_config: networkConfig });
       setConnectionStatus('success');
@@ -278,6 +281,7 @@ export default function ConnectionSetupWizard({
     setShowManualSsid(false);
     setSecurityType('WPA2');
     setPortalComplete(false);
+    setManagedNetwork(false);
     setWifiPassword('');
     setUsbStatus('idle');
     setStreamUrl(String(product.metadata?.camera_stream_url || suggestedStreamUrl));
@@ -315,6 +319,19 @@ export default function ConnectionSetupWizard({
             <Alert severity="warning">
               Use a 2.4 GHz network. ESP32-S3 cannot join a 5 GHz-only SSID.
             </Alert>
+            <Alert severity="info">
+              <strong>School or shared lab:</strong> a teacher or IT administrator should provision the board once over USB using a dedicated IoT network or per-device credential. Students should not be given the school Wi-Fi password.
+            </Alert>
+            <Button variant="outlined" onClick={() => { setManagedNetwork(true); setPortalComplete(true); setWifiPassword(''); }}>
+              Network Already Set by Teacher or IT
+            </Button>
+            {managedNetwork && (
+              <Alert severity="success">
+                No password is needed here. Continue and verify the device. TenderCells records only that networking is managed; it does not receive the credential.
+              </Alert>
+            )}
+            {!managedNetwork && (
+            <>
             <Typography variant="subtitle2">Recommended: provision over USB</Typography>
             <Button variant="outlined" disabled={networkScanStatus === 'scanning'} onClick={() => void scanNetworksOverUsb()}>
               {networkScanStatus === 'scanning' ? 'Scanning with Camera...' : 'Scan Nearby Networks'}
@@ -364,6 +381,8 @@ export default function ConnectionSetupWizard({
               </Select>
             </FormControl>
             <FormControlLabel control={<Checkbox checked={portalComplete} onChange={(e) => setPortalComplete(e.target.checked)} />} label="The node portal confirmed Wi-Fi was saved" />
+            </>
+            )}
           </Box>
         );
       case 2:
@@ -465,7 +484,7 @@ export default function ConnectionSetupWizard({
             variant="contained"
             onClick={handleNext}
             disabled={
-              (activeStep === 1 && (!ssid.trim() || !portalComplete)) ||
+              (activeStep === 1 && ((!managedNetwork && !ssid.trim()) || !portalComplete)) ||
               (activeStep === 2 && ((isCamera && !/^http:\/\/[^/]+\/stream$/i.test(streamUrl.trim())) || !cameraVerified || connectionStatus === 'connecting'))
             }
           >

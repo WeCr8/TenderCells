@@ -129,6 +129,9 @@ describe('TenderCells OS contracts', () => {
     expect(wizard).toContain('never saved by TenderCells');
     expect(wizard).not.toContain('password: password.trim()');
     expect(wizard).not.toContain('Simulate pairing process');
+    expect(wizard).toContain('Network Already Set by Teacher or IT');
+    expect(wizard).toContain('network_managed_by_it: managedNetwork');
+    expect(wizard).toContain("setWifiPassword('')");
   });
 
   it('keeps FarmBot attribution and reuse policy visible in repo docs', () => {

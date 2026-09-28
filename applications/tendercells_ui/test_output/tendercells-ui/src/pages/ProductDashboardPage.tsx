@@ -95,7 +95,7 @@ export default function ProductDashboardPage() {
                 resolution: '720p',
                 fps: 15,
                 connected: product.connection_status === 'online' && Boolean(streamUrl),
-              }} height={480} />
+              }} height={480} allowBrowserCamera={false} />
               {!streamUrl && <Typography variant="body2" color="text.secondary">Flash the camera, complete its WiFi setup, then add the reported <code>/stream</code> address in Configure.</Typography>}
             </Stack>
           ) : (

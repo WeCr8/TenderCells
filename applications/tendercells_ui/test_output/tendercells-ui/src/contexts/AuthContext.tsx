@@ -10,7 +10,6 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
@@ -118,20 +117,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!FIREBASE_ENABLED) {
         throw new Error(AUTH_UNCONFIGURED_MESSAGE);
       }
+      auth.tenantId = null;
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (err) {
-        const code = typeof err === 'object' && err && 'code' in err
-          ? String((err as { code?: unknown }).code)
-          : '';
-        if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
-          await signInWithRedirect(auth, provider);
-          return;
-        }
-        throw err;
-      }
+      await signInWithRedirect(auth, provider);
     } catch (err) {
       const message = formatAuthError(err, 'Google login failed');
       setError(message);

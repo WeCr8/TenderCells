@@ -117,11 +117,15 @@ jobs:
             exit 1
           fi
 
-      - name: Deploy Hosting, Functions, and Firestore policy
+      - name: Deploy Hosting and Firestore policy
         working-directory: .
         run: |
           echo "Deploying to project: $FIREBASE_PROJECT"
-          firebase deploy --only hosting:main,functions,firestore:rules,firestore:indexes --non-interactive --project "$FIREBASE_PROJECT"
+          firebase deploy --only hosting:main,firestore:rules,firestore:indexes --non-interactive --project "$FIREBASE_PROJECT"
+
+      - name: Deploy Cloud Functions
+        working-directory: .
+        run: firebase deploy --only functions --non-interactive --project "$FIREBASE_PROJECT"
 
       - name: Remove credentials
         if: always()

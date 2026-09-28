@@ -1,10 +1,10 @@
 # School & district accounts (SSO) — plan
 
-**Status: prepared, not live.** The website account page (`tendercells.com/account`) shows
-school sign-in, account types and classroom features with **Coming soon** labels. No SSO
-provider is connected, and `startSsoSignIn()` in `website/src/lib/sso.ts` always refuses.
-The OS login shows a disabled "School or district sign-in" button that points to the website
-account page, which is where all account functions live.
+**Status: backend and UI implemented; providers require district activation.** The website
+account page accepts a school code, discovers enabled providers from a server-authoritative
+organization record, sets the Identity Platform tenant, and starts Firebase OIDC/SAML sign-in.
+Providers do not appear until their district tenant and provider configuration are approved.
+See [School Platform Operations](SCHOOL_PLATFORM_OPERATIONS.md).
 
 ## What users will get
 

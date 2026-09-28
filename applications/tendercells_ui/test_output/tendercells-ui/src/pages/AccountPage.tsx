@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -15,8 +15,9 @@ import {
   Grid,
 } from '@mui/material';
 import { CreditCard, DeleteSweep, Devices, Google as GoogleIcon, Logout as LogoutIcon, School as SchoolIcon, VerifiedUser } from '@mui/icons-material';
-import { doc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
 import { sendEmailVerification, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 // The website's account page (same origin in production: tendercells.com/account; the OS is /app).
 const WEBSITE_ACCOUNT_URL = '/account';
@@ -25,7 +26,7 @@ import { useProducts } from '../hooks/useProducts';
 import ProductCard from '../components/products/ProductCard';
 import ProductRegistrationModal from '../components/products/ProductRegistrationModal';
 import type { RegisterProductData } from '../types/products';
-import { auth, db } from '../lib/firebase/firebaseApp';
+import firebaseApp, { auth, db } from '../lib/firebase/firebaseApp';
 import { clearTenderCellsWorkspace } from '../services/workspaceReset';
 
 interface TabPanelProps {
@@ -62,6 +63,56 @@ export default function AccountPage() {
   const [isResettingWorkspace, setIsResettingWorkspace] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [accountMessage, setAccountMessage] = useState<{ severity: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [schoolAccess, setSchoolAccess] = useState<{ organizationId: string; role: string } | null>(null);
+  const [purchaseOrders, setPurchaseOrders] = useState<Array<Record<string, unknown>>>([]);
+  const [invoices, setInvoices] = useState<Array<Record<string, unknown>>>([]);
+  const [poAmount, setPoAmount] = useState('');
+  const [poDescription, setPoDescription] = useState('');
+
+  useEffect(() => {
+    if (!user) return;
+    void user.getIdTokenResult().then((token) => {
+      const organizationId = String(token.claims.organizationId || '');
+      const role = String(token.claims.schoolRole || '');
+      setSchoolAccess(organizationId ? { organizationId, role } : null);
+    });
+  }, [user]);
+
+  const loadOrganizationBilling = async (organizationId: string) => {
+    const [poSnap, invoiceSnap] = await Promise.all([
+      getDocs(collection(db, `organizations/${organizationId}/purchaseOrders`)),
+      getDocs(collection(db, `organizations/${organizationId}/invoices`)),
+    ]);
+    setPurchaseOrders(poSnap.docs.map((item) => ({ id: item.id, ...item.data() })));
+    setInvoices(invoiceSnap.docs.map((item) => ({ id: item.id, ...item.data() })));
+  };
+
+  useEffect(() => {
+    if (schoolAccess && ['district-admin', 'school-admin'].includes(schoolAccess.role)) {
+      void loadOrganizationBilling(schoolAccess.organizationId).catch(() => {
+        setAccountMessage({ severity: 'error', text: 'Organization billing records could not be loaded.' });
+      });
+    }
+  }, [schoolAccess]);
+
+  const submitPurchaseOrder = async () => {
+    if (!firebaseApp || !schoolAccess) return;
+    const amountCents = Math.round(Number(poAmount) * 100);
+    if (!Number.isSafeInteger(amountCents) || amountCents < 100) {
+      setAccountMessage({ severity: 'error', text: 'Enter a valid purchase-order amount.' });
+      return;
+    }
+    await httpsCallable(getFunctions(firebaseApp), 'createPurchaseOrder')({
+      organizationId: schoolAccess.organizationId,
+      amountCents,
+      currency: 'USD',
+      description: poDescription,
+    });
+    setPoAmount('');
+    setPoDescription('');
+    await loadOrganizationBilling(schoolAccess.organizationId);
+    setAccountMessage({ severity: 'success', text: 'Purchase-order request submitted.' });
+  };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -367,7 +418,7 @@ export default function AccountPage() {
                 <Typography variant="body2" color="text.secondary">Not connected. Google Workspace Education, Microsoft Education, Clever, and ClassLink require district setup.</Typography>
               </Box>
             </Stack>
-            <Button disabled variant="outlined" sx={{ mt: 1.5 }}>Connect SSO</Button>
+            <Button component="a" href={`${WEBSITE_ACCOUNT_URL}#school-sign-in`} variant="outlined" sx={{ mt: 1.5 }}>Connect School Account</Button>
           </Box>
         </Stack>
         <Divider sx={{ my: 3 }} />
@@ -392,11 +443,21 @@ export default function AccountPage() {
               <Chip label="Current" color="success" size="small" />
             </Stack>
           </Box>
-          <Box sx={{ opacity: 0.55, border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={700}>Cloud billing</Typography>
-            <Typography variant="body2" color="text.secondary">Hosted plans, invoices, payment methods, and organization billing are not connected yet.</Typography>
-            <Button disabled variant="contained" startIcon={<CreditCard />} sx={{ mt: 1.5 }}>Manage Billing</Button>
-          </Box>
+          {schoolAccess && ['district-admin', 'school-admin'].includes(schoolAccess.role) ? (
+            <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+              <Typography variant="subtitle1" fontWeight={700}>Organization billing</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Submit a purchase-order request and review invoices for this school organization.</Typography>
+              <Stack spacing={1.5}>
+                <TextField label="PO amount (USD)" type="number" value={poAmount} onChange={(event) => setPoAmount(event.target.value)} inputProps={{ min: 1, step: '0.01' }} />
+                <TextField label="Purpose or quote reference" value={poDescription} onChange={(event) => setPoDescription(event.target.value)} />
+                <Button variant="contained" startIcon={<CreditCard />} onClick={() => void submitPurchaseOrder()}>Submit Purchase Order</Button>
+                <Typography variant="body2"><strong>Purchase orders:</strong> {purchaseOrders.length}</Typography>
+                <Typography variant="body2"><strong>Invoices:</strong> {invoices.length}</Typography>
+              </Stack>
+            </Box>
+          ) : (
+            <Alert severity="info">Organization purchase orders and invoices appear after a district or school administrator account is connected.</Alert>
+          )}
         </Stack>
       </TabPanel>
 

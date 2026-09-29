@@ -62,6 +62,16 @@ async function canAccessDevice(uid: string, deviceId: string): Promise<boolean> 
     (Array.isArray(memberData.deviceIds) && memberData.deviceIds.includes(deviceId));
 }
 
+async function hasManagedRelayAccess(uid: string, context: functions.https.CallableContext): Promise<boolean> {
+  if (context.auth?.token.platformOwner === true || context.auth?.token.platformAdmin === true) return true;
+  const subscription = await db.doc(`billingSubscriptions/${uid}`).get();
+  if (subscription.exists && ["active", "trialing"].includes(String(subscription.data()?.status || ""))) return true;
+  const organizationId = String(context.auth?.token.organizationId || "");
+  if (!organizationId) return false;
+  const organization = await db.doc(`organizations/${organizationId}`).get();
+  return organization.exists && organization.data()?.cloudRelayEnabled === true;
+}
+
 /** Bootstrap or update a district after approval. Provider IDs are public; secrets stay in Identity Platform. */
 export const configureSchoolOrganization = functions.https.onCall(async (
   data: {
@@ -303,7 +313,7 @@ export const createOrganizationInvoice = functions.https.onCall(async (
 });
 
 /** Issue a short-lived, owner-authorized signaling session for an HTTPS/WebRTC relay. */
-export const createCameraRelaySession = functions.https.onCall(async (
+export const createCameraRelaySession = functions.runWith({ secrets: ["TURN_SHARED_SECRET"] }).https.onCall(async (
   data: { deviceId?: string },
   context,
 ) => {
@@ -311,6 +321,9 @@ export const createCameraRelaySession = functions.https.onCall(async (
   const deviceId = cleanId(data?.deviceId, "deviceId");
   if (!(await canAccessDevice(uid, deviceId))) {
     throw new functions.https.HttpsError("permission-denied", "Camera device access denied");
+  }
+  if (!(await hasManagedRelayAccess(uid, context))) {
+    throw new functions.https.HttpsError("permission-denied", "Managed camera relay requires hosted cloud access");
   }
   const turnUrls = String(process.env.TURN_URLS || "").split(",").map((url) => url.trim()).filter(Boolean);
   const turnSecret = process.env.TURN_SHARED_SECRET || "";

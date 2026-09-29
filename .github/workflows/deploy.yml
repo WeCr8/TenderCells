@@ -66,7 +66,6 @@ jobs:
           FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENDER_CELLS }}
           FIREBASE_WEB_APP_ID: ${{ vars.FIREBASE_WEB_APP_ID }}
           TURN_URLS: ${{ secrets.TURN_URLS }}
-          TURN_SHARED_SECRET: ${{ secrets.TURN_SHARED_SECRET }}
           STRIPE_STARTER_PRICE_ID: ${{ vars.STRIPE_STARTER_PRICE_ID }}
           STRIPE_SCHOOL_PRICE_ID: ${{ vars.STRIPE_SCHOOL_PRICE_ID }}
           # Use Firebase's registered OAuth callback domain. The custom domain can
@@ -80,7 +79,7 @@ jobs:
           echo "FIREBASE_PROJECT=$PROJECT" >> "$GITHUB_ENV"
           npm i -g firebase-tools
           node scripts/firebase-web-env.mjs --project "$PROJECT"
-          printf 'TURN_URLS=%s\nTURN_SHARED_SECRET=%s\nSTRIPE_STARTER_PRICE_ID=%s\nSTRIPE_SCHOOL_PRICE_ID=%s\n' "$TURN_URLS" "$TURN_SHARED_SECRET" "$STRIPE_STARTER_PRICE_ID" "$STRIPE_SCHOOL_PRICE_ID" > functions/.env
+          printf 'TURN_URLS=%s\nSTRIPE_STARTER_PRICE_ID=%s\nSTRIPE_SCHOOL_PRICE_ID=%s\n' "$TURN_URLS" "$STRIPE_STARTER_PRICE_ID" "$STRIPE_SCHOOL_PRICE_ID" > functions/.env
 
       - name: Check Firebase Auth settings (providers + authorized domains)
         working-directory: .

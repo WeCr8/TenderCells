@@ -101,11 +101,11 @@ function cronMatches(expression: string, now: Date): boolean {
 
 /**
  * Process alerts from devices (predator detection, hardware faults, health warnings).
- * Triggered by Firestore write to /alerts/{deviceId}/{alertId}.
+ * Triggered by Firestore write to /alerts/{deviceId}/items/{alertId}.
  * Updates device state and queues push notification to Realtime DB.
  */
 export const processAlert = functions.firestore
-  .document("alerts/{deviceId}/{alertId}")
+  .document("alerts/{deviceId}/items/{alertId}")
   .onCreate(async (snap, context) => {
     const { deviceId, alertId } = context.params as { deviceId: string; alertId: string };
     const alert = snap.data() as AlertDoc;

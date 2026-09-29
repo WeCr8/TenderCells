@@ -64,6 +64,7 @@ export default function AccountPage() {
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [accountMessage, setAccountMessage] = useState<{ severity: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [schoolAccess, setSchoolAccess] = useState<{ organizationId: string; role: string } | null>(null);
+  const [isPlatformOwner, setIsPlatformOwner] = useState(false);
   const [purchaseOrders, setPurchaseOrders] = useState<Array<Record<string, unknown>>>([]);
   const [invoices, setInvoices] = useState<Array<Record<string, unknown>>>([]);
   const [poAmount, setPoAmount] = useState('');
@@ -76,6 +77,7 @@ export default function AccountPage() {
       const organizationId = String(token.claims.organizationId || '');
       const role = String(token.claims.schoolRole || '');
       setSchoolAccess(organizationId ? { organizationId, role } : null);
+      setIsPlatformOwner(token.claims.platformOwner === true || token.claims.platformAdmin === true);
     });
   }, [user]);
 
@@ -454,29 +456,31 @@ export default function AccountPage() {
           <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1}>
               <Box>
-                <Typography variant="subtitle1" fontWeight={700}>Local / open-source plan</Typography>
-                <Typography variant="body2" color="text.secondary">No active subscription or payment method is attached to this Firebase account.</Typography>
+                <Typography variant="subtitle1" fontWeight={700}>{isPlatformOwner ? 'Platform Owner' : 'Local / open-source plan'}</Typography>
+                <Typography variant="body2" color="text.secondary">{isPlatformOwner ? 'Full TenderCells cloud and administration access is included for this account.' : 'No active subscription or payment method is attached to this Firebase account.'}</Typography>
               </Box>
-              <Chip label="Current" color="success" size="small" />
+              <Chip label={isPlatformOwner ? 'Cloud included' : 'Current'} color="success" size="small" />
             </Stack>
           </Box>
-          <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={700}>TenderCells Starter</Typography>
-            <Typography variant="h6">$5/month</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>30-day free trial for hosted history, remote features, alerts, and support. Local operation remains free.</Typography>
-            <Button variant="contained" onClick={() => void openBilling('starter_monthly')} disabled={Boolean(billingAction)}>
-              Start 30-day trial
-            </Button>
-          </Box>
-          <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={700}>TenderCells School Pilot</Typography>
-            <Typography variant="h6">$499/year</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>60-day managed pilot. School administrators can use card billing or continue through purchase order and invoice review.</Typography>
-            <Button variant="contained" onClick={() => void openBilling('school_annual')} disabled={!schoolAccess || !['district-admin', 'school-admin'].includes(schoolAccess.role) || Boolean(billingAction)}>
-              Start 60-day school pilot
-            </Button>
-          </Box>
-          <Button variant="outlined" startIcon={<CreditCard />} onClick={() => void openBilling('portal')} disabled={Boolean(billingAction)}>Manage billing</Button>
+          {!isPlatformOwner && <>
+            <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+              <Typography variant="subtitle1" fontWeight={700}>TenderCells Starter</Typography>
+              <Typography variant="h6">$5/month</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>30-day free trial for hosted history, remote features, alerts, and support. Local operation remains free.</Typography>
+              <Button variant="contained" onClick={() => void openBilling('starter_monthly')} disabled={Boolean(billingAction)}>
+                Start 30-day trial
+              </Button>
+            </Box>
+            <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+              <Typography variant="subtitle1" fontWeight={700}>TenderCells School Pilot</Typography>
+              <Typography variant="h6">$499/year</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>60-day managed pilot. School administrators can use card billing or continue through purchase order and invoice review.</Typography>
+              <Button variant="contained" onClick={() => void openBilling('school_annual')} disabled={!schoolAccess || !['district-admin', 'school-admin'].includes(schoolAccess.role) || Boolean(billingAction)}>
+                Start 60-day school pilot
+              </Button>
+            </Box>
+            <Button variant="outlined" startIcon={<CreditCard />} onClick={() => void openBilling('portal')} disabled={Boolean(billingAction)}>Manage billing</Button>
+          </>}
           {schoolAccess && ['district-admin', 'school-admin'].includes(schoolAccess.role) ? (
             <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
               <Typography variant="subtitle1" fontWeight={700}>Organization billing</Typography>

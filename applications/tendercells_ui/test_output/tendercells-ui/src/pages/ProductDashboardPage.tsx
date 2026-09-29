@@ -1,5 +1,7 @@
-import { Alert, Box, Button, Chip, CircularProgress, FormControlLabel, Grid, Paper, Stack, Switch, Typography } from '@mui/material';
+import { Alert, Box, Button, Chip, CircularProgress, FormControl, FormControlLabel, Grid, IconButton, InputLabel, MenuItem, Paper, Select, Stack, Switch, Tooltip, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import SettingsRemoteIcon from '@mui/icons-material/SettingsRemote';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import MicIcon from '@mui/icons-material/Mic';
@@ -11,7 +13,7 @@ import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import WifiIcon from '@mui/icons-material/Wifi';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import Viewport3D from '../components/viewport/Viewport3D';
 import CameraFeedViewer from '../components/camera/CameraFeedViewer';
@@ -26,8 +28,28 @@ export default function ProductDashboardPage() {
   const [savingCapability, setSavingCapability] = useState<string | null>(null);
   const [capabilityError, setCapabilityError] = useState<string | null>(null);
   const product = products.find((item) => item.id === productId);
+  const availableCameras = products.filter((item) => String(item.metadata?.camera_stream_url || '').trim());
+  const activeCameraIndex = availableCameras.findIndex((item) => item.id === productId);
   const hardware = useHardwareControl(product?.device_id || 'unassigned');
   const telemetry = useTelemetry(product?.device_id || 'unassigned');
+
+  const selectCamera = (index: number) => {
+    if (!availableCameras.length) return;
+    const normalized = (index + availableCameras.length) % availableCameras.length;
+    navigate(`/product/${encodeURIComponent(availableCameras[normalized].id)}`);
+  };
+
+  useEffect(() => {
+    if (activeCameraIndex < 0 || availableCameras.length < 2) return undefined;
+    const switchWithArrowKeys = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.matches('input, textarea, select, [contenteditable="true"]')) return;
+      if (event.key === 'ArrowLeft') selectCamera(activeCameraIndex - 1);
+      if (event.key === 'ArrowRight') selectCamera(activeCameraIndex + 1);
+    };
+    window.addEventListener('keydown', switchWithArrowKeys);
+    return () => window.removeEventListener('keydown', switchWithArrowKeys);
+  }, [activeCameraIndex, availableCameras.length]);
 
   if (loading) return <Box sx={{ minHeight: 360, display: 'grid', placeItems: 'center' }}><CircularProgress /></Box>;
   if (!product) return <Navigate to="/products" replace />;
@@ -102,6 +124,38 @@ export default function ProductDashboardPage() {
                 fps: 15,
                 connected: product.connection_status === 'online' && Boolean(streamUrl),
               }} height="min(62dvh, 480px)" allowBrowserCamera={false} />
+              {activeCameraIndex >= 0 && availableCameras.length > 1 && (
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Tooltip title="Previous camera">
+                    <IconButton aria-label="Previous camera" onClick={() => selectCamera(activeCameraIndex - 1)} size="large">
+                      <ArrowBackIosNewIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <FormControl size="small" fullWidth>
+                    <InputLabel id="camera-node-selector-label">Camera</InputLabel>
+                    <Select
+                      labelId="camera-node-selector-label"
+                      value={product.id}
+                      label="Camera"
+                      onChange={(event) => navigate(`/product/${encodeURIComponent(String(event.target.value))}`)}
+                    >
+                      {availableCameras.map((cameraProduct) => (
+                        <MenuItem key={cameraProduct.id} value={cameraProduct.id}>
+                          {cameraProduct.product_name} · {cameraProduct.connection_status}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                    {activeCameraIndex + 1} of {availableCameras.length}
+                  </Typography>
+                  <Tooltip title="Next camera">
+                    <IconButton aria-label="Next camera" onClick={() => selectCamera(activeCameraIndex + 1)} size="large">
+                      <ArrowForwardIosIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
+              )}
               {!streamUrl && <Typography variant="body2" color="text.secondary">Flash the camera, complete its WiFi setup, then add the reported <code>/stream</code> address in Configure.</Typography>}
               {streamSecurity === 'local' && <Alert severity="info">Local-network stream: video stays on this Wi-Fi, but HTTP MJPEG is not encrypted. Authenticated remote viewing requires the TenderCells HTTPS relay.</Alert>}
               {streamSecurity === 'insecure-remote' && <Alert severity="error">This remote HTTP stream is not secure. Use a local address or an authenticated HTTPS relay URL.</Alert>}

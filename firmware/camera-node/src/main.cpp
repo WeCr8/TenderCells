@@ -189,6 +189,7 @@ void onMqtt(char* topic, byte* payload, unsigned int len) {
 }
 
 bool reconnect() {
+  if (brokerIp.isEmpty() || WiFi.status() != WL_CONNECTED) return false;
   String id = "tc-cam-" + deviceId + "-" + String((uint32_t)esp_random(), HEX);
   if (mqtt.connect(id.c_str())) {
     mqtt.subscribe(topicEstop().c_str(), 1);

@@ -68,6 +68,7 @@ export default function AccountPage() {
   const [invoices, setInvoices] = useState<Array<Record<string, unknown>>>([]);
   const [poAmount, setPoAmount] = useState('');
   const [poDescription, setPoDescription] = useState('');
+  const [billingAction, setBillingAction] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -112,6 +113,22 @@ export default function AccountPage() {
     setPoDescription('');
     await loadOrganizationBilling(schoolAccess.organizationId);
     setAccountMessage({ severity: 'success', text: 'Purchase-order request submitted.' });
+  };
+
+  const openBilling = async (action: 'starter_monthly' | 'school_annual' | 'portal') => {
+    if (!firebaseApp) return;
+    setBillingAction(action);
+    setAccountMessage(null);
+    try {
+      const callable = httpsCallable(getFunctions(firebaseApp), action === 'portal' ? 'createBillingPortal' : 'createBillingCheckout');
+      const result = await callable(action === 'portal' ? {} : { plan: action, organizationId: schoolAccess?.organizationId });
+      const url = String((result.data as { url?: string }).url || '');
+      if (!url) throw new Error('Stripe did not return a billing page.');
+      window.location.assign(url);
+    } catch (billingError) {
+      setAccountMessage({ severity: 'error', text: billingError instanceof Error ? billingError.message : 'Billing could not be opened.' });
+      setBillingAction(null);
+    }
   };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -443,6 +460,23 @@ export default function AccountPage() {
               <Chip label="Current" color="success" size="small" />
             </Stack>
           </Box>
+          <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+            <Typography variant="subtitle1" fontWeight={700}>TenderCells Starter</Typography>
+            <Typography variant="h6">$5/month</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>30-day free trial for hosted history, remote features, alerts, and support. Local operation remains free.</Typography>
+            <Button variant="contained" onClick={() => void openBilling('starter_monthly')} disabled={Boolean(billingAction)}>
+              Start 30-day trial
+            </Button>
+          </Box>
+          <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
+            <Typography variant="subtitle1" fontWeight={700}>TenderCells School Pilot</Typography>
+            <Typography variant="h6">$499/year</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>60-day managed pilot. School administrators can use card billing or continue through purchase order and invoice review.</Typography>
+            <Button variant="contained" onClick={() => void openBilling('school_annual')} disabled={!schoolAccess || !['district-admin', 'school-admin'].includes(schoolAccess.role) || Boolean(billingAction)}>
+              Start 60-day school pilot
+            </Button>
+          </Box>
+          <Button variant="outlined" startIcon={<CreditCard />} onClick={() => void openBilling('portal')} disabled={Boolean(billingAction)}>Manage billing</Button>
           {schoolAccess && ['district-admin', 'school-admin'].includes(schoolAccess.role) ? (
             <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 2 }}>
               <Typography variant="subtitle1" fontWeight={700}>Organization billing</Typography>

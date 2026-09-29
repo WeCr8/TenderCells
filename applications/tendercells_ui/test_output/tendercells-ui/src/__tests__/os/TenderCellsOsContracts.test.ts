@@ -50,11 +50,18 @@ describe('TenderCells OS contracts', () => {
 
   it('shows truthful account billing and links to configured school sign-in', () => {
     const account = readProjectFile('src/pages/AccountPage.tsx');
+    const billing = readProjectFile('../../../../functions/src/billing.ts');
     expect(account).toContain('<Tab label="Billing"');
     expect(account).toContain('No active subscription or payment method');
     expect(account).toContain('School or district SSO');
     expect(account).toContain('Connect School Account');
     expect(account).toContain('Submit Purchase Order');
+    expect(account).toContain('$5/month');
+    expect(account).toContain('Start 30-day trial');
+    expect(account).toContain('$499/year');
+    expect(account).toContain('Start 60-day school pilot');
+    expect(billing).toContain('payment_method_collection: "if_required"');
+    expect(billing).toContain('missing_payment_method: "cancel"');
   });
 
   it('keeps school roles, roster, billing, and camera sessions server-authoritative', () => {

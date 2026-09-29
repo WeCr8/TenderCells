@@ -35,6 +35,7 @@ export default function CameraFeedViewer({
   const [connecting, setConnecting] = useState(false);
   const [streamError, setStreamError] = useState(false);
   const [streamAttempt, setStreamAttempt] = useState(0);
+  const retryCountRef = useRef(0);
   const lastResumeRef = useRef(0);
   const [pageVisible, setPageVisible] = useState(() => document.visibilityState === 'visible');
   const orientationKey = `tendercells-camera-orientation:${camera.deviceId}`;
@@ -107,6 +108,17 @@ export default function CameraFeedViewer({
   useEffect(() => setStreamError(false), [camera.streamUrl, streamAttempt]);
 
   useEffect(() => {
+    if (!streamError || !camera.streamUrl || !pageVisible) return;
+    const retryDelay = Math.min(2_000 * (retryCountRef.current + 1), 15_000);
+    const timer = window.setTimeout(() => {
+      retryCountRef.current += 1;
+      setStreamError(false);
+      setStreamAttempt((value) => value + 1);
+    }, retryDelay);
+    return () => window.clearTimeout(timer);
+  }, [camera.streamUrl, pageVisible, streamError]);
+
+  useEffect(() => {
     if (!camera.streamUrl) return;
     const reconnect = () => {
       const visible = document.visibilityState === 'visible';
@@ -131,6 +143,7 @@ export default function CameraFeedViewer({
   }, [orientation, orientationKey]);
 
   const refreshStream = () => {
+    retryCountRef.current = 0;
     setStreamError(false);
     setStreamAttempt((value) => value + 1);
   };
@@ -171,7 +184,7 @@ export default function CameraFeedViewer({
           src={`${camera.streamUrl}${camera.streamUrl.includes('?') ? '&' : '?'}attempt=${streamAttempt}`}
           alt={`Live feed: ${camera.name}`}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: cameraTransform(orientation.rotation, orientation.flipX, orientation.flipY) }}
-          onLoad={() => setStreamError(false)}
+          onLoad={() => { retryCountRef.current = 0; setStreamError(false); }}
           onError={() => setStreamError(true)}
         />
       ) : (

@@ -206,6 +206,8 @@ describe('TenderCells OS contracts', () => {
     const viewer = readProjectFile('src/components/camera/CameraFeedViewer.tsx');
     const chickenEye = readProjectFile('src/pages/ChickenEyeDashboardPage.tsx');
     expect(viewer).toContain("document.addEventListener('visibilitychange', reconnect)");
+    expect(viewer).toContain('retryCountRef.current += 1');
+    expect(viewer).toContain('Math.min(2_000 * (retryCountRef.current + 1), 15_000)');
     expect(viewer).toContain("window.addEventListener('focus', reconnect)");
     expect(viewer).toContain('setStreamAttempt((value) => value + 1)');
     expect(chickenEye).toContain('camera_stream_url');

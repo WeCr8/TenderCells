@@ -43,6 +43,7 @@
 
 static const unsigned long HEARTBEAT_INTERVAL_MS = 10000;
 static const unsigned long MQTT_RECONNECT_MS     = 5000;
+static const unsigned long WIFI_RECONNECT_MS     = 10000;
 static const unsigned long WATCHDOG_TIMEOUT_S    = 8;
 
 Preferences prefs;
@@ -54,6 +55,7 @@ httpd_handle_t streamServer = NULL;
 
 volatile bool eStopActive = false;
 unsigned long lastHeartbeat = 0, lastReconnect = 0;
+unsigned long lastWifiReconnect = 0;
 
 String topicSensors() { return "tc/" + deviceId + "/sensors"; }
 String topicState()   { return "tc/" + deviceId + "/state"; }
@@ -79,6 +81,7 @@ static esp_err_t streamHandler(httpd_req_t* req) {
   esp_err_t res = httpd_resp_set_type(req, STREAM_CONTENT_TYPE);
   if (res != ESP_OK) return res;
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+  httpd_resp_set_hdr(req, "Cache-Control", "no-store, no-cache, must-revalidate");
   char part[64];
   while (true) {
     camera_fb_t* fb = esp_camera_fb_get();
@@ -89,6 +92,7 @@ static esp_err_t streamHandler(httpd_req_t* req) {
     if (res == ESP_OK) res = httpd_resp_send_chunk(req, (const char*)fb->buf, fb->len);
     esp_camera_fb_return(fb);
     if (res != ESP_OK) break;  // client disconnected
+    vTaskDelay(pdMS_TO_TICKS(1));
   }
   return res;
 }
@@ -96,6 +100,9 @@ static esp_err_t streamHandler(httpd_req_t* req) {
 void startStreamServer() {
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
   config.server_port = 80;
+  config.lru_purge_enable = true;
+  config.max_open_sockets = 4;
+  config.send_wait_timeout = 5;
   httpd_uri_t uri = { .uri = "/stream", .method = HTTP_GET, .handler = streamHandler, .user_ctx = NULL };
   if (httpd_start(&streamServer, &config) == ESP_OK) {
     httpd_register_uri_handler(streamServer, &uri);
@@ -120,7 +127,7 @@ bool initCamera() {
   c.jpeg_quality = 12;
   c.fb_count     = psramFound() ? 2 : 1;
   c.fb_location  = psramFound() ? CAMERA_FB_IN_PSRAM : CAMERA_FB_IN_DRAM;
-  c.grab_mode    = CAMERA_GRAB_WHEN_EMPTY;
+  c.grab_mode    = CAMERA_GRAB_LATEST;
   esp_err_t err = esp_camera_init(&c);
   if (err != ESP_OK) { Serial.printf("[CAM] init failed 0x%x\n", err); return false; }
   return true;
@@ -305,6 +312,8 @@ void setup() {
   if (!initCamera()) Serial.println("[CAM] no camera — check board/ribbon");
 
   provision();
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(true);
   discoverBroker();
   if (WiFi.status() == WL_CONNECTED) startStreamServer();
 
@@ -320,6 +329,10 @@ void setup() {
 
 void loop() {
   esp_task_wdt_reset();
+  if (WiFi.status() != WL_CONNECTED && millis() - lastWifiReconnect > WIFI_RECONNECT_MS) {
+    lastWifiReconnect = millis();
+    WiFi.reconnect();
+  }
   if (!mqtt.connected()) {
     if (millis() - lastReconnect > MQTT_RECONNECT_MS) { lastReconnect = millis(); reconnect(); }
     return;

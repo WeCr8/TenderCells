@@ -125,12 +125,16 @@ describe('TenderCells OS contracts', () => {
 
   it('keeps device flashing inside the registration workflow', () => {
     const registration = readProjectFile('src/components/products/ProductRegistrationModal.tsx');
+    const flasher = readProjectFile('../website/public/flash/index.html');
     const firebaseConfig = readProjectFile('../../../../firebase.json');
 
     expect(registration).toContain('setFlasherUrl(`/flash/?${params.toString()}`)');
+    expect(registration).toContain("embed: '1'");
     expect(registration).toContain('title="Tender Cells device flasher"');
     expect(registration).toContain('allow="serial; usb"');
     expect(registration).not.toContain("window.open(`/flash/");
+    expect(flasher).toContain('id="customFirmwareChoice"');
+    expect(flasher).toContain("#useCasePick .device[data-device]");
     expect(firebaseConfig).toContain("frame-ancestors 'self'");
   });
 
@@ -208,6 +212,11 @@ describe('TenderCells OS contracts', () => {
     expect(viewer).toContain("document.addEventListener('visibilitychange', reconnect)");
     expect(viewer).toContain('retryCountRef.current += 1');
     expect(viewer).toContain('Math.min(2_000 * (retryCountRef.current + 1), 15_000)');
+    const productDashboard = readProjectFile('src/pages/ProductDashboardPage.tsx');
+    expect(productDashboard).toContain('availableCameras.length > 1');
+    expect(productDashboard).toContain('aria-label="Previous camera"');
+    expect(productDashboard).toContain('aria-label="Next camera"');
+    expect(productDashboard).toContain("event.key === 'ArrowLeft'");
     expect(viewer).toContain("window.addEventListener('focus', reconnect)");
     expect(viewer).toContain('setStreamAttempt((value) => value + 1)');
     expect(chickenEye).toContain('camera_stream_url');

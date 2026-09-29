@@ -48,6 +48,7 @@ import SensorsOutlinedIcon from '@mui/icons-material/SensorsOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import WaterDropOutlinedIcon from '@mui/icons-material/WaterDropOutlined';
 import { useTheme, useMediaQuery } from '@mui/material';
 import QRCodeScanner from './QRCodeScanner';
@@ -861,6 +862,7 @@ export default function ProductRegistrationModal({
       target,
       product: productFamily,
       name: productName.trim() || customProductName.trim() || 'My Tender Cells Device',
+      embed: '1',
     });
     if (deviceId.trim()) params.set('deviceId', deviceId.trim());
     setFlasherUrl(`/flash/?${params.toString()}`);
@@ -1694,9 +1696,20 @@ export default function ProductRegistrationModal({
               Close this window after flashing to continue registration.
             </Typography>
           </Box>
-          <IconButton aria-label="Close flasher and return to registration" onClick={() => setFlasherUrl(null)}>
-            <CloseIcon />
-          </IconButton>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Button
+              startIcon={<MenuBookIcon />}
+              href="/guides/camera-node-first-build"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Guide
+            </Button>
+            <Button variant="contained" onClick={() => setFlasherUrl(null)}>Done</Button>
+            <IconButton aria-label="Close flasher and return to registration" onClick={() => setFlasherUrl(null)}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
         </DialogTitle>
         {flasherUrl && (
           <Box

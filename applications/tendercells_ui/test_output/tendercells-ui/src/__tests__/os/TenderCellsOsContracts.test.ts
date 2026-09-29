@@ -60,6 +60,8 @@ describe('TenderCells OS contracts', () => {
     expect(account).toContain('Start 30-day trial');
     expect(account).toContain('$499/year');
     expect(account).toContain('Start 60-day school pilot');
+    expect(account).toContain('Cloud included');
+    expect(billing).toContain('platformOwner === true');
     expect(billing).toContain('payment_method_collection: "if_required"');
     expect(billing).toContain('missing_payment_method: "cancel"');
   });

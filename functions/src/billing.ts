@@ -35,6 +35,9 @@ export const createBillingCheckout = functions.runWith({ secrets: ["STRIPE_SECRE
   data: { plan?: Plan; organizationId?: string }, context,
 ) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Sign in before starting checkout");
+  if (context.auth.token.platformOwner === true || context.auth.token.platformAdmin === true) {
+    throw new functions.https.HttpsError("failed-precondition", "Cloud billing is included for this platform owner account");
+  }
   const plan = data?.plan;
   if (!plan || !["starter_monthly", "school_annual"].includes(plan)) {
     throw new functions.https.HttpsError("invalid-argument", "Unknown billing plan");
@@ -69,6 +72,9 @@ export const createBillingCheckout = functions.runWith({ secrets: ["STRIPE_SECRE
 
 export const createBillingPortal = functions.runWith({ secrets: ["STRIPE_SECRET_KEY"] }).https.onCall(async (_data, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Sign in to manage billing");
+  if (context.auth.token.platformOwner === true || context.auth.token.platformAdmin === true) {
+    throw new functions.https.HttpsError("failed-precondition", "Cloud billing is included for this platform owner account");
+  }
   const customer = await customerFor(context.auth.uid, context.auth.token.email as string | undefined);
   const session = await stripeClient().billingPortal.sessions.create({ customer, return_url: APP_URL });
   return { url: session.url };

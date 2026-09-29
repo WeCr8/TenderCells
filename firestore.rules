@@ -81,6 +81,16 @@ service cloud.firestore {
              request.resource.data.deviceId == deviceId;
     }
 
+    // Stripe writes these server-side; a user may only read their own billing state.
+    match /billingSubscriptions/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
+    match /billingCustomers/{userId} {
+      allow read, write: if false;
+    }
+
     // Properties collection
     // Users can only read/write their own properties
     match /properties/{propertyId} {

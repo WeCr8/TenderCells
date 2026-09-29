@@ -1,0 +1,11 @@
+logLevel: info
+api: false
+metrics: false
+pprof: false
+rtspAddress: :8554
+webrtc: true
+webrtcAddress: :8889
+webrtcEncryption: false
+paths:
+  camera:
+    source: publisher

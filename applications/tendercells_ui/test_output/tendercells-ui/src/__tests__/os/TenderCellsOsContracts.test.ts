@@ -82,6 +82,18 @@ describe('TenderCells OS contracts', () => {
     expect(websiteAccount).toContain('auth.tenantId = provider.tenantId');
   });
 
+  it('keeps managed relay secrets out of deploy environment files', () => {
+    const schoolPlatform = readProjectFile('../../../../functions/src/schoolPlatform.ts');
+    const deployWorkflow = readProjectFile('../../../../.github/workflows/deploy.yml');
+    const selfHosted = readProjectFile('../../../../deploy/self-hosted-camera/docker-compose.yml');
+    expect(schoolPlatform).toContain('runWith({ secrets: ["TURN_SHARED_SECRET"] })');
+    expect(schoolPlatform).toContain('Managed camera relay requires hosted cloud access');
+    expect(schoolPlatform).toContain('["active", "trialing"]');
+    expect(deployWorkflow).not.toContain('TURN_SHARED_SECRET: ${{ secrets.TURN_SHARED_SECRET }}');
+    expect(selfHosted).toContain('TC_TURN_SHARED_SECRET');
+    expect(selfHosted).not.toContain('FIREBASE_SERVICE_ACCOUNT');
+  });
+
   it('keeps product registration open to full products, modules, and custom builds', () => {
     const registration = readProjectFile('src/components/products/ProductRegistrationModal.tsx');
     [

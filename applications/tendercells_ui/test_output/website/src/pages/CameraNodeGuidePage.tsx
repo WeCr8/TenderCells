@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import RelatedContent from "../components/RelatedContent";
 import PageHero from "../components/PageHero";
 import "./CameraNodeGuidePage.css";
 
@@ -56,6 +57,7 @@ export default function CameraNodeGuidePage() {
         <h2>Engineering sources</h2><p>Board imagery and pin assignments come from Seeed Studio documentation under CC BY-SA 4.0. Verify the current manufacturer schematic and the exact breakout-board datasheet before assembly.</p>
         <div className="camera-source-links"><a href="https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/">Board, power, battery, and schematics</a><a href="https://wiki.seeedstudio.com/xiao_esp32s3_pin_multiplexing/">Pin multiplexing</a><a href="https://wiki.seeedstudio.com/License/">Seeed documentation license</a></div>
       </section>
+      <RelatedContent />
     </PageLayout>
   );
 }

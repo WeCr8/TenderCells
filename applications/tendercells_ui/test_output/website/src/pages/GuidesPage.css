@@ -1,0 +1,19 @@
+/* /guides */
+.gd-layers { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.9rem; }
+.gd-layer { position: relative; padding: 1rem 1.1rem; border-radius: 10px; border: 1px solid #d1d9e0; background: #fff; border-top: 4px solid #2e7d32; }
+.gd-layer h3 { margin: 0.2rem 0 0.3rem; }
+.gd-layer p { margin: 0 0 0.6rem; color: #59636e; font-size: 0.93rem; }
+.gd-layer a { font-weight: 600; color: #2e7d32; text-decoration: none; }
+.gd-layer-num { font-size: 0.75rem; font-weight: 700; color: #59636e; }
+.gd-guide { border-top-color: #1a56b8; }
+.gd-lesson { border-top-color: #2e7d32; }
+.gd-doc { border-top-color: #3d4650; }
+.gd-os { border-top-color: #9a5b00; }
+
+.gd-journeys { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.9rem; }
+.gd-journey {
+  display: flex; flex-direction: column; gap: 0.3rem; padding: 1rem 1.1rem; border-radius: 10px;
+  background: #e8f3ea; border: 1px solid #c7e1cb; color: #1f2328; text-decoration: none;
+}
+.gd-journey:hover { border-color: #2e7d32; }
+.gd-journey span { color: #3d4a41; font-size: 0.92rem; }

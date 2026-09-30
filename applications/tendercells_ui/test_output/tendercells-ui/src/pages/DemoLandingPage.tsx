@@ -25,6 +25,7 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import { seedDemoEnvironment, type DemoReport } from "../services/demo/demoEnvironment";
+import { safeDemoNext } from "../lib/demo/demoNext";
 
 const C = {
   bg: "#0D2B1E",
@@ -79,6 +80,9 @@ export default function DemoLandingPage() {
         setReport(seeded);
         track("demo_loaded", { ok: seeded.ok, devices: seeded.devices.length });
         setPhase("ready");
+        // Deep link from the website: open the requested OS page with the demo data loaded.
+        const next = safeDemoNext(new URLSearchParams(window.location.search).get("next"));
+        if (next) navigate(next, { replace: true });
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         track("demo_load_error", { message: msg });

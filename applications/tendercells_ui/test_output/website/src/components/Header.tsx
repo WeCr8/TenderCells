@@ -63,6 +63,8 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { label: "Mobile App (iOS)",        to: "/apps#ios" },
       { label: "Mobile App (Android)",    to: "/apps#android" },
+      { label: "Tender Cells OS",         to: "/os" },
+      { label: "Build a Device for the OS", to: "/os#build" },
       { label: "Web Dashboard (OS)",      href: TENDERCELLS_OS_URL },
       { label: "Developer API",           to: "/apps#api" },
       { label: "MQTT Integration Guide",  to: "/apps#mqtt" },

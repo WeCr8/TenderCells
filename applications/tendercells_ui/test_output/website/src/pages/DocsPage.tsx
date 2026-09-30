@@ -7,6 +7,7 @@ import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
 import DocGroups from "../components/DocGroups";
 import TutorialArticle from "../components/TutorialArticle";
+import RelatedContent from "../components/RelatedContent";
 import { useMarkdown } from "../hooks/useMarkdown";
 import { siteDocBySlug } from "../data/docs";
 
@@ -53,7 +54,10 @@ function DocView({ slug }: { slug: string }) {
         <TutorialArticle
           md={md}
           crumbs={crumbs}
-          footer={<p className="tut-source">Kept in step with <code>{doc.source}</code> in the open-source repository.</p>}
+          footer={<>
+            <p className="tut-source">Kept in step with <code>{doc.source}</code> in the open-source repository.</p>
+            <RelatedContent />
+          </>}
         />
       )}
     </PageLayout>

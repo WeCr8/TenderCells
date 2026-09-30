@@ -20,6 +20,9 @@ import TrustPage from "./pages/TrustPage";
 import GuidePage from "./pages/GuidePage";
 import CameraNodeGuidePage from "./pages/CameraNodeGuidePage";
 import SeoHubPage from "./pages/SeoHubPage";
+import GuidesPage from "./pages/GuidesPage";
+import ScienceFairPage from "./pages/ScienceFairPage";
+import TenderCellsOsPage from "./pages/TenderCellsOsPage";
 import LLMDemoTestPage from "./pages/LLMDemoTestPage";
 import FarmAutomationPage from "./pages/FarmAutomationPage";
 import PublicDemoPage from "./pages/PublicDemoPage";
@@ -77,11 +80,12 @@ function App() {
         <Route path="/4h" element={<AudienceProgramPage kind="4h" />} />
         <Route path="/ffa" element={<AudienceProgramPage kind="ffa" />} />
         <Route path="/homeschool" element={<AudienceProgramPage kind="homeschool" />} />
-        <Route path="/science-fair" element={<AudienceProgramPage kind="science-fair" />} />
+        <Route path="/science-fair" element={<ScienceFairPage />} />
 
         {/* Applications */}
         <Route path="/apps" element={<ApplicationsPage />} />
         <Route path="/demo" element={<PublicDemoPage />} />
+        <Route path="/os" element={<TenderCellsOsPage />} />
 
         {/* Learn */}
         <Route path="/learn" element={<LearnPage />} />
@@ -90,7 +94,7 @@ function App() {
         <Route path="/learn/homesteading" element={<HomesteadingPage />} />
         <Route path="/learn/automation" element={<AutomationPage />} />
         <Route path="/learn/faq" element={<FaqPage />} />
-        <Route path="/guides" element={<SeoHubPage kind="guides" />} />
+        <Route path="/guides" element={<GuidesPage />} />
         <Route path="/guides/smart-chicken-coop" element={<GuidePage slug="smart-chicken-coop" />} />
         <Route path="/guides/predator-monitoring" element={<GuidePage slug="predator-monitoring" />} />
         <Route path="/guides/pasture-rotation" element={<GuidePage slug="pasture-rotation" />} />

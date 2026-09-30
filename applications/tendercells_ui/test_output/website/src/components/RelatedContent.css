@@ -1,0 +1,21 @@
+/* RelatedContent + shared content-link rows (Guides hub, OS page, Science fair). */
+.rc { margin: 2.5rem 0 1rem; }
+.rc-heading { font-size: 1.35rem; margin: 0 0 1rem; }
+.rc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+.rc-topic { border: 1px solid #d1d9e0; border-radius: 10px; padding: 1rem 1.1rem; background: #fff; }
+.rc-topic h3 { margin: 0 0 0.25rem; font-size: 1.05rem; }
+.rc-topic > p { margin: 0 0 0.6rem; color: #59636e; font-size: 0.92rem; }
+.rc-topic ul { list-style: none; margin: 0; padding: 0; }
+.rc-topic li + li { border-top: 1px solid #eef1f4; }
+.rc-link { display: flex; align-items: baseline; gap: 0.6rem; padding: 0.45rem 0; color: #1f2328; text-decoration: none; }
+.rc-link:hover .rc-title { color: #2e7d32; text-decoration: underline; }
+.rc-kind {
+  flex: none; min-width: 5.6rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; padding: 0.15rem 0.45rem; border-radius: 99px; text-align: center;
+}
+.rc-kind-guide { background: #e8f0fe; color: #1a56b8; }
+.rc-kind-lesson { background: #e8f3ea; color: #2e7d32; }
+.rc-kind-doc { background: #f1f3f5; color: #3d4650; }
+.rc-kind-os { background: #fff4e0; color: #9a5b00; }
+.rc-kind-tool { background: #f3ecff; color: #6a3fc4; }
+.rc-title { line-height: 1.35; }

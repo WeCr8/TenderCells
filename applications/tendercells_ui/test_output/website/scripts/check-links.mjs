@@ -108,6 +108,18 @@ for (const f of allSrc.filter((x) => /\.tsx?$/.test(x))) {
   }
 }
 
+// Demo deep links (/app/demo?next=/page, demo("/page")): the page must be an OS route the
+// demo agrees to open (tendercells-ui/src/lib/demo/demoNext.ts DEMO_PAGES).
+const demoPages = new Set([...read(join(OS, "src/lib/demo/demoNext.ts")).matchAll(/"([a-z0-9-]+)"/g)].map((m) => m[1]));
+for (const f of allSrc.filter((x) => /\.tsx?$/.test(x))) {
+  const text = read(f).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, ""); // code only, not comments
+  for (const m of text.matchAll(/(?:demo\(\s*["']|\/app\/demo\?next=)(\/[a-z0-9/-]+)/gi)) {
+    const page = m[1];
+    const first = page.split("/")[1];
+    if (!demoPages.has(first) || !osRoutes.some((r) => toRe(r).test(page))) problems.push(`${relative(WEBSITE, f)}: demo deep link ${page} - the demo will not open that OS page`);
+  }
+}
+
 // Links in the published lessons and docs (markdown): internal ones must resolve too.
 for (const dir of ["lessons", "docs"]) for (const f of walk(join(WEBSITE, "public", dir)).filter((x) => x.endsWith(".md"))) {
   const md = read(f).replace(/```[\s\S]*?```/g, "");

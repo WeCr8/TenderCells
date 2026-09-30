@@ -113,31 +113,6 @@ const programs: Record<string, Program> = {
       { label: "GitHub discussions", href: "https://github.com/WeCr8/TenderCells/discussions" },
     ],
   },
-  "science-fair": {
-    title: "Science Fair Agricultural Robotics Projects",
-    kicker: "Smart animal care experiments and build guides",
-    description:
-      "TenderCells gives students science fair ideas that combine animal welfare, environmental sensing, smart chicken coops, robotics, computer vision, and open-source farming.",
-    audience:
-      "For middle school, high school, 4-H, FFA, homeschool, and makerspace students who need a testable question, measurable data, and a practical prototype.",
-    outcomes: [
-      "Ask measurable questions about environment, feed, water, movement, or egg production.",
-      "Collect repeatable sensor data and explain limitations honestly.",
-      "Build small prototypes before full animal deployment.",
-      "Present the connection between animal welfare, automation, and engineering.",
-    ],
-    projects: [
-      { title: "Does Coop Temperature Affect Egg Patterns?", desc: "Compare daily temperature and nest-box activity over several weeks.", href: "/health" },
-      { title: "Can a Camera Reduce Missed Coop Checks?", desc: "Design a monitoring workflow and compare manual vs camera-assisted observations.", href: "/shop/watchtower" },
-      { title: "What Pasture Route Reduces Overgrazing?", desc: "Model mobile coop paths and compare grass recovery assumptions.", href: "/shop/roaming-roost" },
-    ],
-    resources: [
-      { label: "Academy", href: "/academy" },
-      { label: "Public demo", href: "/app/demo" },
-      { label: "Learn automation", href: "/learn/automation" },
-      { label: "Developer docs", href: "/developers" },
-    ],
-  },
 };
 
 interface AudienceProgramPageProps {

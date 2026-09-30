@@ -4,6 +4,7 @@
 import { Link, useParams } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import TutorialArticle from "../components/TutorialArticle";
+import RelatedContent from "../components/RelatedContent";
 import { useMarkdown } from "../hooks/useMarkdown";
 import { LESSONS, lessonBySlug } from "../data/lessons";
 
@@ -38,13 +39,14 @@ export default function LessonPage() {
             <span className="tag">{meta.tag}</span>
             {idx >= 0 && <span>Lesson {idx + 1} of {LESSONS.length}</span>}
           </>}
-          footer={
+          footer={<>
             <div className="tut-footer cta-bar" style={{ justifyContent: "space-between" }}>
               {prev ? <Link to={`/lessons/${prev.slug}`} className="btn-outline">← {prev.title}</Link> : <Link to="/lessons" className="btn-outline">← All lessons</Link>}
               {next ? <Link to={`/lessons/${next.slug}`} className="btn-primary">Next: {next.title} →</Link>
                     : <Link to="/lessons" className="btn-primary">All lessons →</Link>}
             </div>
-          }
+            <RelatedContent />
+          </>}
         />
       )}
     </PageLayout>

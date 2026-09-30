@@ -547,3 +547,6 @@ export {
 } from "./schoolPlatform";
 
 export { createBillingCheckout, createBillingPortal, stripeBillingWebhook } from "./billing";
+
+// Newsletter double opt-in + email preferences (Trigger Email extension via the `mail` collection).
+export { onNewsletterSignup, confirmNewsletter, unsubscribeNewsletter, syncEmailPreferences } from "./email";

@@ -28,9 +28,19 @@ export interface YardEvent {
   label?: string;            // what was seen, e.g. "fox" (predator alerts)
   bearingDeg?: number;       // from the reporting device, 0 = map north (up), clockwise
   distanceFt?: number;       // estimated range from the device, when known
+  propFt?: { x: number; y: number }; // property position (ft) - mobile robot sightings
+  scout?: boolean;           // weed found by a camera-only rover: pulled by hand, never lased
+  finding?: Finding;         // rover alerts: an animal on the route, a water leak, a plant
+  animalGroup?: AnimalGroup; // animal findings: own flock / pet / wildlife / predator
   ts: number;
   updatedAt: number;
 }
+
+export type Finding = "animal" | "leak" | "plant";
+export type AnimalGroup = "flock" | "pet" | "wildlife" | "predator";
+const FINDINGS: Finding[] = ["animal", "leak", "plant"];
+const ANIMAL_GROUPS: AnimalGroup[] = ["flock", "pet", "wildlife", "predator"];
+const oneOf = <T extends string>(v: unknown, allowed: T[]): T | undefined => (allowed.includes(v as T) ? (v as T) : undefined);
 
 const TYPES: YardEventType[] = ["egg_ready", "pickup_ready", "weed_detected", "headcount", "alert"];
 const STATUSES: YardEventStatus[] = ["active", "pending_review", "approved", "rejected", "treated", "cleared"];
@@ -60,6 +70,8 @@ export function ingestEvent(deviceId: string, payload: Record<string, unknown>):
   if (!STATUSES.includes(status)) return `event.status must be one of ${STATUSES.join(", ")}`;
   const bed = payload.bedMm as { x?: unknown; y?: unknown } | undefined;
   const bedMm = bed && num(bed.x) !== undefined && num(bed.y) !== undefined ? { x: bed.x as number, y: bed.y as number } : undefined;
+  const pf = payload.propFt as { x?: unknown; y?: unknown } | undefined;
+  const propFt = pf && num(pf.x) !== undefined && num(pf.y) !== undefined ? { x: pf.x as number, y: pf.y as number } : undefined;
   const now = Date.now();
 
   const byId = events.get(deviceId) ?? new Map<string, YardEvent>();
@@ -73,10 +85,14 @@ export function ingestEvent(deviceId: string, payload: Record<string, unknown>):
     confidence: num(payload.confidence) ?? prev?.confidence,
     itemId: str(payload.itemId, 64) ?? prev?.itemId,
     bedMm: bedMm ?? prev?.bedMm,
+    propFt: propFt ?? prev?.propFt,
     station: str(payload.station) ?? prev?.station,
     label: str(payload.label, 40) ?? prev?.label,
     bearingDeg: num(payload.bearingDeg) !== undefined ? (((payload.bearingDeg as number) % 360) + 360) % 360 : prev?.bearingDeg,
     distanceFt: num(payload.distanceFt) !== undefined ? Math.max(0, payload.distanceFt as number) : prev?.distanceFt,
+    scout: typeof payload.scout === "boolean" ? payload.scout : prev?.scout,
+    finding: oneOf(payload.finding, FINDINGS) ?? prev?.finding,
+    animalGroup: oneOf(payload.animalGroup, ANIMAL_GROUPS) ?? prev?.animalGroup,
     ts: prev?.ts ?? (num(payload.ts) ?? now),
     updatedAt: now,
   });

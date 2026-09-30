@@ -4,6 +4,7 @@
 // Eggs / pickups: "Picked up" clears the flag; WatchTower predator alerts: "Seen it". Weeds (human in the loop): each
 // detection waits for a person - Aim (aiming dot only), Burn (laser, interlocked
 // on the robot) or Not a weed. Aim and Burn move hardware, so they confirm first.
+// Weeds found by a camera-only rover scout get "Pulled it" (done by hand) or Not a weed.
 import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -17,6 +18,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type { YardAction } from '../../hooks/useYardEvents';
 import { FLAG_COLORS, needsAttention, type YardFlag } from '../../lib/yard/yardTypes';
+import { findingColor, urgency } from '../../lib/yard/detections';
 
 const colors = {
   bg: '#0D2B1E',
@@ -32,6 +34,10 @@ const colors = {
 const ICON: Record<YardFlag['type'], string> = {
   egg_ready: '🥚', pickup_ready: '📦', weed_detected: '🌱', headcount: '🐔', alert: '⚠️',
 };
+
+/** Row icon: leaks and rover animal sightings get their own. */
+const iconFor = (f: YardFlag): string =>
+  f.finding === 'leak' ? '💧' : f.animalGroup === 'flock' ? '🐔' : f.finding === 'animal' ? '🐾' : f.finding === 'plant' ? '🍂' : ICON[f.type];
 
 interface Props {
   flags: YardFlag[];
@@ -63,7 +69,8 @@ export default function YardAttentionPanel({ flags, act, onFocus, maxRows = 6, f
   const [snack, setSnack] = useState<{ msg: string; error?: boolean } | null>(null);
   const [collapsed, setCollapsed] = useState(false);
 
-  const open = flags.filter(needsAttention).sort((a, b) => b.updatedAt - a.updatedAt);
+  // Leaks and predators first, then animals out, then the rest; newest first within each.
+  const open = flags.filter(needsAttention).sort((a, b) => urgency(a) - urgency(b) || b.updatedAt - a.updatedAt);
   const counts = flags.filter((f) => f.type === 'headcount');
 
   const run = async (flag: YardFlag, action: YardAction) => {
@@ -107,16 +114,23 @@ export default function YardAttentionPanel({ flags, act, onFocus, maxRows = 6, f
           const key = `${f.deviceId}:${f.id}`;
           const weed = f.type === 'weed_detected';
           return (
-            <Box key={key} sx={{ bgcolor: colors.surface, borderLeft: `4px solid ${FLAG_COLORS[f.type]}`, borderRadius: 1, p: 0.75 }}>
+            <Box key={key} sx={{ bgcolor: colors.surface, borderLeft: `4px solid ${f.type === 'alert' ? findingColor(f) : FLAG_COLORS[f.type]}`, borderRadius: 1, p: 0.75 }}>
               <Box onClick={onFocus ? () => onFocus(f) : undefined} sx={{ cursor: onFocus ? 'pointer' : 'default' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {ICON[f.type]} {f.title}{f.count ? ` · ${f.count}` : ''}
+                  {iconFor(f)} {f.title}{f.count ? ` · ${f.count}` : ''}
                   {weed && f.confidence != null ? ` · ${Math.round(f.confidence * 100)}%` : ''}
                 </Typography>
                 {f.detail && <Typography variant="caption" sx={{ color: colors.goldMuted }}>{f.detail}</Typography>}
               </Box>
               <Stack direction="row" spacing={0.5} sx={{ mt: 0.5 }}>
-                {weed ? (
+                {weed && f.scout ? (
+                  <>
+                    <Button size="small" variant="outlined" disabled={busy === key} onClick={() => void run(f, 'ack')}
+                      sx={{ color: colors.gold, borderColor: colors.accent, minWidth: 0 }}>Pulled it</Button>
+                    <Button size="small" disabled={busy === key} onClick={() => void run(f, 'reject')}
+                      sx={{ color: colors.goldMuted, minWidth: 0 }}>Not a weed</Button>
+                  </>
+                ) : weed ? (
                   <>
                     <Button size="small" variant="outlined" disabled={busy === key}
                       onClick={() => setConfirm({ flag: f, action: 'aim' })}
@@ -129,7 +143,7 @@ export default function YardAttentionPanel({ flags, act, onFocus, maxRows = 6, f
                   </>
                 ) : (
                   <Button size="small" variant="outlined" disabled={busy === key} onClick={() => void run(f, 'ack')}
-                    sx={{ color: colors.gold, borderColor: colors.accent }}>{f.type === 'alert' ? 'Seen it' : 'Picked up'}</Button>
+                    sx={{ color: colors.gold, borderColor: colors.accent }}>{f.finding === 'leak' ? 'Fixed' : f.animalGroup === 'flock' ? 'Back inside' : f.type === 'alert' ? 'Seen it' : 'Picked up'}</Button>
                 )}
               </Stack>
             </Box>

@@ -3,6 +3,19 @@ import PageHero from "../components/PageHero";
 import { TENDERCELLS_OS_URL } from "../config/appLinks";
 import { Link } from "react-router-dom";
 
+/** Screenshots of the OS demo (captured from tendercells.com/app/demo). */
+const OS_SCREENS = [
+  { src: "os-3d-camera-views.jpg", title: "3D property + device cameras", body: "Inside and outside camera views of each coop, dock and robot, with station flags (eggs ready, roost headcount)." },
+  { src: "os-predator-monitor.jpg", title: "Predator Monitor", body: "WatchTower's three 120° cameras, located detections and snake / predator patrols on the map." },
+  { src: "os-property-layout.jpg", title: "Property layout", body: "Draw your yard: products, gardens, obstacles, terrain, elevation and No-Go zones." },
+  { src: "os-robot-zones.jpg", title: "Robot exclusion zones", body: "No-go, keep-out and no-laser zones around animals, sent to robots over MQTT and enforced on board." },
+  { src: "os-weed-patrol.jpg", title: "Weed Patrol", body: "Camera passes find weeds; a person approves every aim or laser shot, behind hardware interlocks." },
+  { src: "os-watershed.jpg", title: "Watershed & drainage", body: "Rain, puddles, flow and erosion on your terrain - then try fixes before you dig." },
+  { src: "os-diy-projects.jpg", title: "DIY projects + live feeds", body: "Terrarium, enclosure camera, sound monitor and pond projects - video stays on your network." },
+  { src: "os-library.jpg", title: "Animal & plant library", body: "Health by species (poultry, rodents, livestock, fish, reptiles), predators & pests, crops and weeds." },
+  { src: "os-chicken-tender.jpg", title: "Chicken Tender dashboard", body: "Telemetry, doors, feeding, cleaning and the gantry + arm with a confirmation for every hardware action." },
+];
+
 export default function ApplicationsPage() {
   return (
     <PageLayout>
@@ -10,8 +23,8 @@ export default function ApplicationsPage() {
         variant="dark"
         title={<>Applications &amp; Downloads</>}
         subtitle="Control your entire homestead from one app. Open APIs for builders."
-        image="/assets/images/demos/coop-camera-demo.png"
-        imageAlt="TenderCells coop dashboard showing selectable camera views"
+        image="/assets/images/os/os-3d-camera-views.jpg"
+        imageAlt="Tender Cells OS 3D property view with coop, duck dock and robot camera views"
       />
 
       <h2 className="section-title" id="ios">Mobile App — iOS</h2>
@@ -63,6 +76,23 @@ export default function ApplicationsPage() {
         <Link to="/account" className="btn-outline">
           Log in / My account
         </Link>
+      </div>
+
+      <h2 className="section-title" id="os-screenshots">Inside Tender Cells OS</h2>
+      <div className="prose">
+        <p>Screens from the free demo - no hardware or sign-up needed: <a href="/app/demo">try it</a>.</p>
+      </div>
+      <div className="card-grid" data-testid="os-gallery">
+        {OS_SCREENS.map((s) => (
+          <figure key={s.src} className="card" style={{ margin: 0 }}>
+            <img src={`/assets/images/os/${s.src}`} alt={`Tender Cells OS - ${s.title}`} loading="lazy"
+              style={{ width: "100%", height: "auto", aspectRatio: "16 / 10", objectFit: "cover", objectPosition: "top", borderRadius: 8 }} />
+            <figcaption>
+              <h3 style={{ marginTop: "0.75rem" }}>{s.title}</h3>
+              <p>{s.body}</p>
+            </figcaption>
+          </figure>
+        ))}
       </div>
 
       <h2 className="section-title" id="api">Developer API</h2>

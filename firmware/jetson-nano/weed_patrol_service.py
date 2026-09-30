@@ -3,8 +3,12 @@
     WEED_MODE=simulation|live  DEVICE_ID=garden_weeder  ITEM_ID=item-garden-genesis \\
     MQTT_BROKER=mqtt://192.168.1.50:1883  python3 weed_patrol_service.py
 
-Subscribes:  tc/{id}/cmd/weed   {"seq", "action": "pass"|"approve"|"reject", "passes", "eventId", "mode"}
+Subscribes:  tc/{id}/cmd/weed   {"seq", "action": "pass"|"approve"|"reject", "passes", "task", "eventId", "mode"}
+                                  task: weed (default) | plant_scan | patrol (snakes / animals)
+             tc/{id}/cmd/event  {"seq", "action": "ack", "eventId"}  (a person saw a sighting)
              tc/{id}/cmd/estop  {"active": bool}   (QoS 2, retained)
+             tc/{id}/cfg/zones  exclusion zones from the OS (retained) - no driving into no-go /
+                                keep-out, no aiming dot or laser inside any zone (zones.py)
 Publishes:   tc/{id}/event      weed_detected flags (pending_review -> approved -> treated/rejected)
              tc/{id}/state/weed {state, mode, estop, laser{...}, pass{...}, animalSafetyGate}
              tc/{id}/ack        {"seq", "ok", "error"}  for every command with a seq
@@ -14,7 +18,11 @@ Live hardware settings: CAMERA_INDEX, WEED_DETECTOR=hsv|yolo, WEED_MODEL=hf://ow
 LASER_BURN_ENABLED=true (default false), STUDENT_MODE=false (default true = aiming dot only),
 LASER_PROFILE=fixed|diode-500mw|diode-4w (exposure by weed size; fixed uses LASER_PULSE_MS <= 1500).
 Motion: WEED_GANTRY=grbl (GRBL_PORT) | farmbot (FarmBot Genesis via farmbot-py, FARMBOT_TOKEN).
-Build shown in the OS: WEED_ROBOT=genesis-laser (default) | rover-laser | arm-laser.
+Build shown in the OS: WEED_ROBOT=genesis-laser (default) | rover-laser | arm-laser | rover-scout.
+Rovers (rover_patrol.py): WEED_ROBOT=rover-scout (camera only) or rover-laser patrol the whole
+property - cmd/weed pass takes "area" or "route" (property feet), events carry "propFt",
+state/weed carries "pose". ROVER_DRIVE=sim | mqtt (ROVER_BASE_ID: base controller that takes
+tc/{base}/cmd/goto and reports tc/{base}/state/pose). PROPERTY_WIDTH_FT / PROPERTY_DEPTH_FT.
 Laser pins: LASER_OUTPUT=gpio (AIM_PIN, LASER_PIN, ENCLOSURE_PIN - BCM, Pi / Jetson) |
 farmbot (FARMBOT_AIM_PIN, FARMBOT_LASER_PIN, FARMBOT_ENCLOSURE_PIN on the Farmduino).
 """
@@ -29,7 +37,14 @@ import time
 from typing import Callable, Dict, Optional
 from urllib.parse import urlparse
 
-from weed_patrol import (BedConfig, InterlockError, LaserController, SimDetector, SimGantry, WeedPatrol)
+from weed_patrol import (TASKS, BedConfig, InterlockError, LaserController, SimDetector, SimGantry, WeedPatrol)
+from zones import ZoneGuard, ZoneViolation
+
+try:  # rover weed patrol (optional module, same interface)
+    from rover_patrol import ScoutOnly
+except ImportError:  # pragma: no cover
+    class ScoutOnly(RuntimeError):
+        pass
 
 
 class WeedPatrolService:
@@ -46,19 +61,23 @@ class WeedPatrolService:
         return f"tc/{self.device_id}/{suffix}"
 
     def subscriptions(self):
-        return [(self.topic("cmd/weed"), 2), (self.topic("cmd/estop"), 2)]
+        return [(self.topic("cmd/weed"), 2), (self.topic("cmd/estop"), 2), (self.topic("cmd/event"), 1),
+                (self.topic("cfg/zones"), 1)]
 
     def snapshot(self) -> dict:
         laser = self.patrol.laser
         return {"state": "estop" if laser.estop_active else self.state, "mode": self.mode, "estop": laser.estop_active,
                 "laser": laser.status(), "pass": dict(self.patrol.progress), "error": self.error,
                 "robotType": self.robot_type, "tool": self._tool(),
+                "zones": self.patrol.zones.summary() if self.patrol.zones else None,
+                **({"pose": self.patrol.pose_dict()} if hasattr(self.patrol, "pose_dict") else {}),
                 # Gardens have no chicken headcount; the per-weed human approval (with
                 # "people and animals clear" confirmation in the UI) is the gate.
                 "animalSafetyGate": False, "ts": int(time.time() * 1000)}
 
     def _tool(self) -> dict:
-        pos = getattr(self.patrol.gantry, "position", (0.0, 0.0, 0.0))
+        gantry = getattr(self.patrol, "gantry", None)  # rovers report pose instead
+        pos = getattr(gantry, "position", (0.0, 0.0, 0.0))
         laser = self.patrol.laser
         return {"x": round(pos[0], 1), "y": round(pos[1], 1), "z": round(pos[2], 1),
                 "aim": bool(getattr(laser, "aim_on", False)), "laser": bool(getattr(laser, "laser_on", False))}
@@ -90,22 +109,57 @@ class WeedPatrolService:
             self._ack(seq, True)
             return self.publish_state()
 
+        if topic.endswith("cfg/zones"):
+            try:
+                self.patrol.zones = ZoneGuard.from_payload(msg)
+                self._ack(seq, True)
+            except (ValueError, TypeError, KeyError, IndexError) as err:
+                self._ack(seq, False, f"Bad zones: {err}")  # keep the previous zones
+            return self.publish_state()
+
+        if topic.endswith("cmd/event"):  # "Seen it" on a sighting, "Pulled it" on a rover weed
+            try:
+                self.patrol.ack_alert(str(msg.get("eventId", "")))
+                self._ack(seq, True)
+            except KeyError as err:
+                self._ack(seq, False, str(err))
+            return None
+
         action = msg.get("action")
         if self.patrol.laser.estop_active and action in ("pass", "approve"):
             self._ack(seq, False, "E-STOP is active")
             return
         if action == "pass":
             passes = int(msg.get("passes", 1))
+            task = str(msg.get("task", "weed"))
             if not 1 <= passes <= 10:
                 return self._ack(seq, False, "passes must be 1-10")
+            if task not in TASKS:
+                return self._ack(seq, False, f"task must be one of {', '.join(TASKS)}")
             if self.patrol.progress.get("running"):
                 return self._ack(seq, False, "A pass is already running")
+            if hasattr(self.patrol, "set_coverage") and (msg.get("area") or msg.get("route") or msg.get("waterPoints") is not None):
+                try:
+                    self.patrol.set_coverage(area=msg.get("area"), route=msg.get("route"))
+                    self.patrol.set_water_points(msg.get("waterPoints"))
+                except (ValueError, TypeError, KeyError) as err:
+                    return self._ack(seq, False, f"Bad coverage: {err}")
             self._ack(seq, True)  # accepted; the pass itself runs in the worker
-            self._jobs.put(lambda: self._run("scanning", lambda: self.patrol.run_passes(passes)))
+            self._jobs.put(lambda: self._run("scanning" if task == "weed" else task, lambda: self.patrol.run_passes(passes, task)))
         elif action == "approve":
             event_id, mode = str(msg.get("eventId", "")), msg.get("mode", "aim")
             if event_id not in self.patrol.weeds:
                 return self._ack(seq, False, f"Unknown weed {event_id}")
+            if not getattr(self.patrol, "has_laser", True):
+                return self._ack(seq, False, "This rover has a camera only - pull the weed by hand, then mark it pulled")
+            try:  # refuse up front with the reason
+                if hasattr(self.patrol, "laser_zone_check"):
+                    self.patrol.laser_zone_check(event_id)
+                elif self.patrol.zones:
+                    weed = self.patrol.weeds[event_id]
+                    self.patrol.zones.check_bed(weed["x"], weed["y"], "laser")
+            except ZoneViolation as err:
+                return self._ack(seq, False, str(err))
             if mode == "burn":
                 try:
                     self.patrol.laser.check_burn_allowed()  # refuse up front with the reason
@@ -127,7 +181,7 @@ class WeedPatrolService:
         self.publish_state()
         try:
             job()
-        except InterlockError as err:
+        except (InterlockError, ZoneViolation, ScoutOnly) as err:
             self.error = str(err)
         except Exception as err:  # noqa: BLE001 - report and keep serving
             self.error = f"{state} failed: {err}"
@@ -148,6 +202,53 @@ class WeedPatrolService:
         end = time.time() + timeout
         while self._jobs.unfinished_tasks and time.time() < end:
             time.sleep(0.01)
+
+
+def build_rover(env: Dict[str, str], publish=None):  # pragma: no cover - hardware wiring
+    from rover_patrol import (FrameDetector, MqttGotoDrive, RoverConfig, RoverWeedPatrol, SimDrive, SimRoverDetector,
+                              WetGroundLeakDetector, YoloAnimalDetector)
+
+    cfg = RoverConfig(width_ft=float(env.get("PROPERTY_WIDTH_FT", 80)), depth_ft=float(env.get("PROPERTY_DEPTH_FT", 60)),
+                      item_id=env.get("ITEM_ID"))
+    has_laser = env.get("WEED_ROBOT") == "rover-laser"
+    student = env.get("STUDENT_MODE", "true").lower() != "false"
+    burn = has_laser and env.get("LASER_BURN_ENABLED", "false").lower() == "true"
+    if env.get("WEED_MODE", "simulation") == "simulation":
+        laser = LaserController(lambda on: None, lambda on: print(f"[sim] LASER {'ON' if on else 'off'}"), lambda: True,
+                                burn_enabled=burn, student_mode=student or not has_laser,
+                                pulse_ms=int(env.get("LASER_PULSE_MS", 600)), profile=env.get("LASER_PROFILE", "fixed"))
+        return RoverWeedPatrol(cfg, SimRoverDetector(cfg, seed=int(env.get("SIM_SEED", 11)),
+                                                    leaking=[x for x in env.get("SIM_LEAKS", "").split(",") if x]), SimDrive((cfg.width_ft / 2, cfg.depth_ft - 3)),
+                               laser, lambda e: None, has_laser=has_laser)
+    import cv2  # type: ignore
+    from weed_patrol import HsvDetector, YoloDetector
+
+    cam = cv2.VideoCapture(int(env.get("CAMERA_INDEX", 0)))
+    capture = lambda: cam.read()[1]  # noqa: E731
+    inner = (YoloDetector(capture, env["WEED_MODEL"]) if env.get("WEED_DETECTOR") == "yolo"
+             else HsvDetector(capture, mm_per_px=float(env.get("MM_PER_PX", 1.0))))
+    drive = MqttGotoDrive(publish, env.get("ROVER_BASE_ID", env.get("DEVICE_ID", "rover_001"))) if env.get("ROVER_DRIVE") == "mqtt" else SimDrive()
+    if has_laser:
+        from gpiozero import DigitalInputDevice, DigitalOutputDevice  # type: ignore
+
+        aim, laser_out = DigitalOutputDevice(int(env["AIM_PIN"])), DigitalOutputDevice(int(env["LASER_PIN"]))
+        shroud = DigitalInputDevice(int(env["ENCLOSURE_PIN"]), pull_up=True)
+        laser = LaserController(lambda on: aim.on() if on else aim.off(), lambda on: laser_out.on() if on else laser_out.off(),
+                                lambda: not shroud.value, burn_enabled=burn, student_mode=student,
+                                pulse_ms=int(env.get("LASER_PULSE_MS", 600)), profile=env.get("LASER_PROFILE", "diode-4w"))
+    else:
+        laser = LaserController(lambda on: None, lambda on: None, lambda: True, burn_enabled=False, student_mode=True)
+    # Animals on the route (COCO YOLO by default, or ROVER_ANIMAL_MODEL=hf://owner/repo/best.pt) and
+    # leak checks at water points (wet-ground change detection). ROVER_ANIMALS=off / ROVER_LEAKS=off disable.
+    animals = None
+    if env.get("ROVER_ANIMALS", "on") != "off":
+        model = env.get("ROVER_ANIMAL_MODEL", "yolov8n.pt")
+        # A property model's own class names are the labels ({}); COCO weights map through COCO_ANIMALS (None).
+        animals = YoloAnimalDetector(capture, model, mm_per_px=float(env.get("MM_PER_PX", 1.0)),
+                                     labels={} if model.startswith("hf://") else None)
+    leaks = WetGroundLeakDetector(capture) if env.get("ROVER_LEAKS", "on") != "off" else None
+    return RoverWeedPatrol(cfg, FrameDetector(inner, BedConfig()), drive, laser, lambda e: None, has_laser=has_laser,
+                           animal_detector=animals, leak_detector=leaks)
 
 
 def build_patrol(env: Dict[str, str]) -> WeedPatrol:  # pragma: no cover - hardware wiring
@@ -199,19 +300,33 @@ def main() -> None:  # pragma: no cover - wiring for real deployments
     broker = urlparse(env.get("MQTT_BROKER", "mqtt://localhost:1883"))
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"tc-weed-{device_id}")
     publish = lambda t, body, qos, retain: client.publish(t, json.dumps(body), qos=qos, retain=retain)  # noqa: E731
-    service = WeedPatrolService(device_id, build_patrol(env), publish, mode=env.get("WEED_MODE", "simulation"),
+    rover = env.get("WEED_ROBOT", "").startswith("rover-")
+    patrol = build_rover(env, publish) if rover else build_patrol(env)
+    service = WeedPatrolService(device_id, patrol, publish, mode=env.get("WEED_MODE", "simulation"),
                                 robot_type=env.get("WEED_ROBOT", "genesis-laser"))
     status_topic = service.topic("status")
     client.will_set(status_topic, json.dumps({"online": False}), qos=1, retain=True)
 
     def on_connect(c, _u, _f, _r, _p=None):
-        c.subscribe(service.subscriptions())
+        c.subscribe(service.subscriptions() + ([(pose_topic, 0)] if pose_topic else []))
         c.publish(status_topic, json.dumps({"online": True}), qos=1, retain=True)
         service.publish_state()
         print(f"✅ weed patrol {device_id} ({service.mode}) on {broker.hostname}:{broker.port or 1883}")
 
     client.on_connect = on_connect
-    client.on_message = lambda _c, _u, m: service.handle(m.topic, m.payload)
+    drive = getattr(patrol, "drive", None)
+    pose_topic = f"tc/{getattr(drive, 'base_id', '')}/state/pose" if hasattr(drive, "on_pose") else None
+
+    def on_message(_c, _u, m):
+        if pose_topic and m.topic == pose_topic:
+            try:
+                drive.on_pose(json.loads(m.payload))
+            except (ValueError, KeyError, TypeError):
+                pass
+            return
+        service.handle(m.topic, m.payload)
+
+    client.on_message = on_message
     # connect_async + loop_start keeps retrying, so the service survives booting before
     # the broker (or a broker restart) instead of exiting with "connection refused".
     client.reconnect_delay_set(min_delay=1, max_delay=30)

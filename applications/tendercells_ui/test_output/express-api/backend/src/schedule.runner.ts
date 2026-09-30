@@ -15,6 +15,7 @@ interface ScheduleDoc {
   deviceId?: string;
   action?: "feed" | "clean" | "door" | "water" | "weed_pass";
   passes?: number;            // weed_pass: detection passes per run (1-10)
+  task?: "weed" | "plant_scan" | "patrol"; // weed_pass: what the pass looks for (default weed)
   cronExpression?: string;
   enabled?: boolean;
   amount?: number;
@@ -74,7 +75,10 @@ function fire(deviceId: string, s: ScheduleDoc): boolean {
     case "door":  return MQTTController.publishCommand(deviceId, "door",  { state: s.state ?? "open" });
     case "water": return MQTTController.publishCommand(deviceId, "light", { on: s.on ?? true });
     case "weed_pass":
-      return MQTTController.publishWithSeq(deviceId, "weed", { action: "pass", passes: Math.min(10, Math.max(1, s.passes ?? 1)) }) !== null;
+      return MQTTController.publishWithSeq(deviceId, "weed", {
+        action: "pass", passes: Math.min(10, Math.max(1, s.passes ?? 1)),
+        task: s.task === "plant_scan" || s.task === "patrol" ? s.task : "weed",
+      }) !== null;
     default: return false;
   }
 }

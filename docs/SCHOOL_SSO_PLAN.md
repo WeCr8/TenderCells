@@ -6,6 +6,23 @@ organization record, sets the Identity Platform tenant, and starts Firebase OIDC
 Providers do not appear until their district tenant and provider configuration are approved.
 See [School Platform Operations](SCHOOL_PLATFORM_OPERATIONS.md).
 
+## Google Workspace schools: what their IT admin does
+
+Google sign-in needs no extra scopes (`openid email profile`), but two things are needed before students can use it:
+
+1. **Publish our OAuth brand.**
+   - Google Cloud console → OAuth consent screen: app name, logo, support email, `tendercells.com` as an authorized domain, privacy and terms URLs.
+   - Publish it *In production*.
+   - Non-sensitive scopes need no app verification.
+2. **The school marks Tender Cells as Trusted.**
+   - In the school's Admin console: Security → Access and data control → API controls → Manage Third-Party App Access → Add app → OAuth App Name or Client ID → pick the org units → **Trusted**.
+   - Accounts designated as under 18 are blocked from any third-party app the admin has not configured, even for plain sign-in.
+   - `tendercells.com/schools` walks IT admins through this. It shows our client ID when the repo variable `GOOGLE_OAUTH_CLIENT_ID` is set.
+
+Google Classroom roster scopes are sensitive and need Google's app verification. Start that when roster sync uses the Classroom API.
+
+Pilot requests from `tendercells.com/schools` arrive in Firestore `schoolInquiries` (create-only). Nobody is granted access automatically.
+
 ## What users will get
 
 | Account type | Signs in with | Sees |

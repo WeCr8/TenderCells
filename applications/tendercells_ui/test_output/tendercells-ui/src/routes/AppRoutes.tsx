@@ -34,6 +34,8 @@ import ChickenEyeBirdPage from "../pages/ChickenEyeBirdPage";
 import DemoLandingPage from "../pages/DemoLandingPage";
 import WeedPatrolPage from "../pages/WeedPatrolPage";
 import WatershedPage from "../pages/WatershedPage";
+import LibraryPage from "../pages/LibraryPage";
+import ProjectsPage from "../pages/ProjectsPage";
 import ProductDashboardPage from "../pages/ProductDashboardPage";
 import CameraNodeFirstBuildPage from "../pages/guides/CameraNodeFirstBuildPage";
 
@@ -89,6 +91,9 @@ export default function AppRoutes() {
       <Route path="/schedules" element={<SchedulesPage />} />
       <Route path="/weed-patrol" element={<WeedPatrolPage />} />
       <Route path="/watershed" element={<WatershedPage />} />
+      <Route path="/library" element={<LibraryPage />} />
+      <Route path="/library/:kind/:id" element={<LibraryPage />} />
+      <Route path="/projects" element={<ProjectsPage />} />
       <Route path="/specs" element={<ProductSpecsPage />} />
       <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
       <Route path="/product/:productId" element={<ProductDashboardPage />} />

@@ -93,10 +93,28 @@ Fixes are saved as a plan on the property (`drainagePlan`). **Plan vs now** comp
 area, stored water and erosion. It warns when a plan trades puddles for erosion, i.e. when more
 ground moves into a moderate or high erosion class.
 
+## Device camera views (inside / outside)
+
+- **Mounts:** every product has default camera mounts (`src/lib/yard/cameraMounts.ts`):
+  - Chicken Tender: roost + nest boxes (inside), run (outside).
+  - Duck Dock: shelter + pond.
+  - Roaming Roost: dome + front/rear.
+  - Garden robots: tool camera + bed overview.
+  - Bunny Burrow, Goat Guardian, Turkey Tower, Pigeon Palace: one inside and one outside.
+
+  A custom build sets `PropertyItem.cameras` to its own mounts. Each mount has a position, height, yaw/pitch, field of view and an inside/outside flag.
+- **Demo:** the 3D view's **Cameras** menu picks up to three views and renders them as picture-in-picture insets.
+- **Live:** a camera node publishes its MJPEG `streamUrl` on `tc/{deviceId}_{mountId}/sensors`, or on `streamDeviceId` when that is set.
+- **Isaac Sim:** the USD export turns each mount into a `Camera` prim (see [ISAAC_SIM.md](ISAAC_SIM.md)).
+
+## Robot exclusion zones
+
+No-Go Zones, obstacle footprints and a no-laser buffer around animal housing are sent to robots over MQTT and enforced on the robot. They are drawn in 3D as red curtains. See [ROBOT_EXCLUSION_ZONES.md](ROBOT_EXCLUSION_ZONES.md).
+
 ## WatchTower camera views
 
 - **Demo:** the 3D view renders what each of the tower's three 120° cameras sees, as
-  picture-in-picture insets. Toggle them with the **Tower cams** button; they are on by
+  picture-in-picture insets. Pick them in the **Cameras** menu; they are shown by
   default in Predator Monitor.
 - **Live:** each camera node (`firmware/camera-node`) publishes its MJPEG `streamUrl`.
   The Predator Monitor page shows `{tower}_cam1..3` together with the recent located

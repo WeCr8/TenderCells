@@ -69,6 +69,10 @@ import { TerrainEditorPanel, TerrainSvgLayer } from '../components/property/Terr
 import WatchTowerSvgLayer from '../components/property/WatchTowerLayer';
 import { useYardEvents } from '../hooks/useYardEvents';
 import FarmBotBridgePanel from '../components/garden/FarmBotBridgePanel';
+import RobotZonesDialog from '../components/property/RobotZonesDialog';
+import DetectionsSvgLayer, { type RoverMarker } from '../components/yard/DetectionsSvgLayer';
+import { getSimRover } from '../lib/yard/roverSim';
+import { WEED_ROVER_TYPES, YARD_LIVE } from '../lib/yard/yardTypes';
 import { saveModelFile } from '../lib/three/modelStore';
 import { hfModelUrl } from '../lib/three/huggingFace';
 import { useProducts } from '../hooks/useProducts';
@@ -117,6 +121,8 @@ const TYPE_LABELS: Record<string, string> = {
   pond: 'Pond',
   garden: 'Garden',
   'no-go-zone': 'No-Go Zone',
+  'weed-rover': 'Weed Rover',
+  'water-point': 'Water Point',
   fence: 'Fence',
 };
 
@@ -207,6 +213,15 @@ export default function PropertyLayoutBuilder() {
   // Predator detections for the WatchTower layer (only polled while the layer is on).
   const watchtowerItems = useMemo(() => (showPredatorLayer ? items.filter((i) => i.type === 'watchtower') : []), [items, showPredatorLayer]);
   const { flags: towerFlags } = useYardEvents(watchtowerItems);
+  // Rover weed patrol / robot sightings placed on the map by property position.
+  const [showDetectionsLayer, setShowDetectionsLayer] = useState(true);
+  const roverItems = useMemo(() => (showDetectionsLayer ? items.filter((i) => i.kind === 'hardware' && WEED_ROVER_TYPES.has(i.type)) : []), [items, showDetectionsLayer]);
+  const { flags: roverFlags, robots: roverStates } = useYardEvents(roverItems);
+  const roverMarkers: RoverMarker[] = roverItems.flatMap((i) => {
+    const st = YARD_LIVE ? roverStates[i.id] : getSimRover(i.id);
+    return st?.pose && (YARD_LIVE || st.pass?.running)
+      ? [{ itemId: i.id, name: i.name, xFt: st.pose.xFt, yFt: st.pose.yFt, headingDeg: st.pose.headingDeg, running: !!st.pass?.running }] : [];
+  });
 
   // Stop any running patrol playback when leaving simulation mode (or unmounting) -
   // otherwise a rover would keep "driving" in the 3D view after the button that
@@ -735,6 +750,23 @@ export default function PropertyLayoutBuilder() {
               </ToggleButton>
             </Tooltip>
 
+            <Tooltip title={showDetectionsLayer ? 'Hide weeds and sightings found by robots' : 'Show weeds and sightings found by robots (rover weed patrol)'}>
+              <ToggleButton
+                value="detections" selected={showDetectionsLayer}
+                onChange={() => setShowDetectionsLayer((v) => !v)}
+                size="small" data-testid="detections-toggle"
+                sx={{
+                  px: 1.5, border: '1px solid',
+                  borderColor: showDetectionsLayer ? '#E8A020' : '#2A5C3B',
+                  color: showDetectionsLayer ? '#E8A020' : 'text.secondary',
+                  '&.Mui-selected': { bgcolor: alpha('#E8A020', 0.12), color: '#E8A020' },
+                }}
+              >
+                <GrassIcon fontSize="small" sx={{ mr: 0.5 }} />
+                Detections
+              </ToggleButton>
+            </Tooltip>
+
             <Button
               variant="contained" size="small" startIcon={<AgricultureIcon />}
               onClick={() => openAddDialog('hardware')}
@@ -756,6 +788,7 @@ export default function PropertyLayoutBuilder() {
             >
               Add Obstacle
             </Button>
+            <RobotZonesDialog layout={{ property, items }} />
           </Stack>
         </Stack>
       </Paper>
@@ -926,6 +959,7 @@ export default function PropertyLayoutBuilder() {
                 {/* Terrain zones + elevation contours (under the items) */}
                 {showTerrainLayer && <TerrainSvgLayer property={property} scaleX={scaleX} scaleY={scaleY} />}
                 {showPredatorLayer && <WatchTowerSvgLayer items={items} flags={towerFlags} scaleX={scaleX} scaleY={scaleY} />}
+                {showDetectionsLayer && <DetectionsSvgLayer flags={roverFlags} rovers={roverMarkers} scaleX={scaleX} scaleY={scaleY} />}
 
                 {/* Border */}
                 <rect x={0} y={0} width={mapWidth} height={mapHeight} fill="none" stroke="#2A5C3B" strokeWidth={2} />

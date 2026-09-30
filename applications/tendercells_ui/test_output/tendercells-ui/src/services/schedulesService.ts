@@ -24,6 +24,7 @@ export interface Schedule {
   label?: string;
   amount?: number; // grams (feed) or ml (water)
   passes?: number; // weed_pass: detection passes per run (1-10)
+  task?: 'weed' | 'plant_scan' | 'patrol'; // weed_pass: what the pass looks for
   lastRun?: Timestampish | null;
   createdAt?: Timestampish;
 }

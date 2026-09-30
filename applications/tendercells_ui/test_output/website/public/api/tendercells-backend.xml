@@ -132,9 +132,10 @@
       <publishes topic="tc/{id}/cmd/motion" qos="1"/>
     </endpoint>
     <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/weeds/pass" auth="device-owner" gated="weed" waits-for-ack="true">
-      <summary>Run 1-10 weed detection passes (detect only).</summary>
+      <summary>Run 1-10 passes: task weed (detect weeds for review), plant_scan (crop health alerts) or patrol (snake / animal alerts). Detect only. Rovers also take area {x,y,width,depth} or route [{x,y}] in property feet and report finds with propFt; on every pass they also report animals seen on the route and check waterPoints [{id,name,x,y,radiusFt}] for leaks (alert events with finding animal|leak).</summary>
       <body schema="weedPass">
         <field name="passes" type="number" min="1" max="10"/>
+        <field name="task" type="string" values="weed|plant_scan|patrol"/>
       </body>
       <publishes topic="tc/{id}/cmd/weed" qos="1"/>
     </endpoint>
@@ -148,6 +149,13 @@
     <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/weeds/{eventId}/reject" auth="device-owner" waits-for-ack="true">
       <summary>Not a weed / leave it.</summary>
       <publishes topic="tc/{id}/cmd/weed" qos="1"/>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/zones" auth="device-owner" waits-for-ack="true">
+      <summary>Send a robot its exclusion zones (no-go, keep-out, no-laser near animals); enforced on the robot.</summary>
+      <publishes topic="tc/{id}/cfg/zones" qos="1" retain="true"/>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/devices/{deviceId}/zones" auth="device-owner">
+      <summary>Zones last sent to this robot.</summary>
     </endpoint>
     <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/estop" auth="device-owner">
       <summary>EMERGENCY STOP: latches on every subscriber.</summary>
@@ -235,6 +243,10 @@
     <topic pattern="tc/{id}/cmd/estop" direction="api-to-device" qos="2" retain="true">
       <payload>{active: boolean, source, ts}</payload>
     </topic>
+    <topic pattern="tc/{id}/cfg/zones" direction="api-to-device" qos="1" retain="true">
+      <payload>{v:1, seq, units:&apos;ft&apos;, self?:{itemId,x,y,width,depth}, zones:[{id,name,kind:no-go|keep-out|no-laser,poly:[[x,y]...]}], ts}</payload>
+      <note>Property feet, origin top-left. Robots refuse motion into no-go / keep-out and lasing inside any zone.</note>
+    </topic>
     <payload-schema name="sensors">
       <field name="temp" type="number"/>
       <field name="humidity" type="number" min="0" max="100"/>
@@ -253,6 +265,10 @@
     <field name="station" type="string"/>
     <field name="label" type="string"/>
     <field name="itemId" type="string"/>
+    <field name="propFt" type="object" note="{x, y} property position in feet (mobile robot sightings)"/>
+    <field name="scout" type="boolean" note="weed found by a camera-only rover: pulled by hand, never lased"/>
+    <field name="finding" type="string" note="rover alerts: animal | leak | plant"/>
+    <field name="animalGroup" type="string" note="animal findings: flock | pet | wildlife | predator"/>
     <field name="count" type="number"/>
     <field name="confidence" type="number"/>
     <field name="bearingDeg" type="number"/>
@@ -279,6 +295,7 @@
     <rule>E-STOP (QoS 2, retained) latches on every subscriber; motion is refused until cleared.</rule>
     <rule>Arm / clean / routine / policy are refused in animal areas while chickens are detected or the headcount is older than 60 s.</rule>
     <rule>Weed treatment needs a human approval per weed; the laser fires only with burn enabled, student mode off, enclosure closed and no E-STOP.</rule>
+    <rule>Robots keep out of no-go and keep-out zones (tc/{id}/cfg/zones, retained) and never fire a laser inside any zone, including the no-laser buffer around animal housing.</rule>
     <rule>Every hardware action in the UI goes through a confirmation dialog.</rule>
   </safety>
   <client-analysis>

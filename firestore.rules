@@ -94,8 +94,8 @@ service cloud.firestore {
     // Properties collection
     // Users can only read/write their own properties
     match /properties/{propertyId} {
-      // Allow read only for the property owner.
-      allow read: if isOwnedResource();
+      // Owner, or a school property shared with the reader's class (same shape as devices).
+      allow read: if isOwnedResource() || schoolDeviceAccess(resource.data);
       
       // Allow create if user is authenticated and sets their own userId
       allow create: if isCreatingOwnData();
@@ -162,7 +162,7 @@ service cloud.firestore {
     // Products collection (if stored in Firestore)
     // Users can manage products associated with their properties
     match /products/{productId} {
-      allow read: if isOwnedResource();
+      allow read: if isOwnedResource() || schoolDeviceAccess(resource.data);
       allow create: if isCreatingOwnData();
       allow update: if keepsOwner();
       allow delete: if isOwnedResource();
@@ -272,6 +272,37 @@ service cloud.firestore {
         allow read: if isSchoolAdmin(organizationId);
         allow write: if false;
       }
+    }
+
+    // Newsletter sign-up (double opt-in): anyone may request; nobody reads from a client.
+    match /newsletterSignups/{signupId} {
+      allow create: if request.resource.data.keys().hasOnly(['email', 'topics', 'source', 'status', 'createdAt']) &&
+                       request.resource.data.email is string &&
+                       request.resource.data.email.size() <= 254 &&
+                       request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$') &&
+                       request.resource.data.topics is list && request.resource.data.topics.size() <= 10 &&
+                       request.resource.data.status == 'pending' &&
+                       request.resource.data.createdAt == request.time;
+      allow read, update, delete: if false;
+    }
+
+    // Confirmed newsletter subscribers - managed by Cloud Functions only.
+    match /newsletterSubscribers/{subscriberId} {
+      allow read, write: if false;
+    }
+
+    // School pilot / sign-up inquiries from tendercells.com/schools.
+    match /schoolInquiries/{inquiryId} {
+      allow create: if request.resource.data.keys().hasOnly(['school', 'district', 'contactName', 'email', 'role',
+                         'students', 'sso', 'notes', 'createdAt', 'uid']) &&
+                       request.resource.data.school is string && request.resource.data.school.size() > 1 &&
+                       request.resource.data.school.size() <= 200 &&
+                       request.resource.data.email is string && request.resource.data.email.size() <= 254 &&
+                       request.resource.data.get('notes', '').size() <= 2000 &&
+                       request.resource.data.createdAt == request.time &&
+                       (request.resource.data.get('uid', null) == null ||
+                        (request.auth != null && request.resource.data.uid == request.auth.uid));
+      allow read, update, delete: if false;
     }
 
     // Session tokens and relay signaling are backend-only.

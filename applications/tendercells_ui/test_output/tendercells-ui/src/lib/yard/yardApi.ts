@@ -1,7 +1,8 @@
 // yardApi.ts - express-api calls for station flags and the weed patrol robot.
 // Every hardware call goes through a confirm dialog in the UI first (CLAUDE.md).
 import { MQTT_API_BASE, apiErrorMessage, hardwareAuthHeaders } from '../api/hardwareApi';
-import type { WeedRobotState, YardEvent } from './yardTypes';
+import type { RobotTask, WeedRobotState, YardEvent } from './yardTypes';
+import type { ZonesPayload } from './exclusionZones';
 
 export interface Presence { online: boolean; lastSeen: number; since: number; stale: boolean }
 
@@ -33,8 +34,20 @@ export async function fetchYardEvents(deviceId: string): Promise<{ events: YardE
 /** Mark a flag handled (eggs picked up); the device clears it. */
 export const ackYardEvent = (deviceId: string, eventId: string) => post(deviceId, `events/${encodeURIComponent(eventId)}/ack`);
 
-/** Start 1-10 detection passes over the bed (robot motion). */
-export const startWeedPass = (deviceId: string, passes: number) => post(deviceId, 'weeds/pass', { passes });
+/** Where a rover should patrol (property feet): an area to cover in lanes, or a drawn route. */
+export interface RoverCoverage {
+  area?: { x: number; y: number; width: number; depth: number };
+  route?: { x: number; y: number }[];
+  /** Water points the rover checks for leaks on every pass (property feet). */
+  waterPoints?: { id: string; name: string; x: number; y: number; radiusFt: number }[];
+}
+
+/**
+ * Start 1-10 passes (robot motion): weeds, plant health or a snake / predator patrol. Bed
+ * robots cover their bed; rovers cover `coverage` (the whole property by default).
+ */
+export const startWeedPass = (deviceId: string, passes: number, task: RobotTask = 'weed', coverage?: RoverCoverage) =>
+  post(deviceId, 'weeds/pass', { passes, task, ...(coverage ?? {}) });
 
 /** Human approval for one weed: 'aim' points the aiming dot, 'burn' fires the laser (interlocked on the robot). */
 export const approveWeed = (deviceId: string, eventId: string, mode: 'aim' | 'burn') =>
@@ -49,6 +62,10 @@ export async function fetchWeedState(deviceId: string): Promise<WeedRobotState |
   if (!res.ok) return null;
   return ((await res.json()) as { data?: WeedRobotState }).data ?? null;
 }
+
+/** Send a robot its exclusion zones (retained on tc/{id}/cfg/zones; enforced on the robot). */
+export const sendZones = (deviceId: string, payload: ZonesPayload) =>
+  post(deviceId, 'zones', payload as unknown as Record<string, unknown>);
 
 /** Trigger the device E-STOP (QoS 2, retained). */
 export const sendEstop = (deviceId: string) => post(deviceId, 'estop', { active: true });

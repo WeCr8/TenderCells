@@ -16,7 +16,7 @@ import {
   assertFails,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 const PROJECT_ID = "tender-cells-rules-test";
@@ -235,5 +235,46 @@ describe("organizations/{organizationId}/classes/{classId}", () => {
 
   it("denies cross-tenant access even with a matching classId string", async () => {
     await assertFails(getDoc(doc(studentCtx(ORG_B, ["class-1"]).firestore(), `organizations/${ORG_A}/classes/class-1`)));
+  });
+});
+
+describe("properties / products - school-owned, shared with classes", () => {
+  beforeEach(async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, "properties/farm-lab"), { userId: "school-admin-uid", organizationId: ORG_A, classIds: ["class-1"], name: "Farm lab" });
+      await setDoc(doc(db, "products/coop-1"), { userId: "school-admin-uid", organizationId: ORG_A, classIds: ["class-1"], product_name: "Lab coop" });
+    });
+  });
+
+  it("lets a student in a shared class read the school's property and product, but not write", async () => {
+    const db = studentCtx(ORG_A, ["class-1"]).firestore();
+    await assertSucceeds(getDoc(doc(db, "properties/farm-lab")));
+    await assertSucceeds(getDoc(doc(db, "products/coop-1")));
+    await assertFails(updateDoc(doc(db, "properties/farm-lab"), { name: "Mine now" }));
+    await assertFails(updateDoc(doc(db, "products/coop-1"), { product_name: "Mine now" }));
+  });
+
+  it("denies a student in another class, another school, or a stranger", async () => {
+    await assertFails(getDoc(doc(studentCtx(ORG_A, ["class-2"]).firestore(), "properties/farm-lab")));
+    await assertFails(getDoc(doc(studentCtx(ORG_B, ["class-1"]).firestore(), "properties/farm-lab")));
+    await assertFails(getDoc(doc(strangerCtx().firestore(), "products/coop-1")));
+  });
+});
+
+describe("newsletterSignups / schoolInquiries - create-only public forms", () => {
+  it("accepts a well-formed pending newsletter signup from anyone and hides the list", async () => {
+    const db = anonCtx().firestore();
+    await assertSucceeds(addDoc(collection(db, "newsletterSignups"), { email: "a@b.co", topics: ["news"], source: "footer", status: "pending", createdAt: serverTimestamp() }));
+    await assertFails(addDoc(collection(db, "newsletterSignups"), { email: "not-an-email", topics: [], source: "footer", status: "pending", createdAt: serverTimestamp() }));
+    await assertFails(addDoc(collection(db, "newsletterSignups"), { email: "a@b.co", topics: [], source: "footer", status: "confirmed", createdAt: serverTimestamp() }));
+    await assertFails(getDoc(doc(db, "newsletterSubscribers/a@b.co")));
+  });
+
+  it("accepts a school pilot inquiry, anonymous or as yourself, never as someone else", async () => {
+    const base = { school: "Dream Academy", email: "t@school.org", createdAt: serverTimestamp() };
+    await assertSucceeds(addDoc(collection(anonCtx().firestore(), "schoolInquiries"), base));
+    await assertSucceeds(addDoc(collection(ownerCtx().firestore(), "schoolInquiries"), { ...base, uid: "owner-uid" }));
+    await assertFails(addDoc(collection(ownerCtx().firestore(), "schoolInquiries"), { ...base, uid: "stranger-uid" }));
+    await assertFails(addDoc(collection(anonCtx().firestore(), "schoolInquiries"), { ...base, isAdmin: true }));
   });
 });

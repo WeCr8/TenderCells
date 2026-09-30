@@ -25,7 +25,8 @@ import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import { TENDERCELLS_OS_URL } from "../config/appLinks";
 import { useAuthUser } from "../hooks/useAuthUser";
-import { AUTH_CONFIGURED, app, auth } from "../lib/firebase";
+import { ACTION_CODE_SETTINGS, AUTH_CONFIGURED, app, auth } from "../lib/firebase";
+import EmailPreferences from "./AccountSettings";
 import "./AccountPage.css";
 
 type Mode = "login" | "register";
@@ -245,7 +246,7 @@ function AccountDetails({ user }: { user: User }) {
   const handleVerify = async () => {
     setBusy(true);
     try {
-      await sendEmailVerification(user);
+      await sendEmailVerification(user, ACTION_CODE_SETTINGS);
       setNotice(`Verification email sent to ${user.email}.`);
     } catch (err) {
       setNotice(describeAuthError(err));
@@ -318,6 +319,7 @@ function AccountDetails({ user }: { user: User }) {
       </p>
 
       <WorkspaceActions />
+      <EmailPreferences user={user} />
     </section>
   );
 }
@@ -348,7 +350,7 @@ function SignInForm() {
       } else {
         const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
         // Best effort - the account works without it; the Account view offers a resend.
-        void sendEmailVerification(cred.user).catch(() => undefined);
+        void sendEmailVerification(cred.user, ACTION_CODE_SETTINGS).catch(() => undefined);
       }
     } catch (err) {
       setError(describeAuthError(err));
@@ -387,7 +389,7 @@ function SignInForm() {
     setBusy(true);
     setError(null);
     try {
-      await sendPasswordResetEmail(auth, email.trim());
+      await sendPasswordResetEmail(auth, email.trim(), ACTION_CODE_SETTINGS);
       setNotice(`If an account exists for ${email.trim()}, a reset link is on its way.`);
     } catch (err) {
       setError(describeAuthError(err));

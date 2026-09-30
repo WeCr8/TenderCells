@@ -3,6 +3,7 @@
     ARM_TYPE=sim       Simulated 6-DOF arm (no hardware)       - works anywhere
     ARM_TYPE=ur        Universal Robots          (UR_HOST)
     ARM_TYPE=lerobot   Hugging Face LeRobot arm  (LEROBOT_TYPE, LEROBOT_PORT, LEROBOT_ID)
+    ARM_TYPE=isaac     NVIDIA Isaac Sim articulation (ISAAC_ARM_PRIM, ISAAC_API) - run in Isaac Sim's Python
 
 ARM_MODE=simulation forces the simulator whatever ARM_TYPE says, using the real
 platform's joint layout where it is known, so a site can rehearse routines and
@@ -17,7 +18,7 @@ from typing import Mapping, Optional
 from arm_interface import ArmConfig, ArmController, ArmSafetyError
 from sim_arm import SIM_CONFIG, SimulatedArm
 
-SUPPORTED_TYPES = ("sim", "ur", "lerobot")
+SUPPORTED_TYPES = ("sim", "ur", "lerobot", "isaac")
 
 # Joint layouts for simulating a platform before the real one is connected.
 _LEROBOT_SO_JOINTS = ["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll", "gripper"]
@@ -42,7 +43,7 @@ class ArmFactory:
     def create(arm_type: Optional[str] = None, env: Optional[Mapping[str, str]] = None, **overrides) -> ArmController:
         """Build the configured arm driver.
 
-        :param arm_type: "sim" | "ur" | "lerobot" (defaults to ARM_TYPE, then "sim").
+        :param arm_type: "sim" | "ur" | "lerobot" | "isaac" (defaults to ARM_TYPE, then "sim").
         :param env:      Settings source (defaults to os.environ).
         :raises ArmSafetyError: unknown type or missing required setting.
         """
@@ -53,6 +54,10 @@ class ArmFactory:
             arm_type = "sim"
         if arm_type not in SUPPORTED_TYPES:
             raise ArmSafetyError(f"Unknown ARM_TYPE '{arm_type}'. Use one of: {', '.join(SUPPORTED_TYPES)}")
+
+        if arm_type == "isaac":  # already a simulator - ARM_MODE does not apply
+            from isaac.isaac_arm import IsaacArm
+            return IsaacArm(env.get("ISAAC_ARM_PRIM", "/World/arm"), api=env.get("ISAAC_API", "auto"), **overrides)
 
         if arm_type == "sim" or env.get("ARM_MODE", "live").lower() == "simulation":
             return SimulatedArm(_sim_config_for(arm_type, env), **overrides)

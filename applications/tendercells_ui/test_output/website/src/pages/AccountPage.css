@@ -273,3 +273,59 @@ button:disabled { opacity: 0.6; cursor: default; }
   border-left: 3px solid #4a90d9;
   background: #f5f8fa;
 }
+
+/* Round 6: account types, school buttons, email + billing preferences, newsletter, library tables */
+.account-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #2f6b3f;
+  background: #e5f3e8;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+}
+.account-school-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px dashed #cfd6d2;
+  border-radius: 8px;
+  background: #f8faf9;
+  color: #5b6760;
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: not-allowed;
+}
+.account-types { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.45rem; }
+.account-types li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #e3e7e4;
+  border-radius: 8px;
+}
+.account-types li.current { border-color: #7fb58e; background: #f3faf5; }
+.account-types li div { display: grid; gap: 0.1rem; }
+.account-types li span:not(.account-soon):not(.account-badge),
+.account-school-btn small { font-size: 0.8rem; color: #6b766f; }
+.account-school { display: grid; gap: 0.5rem; }
+.account-school-btn span:first-child { display: grid; gap: 0.1rem; }
+.account-school-btn strong { color: #33403a; font-size: 0.9rem; }
+/* Newsletter topics + preference toggles */
+.account-topics { border: 1px solid #e3e7e4; border-radius: 8px; padding: 0.6rem 0.8rem; display: grid; gap: 0.35rem; }
+.account-topics legend { font-size: 0.85rem; color: #5b6760; padding: 0 0.3rem; }
+.account-check { display: flex !important; flex-direction: row !important; align-items: center; gap: 0.5rem; font-weight: 400 !important; }
+.account-check input { width: auto !important; }
+.account-prefs { display: grid; gap: 0.45rem; }
+.account-prefs .account-check small { color: #6b766f; display: block; }
+.account-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 0.5rem 0 1rem; }
+.account-table th, .account-table td { text-align: left; padding: 0.45rem 0.5rem; border-bottom: 1px solid #e3e7e4; vertical-align: top; }
+.account-doc h2 { margin-top: 1.4rem; font-size: 1.15rem; }
+.account-doc h3 { margin-top: 0.8rem; font-size: 1rem; }
+.account-doc ul, .account-doc ol { padding-left: 1.2rem; display: grid; gap: 0.35rem; }
+@media (max-width: 560px) { .account-table { display: block; overflow-x: auto; } }

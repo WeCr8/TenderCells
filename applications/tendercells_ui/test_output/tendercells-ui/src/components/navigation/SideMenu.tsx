@@ -17,6 +17,8 @@ import GridOnIcon from "@mui/icons-material/GridOn";
 import HomeIcon from "@mui/icons-material/Home";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import HandymanIcon from "@mui/icons-material/Handyman";
+import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import PetsIcon from "@mui/icons-material/Pets";
 import PoolIcon from "@mui/icons-material/Pool";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
@@ -91,6 +93,8 @@ const PRODUCT_ITEMS: Record<string, MenuItem[]> = {
 const CORE: MenuItem[] = [
   { id: "dashboard", label: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
   { id: "resources", label: "Resources", icon: <MenuBookIcon />, path: "/resources" },
+  { id: "library", label: "Animal & Plant Library", icon: <LocalLibraryIcon />, path: "/library" },
+  { id: "projects", label: "DIY Projects", icon: <HandymanIcon />, path: "/projects" },
   { id: "products", label: "Products & Devices", icon: <DevicesIcon />, path: "/products" },
   { id: "layout", label: "Property Layout", icon: <GridOnIcon />, path: "/layout" },
   { id: "setup", label: "Add Device", icon: <AddCircleOutlineIcon />, path: "/products?register=1" },

@@ -108,6 +108,14 @@ router.post("/devices/:deviceId/weeds/:eventId/reject", ...owns, (req: Request, 
   void controller.rejectWeed(req, res);
 });
 
+// Exclusion zones (no-go / keep-out / no-laser) - retained on tc/{id}/cfg/zones.
+router.post("/devices/:deviceId/zones", ...owns, (req: Request, res: Response) => {
+  void controller.sendZones(req, res);
+});
+router.get("/devices/:deviceId/zones", ...owns, (req: Request, res: Response) => {
+  controller.getZones(req, res);
+});
+
 // Hugging Face LeRobot policies (arm service runs lerobot-rollout / lerobot-eval).
 router.post("/devices/:deviceId/policy", ...owns, (req: Request, res: Response) => {
   controller.sendPolicyCommand(req, res);

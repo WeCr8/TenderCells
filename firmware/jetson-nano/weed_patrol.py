@@ -31,6 +31,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Protocol, Sequence, Tuple
 
+from zones import ZoneGuard, ZoneViolation
+
 
 # ── geometry / config ─────────────────────────────────────────────────────────
 @dataclass
@@ -59,6 +61,13 @@ class Detection:
     y: float
     size_mm: float
     confidence: float
+    label: str = "weed"
+
+
+# What a pass looks for. Only "weed" findings can ever be offered for laser treatment;
+# plant-health and animal sightings are alerts for a person (never lasered).
+TASKS = ("weed", "plant_scan", "patrol")
+ANIMAL_LABELS = {"Snake", "Rat", "Fox", "Raccoon", "Opossum", "Hawk", "Coyote", "Dog", "Cat"}
 
 
 def plan_pass(bed: BedConfig) -> List[Tuple[float, float]]:
@@ -95,6 +104,10 @@ class SimDetector:
             x, y = rnd.uniform(80, bed.length_mm - 80), rnd.uniform(80, bed.width_mm - 80)
             if not near_known_plant(x, y, bed.known_plants, 60):
                 self._weeds.append((x, y, rnd.uniform(8, 35)))
+        # A couple of stressed crops and one visiting animal for plant-scan / patrol tasks.
+        self._stressed = [(p, rnd.choice(["Wilting", "Yellow leaves", "Pest damage"]))
+                          for p in bed.known_plants if rnd.random() < 0.25]
+        self._animals = [(rnd.uniform(200, bed.length_mm - 200), rnd.uniform(200, bed.width_mm - 200), "Snake")]
         self._rnd = rnd
 
     @property
@@ -103,6 +116,16 @@ class SimDetector:
 
     def remove_near(self, x: float, y: float, radius: float = 20.0) -> None:
         self._weeds = [w for w in self._weeds if math.hypot(w[0] - x, w[1] - y) > radius]
+
+    def observe(self, center: Tuple[float, float], bed: BedConfig, task: str) -> List[Detection]:
+        """Non-weed findings in view: stressed crops (plant_scan) or animals (patrol)."""
+        fx, fy = bed.fov_mm
+        inside = lambda x, y: abs(x - center[0]) <= fx / 2 and abs(y - center[1]) <= fy / 2  # noqa: E731
+        if task == "plant_scan":
+            return [Detection(p.x, p.y, p.r, 0.8, label) for p, label in self._stressed if inside(p.x, p.y)]
+        if task == "patrol":
+            return [Detection(x, y, 300, 0.88, label) for x, y, label in self._animals if inside(x, y)]
+        return []
 
     def detect(self, center: Tuple[float, float], bed: BedConfig) -> List[Detection]:
         fx, fy = bed.fov_mm
@@ -384,8 +407,11 @@ class WeedPatrol:
         self.publish_event = publish_event
         self.weeds: Dict[str, dict] = {}
         self._next = 1
-        self.progress = {"running": False, "pass": 0, "passes": 0, "waypoint": 0, "waypoints": 0}
+        self.progress = {"running": False, "pass": 0, "passes": 0, "waypoint": 0, "waypoints": 0, "task": "weed"}
         self.halt = False
+        self.alerts: Dict[str, dict] = {}  # plant-health / animal sightings (never lasered)
+        # Exclusion zones from the OS (tc/{id}/cfg/zones). None = only the bed limits apply.
+        self.zones: Optional[ZoneGuard] = None
 
     def _event(self, weed: dict) -> None:
         self.publish_event({
@@ -407,12 +433,45 @@ class WeedPatrol:
         self.weeds[weed["id"]] = weed
         return weed
 
-    def run_passes(self, passes: int = 1) -> List[dict]:
-        """Scan the bed `passes` times; returns newly flagged weeds."""
+    def _alert(self, d: Detection) -> Optional[dict]:
+        """New located sighting (plant stress / animal) unless one is already open nearby."""
+        for a in self.alerts.values():
+            if a["status"] == "active" and a["label"] == d.label and math.hypot(a["x"] - d.x, a["y"] - d.y) <= 300:
+                return None
+        alert = {"id": f"obs-{self._next}", "x": d.x, "y": d.y, "label": d.label, "confidence": d.confidence, "status": "active"}
+        self._next += 1
+        self.alerts[alert["id"]] = alert
+        return alert
+
+    def _alert_event(self, a: dict) -> None:
+        animal = a["label"] in ANIMAL_LABELS
+        self.publish_event({
+            "id": a["id"], "type": "alert", "status": a["status"], "label": a["label"],
+            "title": f"{a['label']} {'seen' if animal else ''}".strip(),
+            "detail": "Keep people and animals clear; the laser is never used on animals" if animal else "Check the plant",
+            "confidence": a["confidence"], "bedMm": {"x": round(a["x"], 1), "y": round(a["y"], 1)},
+            **({"itemId": self.bed.item_id} if self.bed.item_id else {}),
+        })
+
+    def ack_alert(self, alert_id: str) -> dict:
+        """A person has seen / handled a sighting."""
+        a = self.alerts.get(alert_id)
+        if a is None:
+            raise KeyError(f"Unknown alert {alert_id}")
+        a["status"] = "cleared"
+        self._alert_event(a)
+        return a
+
+    def run_passes(self, passes: int = 1, task: str = "weed") -> List[dict]:
+        """Scan the bed `passes` times for weeds, stressed plants or animals.
+
+        Returns the new weeds (weed task) or the new sightings (other tasks)."""
+        if task not in TASKS:
+            raise ValueError(f"task must be one of {', '.join(TASKS)}")
         found: List[dict] = []
         waypoints = plan_pass(self.bed)
         self.halt = False
-        self.progress = {"running": True, "pass": 0, "passes": passes, "waypoint": 0, "waypoints": len(waypoints)}
+        self.progress = {"running": True, "pass": 0, "passes": passes, "waypoint": 0, "waypoints": len(waypoints), "task": task}
         try:
             for p in range(passes):
                 self.progress["pass"] = p + 1
@@ -420,7 +479,20 @@ class WeedPatrol:
                     if self.halt or self.laser.estop_active:
                         return found
                     self.progress["waypoint"] = i + 1
+                    if self.zones:
+                        try:
+                            self.zones.check_bed(x, y, "drive")
+                        except ZoneViolation:
+                            continue  # never drive into a no-go / keep-out area; scan the rest
                     self.gantry.move_to(x, y, self.bed.scan_z_mm)
+                    if task != "weed":
+                        observe = getattr(self.detector, "observe", None)
+                        for d in (observe((x, y), self.bed, task) if observe else []):
+                            alert = self._alert(d)
+                            if alert:
+                                found.append(alert)
+                                self._alert_event(alert)
+                        continue
                     for d in self.detector.detect((x, y), self.bed):
                         if not (0 <= d.x <= self.bed.length_mm and 0 <= d.y <= self.bed.width_mm):
                             continue
@@ -441,6 +513,14 @@ class WeedPatrol:
             raise KeyError(f"Unknown weed {weed_id}")
         if weed["status"] not in ("pending_review", "approved"):
             raise ValueError(f"Weed is already {weed['status']}")
+        if self.zones:
+            try:
+                # The aiming dot counts as laser too: nothing is lit inside a zone.
+                self.zones.check_bed(weed["x"], weed["y"], "laser")
+            except ZoneViolation as err:
+                weed["detail"] = str(err)
+                self._event(weed)
+                raise
         weed["status"] = "approved"
         self._event(weed)
         self.gantry.move_to(weed["x"], weed["y"], self.bed.aim_z_mm)

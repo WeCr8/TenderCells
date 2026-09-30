@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
+import { ANIMALS } from "../../../shared/library/animals";
 import "./ReferenceLibrary.css";
 
 const urgentSigns = [
@@ -111,6 +112,13 @@ export default function HealthPage() {
         <h2>What sensors can and cannot do</h2>
         <p>Temperature, humidity, air-quality, feed, water, egg, camera, and headcount data can reveal a change worth checking. They cannot diagnose disease or prove an animal is healthy.</p>
         <div><span>Measure</span><span>Compare with baseline</span><span>Inspect the animal</span><span>Escalate to a professional</span></div>
+      </section>
+
+      <section className="library-links" id="species" data-testid="health-library-links">
+        <h2>Health by species</h2>
+        {ANIMALS.map((a) => <Link key={a.id} to={`/library/animals/${a.id}`}>{a.emoji} {a.name}</Link>)}
+        <Link to="/library#wildlife">Predators &amp; pests</Link>
+        <Link to="/library#toxic">Plants toxic to animals</Link>
       </section>
 
       <section className="library-links">

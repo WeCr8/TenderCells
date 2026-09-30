@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import { trackProductInterest, trackProductView } from "../utils/analytics";
+import { animalById } from "../../../shared/library/animals";
+import { speciesForProduct } from "../../../shared/library/links";
 
 const PRODUCTS: Record<string, {
   icon: string; name: string; tagline: string; price: string; desc: string;
@@ -404,6 +406,7 @@ export default function ProductDetailPage() {
   const product = slug ? PRODUCTS[slug] : undefined;
   const visual = slug ? PRODUCT_VISUALS[slug] : undefined;
   const hubLinks = slug ? PRODUCT_HUB_LINKS[slug] : undefined;
+  const species = slug ? speciesForProduct(slug).map(animalById).filter((a) => !!a) : [];
 
   useEffect(() => {
     if (product && slug) {
@@ -490,6 +493,21 @@ export default function ProductDetailPage() {
         <Link to="/developers#hardware" className="btn-outline">Build your own</Link>
         <Link to="/shop" className="btn-outline">← All Products</Link>
       </div>
+
+      {species.length > 0 && (
+        <>
+          <h2 className="section-title">Animal health library</h2>
+          <div className="card-grid" data-testid="product-species-links">
+            {species.map((a) => (
+              <Link key={a!.id} to={`/library/animals/${a!.id}`} className="card" style={{ textDecoration: "none" }}>
+                <h3>{a!.emoji} {a!.name}</h3>
+                <p>Daily checks, warning signs, {a!.conditions.length} common conditions and when to call a vet.</p>
+                <span className="tag">Open health guide</span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
 
       {hubLinks && (
         <>

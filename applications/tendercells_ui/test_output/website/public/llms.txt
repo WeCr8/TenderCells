@@ -24,6 +24,9 @@ TenderCells product framing: users can register interest to buy future TenderCel
 - https://tendercells.com/app/demo-manifest.json
 - https://tendercells.com/app/demo-description.html
 - https://tendercells.com/education
+- https://tendercells.com/schools (school accounts, SSO setup for IT admins, pilot sign-up)
+- https://tendercells.com/library (animal health by species - poultry, rabbits & rodents, livestock, pond fish, reptiles; predators & pests incl. rats, mice and snakes; DIY terrarium / enclosure camera / sound monitor projects with Hugging Face models; crops, weeds, toxic plants)
+- https://tendercells.com/apps#os-screenshots (Tender Cells OS screenshots: 3D property + device cameras, predator monitor, robot exclusion zones, weed patrol, watershed, DIY projects, library)
 - https://tendercells.com/academy
 - https://tendercells.com/audiences
 - https://tendercells.com/4h

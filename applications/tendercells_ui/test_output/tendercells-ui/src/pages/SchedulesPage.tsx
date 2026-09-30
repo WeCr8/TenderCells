@@ -175,6 +175,7 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
   const [label, setLabel] = useState('');
   const [amount, setAmount] = useState<number>(100);
   const [passes, setPasses] = useState<number>(1);
+  const [robotTask, setRobotTask] = useState<'weed' | 'plant_scan' | 'patrol'>('weed');
   const [enabled, setEnabled] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -186,6 +187,7 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
       setLabel(initial.label ?? '');
       setAmount(initial.amount ?? 100);
       setPasses(initial.passes ?? 1);
+      setRobotTask(initial.task ?? 'weed');
       setEnabled(initial.enabled);
     } else {
       setAction('feed');
@@ -193,6 +195,7 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
       setLabel('');
       setAmount(100);
       setPasses(1);
+      setRobotTask('weed');
       setEnabled(true);
     }
   }, [open, initial, defaultCron]);
@@ -208,6 +211,7 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
         label: label.trim() || undefined,
         amount: action === 'feed' || action === 'water' ? amount : undefined,
         passes: action === 'weed_pass' ? passes : undefined,
+        task: action === 'weed_pass' ? robotTask : undefined,
       });
       onClose();
     } finally {
@@ -258,6 +262,18 @@ function ScheduleFormDialog({ open, initial, deviceId, onSave, onClose }: Schedu
                 '& .MuiOutlinedInput-notchedOutline': { borderColor: colors.accent },
               }}
             />
+          )}
+
+          {action === 'weed_pass' && (
+            <FormControl size="small" fullWidth>
+              <InputLabel sx={{ color: colors.goldMuted }}>Robot task</InputLabel>
+              <Select value={robotTask} label="Robot task" onChange={(e) => setRobotTask(e.target.value as typeof robotTask)}
+                sx={{ color: colors.white, '.MuiOutlinedInput-notchedOutline': { borderColor: colors.accent } }}>
+                <MenuItem value="weed">Weed pass</MenuItem>
+                <MenuItem value="plant_scan">Plant health scan</MenuItem>
+                <MenuItem value="patrol">Snake &amp; predator patrol</MenuItem>
+              </Select>
+            </FormControl>
           )}
 
           {action === 'weed_pass' && (
@@ -494,6 +510,7 @@ export default function SchedulesPage() {
         label: data.label,
         amount: data.amount,
         passes: data.passes,
+        task: data.task,
       });
       setSnack({ msg: 'Schedule updated', severity: 'success' });
     } else {
@@ -542,7 +559,7 @@ export default function SchedulesPage() {
           break;
         case 'weed_pass':
           endpoint = `${EXPRESS_API}/devices/${s.deviceId}/weeds/pass`;
-          body = { passes: s.passes ?? 1 };
+          body = { passes: s.passes ?? 1, task: s.task ?? 'weed' };
           break;
       }
 

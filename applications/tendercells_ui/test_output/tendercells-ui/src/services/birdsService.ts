@@ -11,10 +11,12 @@
 // static import adds no bundle cost and avoids the mixed static/dynamic-import
 // warning. The firestore query SDK below stays dynamic to keep it lazy.
 import { FIREBASE_ENABLED, auth, db } from '../lib/firebase/firebaseApp';
+import { ANIMALS, type SpeciesId } from '../../../shared/library/animals';
 
 export type Sex = 'female' | 'male' | 'spayed_female' | 'neutered_male' | 'hen' | 'rooster' | 'doe' | 'buck' | 'wether' | 'unknown';
 export type HealthStatus = 'healthy' | 'watch' | 'sick' | 'quarantine';
-export type Species = 'dog' | 'cat' | 'goat' | 'sheep' | 'pig' | 'cow' | 'horse' | 'alpaca' | 'rabbit' | 'chicken' | 'duck' | 'turkey' | 'goose' | 'quail' | 'pigeon' | 'other';
+// Every species in the shared health library (shared/library/animals.ts) plus 'other'.
+export type Species = SpeciesId | 'other';
 
 export interface Bird {
   id: string;
@@ -46,16 +48,15 @@ export const EMPTY_BIRD: CreateBirdData = {
   eggColor: '', avgEggsPerWeek: 0, bandId: '', device: '',
 };
 
-export const SPECIES_EMOJI: Partial<Record<Species, string>> = {
-  chicken: '🐔', duck: '🦆', turkey: '🦃', goose: '🪿',
-  quail: '🐦', pigeon: '🕊️', rabbit: '🐇', goat: '🐐',
-};
+export const SPECIES_EMOJI: Partial<Record<Species, string>> = Object.fromEntries(ANIMALS.map((a) => [a.id, a.emoji]));
 
 export const SPECIES_GROUPS: { label: string; species: Species[] }[] = [
   { label: 'Companion animals', species: ['dog', 'cat'] },
   { label: 'Livestock', species: ['goat', 'sheep', 'pig', 'cow', 'horse', 'alpaca'] },
-  { label: 'Small animals', species: ['rabbit'] },
+  { label: 'Small animals', species: ['rabbit', 'guinea-pig', 'chinchilla', 'hamster', 'rat', 'mouse'] },
   { label: 'Poultry and birds', species: ['chicken', 'duck', 'turkey', 'goose', 'quail', 'pigeon'] },
+  { label: 'Pond and aquatic', species: ['pond-fish'] },
+  { label: 'Reptiles', species: ['tortoise', 'turtle', 'bearded-dragon', 'leopard-gecko', 'ball-python'] },
   { label: 'Other', species: ['other'] },
 ];
 
@@ -75,6 +76,17 @@ export const BREEDS_BY_SPECIES: Record<Species, string[]> = {
   pigeon: ['Racing Homer', 'King', 'Fantail', 'Roller', 'Other'],
   rabbit: ['Rex', 'Holland Lop', 'Flemish Giant', 'New Zealand', 'Other'],
   goat: ['Pygmy', 'Nigerian Dwarf', 'Boer', 'Nubian', 'LaMancha', 'Alpine', 'Other'],
+  'guinea-pig': ['American', 'Abyssinian', 'Peruvian', 'Teddy', 'Other'],
+  chinchilla: ['Standard grey', 'Beige', 'Ebony', 'Other'],
+  hamster: ['Syrian', 'Roborovski', 'Winter white', 'Campbell', 'Other'],
+  rat: ['Standard', 'Dumbo', 'Rex', 'Other'],
+  mouse: ['Fancy mouse', 'Other'],
+  'pond-fish': ['Koi', 'Comet goldfish', 'Shubunkin', 'Other'],
+  tortoise: ['Russian', "Hermann's", 'Sulcata', 'Greek', 'Other'],
+  turtle: ['Red-eared slider', 'Painted turtle', 'Musk turtle', 'Other'],
+  'bearded-dragon': ['Central bearded dragon', 'Other'],
+  'leopard-gecko': ['Normal', 'Tangerine', 'Albino', 'Other'],
+  'ball-python': ['Normal', 'Pastel', 'Banana', 'Other'],
   other: ['Mixed / Unknown', 'Other'],
 };
 
@@ -279,7 +291,7 @@ export const birdsService = {
       return localBackend.updateBird(id, data);
     }
   },
-  async deleteBird(id: string, deviceId?: string): Promise<void> {
+  async deleteBird(id: string, _deviceId?: string): Promise<void> {
     if (!canUseCloud()) return localBackend.deleteBird(id);
     try {
       return await (await firestoreBackend()).deleteBird(id);
@@ -287,7 +299,7 @@ export const birdsService = {
       return localBackend.deleteBird(id);
     }
   },
-  async getBird(id: string, deviceId?: string): Promise<Bird | null> {
+  async getBird(id: string, _deviceId?: string): Promise<Bird | null> {
     if (!canUseCloud()) return localBackend.getBird(id);
     try {
       return await (await firestoreBackend()).getBird(id);

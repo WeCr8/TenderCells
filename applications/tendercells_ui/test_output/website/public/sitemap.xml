@@ -52,4 +52,55 @@
   <url><loc>https://tendercells.com/story</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://tendercells.com/our-story</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://tendercells.com/blog</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
+  <!-- generated:docs start (scripts/sync-docs.mjs) -->
+  <url><loc>https://tendercells.com/docs</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/lessons</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/lessons/your-first-coop-brain</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/lessons/classroom-quickstart</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/lessons/door-roaming-roost</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/lessons/sensors-automation</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/lessons/feeder-waterer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/lessons/build-your-own</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/lessons/gantry-bom</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/lessons/ai-cad-fusion</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/lessons/learning-tracks</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/connect-a-device</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/hardware-testing-motors</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/device-testing-setup</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/hardware-catalog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/weed-patrol</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/arm-service</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/diy-habitat-projects</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/isaac-sim</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/usage</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/machine-readable-backend</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/robot-exclusion-zones</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/property-map-layers</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/control-types-and-arm-plan</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/chicken-tender-master-spec</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/cad-to-web</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/adr-3d-model-loading</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/camera-relay</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/starter-node-firmware</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/school-network-enrollment</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/school-platform-operations</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/lesson-template</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/products</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/chicken-tender</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/chicken-tender-cad</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/roaming-roost</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/barn-brain</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/barn-brain-implementation-plan</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/developer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/developer-hardware</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/product-ideas</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/device-ui-and-secure-video</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/flipper-field-kit</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/school-sso-plan</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/product-documentation-standard</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/roadmap</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/contributing</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/security</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/index</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <!-- generated:docs end -->
 </urlset>

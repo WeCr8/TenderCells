@@ -1,3 +1,5 @@
+<!-- Generated from docs/lessons/00-your-first-coop-brain.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
+
 # 🐣 Your First Coop Brain — Start Here (ages 7+)
 
 > **Grown-ups:** this is the very first lesson. A 7-year-old can do it with a helper
@@ -58,12 +60,12 @@ Open the "bag" and put each part in front of you. Count them. Check the box. ✅
 1. On the laptop, open **Chrome** or **Edge**.
 2. In the address bar at the top, type this and press **Enter**:
    ```
-   tender-cells.web.app/flash
+   tendercells.com/flash
    ```
 3. **What you see:** a green page that says **🐔 Tender Cells Flasher**.
 
 ✅ *You found the launch pad!* If you want, read the
-[full Flasher page guide](https://github.com/WeCr8/TenderCells/blob/main/applications/tendercells_ui/test_output/website/public/flash/index.html)
+[full Flasher page guide](/flash)
 later — but you don't need it. Just follow along here.
 
 ### Step 2 — Pick "Starter Node"
@@ -153,13 +155,13 @@ That's **real engineering**. The same steps put the brain in a real robot coop. 
 
 ## 👉 What's next (pick your path)
 
-- 🔌 **Make it do something** → [Build a Door + a Basic Roaming Roost](../CLASSROOM_DOOR_AND_ROAMING_ROOST.md)
+- 🔌 **Make it do something** → [Build a Door + a Basic Roaming Roost](/lessons/door-roaming-roost)
   — add a tiny motor and open a little door from the app.
-- 🌡️ **Make it feel the world** → [Sensors → Automated Tasks](../CLASSROOM_SENSORS_AND_AUTOMATION.md)
+- 🌡️ **Make it feel the world** → [Sensors → Automated Tasks](/lessons/sensors-automation)
   — add a light sensor so the coop opens at sunrise by itself.
-- 🍽️ **Feed and water** → [Feeder + Waterer](../CLASSROOM_FEEDER_AND_WATERER.md)
-- 🧊 **See it in 3D** → open `tender-cells.web.app/viewer` and drop in a model
-- 🗺️ **See all the projects** → [Learning Tracks map](../LEARNING_TRACKS.md)
+- 🍽️ **Feed and water** → [Feeder + Waterer](/lessons/feeder-waterer)
+- 🧊 **See it in 3D** → open `tendercells.com/viewer` and drop in a model
+- 🗺️ **See all the projects** → [Learning Tracks map](/lessons/learning-tracks)
 
 > 🧭 *Do them in order if you're new.* Each one adds one new idea on top of this lesson.
 
@@ -182,4 +184,4 @@ That's **real engineering**. The same steps put the brain in a real robot coop. 
 
 *Teachers: this lesson is the entry node. Keep the deep links live — every other lesson
 should link back here for "what is flashing?" and forward via "What's next." Full printable
-pack format: [lesson template](_TEMPLATE.md). Curriculum map: [Learning Tracks](../LEARNING_TRACKS.md).*
+pack format: [lesson template](/docs/lesson-template). Curriculum map: [Learning Tracks](/lessons/learning-tracks).*

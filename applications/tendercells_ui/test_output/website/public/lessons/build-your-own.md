@@ -1,3 +1,5 @@
+<!-- Generated from docs/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
+
 # Classroom: Build Your Own Smart-Animal Device
 
 A **teacher-led lesson** where students flash a real ESP32 board, invent their own
@@ -6,7 +8,9 @@ in the Tender Cells software — the same pipeline the real robot coops use.
 
 For **adults and kids alike**: middle-school and up with an instructor; older
 students / clubs can run it solo. Pairs with the no-hardware
-[Classroom Quickstart](CLASSROOM_QUICKSTART.md) (do that first if you have no boards).
+[Classroom Quickstart](/lessons/classroom-quickstart) (do that first if you have no boards).
+
+For the camera-first hardware path, use the [Single Camera Node build and registry guide](/guides/camera-node-first-build). It shows the real Seeed Studio board, battery polarity, safe auxiliary pins, browser flashing, and how the device appears in the TenderCells UI.
 
 > **Open-source goal:** this is a platform for builders, techies, and kids to
 > invent on. Students don't just run a demo — they define a *new* device (any
@@ -16,8 +20,8 @@ students / clubs can run it solo. Pairs with the no-hardware
 
 ## 🧱 LEGO-style quick build (ages 7+)
 
-> Do [🐣 Your First Coop Brain](lessons/00-your-first-coop-brain.md) first. Hard words:
-> [Picture Dictionary](lessons/00-your-first-coop-brain.md#-picture-dictionary-hard-words-made-easy).
+> Do [🐣 Your First Coop Brain](/lessons/your-first-coop-brain) first. Hard words:
+> [Picture Dictionary](/lessons/your-first-coop-brain#-picture-dictionary-hard-words-made-easy).
 
 ```text
  ┌──────────────────────────────────────────────┐
@@ -32,8 +36,8 @@ students / clubs can run it solo. Pairs with the no-hardware
 3. **Step 3 of 3 — Fire the alarm!** Press the board's **BOOT** button → your threat
    pops up in the app, live. *✓ you invented a real alert!* 🦅
 
-**👉 Next:** make a real door move → [Door lesson](CLASSROOM_DOOR_AND_ROAMING_ROOST.md) ·
-[Learning Tracks](LEARNING_TRACKS.md)
+**👉 Next:** make a real door move → [Door lesson](/lessons/door-roaming-roost) ·
+[Learning Tracks](/lessons/learning-tracks)
 
 ---
 
@@ -64,7 +68,7 @@ shows up in the software live.
 
 **Teacher provides once for the room:**
 - A laptop running `npm run demo` (the broker + software). See
-  [Classroom Quickstart](CLASSROOM_QUICKSTART.md) Step 2.
+  [Classroom Quickstart](/lessons/classroom-quickstart) Step 2.
 - The same 2.4 GHz WiFi for the laptop and all student boards.
 
 No soldering. No accounts. Nothing leaves the local network.
@@ -95,11 +99,11 @@ No soldering. No accounts. Nothing leaves the local network.
 
 ### Part 1 — Flash the board (10 min)
 1. Plug the board into the laptop with a **data** USB cable.
-2. Open the flash page in Chrome/Edge: **https://tender-cells.web.app/flash**
+2. Open the flash page in Chrome/Edge: **https://tendercells.com/flash**
 3. Pick **Starter Node**, click **Connect**, choose the board's serial port, **Install**.
 4. When it finishes, the board reboots and (first time) creates a WiFi setup network.
 
-See [`firmware/starter-node/README.md`](../firmware/starter-node/README.md) for the
+See [`firmware/starter-node/README.md`](/docs/starter-node-firmware) for the
 Arduino IDE path if you'd rather build from source.
 
 ### Part 2 — Name your animal + threat (10 min)
@@ -140,7 +144,7 @@ Discussion prompts (real engineering, not trivia):
 - **Design the real thing:** sketch an enclosure for your species in CAD; what
   sensors would it actually need? (See the hardware catalog in `docs/`.)
 - **Whole-class project:** every student's species becomes one device in a shared
-  "Barn Brain" edge hub (see [Barn Brain plan](products/barn-brain/IMPLEMENTATION_PLAN.md)).
+  "Barn Brain" edge hub (see [Barn Brain plan](/docs/barn-brain-implementation-plan)).
 
 ---
 

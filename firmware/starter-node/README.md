@@ -51,9 +51,9 @@ There are two ways to flash it:
 - WCH **CH340/CH341**: https://www.wch-ic.com/downloads/CH341SER_EXE.html
 
 **Building a real product device (beyond the node)?** You then wire the per-product
-sensors/actuators (DHT22, MQ-137, door servo, load cells, …) to the ESP32. See
-[`docs/hardware-bom.md`](../../docs/hardware-bom.md) for the parts and the
-product-specific pinouts.
+sensors/actuators (DHT22, MQ-137, door servo, load cells, …) to the ESP32. See the
+[hardware catalog](../../docs/CHICKEN_TENDER_HARDWARE_CATALOG.md) for the parts and the
+[Gantry + BOMs lesson](../../docs/CLASSROOM_GANTRY_AND_BOM.md) for parts lists.
 
 ---
 

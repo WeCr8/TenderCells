@@ -1,26 +1,15 @@
-// LessonPage — renders a lesson's markdown (from /public/lessons/<slug>.md).
-// Images can be added later under /public/lessons/ and referenced from the md.
-import { useEffect, useState } from "react";
+// LessonPage — renders a lesson's markdown (public/lessons/<slug>.md, generated from the
+// repo docs by scripts/sync-docs.mjs).
 import { Link, useParams } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import PageLayout from "../components/PageLayout";
+import MarkdownArticle from "../components/MarkdownArticle";
+import { useMarkdown } from "../hooks/useMarkdown";
 import { LESSONS, lessonBySlug } from "../data/lessons";
 
 export default function LessonPage() {
   const { slug = "" } = useParams();
   const meta = lessonBySlug(slug);
-  const [md, setMd] = useState<string | null>(null);
-  const [err, setErr] = useState(false);
-
-  useEffect(() => {
-    setMd(null);
-    setErr(false);
-    fetch(`/lessons/${slug}.md`)
-      .then((r) => (r.ok ? r.text() : Promise.reject()))
-      .then(setMd)
-      .catch(() => setErr(true));
-  }, [slug]);
+  const md = useMarkdown(`/lessons/${slug}.md`);
 
   const idx = LESSONS.findIndex((l) => l.slug === slug);
   const prev = idx > 0 ? LESSONS[idx - 1] : null;
@@ -35,18 +24,14 @@ export default function LessonPage() {
           {meta ? ` › ${meta.title}` : ""}
         </p>
 
-        {err && (
+        {md === false && (
           <div className="prose">
             <h2>Lesson not found</h2>
             <p>That lesson isn't here. Back to <Link to="/lessons">all lessons</Link>.</p>
           </div>
         )}
-        {!err && !md && <p>Loading lesson…</p>}
-        {md && (
-          <article className="prose lesson-body">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{md}</ReactMarkdown>
-          </article>
-        )}
+        {md === null && <p>Loading lesson…</p>}
+        {md && <MarkdownArticle md={md} className="lesson-body" />}
 
         {/* Prev / Next path */}
         <div className="cta-bar" style={{ marginTop: "2rem", justifyContent: "space-between" }}>

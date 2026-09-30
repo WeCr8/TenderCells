@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
+import DocGroups from "../components/DocGroups";
 import "./EducationPage.css";
 
 const authorityClusters = [
@@ -121,17 +122,18 @@ export default function EducationPage() {
       <h2 className="section-title" id="stem">STEM Programs</h2>
       <div className="card-grid">
         {[
-          { title: "Robotics & Kinematics", desc: "Motion systems, rails, robot arms, drive bases, and safety controls teach practical mechatronics." },
-          { title: "Embedded Systems", desc: "ESP32 firmware, sensors, relays, motors, and MQTT communication give students real device experience." },
-          { title: "Computer Vision", desc: "WatchTower AI concepts introduce cameras, local inference, training data, and animal-safety alerts." },
-          { title: "Data Science", desc: "Temperature, humidity, feed, water, eggs, and behavior data become real analysis projects." },
-          { title: "IoT & Networking", desc: "WiFi, LoRa, local-first control, dashboards, and APIs show the full farm technology stack." },
-          { title: "Biology & Animal Science", desc: "Sensor thresholds connect engineering decisions to animal welfare, daily care, and husbandry." },
+          { title: "Robotics & Kinematics", desc: "Motion systems, rails, robot arms, drive bases, and safety controls teach practical mechatronics.", to: "/lessons/gantry-bom", label: "Gantry + BOM lesson" },
+          { title: "Embedded Systems", desc: "ESP32 firmware, sensors, relays, motors, and MQTT communication give students real device experience.", to: "/lessons/your-first-coop-brain", label: "First Coop Brain lesson" },
+          { title: "Computer Vision", desc: "WatchTower AI concepts introduce cameras, local inference, training data, and animal-safety alerts.", to: "/guides/camera-node-first-build", label: "Camera Node build guide" },
+          { title: "Data Science", desc: "Temperature, humidity, feed, water, eggs, and behavior data become real analysis projects.", to: "/lessons/sensors-automation", label: "Sensors lesson" },
+          { title: "IoT & Networking", desc: "WiFi, LoRa, local-first control, dashboards, and APIs show the full farm technology stack.", to: "/apps#mqtt", label: "MQTT integration" },
+          { title: "Biology & Animal Science", desc: "Sensor thresholds connect engineering decisions to animal welfare, daily care, and husbandry.", to: "/library", label: "Animal & plant library" },
         ].map((c) => (
-          <div key={c.title} className="card">
+          <Link key={c.title} to={c.to} className="card" style={{ textDecoration: "none", color: "inherit" }}>
             <h3>{c.title}</h3>
             <p>{c.desc}</p>
-          </div>
+            <span className="tag">{c.label} →</span>
+          </Link>
         ))}
       </div>
 
@@ -148,21 +150,41 @@ export default function EducationPage() {
           <li><strong>High school:</strong> modify firmware, build modules, document results, and contribute to open source</li>
         </ul>
       </div>
+      <div className="cta-bar">
+        <Link to="/schools" className="btn-primary">School sign-in &amp; IT setup</Link>
+        <Link to="/lessons/classroom-quickstart" className="btn-outline">Classroom Quickstart</Link>
+        <Link to="/lessons/learning-tracks" className="btn-outline">Learning tracks</Link>
+      </div>
 
       <h2 className="section-title" id="curriculum">Curriculum Resources</h2>
       <div className="card-grid">
         {[
-          { title: "Getting Started Guide", desc: "From public demo to first student project, written for non-technical mentors." },
-          { title: "Lesson Plan Library", desc: "Robotics, biology, data analysis, animal welfare, agriculture, and computer science lessons." },
-          { title: "Student Worksheets", desc: "Build logs, observation sheets, data tables, and presentation prompts for real projects." },
-          { title: "Assessment Rubrics", desc: "Project-based assessment for automation, documentation, safety, and collaboration." },
+          { title: "Getting Started Guide", desc: "Classroom Quickstart: from a laptop to a running simulated coop in 5 minutes, written for non-technical mentors.", to: "/lessons/classroom-quickstart", label: "Open" },
+          { title: "Lesson Plan Library", desc: "Hands-on lessons from a first blinking board (ages 7+) to robot gantries and AI-assisted CAD.", to: "/lessons", label: "All lessons" },
+          { title: "Learning Tracks", desc: "The curriculum map: five tiers, every project, and which builds are ready today.", to: "/lessons/learning-tracks", label: "Open the map" },
+          { title: "Build Guides", desc: "Step-by-step hardware builds: camera node, flashing, motors, weed patrol, DIY habitat projects.", to: "/education#docs", label: "See build guides" },
         ].map((c) => (
-          <div key={c.title} className="card">
+          <Link key={c.title} to={c.to} className="card" style={{ textDecoration: "none", color: "inherit" }}>
             <h3>{c.title}</h3>
             <p>{c.desc}</p>
-            <span className="tag">Coming to docs</span>
-          </div>
+            <span className="tag">{c.label} →</span>
+          </Link>
         ))}
+        <div className="card">
+          <h3>Worksheets &amp; Assessment Rubrics</h3>
+          <p>Build logs, observation sheets and project rubrics for automation, documentation, safety and collaboration.</p>
+          <span className="tag">Coming to docs</span>
+        </div>
+      </div>
+
+      <h2 className="section-title" id="docs">Build Guides &amp; Documentation</h2>
+      <div className="prose">
+        <p>The current build instructions and references, kept in step with the open-source repository.</p>
+      </div>
+      <DocGroups only={["build-guides", "schools-docs"]} />
+      <div className="cta-bar">
+        <Link to="/learn#docs" className="btn-outline">Full reference docs</Link>
+        <a href="/flash" className="btn-outline">Flash a device</a>
       </div>
 
       <section className="education-image-strip" aria-label="Student build examples">
@@ -272,6 +294,11 @@ export default function EducationPage() {
           and demo flows visible so students and researchers can evaluate the project before
           requesting deeper collaboration.
         </p>
+      </div>
+      <div className="cta-bar">
+        <Link to="/open-source" className="btn-outline">Open source &amp; licensing</Link>
+        <Link to="/developers" className="btn-outline">Developer docs</Link>
+        <a href="mailto:education@wecr8.info" className="btn-outline">Research partnership</a>
       </div>
     </PageLayout>
   );

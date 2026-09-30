@@ -138,23 +138,30 @@ export default function ApplicationsPage() {
           <li>Alerts: <code>tc/&#123;deviceId&#125;/alert</code> — predator/fault events (QoS 2)</li>
         </ul>
         <p>
-          Full topic reference and payload schemas: <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer">github.com/WeCr8/TenderCells</a>
+          Full topic reference and payload schemas: <a href="/api/tendercells-backend.xml">backend XML (every endpoint and topic)</a> and{" "}
+          <Link to="/docs/machine-readable-backend">how to read it</Link>
         </p>
       </div>
 
       <h2 className="section-title" id="firmware">Firmware Downloads</h2>
       <table className="info-table">
         <thead>
-          <tr><th>Target</th><th>MCU</th><th>Version</th><th>Download</th></tr>
+          <tr><th>Target</th><th>MCU</th><th>Source</th><th>Install</th></tr>
         </thead>
         <tbody>
+          {/* Flash links open the browser flasher with that build selected (/flash?target=...). */}
           {[
-            ["Chicken Tender Coop Controller", "ESP32-WROOM-32", "v0.9.1-beta", "#dl-ct"],
-            ["WatchTower AI Camera Node",      "ESP32-S3-EYE",   "Coming soon",  "#dl-wt"],
-            ["Roaming Roost Drive Controller", "ESP32-WROOM-32", "Coming soon",  "#dl-rr"],
-          ].map(([t, m, v, d]) => (
-            <tr key={t}><td>{t}</td><td><code>{m}</code></td><td>{v}</td>
-              <td><a href={d} className="btn-primary" style={{ padding: "0.3rem 0.8rem", fontSize: "0.8rem" }}>Download</a></td>
+            { t: "Starter Node (door, relay, sensors, RC drive)", m: "ESP32 / XIAO ESP32-C3/S3", src: "firmware/starter-node", flash: "starter-node" },
+            { t: "Camera Node",                    m: "XIAO ESP32-S3 Sense", src: "firmware/camera-node", flash: "camera-node" },
+            { t: "Chicken Tender Coop Controller", m: "ESP32-WROOM-32",      src: "firmware/chicken-tender", flash: "chicken-tender" },
+            { t: "WatchTower AI (3-camera dome)",  m: "ESP32-S3-EYE",        src: "firmware/watchtower", flash: null },
+            { t: "Roaming Roost Drive Controller", m: "ESP32-WROOM-32",      src: "firmware/roaming-roost", flash: null },
+          ].map((f) => (
+            <tr key={f.t}><td>{f.t}</td><td><code>{f.m}</code></td>
+              <td><a href={`https://github.com/WeCr8/TenderCells/tree/main/${f.src}`} target="_blank" rel="noopener noreferrer">{f.src}</a></td>
+              <td>{f.flash
+                ? <a href={`/flash?target=${f.flash}`} className="btn-primary" style={{ padding: "0.3rem 0.8rem", fontSize: "0.8rem" }}>Flash in browser</a>
+                : <span className="tag">Build from source</span>}</td>
             </tr>
           ))}
         </tbody>

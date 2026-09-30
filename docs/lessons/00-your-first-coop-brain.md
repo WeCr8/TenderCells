@@ -58,7 +58,7 @@ Open the "bag" and put each part in front of you. Count them. Check the box. ✅
 1. On the laptop, open **Chrome** or **Edge**.
 2. In the address bar at the top, type this and press **Enter**:
    ```
-   tender-cells.web.app/flash
+   tendercells.com/flash
    ```
 3. **What you see:** a green page that says **🐔 Tender Cells Flasher**.
 
@@ -158,7 +158,7 @@ That's **real engineering**. The same steps put the brain in a real robot coop. 
 - 🌡️ **Make it feel the world** → [Sensors → Automated Tasks](../CLASSROOM_SENSORS_AND_AUTOMATION.md)
   — add a light sensor so the coop opens at sunrise by itself.
 - 🍽️ **Feed and water** → [Feeder + Waterer](../CLASSROOM_FEEDER_AND_WATERER.md)
-- 🧊 **See it in 3D** → open `tender-cells.web.app/viewer` and drop in a model
+- 🧊 **See it in 3D** → open `tendercells.com/viewer` and drop in a model
 - 🗺️ **See all the projects** → [Learning Tracks map](../LEARNING_TRACKS.md)
 
 > 🧭 *Do them in order if you're new.* Each one adds one new idea on top of this lesson.

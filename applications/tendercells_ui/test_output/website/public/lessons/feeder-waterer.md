@@ -1,9 +1,11 @@
+<!-- Generated from docs/CLASSROOM_FEEDER_AND_WATERER.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
+
 # Classroom: Build a Feeder + a Waterer (and your own peripheral)
 
 A **hands-on lesson** to add automatic **feeding** and **watering** to a coop, control
 them from the TenderCells OS, run them on a **schedule**, and — the real goal — learn
 to **invent your own peripheral**. Builds on the
-[door + Roaming Roost lesson](CLASSROOM_DOOR_AND_ROAMING_ROOST.md); same Starter Node
+[door + Roaming Roost lesson](/lessons/door-roaming-roost); same Starter Node
 binary, same safety rules, same MQTT contract.
 
 > **Key idea:** a feeder and a waterer are just *outputs on a timer*. You already have
@@ -14,8 +16,8 @@ binary, same safety rules, same MQTT contract.
 
 ## 🧱 LEGO-style quick build (ages 7+)
 
-> Do [🐣 Your First Coop Brain](lessons/00-your-first-coop-brain.md) first. Hard words:
-> [Picture Dictionary](lessons/00-your-first-coop-brain.md#-picture-dictionary-hard-words-made-easy).
+> Do [🐣 Your First Coop Brain](/lessons/your-first-coop-brain) first. Hard words:
+> [Picture Dictionary](/lessons/your-first-coop-brain#-picture-dictionary-hard-words-made-easy).
 
 ```text
  ┌──────────────────────────────────────────────┐
@@ -34,7 +36,7 @@ binary, same safety rules, same MQTT contract.
 
 > 🦺 **E-STOP** cuts it instantly — try it.
 
-**👉 Next:** [Sensors → Automation](CLASSROOM_SENSORS_AND_AUTOMATION.md) · [Learning Tracks](LEARNING_TRACKS.md)
+**👉 Next:** [Sensors → Automation](/lessons/sensors-automation) · [Learning Tracks](/lessons/learning-tracks)
 
 ---
 
@@ -86,7 +88,7 @@ share **ground** with the board, switch it through the **relay**.
 | `relay` (auger / pump / valve) | **GPIO5** | relay IN |
 
 Pins are at the top of
-[firmware/starter-node/src/main.cpp](../firmware/starter-node/src/main.cpp). Relay is
+[firmware/starter-node/src/main.cpp](https://github.com/WeCr8/TenderCells/blob/main/firmware/starter-node/src/main.cpp). Relay is
 active-HIGH; it boots **OFF** so nothing runs on power-up.
 
 ---
@@ -94,7 +96,7 @@ active-HIGH; it boots **OFF** so nothing runs on power-up.
 ## Flash + pick the peripheral
 
 Already flashed the Starter Node? You **don't re-flash** — just re-open WiFi setup to
-change the peripheral. (New board: flash at **tender-cells.web.app/flash**, pick
+change the peripheral. (New board: flash at **tendercells.com/flash**, pick
 Starter Node — full steps on that page.)
 
 1. Power the board; join its `TenderNode-Setup` WiFi; the setup page opens.
@@ -166,7 +168,7 @@ restart until cleared.
 ## Implement your own peripheral (the real skill)
 
 Any new output follows the **same five-step pattern**. Add it to
-[firmware/starter-node/src/main.cpp](../firmware/starter-node/src/main.cpp), copying how
+[firmware/starter-node/src/main.cpp](https://github.com/WeCr8/TenderCells/blob/main/firmware/starter-node/src/main.cpp), copying how
 `relay`/`door` are done:
 
 1. **Pick a pin + a `peripheral` value.** Add `static const int PIN_MYTHING = 6;` and
@@ -180,8 +182,8 @@ Any new output follows the **same five-step pattern**. Add it to
 
 Then expose it through the OS (optional): add a `cmd/mything` schema + a
 `sendMyThingCommand` + an owner-gated route in express-api
-([mqtt.controller.ts](../applications/tendercells_ui/test_output/express-api/backend/src/controllers/mqtt.controller.ts),
-[mqtt.routes.ts](../applications/tendercells_ui/test_output/express-api/backend/src/routes/mqtt.routes.ts)) — copy the `light` command.
+([mqtt.controller.ts](https://github.com/WeCr8/TenderCells/blob/main/applications/tendercells_ui/test_output/express-api/backend/src/controllers/mqtt.controller.ts),
+[mqtt.routes.ts](https://github.com/WeCr8/TenderCells/blob/main/applications/tendercells_ui/test_output/express-api/backend/src/routes/mqtt.routes.ts)) — copy the `light` command.
 
 That's the whole platform: **pin → topic → subscribe → act → report**, with E-STOP and
 ownership wrapped around it. Feeder, waterer, a coop fan, a UV lamp, a misting line —
@@ -192,6 +194,6 @@ all the same recipe.
 ## Link to the TenderCells OS
 
 Once running, the device shows in the dashboard (live state in its heartbeat) and — on a
-[logged-in instance](CLASSROOM_DOOR_AND_ROAMING_ROOST.md#step-3--register-the-device-to-your-account) —
+[logged-in instance](/lessons/door-roaming-roost#step-3--register-the-device-to-your-account) —
 under your account after you claim it. Telemetry mirrors to Firestore, so you watch and
 trigger feeding/watering from anywhere, not just the coop's WiFi.

@@ -29,6 +29,7 @@ import PartnersPage from "./pages/PartnersPage";
 import SearchPage from "./pages/SearchPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import CookieConsent from "./components/CookieConsent";
+import ScrollManager from "./components/ScrollManager";
 import { usePageTracking } from "./hooks/usePageTracking";
 import { useMarketingTelemetry } from "./hooks/useMarketingTelemetry";
 import { lazy, Suspense, useEffect } from "react";
@@ -41,6 +42,7 @@ const AuthActionPage = lazy(() => import("./pages/AuthActionPage"));
 const NewsletterPage = lazy(() => import("./pages/NewsletterPage"));
 const SchoolsPage = lazy(() => import("./pages/SchoolsPage"));
 const LibraryPage = lazy(() => import("./pages/LibraryPage"));
+const DocsPage = lazy(() => import("./pages/DocsPage"));
 
 // Fires GA4 page_view on every route change — must be inside <BrowserRouter>
 function PageTracker() {
@@ -60,6 +62,7 @@ function App() {
   return (
     <BrowserRouter>
       <PageTracker />
+      <ScrollManager />
       <Routes>
         <Route path="/" element={<LandingPage />} />
 
@@ -93,6 +96,8 @@ function App() {
         <Route path="/guides/pasture-rotation" element={<GuidePage slug="pasture-rotation" />} />
         <Route path="/guides/camera-node-first-build" element={<CameraNodeGuidePage />} />
         <Route path="/farm-automation" element={<FarmAutomationPage />} />
+        <Route path="/docs" element={<Suspense fallback={null}><DocsPage /></Suspense>} />
+        <Route path="/docs/:slug" element={<Suspense fallback={null}><DocsPage /></Suspense>} />
 
         {/* Animal Health */}
         <Route path="/health" element={<HealthPage />} />

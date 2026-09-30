@@ -1,0 +1,235 @@
+<!-- Generated from docs/WEED_PATROL.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
+
+# Weed Patrol — weed finding + laser treatment, human in the loop
+
+A FarmBot-style gantry scans a garden bed with a downward camera, flags every weed it
+finds on the Tender Cells 3D property map, and treats a weed **only after a person
+approves that exact weed**. Students start in **student mode**, where the robot only points a
+low-power aiming dot and the laser never fires.
+
+```
+OS  /weed-patrol  ──HTTP──▶ express-api ──MQTT tc/{id}/cmd/weed──▶ weed_patrol_service.py
+    3D map flags  ◀─poll─── /devices/:id/events ◀── tc/{id}/event ──  (detector + gantry + laser)
+```
+
+Code:
+- Robot side: `firmware/jetson-nano/weed_patrol.py` (planning, detectors, gantry, laser interlocks) and `weed_patrol_service.py` (MQTT).
+- API: `express-api/backend/src/yardEvents.ts` and the weed handlers in `mqtt.controller.ts`.
+- UI: `pages/WeedPatrolPage.tsx`, `components/viewport/yardFlags.ts`, `hooks/useYardEvents.ts`, and `lib/yard/weedSim.ts` (the in-browser demo robot).
+
+## Try it (no hardware)
+
+- **Public demo:** open **Weed Patrol** in the side menu and press **Start pass**. A simulated robot scans the Genesis bed, and amber pins appear on the map and in the review queue. You then choose **Aim**, **Burn** or **Not a weed** for each one. Burn is refused until you turn off *Student mode*, turn on *Burn enabled* and close the enclosure (all simulated).
+- **Full stack on a laptop:**
+  ```bash
+  cd applications/tendercells_ui/test_output/express-api && npm run dev          # API + MQTT broker
+  cd firmware/jetson-nano && WEED_MODE=simulation DEVICE_ID=garden_weeder \
+    ITEM_ID=item-garden-genesis MQTT_BROKER=mqtt://localhost:1883 python3 weed_patrol_service.py
+  # OS with VITE_MQTT_API_BASE_URL=http://localhost:4000/api/mqtt → Weed Patrol
+  ```
+
+## Our robot types
+
+| Type | Build | Laser | Why |
+|---|---|---|---|
+| **1. Genesis laser head (start here)** | FarmBot Genesis with a laser module on the UTM, driven through FarmBot's official `farmbot-py` (`WEED_GANTRY=farmbot`). This is the [Project Cyclops](https://github.com/rahularepaka/Project-Cyclops) design (CC0). | 500 mW 405 nm dot module, **Class 3B** (`LASER_PROFILE=diode-500mw`) | Matches the Genesis beds already on the property map. Cheapest path, well suited to students. |
+| **2. Rover (next)** | A LiteWeed-style stop-and-align rover with a 2-DOF arm, running on-board detection. | 4 W 450 nm blue diode, **Class 4** (`LASER_PROFILE=diode-4w`) | For rows and open ground a gantry can't span. [LiteWeed](https://www.sciencedirect.com/science/article/pii/S2772375526005654) (Simon Fraser University, 2026) is about $500 CAD and reported 96–97% weed removal in field trials. |
+| GRBL gantry | Any GRBL CNC-style gantry (`WEED_GANTRY=grbl`) | either profile | For DIY and classroom gantries |
+
+Commercial references:
+- [Carbon Robotics LaserWeeder G2](https://carbonrobotics.com/) is field-scale, CO₂-class lasers, and priced for large farms.
+- WeedBot and Escarda make row-crop machines.
+- [Tertill](https://tertill.com/) was the home-garden robot (mechanical, not laser) and has been discontinued. That leaves home and school garden laser weeding open.
+
+### Laser profiles
+
+Exposure scales with weed size between the profile's minimum and maximum, the same approach
+LiteWeed takes (it tunes exposure by weed size and species). The pulse runs in 50 ms slices so
+an E-STOP ends it immediately.
+
+| Profile | Power / wavelength | Class | Exposure (starting values) |
+|---|---|---|---|
+| `fixed` (default) | module-specific | — | `LASER_PULSE_MS`, capped at 1500 ms |
+| `diode-500mw` | 0.5 W / 405 nm | 3B | 2–8 s |
+| `diode-4w` | 4 W / 450 nm | 4 | 0.5–3 s |
+
+The exposure values are **starting points**. Calibrate them on test weeds for your module,
+focus and working height.
+
+### Genesis laser head wiring
+
+```bash
+WEED_MODE=live WEED_GANTRY=farmbot FARMBOT_TOKEN=<token from my.farm.bot> \
+LASER_OUTPUT=farmbot FARMBOT_AIM_PIN=7 FARMBOT_LASER_PIN=8 FARMBOT_ENCLOSURE_PIN=9 \
+LASER_PROFILE=diode-500mw STUDENT_MODE=true python3 weed_patrol_service.py
+```
+
+- Use a FarmBot **API token**, never the account password.
+- The pin numbers above are examples. Use the Farmduino peripheral pins your laser relay and
+  enclosure switch are wired to.
+- An enclosure pin that reads unknown counts as **open**.
+
+### In the demo and in 3D
+
+**Weed Patrol → Robot build** switches the demo robot between three builds. The laser class,
+exposure range and 3D model follow the choice:
+
+- the Genesis laser head (gantry bridge and tool head);
+- the laser rover (rover with a 2-DOF arm);
+- the arm-mounted laser (an arm reaching over the bed).
+
+The 3D map shows the tool moving during a pass, the red aiming dot, and a violet (405 nm) or
+blue (450 nm) beam when a burn fires.
+
+Live robots report the same fields in `tc/{id}/state/weed`: `robotType` (from the `WEED_ROBOT`
+setting) and `tool {x, y, z, aim, laser}`.
+
+## Tasks: more than weeding
+
+A pass has a **task**. Choose it in Weed Patrol or on a scheduled "Weed pass":
+
+| Task | Finds | What you do |
+|---|---|---|
+| `weed` (default) | Weeds (`weed_detected`, pending review) | Aim / Burn / Not a weed |
+| `plant_scan` | Wilting, yellowing or pest-damaged crops (`alert` + `bedMm`) | Check the plant → **Seen it** |
+| `patrol` | Snakes and other animals in the bed (`alert` + `bedMm`) | Keep people and animals clear → **Seen it** |
+
+- **Sightings are never laser targets.** `approve()` only accepts weeds, and the API only approves `weed_detected` events.
+- **Mobile robots:** a Roaming Roost on patrol reports sightings with `propFt {x, y}` (property feet), so they land where the robot saw them.
+- **Command:** `POST /devices/:id/weeds/pass {passes, task}`, which publishes `tc/{id}/cmd/weed {action: "pass", task}`.
+- **"Seen it":** sends `tc/{id}/cmd/event {action: "ack"}`.
+
+## Weed patrol on a rover
+
+A mobile robot drives the **whole property** (or the route you drew for it in Property Layout)
+with a downward camera. It works in lawn-mower lanes, one camera swath (4 ft) apart, and skips
+every no-go / keep-out zone. Each find is reported with its property position (`propFt {x, y}`,
+in feet), so it lands as a pin on the **2D property map** (Weed Patrol → 2D property, and the
+Property Layout "Detections" layer) and on the **3D map**. You are told about it wherever you are
+in the OS (a pop-up with **View on map**, plus a browser notification when the tab is hidden).
+
+| Robot | Build | What you do with a weed |
+|---|---|---|
+| Weed Rover | `rover-scout` (camera only, default) | Pull it, then press **Pulled it** (`cmd/event ack`), or **Not a weed** |
+| Weed Rover | `rover-laser` | Aim / Burn after your approval. Refused in any zone and near animals (see below) |
+| Roaming Roost, Community Custom | `rover-scout` only | Pull it by hand. Robots that carry animals never get a laser |
+
+**On every pass, whatever the task, the rover also reports:**
+
+- **Animals on its route.** Each sighting is an `alert` with `finding: "animal"` and `animalGroup`:
+  - `flock`: your hens, ducks or goats outside the run ("Hen outside the run", **Back inside**)
+  - `pet`: a dog or cat
+  - `wildlife`: deer, rabbits, squirrels and so on (no action needed)
+  - `predator`: fox, raccoon, hawk, snake, rat (keep people and animals clear, close the coop)
+
+  The same animal seen again from the next stop is not re-reported for 2 minutes.
+- **Water leaks at water points.** Water points are **Water Point** items (spigot, trough, tank or
+  valve), animal housing with waterers, and aquaponics / hydroponics tanks. Natural ponds are not
+  water points. The first time the camera frame passes within 6 ft of a water point on a pass,
+  the rover looks at the ground there. A leak is an `alert` with `finding: "leak"` and `station`
+  set to the water point id, shown as a blue puddle / droplet on the maps. Press **Fixed** once
+  it is repaired. While a leak is open, that point is not re-reported.
+
+**Laser hold near animals:** a laser rover will not aim or fire within **15 ft** of an animal
+it saw in the **last 10 minutes**. This is on top of the no-laser zones around animal housing.
+
+**Live rover settings** (`WEED_ROBOT=rover-scout|rover-laser`, see `weed_patrol_service.py`):
+
+| Setting | Meaning |
+|---|---|
+| `ROVER_DRIVE=mqtt`, `ROVER_BASE_ID` | Base controller that takes `tc/{base}/cmd/goto {xFt,yFt}` and reports `tc/{base}/state/pose` |
+| `PROPERTY_WIDTH_FT`, `PROPERTY_DEPTH_FT` | Property size (the OS also sends the area with each pass) |
+| `ROVER_ANIMAL_MODEL` | YOLO weights for animals: `yolov8n.pt` (COCO: bird, cat, dog, …, default) or `hf://owner/repo/best.pt` (its class names become the labels, e.g. hen / fox / snake) |
+| `ROVER_LEAKS=off`, `ROVER_ANIMALS=off` | Turn the leak checks or animal sightings off |
+| `SIM_LEAKS=tap,trough` | Simulation: water point ids that show a leak |
+
+The leak check compares the share of "wet" pixels (dark soaked soil, or glare off standing
+water) around each water point with that point's own dry baseline, which it learns on earlier
+passes. A jump of more than 15 % is reported. It is a heuristic: on tricky ground (dark mulch,
+deep shade), plug in a segmentation model through the `LeakDetector` protocol in `rover_patrol.py`.
+
+**Pass command for rovers:**
+
+```json
+tc/{id}/cmd/weed {
+  "action": "pass", "passes": 1, "task": "weed",
+  "area": {"x": 0, "y": 0, "width": 80, "depth": 60},
+  "waterPoints": [{"id": "item-spigot", "name": "Garden spigot", "x": 20.5, "y": 30.5, "radiusFt": 6.5}]
+}
+```
+
+The pass takes either `area` or `route: [{x, y}, …]`. `state/weed` carries the rover's pose as
+`pose {xFt, yFt, headingDeg}` (heading is degrees clockwise from map north).
+
+## Passes on a schedule
+
+In **Schedules**, add a **Weed pass** action for the robot's device id (e.g. dawn and dusk, 1–10
+passes). The express-api schedule runner publishes the pass, but it skips the run while E-STOP is
+latched. Passes only *detect*. Treatment always waits for a person in the review queue.
+
+## Live hardware
+
+| Setting | Meaning |
+|---|---|
+| `WEED_MODE=live` | Real camera + gantry + GPIO |
+| `GRBL_PORT=/dev/ttyUSB0` | G-code gantry (FarmBot-style / CNC controller with GRBL) |
+| `CAMERA_INDEX=0` | Downward camera |
+| `WEED_DETECTOR=hsv` (default) or `yolo` | Green-plant thresholding with known-crop exclusion, or a YOLO model |
+| `WEED_MODEL=hf://owner/repo/best.pt` | YOLO weights from the Hugging Face Hub (needs `ultralytics`, `huggingface_hub`) |
+| `AIM_PIN`, `LASER_PIN`, `ENCLOSURE_PIN` | BCM GPIO numbers; the enclosure switch reads *closed* when low |
+| `STUDENT_MODE=false` | Allow burning (default **true** = aiming dot only) |
+| `LASER_BURN_ENABLED=true` | Second, separate opt-in to burn (default false) |
+| `LASER_PROFILE` | `fixed` (default), `diode-500mw` or `diode-4w`. Sets exposure by weed size; see Laser profiles |
+| `LASER_PULSE_MS` | Pulse for the `fixed` profile, hard-capped at 1500 ms, with a cooldown between pulses |
+| `BED_LENGTH_MM`, `BED_WIDTH_MM`, `ITEM_ID` | Bed size and the property-layout item the pins belong to |
+
+## Laser safety (read before enabling burn)
+
+Weeding lasers are **Class 3B** (the 500 mW module) or **Class 4** (the 4 W diode and up): they cause instant eye damage (including from reflections)
+and are a fire risk in dry mulch. A burn requires **all** of the following:
+
+1. `LASER_BURN_ENABLED=true` **and** `STUDENT_MODE=false` on the robot. These are env settings on the robot, not UI switches.
+2. A closed enclosure / shroud interlock switch (the beam path is blocked otherwise).
+3. No E-STOP. E-STOP latches (QoS 2, retained), stops the pass immediately and turns the laser off.
+4. A person approves that single weed in the UI and confirms "no people or animals near the bed".
+5. A bounded pulse (at most the profile's maximum, and an E-STOP cuts it) and a cooldown.
+
+If any check fails, the robot refuses and the API returns **409** with the reason. The weed then
+goes back into the review queue. Wear laser-safety eyewear rated for the wavelength, never
+run burn mode unattended, and keep a fire extinguisher nearby. Classrooms should stay in
+student mode.
+
+## API / MQTT
+
+| HTTP (express-api) | MQTT | Gated |
+|---|---|---|
+| `POST /devices/:id/weeds/pass {passes}` | `tc/{id}/cmd/weed {action:"pass"}` | E-STOP |
+| `POST /devices/:id/weeds/:eventId/approve {mode:"aim"\|"burn"}` | `tc/{id}/cmd/weed {action:"approve"}` QoS 2 | E-STOP + robot interlocks |
+| `POST /devices/:id/weeds/:eventId/reject` | `tc/{id}/cmd/weed {action:"reject"}` | never |
+| `GET /devices/:id/events` | ← `tc/{id}/event` | — |
+| `GET /devices/:id/state/weed` | ← `tc/{id}/state/weed` | — |
+
+### Station flags
+
+The same event channel carries the other pop-up flags on the 3D map:
+
+- `egg_ready`: eggs ready in a Chicken Tender or Duck Dock. **Picked up** sends `tc/{id}/cmd/event {action:"ack"}`.
+- `pickup_ready`: anything else ready to collect at a station.
+- `headcount`: birds in the Roaming Roost versus roaming. The map shows the roaming birds walking the patrol area.
+- `alert`: a fault or predator.
+
+Events are upserted by `id`. `tools/simulate-device.mjs --kind coop|duck|roost` publishes all of them for testing.
+
+## Existing platforms we looked at (good test beds)
+
+| Project | What it is | Use here |
+|---|---|---|
+| [OpenWeedLocator (OWL)](https://github.com/geezacoleman/OpenWeedLocator) | MIT, Raspberry Pi + camera green-on-brown / in-crop detection driving relays | Same HSV idea as our `hsv` detector; a good student build |
+| [Open Weeding Delta](https://github.com/Agroecology-Lab/Open-Weeding-Delta) | MIT, ROS 2 / Jetson delta robot with optional laser | Hardware reference. It publishes no laser safety process, so add the interlocks above |
+| [Autonomous laser weed removal](https://github.com/RishiKrishnah/Autonomous-laser-weed-removal) | Student project: YOLO + galvo laser | Reference for aiming |
+| [FarmBot weed detection](https://software.farm.bot/v4/Additional-Information/weed-detection.html) / [plant-detection](https://github.com/FarmBot-Labs/plant-detection) | FarmBot's camera weed detection (HSV + known plants) | Our gantry convention and the HSV approach. We wrote our own implementation because the plant-detection licence could not be confirmed |
+| [YOLO weed detection Space](https://huggingface.co/spaces/Rohankumar31/Yolo-weed-detection), [another](https://huggingface.co/spaces/blurerjr/yolo-weed-detection) | Hugging Face demos of YOLO weed models | Try models in the browser, then point `WEED_MODEL` at compatible weights |
+| [CottonWeedDet12](https://huggingface.co/datasets/Voxel51/CottonWeedDet12) | 12-class weed detection dataset for southern U.S. cotton research | **Research reference only.** CC BY-NC 4.0 prohibits commercial use without separate permission; do not bundle it or train production TenderCells models from it. It also ships without official train/validation/test splits and is not validated outside its documented cotton-field conditions. |
+| [WeedStemDetection](https://github.com/InternScience/WeedStemDetection) | Stem-point detection (AAAI 2025) | Better aim point than a box centre, for later |
+
+Check each model's and dataset's licence before commercial use.

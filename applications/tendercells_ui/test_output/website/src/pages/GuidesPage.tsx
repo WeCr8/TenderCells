@@ -29,7 +29,7 @@ const CORE = [
   { title: "Camera Node: first build", body: "Wire, flash, register and use the first battery-powered camera node.", to: "/guides/camera-node-first-build" },
 ];
 
-const ALL_TOPICS: TopicId[] = ["devices", "coop", "predator", "rover", "sensors", "garden", "design", "habitat", "schools"];
+const ALL_TOPICS: TopicId[] = ["twin", "devices", "coop", "predator", "rover", "sensors", "garden", "design", "habitat", "schools"];
 
 export default function GuidesPage() {
   return (

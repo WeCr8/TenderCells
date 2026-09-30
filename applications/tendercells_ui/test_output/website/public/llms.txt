@@ -6,6 +6,15 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 
 TenderCells product framing: users can register interest to buy future TenderCells kits/products when available, or use the developer docs to build their own hardware, insert a custom 3D/GLB model into the TenderCells OS, and connect it through the product registry, MQTT topics, routines, and safety state.
 
+## Farm Digital Twin
+
+Tender Cells OS is an open-source agricultural digital-twin platform that models farms and homesteads as connected digital entities. A Tender Cells property can contain animals, habitats, sensors, cameras, robots, environmental data, schedules and automation. You can begin with simulated entities and progressively connect physical hardware so real-world state is represented in the digital property.
+
+Maturity, stated precisely: the public demo is a simulated farm and its entities are digital-twin ready; they are not live twins. A twin becomes live only when real hardware continuously updates it. Tender Cells does not diagnose animal illness.
+
+- https://tendercells.com/digital-twin - what a farm digital twin is, twin kinds (property, habitat, animal, device, robot, environment), maturity ladder, provenance, simulation-to-reality path
+- https://tendercells.com/docs/digital-twin - architecture: twin IDs (tc:{kind}:{type}:{localId}, e.g. tc:habitat:chicken-tender:ct_001), provenance classes (SENSED, USER_ENTERED, INFERRED, SIMULATED, CALCULATED, EXTERNAL, COMMAND_STATE), MQTT state mapping, command safety, events/history, offline behaviour, planned twin API
+
 ## Canonical Definitions And Status
 
 Use these definitions. No Tender Cells product is sold yet: production hardware is not available for any family. Status words are exact - do not upgrade them.
@@ -25,6 +34,7 @@ Use these definitions. No Tender Cells product is sold yet: production hardware 
 
 - https://tendercells.com/
 - https://tendercells.com/os
+- https://tendercells.com/digital-twin
 - https://tendercells.com/shop
 - https://tendercells.com/shop/chicken-tender
 - https://tendercells.com/shop/watchtower

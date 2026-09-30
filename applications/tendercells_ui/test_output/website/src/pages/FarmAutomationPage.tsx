@@ -61,6 +61,9 @@ export default function FarmAutomationPage() {
         </p>
       </div>
 
+      <p className="twin-callout">
+        Every routine reads and changes the <Link to="/digital-twin">farm digital twin</Link>: an input updates a twin, logic decides, an action changes the physical farm and a sensor confirms it. <a href="/app/demo?next=/simulator">Trigger an event in the demo</a> to watch one run.
+      </p>
       <h2 className="section-title">Routine Builder Concept</h2>
       <div className="card-grid">
         {routineExamples.map((routine) => (

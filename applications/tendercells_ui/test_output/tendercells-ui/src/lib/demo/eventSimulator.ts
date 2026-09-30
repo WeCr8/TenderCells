@@ -10,6 +10,7 @@
 // Everything is simulation: nothing is sent to hardware.
 import { updateDemoEquipment, DEMO_DEVICES } from "../../services/demo/demoEnvironment";
 import { eggService } from "../../services/eggService";
+import { DEMO_PROPERTY_ID, deviceTwinId, type SourceType } from "../twin/twin";
 
 export type ChainKind = "device" | "signal" | "ai" | "rule" | "os" | "actuator" | "action" | "notify";
 
@@ -31,8 +32,22 @@ export interface Scenario {
   /** Website pages: how it works / build it. */
   learn: { label: string; href: string };
   build: { label: string; href: string };
+  /** The twin this event changes (docs/TENDERCELLS_DIGITAL_TWIN_ARCHITECTURE.md). */
+  twin: string;
   apply?: () => Promise<void> | void;
 }
+
+/**
+ * Where each step's data would come from on a live farm. In the demo every value is
+ * SIMULATED; the UI shows both so simulated and real data are never confused.
+ */
+export const LIVE_SOURCE: Record<ChainKind, SourceType> = {
+  device: "SENSED", signal: "SENSED", ai: "INFERRED", rule: "CALCULATED", os: "CALCULATED",
+  actuator: "COMMAND_STATE", action: "SENSED", notify: "CALCULATED",
+};
+
+/** Provenance of every demo event. */
+export const DEMO_SOURCE = { source: "Tender Cells demo simulator", mode: "SIMULATED" as SourceType };
 
 export interface EventLogEntry {
   id: string;
@@ -42,6 +57,8 @@ export interface EventLogEntry {
   outcome: string;
   steps: ChainStep[];
   at: number;
+  /** Twin ID of the entity the event changed. */
+  twin?: string;
   /** The reader opened "Why did this happen?" (missions use it). */
   explained?: boolean;
 }
@@ -51,6 +68,7 @@ const CT = DEMO_DEVICES.chickenTender;
 export const SCENARIOS: Scenario[] = [
   {
     id: "predator",
+    twin: deviceTwinId(CT),
     title: "Predator detected",
     emoji: "🦊",
     summary: "A camera spots a fox near the coop at dusk; the door closes and you are told.",
@@ -72,6 +90,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     id: "sunset",
+    twin: deviceTwinId(CT),
     title: "Sunset - close the coop",
     emoji: "🌇",
     summary: "The light sensor sees dusk; the door closes once the birds are inside.",
@@ -93,6 +112,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     id: "egg-laid",
+    twin: deviceTwinId(CT),
     title: "Egg laid",
     emoji: "🥚",
     summary: "A hen leaves a nest box; the camera finds a new egg and the egg map updates.",
@@ -115,6 +135,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     id: "water-low",
+    twin: deviceTwinId(CT),
     title: "Water level low",
     emoji: "💧",
     summary: "The waterer drops to 12%; the valve tops it up and you are told.",
@@ -135,6 +156,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     id: "feed-low",
+    twin: deviceTwinId(CT),
     title: "Feed level low",
     emoji: "🌾",
     summary: "The hopper load cell reads 15%; you get a refill reminder.",
@@ -153,6 +175,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     id: "heat",
+    twin: deviceTwinId(CT),
     title: "Coop too hot",
     emoji: "🌡️",
     summary: "The coop reaches 92°F; the fan turns on and you get a heat-stress warning.",
@@ -173,6 +196,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     id: "missing-hen",
+    twin: deviceTwinId(CT),
     title: "Hen missing at dusk",
     emoji: "🐔",
     summary: "Headcount is 6 of 7 at dusk; the door waits and you are told where to look.",
@@ -191,6 +215,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     id: "leak",
+    twin: DEMO_PROPERTY_ID,
     title: "Rover finds a water leak",
     emoji: "🚰",
     summary: "The rover's camera sees standing water by the spigot and pins it on the map.",
@@ -209,6 +234,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     id: "offline",
+    twin: deviceTwinId(DEMO_DEVICES.watchTower),
     title: "Device offline",
     emoji: "📡",
     summary: "WatchTower misses its check-ins; the OS marks it offline and flags it.",
@@ -256,7 +282,7 @@ export async function runScenario(id: string, now: number = Date.now()): Promise
   const s = scenarioById(id);
   if (!s) throw new Error(`Unknown event ${id}`);
   await s.apply?.();
-  const entry: EventLogEntry = { id: `${id}-${now}`, scenarioId: id, title: s.title, emoji: s.emoji, outcome: s.outcome, steps: s.steps, at: now };
+  const entry: EventLogEntry = { id: `${id}-${now}`, scenarioId: id, title: s.title, emoji: s.emoji, outcome: s.outcome, steps: s.steps, at: now, twin: s.twin };
   writeEventLog([entry, ...readEventLog()]);
   return entry;
 }

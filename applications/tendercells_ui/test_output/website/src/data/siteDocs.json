@@ -7,6 +7,7 @@
   { "slug": "arm-service", "source": "docs/ARM_SERVICE.md", "title": "Robot arm service" },
   { "slug": "diy-habitat-projects", "source": "docs/DIY_HABITAT_PROJECTS.md", "title": "DIY habitat projects" },
   { "slug": "isaac-sim", "source": "docs/ISAAC_SIM.md", "title": "NVIDIA Isaac Sim" },
+  { "slug": "digital-twin", "source": "docs/TENDERCELLS_DIGITAL_TWIN_ARCHITECTURE.md", "title": "Digital twin architecture" },
   { "slug": "usage", "source": "docs/USAGE.md", "title": "Usage guide" },
   { "slug": "machine-readable-backend", "source": "docs/MACHINE_READABLE_BACKEND.md", "title": "Machine-readable backend" },
   { "slug": "robot-exclusion-zones", "source": "docs/ROBOT_EXCLUSION_ZONES.md", "title": "Robot exclusion zones" },

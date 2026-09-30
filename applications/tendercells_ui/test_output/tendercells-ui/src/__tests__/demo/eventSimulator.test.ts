@@ -41,6 +41,7 @@ describe('demo event simulator', () => {
     expect(getDemoEquipment('ct_001')[0].door).toBe('closed');
     expect(entry.steps.map((s) => s.kind)).toEqual(['device', 'ai', 'rule', 'os', 'actuator', 'action', 'notify']);
     expect(readEventLog()[0]).toMatchObject({ scenarioId: 'predator', outcome: 'Chicken Tender door closed and you were alerted.' });
+    expect(entry.twin).toBe('tc:habitat:chicken-tender:ct_001');
   });
 
   it('low water refills and low feed is recorded on the device', async () => {

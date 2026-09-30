@@ -15,7 +15,7 @@ export type ContentKind = "guide" | "lesson" | "doc" | "os" | "tool";
 export interface ContentLink { kind: ContentKind; title: string; to: string }
 
 export type TopicId =
-  | "coop" | "predator" | "rover" | "sensors" | "garden" | "devices" | "design" | "habitat" | "schools" | "science-fair";
+  | "coop" | "predator" | "rover" | "sensors" | "garden" | "devices" | "design" | "habitat" | "schools" | "science-fair" | "twin";
 
 export interface Topic { title: string; blurb: string; links: ContentLink[] }
 
@@ -23,6 +23,19 @@ export interface Topic { title: string; blurb: string; links: ContentLink[] }
 export const demo = (page: string): string => `/app/demo?next=${page}`;
 
 export const TOPICS: Record<TopicId, Topic> = {
+  twin: {
+    title: "Farm digital twin",
+    blurb: "Build the farm digitally, connect it physically: identity, state, events and provenance.",
+    links: [
+      { kind: "guide", title: "What a farm digital twin is", to: "/digital-twin" },
+      { kind: "lesson", title: "Sensors → Automation", to: "/lessons/sensors-automation" },
+      { kind: "doc", title: "Digital twin architecture", to: "/docs/digital-twin" },
+      { kind: "doc", title: "Connect a device", to: "/docs/connect-a-device" },
+      { kind: "os", title: "Property Twin", to: demo("/layout") },
+      { kind: "os", title: "Trigger an event", to: demo("/simulator") },
+      { kind: "tool", title: "Backend + MQTT contract (XML)", to: "/api/tendercells-backend.xml" },
+    ],
+  },
   coop: {
     title: "Smart coop",
     blurb: "Doors, feed, water, climate and eggs for a backyard flock.",

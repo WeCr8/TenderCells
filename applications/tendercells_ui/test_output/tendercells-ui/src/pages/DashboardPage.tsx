@@ -134,7 +134,7 @@ export default function DashboardPage() {
           {[
             { label: 'Add Device', icon: <AddIcon />, path: '/products' },
             { label: 'Configure / Claim', icon: <SettingsRemoteIcon />, path: '__config__' },
-            { label: 'Property Layout', icon: <GridOnIcon />, path: '/layout' },
+            { label: 'Property Twin', icon: <GridOnIcon />, path: '/layout' },
             { label: 'Animal Roster', icon: <PetsIcon />, path: '/animals' },
             { label: 'Schedules', icon: <ScheduleIcon />, path: '/schedules' },
             { label: 'Diagnostics', icon: <BugReportIcon />, path: '/diagnostics' },

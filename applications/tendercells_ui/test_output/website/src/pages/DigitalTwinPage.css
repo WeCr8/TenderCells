@@ -1,0 +1,20 @@
+/* /digital-twin - farm digital twin page (reuses os-flow / os-steps from TenderCellsOsPage.css). */
+.dt-cta { margin-bottom: 1.5rem; }
+.dt-definition { font-size: 1.08rem; border-left: 4px solid #2e7d32; padding: 0.4rem 0 0.4rem 0.9rem; background: #f6f8fa; }
+.dt-kid { color: #3d4650; }
+.dt-note { color: #59636e; font-size: 0.92rem; margin: 0.25rem 0 1.5rem; }
+.dt-ladder { list-style: none; margin: 0 0 0.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.5rem; counter-reset: rung; }
+.dt-ladder li { counter-increment: rung; padding: 0.7rem 0.8rem; border: 1px solid #d1d9e0; border-radius: 10px; background: #fff; display: flex; flex-direction: column; gap: 0.2rem; }
+.dt-ladder li strong::before { content: counter(rung) ". "; color: #59636e; }
+.dt-ladder li span { color: #59636e; font-size: 0.85rem; }
+.dt-ladder li.dt-now { border-color: #2e7d32; box-shadow: 0 0 0 2px #2e7d3222; }
+.dt-ladder li.dt-now strong::after { content: " - today"; color: #2e7d32; font-weight: 600; }
+.dt-twins, .dt-modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.dt-twin, .dt-mode { border: 1px solid #d1d9e0; border-radius: 10px; padding: 0.9rem 1rem; background: #fff; display: flex; flex-direction: column; gap: 0.35rem; }
+.dt-twin h3, .dt-mode h3 { margin: 0; font-size: 1.05rem; }
+.dt-twin p, .dt-mode p { margin: 0; color: #3d4650; font-size: 0.93rem; }
+.dt-twin .dt-ex { color: #59636e; font-size: 0.85rem; flex: 1; }
+.dt-mode p { flex: 1; }
+.dt-badge { font-size: 0.72rem; font-weight: 600; padding: 0.1rem 0.5rem; border-radius: 99px; background: #eef1f4; color: #3d4650; border: 1px solid #d1d9e0; vertical-align: middle; margin-left: 0.3rem; }
+.dt-loop li:not(:last-child)::after { content: "→"; position: absolute; right: -0.62rem; top: 50%; transform: translateY(-50%); color: #59636e; font-weight: 700; }
+@media (max-width: 640px) { .dt-loop li:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -0.95rem; transform: none; } }

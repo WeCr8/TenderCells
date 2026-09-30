@@ -13,7 +13,8 @@
     "simulate": "node tools/simulate-device.mjs",
     "smoke": "node tools/smoke-test.mjs",
     "tc": "node tools/tc.mjs",
-    "describe:xml": "tsx tools/export-backend-xml.ts"
+    "describe:xml": "tsx tools/export-backend-xml.ts",
+    "camera-bridge": "tsx tools/camera-bridge.mts"
   },
   "dependencies": {
     "aedes": "^0.51.3",
@@ -22,7 +23,8 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "firebase-admin": "^12.0.0",
-    "mqtt": "^5.15.1"
+    "mqtt": "^5.15.1",
+    "werift": "^0.24.4"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

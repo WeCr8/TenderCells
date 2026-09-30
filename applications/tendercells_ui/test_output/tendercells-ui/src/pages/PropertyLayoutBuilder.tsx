@@ -294,6 +294,27 @@ export default function PropertyLayoutBuilder() {
           }
         }
       }
+
+      // Cameras mounted on another product (metadata.mounted_on_product_id -
+      // the "package" registration flow, e.g. Chicken Tender + Camera) sit at
+      // their parent's location, not an independently cascaded slot - they
+      // read as one physical thing. This always re-snaps the mount, even
+      // after a manual drag: a mounted camera doesn't have its own
+      // free-standing position to remember.
+      for (const product of products) {
+        const parentProductId = product.metadata?.mounted_on_product_id as string | undefined;
+        if (!parentProductId) continue;
+        const cameraIdx = next.findIndex(it => it.kind === 'hardware' && it.productId === product.id);
+        const parentItem = next.find(it => it.kind === 'hardware' && it.productId === parentProductId);
+        if (cameraIdx < 0 || !parentItem) continue;
+        const cameraItem = next[cameraIdx];
+        const mountX = parentItem.x + parentItem.width - cameraItem.width / 2;
+        const mountY = parentItem.y - cameraItem.depth / 2;
+        if (cameraItem.x !== mountX || cameraItem.y !== mountY) {
+          next[cameraIdx] = { ...cameraItem, x: mountX, y: mountY };
+        }
+      }
+
       return next;
     });
   }, [products]);

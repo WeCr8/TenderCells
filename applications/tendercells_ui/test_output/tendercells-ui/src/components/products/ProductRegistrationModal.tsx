@@ -89,6 +89,22 @@ const capabilityLabels: Record<string, string> = {
 const senseCapabilities = Object.keys(capabilityLabels);
 const genericCameraCapabilities = ['camera', 'wifi', 'ble', 'gpio'];
 const defaultCameraCapabilities = ['camera', 'wifi', 'ble', 'battery_power'];
+
+/**
+ * A "package" template registers this camera as a SECOND, separate product
+ * (a camera-kit is always its own physical ESP32 board - Seeed XIAO
+ * ESP32-S3 Sense - never the same controller as the coop/unit it's mounted
+ * on) right after the primary product, linked via
+ * metadata.mounted_on_product_id. See handleSubmit.
+ */
+interface BundleCameraSpec {
+  productName: string;
+  model: string;
+  controllerBoard: string;
+  cameraModule: string;
+  firmwareTarget: string;
+  enabledCapabilities: string[];
+}
 const capabilityPresets: Record<string, string[]> = {
   camera_only: defaultCameraCapabilities,
   camera_sound: [...defaultCameraCapabilities, 'microphone'],
@@ -206,6 +222,27 @@ export default function ProductRegistrationModal({
       productName: 'Chicken Tender',
       model: 'Chicken Tender Coop',
       firmwareTarget: 'firmware/chicken-tender',
+    },
+    {
+      id: 'chicken-tender-camera-package',
+      title: 'Chicken Tender + Camera',
+      subtitle: 'Coop and a mounted camera, registered together as one package.',
+      description: 'Registers the coop and a linked camera node in one step - the camera is mounted on this coop, shows on its dashboard, and appears attached to it on the property map instead of as a separate device to place by hand.',
+      icon: <CottageOutlinedIcon />,
+      productType: 'hardware_unit' as ProductType,
+      productFamily: 'chicken-tender' as ProductFamily,
+      buildSource: 'tendercells-kit' as BuildSource,
+      productName: 'Chicken Tender',
+      model: 'Chicken Tender Coop',
+      firmwareTarget: 'firmware/chicken-tender',
+      bundleCamera: {
+        productName: 'Chicken Tender Camera',
+        model: 'ESP32-S3 Camera + Battery',
+        controllerBoard: 'Seeed XIAO ESP32-S3 Sense',
+        cameraModule: 'OV2640 / compatible camera',
+        firmwareTarget: 'firmware/camera-node',
+        enabledCapabilities: defaultCameraCapabilities,
+      } satisfies BundleCameraSpec,
     },
     {
       id: 'roaming-roost',
@@ -836,7 +873,34 @@ export default function ProductRegistrationModal({
       };
 
       const result = await onRegister(registrationData);
-      
+
+      // Package template ("Chicken Tender + Camera" etc.): the camera is a
+      // real, separate ESP32 board - register it as its own product right
+      // after the primary, linked via metadata.mounted_on_product_id so the
+      // property map mounts it on the parent and the parent's dashboard can
+      // show its feed.
+      const template = productTemplates.find((item) => item.id === selectedTemplateId);
+      if (template && 'bundleCamera' in template && template.bundleCamera && result && 'id' in result) {
+        const bundle = template.bundleCamera;
+        await onRegister({
+          product_type: 'automation_device',
+          product_name: bundle.productName,
+          model: bundle.model,
+          metadata: {
+            product_family: 'camera-kit',
+            build_source: buildSource,
+            connection_type: 'tendercells-template',
+            controller_board: bundle.controllerBoard,
+            camera_module: bundle.cameraModule,
+            firmware_target: bundle.firmwareTarget,
+            hardware_capabilities: [...new Set([...senseCapabilities, ...bundle.enabledCapabilities])],
+            enabled_capabilities: bundle.enabledCapabilities,
+            capability_profile: 'camera_only',
+            mounted_on_product_id: result.id,
+          },
+        });
+      }
+
       // If registration returns a product and we should show connection wizard, open it
       if (result && 'id' in result && showConnectionWizardAfterRegister) {
         setRegisteredProduct(result as Product);

@@ -67,6 +67,11 @@ export default function ProductDashboardPage() {
     window.open(`/flash/?${params.toString()}`, '_blank', 'noopener,noreferrer');
   };
   const isCameraNode = family === 'camera-kit';
+  // "Package" registration (e.g. Chicken Tender + Camera) links a camera to
+  // its parent unit via metadata.mounted_on_product_id - surface that link
+  // both ways so either dashboard can jump to the other.
+  const mountedOnProduct = products.find((item) => item.id === product.metadata?.mounted_on_product_id);
+  const attachedCamera = products.find((item) => item.metadata?.mounted_on_product_id === product.id);
   const streamUrl = String(product.metadata?.camera_stream_url || '');
   const streamSecurity = classifyCameraStream(streamUrl);
   const hardwareCapabilities = Array.isArray(product.metadata?.hardware_capabilities) ? product.metadata.hardware_capabilities : [];
@@ -109,6 +114,21 @@ export default function ProductDashboardPage() {
           </Button>
         </Stack>
       </Stack>
+
+      {mountedOnProduct && (
+        <Alert severity="info" action={
+          <Button size="small" onClick={() => navigate(`/product/${encodeURIComponent(mountedOnProduct.id)}`)}>Open {mountedOnProduct.product_name}</Button>
+        }>
+          Mounted on <strong>{mountedOnProduct.product_name}</strong> - registered together as a package.
+        </Alert>
+      )}
+      {attachedCamera && (
+        <Alert severity="info" action={
+          <Button size="small" onClick={() => navigate(`/product/${encodeURIComponent(attachedCamera.id)}`)}>Open {attachedCamera.product_name}</Button>
+        }>
+          <strong>{attachedCamera.product_name}</strong> is mounted on this unit.
+        </Alert>
+      )}
 
       <Grid container spacing={2.5}>
         <Grid item xs={12} lg={8}>

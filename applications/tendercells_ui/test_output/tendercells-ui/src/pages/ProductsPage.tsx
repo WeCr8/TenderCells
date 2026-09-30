@@ -313,8 +313,12 @@ export default function ProductsPage() {
   };
 
   const handleRegister = async (data: RegisterProductData) => {
-    await registerProduct(data);
+    // Returns the created product so the modal can chain a second, linked
+    // registration (the "package" bundles - e.g. a camera mounted on a coop)
+    // and so its post-register connection-wizard auto-open can actually fire.
+    const product = await registerProduct(data);
     await refetch(filter);
+    return product;
   };
 
   const handleImport = async (file: File) => {

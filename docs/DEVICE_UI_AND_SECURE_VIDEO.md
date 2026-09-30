@@ -79,7 +79,15 @@ Only installed board features may be enabled. Never connect a pump or motor dire
 
 ## Open work
 
-- Authenticated HTTPS/WebRTC video relay and multi-viewer fan-out.
+- Authenticated HTTPS/WebRTC video relay: **client viewer built** 2026-09-30
+  (`CameraFeedViewer`'s "🔒 Try secure relay" button, `lib/camera/cameraRelay.ts` -
+  creates the session via `createCameraRelaySession`, exchanges offer/answer/ICE
+  via `cameraRelaySignal`, renders the resulting track). **Device/bridge side is
+  still not built** - nothing today answers the offer, so this correctly reaches
+  "waiting for the camera to answer" and times out until an ESP32-CAM-facing
+  bridge (something that speaks WebRTC toward the browser and MJPEG toward the
+  camera's local `http://` stream) exists. That bridge, and multi-viewer
+  fan-out, remain open.
 - Firebase Storage-backed animal reference-image sets for recognition training.
 - Persistent telemetry history and user-defined alert thresholds.
 - End-to-end MQTT implementations for microphone events, microSD recording, GPIO pin maps, waterer, feeder, RC vehicle, and flight-controller bridge.

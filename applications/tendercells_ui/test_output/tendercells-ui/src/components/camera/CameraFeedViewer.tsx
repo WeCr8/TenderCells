@@ -17,6 +17,7 @@ import FlipIcon from '@mui/icons-material/Flip';
 import SecurityIcon from '@mui/icons-material/Security';
 import { CameraFeed } from '../../types/camera';
 import { cameraTransform, classifyCameraStream } from '../../lib/camera/cameraStream';
+import { useCameraRelay } from '../../lib/camera/cameraRelay';
 
 interface CameraFeedViewerProps {
   camera: CameraFeed;
@@ -47,6 +48,18 @@ export default function CameraFeedViewer({
     }
   });
   const streamSecurity = classifyCameraStream(camera.streamUrl);
+
+  // Authenticated HTTPS/WebRTC relay - an alternative to the raw local http://
+  // stream below, for viewing a LAN-only camera without the browser's mixed-
+  // content "Not Secure" warning. Requires a device-side bridge to actually
+  // answer (not built yet - see cameraRelay.ts header); until then this
+  // correctly reports "waiting for device", not a silent failure.
+  const [relayMode, setRelayMode] = useState(false);
+  const relay = useCameraRelay(camera.deviceId, relayMode);
+  const relayVideoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (relayVideoRef.current) relayVideoRef.current.srcObject = relay.videoStream;
+  }, [relay.videoStream]);
 
   // Browser webcam preview — opt-in, client-side only (no upload/record/store).
   // A "try it now" path for visitors with no hardware. getUserMedia only fires on
@@ -170,7 +183,15 @@ export default function CameraFeedViewer({
       {/* Real live feed: MJPEG streams render natively in <img> (works with any
           off-the-shelf ESP32-CAM/S3-EYE serving /stream). Falls back to the canvas
           status card when no streamUrl is set. */}
-      {webcamOn ? (
+      {relayMode ? (
+        <video
+          ref={relayVideoRef}
+          autoPlay
+          muted
+          playsInline
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: relay.state === 'connected' ? 'block' : 'none', transform: cameraTransform(orientation.rotation, orientation.flipX, orientation.flipY) }}
+        />
+      ) : webcamOn ? (
         <video
           ref={webcamRef}
           autoPlay
@@ -210,7 +231,29 @@ export default function CameraFeedViewer({
         </Box>
       )}
 
-      {streamSecurity === 'insecure-remote' && !webcamOn && (
+      {relayMode && relay.state !== 'connected' && (
+        <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', p: 3, bgcolor: '#0D2B1E' }}>
+          <Stack spacing={1.5} alignItems="center" sx={{ maxWidth: 440, textAlign: 'center' }}>
+            {relay.state === 'error' ? (
+              <>
+                <SecurityIcon sx={{ color: '#E8A020', fontSize: 38 }} />
+                <Typography color="#F0EDE4" fontWeight={600}>Secure relay unavailable</Typography>
+                <Typography variant="body2" color="#B8C8BF">{relay.errorMessage}</Typography>
+                <Button variant="outlined" onClick={() => setRelayMode(false)}>Back to local stream</Button>
+              </>
+            ) : (
+              <>
+                <CircularProgress size={32} sx={{ color: '#C8B882' }} />
+                <Typography color="#F0EDE4" fontWeight={600}>
+                  {relay.state === 'waiting-for-device' ? 'Waiting for the camera to answer…' : 'Starting secure relay…'}
+                </Typography>
+              </>
+            )}
+          </Stack>
+        </Box>
+      )}
+
+      {streamSecurity === 'insecure-remote' && !webcamOn && !relayMode && (
         <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', p: 3, bgcolor: '#0D2B1E' }}>
           <Stack spacing={1.5} alignItems="center" sx={{ maxWidth: 440, textAlign: 'center' }}>
             <SecurityIcon sx={{ color: '#E8A020', fontSize: 38 }} />
@@ -263,9 +306,16 @@ export default function CameraFeedViewer({
           />
           <Chip
             icon={<SecurityIcon />}
-            label={streamSecurity === 'secure' ? 'SECURE' : streamSecurity === 'local' ? 'LOCAL ONLY' : 'UNSECURED'}
+            label={
+              relayMode && relay.state === 'connected' ? 'SECURE RELAY'
+                : streamSecurity === 'secure' ? 'SECURE'
+                : streamSecurity === 'local' ? 'LOCAL ONLY' : 'UNSECURED'
+            }
             size="small"
-            color={streamSecurity === 'secure' ? 'success' : streamSecurity === 'local' ? 'warning' : 'error'}
+            color={
+              (relayMode && relay.state === 'connected') || streamSecurity === 'secure' ? 'success'
+                : streamSecurity === 'local' ? 'warning' : 'error'
+            }
             variant="outlined"
           />
         </Stack>
@@ -311,6 +361,13 @@ export default function CameraFeedViewer({
               sx={{ bgcolor: '#CC3333', color: '#fff', fontSize: '0.7rem' }} />
           )}
           <Box sx={{ flex: 1 }} />
+          {camera.deviceId && !webcamOn && (
+            <Button size="small" variant="contained"
+              onClick={() => setRelayMode((v) => !v)}
+              sx={{ bgcolor: relayMode ? '#CC3333' : '#4A7C59', fontSize: '0.7rem' }}>
+              {relayMode ? 'Stop relay' : '🔒 Try secure relay'}
+            </Button>
+          )}
           {allowBrowserCamera && webcamSupported && (
             <Button size="small" variant="contained"
               onClick={webcamOn ? stopWebcam : startWebcam}

@@ -35,6 +35,7 @@ import DemoLandingPage from "../pages/DemoLandingPage";
 import WeedPatrolPage from "../pages/WeedPatrolPage";
 import WatershedPage from "../pages/WatershedPage";
 import ProductDashboardPage from "../pages/ProductDashboardPage";
+import CameraNodeFirstBuildPage from "../pages/guides/CameraNodeFirstBuildPage";
 
 // Fires a page_view on every route change. No-op when analytics is disabled.
 function RouteAnalytics() {
@@ -71,6 +72,7 @@ export default function AppRoutes() {
       {/* Global pages */}
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/resources" element={<ResourcesPage />} />
+      <Route path="/guides/camera-node-first-build" element={<CameraNodeFirstBuildPage />} />
       <Route path="/coop" element={<Navigate to="/chicken-tender" replace />} />
       <Route path="/sensors" element={<Navigate to="/chicken-tender?section=sensors" replace />} />
       <Route path="/egg-map" element={<Navigate to="/chicken-tender?section=eggs" replace />} />

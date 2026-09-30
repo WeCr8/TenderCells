@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Accordion,
   AccordionDetails,
@@ -7,10 +8,6 @@ import {
   Box,
   Button,
   Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
   InputAdornment,
   Stack,
   Tab,
@@ -27,7 +24,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import BuildIcon from '@mui/icons-material/Build';
-import CloseIcon from '@mui/icons-material/Close';
 import { RESOURCE_LIBRARIES } from '../data/resourceLibraries';
 
 type Category = 'animals' | 'plants' | 'rodents' | 'wildlife' | 'health' | 'libraries' | 'guides';
@@ -132,10 +128,10 @@ const entries: ResourceEntry[] = [
 const C = { bg: '#0D2B1E', surface: '#153A29', border: '#35634A', text: '#F0EDE4', muted: '#B7C7BF', gold: '#C8B882' };
 
 export default function ResourcesPage() {
+  const navigate = useNavigate();
   const requestedCategory = new URLSearchParams(window.location.search).get('category') as Category | null;
   const [category, setCategory] = useState<Category>(categories.some((item) => item.id === requestedCategory) ? requestedCategory! : 'animals');
   const [query, setQuery] = useState('');
-  const [guideUrl, setGuideUrl] = useState<string | null>(null);
   const visibleEntries = useMemo(() => {
     const term = query.trim().toLowerCase();
     return entries.filter((entry) => entry.category === category && (!term || [entry.title, entry.summary, ...entry.tags, ...entry.checks].join(' ').toLowerCase().includes(term)));
@@ -210,7 +206,7 @@ export default function ResourcesPage() {
           <Box sx={{ border: `1px solid ${C.border}`, borderRadius: '6px', bgcolor: C.surface, p: 2 }}>
             <Typography sx={{ color: C.gold, fontWeight: 700 }}>Single Camera Node: first build</Typography>
             <Typography sx={{ color: C.muted, mt: 0.5, mb: 1.5 }}>Seeed XIAO ESP32-S3 Sense wiring, battery safety, browser flashing, Wi-Fi setup, device registration, MQTT, and first-stream verification.</Typography>
-            <Button variant="outlined" onClick={() => setGuideUrl('/guides/camera-node-first-build')}>Read in TenderCells</Button>
+            <Button variant="outlined" onClick={() => navigate('/guides/camera-node-first-build')}>Read in TenderCells</Button>
           </Box>
           <Box sx={{ border: `1px solid ${C.border}`, borderRadius: '6px', bgcolor: C.surface, p: 2 }}>
             <Typography sx={{ color: C.gold, fontWeight: 700 }}>Hardware diagnostics</Typography>
@@ -246,15 +242,6 @@ export default function ResourcesPage() {
         ))}
         {!visibleEntries.length && <Typography sx={{ color: C.muted, py: 3 }}>No matching resources in this category.</Typography>}
       </Stack>}
-      <Dialog open={Boolean(guideUrl)} onClose={() => setGuideUrl(null)} fullScreen>
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          Camera Node Build Guide
-          <IconButton aria-label="Close guide" onClick={() => setGuideUrl(null)}><CloseIcon /></IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ p: 0 }}>
-          {guideUrl && <Box component="iframe" title="Camera Node Build Guide" src={guideUrl} sx={{ width: '100%', height: '100%', border: 0, display: 'block' }} />}
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 }

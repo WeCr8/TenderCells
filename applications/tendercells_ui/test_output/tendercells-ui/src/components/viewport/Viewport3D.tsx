@@ -89,6 +89,7 @@ const FAMILY_TO_ITEM_TYPE: Record<string, string> = {
   'rail-system': 'rail-module',
   'rail-system-modules': 'rail-module',
   'sensor-pod': 'sensor',
+  'camera-kit': 'camera-kit',
 };
 
 const DEFAULT_SIZE_BY_TYPE: Record<string, { width: number; depth: number }> = {
@@ -100,6 +101,7 @@ const DEFAULT_SIZE_BY_TYPE: Record<string, { width: number; depth: number }> = {
   'turkey-tower': { width: 4, depth: 4 },
   'pigeon-palace': { width: 4, depth: 4 },
   'watchtower': { width: 2, depth: 2 },
+  'camera-kit': { width: 2, depth: 2 },
   'rail-module': { width: 2, depth: 1 },
   'sensor': { width: 1, depth: 1 },
 };
@@ -423,6 +425,37 @@ const createHardwareMesh = (
         );
         g.add(lens);
       });
+      return g;
+    }
+
+    case 'camera-kit': {
+      // A single registered "DIY ESP32 Camera Node" (Seeed XIAO ESP32-S3
+      // Sense) - a short mount pole + small body + one lens, deliberately
+      // simpler than watchtower's 3-camera dome so the two read as different
+      // products at a glance.
+      const g = new THREE.Group();
+      const poleH = H * 1.3;
+      const pole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.06, 0.08, poleH, 8),
+        new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.5, roughness: 0.4 })
+      );
+      pole.position.set(x, poleH / 2, z);
+      pole.castShadow = true;
+      g.add(pole);
+      const body = new THREE.Mesh(
+        new THREE.BoxGeometry(0.32, 0.22, 0.4),
+        mat.clone()
+      );
+      body.position.set(x, poleH + 0.12, z);
+      body.castShadow = true;
+      g.add(body);
+      const lens = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.07, 0.07, 0.1, 12),
+        new THREE.MeshStandardMaterial({ color: 0x080810, roughness: 0.15, metalness: 0.6 })
+      );
+      lens.rotation.x = Math.PI / 2;
+      lens.position.set(x, poleH + 0.12, z + 0.24);
+      g.add(lens);
       return g;
     }
 

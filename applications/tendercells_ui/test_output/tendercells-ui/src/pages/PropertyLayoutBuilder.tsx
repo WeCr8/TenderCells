@@ -85,6 +85,7 @@ const FAMILY_TO_HW_TYPE: Partial<Record<string, HardwareType>> = {
   'predator-monitor': 'watchtower',
   'rail-system':    'rail-module',
   'sensor-pod':     'sensor',
+  'camera-kit':     'camera-kit',
 };
 
 type LayoutMode = 'edit' | 'simulation';
@@ -107,6 +108,7 @@ const TYPE_LABELS: Record<string, string> = {
   hydroponics: 'Garden — Hydroponics',
   greenhouse: 'Garden — Greenhouse',
   'community-custom': 'Community Custom',
+  'camera-kit': 'Camera Node',
   tree: 'Tree',
   bush: 'Bush',
   'crop-row': 'Crop Row',

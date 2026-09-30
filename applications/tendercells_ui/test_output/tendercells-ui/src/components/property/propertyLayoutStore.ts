@@ -30,7 +30,13 @@ export type HardwareType =
   // uploaded GLB when the product has one (see Viewport3D's product glbCache,
   // keyed by product.id - same path already used for a linked built-in
   // product's custom_device_asset_url), otherwise a plain placeholder box.
-  | 'community-custom';
+  | 'community-custom'
+  // A registered "DIY ESP32 Camera Node" (docs/CAMERA_NODE_FIRST_BUILD.md,
+  // productFamily 'camera-kit') - a fixed camera, not a mobile robot. Always
+  // placeable/visible on the property map once registered (no
+  // property_simulation_enabled opt-in needed, unlike community-custom -
+  // a camera has no ambiguous non-ground-placement case to guard against).
+  | 'camera-kit';
 export type ObstacleType =
   | 'tree' | 'fence' | 'pond' | 'rock' | 'building' | 'garden' | 'no-go-zone'
   | 'bush' | 'crop-row';
@@ -108,6 +114,7 @@ export const HARDWARE_TYPES: HardwareType[] = [
   'sensor',
   ...GARDEN_TYPES,
   'community-custom',
+  'camera-kit',
 ];
 
 // Mobile ground robots that can be given a hand-drawn patrol route and driven
@@ -129,6 +136,7 @@ export const PRODUCT_DIMENSIONS: Record<HardwareType, { width: number; depth: nu
   'watchtower':     { width: 3, depth: 3, shape: 'hexagon' }, // 3×3×5 ft dome
   'rail-module':    { width: 4, depth: 2, shape: 'rect'    }, // linear rail segment
   'sensor':         { width: 1, depth: 1, shape: 'circle'  }, // point sensor
+  'camera-kit':     { width: 2, depth: 2, shape: 'hexagon' }, // Seeed XIAO ESP32-S3 Sense on a small pole
   // Gardens — FarmBot-aligned footprints (converted from FarmBot bed specs to ft)
   'farmbot-genesis':    { width: 5,  depth: 10, shape: 'rect' }, // FarmBot Genesis ~1.5×3 m bed
   'farmbot-genesis-xl': { width: 9,  depth: 20, shape: 'rect' }, // Genesis XL ~2.86×6 m bed
@@ -171,6 +179,7 @@ export const ITEM_COLORS: Record<string, string> = {
   hydroponics:          '#42A5B5',
   greenhouse:           '#9CCC65',
   'community-custom':   '#5AC8C8',
+  'camera-kit':         '#8AACC8',
   tree:             '#2F7D32',
   bush:             '#4C9A4C',
   'crop-row':       '#6B8E23',

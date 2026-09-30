@@ -1,17 +1,18 @@
 import { createHash, createHmac, randomBytes } from "node:crypto";
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { canImportSchoolRole, identityMatchesRoster, type SchoolRole } from "./schoolPolicy";
 
 if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
 
-type SchoolRole = "district-admin" | "school-admin" | "teacher" | "student";
 type ProviderKind = "google-workspace" | "microsoft-education" | "clever" | "classlink" | "saml";
 
 interface RosterEntry {
   externalId: string;
   email?: string;
+  providerSubject?: string;
   displayName?: string;
   role: SchoolRole;
   schoolId: string;
@@ -156,12 +157,12 @@ export const getSchoolLoginOptions = functions.https.onCall(async (data: { organ
 
 /** District-authorized normalized roster import. Vendor access tokens stay server-side. */
 export const syncSchoolRoster = functions.https.onCall(async (
-  data: { organizationId?: string; source?: ProviderKind | "csv"; entries?: RosterEntry[] },
+  data: { organizationId?: string; source?: ProviderKind | "csv"; entries?: RosterEntry[]; replaceExisting?: boolean },
   context,
 ) => {
   const uid = requireAuth(context);
   const organizationId = cleanId(data?.organizationId, "organizationId");
-  await requireOrganizationRole(uid, organizationId, ["district-admin", "school-admin"]);
+  const { role: actorRole } = await requireOrganizationRole(uid, organizationId, ["district-admin", "school-admin"]);
   const entries = Array.isArray(data?.entries) ? data.entries : [];
   if (!entries.length || entries.length > 200) {
     throw new functions.https.HttpsError("invalid-argument", "Roster batch must contain 1 to 200 entries");
@@ -175,10 +176,14 @@ export const syncSchoolRoster = functions.https.onCall(async (
     if (!["district-admin", "school-admin", "teacher", "student"].includes(entry.role)) {
       throw new functions.https.HttpsError("invalid-argument", "Roster role is invalid");
     }
+    if (!canImportSchoolRole(actorRole, entry.role)) {
+      throw new functions.https.HttpsError("permission-denied", `${actorRole} cannot import ${entry.role} accounts`);
+    }
     const ref = db.doc(`organizations/${organizationId}/roster/${externalId}`);
     batch.set(ref, {
       externalId,
       email: entry.email ? String(entry.email).trim().toLowerCase() : null,
+      providerSubject: entry.providerSubject ? String(entry.providerSubject).trim().slice(0, 200) : null,
       displayName: entry.displayName ? String(entry.displayName).trim().slice(0, 120) : null,
       role: entry.role,
       schoolId,
@@ -189,14 +194,47 @@ export const syncSchoolRoster = functions.https.onCall(async (
     }, { merge: true });
   }
   await batch.commit();
+  let deactivated = 0;
+  if (data.replaceExisting === true) {
+    // Re-clean the same way each ref was built above (cleanId only trims) - a raw,
+    // un-trimmed externalId here would silently miss its own just-synced doc and
+    // get "deactivated" one line after being (re)activated.
+    const importedIds = new Set(entries.map((entry) => cleanId(entry.externalId, "externalId")));
+    const existing = await db.collection(`organizations/${organizationId}/roster`)
+      .where("source", "==", data.source || "csv").where("status", "==", "active").get();
+    for (const rosterDoc of existing.docs) {
+      const rosterRole = rosterDoc.data().role as SchoolRole;
+      if (importedIds.has(rosterDoc.id) || !canImportSchoolRole(actorRole, rosterRole)) continue;
+      await rosterDoc.ref.set({ status: "inactive", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+      const members = await db.collection(`organizations/${organizationId}/members`)
+        .where("externalId", "==", rosterDoc.id).get();
+      for (const member of members.docs) {
+        await member.ref.set({ status: "inactive", classIds: [], updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+        // A stale member doc can point at a since-deleted Firebase user; don't let
+        // one bad record abort deprovisioning for the rest of the roster.
+        try {
+          const user = await admin.auth().getUser(member.id);
+          if (user.customClaims?.organizationId === organizationId) {
+            const { organizationId: _organizationId, schoolId: _schoolId, schoolRole: _schoolRole, classIds: _classIds, ...remainingClaims } = user.customClaims;
+            await admin.auth().setCustomUserClaims(member.id, remainingClaims);
+            await admin.auth().revokeRefreshTokens(member.id);
+          }
+        } catch (err) {
+          console.warn(`[syncSchoolRoster] Could not clear claims for ${member.id}:`, err);
+        }
+      }
+      deactivated += 1;
+    }
+  }
   await db.collection(`organizations/${organizationId}/audit`).add({
     action: "roster.sync",
     actorUid: uid,
     source: data.source || "csv",
     count: entries.length,
+    deactivated,
     createdAt: now,
   });
-  return { synchronized: entries.length };
+  return { synchronized: entries.length, deactivated };
 });
 
 /** Link the signed-in Firebase account to an approved roster identity and refresh custom claims. */
@@ -206,6 +244,19 @@ export const claimSchoolMembership = functions.https.onCall(async (
 ) => {
   const uid = requireAuth(context);
   const organizationId = cleanId(data?.organizationId, "organizationId");
+  const organization = await db.doc(`organizations/${organizationId}`).get();
+  if (!organization.exists || organization.data()?.status !== "active") {
+    throw new functions.https.HttpsError("permission-denied", "School organization is not active");
+  }
+  const organizationData = organization.data() || {};
+  const firebaseClaims = context.auth?.token.firebase as { tenant?: string } | undefined;
+  const authTenant = String(firebaseClaims?.tenant || "");
+  const enabledTenants = (Array.isArray(organizationData.identityProviders) ? organizationData.identityProviders : [])
+    .filter((provider: Record<string, unknown>) => provider.enabled === true)
+    .map((provider: Record<string, unknown>) => String(provider.tenantId || ""));
+  if (!authTenant || !enabledTenants.includes(authTenant)) {
+    throw new functions.https.HttpsError("permission-denied", "Sign in with an enabled school identity provider");
+  }
   const authUser = await admin.auth().getUser(uid);
   let roster: admin.firestore.DocumentSnapshot;
   if (data?.externalId) {
@@ -223,7 +274,14 @@ export const claimSchoolMembership = functions.https.onCall(async (
     throw new functions.https.HttpsError("permission-denied", "No active roster membership was found");
   }
   const rosterData = roster.data() || {};
-  if (rosterData.email && authUser.email?.toLowerCase() !== String(rosterData.email).toLowerCase()) {
+  if (!identityMatchesRoster({
+    authEmail: authUser.email,
+    emailVerified: authUser.emailVerified,
+    authSubject: String(context.auth?.token.sub || uid),
+    rosterEmail: rosterData.email,
+    rosterProviderSubject: rosterData.providerSubject,
+    approvedDomains: Array.isArray(organizationData.approvedDomains) ? organizationData.approvedDomains : [],
+  })) {
     throw new functions.https.HttpsError("permission-denied", "Signed-in account does not match the roster entry");
   }
   const claims = {

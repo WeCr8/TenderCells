@@ -43,6 +43,23 @@ interface SchoolLoginOptions {
   providers: SchoolLoginOption[];
 }
 
+const SCHOOL_REDIRECT_KEY = "tendercells_school_redirect";
+
+interface SchoolRedirectState {
+  organizationId: string;
+  tenantId: string;
+  providerId: string;
+}
+
+function readSchoolRedirect(): SchoolRedirectState | null {
+  try {
+    const value = JSON.parse(sessionStorage.getItem(SCHOOL_REDIRECT_KEY) || "null") as Partial<SchoolRedirectState> | null;
+    return value?.organizationId && value.tenantId && value.providerId ? value as SchoolRedirectState : null;
+  } catch {
+    return null;
+  }
+}
+
 function SchoolSignIn() {
   const [organizationCode, setOrganizationCode] = useState("");
   const [options, setOptions] = useState<SchoolLoginOptions | null>(null);
@@ -83,7 +100,11 @@ function SchoolSignIn() {
       } catch (reason) {
         const code = errorCode(reason);
         if (["auth/popup-blocked", "auth/cancelled-popup-request", "auth/operation-not-supported-in-this-environment"].includes(code)) {
-          sessionStorage.setItem("tendercells_school_org", options.organizationId);
+          sessionStorage.setItem(SCHOOL_REDIRECT_KEY, JSON.stringify({
+            organizationId: options.organizationId,
+            tenantId: provider.tenantId,
+            providerId: provider.providerId,
+          } satisfies SchoolRedirectState));
           await signInWithRedirect(auth, authProvider);
           return;
         }
@@ -435,19 +456,29 @@ function SignInForm() {
 
 export default function AccountPage() {
   const { user, loading } = useAuthUser();
+  const [redirectError, setRedirectError] = useState("");
 
   useEffect(() => {
     if (!app || !auth) return;
-    void getRedirectResult(auth).then(async (result) => {
+    // Narrow once, outside the closures below - `auth`'s declared type stays
+    // possibly-undefined inside a nested arrow function even after this guard,
+    // since TS control-flow narrowing of a mutable outer binding doesn't
+    // persist into a deferred callback.
+    const firebaseApp = app;
+    const firebaseAuth = auth;
+    const schoolRedirect = readSchoolRedirect();
+    if (schoolRedirect) firebaseAuth.tenantId = schoolRedirect.tenantId;
+    void getRedirectResult(firebaseAuth).then(async (result) => {
       if (!result?.user) return;
-      const organizationId = sessionStorage.getItem("tendercells_school_org");
-      if (!organizationId) return;
-      sessionStorage.removeItem("tendercells_school_org");
-      await httpsCallable(getFunctions(app), "claimSchoolMembership")({ organizationId });
+      if (!schoolRedirect) return;
+      sessionStorage.removeItem(SCHOOL_REDIRECT_KEY);
+      await httpsCallable(getFunctions(firebaseApp), "claimSchoolMembership")({ organizationId: schoolRedirect.organizationId });
       await result.user.getIdToken(true);
       window.location.assign("/app/dashboard");
-    }).catch(() => {
-      sessionStorage.removeItem("tendercells_school_org");
+    }).catch((reason) => {
+      sessionStorage.removeItem(SCHOOL_REDIRECT_KEY);
+      firebaseAuth.tenantId = null;
+      setRedirectError(reason instanceof Error ? reason.message : "School sign-in could not be completed. Please try again.");
     });
   }, []);
 
@@ -471,7 +502,10 @@ export default function AccountPage() {
 
   return (
     <PageLayout>
-      <div className="account-page">{body}</div>
+      <div className="account-page">
+        {redirectError && <p className="account-error" role="alert">{redirectError}</p>}
+        {body}
+      </div>
     </PageLayout>
   );
 }

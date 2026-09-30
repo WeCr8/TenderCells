@@ -178,7 +178,7 @@ service cloud.firestore {
       
       // Allow update if user owns the device
       allow update: if keepsOwner() ||
-                       (schoolDeviceAccess(resource.data) &&
+                       (isSchoolAdmin(resource.data.organizationId) &&
                         request.resource.data.organizationId == resource.data.organizationId &&
                         request.resource.data.userId == resource.data.userId);
       

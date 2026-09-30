@@ -1,0 +1,1141 @@
+{
+ "title": "Tender Cells Anthem — demo video",
+ "audio": "tender-cells-anthem.mp3",
+ "artist": "wecr8",
+ "durationSec": 224.88,
+ "bpm": 129.2,
+ "firstBeatSec": 0.37,
+ "timingNote": "Section starts come from audio analysis (repeated sections matched: chorus 0:56.1 = 2:13.1, pre-chorus 0:48.3 = 2:05.4, verse 0:14.2 = 1:31.4; final chorus 3:18.4). Line times inside a section are spread evenly - nudge each caption to the vocal in the editor.",
+ "sections": [
+  {
+   "id": "intro",
+   "name": "Intro (instrumental)",
+   "start": 0.0,
+   "end": 14.2
+  },
+  {
+   "id": "verse1",
+   "name": "Verse 1",
+   "start": 14.2,
+   "end": 48.3
+  },
+  {
+   "id": "pre1",
+   "name": "Pre-chorus 1",
+   "start": 48.3,
+   "end": 56.1
+  },
+  {
+   "id": "chorus1",
+   "name": "Chorus 1",
+   "start": 56.1,
+   "end": 91.4
+  },
+  {
+   "id": "verse2",
+   "name": "Verse 2",
+   "start": 91.4,
+   "end": 125.4
+  },
+  {
+   "id": "pre2",
+   "name": "Pre-chorus 2",
+   "start": 125.4,
+   "end": 133.1
+  },
+  {
+   "id": "chorus2",
+   "name": "Chorus 2",
+   "start": 133.1,
+   "end": 169.7
+  },
+  {
+   "id": "bridge",
+   "name": "Bridge",
+   "start": 169.7,
+   "end": 194.4
+  },
+  {
+   "id": "break",
+   "name": "Break",
+   "start": 194.4,
+   "end": 198.4
+  },
+  {
+   "id": "final",
+   "name": "Final chorus",
+   "start": 198.4,
+   "end": 220.3
+  },
+  {
+   "id": "outro",
+   "name": "Outro / end card",
+   "start": 220.3,
+   "end": 224.88
+  }
+ ],
+ "lines": [
+  {
+   "section": "verse1",
+   "start": 14.2,
+   "end": 18.46,
+   "text": "Sun comes up and the birds wake too"
+  },
+  {
+   "section": "verse1",
+   "start": 18.46,
+   "end": 22.72,
+   "text": "Got a smarter way to do what farmers do"
+  },
+  {
+   "section": "verse1",
+   "start": 22.72,
+   "end": 26.99,
+   "text": "Feeders running, gates all clear"
+  },
+  {
+   "section": "verse1",
+   "start": 26.99,
+   "end": 31.25,
+   "text": "Tender Cells is working while we're drinking beer"
+  },
+  {
+   "section": "verse1",
+   "start": 31.25,
+   "end": 35.51,
+   "text": "Chickens happy, ducks in line"
+  },
+  {
+   "section": "verse1",
+   "start": 35.51,
+   "end": 39.77,
+   "text": "Everything's connected and running fine"
+  },
+  {
+   "section": "verse1",
+   "start": 39.77,
+   "end": 44.04,
+   "text": "Open source and built to share"
+  },
+  {
+   "section": "verse1",
+   "start": 44.04,
+   "end": 48.3,
+   "text": "Growing the future everywhere"
+  },
+  {
+   "section": "pre1",
+   "start": 48.3,
+   "end": 50.25,
+   "text": "From the backyard coop"
+  },
+  {
+   "section": "pre1",
+   "start": 50.25,
+   "end": 52.2,
+   "text": "To the family farm"
+  },
+  {
+   "section": "pre1",
+   "start": 52.2,
+   "end": 54.15,
+   "text": "Technology and care"
+  },
+  {
+   "section": "pre1",
+   "start": 54.15,
+   "end": 56.1,
+   "text": "Working arm in arm"
+  },
+  {
+   "section": "chorus1",
+   "start": 56.1,
+   "end": 58.0,
+   "text": "Hey! Tender Cells, let's go!"
+  },
+  {
+   "section": "chorus1",
+   "start": 58.0,
+   "end": 61.7,
+   "text": "Chicken Tender keeps the flock alright"
+  },
+  {
+   "section": "chorus1",
+   "start": 61.7,
+   "end": 65.4,
+   "text": "Duck Dock keeps the water shining bright"
+  },
+  {
+   "section": "chorus1",
+   "start": 65.4,
+   "end": 69.1,
+   "text": "Roaming Roost moving through the field"
+  },
+  {
+   "section": "chorus1",
+   "start": 69.1,
+   "end": 72.8,
+   "text": "Future farming's finally been revealed"
+  },
+  {
+   "section": "chorus1",
+   "start": 72.8,
+   "end": 76.5,
+   "text": "Hey! Everybody sing along"
+  },
+  {
+   "section": "chorus1",
+   "start": 76.5,
+   "end": 80.2,
+   "text": "Tender Cells all day long"
+  },
+  {
+   "section": "chorus1",
+   "start": 80.2,
+   "end": 83.9,
+   "text": "Teaching kids and helping farms"
+  },
+  {
+   "section": "chorus1",
+   "start": 83.9,
+   "end": 87.6,
+   "text": "Building better barns and robot arms"
+  },
+  {
+   "section": "chorus1",
+   "start": 87.6,
+   "end": 89.5,
+   "text": "Tender Cells! Whoa-oh-oh!"
+  },
+  {
+   "section": "chorus1",
+   "start": 89.5,
+   "end": 91.4,
+   "text": "Tender Cells! Whoa-oh-oh!"
+  },
+  {
+   "section": "verse2",
+   "start": 91.4,
+   "end": 95.65,
+   "text": "Eggs get counted, data flows"
+  },
+  {
+   "section": "verse2",
+   "start": 95.65,
+   "end": 99.9,
+   "text": "Every day the system grows"
+  },
+  {
+   "section": "verse2",
+   "start": 99.9,
+   "end": 104.15,
+   "text": "Sensors watching day and night"
+  },
+  {
+   "section": "verse2",
+   "start": 104.15,
+   "end": 108.4,
+   "text": "Keeping every animal safe and right"
+  },
+  {
+   "section": "verse2",
+   "start": 108.4,
+   "end": 112.65,
+   "text": "4-H kids are learning too"
+  },
+  {
+   "section": "verse2",
+   "start": 112.65,
+   "end": 116.9,
+   "text": "Building things and seeing them through"
+  },
+  {
+   "section": "verse2",
+   "start": 116.9,
+   "end": 121.15,
+   "text": "Makers, farmers, engineers"
+  },
+  {
+   "section": "verse2",
+   "start": 121.15,
+   "end": 125.4,
+   "text": "Creating tomorrow through the years"
+  },
+  {
+   "section": "pre2",
+   "start": 125.4,
+   "end": 127.33,
+   "text": "Open source dreams"
+  },
+  {
+   "section": "pre2",
+   "start": 127.33,
+   "end": 129.25,
+   "text": "Built by many hands"
+  },
+  {
+   "section": "pre2",
+   "start": 129.25,
+   "end": 131.18,
+   "text": "Sharing knowledge"
+  },
+  {
+   "section": "pre2",
+   "start": 131.18,
+   "end": 133.1,
+   "text": "Across the lands"
+  },
+  {
+   "section": "chorus2",
+   "start": 133.1,
+   "end": 135.0,
+   "text": "Hey! Tender Cells, let's go!"
+  },
+  {
+   "section": "chorus2",
+   "start": 135.0,
+   "end": 138.7,
+   "text": "Chicken Tender keeps the flock alright"
+  },
+  {
+   "section": "chorus2",
+   "start": 138.7,
+   "end": 142.4,
+   "text": "Duck Dock keeps the water shining bright"
+  },
+  {
+   "section": "chorus2",
+   "start": 142.4,
+   "end": 146.1,
+   "text": "Roaming Roost moving through the field"
+  },
+  {
+   "section": "chorus2",
+   "start": 146.1,
+   "end": 149.8,
+   "text": "Future farming's finally been revealed"
+  },
+  {
+   "section": "chorus2",
+   "start": 149.8,
+   "end": 153.5,
+   "text": "Hey! Everybody sing along"
+  },
+  {
+   "section": "chorus2",
+   "start": 153.5,
+   "end": 157.2,
+   "text": "Tender Cells all day long"
+  },
+  {
+   "section": "chorus2",
+   "start": 157.2,
+   "end": 160.9,
+   "text": "Teaching kids and helping farms"
+  },
+  {
+   "section": "chorus2",
+   "start": 160.9,
+   "end": 164.6,
+   "text": "Building better barns and robot arms"
+  },
+  {
+   "section": "chorus2",
+   "start": 164.6,
+   "end": 167.15,
+   "text": "Tender Cells! Whoa-oh-oh!"
+  },
+  {
+   "section": "chorus2",
+   "start": 167.15,
+   "end": 169.7,
+   "text": "Tender Cells! Whoa-oh-oh!"
+  },
+  {
+   "section": "bridge",
+   "start": 169.7,
+   "end": 172.79,
+   "text": "Robot arm picking eggs today"
+  },
+  {
+   "section": "bridge",
+   "start": 172.79,
+   "end": 175.88,
+   "text": "Computer vision leads the way"
+  },
+  {
+   "section": "bridge",
+   "start": 175.88,
+   "end": 178.96,
+   "text": "Solar power, sensors too"
+  },
+  {
+   "section": "bridge",
+   "start": 178.96,
+   "end": 182.05,
+   "text": "There's nothing that we cannot do"
+  },
+  {
+   "section": "bridge",
+   "start": 182.05,
+   "end": 185.14,
+   "text": "From California out to Texas"
+  },
+  {
+   "section": "bridge",
+   "start": 185.14,
+   "end": 188.22,
+   "text": "Helping every farmer next us"
+  },
+  {
+   "section": "bridge",
+   "start": 188.22,
+   "end": 191.31,
+   "text": "Big ideas from small beginnings"
+  },
+  {
+   "section": "bridge",
+   "start": 191.31,
+   "end": 194.4,
+   "text": "Tender Cells is just beginning"
+  },
+  {
+   "section": "final",
+   "start": 198.4,
+   "end": 202.05,
+   "text": "Chicken Tender! Duck Dock! Roaming Roost! Don't stop!"
+  },
+  {
+   "section": "final",
+   "start": 202.05,
+   "end": 205.7,
+   "text": "Chicken Tender! Duck Dock! Roaming Roost! Don't stop!"
+  },
+  {
+   "section": "final",
+   "start": 205.7,
+   "end": 209.35,
+   "text": "Tender Cells! Building the future one flock at a time!"
+  },
+  {
+   "section": "final",
+   "start": 209.35,
+   "end": 213.0,
+   "text": "Tender Cells! Building the future one flock at a time!"
+  },
+  {
+   "section": "final",
+   "start": 213.0,
+   "end": 216.65,
+   "text": "Whoa-oh-oh-oh! Tender Cells!"
+  },
+  {
+   "section": "final",
+   "start": 216.65,
+   "end": 220.3,
+   "text": "Whoa-oh-oh-oh! Tender Cells!"
+  }
+ ],
+ "shots": [
+  {
+   "id": "S01",
+   "start": 0.0,
+   "end": 7.1,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "TENDER CELLS\nThe Tender Cells Anthem",
+   "visual": "Open on the live 3D demo farm (landing hero). Slow push-in; the autopilot panel shows every unit working."
+  },
+  {
+   "id": "S02",
+   "start": 7.1,
+   "end": 14.2,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero2d",
+   "onScreen": "Your whole property in 2D and 3D",
+   "visual": "Same hero, flip to 2D top-down plan on the downbeat at 0:07.1."
+  },
+  {
+   "id": "S03",
+   "start": 14.2,
+   "end": 18.46,
+   "app": "os",
+   "route": "/chicken-tender?section=coop",
+   "action": "page",
+   "onScreen": "6:30 AM · coop door opens on schedule",
+   "visual": "Chicken Tender coop dashboard: temperature, humidity, occupancy."
+  },
+  {
+   "id": "S04",
+   "start": 18.46,
+   "end": 22.73,
+   "app": "os",
+   "route": "/schedules",
+   "action": "page",
+   "onScreen": "Doors, feed, water and cleaning on schedules",
+   "visual": "Schedules list."
+  },
+  {
+   "id": "S05",
+   "start": 22.73,
+   "end": 26.99,
+   "app": "os",
+   "route": "/chicken-tender?section=feed",
+   "action": "page",
+   "onScreen": "Feed and water levels, live",
+   "visual": "Feeding & Water section."
+  },
+  {
+   "id": "S06",
+   "start": 26.99,
+   "end": 31.25,
+   "app": "os",
+   "route": "/layout",
+   "action": "viewer",
+   "onScreen": "Autonomous farm · simulated",
+   "visual": "3D viewer with the autopilot panel: rover, mower and Roaming Roost moving. Optional real b-roll: owner relaxing on the porch with the app."
+  },
+  {
+   "id": "S07",
+   "start": 31.25,
+   "end": 35.51,
+   "app": "os",
+   "route": "/flock",
+   "action": "page",
+   "onScreen": "Every bird has a profile",
+   "visual": "Flock roster."
+  },
+  {
+   "id": "S08",
+   "start": 35.51,
+   "end": 39.78,
+   "app": "os",
+   "route": "/layout",
+   "action": "viewer2d",
+   "onScreen": "Everything connected on one map",
+   "visual": "2D top view of the whole property with the boundary line."
+  },
+  {
+   "id": "S09",
+   "start": 39.78,
+   "end": 44.04,
+   "app": "web",
+   "route": "/open-source",
+   "action": "page",
+   "onScreen": "Open source · github.com/WeCr8/TenderCells",
+   "visual": "Website open-source page (or a screen capture of the GitHub repo)."
+  },
+  {
+   "id": "S10",
+   "start": 44.04,
+   "end": 48.3,
+   "app": "web",
+   "route": "/digital-twin",
+   "action": "page",
+   "onScreen": "A digital twin of your farm",
+   "visual": "Website digital-twin page."
+  },
+  {
+   "id": "S11",
+   "start": 48.3,
+   "end": 50.25,
+   "app": "os",
+   "route": "/chicken-tender?section=coop",
+   "action": "page",
+   "onScreen": "From the backyard coop…",
+   "visual": "Coop close-up."
+  },
+  {
+   "id": "S12",
+   "start": 50.25,
+   "end": 52.2,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "…to the family farm",
+   "visual": "Wide 3D farm."
+  },
+  {
+   "id": "S13",
+   "start": 52.2,
+   "end": 54.15,
+   "app": "os",
+   "route": "/chicken-eye",
+   "action": "page",
+   "onScreen": "Vision that watches over the flock",
+   "visual": "ChickenEye AI vision."
+  },
+  {
+   "id": "S14",
+   "start": 54.15,
+   "end": 56.1,
+   "app": "os",
+   "route": "/chicken-tender?section=robot",
+   "action": "page",
+   "onScreen": "Robot arm + gantry",
+   "visual": "Robot Arm section."
+  },
+  {
+   "id": "S15",
+   "start": 56.1,
+   "end": 58.0,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "TENDER CELLS — LET'S GO!",
+   "visual": "Big title slam on the downbeat over the 3D farm."
+  },
+  {
+   "id": "S16",
+   "start": 58.0,
+   "end": 61.7,
+   "app": "os",
+   "route": "/chicken-tender?section=coop",
+   "action": "page",
+   "onScreen": "Chicken Tender™",
+   "visual": "Chicken Tender dashboard."
+  },
+  {
+   "id": "S17",
+   "start": 61.7,
+   "end": 65.4,
+   "app": "os",
+   "route": "/duck-dock",
+   "action": "page",
+   "onScreen": "Duck Dock™",
+   "visual": "Duck Dock dashboard."
+  },
+  {
+   "id": "S18",
+   "start": 65.4,
+   "end": 69.1,
+   "app": "os",
+   "route": "/roaming-roost",
+   "action": "page",
+   "onScreen": "Roaming Roost™",
+   "visual": "Roaming Roost dashboard (3D viewer shows it moving)."
+  },
+  {
+   "id": "S19",
+   "start": 69.1,
+   "end": 72.8,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "Tender Cells OS",
+   "visual": "Whole farm in 3D."
+  },
+  {
+   "id": "S20",
+   "start": 72.8,
+   "end": 76.5,
+   "app": "os",
+   "route": "/missions",
+   "action": "page",
+   "onScreen": "Missions for kids and families",
+   "visual": "Missions page."
+  },
+  {
+   "id": "S21",
+   "start": 76.5,
+   "end": 80.2,
+   "app": "os",
+   "route": "/dashboard",
+   "action": "page",
+   "onScreen": "Automations day and night",
+   "visual": "Command Center dashboard."
+  },
+  {
+   "id": "S22",
+   "start": 80.2,
+   "end": 83.9,
+   "app": "web",
+   "route": "/4h",
+   "action": "page",
+   "onScreen": "4-H · FFA · schools",
+   "visual": "Website 4-H page."
+  },
+  {
+   "id": "S23",
+   "start": 83.9,
+   "end": 87.6,
+   "app": "os",
+   "route": "/chicken-tender?section=robot",
+   "action": "page",
+   "onScreen": "6DOF arm + XYZ gantry (simulated)",
+   "visual": "Robot Arm section."
+  },
+  {
+   "id": "S24",
+   "start": 87.6,
+   "end": 89.5,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "",
+   "visual": "Whoa 1: 3D."
+  },
+  {
+   "id": "S25",
+   "start": 89.5,
+   "end": 91.4,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero2d",
+   "onScreen": "",
+   "visual": "Whoa 2: 2D."
+  },
+  {
+   "id": "S26",
+   "start": 91.4,
+   "end": 95.65,
+   "app": "os",
+   "route": "/egg-map",
+   "action": "page",
+   "onScreen": "Egg Map · eggs counted automatically",
+   "visual": "Egg Map."
+  },
+  {
+   "id": "S27",
+   "start": 95.65,
+   "end": 99.9,
+   "app": "os",
+   "route": "/products",
+   "action": "page",
+   "onScreen": "One OS, many product families",
+   "visual": "Products & Devices."
+  },
+  {
+   "id": "S28",
+   "start": 99.9,
+   "end": 104.15,
+   "app": "os",
+   "route": "/sensors",
+   "action": "page",
+   "onScreen": "Sensors, day and night",
+   "visual": "Sensors."
+  },
+  {
+   "id": "S29",
+   "start": 104.15,
+   "end": 108.4,
+   "app": "os",
+   "route": "/predator-monitor",
+   "action": "page",
+   "onScreen": "WatchTower AI · predator watch",
+   "visual": "WatchTower dashboard / camera views."
+  },
+  {
+   "id": "S30",
+   "start": 108.4,
+   "end": 112.65,
+   "app": "web",
+   "route": "/science-fair",
+   "action": "page",
+   "onScreen": "Projects for 4-H and science fairs",
+   "visual": "Website science-fair page."
+  },
+  {
+   "id": "S31",
+   "start": 112.65,
+   "end": 116.9,
+   "app": "os",
+   "route": "/projects",
+   "action": "page",
+   "onScreen": "Build it yourself",
+   "visual": "DIY projects."
+  },
+  {
+   "id": "S32",
+   "start": 116.9,
+   "end": 121.15,
+   "app": "web",
+   "route": "/developers",
+   "action": "page",
+   "onScreen": "Makers · farmers · engineers",
+   "visual": "Website developers page."
+  },
+  {
+   "id": "S33",
+   "start": 121.15,
+   "end": 125.4,
+   "app": "web",
+   "route": "/os",
+   "action": "page",
+   "onScreen": "Tender Cells OS",
+   "visual": "Website OS page."
+  },
+  {
+   "id": "S34",
+   "start": 125.4,
+   "end": 127.33,
+   "app": "web",
+   "route": "/open-source",
+   "action": "page",
+   "onScreen": "Open source",
+   "visual": "Open-source page."
+  },
+  {
+   "id": "S35",
+   "start": 127.33,
+   "end": 129.25,
+   "app": "web",
+   "route": "/os",
+   "action": "page",
+   "onScreen": "Built by many hands",
+   "visual": "Website OS page, build section."
+  },
+  {
+   "id": "S36",
+   "start": 129.25,
+   "end": 131.18,
+   "app": "os",
+   "route": "/library",
+   "action": "page",
+   "onScreen": "Animal & plant library",
+   "visual": "Library."
+  },
+  {
+   "id": "S37",
+   "start": 131.18,
+   "end": 133.1,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "",
+   "visual": "Wide 3D farm."
+  },
+  {
+   "id": "S38",
+   "start": 133.1,
+   "end": 135.0,
+   "app": "os",
+   "route": "/layout",
+   "action": "viewer",
+   "onScreen": "TENDER CELLS — LET'S GO!",
+   "visual": "Title slam over the Property Twin viewer."
+  },
+  {
+   "id": "S39",
+   "start": 135.0,
+   "end": 138.7,
+   "app": "os",
+   "route": "/chicken-tender?section=eggs",
+   "action": "page",
+   "onScreen": "Chicken Tender™",
+   "visual": "Egg Map section."
+  },
+  {
+   "id": "S40",
+   "start": 138.7,
+   "end": 142.4,
+   "app": "os",
+   "route": "/watershed",
+   "action": "page",
+   "onScreen": "Duck Dock™ · water",
+   "visual": "Watershed & drainage (water on the map)."
+  },
+  {
+   "id": "S41",
+   "start": 142.4,
+   "end": 146.1,
+   "app": "os",
+   "route": "/layout",
+   "action": "viewer2d",
+   "onScreen": "Roaming Roost™",
+   "visual": "2D top view: roost loop inside the boundary."
+  },
+  {
+   "id": "S42",
+   "start": 146.1,
+   "end": 149.8,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "Future farming",
+   "visual": "Whole farm in 3D."
+  },
+  {
+   "id": "S43",
+   "start": 149.8,
+   "end": 153.5,
+   "app": "os",
+   "route": "/simulator",
+   "action": "trigger",
+   "onScreen": "Trigger an event",
+   "visual": "Event simulator: predator event runs its chain."
+  },
+  {
+   "id": "S44",
+   "start": 153.5,
+   "end": 157.2,
+   "app": "os",
+   "route": "/mowers",
+   "action": "page",
+   "onScreen": "Bring your own robot mower",
+   "visual": "Mowers page."
+  },
+  {
+   "id": "S45",
+   "start": 157.2,
+   "end": 160.9,
+   "app": "web",
+   "route": "/schools",
+   "action": "page",
+   "onScreen": "Teaching kids and helping farms",
+   "visual": "Website schools page."
+  },
+  {
+   "id": "S46",
+   "start": 160.9,
+   "end": 164.6,
+   "app": "os",
+   "route": "/weed-patrol",
+   "action": "page",
+   "onScreen": "Weed patrol robots",
+   "visual": "Weed Patrol."
+  },
+  {
+   "id": "S47",
+   "start": 164.6,
+   "end": 167.15,
+   "app": "os",
+   "route": "/layout",
+   "action": "viewer",
+   "onScreen": "",
+   "visual": "Whoa 1."
+  },
+  {
+   "id": "S48",
+   "start": 167.15,
+   "end": 169.7,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero2d",
+   "onScreen": "",
+   "visual": "Whoa 2."
+  },
+  {
+   "id": "S49",
+   "start": 169.7,
+   "end": 172.79,
+   "app": "os",
+   "route": "/chicken-tender?section=robot",
+   "action": "page",
+   "onScreen": "Robot arm · simulated today",
+   "visual": "Robot Arm section."
+  },
+  {
+   "id": "S50",
+   "start": 172.79,
+   "end": 175.88,
+   "app": "os",
+   "route": "/chicken-eye",
+   "action": "page",
+   "onScreen": "Computer vision",
+   "visual": "ChickenEye."
+  },
+  {
+   "id": "S51",
+   "start": 175.88,
+   "end": 178.96,
+   "app": "os",
+   "route": "/predator-monitor",
+   "action": "page",
+   "onScreen": "Solar WatchTower + sensors",
+   "visual": "WatchTower."
+  },
+  {
+   "id": "S52",
+   "start": 178.96,
+   "end": 182.05,
+   "app": "os",
+   "route": "/weed-patrol",
+   "action": "page",
+   "onScreen": "",
+   "visual": "Weed Patrol."
+  },
+  {
+   "id": "S53",
+   "start": 182.05,
+   "end": 185.14,
+   "app": "os",
+   "route": "/layout",
+   "action": "viewer2d",
+   "onScreen": "Your property, your boundary",
+   "visual": "2D map with the property boundary. No map pins or claims about where users are."
+  },
+  {
+   "id": "S54",
+   "start": 185.14,
+   "end": 188.23,
+   "app": "os",
+   "route": "/mowers",
+   "action": "page",
+   "onScreen": "Works with the gear you already have",
+   "visual": "Mowers page."
+  },
+  {
+   "id": "S55",
+   "start": 188.23,
+   "end": 191.31,
+   "app": "os",
+   "route": "/projects",
+   "action": "page",
+   "onScreen": "Big ideas, small beginnings",
+   "visual": "DIY projects."
+  },
+  {
+   "id": "S56",
+   "start": 191.31,
+   "end": 194.4,
+   "app": "web",
+   "route": "/digital-twin",
+   "action": "page",
+   "onScreen": "Just beginning",
+   "visual": "Digital-twin page."
+  },
+  {
+   "id": "S57",
+   "start": 194.4,
+   "end": 198.4,
+   "app": "card",
+   "route": "",
+   "action": "",
+   "onScreen": "Chicken Tender · Duck Dock · Roaming Roost",
+   "visual": "Break: hold on black, three product names build in on the beats."
+  },
+  {
+   "id": "S58",
+   "start": 198.4,
+   "end": 199.31,
+   "app": "os",
+   "route": "/chicken-tender?section=coop",
+   "action": "page",
+   "onScreen": "CHICKEN TENDER!",
+   "visual": ""
+  },
+  {
+   "id": "S59",
+   "start": 199.31,
+   "end": 200.23,
+   "app": "os",
+   "route": "/duck-dock",
+   "action": "page",
+   "onScreen": "DUCK DOCK!",
+   "visual": ""
+  },
+  {
+   "id": "S60",
+   "start": 200.23,
+   "end": 201.14,
+   "app": "os",
+   "route": "/roaming-roost",
+   "action": "page",
+   "onScreen": "ROAMING ROOST!",
+   "visual": ""
+  },
+  {
+   "id": "S61",
+   "start": 201.14,
+   "end": 202.05,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "DON'T STOP!",
+   "visual": ""
+  },
+  {
+   "id": "S62",
+   "start": 202.05,
+   "end": 202.96,
+   "app": "os",
+   "route": "/chicken-tender?section=robot",
+   "action": "page",
+   "onScreen": "CHICKEN TENDER!",
+   "visual": ""
+  },
+  {
+   "id": "S63",
+   "start": 202.96,
+   "end": 203.88,
+   "app": "os",
+   "route": "/duck-dock",
+   "action": "page",
+   "onScreen": "DUCK DOCK!",
+   "visual": ""
+  },
+  {
+   "id": "S64",
+   "start": 203.88,
+   "end": 204.79,
+   "app": "os",
+   "route": "/layout",
+   "action": "viewer",
+   "onScreen": "ROAMING ROOST!",
+   "visual": ""
+  },
+  {
+   "id": "S65",
+   "start": 204.79,
+   "end": 205.7,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero2d",
+   "onScreen": "DON'T STOP!",
+   "visual": ""
+  },
+  {
+   "id": "S66",
+   "start": 205.7,
+   "end": 209.35,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "Building the future, one flock at a time",
+   "visual": "Whole farm in 3D."
+  },
+  {
+   "id": "S67",
+   "start": 209.35,
+   "end": 213.0,
+   "app": "os",
+   "route": "/layout",
+   "action": "viewer",
+   "onScreen": "",
+   "visual": ""
+  },
+  {
+   "id": "S68",
+   "start": 213.0,
+   "end": 216.65,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero2d",
+   "onScreen": "",
+   "visual": ""
+  },
+  {
+   "id": "S69",
+   "start": 216.65,
+   "end": 220.3,
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "TENDER CELLS",
+   "visual": ""
+  },
+  {
+   "id": "S70",
+   "start": 220.3,
+   "end": 224.88,
+   "app": "card",
+   "route": "",
+   "action": "",
+   "onScreen": "tendercells.com/demo\nOpen source on GitHub · WeCr8 Solutions",
+   "visual": "End card on black."
+  }
+ ]
+}

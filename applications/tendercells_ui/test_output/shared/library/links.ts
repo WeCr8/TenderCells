@@ -2,7 +2,7 @@
 // One map used by the website library, the OS library, product pages and the health guide,
 // so a species always points at its product page + health guide and a product page points
 // back at its species. A unit test checks every href is a real website route.
-import type { SpeciesId } from './animals';
+import { animalById, type SpeciesId } from './animals';
 import type { PlantKind } from './plants';
 
 export interface PageLink { label: string; href: string }
@@ -24,12 +24,15 @@ export function speciesForProduct(slug: string): SpeciesId[] {
 /** tendercells.com pages related to a species. */
 export function animalPages(id: SpeciesId): PageLink[] {
   const slug = PRODUCT_SLUG_BY_SPECIES[id];
+  const companion = animalById(id)?.group === 'companion';
   return [
-    slug ? { label: 'Product page', href: `/shop/${slug}` } : { label: 'Build your own enclosure (lesson)', href: '/lessons/build-your-own' },
-    { label: id === 'chicken' ? 'Chicken health guide (sensor ranges)' : 'Animal health overview', href: id === 'chicken' ? '/health#chicken' : '/health' },
-    { label: 'Nutrition & feed', href: '/health#nutrition' },
-    { label: 'Disease monitoring', href: '/health#disease' },
-    { label: 'Predator prevention', href: '/guides/predator-monitoring' },
+    ...(slug ? [{ label: 'Product page', href: `/shop/${slug}` }]
+      : companion ? [] : [{ label: 'Build your own enclosure (lesson)', href: '/lessons/build-your-own' }]),
+    { label: id === 'chicken' ? 'Poultry: know what normal looks like' : 'Animal health overview', href: id === 'chicken' ? '/health#chicken' : '/health' },
+    { label: 'Urgent signs - when to call a vet', href: '/health#urgent' },
+    { label: 'Daily health check', href: '/health#daily' },
+    { label: 'Common concerns', href: '/health#concerns' },
+    { label: 'Predator prevention', href: '/health#predators' },
     { label: 'Sensors → automation (lesson)', href: '/lessons/sensors-automation' },
   ];
 }
@@ -38,7 +41,7 @@ export function animalPages(id: SpeciesId): PageLink[] {
 export const PLANT_PAGES: Record<PlantKind, PageLink[]> = {
   crop: [{ label: 'Farm automation & gardens', href: '/farm-automation' }, { label: 'Homesteading', href: '/learn/homesteading' }],
   weed: [{ label: 'Farm automation (Weed Patrol)', href: '/farm-automation' }, { label: 'Automation guide', href: '/learn/automation' }],
-  toxic: [{ label: 'Nutrition & feed', href: '/health#nutrition' }, { label: 'Animal health', href: '/health' }],
+  toxic: [{ label: 'Daily health check', href: '/health#daily' }, { label: 'Animal health', href: '/health' }],
 };
 
 /** tendercells.com pages for predators and pests. */
@@ -51,7 +54,7 @@ export const WILDLIFE_PAGES: PageLink[] = [
 
 /** OS (app) screens related to an entry - paths inside tendercells.com/app. */
 export const OS_SCREENS = {
-  animal: { label: 'My animals', path: '/birds' },
+  animal: { label: 'My animals', path: '/animals' },
   weed: { label: 'Weed Patrol', path: '/weed-patrol' },
   crop: { label: 'Property layout', path: '/layout' },
   wildlife: { label: 'Predator Monitor', path: '/predator-monitor' },

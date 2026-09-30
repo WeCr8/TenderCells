@@ -1,5 +1,5 @@
 // Tender Cells Firebase Cloud Functions
-// Node 20 · CommonJS · firebase-functions v5 (v1 compat API)
+// Node 18 · CommonJS · firebase-functions v5 (v1 compat API)
 
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
@@ -101,11 +101,11 @@ function cronMatches(expression: string, now: Date): boolean {
 
 /**
  * Process alerts from devices (predator detection, hardware faults, health warnings).
- * Triggered by Firestore write to /alerts/{deviceId}/{alertId}.
+ * Triggered by Firestore write to /alerts/{deviceId}/items/{alertId}.
  * Updates device state and queues push notification to Realtime DB.
  */
 export const processAlert = functions.firestore
-  .document("alerts/{deviceId}/{alertId}")
+  .document("alerts/{deviceId}/items/{alertId}")
   .onCreate(async (snap, context) => {
     const { deviceId, alertId } = context.params as { deviceId: string; alertId: string };
     const alert = snap.data() as AlertDoc;
@@ -425,7 +425,8 @@ export const cleanupTelemetry = functions.pubsub
 
 /**
  * Initialize a new device when its Firestore document is created.
- * Sets up /device-states/{deviceId}, default schedules, and welcome notification.
+ * Sets up /device-states/{deviceId} and a welcome notification.
+ * Schedules are created only by an owner for capabilities installed on that device.
  */
 export const onDeviceCreated = functions.firestore
   .document("devices/{deviceId}")
@@ -445,27 +446,6 @@ export const onDeviceCreated = functions.firestore
       uptime: 0,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
-
-    // Create default disabled schedules under /schedules/{deviceId}/items/{id}
-    const defaults: Array<{ id: string } & Omit<ScheduleDoc, "deviceId">> = [
-      { id: "door-open-morning",  action: "door",  cronExpression: "0 7 * * *",  enabled: false },
-      { id: "door-close-evening", action: "door",  cronExpression: "0 20 * * *", enabled: false },
-      { id: "morning-feed",       action: "feed",  cronExpression: "0 8 * * *",  enabled: false },
-      { id: "evening-feed",       action: "feed",  cronExpression: "0 17 * * *", enabled: false },
-      { id: "daily-water",        action: "water", cronExpression: "0 9 * * *",  enabled: false },
-      { id: "weekly-clean",       action: "clean", cronExpression: "0 10 * 0 *", enabled: false },
-    ];
-
-    const batch = db.batch();
-    for (const { id, ...fields } of defaults) {
-      batch.set(db.doc(`schedules/${deviceId}/items/${id}`), {
-        ...fields,
-        deviceId,
-        lastRun: null,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-    }
-    await batch.commit();
 
     // Queue welcome notification
     await rtdb.ref(`notifications/${deviceId}`).push({
@@ -555,10 +535,18 @@ export const health = functions.https.onRequest((_req, res) => {
 
 console.log("[TenderCells] Cloud Functions initialized");
 
-// ============================================================================
-// ORGANIZATIONS (schools / districts / farms) + EMAIL
-// ============================================================================
 export {
-  syncClassAccess, syncMemberAccess, enforceOrgPropertyLimit, enforceOrgProductLimit, onUserCreated,
-} from "./orgs";
+  claimSchoolMembership,
+  cameraRelaySignal,
+  configureSchoolOrganization,
+  createCameraRelaySession,
+  createOrganizationInvoice,
+  createPurchaseOrder,
+  getSchoolLoginOptions,
+  syncSchoolRoster,
+} from "./schoolPlatform";
+
+export { createBillingCheckout, createBillingPortal, stripeBillingWebhook } from "./billing";
+
+// Newsletter double opt-in + email preferences (Trigger Email extension via the `mail` collection).
 export { onNewsletterSignup, confirmNewsletter, unsubscribeNewsletter, syncEmailPreferences } from "./email";

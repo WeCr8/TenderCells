@@ -73,6 +73,20 @@ export const PROJECTS: HabitatProject[] = [
     safety: 'Glue the magnet where it cannot come loose and be swallowed.' },
 ];
 
+/** Billing plans (functions/src/billing.ts) - 'free' when there is no subscription. */
+export type FeedPlan = 'free' | 'starter_monthly' | 'school_annual';
+
+/**
+ * Cloud video / audio per plan (proposed - final numbers are set with pricing). Local live view,
+ * AI events and telemetry are free on every plan; relaying media through Tender Cells costs real
+ * bandwidth, so live cloud view and clip history are paid.
+ */
+export const CLOUD_FEED: Record<FeedPlan, { label: string; liveHoursPerMonth: number; snapshotDays: number; clipDays: number }> = {
+  free: { label: 'Free', liveHoursPerMonth: 0, snapshotDays: 7, clipDays: 0 },
+  starter_monthly: { label: 'Starter', liveHoursPerMonth: 20, snapshotDays: 30, clipDays: 7 },
+  school_annual: { label: 'School', liveHoursPerMonth: 200, snapshotDays: 30, clipDays: 30 },
+};
+
 export const projectById = (id: string): HabitatProject | undefined => PROJECTS.find((p) => p.id === id);
 export const projectsFor = (group: AnimalGroup): HabitatProject[] => PROJECTS.filter((p) => p.groups.includes(group));
 export const hfUrl = (m: HfModel) => `https://huggingface.co/${m.id}`;

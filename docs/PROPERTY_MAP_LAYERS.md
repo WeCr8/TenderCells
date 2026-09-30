@@ -116,6 +116,6 @@ No-Go Zones, obstacle footprints and a no-laser buffer around animal housing are
 - **Demo:** the 3D view renders what each of the tower's three 120° cameras sees, as
   picture-in-picture insets. Pick them in the **Cameras** menu; they are shown by
   default in Predator Monitor.
-- **Live:** each camera node (`firmware/watchtower-cam`) publishes its MJPEG `streamUrl`.
+- **Live:** each camera node (`firmware/camera-node`) publishes its MJPEG `streamUrl`.
   The Predator Monitor page shows `{tower}_cam1..3` together with the recent located
   detections.

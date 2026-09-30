@@ -5,11 +5,13 @@
 // account and see their account on the website itself; the OS opens only from
 // the explicit "Launch Tender Cells OS" button. Both share one Firebase session
 // (same origin + project), so the OS opens already signed in.
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
   GoogleAuthProvider,
   OAuthProvider,
+  SAMLAuthProvider,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -18,76 +20,159 @@ import {
   signOut,
   type User,
 } from "firebase/auth";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import { TENDERCELLS_OS_URL } from "../config/appLinks";
 import { useAuthUser } from "../hooks/useAuthUser";
-import { ACTION_CODE_SETTINGS, AUTH_CONFIGURED, auth } from "../lib/firebase";
-import { ACCOUNT_TYPES, SCHOOL_FEATURES, SSO_PROVIDERS } from "../lib/sso";
-import { EmailPreferences } from "./AccountSettings";
+import { ACTION_CODE_SETTINGS, AUTH_CONFIGURED, app, auth } from "../lib/firebase";
+import EmailPreferences from "./AccountSettings";
 import "./AccountPage.css";
 
 type Mode = "login" | "register";
 
-/** School / district sign-in options - shown, but not live until the SSO backend is set up. */
-function SchoolSignIn({ onProvider, busy }: { onProvider: (id: string) => void; busy: boolean }) {
+interface SchoolLoginOption {
+  kind: string;
+  label: string;
+  providerId: string;
+  tenantId: string;
+}
+
+interface SchoolLoginOptions {
+  organizationId: string;
+  displayName: string;
+  providers: SchoolLoginOption[];
+}
+
+const SCHOOL_REDIRECT_KEY = "tendercells_school_redirect";
+
+interface SchoolRedirectState {
+  organizationId: string;
+  tenantId: string;
+  providerId: string;
+}
+
+function readSchoolRedirect(): SchoolRedirectState | null {
+  try {
+    const value = JSON.parse(sessionStorage.getItem(SCHOOL_REDIRECT_KEY) || "null") as Partial<SchoolRedirectState> | null;
+    return value?.organizationId && value.tenantId && value.providerId ? value as SchoolRedirectState : null;
+  } catch {
+    return null;
+  }
+}
+
+function SchoolSignIn() {
+  const [organizationCode, setOrganizationCode] = useState("");
+  const [options, setOptions] = useState<SchoolLoginOptions | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const findSchool = async () => {
+    if (!app || !organizationCode.trim()) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await httpsCallable<{ organizationCode: string }, SchoolLoginOptions>(getFunctions(app), "getSchoolLoginOptions")({
+        organizationCode: organizationCode.trim().toUpperCase(),
+      });
+      setOptions(result.data);
+      if (!result.data.providers.length) setError("This school has no active sign-in provider yet. Ask the district administrator.");
+    } catch (reason) {
+      setOptions(null);
+      setError(reason instanceof Error ? reason.message : "School sign-in could not be loaded.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const signInToSchool = async (provider: SchoolLoginOption) => {
+    if (!app || !auth || !options) return;
+    setBusy(true);
+    setError("");
+    auth.tenantId = provider.tenantId;
+    const authProvider = provider.providerId === "google.com"
+      ? new GoogleAuthProvider()
+      : provider.providerId.startsWith("saml.")
+        ? new SAMLAuthProvider(provider.providerId)
+        : new OAuthProvider(provider.providerId);
+    try {
+      try {
+        await signInWithPopup(auth, authProvider);
+      } catch (reason) {
+        const code = errorCode(reason);
+        if (["auth/popup-blocked", "auth/cancelled-popup-request", "auth/operation-not-supported-in-this-environment"].includes(code)) {
+          sessionStorage.setItem(SCHOOL_REDIRECT_KEY, JSON.stringify({
+            organizationId: options.organizationId,
+            tenantId: provider.tenantId,
+            providerId: provider.providerId,
+          } satisfies SchoolRedirectState));
+          await signInWithRedirect(auth, authProvider);
+          return;
+        }
+        throw reason;
+      }
+      await httpsCallable(getFunctions(app), "claimSchoolMembership")({ organizationId: options.organizationId });
+      await auth.currentUser?.getIdToken(true);
+      window.location.assign("/app/dashboard");
+    } catch (reason) {
+      auth.tenantId = null;
+      setError(reason instanceof Error ? reason.message : "School sign-in failed.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <details className="account-sso">
+    <details className="account-sso" id="school-sign-in">
       <summary className="account-sso-title">
         School or district account
       </summary>
-      <div className="account-sso-grid">
-        {SSO_PROVIDERS.map((p) => (p.status === "available" ? (
-          <button key={p.id} type="button" className="account-sso-btn account-sso-live" disabled={busy}
-            onClick={() => onProvider(p.id)} title={`${p.label} - ${p.audience}`}>
-            <span>Continue with {p.label}</span>
+      <label className="account-field">
+        <span>School code</span>
+        <input value={organizationCode} onChange={(event) => setOrganizationCode(event.target.value)} autoComplete="organization" placeholder="Provided by your school" />
+      </label>
+      <button type="button" className="btn-secondary account-submit" disabled={busy || !organizationCode.trim()} onClick={() => void findSchool()}>
+        {busy ? "Checking..." : "Find my school"}
+      </button>
+      {options && <p className="account-hint"><strong>{options.displayName}</strong></p>}
+      {options && <div className="account-sso-grid">
+        {options.providers.map((provider) => (
+          <button key={`${provider.tenantId}:${provider.providerId}`} type="button" className="account-sso-btn" disabled={busy}
+            onClick={() => void signInToSchool(provider)}>
+            <span>{provider.label}</span>
           </button>
-        ) : (
-          <button key={p.id} type="button" className="account-sso-btn" disabled aria-disabled="true"
-            title={`${p.label} - ${p.audience}. Coming soon.`}>
-            <span>{p.label}</span>
-            <span className="account-soon">Coming soon</span>
-          </button>
-        )))}
-      </div>
+        ))}
+      </div>}
+      {error && <p className="account-error" role="alert">{error}</p>}
       <p className="account-hint">
-        School Google accounts work now - your IT admin may need to approve Tender Cells first
-        (<Link to="/schools">setup for schools</Link>). Rosters and class access come from the school.
+        Use the code issued by your school. Only district-configured providers appear, and roster access is verified after sign-in.
       </p>
     </details>
   );
 }
 
-/** Account type + school features, prepared for educator / student / admin accounts. */
-function AccountTypesAndSchool() {
+function WorkspaceActions() {
   return (
-    <>
-      <div className="account-section">
-        <h2>Account type</h2>
-        <ul className="account-types">
-          {ACCOUNT_TYPES.map((t) => (
-            <li key={t.id} className={t.id === "personal" ? "current" : undefined}>
-              <div>
-                <strong>{t.label}</strong>
-                <span>{t.description}</span>
-              </div>
-              {t.id === "personal" ? <span className="account-badge">Current</span> : <span className="account-soon">Coming soon</span>}
-            </li>
-          ))}
-        </ul>
+    <div className="account-section">
+      <h2>Workspace</h2>
+      <div className="account-workspace-links">
+        <a href="/app/dashboard">
+          <strong>Open workspace</strong>
+          <span>Continue to your dashboard and connected products.</span>
+        </a>
+        <a href="/app/products?register=1">
+          <strong>Add or import a device</strong>
+          <span>Start from a Tender Cells template, local file, or Hugging Face source.</span>
+        </a>
+        <a href="/app/account">
+          <strong>Profile &amp; security</strong>
+          <span>Update your name, verify email, reset your password, or prepare a fresh test workspace.</span>
+        </a>
       </div>
-      <div className="account-section">
-        <h2>School &amp; classroom</h2>
-        <div className="account-school">
-          {SCHOOL_FEATURES.map((f) => (
-            <button key={f.id} type="button" className="account-school-btn" disabled aria-disabled="true" title={`${f.detail} Coming soon.`}>
-              <span><strong>{f.label}</strong><small>{f.detail}</small></span>
-              <span className="account-soon">Coming soon</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </>
+      <p className="account-storage-note">
+        Your sign-in is shared between the website and OS. Workspace products and settings are stored by the OS in this browser unless a connected service says otherwise.
+      </p>
+    </div>
   );
 }
 
@@ -230,11 +315,11 @@ function AccountDetails({ user }: { user: User }) {
         </button>
       </div>
       <p className="account-hint">
-        The OS opens with this account already signed in. Your devices, flocks and schedules live there.
+        The OS opens with this account already signed in.
       </p>
 
+      <WorkspaceActions />
       <EmailPreferences user={user} />
-      <AccountTypesAndSchool />
     </section>
   );
 }
@@ -274,22 +359,13 @@ function SignInForm() {
     }
   };
 
-  const handleGoogle = () => signInWith(new GoogleAuthProvider());
-
-  // Microsoft 365 / Entra ID school and work accounts (tenant "organizations" skips personal
-  // Microsoft accounts). Firebase's built-in Microsoft provider - no Identity Platform needed.
-  const handleSchoolProvider = (id: string) => {
-    if (id === "microsoft-edu") {
-      return signInWith(new OAuthProvider("microsoft.com"));
-    }
-    return handleGoogle();
-  };
-
-  const signInWith = async (provider: GoogleAuthProvider | OAuthProvider) => {
+  const handleGoogle = async () => {
     if (!auth) return;
     setBusy(true);
     setError(null);
-    provider.setCustomParameters({ prompt: "select_account", ...(provider.providerId === "microsoft.com" ? { tenant: "organizations" } : {}) });
+    auth.tenantId = null;
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
     try {
       await signInWithPopup(auth, provider);
     } catch (err) {
@@ -346,7 +422,7 @@ function SignInForm() {
         <span aria-hidden="true" className="account-google-g">G</span> Continue with Google
       </button>
 
-      <SchoolSignIn onProvider={(id) => void handleSchoolProvider(id)} busy={busy} />
+      <SchoolSignIn />
 
       <div className="account-divider"><span>or use email</span></div>
 
@@ -382,6 +458,31 @@ function SignInForm() {
 
 export default function AccountPage() {
   const { user, loading } = useAuthUser();
+  const [redirectError, setRedirectError] = useState("");
+
+  useEffect(() => {
+    if (!app || !auth) return;
+    // Narrow once, outside the closures below - `auth`'s declared type stays
+    // possibly-undefined inside a nested arrow function even after this guard,
+    // since TS control-flow narrowing of a mutable outer binding doesn't
+    // persist into a deferred callback.
+    const firebaseApp = app;
+    const firebaseAuth = auth;
+    const schoolRedirect = readSchoolRedirect();
+    if (schoolRedirect) firebaseAuth.tenantId = schoolRedirect.tenantId;
+    void getRedirectResult(firebaseAuth).then(async (result) => {
+      if (!result?.user) return;
+      if (!schoolRedirect) return;
+      sessionStorage.removeItem(SCHOOL_REDIRECT_KEY);
+      await httpsCallable(getFunctions(firebaseApp), "claimSchoolMembership")({ organizationId: schoolRedirect.organizationId });
+      await result.user.getIdToken(true);
+      window.location.assign("/app/dashboard");
+    }).catch((reason) => {
+      sessionStorage.removeItem(SCHOOL_REDIRECT_KEY);
+      firebaseAuth.tenantId = null;
+      setRedirectError(reason instanceof Error ? reason.message : "School sign-in could not be completed. Please try again.");
+    });
+  }, []);
 
   let body: ReactNode;
   if (!AUTH_CONFIGURED) {
@@ -403,7 +504,10 @@ export default function AccountPage() {
 
   return (
     <PageLayout>
-      <div className="account-page">{body}</div>
+      <div className="account-page">
+        {redirectError && <p className="account-error" role="alert">{redirectError}</p>}
+        {body}
+      </div>
     </PageLayout>
   );
 }

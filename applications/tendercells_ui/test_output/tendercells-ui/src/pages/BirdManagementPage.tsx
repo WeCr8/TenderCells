@@ -1,10 +1,11 @@
 // BirdManagementPage.tsx — Flock roster: list, add, edit individual birds
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Box, Paper, Stack, Typography, Button, Grid, Chip, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-  Select, MenuItem, FormControl, InputLabel, Avatar, Tooltip,
+  Select, MenuItem, FormControl, InputLabel, Avatar, Tooltip, ListSubheader,
+  FormControlLabel, Switch, Autocomplete,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -14,9 +15,10 @@ import EggIcon from '@mui/icons-material/Egg';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { useBirds } from '../hooks/useBirds';
 import {
-  EMPTY_BIRD, SPECIES_EMOJI, BREEDS_BY_SPECIES, DEMO_ANIMAL_PACKS,
+  EMPTY_BIRD, SPECIES_EMOJI, SPECIES_GROUPS, BREEDS_BY_SPECIES, DEMO_ANIMAL_PACKS,
   type Bird, type Sex, type HealthStatus, type Species,
 } from '../services/birdsService';
 
@@ -32,7 +34,7 @@ const HEALTH_COLORS: Record<HealthStatus, string> = {
 
 function BirdCard({ bird, onEdit, onDelete }: { bird: Bird; onEdit: () => void; onDelete: () => void }) {
   const hc = HEALTH_COLORS[bird.health];
-  const emoji = SPECIES_EMOJI[bird.species];
+  const speciesMark = SPECIES_EMOJI[bird.species] ?? bird.species.slice(0, 3).toUpperCase();
   const age = bird.hatchDate
     ? Math.floor((Date.now() - new Date(bird.hatchDate).getTime()) / (1000 * 60 * 60 * 24 * 30))
     : null;
@@ -41,11 +43,13 @@ function BirdCard({ bird, onEdit, onDelete }: { bird: Bird; onEdit: () => void; 
     <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${hc}44`, borderRadius: 2, p: 2 }}>
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Avatar sx={{ bgcolor: C.bg, fontSize: 24, width: 44, height: 44 }}>{emoji}</Avatar>
+          <Avatar src={bird.profileImage || undefined} alt={`${bird.name} profile`} sx={{ bgcolor: C.bg, fontSize: 11, width: 52, height: 52 }}>
+            {bird.profileIcon === 'paw' ? <PetsIcon /> : bird.profileIcon === 'id' ? 'ID' : speciesMark}
+          </Avatar>
           <Box>
             <Stack direction="row" spacing={0.75} alignItems="center">
               <Typography sx={{ color: C.gold, fontWeight: 700, fontSize: 15 }}>{bird.name}</Typography>
-              {bird.sex === 'hen' ? <FemaleIcon sx={{ color: '#F48FB1', fontSize: 16 }} /> : bird.sex === 'rooster' ? <MaleIcon sx={{ color: '#90CAF9', fontSize: 16 }} /> : null}
+              {['hen', 'doe', 'female', 'spayed_female'].includes(bird.sex) ? <FemaleIcon sx={{ color: '#F48FB1', fontSize: 16 }} /> : ['rooster', 'buck', 'male', 'wether', 'neutered_male'].includes(bird.sex) ? <MaleIcon sx={{ color: '#90CAF9', fontSize: 16 }} /> : null}
             </Stack>
             <Typography sx={{ color: C.goldMuted, fontSize: 12 }}>{bird.breed}</Typography>
           </Box>
@@ -66,12 +70,16 @@ function BirdCard({ bird, onEdit, onDelete }: { bird: Bird; onEdit: () => void; 
 
       <Stack direction="row" spacing={1} mt={1.5} flexWrap="wrap">
         <Chip label={bird.health} size="small" sx={{ bgcolor: hc + '22', color: hc, border: `1px solid ${hc}44`, fontSize: 10, fontWeight: 700 }} />
-        <Chip component={RouterLink} to={`/library/animals/${bird.species}`} clickable label="Health guide" size="small"
-          sx={{ bgcolor: C.bg, color: C.gold, border: `1px solid ${C.gold}44`, fontSize: 10 }} />
+        {bird.species !== 'other' && (
+          <Chip component={RouterLink} to={`/library/animals/${bird.species}`} clickable label="Health guide" size="small"
+            sx={{ bgcolor: C.bg, color: C.gold, border: `1px solid ${C.gold}44`, fontSize: 10 }} />
+        )}
         {bird.eggColor && bird.sex === 'hen' && (
           <Chip icon={<EggIcon sx={{ fontSize: 12 }} />} label={bird.eggColor} size="small" sx={{ bgcolor: C.bg, color: C.goldMuted, fontSize: 10 }} />
         )}
-        {bird.bandId && <Chip label={`Band: ${bird.bandId}`} size="small" sx={{ bgcolor: C.bg, color: C.goldMuted, fontSize: 10 }} />}
+        {bird.bandId && <Chip label={`ID: ${bird.bandId}`} size="small" sx={{ bgcolor: C.bg, color: C.goldMuted, fontSize: 10 }} />}
+        {bird.cameraTracking && <Chip icon={<PhotoCameraIcon sx={{ fontSize: 12 }} />} label="Camera ID enrolled" size="small" sx={{ bgcolor: C.bg, color: '#90CAF9', fontSize: 10 }} />}
+        {bird.trackingMethod && bird.trackingMethod !== 'none' && <Chip label={`Tracking: ${bird.trackingMethod.replace('_', ' + ')}`} size="small" sx={{ bgcolor: C.bg, color: C.goldMuted, fontSize: 10 }} />}
         {age != null && <Chip label={`${age} mo`} size="small" sx={{ bgcolor: C.bg, color: C.goldMuted, fontSize: 10 }} />}
       </Stack>
 
@@ -100,9 +108,31 @@ interface EditDialogProps {
 
 function EditDialog({ open, bird, onClose, onSave }: EditDialogProps) {
   const [form, setForm] = useState<Omit<Bird, 'id'>>({ ...bird });
-  const set = (k: keyof Omit<Bird, 'id'>, v: string | number) =>
+  useEffect(() => {
+    if (open) setForm({ ...bird });
+  }, [bird, open]);
+  const set = (k: keyof Omit<Bird, 'id'>, v: string | number | boolean) =>
     setForm(prev => ({ ...prev, [k]: v }));
   const breeds = BREEDS_BY_SPECIES[form.species] ?? ['Other'];
+  const laysEggs = ['chicken', 'duck', 'turkey', 'goose', 'quail', 'pigeon'].includes(form.species);
+  const handlePhoto = (file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const scale = Math.min(1, 640 / Math.max(image.width, image.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(image.width * scale);
+        canvas.height = Math.round(image.height * scale);
+        canvas.getContext('2d')?.drawImage(image, 0, 0, canvas.width, canvas.height);
+        set('profileImage', canvas.toDataURL('image/jpeg', 0.78));
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const inputSx = {
     '& label': { color: C.goldMuted },
@@ -122,31 +152,33 @@ function EditDialog({ open, bird, onClose, onSave }: EditDialogProps) {
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth size="small">
               <InputLabel sx={{ color: C.goldMuted }}>Species</InputLabel>
-              <Select value={form.species} label="Species" onChange={e => set('species', e.target.value as Species)} sx={{ color: C.white }}>
-                {(Object.keys(SPECIES_EMOJI) as Species[]).map(s => (
-                  <MenuItem key={s} value={s}>{SPECIES_EMOJI[s]} {s}</MenuItem>
-                ))}
+              <Select value={form.species} label="Species" onChange={e => setForm(prev => ({ ...prev, species: e.target.value as Species, breed: '' }))} sx={{ color: C.white }}>
+                {SPECIES_GROUPS.flatMap(group => [
+                  <ListSubheader key={`${group.label}-heading`}>{group.label}</ListSubheader>,
+                  ...group.species.map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>),
+                ])}
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth size="small">
-              <InputLabel sx={{ color: C.goldMuted }}>Breed</InputLabel>
-              <Select value={form.breed || breeds[0]} label="Breed" onChange={e => set('breed', e.target.value)} sx={{ color: C.white }}>
-                {breeds.map(b => <MenuItem key={b} value={b}>{b}</MenuItem>)}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              freeSolo
+              options={breeds}
+              value={form.breed}
+              onInputChange={(_, value) => set('breed', value)}
+              renderInput={params => <TextField {...params} label="Breed" placeholder="Select or type a breed" size="small" sx={inputSx} />}
+            />
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth size="small">
               <InputLabel sx={{ color: C.goldMuted }}>Sex</InputLabel>
               <Select value={form.sex} label="Sex" onChange={e => set('sex', e.target.value as Sex)} sx={{ color: C.white }}>
-                {(['hen', 'rooster', 'doe', 'buck', 'wether', 'unknown'] as Sex[]).map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+                {(['female', 'male', 'spayed_female', 'neutered_male', 'hen', 'rooster', 'doe', 'buck', 'wether', 'unknown'] as Sex[]).map(s => <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Hatch Date" type="date" value={form.hatchDate} onChange={e => set('hatchDate', e.target.value)}
+            <TextField label="Birth / hatch date" type="date" value={form.hatchDate} onChange={e => set('hatchDate', e.target.value)}
               fullWidth size="small" sx={inputSx} InputLabelProps={{ shrink: true }} />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -170,15 +202,56 @@ function EditDialog({ open, bird, onClose, onSave }: EditDialogProps) {
           <Grid item xs={12} sm={6}>
             <TextField label="Weight (lbs)" value={form.weight} onChange={e => set('weight', e.target.value)} fullWidth size="small" sx={inputSx} />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          {laysEggs && <Grid item xs={12} sm={6}>
             <TextField label="Egg Color" value={form.eggColor} onChange={e => set('eggColor', e.target.value)} fullWidth size="small" sx={inputSx} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
+          </Grid>}
+          {laysEggs && <Grid item xs={12} sm={6}>
             <TextField label="Avg Eggs/Week" type="number" value={form.avgEggsPerWeek}
               onChange={e => set('avgEggsPerWeek', Number(e.target.value))} fullWidth size="small" sx={inputSx} inputProps={{ min: 0, max: 7 }} />
+          </Grid>}
+          <Grid item xs={12} sm={6}>
+            <TextField label="Tag / band / microchip ID" value={form.bandId} onChange={e => set('bandId', e.target.value)} fullWidth size="small" sx={inputSx} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Band ID" value={form.bandId} onChange={e => set('bandId', e.target.value)} fullWidth size="small" sx={inputSx} />
+            <Stack direction="row" spacing={1} alignItems="center">
+              {form.profileImage && <Avatar src={form.profileImage} alt="Profile preview" />}
+              <Button component="label" variant="outlined" startIcon={<PhotoCameraIcon />} fullWidth sx={{ borderColor: C.accent, color: C.gold }}>
+                {form.profileImage ? 'Replace photo' : 'Add profile photo'}
+                <input hidden type="file" accept="image/*" onChange={e => handlePhoto(e.target.files?.[0])} />
+              </Button>
+            </Stack>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth size="small">
+              <InputLabel sx={{ color: C.goldMuted }}>Profile tile</InputLabel>
+              <Select value={form.profileIcon || 'species'} label="Profile tile" onChange={e => set('profileIcon', e.target.value)} sx={{ color: C.white }}>
+                <MenuItem value="species">Species label</MenuItem>
+                <MenuItem value="paw">Animal icon</MenuItem>
+                <MenuItem value="id">ID badge</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth size="small">
+              <InputLabel sx={{ color: C.goldMuted }}>Tracking method</InputLabel>
+              <Select value={form.trackingMethod || 'none'} label="Tracking method" onChange={e => set('trackingMethod', e.target.value)} sx={{ color: C.white }}>
+                <MenuItem value="none">Roster only</MenuItem>
+                <MenuItem value="visual">Camera-assisted</MenuItem>
+                <MenuItem value="rfid">RFID tag</MenuItem>
+                <MenuItem value="microchip">Microchip record</MenuItem>
+                <MenuItem value="visual_rfid">Camera + RFID</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          {['rfid', 'microchip', 'visual_rfid'].includes(form.trackingMethod || '') && <Grid item xs={12} sm={6}>
+            <TextField label="RFID / microchip number" value={form.rfidId || ''} onChange={e => set('rfidId', e.target.value)} fullWidth size="small" sx={inputSx} />
+          </Grid>}
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={<Switch checked={Boolean(form.cameraTracking)} onChange={e => set('cameraTracking', e.target.checked)} />}
+              label="Use this profile as a camera identity reference"
+            />
+            <Typography sx={{ color: C.goldMuted, fontSize: 11 }}>Add a clear profile photo and a unique tag or microchip ID. Camera matching remains a reviewable aid, not a guaranteed identification.</Typography>
           </Grid>
           <Grid item xs={12}>
             <TextField label="Notes" value={form.notes} onChange={e => set('notes', e.target.value)}

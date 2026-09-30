@@ -174,6 +174,12 @@ export function useProducts() {
   useEffect(() => {
     fetchProducts();
     fetchStats();
+    const refresh = () => {
+      void fetchProducts();
+      void fetchStats();
+    };
+    window.addEventListener(ProductsService.PRODUCTS_UPDATED_EVENT, refresh);
+    return () => window.removeEventListener(ProductsService.PRODUCTS_UPDATED_EVENT, refresh);
   }, [fetchProducts, fetchStats]);
 
   return {

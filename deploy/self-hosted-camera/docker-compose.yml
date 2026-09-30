@@ -1,0 +1,37 @@
+services:
+  turn:
+    image: coturn/coturn:4.6.3
+    restart: unless-stopped
+    network_mode: host
+    env_file: .env
+    entrypoint: ["/bin/sh", "-c"]
+    command: >-
+      exec turnserver --fingerprint --use-auth-secret
+      --static-auth-secret="$${TC_TURN_SHARED_SECRET}"
+      --realm="$${TC_TURN_REALM}"
+      --listening-port="$${TC_TURN_PORT}"
+      --tls-listening-port="$${TC_TURN_TLS_PORT}"
+      --min-port="$${TC_TURN_MIN_PORT}"
+      --max-port="$${TC_TURN_MAX_PORT}"
+      --no-cli --no-multicast-peers --stale-nonce=600 --log-file=stdout
+
+  media:
+    image: bluenviron/mediamtx:1.15.4
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8554:8554"
+      - "127.0.0.1:8889:8889"
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml:ro
+
+  camera-ingest:
+    image: linuxserver/ffmpeg:7.1.1
+    restart: unless-stopped
+    depends_on: [media]
+    env_file: .env
+    entrypoint: ["/bin/sh", "-c"]
+    command: >-
+      exec ffmpeg -hide_banner -loglevel warning -reconnect 1 -reconnect_streamed 1
+      -reconnect_delay_max 5 -i $${TC_CAMERA_URL}
+      -an -c:v libx264 -preset veryfast -tune zerolatency
+      -f rtsp rtsp://media:8554/camera

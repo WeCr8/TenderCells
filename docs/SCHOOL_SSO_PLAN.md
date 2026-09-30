@@ -1,60 +1,27 @@
 # School & district accounts (SSO) — plan
 
-## Start now: what gets a school signed up
+**Status: backend and UI implemented; providers require district activation.** The website
+account page accepts a school code, discovers enabled providers from a server-authoritative
+organization record, sets the Identity Platform tenant, and starts Firebase OIDC/SAML sign-in.
+Providers do not appear until their district tenant and provider configuration are approved.
+See [School Platform Operations](SCHOOL_PLATFORM_OPERATIONS.md).
 
-**Google Workspace for Education already works.** "Continue with Google" uses Firebase's
-Google provider, so no SSO backend is needed to sign in. The following steps are still needed.
+## Google Workspace schools: what their IT admin does
 
-1. **Google Cloud console → OAuth consent screen (brand).**
-   - App name: Tender Cells. Add the logo, the support email, `tendercells.com` as an authorized domain, and the privacy and terms URLs.
-   - Publish the app to *In production*.
-   - We only request `openid email profile`, which are non-sensitive scopes, so Google app verification is **not** required.
-   - Brand verification is quick and makes the logo show.
-2. **Give the school's IT admin the OAuth client ID.**
-   - Find it in Google Cloud console → Credentials → "Web client (auto created by Google Service)".
-   - Set it as the repo variable `GOOGLE_OAUTH_CLIENT_ID` so `/schools` shows it.
-3. **School IT admin marks Tender Cells as Trusted.**
-   - In the Admin console: Security → Access and data control → API controls → Manage Third-Party App Access → Add app → OAuth App Name or Client ID.
-   - Choose the org units → **Trusted**.
-   - **Why this is required:** accounts designated as under 18 are blocked from any third-party app the admin has not configured, even for plain Google sign-in.
-4. **Later: Google Classroom rosters.**
-   - The `classroom.rosters.readonly` / `classroom.courses.readonly` scopes are sensitive.
-   - They need Google OAuth app verification (a demo video and a privacy policy review).
-   - Start that when roster sync is built.
+Google sign-in needs no extra scopes (`openid email profile`), but two things are needed before students can use it:
 
-**Microsoft 365 can be turned on without Identity Platform.** Firebase's built-in Microsoft
-provider handles it.
+1. **Publish our OAuth brand.**
+   - Google Cloud console → OAuth consent screen: app name, logo, support email, `tendercells.com` as an authorized domain, privacy and terms URLs.
+   - Publish it *In production*.
+   - Non-sensitive scopes need no app verification.
+2. **The school marks Tender Cells as Trusted.**
+   - In the school's Admin console: Security → Access and data control → API controls → Manage Third-Party App Access → Add app → OAuth App Name or Client ID → pick the org units → **Trusted**.
+   - Accounts designated as under 18 are blocked from any third-party app the admin has not configured, even for plain sign-in.
+   - `tendercells.com/schools` walks IT admins through this. It shows our client ID when the repo variable `GOOGLE_OAUTH_CLIENT_ID` is set.
 
-1. **Register the app.**
-   - Microsoft Entra admin center → App registrations → New registration.
-   - Choose **Accounts in any organizational directory (multi-tenant)**.
-   - Redirect URI: `https://<project>.firebaseapp.com/__/auth/handler`.
-2. **Enable it in Firebase.**
-   - Create a client secret.
-   - In the Firebase console → Authentication → Sign-in method → Microsoft, enable the provider with the client ID and secret.
-3. **Turn on the button.**
-   - Set repo variables `SSO_MICROSOFT=1` and `MICROSOFT_CLIENT_ID=<application id>`.
-   - The sign-in page then shows "Continue with Microsoft 365" (tenant `organizations`: school and work accounts only).
-   - `/schools` shows the admin-consent link each school's admin accepts once.
+Google Classroom roster scopes are sensitive and need Google's app verification. Start that when roster sync uses the Classroom API.
 
-**Clever and ClassLink need Identity Platform (OIDC/SAML).** Start this when a district asks
-for them; the steps are below.
-
-**School pilot sign-ups:**
-- Pilot requests arrive in Firestore `schoolInquiries` from `tendercells.com/schools`.
-- An account whose email domain matches an org's `domains` gets a join request (`orgs/{id}/joinRequests/{uid}`) for that org's staff to approve.
-- No account is granted access automatically.
-
-See `docs/SCHOOL_ACCOUNTS.md` for how the school owns properties and products.
-
----
-
-
-**Status: Google works now; Microsoft is ready to enable; the rest is prepared.** The website account page (`tendercells.com/account`) shows
-school sign-in, account types and classroom features with **Coming soon** labels. No SSO
-provider is connected, and `startSsoSignIn()` in `website/src/lib/sso.ts` always refuses.
-The OS login shows a disabled "School or district sign-in" button that points to the website
-account page, which is where all account functions live.
+Pilot requests from `tendercells.com/schools` arrive in Firestore `schoolInquiries` (create-only). Nobody is granted access automatically.
 
 ## What users will get
 

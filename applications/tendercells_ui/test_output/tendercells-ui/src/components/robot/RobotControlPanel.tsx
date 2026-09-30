@@ -19,12 +19,14 @@ import CameraFeedViewer from '../camera/CameraFeedViewer';
 import ArmKinematics3D from './ArmKinematics3D';
 import HuggingFacePolicyCard, { type PolicyStatus } from './HuggingFacePolicyCard';
 import { useHardwareControl } from '../../hooks/useHardwareControl';
+import { useTelemetry } from '../../hooks/useTelemetry';
 import { useGamepad, type GamepadFrame } from '../../hooks/useGamepad';
 
 type Joints = [number, number, number, number, number, number];
 
 export default function RobotControlPanel({ deviceId = 'ct_001' }: { deviceId?: string }) {
   const hw = useHardwareControl(deviceId);
+  const telemetry = useTelemetry(deviceId);
 
   const [joints, setJoints] = useState<Joints>([0, 45, 90, 0, 45, 0]);
   const [feedRate, setFeedRate] = useState(50);
@@ -186,8 +188,11 @@ export default function RobotControlPanel({ deviceId = 'ct_001' }: { deviceId?: 
           </Stack>
         </DialogTitle>
         <DialogContent sx={{ bgcolor: '#0D2B1E', p: 2 }}>
+          {/* No streamUrl is wired for this panel yet - shows the honest
+              offline/status canvas rather than claiming a fake live feed.
+              connected/signal come from real telemetry, not a guess. */}
           <CameraFeedViewer camera={{ id: 'robot-camera-1', deviceId, name: 'Robot Arm Overhead View',
-            location: 'main-feed', resolution: '1080p', fps: 30, connected: true, signal: -55 }} height={480} />
+            location: 'main-feed', connected: !telemetry.error && !!telemetry.data, signal: telemetry.data?.wifiRssi }} height={480} />
         </DialogContent>
       </Dialog>
 

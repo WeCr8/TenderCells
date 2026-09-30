@@ -1,22 +1,30 @@
 // SchoolsPage.tsx - tendercells.com/schools: how a school signs up, what IT has to do for
-// sign-in, how school accounts work (org-owned property + products, class access), and
-// a pilot sign-up form (saved to Firestore schoolInquiries, create-only).
+// sign-in (school code -> the school's own Identity Platform tenant, see
+// docs/SCHOOL_PLATFORM_OPERATIONS.md), how school accounts work (school-owned devices shared
+// with classes) and a pilot sign-up form (saved to Firestore schoolInquiries, create-only).
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
 import { getDb } from "../lib/firestore";
 import { auth } from "../lib/firebase";
-import { SSO_PROVIDERS } from "../lib/sso";
 import "./AccountPage.css";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID as string | undefined;
 const MICROSOFT_CLIENT_ID = import.meta.env.VITE_MICROSOFT_CLIENT_ID as string | undefined;
 
 const PLANS = [
-  { name: "Classroom", detail: "1 property, up to 10 products, 3 classes, 40 seats" },
-  { name: "School", detail: "3 properties, up to 40 products, 30 classes, 600 seats" },
-  { name: "District", detail: "Properties per school, district-wide SSO and roster sync" },
+  { name: "Starter (monthly)", detail: "30-day free trial - one teacher or homestead" },
+  { name: "School (annual)", detail: "60-day free trial, purchase orders and invoices, school sign-in and roster sync" },
+];
+
+/** Providers a school can turn on. Each is configured on the school's own tenant; nothing shows until it is. */
+const SSO_PROVIDERS = [
+  { id: "google", label: "Google Workspace for Education", setup: "Mark Tender Cells as a Trusted app (steps below); we connect it to your school's tenant." },
+  { id: "microsoft", label: "Microsoft 365 Education", setup: "A Global / Cloud Application Administrator accepts the admin consent link once." },
+  { id: "clever", label: "Clever", setup: "Approve Tender Cells in your Clever district dashboard (OIDC); rosters sync from Clever." },
+  { id: "classlink", label: "ClassLink", setup: "Add Tender Cells in ClassLink (OIDC or SAML); rosters sync with OneRoster." },
+  { id: "saml", label: "Other district identity provider", setup: "Any SAML 2.0 IdP - send us your metadata URL." },
 ];
 
 function PilotForm() {
@@ -73,23 +81,28 @@ export default function SchoolsPage() {
     <PageLayout>
       <PageHero kicker="For schools" title="Tender Cells for schools" subtitle="Your school owns its farm lab, garden and robots. Teachers choose what each class can see and run; students sign in with their school account." />
       <div className="account-page" style={{ alignItems: "flex-start" }}>
-        <section className="account-card" style={{ maxWidth: 760 }}>
+        <section className="account-card account-doc" style={{ maxWidth: 760 }}>
           <h2>How school accounts work</h2>
           <ul>
-            <li><strong>The school owns the property and products</strong> - the farm lab, garden beds, coops and robots. A district can hold shared ones too.</li>
-            <li><strong>Classes decide access.</strong> Each class gets the properties and products it needs, plus what students may do: view the map, watch cameras, run routines, aim the weeding laser.</li>
-            <li><strong>Students never get their own property</strong>, and never fire a laser - only teachers can, with every safety interlock in place.</li>
+            <li><strong>The school owns its devices</strong> - the farm lab, garden beds, coops and robots belong to the school's organization, not to a student.</li>
+            <li><strong>Classes decide access.</strong> School and district admins enroll devices and share each one with the classes that use it; teachers see their classes, students see only their class's devices.</li>
+            <li><strong>Roles come from your roster</strong> (district admin, school admin, teacher, student) - verified on the server after sign-in, never chosen by the user.</li>
+            <li><strong>Class robots run in student mode</strong>: the weeding laser only shows its aiming dot. Firing needs a teacher to switch student mode off on the robot, with every interlock closed.</li>
             <li><strong>Plans</strong>: {PLANS.map((p) => `${p.name} (${p.detail})`).join("; ")}.</li>
           </ul>
 
-          <h2 id="sign-in">Sign-in (SSO) - what works today</h2>
+          <h2 id="sign-in">Sign-in (SSO)</h2>
+          <p>
+            Students and staff open <Link to="/account#school-sign-in">Sign in → School or district account</Link>, enter the school code
+            we issue, and sign in with the provider your school turned on. Personal Google and email sign-in work for everyone today.
+          </p>
           <table className="account-table">
             <thead><tr><th>Provider</th><th>Status</th><th>What is needed</th></tr></thead>
             <tbody>
               {SSO_PROVIDERS.map((p) => (
                 <tr key={p.id}>
                   <td>{p.label}</td>
-                  <td>{p.status === "available" ? <span className="account-badge">Available</span> : <span className="account-soon">Coming soon</span>}</td>
+                  <td><span className="account-badge">Activated per school</span></td>
                   <td>{p.setup}</td>
                 </tr>
               ))}
@@ -113,8 +126,8 @@ export default function SchoolsPage() {
             <li>{consentUrl ? <>Open the <a href={consentUrl} rel="noopener noreferrer">admin consent link</a> as a Global / Cloud Application Administrator and accept.</> : <>We send an admin consent link with your pilot; a Global or Cloud Application Administrator accepts it once.</>}</li>
             <li>Students and teachers then use <strong>School or district account → Microsoft 365</strong> on the sign-in page.</li>
           </ol>
-          <h3>Clever and ClassLink</h3>
-          <p>Planned - tell us in the form if your district uses them so we prioritise the connection.</p>
+          <h3>Clever, ClassLink or another SAML provider</h3>
+          <p>Tell us in the form which one your district uses; we register it on your school's tenant and send the details for your dashboard.</p>
 
           <h2 id="pilot">Start a school pilot</h2>
           <PilotForm />

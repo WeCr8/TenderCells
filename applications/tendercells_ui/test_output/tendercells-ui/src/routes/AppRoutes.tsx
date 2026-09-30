@@ -15,6 +15,7 @@ import {
   ProductsPage,
   PropertyLayoutBuilder,
   RailSystemModulesDashboard,
+  ResourcesPage,
   RoamingRoostDashboard,
   SchedulesPage,
   SettingsPage,
@@ -35,6 +36,8 @@ import WeedPatrolPage from "../pages/WeedPatrolPage";
 import WatershedPage from "../pages/WatershedPage";
 import LibraryPage from "../pages/LibraryPage";
 import ProjectsPage from "../pages/ProjectsPage";
+import ProductDashboardPage from "../pages/ProductDashboardPage";
+import CameraNodeFirstBuildPage from "../pages/guides/CameraNodeFirstBuildPage";
 
 // Fires a page_view on every route change. No-op when analytics is disabled.
 function RouteAnalytics() {
@@ -70,12 +73,14 @@ export default function AppRoutes() {
 
       {/* Global pages */}
       <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/resources" element={<ResourcesPage />} />
+      <Route path="/guides/camera-node-first-build" element={<CameraNodeFirstBuildPage />} />
       <Route path="/coop" element={<Navigate to="/chicken-tender" replace />} />
       <Route path="/sensors" element={<Navigate to="/chicken-tender?section=sensors" replace />} />
       <Route path="/egg-map" element={<Navigate to="/chicken-tender?section=eggs" replace />} />
       <Route path="/eggs" element={<Navigate to="/chicken-tender?section=eggs" replace />} />
-      <Route path="/flock" element={<Navigate to="/birds" replace />} />
-      <Route path="/flock-roster" element={<Navigate to="/birds" replace />} />
+      <Route path="/flock" element={<Navigate to="/animals" replace />} />
+      <Route path="/flock-roster" element={<Navigate to="/animals" replace />} />
       <Route path="/tenderai" element={<Navigate to="/ai" replace />} />
       <Route path="/tender-ai" element={<Navigate to="/ai" replace />} />
       <Route path="/tender-ai-chat" element={<Navigate to="/ai" replace />} />
@@ -91,10 +96,13 @@ export default function AppRoutes() {
       <Route path="/projects" element={<ProjectsPage />} />
       <Route path="/specs" element={<ProductSpecsPage />} />
       <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
+      <Route path="/product/:productId" element={<ProductDashboardPage />} />
       <Route path="/analytics" element={<AnalyticsPage />} />
       <Route path="/diagnostics" element={<DiagnosticsPage />} />
-      <Route path="/birds" element={<BirdManagementPage />} />
-      <Route path="/birds/:birdId" element={<BirdEditPage />} />
+      <Route path="/animals" element={<BirdManagementPage />} />
+      <Route path="/animals/:birdId" element={<BirdEditPage />} />
+      <Route path="/birds" element={<Navigate to="/animals" replace />} />
+      <Route path="/birds/:birdId" element={<Navigate to="/animals" replace />} />
       <Route path="/ai" element={<TenderAIPage />} />
       <Route path="/setup" element={<SetupWizardPage />} />
       <Route path="/chicken-eye" element={<ChickenEyeDashboardPage />} />

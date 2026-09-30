@@ -1,15 +1,14 @@
 // App.tsx
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import SplashScreen from "./components/SplashScreen";
 import MainLayout from "./components/layout/MainLayout";
-import { BrowserRouter, useNavigate, useLocation } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import AppRoutes from "./routes/AppRoutes";
 
 function AppContent() {
   const [product, setProduct] = useState("chicken-tender");
   const [showSplash, setShowSplash] = useState(true);
-  const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
@@ -23,22 +22,22 @@ function AppContent() {
   // Update product state based on current route
   useEffect(() => {
     const pathProduct = location.pathname.split('/')[1];
-    if (pathProduct && pathProduct !== 'settings' && pathProduct !== 'account' && pathProduct !== 'schedules') {
+    const productRoutes = new Set([
+      'chicken-tender', 'roaming-roost', 'duck-dock', 'goat-guardian',
+      'bunny-burrow', 'turkey-tower', 'predator-monitor',
+      'rail-system-modules', 'tender-cells-cloud', 'pigeon-palace',
+    ]);
+    if (productRoutes.has(pathProduct)) {
       setProduct(pathProduct);
     }
   }, [location.pathname]);
-
-  const handleProductChange = (newProduct: string) => {
-    setProduct(newProduct);
-    navigate(`/${newProduct}`);
-  };
 
   if (showSplash) {
     return <SplashScreen />;
   }
 
   return (
-    <MainLayout title={product} product={product} onProductChange={handleProductChange}>
+    <MainLayout title={product} product={product}>
       <AppRoutes />
     </MainLayout>
   );

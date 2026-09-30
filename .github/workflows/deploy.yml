@@ -29,9 +29,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Save build minutes: only rebuild + publish when something that ships to Hosting
-  # changed in this commit (site, app, shared data, hosting config, this workflow).
-  # Firmware / Python / docs-only merges skip the ~2 min build. Manual runs always deploy.
+  # Save build minutes: only rebuild + publish when something this workflow ships changed
+  # (site, app, shared data, Firestore rules/indexes, Cloud Functions, Firebase config, this
+  # workflow). Firmware / Python / docs-only merges skip it. Manual runs always deploy.
   should-deploy:
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
@@ -52,10 +52,10 @@ jobs:
           if ! git rev-parse -q --verify HEAD^1 >/dev/null; then echo "deploy=true" >> "$GITHUB_OUTPUT"; exit 0; fi
           FILES=$(git diff --name-only HEAD^1 HEAD)
           echo "$FILES"
-          if echo "$FILES" | grep -qE '^applications/tendercells_ui/test_output/(tendercells-ui|website|shared)/|^firebase\.json$|^\.firebaserc$|^scripts/firebase-|^\.github/workflows/deploy\.yml$'; then
+          if echo "$FILES" | grep -qE '^applications/tendercells_ui/test_output/(tendercells-ui|website|shared)/|^functions/|^firestore\.(rules|indexes\.json)$|^storage\.rules$|^firebase\.json$|^\.firebaserc$|^scripts/firebase-|^\.github/workflows/deploy\.yml$'; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Nothing that ships to Hosting changed - skipping the build."
+            echo "Nothing this workflow deploys changed - skipping the build."
             echo "deploy=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -81,6 +81,12 @@ jobs:
       - name: Install website deps
         run: npm ci --prefix website || npm install --prefix website
 
+      - name: Install and build Cloud Functions
+        working-directory: .
+        run: |
+          npm ci --prefix functions
+          npm --prefix functions run build
+
       # FIX(2026-09-27): the app used to be built with NO Firebase config, so sign-in
       # and sign-up on tendercells.com/app always failed. Write the project's web
       # config to the repo-root .env (the app's envDir) before building.
@@ -89,6 +95,12 @@ jobs:
         env:
           FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TENDER_CELLS }}
           FIREBASE_WEB_APP_ID: ${{ vars.FIREBASE_WEB_APP_ID }}
+          TURN_URLS: ${{ secrets.TURN_URLS }}
+          STRIPE_STARTER_PRICE_ID: ${{ vars.STRIPE_STARTER_PRICE_ID }}
+          STRIPE_SCHOOL_PRICE_ID: ${{ vars.STRIPE_SCHOOL_PRICE_ID }}
+          # Use Firebase's registered OAuth callback domain. The custom domain can
+          # return only after its /__/auth/handler URI is added to the Google client.
+          FIREBASE_AUTH_DOMAIN: tender-cells.firebaseapp.com
         run: |
           printf '%s' "$FIREBASE_SA" > "$HOME/sa.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/sa.json" >> "$GITHUB_ENV"
@@ -97,6 +109,7 @@ jobs:
           echo "FIREBASE_PROJECT=$PROJECT" >> "$GITHUB_ENV"
           npm i -g firebase-tools
           node scripts/firebase-web-env.mjs --project "$PROJECT"
+          printf 'TURN_URLS=%s\nSTRIPE_STARTER_PRICE_ID=%s\nSTRIPE_SCHOOL_PRICE_ID=%s\n' "$TURN_URLS" "$STRIPE_STARTER_PRICE_ID" "$STRIPE_SCHOOL_PRICE_ID" > functions/.env
 
       - name: Check Firebase Auth settings (providers + authorized domains)
         working-directory: .
@@ -108,10 +121,8 @@ jobs:
 
       - name: Build site + app + snapshot
         env:
-          # Optional repo variables for school sign-in (docs/SCHOOL_SSO_PLAN.md):
-          # SSO_MICROSOFT=1 once Microsoft is enabled in Firebase Auth; client IDs are shown
-          # to school IT admins on /schools (they are public identifiers, not secrets).
-          VITE_SSO_MICROSOFT: ${{ vars.SSO_MICROSOFT }}
+          # Optional repo variables: OAuth client IDs shown to school IT admins on /schools
+          # (public identifiers, not secrets) - see docs/SCHOOL_SSO_PLAN.md.
           VITE_GOOGLE_OAUTH_CLIENT_ID: ${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
           VITE_MICROSOFT_CLIENT_ID: ${{ vars.MICROSOFT_CLIENT_ID }}
         run: npm --prefix website run build:with-app
@@ -124,6 +135,10 @@ jobs:
           APP_JS=applications/tendercells_ui/test_output/website/dist/app/assets
           echo "Root .env keys: $(cut -d= -f1 .env 2>/dev/null | tr '\n' ' ')"
           echo "Build env has API key: $([ -n "$VITE_FIREBASE_API_KEY" ] && echo yes || echo no)"
+          test "$VITE_FIREBASE_AUTH_DOMAIN" = "tender-cells.firebaseapp.com" || {
+            echo "::error::Production authDomain must use the registered Firebase callback domain."
+            exit 1
+          }
           SITE_JS=applications/tendercells_ui/test_output/website/dist/assets
           if grep -lqF "$VITE_FIREBASE_API_KEY" $SITE_JS/*.js; then
             echo "OK: website /account sign-in has the Firebase config."
@@ -139,13 +154,17 @@ jobs:
             exit 1
           fi
 
-      - name: Deploy to Firebase Hosting
+      - name: Deploy Hosting and Firestore policy
         working-directory: .
         run: |
           echo "Deploying to project: $FIREBASE_PROJECT"
-          firebase deploy --only hosting:main --non-interactive --project "$FIREBASE_PROJECT"
+          firebase deploy --only hosting:main,firestore:rules,firestore:indexes --non-interactive --project "$FIREBASE_PROJECT"
+
+      - name: Deploy Cloud Functions
+        working-directory: .
+        run: firebase deploy --only functions --non-interactive --project "$FIREBASE_PROJECT"
 
       - name: Remove credentials
         if: always()
         working-directory: .
-        run: rm -f "$HOME/sa.json" .env
+        run: rm -f "$HOME/sa.json" .env functions/.env

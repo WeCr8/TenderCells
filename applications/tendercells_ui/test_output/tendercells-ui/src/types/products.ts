@@ -56,6 +56,17 @@ export interface NetworkConfig {
 }
 
 export interface ProductMetadata {
+  connection_type?: 'tendercells-template' | 'local-import' | 'huggingface' | string;
+  source_url?: string;
+  huggingface_repo?: string;
+  controller_board?: string;
+  power_source?: string;
+  battery_capacity_mah?: number;
+  camera_module?: string;
+  camera_stream_url?: string;
+  hardware_capabilities?: string[];
+  enabled_capabilities?: string[];
+  capability_profile?: string;
   owner_email?: string;
   product_family?: ProductFamily | string;
   build_source?: BuildSource | string;
@@ -91,6 +102,13 @@ export interface ProductMetadata {
   terrain_capture_device_id?: string;
   terrain_detail_status?: 'not_started' | 'manual' | 'collecting' | 'generated' | string;
   custom_device_asset_url?: string;
+  // A camera-kit product mounted on another registered product (e.g. a
+  // camera bundled with a Chicken Tender coop) - the parent product's
+  // Firestore doc id. Set by the "package" registration flow, or by hand
+  // when attaching an existing camera to an existing unit. The property
+  // layout sync positions this item on/beside its parent instead of an
+  // independent placement, and the parent's dashboard can show its feed.
+  mounted_on_product_id?: string;
   telemetry_learning_enabled?: boolean;
   telemetry_consent?: TelemetryConsent | string;
   telemetry_retention_days?: number;

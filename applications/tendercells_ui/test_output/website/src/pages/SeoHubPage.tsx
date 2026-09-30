@@ -41,6 +41,7 @@ const hubs = {
           { label: "Smart Chicken Coop Guide", href: "/guides/smart-chicken-coop", desc: "Plan sensors, records, safety, manual override, and open-source coop automation." },
           { label: "Predator Monitoring Guide", href: "/guides/predator-monitoring", desc: "Understand cameras, alerts, solar design, and safe monitoring workflows." },
           { label: "Mobile Coop and Pasture Rotation", href: "/guides/pasture-rotation", desc: "Study routes, docking, safe movement, and pasture care." },
+          { label: "ESP32-S3 Camera Node", href: "/guides/camera-node-first-build", desc: "Wire, flash, register, and control the first battery-powered TenderCells device." },
         ],
       },
       {

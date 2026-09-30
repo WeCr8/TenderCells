@@ -52,13 +52,15 @@ export const PLANTS: Plant[] = [
     identify: 'Arrowhead leaves, white-pink trumpet flowers, twining stems', control: 'Persistent removal over seasons; smother with mulch',
     laser: 'Only slows it - roots go very deep; combine with mulch' },
   // ── toxic to animals ──
-  { id: 'avocado', kind: 'toxic', name: 'Avocado (leaves, pit, skin)', emoji: '🥑', summary: 'Contains persin - dangerous to birds, rabbits and goats.', toxicTo: ['chicken', 'duck', 'rabbit', 'goat'] },
-  { id: 'nightshade', kind: 'toxic', name: 'Nightshades (green parts)', emoji: '☠️', summary: 'Leaves and green fruit of tomato, potato and wild nightshade contain solanine.', toxicTo: ['chicken', 'duck', 'goat', 'rabbit'] },
-  { id: 'yew', kind: 'toxic', name: 'Yew', emoji: '🌲', summary: 'Evergreen hedge; very toxic to livestock and poultry even in small amounts.', toxicTo: ['chicken', 'duck', 'goat', 'rabbit'] },
-  { id: 'rhododendron', kind: 'toxic', name: 'Rhododendron / azalea', emoji: '🌺', summary: 'Grayanotoxins - a common cause of goat poisoning.', toxicTo: ['goat', 'rabbit'] },
-  { id: 'oleander', kind: 'toxic', name: 'Oleander', emoji: '🌸', summary: 'Heart toxin; all parts, fresh or dried.', toxicTo: ['goat', 'chicken', 'rabbit'] },
-  { id: 'foxglove', kind: 'toxic', name: 'Foxglove', emoji: '🔔', summary: 'Heart toxin (digitalis).', toxicTo: ['rabbit', 'goat'] },
-  { id: 'rhubarb-leaves', kind: 'toxic', name: 'Rhubarb leaves', emoji: '🍂', summary: 'Oxalic acid in the leaves.', toxicTo: ['chicken', 'goat', 'rabbit'] },
+  { id: 'avocado', kind: 'toxic', name: 'Avocado (leaves, pit, skin)', emoji: '🥑', summary: 'Contains persin - dangerous to birds, rabbits and goats.', toxicTo: ['chicken', 'duck', 'rabbit', 'goat', 'guinea-pig', 'chinchilla', 'pig', 'tortoise', 'bearded-dragon', 'horse', 'dog'] },
+  { id: 'nightshade', kind: 'toxic', name: 'Nightshades (green parts)', emoji: '☠️', summary: 'Leaves and green fruit of tomato, potato and wild nightshade contain solanine.', toxicTo: ['chicken', 'duck', 'goat', 'rabbit', 'guinea-pig', 'sheep', 'pig', 'cow'] },
+  { id: 'yew', kind: 'toxic', name: 'Yew', emoji: '🌲', summary: 'Evergreen hedge; very toxic to livestock and poultry even in small amounts.', toxicTo: ['chicken', 'duck', 'goat', 'rabbit', 'sheep', 'alpaca', 'horse', 'cow', 'dog'] },
+  { id: 'rhododendron', kind: 'toxic', name: 'Rhododendron / azalea', emoji: '🌺', summary: 'Grayanotoxins - a common cause of goat poisoning.', toxicTo: ['goat', 'rabbit', 'guinea-pig', 'chinchilla', 'sheep', 'alpaca', 'tortoise'] },
+  { id: 'oleander', kind: 'toxic', name: 'Oleander', emoji: '🌸', summary: 'Heart toxin; all parts, fresh or dried.', toxicTo: ['goat', 'chicken', 'rabbit', 'chinchilla', 'sheep', 'pig', 'alpaca', 'tortoise', 'horse', 'cow', 'cat', 'dog'] },
+  { id: 'foxglove', kind: 'toxic', name: 'Foxglove', emoji: '🔔', summary: 'Heart toxin (digitalis).', toxicTo: ['rabbit', 'goat', 'guinea-pig', 'tortoise'] },
+  { id: 'lily', kind: 'toxic', name: 'Lilies (Lilium, daylily)', emoji: '🌷', summary: 'Every part, even pollen or vase water, causes kidney failure in cats.', toxicTo: ['cat'] },
+  { id: 'red-maple', kind: 'toxic', name: 'Red maple (wilted leaves)', emoji: '🍁', summary: 'Wilted or dried leaves destroy red blood cells in horses - keep fallen leaves out of pastures.', toxicTo: ['horse'] },
+  { id: 'rhubarb-leaves', kind: 'toxic', name: 'Rhubarb leaves', emoji: '🍂', summary: 'Oxalic acid in the leaves.', toxicTo: ['chicken', 'goat', 'rabbit', 'bearded-dragon'] },
 ];
 
 export const plantById = (id: string): Plant | undefined => PLANTS.find((p) => p.id === id);

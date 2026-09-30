@@ -8,7 +8,7 @@
 // Live: express-api → MQTT tc/{id}/cmd/weed → firmware/jetson-nano/weed_patrol_service.py.
 // Demo (no API configured): an in-browser simulated robot (lib/yard/weedSim.ts).
 // Student mode (default on the robot) only ever points the aiming dot.
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -24,11 +24,14 @@ import Paper from '@mui/material/Paper';
 import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import GrassIcon from '@mui/icons-material/Grass';
 import Viewport3D from '../components/viewport/Viewport3D';
 import YardAttentionPanel from '../components/yard/YardAttentionPanel';
+import WeedBedMap2D from '../components/yard/WeedBedMap2D';
 import { loadPropertyLayout, PROPERTY_LAYOUT_EVENT, type PropertyItem } from '../components/property/propertyLayoutStore';
 import { useYardEvents } from '../hooks/useYardEvents';
 import { fetchWeedState, sendEstop, startWeedPass } from '../lib/yard/yardApi';
@@ -97,6 +100,8 @@ export default function WeedPatrolPage() {
   const [task, setTask] = useState<RobotTask>('weed');
   const [confirmPass, setConfirmPass] = useState(false);
   const [snack, setSnack] = useState<{ msg: string; error?: boolean } | null>(null);
+  const [mapView, setMapView] = useState<'2d' | '3d'>('2d');
+  const seenDetections = useRef<Set<string> | null>(null);
 
   const weeds = flags.filter((f) => f.type === 'weed_detected');
   const pending = weeds.filter((w) => w.status === 'pending_review');
@@ -105,6 +110,21 @@ export default function WeedPatrolPage() {
   const treated = weeds.filter((w) => w.status === 'treated').length;
   const rejected = weeds.filter((w) => w.status === 'rejected').length;
   const online = YARD_LIVE ? presence[deviceId]?.online ?? false : true;
+
+  useEffect(() => {
+    const currentIds = new Set(pending.map((detection) => detection.id));
+    const previousIds = seenDetections.current;
+    seenDetections.current = currentIds;
+    if (!previousIds) return;
+    const fresh = pending.find((detection) => !previousIds.has(detection.id));
+    if (!fresh) return;
+    const confidence = fresh.confidence == null ? '' : ` (${Math.round(fresh.confidence * 100)}% confidence)`;
+    setSnack({ msg: `Detection alert: ${fresh.title}${confidence}` });
+    window.dispatchEvent(new CustomEvent('tendercells-detection-alert', { detail: fresh }));
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('TenderCells detection', { body: `${fresh.title}${confidence}` });
+    }
+  }, [pending]);
 
   const report = (msg: string, isError = false) => setSnack({ msg, error: isError });
   const runPasses = useCallback(async () => {
@@ -263,8 +283,19 @@ export default function WeedPatrolPage() {
 
             <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2}>
               <Box sx={{ flex: 2, minWidth: 0 }}>
-                <Viewport3D product={item.type} focusItemId={item.id} initialWorkspaceMode="simulation"
-                  showAttentionPanel={false} title={`${item.name} - weed map`} height={{ xs: 420, md: 520 }} />
+                <Paper elevation={0} sx={{ ...card, p: { xs: 1, sm: 2 } }}>
+                  <Tabs value={mapView} onChange={(_, value: '2d' | '3d') => setMapView(value)}
+                    aria-label="Detection map view" sx={{ mb: 1, minHeight: 40, '& .MuiTab-root': { color: C.goldMuted, minHeight: 40 }, '& .Mui-selected': { color: `${C.gold} !important` } }}>
+                    <Tab value="2d" label="2D bed" />
+                    <Tab value="3d" label="3D property" />
+                  </Tabs>
+                  {mapView === '2d' ? (
+                    <WeedBedMap2D name={item.name} widthFt={item.width} depthFt={item.depth} flags={weeds} />
+                  ) : (
+                    <Viewport3D product={item.type} focusItemId={item.id} initialWorkspaceMode="simulation"
+                      showAttentionPanel={false} title={`${item.name} - weed map`} height={{ xs: 420, md: 520 }} />
+                  )}
+                </Paper>
               </Box>
               <Paper elevation={0} sx={{ ...card, flex: 1, minWidth: 280 }}>
                 <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>

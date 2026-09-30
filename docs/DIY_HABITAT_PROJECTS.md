@@ -20,15 +20,15 @@ Safety is part of every project:
 
 ## Local-first feeds: what is free and what is paid
 
-| | Free (every plan) | Paid (Classroom and up, or a personal TenderCare plan) |
+| | Free (every plan) | Paid (Starter monthly, School annual) |
 |---|---|---|
 | Live video / audio on your network | ✅ straight from the device to your browser | ✅ |
 | Telemetry + AI events (JSON) | ✅ through Tender Cells | ✅ |
-| Event snapshots | 7 days | 30-90 days |
+| Event snapshots | 7 days | 30 days |
 | **Live cloud view** away from home | — | ✅ (hours per month by plan) |
 | Clip history | — | 7-30 days |
 
-Allowances are in `CLOUD_FEED` (`shared/org/orgModel.ts`) and are **proposed**. Billing sets the final numbers.
+Allowances are in `CLOUD_FEED` (`shared/library/projects.ts`), keyed by the Stripe plans in `functions/src/billing.ts`. They are **proposed**; pricing sets the final numbers.
 
 **Why this split:**
 

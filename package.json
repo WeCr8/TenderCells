@@ -12,7 +12,8 @@
     "functions:build": "cd functions && npm run build",
     "functions:deploy": "firebase deploy --only functions",
     "functions:serve": "firebase emulators:start --only functions",
-    "firebase:emulate": "firebase emulators:start"
+    "firebase:emulate": "firebase emulators:start",
+    "test:rules": "firebase emulators:exec --only firestore \"vitest run\""
   },
   "dependencies": {
     "cors": "^2.8.6",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/react": "^19.1.8",
@@ -37,7 +39,8 @@
     "ts-node": "^10.9.2",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
-    "vite": "^8.0.16"
+    "vite": "^8.0.16",
+    "vitest": "^5.0.2"
   },
   "overrides": {
     "esbuild": "0.28.1"

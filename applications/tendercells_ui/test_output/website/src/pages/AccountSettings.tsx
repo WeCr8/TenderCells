@@ -3,8 +3,8 @@
 // Preferences:  user_preferences/{uid} { email: {...}, billing: { billingEmail, invoiceEmails } }
 //               (owner read/write in firestore.rules). The syncEmailPreferences Cloud
 //               Function mirrors email.newsletter into the subscriber list.
-// Billing:      billing/{uid} is written only by the billing backend (not live yet), so
-//               plan changes and the billing portal show "Coming soon".
+// Billing:      billingSubscriptions/{uid} is written by the Stripe webhook (functions/src/billing.ts,
+//               owner read-only). Checkout and the billing portal live in the OS (Account -> Billing).
 import { useEffect, useState } from "react";
 import type { User } from "firebase/auth";
 import { getDb } from "../lib/firestore";
@@ -27,6 +27,8 @@ const EMAIL_OPTIONS: Array<{ key: keyof Omit<EmailPrefs, "frequency">; label: st
   { key: "newsletter", label: "Newsletter", help: "Occasional news from Tender Cells." },
 ];
 
+const PLAN_LABEL: Record<string, string> = { free: "Free", starter_monthly: "Starter (monthly)", school_annual: "School (annual)" };
+
 /** Email notification preferences (saved to Firestore as you change them). */
 export function EmailPreferences({ user }: { user: User }) {
   const [prefs, setPrefs] = useState<EmailPrefs>(DEFAULT_EMAIL);
@@ -39,12 +41,13 @@ export function EmailPreferences({ user }: { user: User }) {
     (async () => {
       try {
         const [{ doc, getDoc }, db] = await Promise.all([import("firebase/firestore"), getDb()]);
-        const [p, b] = await Promise.all([getDoc(doc(db, "user_preferences", user.uid)), getDoc(doc(db, "billing", user.uid))]);
+        const [p, b] = await Promise.all([getDoc(doc(db, "user_preferences", user.uid)), getDoc(doc(db, "billingSubscriptions", user.uid))]);
         if (!alive) return;
         const data = p.data() as { email?: Partial<EmailPrefs>; billing?: Partial<BillingPrefs> } | undefined;
         setPrefs({ ...DEFAULT_EMAIL, ...(data?.email ?? {}) });
         setBilling((cur) => ({ ...cur, ...(data?.billing ?? {}) }));
-        setPlan((b.data() as { plan: string; status?: string } | undefined) ?? { plan: "free" });
+        const sub = b.data() as { plan?: string | null; status?: string } | undefined;
+        setPlan({ plan: sub?.plan ?? "free", status: sub?.status });
         setState("ready");
       } catch {
         if (alive) setState("error");
@@ -96,8 +99,8 @@ export function EmailPreferences({ user }: { user: User }) {
         <ul className="account-types">
           <li className="current">
             <div>
-              <strong>Plan: {plan ? plan.plan[0].toUpperCase() + plan.plan.slice(1) : "…"}</strong>
-              <span>{plan?.status ? `Status: ${plan.status}` : "Personal accounts are free while billing is being set up."}</span>
+              <strong>Plan: {plan ? PLAN_LABEL[plan.plan] ?? plan.plan : "…"}</strong>
+              <span>{plan?.status ? `Status: ${plan.status}` : "Free - start a 30-day Starter trial or a school plan in the OS."}</span>
             </div>
             <span className="account-badge">Current</span>
           </li>
@@ -113,16 +116,15 @@ export function EmailPreferences({ user }: { user: User }) {
             <span>Email me receipts and invoices</span>
           </label>
         </div>
-        <div className="account-school" style={{ marginTop: "0.6rem" }}>
-          {["Upgrade plan (Classroom, School, District)", "Payment method & invoices", "School purchase orders"].map((label) => (
-            <button key={label} type="button" className="account-school-btn" disabled aria-disabled="true">
-              <span><strong>{label}</strong></span><span className="account-soon">Coming soon</span>
-            </button>
-          ))}
+        <div className="account-actions" style={{ marginTop: "0.6rem" }}>
+          <a className="btn-outline" href="/app/account">Upgrade, payment method &amp; invoices</a>
         </div>
+        <p className="account-hint">Checkout, the billing portal and school purchase orders open from Tender Cells OS → Account → Billing.</p>
       </div>
       {state === "saved" && <p className="account-notice" role="status">Preferences saved.</p>}
       {state === "error" && <p className="account-error" role="alert">Could not load or save preferences. Try again later.</p>}
     </>
   );
 }
+
+export default EmailPreferences;

@@ -1,6 +1,7 @@
 import type { TerrainLayers } from './terrain';
 import type { DrainageFix } from './watershed';
 import type { CameraMount } from '../../lib/yard/cameraMounts';
+import { auth } from '../../lib/firebase/firebaseApp';
 
 export type PropertyItemKind = 'hardware' | 'obstacle';
 export type HardwareType =
@@ -23,7 +24,20 @@ export type HardwareType =
   | 'farmbot-genesis-xl'
   | 'aquaponics'
   | 'hydroponics'
-  | 'greenhouse';
+  | 'greenhouse'
+  // A user's own registered device with no built-in product family (Product
+  // Registration Modal's "DIY RC Vehicle" / "Community Custom" templates, or
+  // anything else with property_simulation_enabled checked). Renders its own
+  // uploaded GLB when the product has one (see Viewport3D's product glbCache,
+  // keyed by product.id - same path already used for a linked built-in
+  // product's custom_device_asset_url), otherwise a plain placeholder box.
+  | 'community-custom'
+  // A registered "DIY ESP32 Camera Node" (docs/CAMERA_NODE_FIRST_BUILD.md,
+  // productFamily 'camera-kit') - a fixed camera, not a mobile robot. Always
+  // placeable/visible on the property map once registered (no
+  // property_simulation_enabled opt-in needed, unlike community-custom -
+  // a camera has no ambiguous non-ground-placement case to guard against).
+  | 'camera-kit';
 export type ObstacleType =
   | 'tree' | 'fence' | 'pond' | 'rock' | 'building' | 'garden' | 'no-go-zone'
   | 'bush' | 'crop-row';
@@ -103,7 +117,15 @@ export const HARDWARE_TYPES: HardwareType[] = [
   'rail-module',
   'sensor',
   ...GARDEN_TYPES,
+  'community-custom',
+  'camera-kit',
 ];
+
+// Mobile ground robots that can be given a hand-drawn patrol route and driven
+// through it in the 3D viewport (Draw Path / Simulate Route). A one-line
+// addition here is all a *new* mobile robot type needs to pick up that whole
+// feature - see PropertyLayoutBuilder.tsx and Viewport3D.tsx for the consumers.
+export const MOBILE_ROBOT_TYPES = new Set<HardwareType>(['roaming-roost', 'community-custom']);
 
 // Real-world footprint dimensions from product specs (CLAUDE.md)
 // width × depth in feet; height not used on 2D map
@@ -118,12 +140,14 @@ export const PRODUCT_DIMENSIONS: Record<HardwareType, { width: number; depth: nu
   'watchtower':     { width: 3, depth: 3, shape: 'hexagon' }, // 3×3×5 ft dome
   'rail-module':    { width: 4, depth: 2, shape: 'rect'    }, // linear rail segment
   'sensor':         { width: 1, depth: 1, shape: 'circle'  }, // point sensor
+  'camera-kit':     { width: 2, depth: 2, shape: 'hexagon' }, // Seeed XIAO ESP32-S3 Sense on a small pole
   // Gardens — FarmBot-aligned footprints (converted from FarmBot bed specs to ft)
   'farmbot-genesis':    { width: 5,  depth: 10, shape: 'rect' }, // FarmBot Genesis ~1.5×3 m bed
   'farmbot-genesis-xl': { width: 9,  depth: 20, shape: 'rect' }, // Genesis XL ~2.86×6 m bed
   'aquaponics':         { width: 4,  depth: 8,  shape: 'rect' }, // tank + grow bed
   'hydroponics':        { width: 2,  depth: 2,  shape: 'circle' }, // vertical tower
   'greenhouse':         { width: 8,  depth: 12, shape: 'rect' }, // enclosed grow house
+  'community-custom':   { width: 4,  depth: 4,  shape: 'rect' }, // arbitrary - resize after adding
 };
 
 export const OBSTACLE_TYPES: ObstacleType[] = ['tree', 'bush', 'crop-row', 'fence', 'pond', 'rock', 'building', 'garden', 'no-go-zone'];
@@ -158,6 +182,8 @@ export const ITEM_COLORS: Record<string, string> = {
   aquaponics:           '#26A69A',
   hydroponics:          '#42A5B5',
   greenhouse:           '#9CCC65',
+  'community-custom':   '#5AC8C8',
+  'camera-kit':         '#8AACC8',
   tree:             '#2F7D32',
   bush:             '#4C9A4C',
   'crop-row':       '#6B8E23',
@@ -211,21 +237,58 @@ export const DEFAULT_ITEMS: PropertyItem[] = [
   { id: 'item-septic-nogo',    kind: 'obstacle', name: 'Septic field',   type: 'no-go-zone',     shape: 'rect',    x: 24, y: 40, width: 10, depth: 6  },
 ];
 
+const getPropertyLayoutStorageKey = () => {
+  const uid = auth.currentUser?.uid;
+  return uid ? `${PROPERTY_LAYOUT_STORAGE_KEY}:${uid}` : `${PROPERTY_LAYOUT_STORAGE_KEY}:demo`;
+};
+
+const emptyAccountLayout = (): PropertyLayoutState => ({
+  property: {
+    name: 'My Property',
+    widthFt: 80,
+    depthFt: 60,
+    gridStepFt: 1,
+    terrainZones: [],
+    elevationPoints: [],
+  },
+  items: [],
+});
+
 export const loadPropertyLayout = (): PropertyLayoutState => {
   try {
-    const saved = localStorage.getItem(PROPERTY_LAYOUT_STORAGE_KEY);
-    if (!saved) return { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
+    const signedIn = Boolean(auth.currentUser?.uid);
+    const fallback = signedIn ? emptyAccountLayout() : { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
+    const saved = localStorage.getItem(getPropertyLayoutStorageKey());
+    if (!saved) return fallback;
     const parsed = JSON.parse(saved) as Partial<PropertyLayoutState>;
     return {
-      property: parsed.property || DEFAULT_PROPERTY,
-      items: Array.isArray(parsed.items) ? parsed.items : DEFAULT_ITEMS,
+      property: parsed.property || fallback.property,
+      items: Array.isArray(parsed.items) ? parsed.items : fallback.items,
     };
   } catch {
-    return { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
+    return auth.currentUser?.uid ? emptyAccountLayout() : { property: DEFAULT_PROPERTY, items: DEFAULT_ITEMS };
   }
 };
 
 export const savePropertyLayout = (state: PropertyLayoutState) => {
-  localStorage.setItem(PROPERTY_LAYOUT_STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(getPropertyLayoutStorageKey(), JSON.stringify(state));
   window.dispatchEvent(new CustomEvent<PropertyLayoutState>(PROPERTY_LAYOUT_EVENT, { detail: state }));
 };
+
+/**
+ * Where a camera mounted on another product (metadata.mounted_on_product_id -
+ * the "package" registration flow) should sit: the parent's top-right corner,
+ * centered on that edge. Pure/no React - PropertyLayoutBuilder's sync effect
+ * re-snaps a mounted camera to this every pass instead of remembering a
+ * free-standing position, and this function is what makes that math testable
+ * without mounting the whole builder.
+ */
+export function computeMountPosition(
+  parent: { x: number; y: number; width: number },
+  camera: { width: number; depth: number }
+): { x: number; y: number } {
+  return {
+    x: parent.x + parent.width - camera.width / 2,
+    y: parent.y - camera.depth / 2,
+  };
+}

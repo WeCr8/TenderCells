@@ -1,6 +1,6 @@
 // WatchTowerCameraPanel.tsx - WatchTower camera feeds + recent predator detections.
 //
-// Live (hardware API configured): each camera node (firmware/watchtower-cam) publishes
+// Live (hardware API configured): each camera node (firmware/camera-node) publishes
 // its MJPEG streamUrl in its heartbeat on tc/{towerId}_cam{n}/sensors; this panel shows
 // those streams. Demo: the 3D view above renders what each tower camera sees.
 import { useEffect, useMemo, useState } from 'react';

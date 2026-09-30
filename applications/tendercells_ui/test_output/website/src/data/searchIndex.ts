@@ -49,6 +49,7 @@ export const SEARCH_INDEX: SearchEntry[] = [
   { title: "Smart Coop Guide", path: "/guides/smart-chicken-coop", description: "How to build and automate a smart chicken coop.", keywords: ["smart coop", "chicken coop", "automation guide"] },
   { title: "Predator Monitoring Guide", path: "/guides/predator-monitoring", description: "Detect and deter coop predators.", keywords: ["predator", "monitoring", "security", "hawk", "fox"] },
   { title: "Pasture Rotation Guide", path: "/guides/pasture-rotation", description: "Rotate pasture for healthier flocks and land.", keywords: ["pasture", "rotation", "grazing"] },
+  { title: "ESP32-S3 Camera Node Build", path: "/guides/camera-node-first-build", description: "Wire, flash, register, and control a battery-powered camera node.", keywords: ["esp32", "camera", "wiring", "mqtt", "device registry", "student"] },
   { title: "Farm Automation", path: "/farm-automation", description: "Automate farm and homestead animal care.", keywords: ["farm", "automation", "homestead"] },
   { title: "Homesteading Guide", path: "/learn/homesteading", description: "Homesteading with smart animal care.", keywords: ["homesteading", "self sufficient", "homestead"] },
   { title: "Automation Ideas", path: "/learn/automation", description: "Ideas for automating animal care tasks.", keywords: ["automation", "ideas", "diy"] },

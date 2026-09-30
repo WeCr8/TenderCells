@@ -5,7 +5,7 @@
 // Feeds are local-first: the camera / audio stream loads straight from the device on the
 // viewer's network (free), and only JSON telemetry + AI events come through the Tender
 // Cells API. "Cloud" live view relays media for viewers away from home - a paid plan
-// feature (CLOUD_FEED in shared/org/orgModel.ts), shown here as coming soon.
+// feature (CLOUD_FEED in shared/library/projects.ts), shown here as coming soon.
 import { useEffect, useMemo, useState } from 'react';
 import { Link as RouterLink, useSearchParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
@@ -20,8 +20,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import { GROUP_LABEL, type AnimalGroup } from '../../../shared/library/animals';
-import { PROJECTS, feedBudget, formatBytes, hfUrl, projectById, type HabitatProject } from '../../../shared/library/projects';
-import { CLOUD_FEED } from '../../../shared/org/orgModel';
+import { CLOUD_FEED, PROJECTS, feedBudget, formatBytes, hfUrl, projectById, type HabitatProject } from '../../../shared/library/projects';
 import { MQTT_API_BASE, hardwareAuthHeaders } from '../lib/api/hardwareApi';
 import { fetchYardEvents } from '../lib/yard/yardApi';
 import { YARD_LIVE, type YardEvent } from '../lib/yard/yardTypes';
@@ -116,9 +115,9 @@ function Feed({ dev, onRemove }: { dev: ProjectDevice; onRemove: () => void }) {
         <Box sx={{ bgcolor: C.bg, borderRadius: 1, p: 1.5, mb: 1 }} data-testid="cloud-feed-upsell">
           <Typography variant="body2" sx={{ fontWeight: 700, color: C.gold }}>Cloud live view - coming soon (paid plans)</Typography>
           <Typography variant="caption" sx={{ display: 'block' }}>
-            Watch from anywhere without opening your network. Classroom includes {CLOUD_FEED.classroom.liveHoursPerMonth} h/month of cloud live
-            view and {CLOUD_FEED.classroom.clipDays}-day clips; School {CLOUD_FEED.school.liveHoursPerMonth} h. Free plans keep local live view,
-            AI events and {CLOUD_FEED.free.snapshotDays}-day event snapshots.
+            Watch from anywhere without opening your network. {CLOUD_FEED.starter_monthly.label} includes {CLOUD_FEED.starter_monthly.liveHoursPerMonth} h/month
+            of cloud live view and {CLOUD_FEED.starter_monthly.clipDays}-day clips; {CLOUD_FEED.school_annual.label} {CLOUD_FEED.school_annual.liveHoursPerMonth} h.
+            Free keeps local live view, AI events and {CLOUD_FEED.free.snapshotDays}-day event snapshots. Plans: Account → Billing.
           </Typography>
         </Box>
       )}

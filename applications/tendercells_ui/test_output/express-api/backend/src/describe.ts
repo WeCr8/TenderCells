@@ -48,6 +48,7 @@ export const ENDPOINTS: EndpointDoc[] = [
   { method: "POST", path: `${M}/devices/{deviceId}/door`, auth: "device-owner", summary: "Open / close the door.", body: "door", mqtt: { topic: "tc/{id}/cmd/door", qos: 1 } },
   { method: "POST", path: `${M}/devices/{deviceId}/drive`, auth: "device-owner", summary: "Roaming Roost differential drive.", body: "drive", mqtt: { topic: "tc/{id}/cmd/drive", qos: 1 } },
   { method: "POST", path: `${M}/devices/{deviceId}/light`, auth: "device-owner", summary: "Relay on/off (heat lamp, pump, fan, grow light).", body: "light", mqtt: { topic: "tc/{id}/cmd/light", qos: 1 } },
+  { method: "POST", path: `${M}/devices/{deviceId}/camera/config`, auth: "device-owner", summary: "Apply enabled features to a camera node.", body: "cameraConfig", mqtt: { topic: "tc/{id}/cmd/camera/config", qos: 1 } },
   { method: "POST", path: `${M}/devices/{deviceId}/gantry`, auth: "device-owner", summary: "GRBL gantry move or real-time command.", body: "gantry", mqtt: { topic: "tc/{id}/cmd/gantry", qos: 1 } },
   { method: "POST", path: `${M}/devices/{deviceId}/feed`, auth: "device-owner", summary: "Dispense feed (grams).", body: "feed", mqtt: { topic: "tc/{id}/cmd/feed", qos: 1 } },
   { method: "POST", path: `${M}/devices/{deviceId}/clean`, auth: "device-owner", summary: "Start / stop a cleaning cycle.", body: "clean", mqtt: { topic: "tc/{id}/cmd/clean", qos: 1 }, gated: "arm" },
@@ -85,7 +86,7 @@ export const MQTT_TOPICS: TopicDoc[] = [
   { pattern: "tc/{id}/event", direction: "device-to-api", qos: 1, payload: "yard event (see <yard-events>)", note: "Upserted by id." },
   { pattern: "tc/{id}/alert", direction: "device-to-api", qos: 2, payload: "{type: predator|fault|health, label?, confidence, camera?, bearingDeg?, distanceFt?, ts}", note: "Predator alerts become located yard events." },
   { pattern: "tc/broadcast/alert", direction: "device-to-api", qos: 2, payload: "alert", note: "WatchTower broadcast to every device (not stored as an event)." },
-  { pattern: "tc/{id}/cmd/{command}", direction: "api-to-device", qos: 1, payload: "command body + {seq, timestamp}", note: "door, feed, clean, arm, motion, drive, light, gantry, weed, event" },
+  { pattern: "tc/{id}/cmd/{command}", direction: "api-to-device", qos: 1, payload: "command body + {seq, timestamp}", note: "door, feed, clean, arm, motion, drive, light, camera/config, gantry, weed, event" },
   { pattern: "tc/{id}/cmd/estop", direction: "api-to-device", qos: 2, retain: true, payload: "{active: boolean, source, ts}" },
   { pattern: "tc/{id}/cfg/zones", direction: "api-to-device", qos: 1, retain: true, payload: "{v:1, seq, units:'ft', self?:{itemId,x,y,width,depth}, zones:[{id,name,kind:no-go|keep-out|no-laser,poly:[[x,y]...]}], ts}", note: "Property feet, origin top-left. Robots refuse motion into no-go / keep-out and lasing inside any zone." },
 ];

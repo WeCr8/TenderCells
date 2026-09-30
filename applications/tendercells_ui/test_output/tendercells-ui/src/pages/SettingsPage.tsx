@@ -18,6 +18,10 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import LockIcon from "@mui/icons-material/Lock";
 import ScienceIcon from "@mui/icons-material/Science";
+import MemoryIcon from "@mui/icons-material/Memory";
+import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 import { settingsService, DEFAULT_SETTINGS, type UserSettings } from "../services/settingsService";
 import {
@@ -84,6 +88,7 @@ function DangerConfirmDialog({
 }
 
 export default function SettingsPage() {
+  const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
@@ -512,6 +517,24 @@ export default function SettingsPage() {
                 can explore the whole app with no hardware. Everything stays local to this browser
                 (<code>telemetry_consent: local_only</code>); your own records are never overwritten.
               </Alert>
+
+              <Box>
+                <Typography sx={{ color: C.gold, fontWeight: 700, fontSize: 14, mb: 1 }}>Device tools</Typography>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={1} flexWrap="wrap" useFlexGap>
+                  <Button variant="outlined" startIcon={<MemoryIcon />} onClick={() => { window.location.href = "/flash/"; }} sx={{ borderColor: C.accent, color: C.accent, minHeight: 44 }}>
+                    Flash a Device
+                  </Button>
+                  <Button variant="outlined" startIcon={<RouterIcon />} onClick={() => navigate("/products")} sx={{ borderColor: C.accent, color: C.accent, minHeight: 44 }}>
+                    Register Devices
+                  </Button>
+                  <Button variant="outlined" startIcon={<MonitorHeartIcon />} onClick={() => navigate("/diagnostics")} sx={{ borderColor: C.accent, color: C.accent, minHeight: 44 }}>
+                    Diagnostics
+                  </Button>
+                  <Button variant="outlined" startIcon={<MenuBookIcon />} onClick={() => navigate("/resources?category=guides")} sx={{ borderColor: C.accent, color: C.accent, minHeight: 44 }}>
+                    Build Guides
+                  </Button>
+                </Stack>
+              </Box>
 
               {/* Status chip */}
               <Stack direction="row" spacing={1} alignItems="center">

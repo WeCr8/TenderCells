@@ -1,19 +1,21 @@
 // animals.ts - species health library shared by tendercells.com (/library) and the OS
 // (/library in the app, linked from the flock roster). General care education, not
 // veterinary advice: every entry says when to call a vet.
+import { PLANTS } from './plants';
 
 export type SpeciesId =
   | 'chicken' | 'duck' | 'turkey' | 'goose' | 'quail' | 'pigeon'
   | 'rabbit' | 'guinea-pig' | 'chinchilla' | 'hamster' | 'rat' | 'mouse'
-  | 'goat' | 'sheep' | 'pig' | 'alpaca'
+  | 'goat' | 'sheep' | 'pig' | 'alpaca' | 'cow' | 'horse'
+  | 'dog' | 'cat'
   | 'pond-fish'
   | 'tortoise' | 'turtle' | 'bearded-dragon' | 'leopard-gecko' | 'ball-python';
 
-export type AnimalGroup = 'poultry' | 'small-mammal' | 'livestock' | 'aquatic' | 'reptile';
+export type AnimalGroup = 'poultry' | 'small-mammal' | 'livestock' | 'aquatic' | 'reptile' | 'companion';
 
 export const GROUP_LABEL: Record<AnimalGroup, string> = {
   poultry: 'Poultry & birds', 'small-mammal': 'Rabbits & rodents', livestock: 'Livestock',
-  aquatic: 'Pond & aquatic', reptile: 'Reptiles',
+  aquatic: 'Pond & aquatic', reptile: 'Reptiles', companion: 'Dogs & cats',
 };
 
 export interface Condition {
@@ -312,6 +314,58 @@ export const ANIMALS: AnimalSpecies[] = [
     ],
     sensors: ['Warm and cool side temperature', 'Humidity'],
   },
+  {
+    id: 'cow', name: 'Cattle', emoji: '🐄', group: 'livestock', product: 'Custom enclosure (build your own)', comfortF: [40, 75], bodyTempF: [101, 102.5], lifespanYears: [15, 20],
+    spacePerAnimal: 'Roughly 1.5-2 acres of good pasture per cow-calf pair; shade and constant water',
+    dailyChecks: ['Water - a cow can drink 20+ gallons a day, more in heat', 'Chewing cud, eating, normal manure', 'Shade when it is hot and humid', 'Walking sound on all four feet'],
+    warningSigns: ['Swollen left side (bloat)', 'Down and unable to rise after calving', 'Panting, drooling in heat', 'Cloudy or watery eye', 'Not eating or not chewing cud'],
+    conditions: [
+      { name: 'Bloat', signs: 'Distended left side, discomfort', firstSteps: 'Remove the rich feed, keep her walking', vetWhen: 'Immediately' },
+      { name: 'Milk fever', signs: 'Weak, wobbly or down around calving', firstSteps: 'Keep her quiet', vetWhen: 'Immediately (needs calcium)' },
+      { name: 'Pinkeye', signs: 'Squinting, tearing, cloudy eye', firstSteps: 'Shade, fly control', vetWhen: 'For treatment before an ulcer forms' },
+      { name: 'Heat stress', signs: 'Open-mouth panting, drooling', firstSteps: 'Shade, water, fans or sprinklers', vetWhen: 'Collapse or no improvement' },
+    ],
+    sensors: ['Water level (critical)', 'Temperature + humidity (heat index)', 'Gate', 'Pasture rotation'],
+  },
+  {
+    id: 'horse', name: 'Horses', emoji: '🐴', group: 'livestock', product: 'Custom enclosure (build your own)', comfortF: [20, 75], bodyTempF: [99, 101], lifespanYears: [25, 30],
+    spacePerAnimal: 'About 12 x 12 ft stall or run-in shelter plus 1-2 acres of pasture; horses need company',
+    dailyChecks: ['Hay/forage and fresh water (10+ gallons a day)', 'Normal manure and appetite', 'Legs and hooves - heat, swelling, stones', 'Weight and coat condition'],
+    warningSigns: ['Pawing, rolling, looking at the belly (colic)', 'Rocked-back stance, hot hooves', 'Not eating or no manure', 'Feed coming out of the nose'],
+    conditions: [
+      { name: 'Colic', signs: 'Pawing, rolling, sweating, looking at flanks', firstSteps: 'Remove feed, walk calmly', vetWhen: 'Immediately - it can be fatal' },
+      { name: 'Laminitis', signs: 'Reluctant to move, leaning back, hot hooves', firstSteps: 'Stop grain and rich grass, soft footing', vetWhen: 'Immediately' },
+      { name: 'Choke', signs: 'Feed and saliva from the nose, stretching the neck', firstSteps: 'Remove all feed and water', vetWhen: 'Right away if it lasts more than a few minutes' },
+      { name: 'Thrush', signs: 'Black smelly material in the hoof', firstSteps: 'Clean dry footing, pick hooves daily', vetWhen: 'Lameness or deep infection' },
+    ],
+    sensors: ['Water level', 'Shelter temperature', 'Gate', 'Pasture rotation'],
+  },
+  // ── dogs & cats (farm companions, livestock guardians, barn cats) ──
+  {
+    id: 'dog', name: 'Dogs', emoji: '🐕', group: 'companion', product: 'Farm companion (no dedicated product)', comfortF: [45, 85], bodyTempF: [101, 102.5], lifespanYears: [10, 14],
+    spacePerAnimal: 'Shelter out of wind and sun, daily exercise; livestock guardians live with the flock',
+    dailyChecks: ['Fresh water and food', 'Energy and appetite', 'Paws and coat after work in the field', 'Shade and water on hot days'],
+    warningSigns: ['Swollen belly with retching that brings nothing up', 'Heavy panting, collapse in heat', 'Vomiting or bloody diarrhea', 'Ate chocolate, grapes, xylitol, bait or antifreeze'],
+    conditions: [
+      { name: 'Bloat / GDV', signs: 'Swollen belly, unproductive retching, restless (large breeds)', firstSteps: 'Go now', vetWhen: 'Emergency - within the hour' },
+      { name: 'Heat stroke', signs: 'Heavy panting, red gums, collapse', firstSteps: 'Shade, cool (not icy) water', vetWhen: 'Right away' },
+      { name: 'Parvovirus', signs: 'Vomiting, bloody diarrhea in a puppy', firstSteps: 'Isolate', vetWhen: 'Immediately' },
+      { name: 'Poisoning', signs: 'Vomiting, tremors after eating something toxic', firstSteps: 'Note what and how much', vetWhen: 'Immediately (or a pet poison hotline)' },
+    ],
+    sensors: ['Camera ID (animal roster)', 'Water bowl level', 'Kennel temperature'],
+  },
+  {
+    id: 'cat', name: 'Cats', emoji: '🐈', group: 'companion', product: 'Farm companion (no dedicated product)', comfortF: [50, 85], bodyTempF: [100.5, 102.5], lifespanYears: [12, 18],
+    spacePerAnimal: 'Warm dry shelter; barn cats need food, water and a safe spot up high',
+    dailyChecks: ['Eating and drinking', 'Litter or elimination normal', 'Grooming and energy', 'Keep lilies and antifreeze away'],
+    warningSigns: ['Straining to pee with little or nothing coming out (males)', 'Not eating for a day', 'Open-mouth breathing', 'Hiding and not grooming'],
+    conditions: [
+      { name: 'Urinary blockage', signs: 'Straining, crying, no urine (usually males)', firstSteps: 'Go now', vetWhen: 'Emergency - it is fatal within a day or two' },
+      { name: 'Lily poisoning', signs: 'Vomiting, drooling after chewing any lily or its pollen', firstSteps: 'Go now', vetWhen: 'Emergency - kidney failure' },
+      { name: 'Upper respiratory infection', signs: 'Sneezing, runny eyes and nose', firstSteps: 'Keep warm, encourage eating', vetWhen: 'Not eating or breathing hard' },
+    ],
+    sensors: ['Camera ID (animal roster)', 'Water bowl level'],
+  },
 ];
 
 /** Species in one group, in library order. */
@@ -319,17 +373,8 @@ export const animalsIn = (g: AnimalGroup) => ANIMALS.filter((a) => a.group === g
 
 export const animalById = (id: string): AnimalSpecies | undefined => ANIMALS.find((a) => a.id === id);
 
-/** Plants poisonous to these animals - keep them out of runs, pastures and hay. */
-export const TOXIC_PLANT_IDS_BY_SPECIES: Partial<Record<SpeciesId, string[]>> = {
-  chicken: ['avocado', 'nightshade', 'yew', 'rhubarb-leaves'],
-  duck: ['avocado', 'nightshade', 'yew'],
-  goat: ['rhododendron', 'yew', 'nightshade', 'oleander'],
-  rabbit: ['rhododendron', 'foxglove', 'yew', 'nightshade'],
-  'guinea-pig': ['rhododendron', 'foxglove', 'nightshade', 'avocado'],
-  chinchilla: ['rhododendron', 'avocado', 'oleander'],
-  sheep: ['rhododendron', 'yew', 'oleander', 'nightshade'],
-  pig: ['nightshade', 'oleander', 'avocado'],
-  alpaca: ['rhododendron', 'yew', 'oleander'],
-  tortoise: ['rhododendron', 'oleander', 'foxglove', 'avocado'],
-  'bearded-dragon': ['avocado', 'rhubarb-leaves'],
-};
+/** Plants poisonous to each species - derived from PLANTS[].toxicTo so the two never disagree. */
+export const TOXIC_PLANT_IDS_BY_SPECIES: Partial<Record<SpeciesId, string[]>> = PLANTS.reduce<Partial<Record<SpeciesId, string[]>>>((acc, p) => {
+  for (const s of (p.toxicTo ?? []) as SpeciesId[]) (acc[s] ??= []).push(p.id);
+  return acc;
+}, {});

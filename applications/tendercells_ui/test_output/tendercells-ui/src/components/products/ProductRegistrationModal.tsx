@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { modelUrlProblem } from '../../lib/three/gltfLoader';
+import { hfModelUrl } from '../../lib/three/huggingFace';
 import {
   Dialog,
   DialogTitle,
@@ -45,11 +46,15 @@ import PrecisionManufacturingOutlinedIcon from '@mui/icons-material/PrecisionMan
 import RestaurantOutlinedIcon from '@mui/icons-material/RestaurantOutlined';
 import SensorsOutlinedIcon from '@mui/icons-material/SensorsOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import WaterDropOutlinedIcon from '@mui/icons-material/WaterDropOutlined';
 import { useTheme, useMediaQuery } from '@mui/material';
 import QRCodeScanner from './QRCodeScanner';
 import ConnectionSetupWizard from './ConnectionSetupWizard';
 import type { BuildSource, HardwareSetupMode, Product, ProductFamily, ProductType, RegisterProductData, SimulationBackend } from '../../types/products';
+import { buildBundleCameraRegistration, type BundleCameraSpec } from '../../lib/products/cameraPackage';
 
 interface ProductRegistrationModalProps {
   isOpen: boolean;
@@ -58,6 +63,46 @@ interface ProductRegistrationModalProps {
   onRegisterFirstChickenTender?: () => Promise<Product | void>;
   showConnectionWizardAfterRegister?: boolean;
 }
+
+const capabilityLabels: Record<string, string> = {
+  camera: 'Camera',
+  microphone: 'Digital microphone',
+  microsd: 'microSD storage',
+  wifi: 'Wi-Fi',
+  ble: 'Bluetooth LE',
+  gpio: 'GPIO / I2C / SPI',
+  battery_power: 'Battery power + USB charging',
+  temperature: 'Temperature sensor',
+  water_level: 'Water level sensor',
+  flow_sensor: 'Water flow sensor',
+  pump_relay: 'Low-voltage pump relay',
+  feed_level: 'Feed level sensor',
+  load_cell: 'Load cell / scale',
+  feeder_motor: 'Feeder motor driver',
+  drive_motor: 'RC drive motor driver',
+  steering_servo: 'RC steering servo',
+  gps: 'GPS position',
+  route_monitoring: 'Route monitoring',
+  flight_telemetry: 'Flight telemetry and reports',
+  task_schedules: 'Schedules and tasks',
+};
+
+const senseCapabilities = Object.keys(capabilityLabels);
+const genericCameraCapabilities = ['camera', 'wifi', 'ble', 'gpio'];
+const defaultCameraCapabilities = ['camera', 'wifi', 'ble', 'battery_power'];
+
+const capabilityPresets: Record<string, string[]> = {
+  camera_only: defaultCameraCapabilities,
+  camera_sound: [...defaultCameraCapabilities, 'microphone'],
+  local_recording: [...defaultCameraCapabilities, 'microsd'],
+  full_sense: senseCapabilities,
+  custom: [],
+};
+const familyCapabilities: Partial<Record<ProductFamily, string[]>> = {
+  waterer: ['wifi', 'ble', 'gpio', 'water_level', 'flow_sensor', 'pump_relay', 'temperature', 'battery_power'],
+  feeder: ['wifi', 'ble', 'gpio', 'feed_level', 'load_cell', 'feeder_motor', 'battery_power'],
+  'sensor-pod': ['wifi', 'ble', 'gpio', 'temperature', 'battery_power'],
+};
 
 export default function ProductRegistrationModal({
   isOpen,
@@ -68,17 +113,26 @@ export default function ProductRegistrationModal({
 }: ProductRegistrationModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [activeTab, setActiveTab] = useState<number>(0);
-  const [productType, setProductType] = useState<ProductType>('hardware_unit');
-  const [productName, setProductName] = useState('');
-  const [productFamily, setProductFamily] = useState<ProductFamily>('chicken-tender');
-  const [buildSource, setBuildSource] = useState<BuildSource>('tendercells-kit');
-  const [selectedTemplateId, setSelectedTemplateId] = useState('chicken-tender-kit');
+  const [activeTab, setActiveTab] = useState<number>(3);
+  const [productType, setProductType] = useState<ProductType>('automation_device');
+  const [productName, setProductName] = useState('My Camera Node');
+  const [productFamily, setProductFamily] = useState<ProductFamily>('camera-kit');
+  const [buildSource, setBuildSource] = useState<BuildSource>('open-source-diy');
+  const [selectedTemplateId, setSelectedTemplateId] = useState('camera-kit');
+  const [connectionType, setConnectionType] = useState<'tendercells-template' | 'local-import' | 'huggingface'>('tendercells-template');
+  const [sourceUrl, setSourceUrl] = useState('');
+  const [controllerBoard, setControllerBoard] = useState('Seeed XIAO ESP32-S3 Sense');
+  const [powerSource, setPowerSource] = useState('Rechargeable battery');
+  const [batteryCapacity, setBatteryCapacity] = useState('2000');
+  const [cameraModule, setCameraModule] = useState('OV2640 / compatible camera');
+  const [cameraStreamUrl, setCameraStreamUrl] = useState('');
+  const [enabledCapabilities, setEnabledCapabilities] = useState<string[]>(defaultCameraCapabilities);
+  const [capabilityProfile, setCapabilityProfile] = useState('camera_only');
   const [customProductName, setCustomProductName] = useState('');
   const [model, setModel] = useState('');
   const [location, setLocation] = useState('');
   const [animalCount, setAnimalCount] = useState('4');
-  const [hardwareSetupMode, setHardwareSetupMode] = useState<HardwareSetupMode>('sim_only');
+  const [hardwareSetupMode, setHardwareSetupMode] = useState<HardwareSetupMode>('connect_now');
   const [simulationBackend, setSimulationBackend] = useState<SimulationBackend>('browser_threejs');
   const [simulationProfile, setSimulationProfile] = useState('layout-and-axis-preview');
   const [roboticsMiddleware, setRoboticsMiddleware] = useState('mqtt_bridge');
@@ -94,7 +148,7 @@ export default function ProductRegistrationModal({
   const [ownerEmail, setOwnerEmail] = useState('');
   const [deviceId, setDeviceId] = useState('');
   const [hardwareRevision, setHardwareRevision] = useState('');
-  const [firmwareTarget, setFirmwareTarget] = useState('');
+  const [firmwareTarget, setFirmwareTarget] = useState('firmware/camera-node');
   const [firmwareVersion, setFirmwareVersion] = useState('');
   const [mqttBaseTopic, setMqttBaseTopic] = useState('');
   const [repoUrl, setRepoUrl] = useState('');
@@ -112,6 +166,8 @@ export default function ProductRegistrationModal({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [registeredProduct, setRegisteredProduct] = useState<Product | null>(null);
   const [isConnectionWizardOpen, setIsConnectionWizardOpen] = useState(false);
+  const [flasherUrl, setFlasherUrl] = useState<string | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const productTemplates = [
     {
@@ -152,6 +208,27 @@ export default function ProductRegistrationModal({
       productName: 'Chicken Tender',
       model: 'Chicken Tender Coop',
       firmwareTarget: 'firmware/chicken-tender',
+    },
+    {
+      id: 'chicken-tender-camera-package',
+      title: 'Chicken Tender + Camera',
+      subtitle: 'Coop and a mounted camera, registered together as one package.',
+      description: 'Registers the coop and a linked camera node in one step - the camera is mounted on this coop, shows on its dashboard, and appears attached to it on the property map instead of as a separate device to place by hand.',
+      icon: <CottageOutlinedIcon />,
+      productType: 'hardware_unit' as ProductType,
+      productFamily: 'chicken-tender' as ProductFamily,
+      buildSource: 'tendercells-kit' as BuildSource,
+      productName: 'Chicken Tender',
+      model: 'Chicken Tender Coop',
+      firmwareTarget: 'firmware/chicken-tender',
+      bundleCamera: {
+        productName: 'Chicken Tender Camera',
+        model: 'ESP32-S3 Camera + Battery',
+        controllerBoard: 'Seeed XIAO ESP32-S3 Sense',
+        cameraModule: 'OV2640 / compatible camera',
+        firmwareTarget: 'firmware/camera-node',
+        enabledCapabilities: defaultCameraCapabilities,
+      } satisfies BundleCameraSpec,
     },
     {
       id: 'roaming-roost',
@@ -298,30 +375,38 @@ export default function ProductRegistrationModal({
     },
     {
       id: 'waterer',
-      title: 'Smart Waterer',
-      subtitle: 'Water level, valves, flow, and freeze protection.',
+      title: 'DIY ESP32 Waterer',
+      subtitle: 'Low-cost water level, flow, and pump control.',
       description: 'Water product for float sensors, valves, heaters, reservoirs, and printed mounts.',
       icon: <LocalDrinkOutlinedIcon />,
       productType: 'automation_device' as ProductType,
       productFamily: 'waterer' as ProductFamily,
-      buildSource: 'prototype' as BuildSource,
-      productName: 'Smart Waterer',
-      model: 'TenderCells Waterer Module',
+      buildSource: 'open-source-diy' as BuildSource,
+      productName: 'My Watering Node',
+      model: 'Seeed XIAO ESP32-C3 Watering Node',
       firmwareTarget: 'firmware/waterer',
+      hardwareSetupMode: 'connect_now' as HardwareSetupMode,
+      controllerBoard: 'Seeed XIAO ESP32-C3',
+      powerSource: 'USB-C 5V or protected battery supply',
+      enabledCapabilities: ['wifi', 'gpio', 'water_level'],
       activeTab: 3,
     },
     {
       id: 'feeder',
-      title: 'Smart Feeder',
-      subtitle: 'Feed hoppers, augers, scales, and portion control.',
+      title: 'DIY ESP32 Feeder',
+      subtitle: 'Low-cost hopper sensing, weighing, and motor control.',
       description: 'Standalone feeder product for feed dispensing, reservoir sensing, anti-clog cycles, and calibration.',
       icon: <RestaurantOutlinedIcon />,
       productType: 'automation_device' as ProductType,
       productFamily: 'feeder' as ProductFamily,
-      buildSource: 'prototype' as BuildSource,
-      productName: 'Smart Feeder',
-      model: 'TenderCells Feeder Module',
+      buildSource: 'open-source-diy' as BuildSource,
+      productName: 'My Feeding Node',
+      model: 'Seeed XIAO ESP32-C3 Feeding Node',
       firmwareTarget: 'firmware/feeder',
+      hardwareSetupMode: 'connect_now' as HardwareSetupMode,
+      controllerBoard: 'Seeed XIAO ESP32-C3',
+      powerSource: 'USB-C 5V or protected battery supply',
+      enabledCapabilities: ['wifi', 'gpio', 'feed_level'],
       activeTab: 3,
     },
     {
@@ -340,16 +425,58 @@ export default function ProductRegistrationModal({
     },
     {
       id: 'camera-kit',
-      title: 'Camera Kit',
-      subtitle: 'Camera, enclosure, and AI vision accessory.',
-      description: 'Register camera kits, IR modules, printed mounts, detection zones, and stream hardware.',
+      title: 'DIY ESP32 Camera Node',
+      subtitle: 'Camera, battery, enclosure, and programmable starter device.',
+      description: 'Build a named home camera or viewing node, flash it in the browser, and add its live view to a custom dashboard.',
       icon: <CameraAltOutlinedIcon />,
       productType: 'automation_device' as ProductType,
       productFamily: 'camera-kit' as ProductFamily,
-      buildSource: 'prototype' as BuildSource,
-      productName: 'Camera Kit',
-      model: 'TenderCells Camera Kit',
-      firmwareTarget: 'firmware/camera-kit',
+      buildSource: 'open-source-diy' as BuildSource,
+      productName: 'My Camera Node',
+      model: 'ESP32-S3 Camera + Battery',
+      firmwareTarget: 'firmware/camera-node',
+      hardwareSetupMode: 'connect_now' as HardwareSetupMode,
+      controllerBoard: 'Seeed XIAO ESP32-S3 Sense',
+      powerSource: 'Rechargeable battery',
+      batteryCapacity: '2000',
+      cameraModule: 'OV2640 / compatible camera',
+      enabledCapabilities: defaultCameraCapabilities,
+      activeTab: 3,
+    },
+    {
+      id: 'rc-vehicle',
+      title: 'DIY RC Vehicle',
+      subtitle: 'Motorized rover, cart, or inspection vehicle.',
+      description: 'Starter Node control for a low-voltage motor driver and steering servo. Motors default to stopped.',
+      icon: <DirectionsCarOutlinedIcon />,
+      productType: 'automation_device' as ProductType,
+      productFamily: 'community-custom' as ProductFamily,
+      buildSource: 'open-source-diy' as BuildSource,
+      productName: 'My RC Vehicle',
+      model: 'ESP32 Starter Node RC Vehicle',
+      firmwareTarget: 'firmware/starter-node',
+      hardwareSetupMode: 'connect_now' as HardwareSetupMode,
+      controllerBoard: 'Seeed XIAO ESP32-S3',
+      powerSource: 'Separate protected motor and controller supplies',
+      enabledCapabilities: ['wifi', 'ble', 'gpio', 'drive_motor', 'steering_servo', 'battery_power'],
+      activeTab: 3,
+    },
+    {
+      id: 'drone-monitor',
+      title: 'Drone Monitor',
+      subtitle: 'Routes, monitoring, reports, schedules, and tasks.',
+      description: 'Basic mission planning and telemetry integration for ArduPilot or PX4. TenderCells does not replace flight stabilization, arming, or failsafes.',
+      icon: <HubOutlinedIcon />,
+      productType: 'custom_product' as ProductType,
+      productFamily: 'community-custom' as ProductFamily,
+      buildSource: 'third-party' as BuildSource,
+      productName: 'My Drone Monitor',
+      model: 'ArduPilot / PX4 telemetry bridge',
+      firmwareTarget: 'external-flight-controller',
+      hardwareSetupMode: 'connect_now' as HardwareSetupMode,
+      controllerBoard: 'Supported ArduPilot or PX4 flight controller',
+      powerSource: 'Flight controller managed',
+      enabledCapabilities: ['wifi', 'battery_power', 'gps', 'route_monitoring', 'flight_telemetry', 'task_schedules'],
       activeTab: 3,
     },
     {
@@ -445,6 +572,8 @@ export default function ProductRegistrationModal({
   ];
 
   const applyTemplate = (template: typeof productTemplates[number]) => {
+    setConnectionType('tendercells-template');
+    setSourceUrl('');
     setSelectedTemplateId(template.id);
     setProductType(template.productType);
     setProductFamily(template.productFamily);
@@ -471,6 +600,13 @@ export default function ProductRegistrationModal({
     setHardwareRevision(template.hardwareRevision || '');
     setFirmwareTarget(template.firmwareTarget || '');
     setFirmwareVersion('');
+    setControllerBoard('controllerBoard' in template ? String(template.controllerBoard || '') : '');
+    setPowerSource('powerSource' in template ? String(template.powerSource || '') : '');
+    setBatteryCapacity('batteryCapacity' in template ? String(template.batteryCapacity || '') : '');
+    setCameraModule('cameraModule' in template ? String(template.cameraModule || '') : '');
+    setEnabledCapabilities('enabledCapabilities' in template && Array.isArray(template.enabledCapabilities) ? [...template.enabledCapabilities] : []);
+    setCapabilityProfile('enabledCapabilities' in template && Array.isArray(template.enabledCapabilities) ? 'camera_only' : 'custom');
+    setCameraStreamUrl('');
     setMqttBaseTopic(template.mqttBaseTopic || '');
     setRepoUrl('');
     setSchematicUrl('');
@@ -484,6 +620,38 @@ export default function ProductRegistrationModal({
     setActiveTab(template.activeTab ?? 0);
     setErrors({});
     setSubmitError(null);
+  };
+
+  const importLocalTemplate = async (file: File) => {
+    try {
+      const data = JSON.parse(await file.text()) as RegisterProductData;
+      setConnectionType('local-import');
+      setSourceUrl(file.name);
+      setProductType(data.product_type || 'custom_product');
+      setProductFamily((data.metadata?.product_family as ProductFamily) || 'community-custom');
+      setBuildSource((data.metadata?.build_source as BuildSource) || 'open-source-diy');
+      setProductName(data.product_name || '');
+      setCustomProductName(String(data.metadata?.custom_product_name || data.product_name || ''));
+      setModel(data.model || '');
+      setLocation(data.location || '');
+      setSerialNumber(data.serial_number || '');
+      setActivationCode(data.activation_code || '');
+      setDeviceId(data.device_id || '');
+      setFirmwareTarget(String(data.metadata?.firmware_target || ''));
+      setMqttBaseTopic(String(data.metadata?.mqtt_base_topic || ''));
+      setCustomDeviceAssetUrl(String(data.metadata?.custom_device_asset_url || ''));
+      setCameraStreamUrl(String(data.metadata?.camera_stream_url || ''));
+      setEnabledCapabilities(Array.isArray(data.metadata?.enabled_capabilities) ? data.metadata.enabled_capabilities : []);
+      setCapabilityProfile(String(data.metadata?.capability_profile || 'custom'));
+      setRepoUrl(String(data.metadata?.repo_url || ''));
+      setNotes(String(data.metadata?.notes || ''));
+      setActiveTab(3);
+      setErrors({});
+    } catch {
+      setSubmitError('Could not import this product JSON template.');
+    } finally {
+      if (importInputRef.current) importInputRef.current.value = '';
+    }
   };
 
   const handleRegisterFirstChickenTender = async () => {
@@ -511,18 +679,42 @@ export default function ProductRegistrationModal({
 
   // Reset form when modal opens/closes
   useEffect(() => {
-    if (!isOpen) {
-      setActiveTab(0);
-      setProductType('hardware_unit');
-      setProductFamily('chicken-tender');
-      setBuildSource('tendercells-kit');
-      setSelectedTemplateId('chicken-tender-kit');
+    if (isOpen) {
+      const params = new URLSearchParams(window.location.search);
+      const requestedName = params.get('name')?.trim();
+      const requestedDeviceId = params.get('deviceId')?.trim();
+      if (params.get('template') === 'camera-kit') {
+        setSelectedTemplateId('camera-kit');
+        setProductFamily('camera-kit');
+        setFirmwareTarget('firmware/camera-node');
+      }
+      if (requestedName) setProductName(requestedName);
+      if (requestedDeviceId) {
+        setDeviceId(requestedDeviceId);
+        setMqttBaseTopic(`tc/${requestedDeviceId}`);
+        setCameraStreamUrl(`http://${requestedDeviceId}.local/stream`);
+      }
+    } else {
+      setActiveTab(3);
+      setProductType('automation_device');
+      setProductFamily('camera-kit');
+      setBuildSource('open-source-diy');
+      setSelectedTemplateId('camera-kit');
+      setConnectionType('tendercells-template');
+      setSourceUrl('');
+      setControllerBoard('Seeed XIAO ESP32-S3 Sense');
+      setPowerSource('Rechargeable battery');
+      setBatteryCapacity('2000');
+      setCameraModule('OV2640 / compatible camera');
+      setCameraStreamUrl('');
+      setEnabledCapabilities(defaultCameraCapabilities);
+      setCapabilityProfile('camera_only');
       setCustomProductName('');
-      setProductName('');
-      setModel('');
+      setProductName('My Camera Node');
+      setModel('ESP32-S3 Camera + Battery');
       setLocation('');
       setAnimalCount('4');
-      setHardwareSetupMode('sim_only');
+      setHardwareSetupMode('connect_now');
       setSimulationBackend('browser_threejs');
       setSimulationProfile('layout-and-axis-preview');
       setRoboticsMiddleware('mqtt_bridge');
@@ -538,7 +730,7 @@ export default function ProductRegistrationModal({
       setOwnerEmail('');
       setDeviceId('');
       setHardwareRevision('');
-      setFirmwareTarget('');
+      setFirmwareTarget('firmware/camera-node');
       setFirmwareVersion('');
       setMqttBaseTopic('');
       setRepoUrl('');
@@ -619,6 +811,20 @@ export default function ProductRegistrationModal({
           owner_email: ownerEmail.trim() || undefined,
           product_family: productFamily,
           build_source: buildSource,
+          connection_type: connectionType,
+          source_url: sourceUrl.trim() || undefined,
+          huggingface_repo: connectionType === 'huggingface' ? sourceUrl.trim() || undefined : undefined,
+          controller_board: controllerBoard.trim() || undefined,
+          power_source: powerSource.trim() || undefined,
+          battery_capacity_mah: batteryCapacity ? Number(batteryCapacity) : undefined,
+          camera_module: cameraModule.trim() || undefined,
+          camera_stream_url: cameraStreamUrl.trim() || undefined,
+          hardware_capabilities: [...new Set([
+            ...(familyCapabilities[productFamily] || (controllerBoard === 'Seeed XIAO ESP32-S3 Sense' ? senseCapabilities : genericCameraCapabilities)),
+            ...enabledCapabilities,
+          ])],
+          enabled_capabilities: enabledCapabilities,
+          capability_profile: capabilityProfile,
           custom_product_name: customProductName.trim() || undefined,
           hardware_revision: hardwareRevision.trim() || undefined,
           firmware_target: firmwareTarget.trim() || undefined,
@@ -644,14 +850,26 @@ export default function ProductRegistrationModal({
           terrain_source: terrainSource,
           terrain_capture_device_id: terrainCaptureDeviceId.trim() || undefined,
           terrain_detail_status: propertySimulationEnabled ? 'manual' : 'not_started',
-          custom_device_asset_url: customDeviceAssetUrl.trim() || undefined,
+          custom_device_asset_url: connectionType === 'huggingface' && customDeviceAssetUrl.trim()
+            ? hfModelUrl(customDeviceAssetUrl.trim()).url
+            : customDeviceAssetUrl.trim() || undefined,
           telemetry_learning_enabled: telemetryLearningEnabled,
           notes: notes.trim() || undefined,
         },
       };
 
       const result = await onRegister(registrationData);
-      
+
+      // Package template ("Chicken Tender + Camera" etc.): the camera is a
+      // real, separate ESP32 board - register it as its own product right
+      // after the primary, linked via metadata.mounted_on_product_id so the
+      // property map mounts it on the parent and the parent's dashboard can
+      // show its feed.
+      const template = productTemplates.find((item) => item.id === selectedTemplateId);
+      if (template && 'bundleCamera' in template && template.bundleCamera && result && 'id' in result) {
+        await onRegister(buildBundleCameraRegistration(template.bundleCamera, result.id, buildSource, senseCapabilities));
+      }
+
       // If registration returns a product and we should show connection wizard, open it
       if (result && 'id' in result && showConnectionWizardAfterRegister) {
         setRegisteredProduct(result as Product);
@@ -665,6 +883,22 @@ export default function ProductRegistrationModal({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const openRegistrationFlasher = () => {
+    const target = productFamily === 'camera-kit' || firmwareTarget.includes('camera-node')
+      ? 'camera-node'
+      : productFamily === 'chicken-tender' || firmwareTarget.includes('chicken-tender')
+        ? 'chicken-tender'
+        : 'starter-node';
+    const params = new URLSearchParams({
+      target,
+      product: productFamily,
+      name: productName.trim() || customProductName.trim() || 'My Tender Cells Device',
+      embed: '1',
+    });
+    if (deviceId.trim()) params.set('deviceId', deviceId.trim());
+    setFlasherUrl(`/flash/?${params.toString()}`);
   };
 
   return (
@@ -715,50 +949,93 @@ export default function ProductRegistrationModal({
 
             <Box>
               <Grid container spacing={1.5}>
-                {productTemplates.map((template) => (
-                  <Grid item xs={12} sm={6} key={template.id}>
-                    <Paper
-                      component="button"
-                      type="button"
-                      onClick={() => applyTemplate(template)}
-                      sx={{
-                        p: 2,
-                        height: '100%',
-                        width: '100%',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        bgcolor: selectedTemplateId === template.id ? 'rgba(107, 191, 89, 0.13)' : 'rgba(0, 43, 31, 0.64)',
-                        border: `1px solid ${selectedTemplateId === template.id ? '#C8E6A0' : 'rgba(159, 176, 141, 0.28)'}`,
-                        borderRadius: 1,
-                        color: 'text.primary',
-                        '&:hover': {
-                          borderColor: '#C8E6A0',
-                          bgcolor: 'rgba(107, 191, 89, 0.10)',
-                        },
-                      }}
-                    >
-                      <Stack direction="row" spacing={2} alignItems="flex-start">
-                        <Box sx={{ color: '#DDF2B1', '& svg': { fontSize: 48 } }}>
-                          {template.icon}
-                        </Box>
-                        <Box>
-                          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-                            <Typography variant="h6" sx={{ color: '#F0F2DA' }}>
-                              {template.title}
-                            </Typography>
-                            {template.id === 'first-chicken-tender' && <Chip size="small" label="Garage" color="success" />}
+                {[...productTemplates].sort((a, b) => Number(b.id === 'camera-kit') - Number(a.id === 'camera-kit')).map((template) => {
+                  const isSelected = selectedTemplateId === template.id;
+                  return (
+                    <Grid item xs={12} sm={6} key={template.id}>
+                      <Paper
+                        sx={{
+                          height: '100%',
+                          overflow: 'hidden',
+                          bgcolor: isSelected ? 'rgba(107, 191, 89, 0.13)' : 'rgba(0, 43, 31, 0.64)',
+                          border: `1px solid ${isSelected ? '#C8E6A0' : 'rgba(159, 176, 141, 0.28)'}`,
+                          borderRadius: 1,
+                          color: 'text.primary',
+                        }}
+                      >
+                        <Box
+                          component="button"
+                          type="button"
+                          onClick={() => applyTemplate(template)}
+                          aria-pressed={isSelected}
+                          sx={{
+                            p: 2,
+                            width: '100%',
+                            minHeight: 148,
+                            border: 0,
+                            bgcolor: 'transparent',
+                            color: 'inherit',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            '&:hover': { bgcolor: 'rgba(107, 191, 89, 0.10)' },
+                            '&:focus-visible': { outline: '2px solid #C8E6A0', outlineOffset: -2 },
+                          }}
+                        >
+                          <Stack direction="row" spacing={2} alignItems="flex-start">
+                            <Box sx={{ color: '#DDF2B1', '& svg': { fontSize: 48 } }}>
+                              {template.icon}
+                            </Box>
+                            <Box>
+                              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                                <Typography variant="h6" sx={{ color: '#F0F2DA' }}>
+                                  {template.title}
+                                </Typography>
+                                {template.id === 'first-chicken-tender' && <Chip size="small" label="Garage" color="success" />}
+                              </Stack>
+                              <Typography variant="body2" sx={{ color: '#C8E6A0', mb: 0.75 }}>
+                                {template.subtitle}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {template.description}
+                              </Typography>
+                            </Box>
                           </Stack>
-                          <Typography variant="body2" sx={{ color: '#C8E6A0', mb: 0.75 }}>
-                            {template.subtitle}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {template.description}
-                          </Typography>
                         </Box>
-                      </Stack>
-                    </Paper>
-                  </Grid>
-                ))}
+                        {isSelected && (
+                          <Stack
+                            direction={{ xs: 'column', sm: 'row' }}
+                            spacing={1}
+                            sx={{ p: 1.5, pt: 1, borderTop: '1px solid rgba(200, 230, 160, 0.22)' }}
+                          >
+                            <Button
+                              fullWidth
+                              onClick={openRegistrationFlasher}
+                              variant="outlined"
+                              startIcon={<SystemUpdateAltIcon />}
+                              disabled={isSubmitting}
+                            >
+                              {productFamily === 'camera-kit' ? '1. Flash Camera' : 'Flash Firmware'}
+                            </Button>
+                            <Button
+                              fullWidth
+                              onClick={template.id === 'first-chicken-tender' ? handleRegisterFirstChickenTender : handleSubmit}
+                              variant="contained"
+                              disabled={isSubmitting}
+                            >
+                              {isSubmitting
+                                ? 'Registering...'
+                                : productFamily === 'camera-kit'
+                                  ? '2. Register Camera'
+                                  : template.id === 'first-chicken-tender'
+                                    ? 'Register First Device'
+                                    : 'Register Product'}
+                            </Button>
+                          </Stack>
+                        )}
+                      </Paper>
+                    </Grid>
+                  );
+                })}
               </Grid>
             </Box>
 
@@ -783,13 +1060,52 @@ export default function ProductRegistrationModal({
                     Confirm the product name, location, animal count, and hardware setup before registering.
                   </Typography>
                 </Box>
-                {selectedTemplateId === 'first-chicken-tender' && (
-                  <Button variant="contained" onClick={handleRegisterFirstChickenTender} disabled={isSubmitting}>
-                    Register First Device
-                  </Button>
-                )}
               </Stack>
             </Paper>
+
+            <Grid container spacing={2} alignItems="flex-start">
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Registration Source</InputLabel>
+                  <Select
+                    value={connectionType}
+                    label="Registration Source"
+                    onChange={(event) => {
+                      const next = event.target.value as typeof connectionType;
+                      setConnectionType(next);
+                      if (next === 'huggingface') {
+                        setProductType('custom_product');
+                        setBuildSource('open-source-diy');
+                      }
+                    }}
+                  >
+                    <MenuItem value="tendercells-template">TenderCells Template</MenuItem>
+                    <MenuItem value="local-import">Local Product Template</MenuItem>
+                    <MenuItem value="huggingface">Hugging Face</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                {connectionType === 'local-import' ? (
+                  <>
+                    <input ref={importInputRef} type="file" accept="application/json,.json" hidden onChange={(event) => event.target.files?.[0] && void importLocalTemplate(event.target.files[0])} />
+                    <Button fullWidth variant="outlined" startIcon={<UploadFileIcon />} onClick={() => importInputRef.current?.click()} sx={{ minHeight: 56 }}>
+                      Choose Product JSON
+                    </Button>
+                  </>
+                ) : connectionType === 'huggingface' ? (
+                  <TextField
+                    fullWidth
+                    label="Hugging Face Repository"
+                    value={sourceUrl}
+                    onChange={(event) => setSourceUrl(event.target.value)}
+                    placeholder="https://huggingface.co/owner/repository"
+                  />
+                ) : (
+                  <TextField fullWidth label="Template" value={selectedTemplateId} disabled />
+                )}
+              </Grid>
+            </Grid>
 
             {/* Product Type Selection */}
             <FormControl fullWidth required>
@@ -807,6 +1123,96 @@ export default function ProductRegistrationModal({
             </FormControl>
 
             <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Controller Board</InputLabel>
+                  <Select
+                    label="Controller Board"
+                    value={controllerBoard}
+                    onChange={(event) => {
+                      const board = event.target.value;
+                      setControllerBoard(board);
+                      setCapabilityProfile('camera_only');
+                      setEnabledCapabilities(board === 'Seeed XIAO ESP32-S3 Sense'
+                        ? defaultCameraCapabilities
+                        : ['camera', 'wifi', 'ble']);
+                    }}
+                  >
+                    <MenuItem value="Seeed XIAO ESP32-S3 Sense">Seeed XIAO ESP32-S3 Sense</MenuItem>
+                    <MenuItem value="Generic ESP32-S3 camera board">Generic ESP32-S3 camera board</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth label="Camera Module" value={cameraModule} onChange={(event) => setCameraModule(event.target.value)} placeholder="OV2640" />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth label="Power Source" value={powerSource} onChange={(event) => setPowerSource(event.target.value)} placeholder="Rechargeable battery + USB-C" />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField fullWidth type="number" label="Battery Capacity (mAh)" value={batteryCapacity} onChange={(event) => setBatteryCapacity(event.target.value)} />
+              </Grid>
+              {productFamily === 'camera-kit' && (
+                <>
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" gutterBottom>Use available board features</Typography>
+                    <FormControl fullWidth sx={{ mb: 1 }}>
+                      <InputLabel>Starter setup</InputLabel>
+                      <Select
+                        label="Starter setup"
+                        value={capabilityProfile}
+                        onChange={(event) => {
+                          const profile = event.target.value;
+                          setCapabilityProfile(profile);
+                          if (profile !== 'custom') setEnabledCapabilities(capabilityPresets[profile]);
+                        }}
+                      >
+                        <MenuItem value="camera_only">Camera only</MenuItem>
+                        <MenuItem value="camera_sound" disabled={controllerBoard !== 'Seeed XIAO ESP32-S3 Sense'}>Camera + sound events</MenuItem>
+                        <MenuItem value="local_recording" disabled={controllerBoard !== 'Seeed XIAO ESP32-S3 Sense'}>Camera + microSD recording</MenuItem>
+                        <MenuItem value="full_sense" disabled={controllerBoard !== 'Seeed XIAO ESP32-S3 Sense'}>Full Sense board</MenuItem>
+                        <MenuItem value="custom">Custom selection</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                      {Object.entries(capabilityLabels).map(([capability, label]) => {
+                        const supported = (controllerBoard === 'Seeed XIAO ESP32-S3 Sense'
+                          ? senseCapabilities
+                          : genericCameraCapabilities).includes(capability);
+                        return (
+                          <FormControlLabel
+                            key={capability}
+                            disabled={!supported}
+                            control={<Checkbox
+                              checked={supported && enabledCapabilities.includes(capability)}
+                              onChange={(event) => {
+                                setCapabilityProfile('custom');
+                                setEnabledCapabilities((current) => event.target.checked
+                                  ? [...new Set([...current, capability])]
+                                  : current.filter((item) => item !== capability));
+                              }}
+                            />}
+                            label={label}
+                          />
+                        );
+                      })}
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary">
+                      Unavailable features are disabled for this board profile. External modules must be registered separately.
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Camera Stream URL (optional)"
+                      value={cameraStreamUrl}
+                      onChange={(event) => setCameraStreamUrl(event.target.value)}
+                      placeholder="http://192.168.1.50/stream"
+                      helperText="Add this after WiFi setup if the camera reports a stream address. You can also add it later."
+                    />
+                  </Grid>
+                </>
+              )}
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth required>
                   <InputLabel>Product Family</InputLabel>
@@ -1305,14 +1711,48 @@ export default function ProductRegistrationModal({
           <Button onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Registering...' : 'Register Product'}
-          </Button>
         </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(flasherUrl)}
+        onClose={() => setFlasherUrl(null)}
+        fullScreen
+        PaperProps={{ sx: { bgcolor: '#001F17' } }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1 }}>
+          <Box>
+            <Typography variant="subtitle1" sx={{ color: '#E6E8D8', fontWeight: 700 }}>
+              Flash {productName.trim() || customProductName.trim() || 'Device'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Close this window after flashing to continue registration.
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Button
+              startIcon={<MenuBookIcon />}
+              href="/guides/camera-node-first-build"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Guide
+            </Button>
+            <Button variant="contained" onClick={() => setFlasherUrl(null)}>Done</Button>
+            <IconButton aria-label="Close flasher and return to registration" onClick={() => setFlasherUrl(null)}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        {flasherUrl && (
+          <Box
+            component="iframe"
+            src={flasherUrl}
+            title="Tender Cells device flasher"
+            allow="serial; usb"
+            sx={{ width: '100%', flex: 1, border: 0, bgcolor: '#fff' }}
+          />
+        )}
       </Dialog>
 
       {/* QR Code Scanner Modal */}

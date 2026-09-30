@@ -75,6 +75,9 @@ export const SCHEMAS: Record<string, Schema> = {
   },
   // Relay/light: any farm load on/off (heat lamp, water pump, fan, grow light).
   light:   { on:      { type: "boolean", required: true } },
+  cameraConfig: {
+    enabled: { type: "array", required: true },
+  },
   // GRBL gantry: coordinate move {x,y,speed} or real-time control {cmd}.
   gantry:  {
     x:     { type: "number", required: false },

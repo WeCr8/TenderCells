@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tender Cells Flasher — Put the brain in your coop</title>
+  <title>Flash a TenderCells Device</title>
   <meta name="description" content="One-click web flasher for Tender Cells ESP32 devices. No installs. Works in Chrome or Edge." />
   <style>
     :root {
@@ -60,7 +60,11 @@
     .device.soon { opacity: .5; cursor: not-allowed; }
     .device h3 { margin: 6px 0 2px; color: var(--gold); font-size: 1.05rem; }
     .device small { color: var(--goldMuted); }
-    .install-row { text-align: center; margin: 8px 0 4px; }
+    .install-row {
+      text-align: center; margin: 8px 0 4px; position: sticky; bottom: 10px;
+      z-index: 20; padding: 12px; background: var(--surface);
+      border: 1px solid var(--accent); border-radius: 10px;
+    }
     esp-web-install-button { --esp-tools-button-color: var(--bg); }
     esp-web-install-button[install-unsupported] { display: none; }
     .btn-fallback {
@@ -101,29 +105,42 @@
       cursor: pointer; color: var(--gold); font-weight: 600; padding: 6px 0;
     }
     .trouble[open] summary { margin-bottom: 8px; }
+    details.card > summary { cursor: pointer; color: var(--gold); font-weight: 700; font-size: 1.05rem; }
+    .adult { border-left-color: var(--warning); }
+    button, .device, a { touch-action: manipulation; }
+    @media (max-width: 640px) {
+      .wrap { padding: 12px 12px 72px; }
+      .topbar { padding: 10px 12px; }
+      .toplinks { display: none !important; }
+      h1 { font-size: 1.45rem; }
+      .tabs { position: sticky; top: 0; z-index: 30; background: var(--bg); padding: 8px 0; margin: 8px 0; }
+      .tab { min-height: 44px; padding: 8px 14px; }
+      .card { padding: 16px; margin: 10px 0; border-radius: 8px; }
+      .device { flex-basis: 46%; min-height: 96px; padding: 10px; }
+      .btn-fallback { width: 100%; min-height: 52px; }
+    }
     .footnote { text-align: center; }
     footer { text-align: center; color: var(--goldMuted); margin-top: 40px; font-size: .85rem; }
+    body.embed .topbar, body.embed header, body.embed .tabs, body.embed .optional-intro, body.embed footer { display: none; }
+    body.embed .wrap { max-width: 820px; padding-top: 8px; }
+    body.embed #easy { display: block; }
   </style>
 </head>
 <body>
 <nav class="topbar">
   <a class="brand" href="/">🐔 Tender Cells</a>
   <div class="toplinks">
-    <a href="/">Home</a>
-    <a href="/shop">Products</a>
-    <a href="/viewer">3D Viewer</a>
-    <a href="https://github.com/WeCr8/TenderCells/tree/main/docs/lessons" target="_blank" rel="noopener noreferrer">Lessons</a>
-    <a href="/open-source">Open Source</a>
-    <a href="/demo">App Demo</a>
+    <a href="#devicePick">Devices</a>
+    <a href="/guides/camera-node-first-build">Build guide</a>
     <a href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer">GitHub</a>
   </div>
 </nav>
 
 <div class="wrap">
   <header>
-    <h1>🐔 Tender Cells Flasher</h1>
-    <p class="tag">Put the brain into your coop — right from this page. No installs.</p>
-    <p class="url-pill">Bookmark this: <strong>tender-cells.web.app/flash</strong></p>
+    <h1>Flash a TenderCells Device</h1>
+    <p class="tag">Choose a device, connect its USB cable, and install.</p>
+    <p id="productContext" class="callout" style="display:none"></p>
   </header>
 
   <div class="tabs" role="tablist">
@@ -134,8 +151,13 @@
   <!-- ===================== EASY MODE ===================== -->
   <section id="easy" class="panel active" role="tabpanel">
 
-    <div class="card">
-      <h3 class="gold-h">What can I build right now? (pick a use case)</h3>
+    <div class="callout adult">
+      <strong>Build with an adult.</strong> An adult handles wiring, batteries, pumps,
+      motors, and powered equipment. Choose a project and follow each screen together.
+    </div>
+
+    <details class="card optional-intro">
+      <summary>What can I build?</summary>
       <p class="hint">One Starter Node board + this flasher gets you a real, live device on the
         Tender Cells open-source stack in minutes. At WiFi setup (Step 4) set <strong>peripheral</strong>
         to match — that's all that changes between these:</p>
@@ -152,10 +174,10 @@
             live alert into the dashboard. Zero extra wiring — great for classrooms.</li>
       </ul>
       <p class="hint">All open source — read and change the code anytime (see 📚 Learn mode).</p>
-    </div>
+    </details>
 
-    <div class="card">
-      <h3 class="gold-h">Prerequisites</h3>
+    <details class="card optional-intro">
+      <summary>What do I need?</summary>
 
       <div class="callout">
         <strong>To flash right now — that's all you need:</strong>
@@ -193,33 +215,38 @@
         <p class="hint">Don't have the backend yet? You can still flash now and set up WiFi later —
         the board just waits.</p>
       </details>
-    </div>
+    </details>
 
     <div class="card">
-      <h3 class="gold-h">Step 0 — What do you want to build? (auto-picks the board)</h3>
+      <h3 class="gold-h">Step 1 — What do you want to build?</h3>
       <p class="hint">Pick a goal. We select the right firmware card for you and tell you the
         one setting to choose at WiFi setup. Your chip is still auto-verified on connect — if
         the board doesn't match, the installer says so and stops.</p>
       <div class="device-pick" id="useCasePick">
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="door">🚪<h3>Open/close a door</h3><small>Starter Node · set <code>door</code></small></div>
-        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="drive">🛞<h3>Drive a rover</h3><small>Starter Node · set <code>drive</code></small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="drive">🛞<h3>Motorized RC vehicle</h3><small>Starter Node · motor driver + steering</small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="relay">💡<h3>Lamp / pump / fan</h3><small>Starter Node · set <code>relay</code></small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="temp-humidity">🌡️<h3>Temp / humidity</h3><small>Starter Node · set <code>temp-humidity</code></small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="light">☀️<h3>Light sensor</h3><small>Starter Node · set <code>light</code></small></div>
-        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-watchtower-cam.json" data-peripheral="camera">📷<h3>Live camera</h3><small>Camera Node · ESP32-S3-Sense</small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-camera-node.json" data-peripheral="camera">📷<h3>Live camera</h3><small>Single Camera Node · ESP32-S3-Sense</small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="none">🦅<h3>Threat demo</h3><small>Starter Node · no wiring</small></div>
         <div class="device" role="button" tabindex="0" data-device="/flash/manifest-chicken-tender.json" data-peripheral="">🐔<h3>Full coop</h3><small>Chicken Tender · ESP32-WROOM</small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="water-level"><h3>Watering node</h3><small>XIAO ESP32-C3/S3 - water level first</small></div>
+        <div class="device" role="button" tabindex="0" data-device="/flash/manifest-starter-node.json" data-peripheral="feed-level"><h3>Feeding node</h3><small>XIAO ESP32-C3/S3 - hopper level first</small></div>
+        <div class="device" role="button" tabindex="0" id="customFirmwareChoice"><h3>Code my own</h3><small>Edit, compile, and flash custom firmware</small></div>
       </div>
       <div id="useCaseHint" class="callout" style="display:none"></div>
     </div>
 
     <div class="card">
-      <h3 class="gold-h">Step 1 — Pick what to flash</h3>
+      <h3 class="gold-h">Your matching firmware is ready</h3>
       <p class="hint">New here, or using a small dev board like a <strong>Seeed XIAO ESP32-S3</strong>?
          Start with <strong>Starter Node</strong> — it needs no coop hardware and proves everything works.
          <strong>One Starter Node binary works for <em>any</em> product</strong> (Chicken Tender, Roaming Roost,
          Duck Dock, WatchTower, …) — you pick which product it represents during WiFi setup (Step 4).
          The flasher checks your chip on connect and won't let you flash the wrong one.</p>
+      <details class="trouble">
+      <summary>Board details (optional)</summary>
       <div class="device-pick" id="devicePick">
         <div class="device" data-manifest="/flash/manifest-starter-node.json" role="button" aria-pressed="true" tabindex="0">
           🌱 <h3>Starter Node</h3><small>ESP32-S3 (XIAO &amp; dev boards) · works for <em>any</em> product · start here</small>
@@ -227,8 +254,8 @@
         <div class="device" data-manifest="/flash/manifest-chicken-tender.json" role="button" aria-pressed="false" tabindex="0">
           🐔 <h3>Chicken Tender</h3><small>needs ESP32-WROOM-32 + coop hardware</small>
         </div>
-        <div class="device" data-manifest="/flash/manifest-watchtower-cam.json" role="button" aria-pressed="false" tabindex="0">
-          📷 <h3>Camera Node</h3><small>ESP32-S3-Sense / ESP32-CAM · live MJPEG feed</small>
+        <div class="device" data-manifest="/flash/manifest-camera-node.json" role="button" aria-pressed="false" tabindex="0">
+          📷 <h3>Single Camera Node</h3><small>Battery-powered ESP32-S3-Sense · one live MJPEG feed</small>
         </div>
       </div>
 
@@ -246,6 +273,8 @@
         card matches them yet.
       </div>
 
+      </details>
+
       <h3 class="gold-h">Step 2 — Plug the board into this computer</h3>
       <p>Use the USB cable. A light on the board should turn on.</p>
 
@@ -257,6 +286,7 @@
           <span slot="not-allowed"></span>
         </esp-web-install-button>
       </div>
+      <p class="footnote"><a href="/guides/camera-node-first-build">Open the camera wiring and first-build guide</a></p>
       <ol class="steps">
         <li>A little window pops up asking which USB port. Pick the one that appears when the
             board is plugged in (often named <code>CP210x</code>, <code>CH340</code>, or
@@ -313,8 +343,8 @@
       </div>
     </div>
 
-    <div class="card">
-      <h3 class="gold-h">Step 4 — Tell the coop your WiFi</h3>
+    <details class="card">
+      <summary>After install: connect home Wi-Fi</summary>
       <ol class="steps">
         <li>After flashing, the board makes its own WiFi network —
             <code>TenderNode-Setup</code> for the Starter Node, or <code>ChickenTender-Setup</code> for a coop.</li>
@@ -342,10 +372,10 @@
       </ol>
       <p class="hint">Nothing secret is ever baked into the chip — you set the WiFi yourself, so it's safe to share boards.
         Teachers: see the <a href="https://github.com/WeCr8/TenderCells/blob/main/docs/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md">Build Your Own Device classroom lesson</a>.</p>
-    </div>
+    </details>
 
-    <div class="card">
-      <h3 class="gold-h">⚙️ Expert mode — flash your own firmware (in-browser)</h3>
+    <details class="card" id="customFirmware">
+      <summary>Advanced: flash your own firmware</summary>
       <p class="hint">Kids and first-timers: you don't need this — Steps 0–4 above are all you do.
         This is for coders who want to compile and flash <em>custom</em> code from the browser,
         no Arduino IDE upload step.</p>
@@ -370,7 +400,7 @@
       </ol>
       <p class="hint">Same chip auto-detection applies everywhere — these tools refuse a binary
         built for the wrong chip family. All open source: read and change any of it.</p>
-    </div>
+    </details>
   </section>
 
   <!-- ===================== LEARN MODE ===================== -->
@@ -490,6 +520,13 @@
 
   // Device picker → swaps the installer manifest
   const installer = document.getElementById('installer');
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === '1') document.body.classList.add('embed');
+  const manifests = {
+    'starter-node': '/flash/manifest-starter-node.json',
+    'chicken-tender': '/flash/manifest-chicken-tender.json',
+    'camera-node': '/flash/manifest-camera-node.json'
+  };
   document.querySelectorAll('#devicePick .device:not(.soon)').forEach(d => {
     const choose = () => {
       document.querySelectorAll('#devicePick .device').forEach(x => x.setAttribute('aria-pressed', 'false'));
@@ -507,8 +544,31 @@
       x.setAttribute('aria-pressed', x.dataset.manifest === manifest ? 'true' : 'false'));
     if (installer) installer.setAttribute('manifest', manifest);
   }
+  const requestedManifest = manifests[params.get('target')];
+  if (requestedManifest) selectDeviceByManifest(requestedManifest);
+  const customFirmwareChoice = document.getElementById('customFirmwareChoice');
+  const openCustomFirmware = () => {
+    const customFirmware = document.getElementById('customFirmware');
+    customFirmware.open = true;
+    customFirmware.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  customFirmwareChoice?.addEventListener('click', openCustomFirmware);
+  customFirmwareChoice?.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openCustomFirmware();
+    }
+  });
+  const productContext = document.getElementById('productContext');
+  if (productContext && params.get('name')) {
+    const name = document.createElement('strong');
+    name.textContent = params.get('name');
+    const details = [params.get('product'), params.get('deviceId')].filter(Boolean).join(' / ');
+    productContext.append('Preparing firmware for ', name, details ? ` (${details})` : '');
+    productContext.style.display = 'block';
+  }
   const useCaseHint = document.getElementById('useCaseHint');
-  document.querySelectorAll('#useCasePick .device').forEach(d => {
+  document.querySelectorAll('#useCasePick .device[data-device]').forEach(d => {
     const choose = () => {
       document.querySelectorAll('#useCasePick .device').forEach(x => x.setAttribute('aria-pressed', 'false'));
       d.setAttribute('aria-pressed', 'true');

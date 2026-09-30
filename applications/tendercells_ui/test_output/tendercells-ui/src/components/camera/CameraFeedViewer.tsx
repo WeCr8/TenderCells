@@ -10,21 +10,75 @@ import {
 } from '@mui/material';
 import { Button, Alert } from '@mui/material';
 import { CameraAlt as CameraIcon, SignalCellularAlt as SignalIcon } from '@mui/icons-material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import RotateRightIcon from '@mui/icons-material/RotateRight';
+import FlipIcon from '@mui/icons-material/Flip';
+import SecurityIcon from '@mui/icons-material/Security';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { CameraFeed } from '../../types/camera';
+import { cameraTransform, classifyCameraStream } from '../../lib/camera/cameraStream';
+import { useCameraRelay } from '../../lib/camera/cameraRelay';
 
 interface CameraFeedViewerProps {
   camera: CameraFeed;
   width?: string | number;
   height?: string | number;
+  allowBrowserCamera?: boolean;
 }
 
 export default function CameraFeedViewer({
   camera,
   width = '100%',
   height = 360,
+  allowBrowserCamera = true,
 }: CameraFeedViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [connecting, setConnecting] = useState(false);
+  const [streamError, setStreamError] = useState(false);
+  const [streamAttempt, setStreamAttempt] = useState(0);
+  const retryCountRef = useRef(0);
+  const lastResumeRef = useRef(0);
+  const [pageVisible, setPageVisible] = useState(() => document.visibilityState === 'visible');
+  const orientationKey = `tendercells-camera-orientation:${camera.deviceId}`;
+  const [orientation, setOrientation] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(orientationKey) || '') as { rotation: number; flipX: boolean; flipY: boolean };
+    } catch {
+      return { rotation: 0, flipX: false, flipY: false };
+    }
+  });
+  const streamSecurity = classifyCameraStream(camera.streamUrl);
+
+  // Fullscreen - a real, always-available adjustment (works regardless of what
+  // the camera itself reports) that matters most on small phone/tablet screens.
+  const paperRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(document.fullscreenElement === paperRef.current);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+    } else if (paperRef.current) {
+      void paperRef.current.requestFullscreen().catch(() => {});
+    }
+  };
+
+  // Authenticated HTTPS/WebRTC relay - an alternative to the raw local http://
+  // stream below, for viewing a LAN-only camera without the browser's mixed-
+  // content "Not Secure" warning. Requires a device-side bridge to actually
+  // answer (not built yet - see cameraRelay.ts header); until then this
+  // correctly reports "waiting for device", not a silent failure.
+  const [relayMode, setRelayMode] = useState(false);
+  const relay = useCameraRelay(camera.deviceId, relayMode);
+  const relayVideoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (relayVideoRef.current) relayVideoRef.current.srcObject = relay.videoStream;
+  }, [relay.videoStream]);
 
   // Browser webcam preview — opt-in, client-side only (no upload/record/store).
   // A "try it now" path for visitors with no hardware. getUserMedia only fires on
@@ -83,6 +137,49 @@ export default function CameraFeedViewer({
     setConnecting(false);
   }, [camera]);
 
+  useEffect(() => setStreamError(false), [camera.streamUrl, streamAttempt]);
+
+  useEffect(() => {
+    if (!streamError || !camera.streamUrl || !pageVisible) return;
+    const retryDelay = Math.min(2_000 * (retryCountRef.current + 1), 15_000);
+    const timer = window.setTimeout(() => {
+      retryCountRef.current += 1;
+      setStreamError(false);
+      setStreamAttempt((value) => value + 1);
+    }, retryDelay);
+    return () => window.clearTimeout(timer);
+  }, [camera.streamUrl, pageVisible, streamError]);
+
+  useEffect(() => {
+    if (!camera.streamUrl) return;
+    const reconnect = () => {
+      const visible = document.visibilityState === 'visible';
+      setPageVisible(visible);
+      if (!visible) return;
+      const now = Date.now();
+      if (now - lastResumeRef.current < 750) return;
+      lastResumeRef.current = now;
+      setStreamError(false);
+      setStreamAttempt((value) => value + 1);
+    };
+    document.addEventListener('visibilitychange', reconnect);
+    window.addEventListener('focus', reconnect);
+    return () => {
+      document.removeEventListener('visibilitychange', reconnect);
+      window.removeEventListener('focus', reconnect);
+    };
+  }, [camera.streamUrl]);
+
+  useEffect(() => {
+    localStorage.setItem(orientationKey, JSON.stringify(orientation));
+  }, [orientation, orientationKey]);
+
+  const refreshStream = () => {
+    retryCountRef.current = 0;
+    setStreamError(false);
+    setStreamAttempt((value) => value + 1);
+  };
+
   const getSignalColor = (signal?: number) => {
     if (!signal) return 'default';
     if (signal > -50) return 'success';
@@ -92,10 +189,11 @@ export default function CameraFeedViewer({
 
   return (
     <Paper
+      ref={paperRef}
       elevation={2}
       sx={{
         width,
-        height,
+        height: isFullscreen ? '100%' : height,
         bgcolor: '#0D2B1E',
         position: 'relative',
         overflow: 'hidden',
@@ -105,7 +203,15 @@ export default function CameraFeedViewer({
       {/* Real live feed: MJPEG streams render natively in <img> (works with any
           off-the-shelf ESP32-CAM/S3-EYE serving /stream). Falls back to the canvas
           status card when no streamUrl is set. */}
-      {webcamOn ? (
+      {relayMode ? (
+        <video
+          ref={relayVideoRef}
+          autoPlay
+          muted
+          playsInline
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: relay.state === 'connected' ? 'block' : 'none', transform: cameraTransform(orientation.rotation, orientation.flipX, orientation.flipY) }}
+        />
+      ) : webcamOn ? (
         <video
           ref={webcamRef}
           autoPlay
@@ -113,12 +219,14 @@ export default function CameraFeedViewer({
           playsInline
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
-      ) : camera.streamUrl ? (
+      ) : camera.streamUrl && streamSecurity !== 'insecure-remote' && !streamError && pageVisible ? (
         <img
-          src={camera.streamUrl}
+          key={`${camera.deviceId}-${streamAttempt}`}
+          src={`${camera.streamUrl}${camera.streamUrl.includes('?') ? '&' : '?'}attempt=${streamAttempt}`}
           alt={`Live feed: ${camera.name}`}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: cameraTransform(orientation.rotation, orientation.flipX, orientation.flipY) }}
+          onLoad={() => { retryCountRef.current = 0; setStreamError(false); }}
+          onError={() => setStreamError(true)}
         />
       ) : (
         <canvas
@@ -127,6 +235,52 @@ export default function CameraFeedViewer({
           height={typeof height === 'number' ? height : 360}
           style={{ width: '100%', height: '100%', display: 'block' }}
         />
+      )}
+
+      {streamError && camera.streamUrl && !webcamOn && (
+        <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', p: 3, bgcolor: '#0D2B1E' }}>
+          <Stack spacing={1.5} alignItems="center" sx={{ maxWidth: 420, textAlign: 'center' }}>
+            <CameraIcon sx={{ color: '#C8B882', fontSize: 38 }} />
+            <Typography color="#F0EDE4" fontWeight={600}>The local camera stream could not load in the dashboard.</Typography>
+            <Typography variant="body2" color="#B8C8BF">Confirm this browser can open the device on the same local network, then retry.</Typography>
+            <Stack direction="row" spacing={1}>
+              <Button startIcon={<RefreshIcon />} variant="contained" onClick={() => setStreamAttempt((value) => value + 1)}>Retry</Button>
+              <Button startIcon={<OpenInNewIcon />} variant="outlined" onClick={() => window.open(camera.streamUrl, 'tendercells-camera-stream', 'noopener,noreferrer')}>Open Stream</Button>
+            </Stack>
+          </Stack>
+        </Box>
+      )}
+
+      {relayMode && relay.state !== 'connected' && (
+        <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', p: 3, bgcolor: '#0D2B1E' }}>
+          <Stack spacing={1.5} alignItems="center" sx={{ maxWidth: 440, textAlign: 'center' }}>
+            {relay.state === 'error' ? (
+              <>
+                <SecurityIcon sx={{ color: '#E8A020', fontSize: 38 }} />
+                <Typography color="#F0EDE4" fontWeight={600}>Secure relay unavailable</Typography>
+                <Typography variant="body2" color="#B8C8BF">{relay.errorMessage}</Typography>
+                <Button variant="outlined" onClick={() => setRelayMode(false)}>Back to local stream</Button>
+              </>
+            ) : (
+              <>
+                <CircularProgress size={32} sx={{ color: '#C8B882' }} />
+                <Typography color="#F0EDE4" fontWeight={600}>
+                  {relay.state === 'waiting-for-device' ? 'Waiting for the camera to answer…' : 'Starting secure relay…'}
+                </Typography>
+              </>
+            )}
+          </Stack>
+        </Box>
+      )}
+
+      {streamSecurity === 'insecure-remote' && !webcamOn && !relayMode && (
+        <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', p: 3, bgcolor: '#0D2B1E' }}>
+          <Stack spacing={1.5} alignItems="center" sx={{ maxWidth: 440, textAlign: 'center' }}>
+            <SecurityIcon sx={{ color: '#E8A020', fontSize: 38 }} />
+            <Typography color="#F0EDE4" fontWeight={600}>Remote unencrypted video was blocked.</Typography>
+            <Typography variant="body2" color="#B8C8BF">Use the camera on its private local network or configure an authenticated HTTPS TenderCells relay.</Typography>
+          </Stack>
+        </Box>
       )}
 
       {connecting && (
@@ -155,9 +309,9 @@ export default function CameraFeedViewer({
           zIndex: 5,
         }}
       >
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
           <CameraIcon sx={{ color: '#C8B882', fontSize: 18 }} />
-          <Typography variant="subtitle2" sx={{ color: '#C8B882', flex: 1 }}>
+          <Typography variant="subtitle2" sx={{ color: '#C8B882', flex: 1, minWidth: 120 }}>
             {camera.name}
           </Typography>
           <Chip
@@ -170,8 +324,34 @@ export default function CameraFeedViewer({
               color: camera.connected ? '#4A7C59' : '#CC3333',
             }}
           />
+          <Chip
+            icon={<SecurityIcon />}
+            label={
+              relayMode && relay.state === 'connected' ? 'SECURE RELAY'
+                : streamSecurity === 'secure' ? 'SECURE'
+                : streamSecurity === 'local' ? 'LOCAL ONLY' : 'UNSECURED'
+            }
+            size="small"
+            color={
+              (relayMode && relay.state === 'connected') || streamSecurity === 'secure' ? 'success'
+                : streamSecurity === 'local' ? 'warning' : 'error'
+            }
+            variant="outlined"
+          />
         </Stack>
       </Box>
+
+      {camera.streamUrl && !streamError && (
+        <Stack direction="column" spacing={0.5} sx={{ position: 'absolute', right: 8, top: 52, zIndex: 6 }}>
+          <Button aria-label="Refresh camera stream" title="Refresh stream" variant="contained" size="small" onClick={refreshStream} sx={{ minWidth: 44, minHeight: 44, p: 0.75 }}><RefreshIcon fontSize="small" /></Button>
+          <Button aria-label="Rotate camera clockwise" title="Rotate 90 degrees" variant="contained" size="small" onClick={() => setOrientation(value => ({ ...value, rotation: (value.rotation + 90) % 360 }))} sx={{ minWidth: 44, minHeight: 44, p: 0.75 }}><RotateRightIcon fontSize="small" /></Button>
+          <Button aria-label="Flip camera horizontally" title="Flip horizontally" variant="contained" size="small" onClick={() => setOrientation(value => ({ ...value, flipX: !value.flipX }))} sx={{ minWidth: 44, minHeight: 44, p: 0.75 }}><FlipIcon fontSize="small" /></Button>
+          <Button aria-label="Flip camera vertically" title="Flip vertically" variant="contained" size="small" onClick={() => setOrientation(value => ({ ...value, flipY: !value.flipY }))} sx={{ minWidth: 44, minHeight: 44, p: 0.75, transform: 'rotate(90deg)' }}><FlipIcon fontSize="small" /></Button>
+          <Button aria-label={isFullscreen ? 'Exit fullscreen' : 'View fullscreen'} title={isFullscreen ? 'Exit fullscreen' : 'View fullscreen'} variant="contained" size="small" onClick={toggleFullscreen} sx={{ minWidth: 44, minHeight: 44, p: 0.75 }}>
+            {isFullscreen ? <FullscreenExitIcon fontSize="small" /> : <FullscreenIcon fontSize="small" />}
+          </Button>
+        </Stack>
+      )}
 
       {/* Stats overlay (bottom) */}
       <Box
@@ -185,9 +365,9 @@ export default function CameraFeedViewer({
           zIndex: 5,
         }}
       >
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
           <Typography variant="caption" sx={{ color: '#F0EDE4' }}>
-            {camera.resolution} @ {camera.fps}fps
+            {camera.resolution && camera.fps ? `${camera.resolution} @ ${camera.fps}fps` : 'Resolution: Not reporting'}
           </Typography>
           {camera.signal && (
             <Chip
@@ -204,7 +384,14 @@ export default function CameraFeedViewer({
               sx={{ bgcolor: '#CC3333', color: '#fff', fontSize: '0.7rem' }} />
           )}
           <Box sx={{ flex: 1 }} />
-          {webcamSupported && (
+          {camera.deviceId && !webcamOn && (
+            <Button size="small" variant="contained"
+              onClick={() => setRelayMode((v) => !v)}
+              sx={{ bgcolor: relayMode ? '#CC3333' : '#4A7C59', fontSize: '0.7rem' }}>
+              {relayMode ? 'Stop relay' : '🔒 Try secure relay'}
+            </Button>
+          )}
+          {allowBrowserCamera && webcamSupported && (
             <Button size="small" variant="contained"
               onClick={webcamOn ? stopWebcam : startWebcam}
               sx={{ bgcolor: webcamOn ? '#CC3333' : '#4A7C59', fontSize: '0.7rem' }}>

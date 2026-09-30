@@ -161,7 +161,11 @@ export function useYardEvents(items: PropertyItem[]) {
   const refresh = useCallback(async () => {
     const list = itemsRef.current;
     if (!YARD_LIVE) {
-      setFlags(await demoFlags(list));
+      const demoEnabled = localStorage.getItem('tendercells_demo_seeded_v1') != null;
+      setFlags(demoEnabled ? await demoFlags(list) : []);
+      setPresence({});
+      setRobots({});
+      setError(demoEnabled ? null : 'No live yard-event service is configured.');
       return;
     }
     const byDevice = new Map<string, PropertyItem>();

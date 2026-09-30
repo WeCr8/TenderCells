@@ -7,12 +7,15 @@ import type {
   ProductFilter,
   RegistrationMethod,
 } from '../types/products';
+import { auth, db, FIREBASE_ENABLED } from '../lib/firebase/firebaseApp';
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 
 /**
  * Service for managing products
  * Uses Supabase client or API endpoints
  */
 export class ProductsService {
+  static readonly PRODUCTS_UPDATED_EVENT = 'tendercells-products-updated';
   private static readonly API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || 'http://localhost:4000/api';
   private static readonly API_ENABLED = Boolean(import.meta.env?.VITE_API_BASE_URL);
   private static readonly DEV_PRODUCTS_KEY = 'tendercells_dev_products';
@@ -20,6 +23,12 @@ export class ProductsService {
   static readonly FIRST_COOP_PRODUCT_ID = 'demo-chicken-tender-001';
   static readonly FIRST_COOP_DEVICE_ID = 'ct_001';
   static readonly FIRST_COOP_SERIAL = 'TC-CT-DEMO-0001';
+
+  // Firebase UID is stable across password and SSO providers linked to an account.
+  private static getDevProductsKey(): string {
+    const uid = auth.currentUser?.uid;
+    return uid ? `${this.DEV_PRODUCTS_KEY}:${uid}` : `${this.DEV_PRODUCTS_KEY}:demo`;
+  }
 
   private static readonly ENDPOINTS = {
     PRODUCTS: '/products',
@@ -79,7 +88,7 @@ export class ProductsService {
 
   private static getDevProducts(): Product[] {
     try {
-      const parsed = JSON.parse(localStorage.getItem(this.DEV_PRODUCTS_KEY) || '[]') as Product[];
+      const parsed = JSON.parse(localStorage.getItem(this.getDevProductsKey()) || '[]') as Product[];
       const sanitized = parsed.map((product) => this.sanitizeDevProduct(product));
       if (JSON.stringify(parsed) !== JSON.stringify(sanitized)) {
         this.setDevProducts(sanitized);
@@ -90,8 +99,47 @@ export class ProductsService {
     }
   }
 
-  private static setDevProducts(products: Product[]) {
-    localStorage.setItem(this.DEV_PRODUCTS_KEY, JSON.stringify(products));
+  private static setDevProducts(products: Product[], notify = true) {
+    const key = this.getDevProductsKey();
+    const serialized = JSON.stringify(products);
+    if (localStorage.getItem(key) === serialized) return;
+    localStorage.setItem(key, serialized);
+    if (notify) window.dispatchEvent(new CustomEvent(this.PRODUCTS_UPDATED_EVENT));
+  }
+
+  private static isRealUserProduct(product: Product): boolean {
+    const source = String(product.metadata?.source || '');
+    return !source.includes('demo') && product.user_id !== this.GARAGE_OWNER_EMAIL;
+  }
+
+  private static async syncProductToCloud(product: Product): Promise<void> {
+    const uid = auth.currentUser?.uid;
+    if (!FIREBASE_ENABLED || !uid || !this.isRealUserProduct(product)) return;
+    const { password: _discardedPassword, ...safeNetworkConfig } = product.network_config || {};
+    const clean = JSON.parse(JSON.stringify({
+      ...product,
+      userId: uid,
+      user_id: uid,
+      network_config: safeNetworkConfig,
+      metadata: { ...product.metadata, network_config: safeNetworkConfig },
+    }));
+    await setDoc(doc(db, 'products', product.id), clean, { merge: true });
+  }
+
+  private static async getCloudProducts(): Promise<Product[]> {
+    const uid = auth.currentUser?.uid;
+    if (!FIREBASE_ENABLED || !uid) return [];
+    const snapshot = await getDocs(query(collection(db, 'products'), where('userId', '==', uid)));
+    return snapshot.docs.map((item) => ({ ...item.data(), id: item.id } as Product));
+  }
+
+  private static mergeProducts(localProducts: Product[], cloudProducts: Product[]): Product[] {
+    const merged = new Map<string, Product>();
+    for (const product of [...cloudProducts, ...localProducts]) {
+      const current = merged.get(product.id);
+      if (!current || String(product.updated_at || '') >= String(current.updated_at || '')) merged.set(product.id, product);
+    }
+    return [...merged.values()];
   }
 
   private static createFirstCoopProduct(): Product {
@@ -290,6 +338,7 @@ export class ProductsService {
       const products = this.getDevProducts();
       const product = this.createDevProduct(data);
       this.setDevProducts([...products, product]);
+      await this.syncProductToCloud(product);
       return product;
     }
   }
@@ -314,7 +363,18 @@ export class ProductsService {
     try {
       return await this.request<Product[]>(endpoint);
     } catch {
-      return this.getDevProducts();
+      const localProducts = this.getDevProducts();
+      if (!auth.currentUser || !FIREBASE_ENABLED) return localProducts;
+      try {
+        const cloudProducts = await this.getCloudProducts();
+        await Promise.all(localProducts.filter((product) => this.isRealUserProduct(product)).map((product) => this.syncProductToCloud(product)));
+        const merged = this.mergeProducts(localProducts, cloudProducts);
+        this.setDevProducts(merged, false);
+        return merged;
+      } catch (error) {
+        console.error('Product account sync failed:', error);
+        return localProducts;
+      }
     }
   }
 
@@ -325,7 +385,15 @@ export class ProductsService {
     try {
       return await this.request<Product>(this.ENDPOINTS.PRODUCT_BY_ID(id));
     } catch {
-      const product = this.getDevProducts().find((item) => item.id === id);
+      let product = this.getDevProducts().find((item) => item.id === id);
+      if (!product && auth.currentUser && FIREBASE_ENABLED) {
+        try {
+          const snapshot = await getDoc(doc(db, 'products', id));
+          if (snapshot.exists() && snapshot.data().userId === auth.currentUser.uid) product = { ...snapshot.data(), id: snapshot.id } as Product;
+        } catch (error) {
+          console.error('Product account lookup failed:', error);
+        }
+      }
       if (!product) throw new Error('Product not found in local dev store');
       return product;
     }
@@ -348,6 +416,7 @@ export class ProductsService {
       this.setDevProducts(updated);
       const product = updated.find((item) => item.id === id);
       if (!product) throw new Error('Product not found in local dev store');
+      await this.syncProductToCloud(product);
       return product;
     }
   }
@@ -362,6 +431,7 @@ export class ProductsService {
       });
     } catch {
       this.setDevProducts(this.getDevProducts().filter((product) => product.id !== id));
+      if (auth.currentUser && FIREBASE_ENABLED) await deleteDoc(doc(db, 'products', id));
     }
   }
 
@@ -417,6 +487,7 @@ export class ProductsService {
       this.setDevProducts(updated);
       const product = updated.find((item) => item.id === id);
       if (!product) throw new Error('Product not found in local dev store');
+      await this.syncProductToCloud(product);
       return product;
     }
   }
@@ -440,6 +511,7 @@ export class ProductsService {
       this.setDevProducts(updated);
       const product = updated.find((item) => item.id === id);
       if (!product) throw new Error('Product not found in local dev store');
+      await this.syncProductToCloud(product);
       return product;
     }
   }
@@ -451,7 +523,7 @@ export class ProductsService {
     try {
       return await this.request<ProductStats>(this.ENDPOINTS.PRODUCT_STATS);
     } catch {
-      return this.getDevStats();
+      return this.getDevStats(await this.getUserProducts());
     }
   }
 
@@ -472,6 +544,7 @@ export class ProductsService {
       this.setDevProducts(updated);
       const product = updated.find((item) => item.id === productId);
       if (!product) throw new Error('Product not found in local dev store');
+      await this.syncProductToCloud(product);
       return product;
     }
   }

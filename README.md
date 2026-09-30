@@ -362,6 +362,50 @@ npm run functions:deploy
 # Or use emulator locally: npm run firebase:emulate
 ```
 
+### 5. Self-hosting on your own domain
+
+If the OS is served from anywhere other than `tendercells.com` (your own
+domain, a different `*.web.app` site, or localhost during development), set
+this Cloud Functions env var to your real origin — otherwise the browser
+camera relay (`cameraRelaySignal`) and Stripe billing return-URLs stay
+pointed at `tendercells.com` and silently fail (CORS-blocked / wrong
+redirect) on your deployment:
+
+Add to `functions/.env` (same file as `ANTHROPIC_API_KEY`/`STRIPE_SECRET_KEY`):
+
+```env
+PUBLIC_APP_ORIGIN=https://your-domain.example
+```
+
+Everything else (Firebase project id, hosting site, MQTT broker) is already
+per-deployment via your own `.env` / Firebase project — this is the one
+value that was hardcoded to the production domain in source.
+
+### 6. Skip billing and school-district functions
+
+`functions/src/billing.ts` (Stripe) and most of `functions/src/schoolPlatform.ts`
+back the two **hosted, paid** plans (`docs/STRIPE_BILLING_SETUP.md` — Starter
+$5/mo, School Pilot $499/yr) — a self-host doesn't need them, and each
+requires infrastructure only a vendor deployment has (a Stripe merchant
+account; district Identity Platform tenants and provider agreements — see
+`docs/SCHOOL_PLATFORM_OPERATIONS.md` "Remaining external gates"). Deploying
+them unconfigured is harmless (`billing.ts` throws a clear "not configured"
+error; school functions just have no organization to operate on) but there's
+no reason to carry them. Deploy only the core, self-host-relevant functions:
+
+```bash
+firebase deploy --only functions:processAlert,functions:aggregateTelemetry,functions:executeSchedules,functions:cleanupTelemetry,functions:onDeviceCreated,functions:aiChat,functions:health,functions:createCameraRelaySession,functions:cameraRelaySignal
+```
+
+That list keeps the camera relay (`createCameraRelaySession`/
+`cameraRelaySignal`) — it's general infrastructure for any registered
+camera, not school-specific, just co-located in `schoolPlatform.ts`. It
+drops the six school-only functions (`claimSchoolMembership`,
+`configureSchoolOrganization`, `syncSchoolRoster`, `createPurchaseOrder`,
+`createOrganizationInvoice`, `getSchoolLoginOptions`) and all three billing
+functions. Skip `npm run functions:deploy` (which deploys everything) for
+this filtered command instead.
+
 ---
 
 ## Architecture Overview

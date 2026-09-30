@@ -35,7 +35,7 @@ function AnimalDetail({ id }: { id: string }) {
   const threats = threatsTo(a.id);
   const projects = projectsFor(a.group);
   return (
-    <article className="account-card library-entry" style={{ maxWidth: 820 }}>
+    <article className="account-card account-doc library-entry" style={{ maxWidth: 820 }}>
       <h1>{a.emoji} {a.name}</h1>
       <p className="account-sub">{GROUP_LABEL[a.group]} · Tender Cells: {a.product} · {a.tempNote ?? "comfortable"} {a.comfortF[0]}–{a.comfortF[1]}°F
         {a.bodyTempF ? ` · normal body temperature ${a.bodyTempF[0]}–${a.bodyTempF[1]}°F` : ""} · lives {a.lifespanYears[0]}–{a.lifespanYears[1]} years</p>
@@ -68,7 +68,7 @@ function WildlifeDetail({ id }: { id: string }) {
   const w = wildlifeById(id);
   if (!w) return <p>Unknown animal. <Link to="/library">Back to the library</Link></p>;
   return (
-    <article className="account-card library-entry" style={{ maxWidth: 820 }}>
+    <article className="account-card account-doc library-entry" style={{ maxWidth: 820 }}>
       <h1>{w.emoji} {w.name}</h1>
       <p className="account-sub">{w.kind === "pest" ? "Pest" : w.kind === "venomous" ? "Venomous" : "Predator"} · usually active {w.active}</p>
       <p><strong>Signs:</strong> {w.signs}</p>
@@ -89,7 +89,7 @@ function PlantDetail({ id }: { id: string }) {
   const p = plantById(id);
   if (!p) return <p>Unknown plant. <Link to="/library">Back to the library</Link></p>;
   return (
-    <article className="account-card library-entry" style={{ maxWidth: 820 }}>
+    <article className="account-card account-doc library-entry" style={{ maxWidth: 820 }}>
       <h1>{p.emoji} {p.name}</h1>
       <p className="account-sub">{KIND_LABEL[p.kind]} · {p.summary}</p>
       {p.spacingIn && <p><strong>Spacing:</strong> {p.spacingIn} in · <strong>Harvest:</strong> {p.daysToHarvest?.join("–")} days</p>}

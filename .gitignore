@@ -118,6 +118,7 @@ applications/web/
 .pio/
 firmware/**/.pio/
 functions/lib/
+deploy/self-hosted-camera/.env
 
 # Fleet-generated survey/triage/work-order output - not source
 reports/

@@ -398,6 +398,24 @@ export class MQTTController {
     res.json({ success: true, deviceId, command: "light", on, message: "Light/relay command sent" });
   }
 
+  sendCameraConfig(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const err = validatePayload(req.body, SCHEMAS.cameraConfig);
+    if (err) return res.status(400).json({ error: err });
+    const allowed = new Set(["camera", "microphone", "microsd", "wifi", "ble", "gpio", "battery_power"]);
+    const enabled = (req.body.enabled as unknown[]).filter((item): item is string => typeof item === "string" && allowed.has(item));
+    if (enabled.length !== req.body.enabled.length) {
+      return res.status(400).json({ error: "enabled contains an unsupported camera-node capability" });
+    }
+    if (!MQTTController.client?.connected) {
+      return res.status(503).json({ error: "MQTT not connected" });
+    }
+
+    const topic = `tc/${deviceId}/cmd/camera/config`;
+    MQTTController.client.publish(topic, JSON.stringify({ enabled, timestamp: Date.now() }), { qos: 1 });
+    return res.json({ success: true, deviceId, command: "camera/config", enabled, message: "Camera node configuration sent" });
+  }
+
   sendGantryCommand(req: Request, res: Response) {
     const { deviceId } = req.params;
     const { x, y, speed, cmd } = req.body;

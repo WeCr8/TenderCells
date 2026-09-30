@@ -547,3 +547,4 @@ export {
 } from "./schoolPlatform";
 
 export { createBillingCheckout, createBillingPortal, stripeBillingWebhook } from "./billing";
+export { createEdgeEnrollmentCode, redeemEdgeEnrollmentCode } from "./edgeEnrollment";

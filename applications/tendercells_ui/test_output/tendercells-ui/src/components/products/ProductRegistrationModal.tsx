@@ -53,6 +53,7 @@ import WaterDropOutlinedIcon from '@mui/icons-material/WaterDropOutlined';
 import { useTheme, useMediaQuery } from '@mui/material';
 import QRCodeScanner from './QRCodeScanner';
 import ConnectionSetupWizard from './ConnectionSetupWizard';
+import EdgeBridgeSetupWizard from './EdgeBridgeSetupWizard';
 import type { BuildSource, HardwareSetupMode, Product, ProductFamily, ProductType, RegisterProductData, SimulationBackend } from '../../types/products';
 import { buildBundleCameraRegistration, type BundleCameraSpec } from '../../lib/products/cameraPackage';
 
@@ -1764,20 +1765,28 @@ export default function ProductRegistrationModal({
 
       {/* Connection Setup Wizard - Opens after product registration */}
       {registeredProduct && (
-        <ConnectionSetupWizard
-          isOpen={isConnectionWizardOpen}
-          onClose={() => {
-            setIsConnectionWizardOpen(false);
-            setRegisteredProduct(null);
-            onClose(); // Close registration modal after connection wizard closes
-          }}
-          product={registeredProduct}
-          onComplete={() => {
+        String(registeredProduct.metadata?.product_family || '') === 'barn-brain' ? (
+          <EdgeBridgeSetupWizard isOpen={isConnectionWizardOpen} product={registeredProduct} onClose={() => {
             setIsConnectionWizardOpen(false);
             setRegisteredProduct(null);
             onClose();
-          }}
-        />
+          }} />
+        ) : (
+          <ConnectionSetupWizard
+            isOpen={isConnectionWizardOpen}
+            onClose={() => {
+              setIsConnectionWizardOpen(false);
+              setRegisteredProduct(null);
+              onClose(); // Close registration modal after connection wizard closes
+            }}
+            product={registeredProduct}
+            onComplete={() => {
+              setIsConnectionWizardOpen(false);
+              setRegisteredProduct(null);
+              onClose();
+            }}
+          />
+        )
       )}
     </>
   );

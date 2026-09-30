@@ -177,6 +177,17 @@ describe('TenderCells OS contracts', () => {
     expect(extensionSchema).toContain('sha256:');
     expect(extensionSchema).toContain('mqttPublish');
     expect(extensionSchema).toContain('lan-camera');
+    expect(guide).toContain('redeemEdgeEnrollmentCode');
+    expect(guide).toContain('Ed25519 key locally');
+    const enrollment = readProjectFile('../../../../functions/src/edgeEnrollment.ts');
+    expect(enrollment).toContain('CODE_TTL_MS = 10 * 60_000');
+    expect(enrollment).toContain('status: "redeemed"');
+    expect(enrollment).toContain('mqttSecretHash');
+    expect(enrollment).toContain('MANAGED_MQTT_URL');
+    const bridgeWizard = readProjectFile('src/components/products/EdgeBridgeSetupWizard.tsx');
+    expect(bridgeWizard).toContain('createEdgeEnrollmentCode');
+    expect(bridgeWizard).toContain('expires after 10 minutes and works once');
+    expect(bridgeWizard).not.toContain('Wi-Fi password</');
   });
 
   it('uses the real cross-platform device provisioning flow', () => {

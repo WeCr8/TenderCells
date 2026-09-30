@@ -279,6 +279,15 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Enrollment codes and MQTT credential hashes are backend-only.
+    match /deviceEnrollmentCodes/{codeHash} {
+      allow read, write: if false;
+    }
+
+    match /deviceCredentials/{deviceId} {
+      allow read, write: if false;
+    }
+
     // Fallback: Deny access to any other collections by default
     // Add specific rules above for any new collections you create
     match /{document=**} {

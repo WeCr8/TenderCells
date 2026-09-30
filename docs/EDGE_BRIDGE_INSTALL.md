@@ -102,6 +102,31 @@ pinned by SHA-256 digest and declare MQTT publish/subscribe topics, host devices
 and GPU use. The eventual installer must validate this manifest and present the permissions to
 an adult or administrator before starting the workload.
 
+## Managed enrollment flow
+
+1. Register the Pi or Jetson as a Bridge or Barn Brain in TenderCells.
+2. While signed in as its owner or school administrator, request a bridge enrollment code.
+   The backend stores only its SHA-256 digest and expires it after ten minutes.
+3. On the bridge, use the code through the environment so it is not saved in shell history:
+
+```bash
+export TC_DEVICE_CLAIM_CODE='code-from-tendercells'
+node deploy/edge-bridge/enroll.mjs \
+  --device barn-brain-01 \
+  --url https://us-central1-tender-cells.cloudfunctions.net/redeemEdgeEnrollmentCode
+unset TC_DEVICE_CLAIM_CODE
+```
+
+The bridge generates its Ed25519 key locally. Redemption atomically consumes the code and
+returns the MQTT password once. The utility requires HTTPS, requires an `mqtts://` broker,
+writes the private key and password with owner-only permissions, and never prints a secret.
+Firestore stores the MQTT password only as a salted scrypt hash in a backend-only collection.
+
+Secure embedded MQTT mode uses `TC_MQTT_SECURE=1`, a TLS certificate/key and
+`TC_MQTT_CREDENTIALS_FILE`. Every credential entry binds an exact MQTT client ID to explicit
+publish and subscribe prefixes. Wildcard `+` topic grants are rejected. Local demo mode remains
+available for an isolated development LAN, but it is not a managed or school deployment.
+
 For camera specifically, prefer [`deploy/self-hosted-camera/`](../deploy/self-hosted-camera/README.md)
 on this bridge computer instead: it needs no TenderCells cloud account or Firebase credential
 of any kind (coturn + MediaMTX + ffmpeg, gated behind an HTTPS proxy or VPN you control). See

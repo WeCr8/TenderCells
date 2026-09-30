@@ -12,13 +12,17 @@
 
 import Aedes from "aedes";
 import { createServer } from "net";
+import { createServer as createTlsServer } from "node:tls";
+import { readFileSync, watch } from "node:fs";
 import { Bonjour } from "bonjour-service";
+import { loadMqttCredentials, topicAllowed, verifyScryptSecret, type MqttCredential } from "./mqttSecurity.js";
 
 const EMBED = process.env.EMBED_BROKER !== "0";
 const MQTT_PORT = Number(process.env.MQTT_PORT || 1883);
 // Advertise the broker over mDNS (_mqtt._tcp) so ESP32 nodes auto-discover it and
 // learners never type an IP. Set MDNS_ADVERTISE=0 to disable on locked-down nets.
 const MDNS_ADVERTISE = process.env.MDNS_ADVERTISE !== "0";
+const SECURE = process.env.TC_MQTT_SECURE === "1";
 
 // Publish the _mqtt._tcp service. Soft-fail: a network that blocks multicast must
 // not take down the broker (devices can still be given the IP by hand).
@@ -35,8 +39,44 @@ function advertiseBroker() {
 }
 
 if (EMBED) {
-  const aedes = new Aedes();
-  const server = createServer(aedes.handle);
+  const credentialPath = process.env.TC_MQTT_CREDENTIALS_FILE || "";
+  let credentials: Map<string, MqttCredential> = SECURE && credentialPath ? loadMqttCredentials(credentialPath) : new Map();
+  if (SECURE && !credentials.size) throw new Error("TC_MQTT_SECURE requires a non-empty TC_MQTT_CREDENTIALS_FILE");
+
+  // A device claimed while the broker is already running (edge-bridge claim
+  // exchange) writes straight to this file — pick the new credential up
+  // without a restart. Soft-fail: a bad edit mid-write must not crash the broker.
+  if (SECURE && credentialPath) {
+    watch(credentialPath, { persistent: false }, () => {
+      try {
+        credentials = loadMqttCredentials(credentialPath);
+        console.log("[broker] MQTT credentials file reloaded");
+      } catch (err) {
+        console.error("[broker] failed to reload MQTT credentials file, keeping the previous version:", err);
+      }
+    });
+  }
+  const aedes = new Aedes(SECURE ? {
+    authenticate(client, username, password, done) {
+      const record = credentials.get(client.id);
+      const valid = Boolean(record && username === record.username && password && verifyScryptSecret(password.toString(), record.passwordHash));
+      done(null, valid);
+    },
+    authorizePublish(client, packet, done) {
+      const record = client && credentials.get(client.id);
+      done(record && topicAllowed(packet.topic, record.publishPrefixes) ? null : new Error("MQTT publish denied"));
+    },
+    authorizeSubscribe(client, subscription, done) {
+      const record = credentials.get(client.id);
+      done(null, record && topicAllowed(subscription.topic, record.subscribePrefixes) ? subscription : null);
+    },
+  } : undefined);
+  const tlsKey = process.env.MQTT_TLS_KEY_FILE || "";
+  const tlsCert = process.env.MQTT_TLS_CERT_FILE || "";
+  if (SECURE && (!tlsKey || !tlsCert)) throw new Error("TC_MQTT_SECURE requires MQTT_TLS_KEY_FILE and MQTT_TLS_CERT_FILE");
+  const server = SECURE
+    ? createTlsServer({ key: readFileSync(tlsKey), cert: readFileSync(tlsCert), minVersion: 'TLSv1.2' }, aedes.handle)
+    : createServer(aedes.handle);
 
   server.listen(MQTT_PORT, () => {
     console.log(`✓ Embedded MQTT broker listening on mqtt://localhost:${MQTT_PORT}`);

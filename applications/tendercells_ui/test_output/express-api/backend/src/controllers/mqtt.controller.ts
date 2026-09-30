@@ -9,6 +9,7 @@ import {
   waitForAck,
 } from "../yardEvents.js";
 import mqtt from "mqtt";
+import { readFileSync } from "node:fs";
 import { AUTH_ENABLED, type AuthedRequest } from "../middleware/auth.js";
 import { getFirestoreAdmin } from "../config/firebase-admin.js";
 
@@ -77,7 +78,11 @@ export class MQTTController {
 
     try {
       MQTTController.client = mqtt.connect(brokerUrl, {
-        clientId: `express-api-${Date.now()}`,
+        clientId: process.env.MQTT_CLIENT_ID || `express-api-${Date.now()}`,
+        username: process.env.MQTT_USERNAME,
+        password: process.env.MQTT_PASSWORD_FILE ? readFileSync(process.env.MQTT_PASSWORD_FILE, 'utf8').trim() : undefined,
+        ca: process.env.MQTT_CA_FILE ? readFileSync(process.env.MQTT_CA_FILE) : undefined,
+        rejectUnauthorized: brokerUrl.startsWith('mqtts://'),
         reconnectPeriod: 5000,
         keepalive: 60,
       });

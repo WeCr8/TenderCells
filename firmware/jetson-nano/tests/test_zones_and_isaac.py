@@ -175,3 +175,25 @@ def test_zones_without_robot_footprint_are_refused():
     g = ZoneGuard([ZoneGuard.from_payload(payload(square("coop", "no-laser", 0, 0, 5, 5))).zones[0]], None)
     with pytest.raises(ZoneViolation, match="footprint"):
         g.check_bed(10, 10, "laser")
+
+
+def test_property_boundary_blocks_driving_and_lasing_outside_or_near_the_edge():
+    p = payload()
+    # Robot footprint at (20,10) 5x10 ft; boundary is 0..40 x 0..30 with a 2 ft margin.
+    p["boundary"] = {"poly": [[0, 0], [40, 0], [40, 30], [0, 30]], "marginFt": 2, "source": "survey"}
+    g = ZoneGuard.from_payload(p)
+    assert g.blocking(20, 15) is None
+    assert g.blocking(39, 15) is g.boundary            # inside, but within the 2 ft margin
+    assert g.blocking(45, 15, "laser") is g.boundary   # outside - no lasing either
+    with pytest.raises(ZoneViolation, match="property boundary"):
+        g.check_path([(20, 15), (50, 15)])
+    g.check_path([(5, 5), (35, 25)])
+    assert g.summary()["boundary"] is True
+    for bad in ({"poly": [[0, 0], [1, 1]], "marginFt": 2}, {"poly": [[0, 0], [9, 0], [9, 9]]}):
+        q = payload()
+        q["boundary"] = bad
+        with pytest.raises(ValueError, match="boundary"):
+            ZoneGuard.from_payload(q)
+    # A boundary alone still needs the footprint.
+    with pytest.raises(ValueError, match="self"):
+        ZoneGuard.from_payload({"v": 1, "units": "ft", "zones": [], "boundary": p["boundary"]})

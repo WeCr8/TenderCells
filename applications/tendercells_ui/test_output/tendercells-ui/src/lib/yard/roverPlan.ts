@@ -1,7 +1,8 @@
 // roverPlan.ts - route planning for a property-wide weed patrol on a rover (pure, tested).
 //
 // The rover drives lanes across the property like a lawn mower, one camera swath apart,
-// and never plans a point inside a no-go or keep-out zone (exclusionZones.ts). A person can
+// and never plans a point inside a no-go or keep-out zone (exclusionZones.ts) or outside the
+// property boundary (boundary.ts). A person can
 // instead draw the route (PropertyItem.patrolPath). Detections are placed on the property
 // from the rover pose: the camera frame is centred ahead of the rover.
 // firmware/jetson-nano/rover_patrol.py uses the same geometry on the real robot.
@@ -24,13 +25,16 @@ export const ROVER_CAMERA = { swathFt: 4, aheadFt: 1.5, frameFt: { along: 3, acr
  * @param stepFt - Spacing of points along a lane
  * @param ignoreId - The rover's own item id (its parking spot is not an obstacle)
  */
-export function coverageRoute(area: Area, zones: ExclusionZone[], laneFt = ROVER_CAMERA.swathFt, stepFt = 2, ignoreId?: string): Pt[] {
+/** Optional stay-inside test (the property boundary, lib/yard/boundary.ts): points it rejects are skipped. */
+export type StayIn = (x: number, y: number) => boolean;
+
+export function coverageRoute(area: Area, zones: ExclusionZone[], laneFt = ROVER_CAMERA.swathFt, stepFt = 2, ignoreId?: string, stayIn?: StayIn): Pt[] {
   const pts: Pt[] = [];
   let lane = 0;
   for (let y = area.y + laneFt / 2; y < area.y + area.depth; y += laneFt, lane++) {
     const row: Pt[] = [];
     for (let x = area.x + stepFt / 2; x < area.x + area.width; x += stepFt) {
-      if (!blockingZone(zones, x, y, 'drive', ignoreId)) row.push({ x: round(x), y: round(y) });
+      if (!blockingZone(zones, x, y, 'drive', ignoreId) && (!stayIn || stayIn(x, y))) row.push({ x: round(x), y: round(y) });
     }
     pts.push(...(lane % 2 ? row.reverse() : row));
   }
@@ -38,14 +42,14 @@ export function coverageRoute(area: Area, zones: ExclusionZone[], laneFt = ROVER
 }
 
 /** A hand-drawn route, densified to points every stepFt (blocked points removed). */
-export function routeFromPath(path: Pt[], zones: ExclusionZone[], stepFt = 2, ignoreId?: string): Pt[] {
+export function routeFromPath(path: Pt[], zones: ExclusionZone[], stepFt = 2, ignoreId?: string, stayIn?: StayIn): Pt[] {
   const out: Pt[] = [];
   for (let i = 1; i < path.length; i++) {
     const a = path[i - 1], b = path[i];
     const n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / stepFt));
     for (let s = i === 1 ? 0 : 1; s <= n; s++) {
       const p = { x: round(a.x + ((b.x - a.x) * s) / n), y: round(a.y + ((b.y - a.y) * s) / n) };
-      if (!blockingZone(zones, p.x, p.y, 'drive', ignoreId)) out.push(p);
+      if (!blockingZone(zones, p.x, p.y, 'drive', ignoreId) && (!stayIn || stayIn(p.x, p.y))) out.push(p);
     }
   }
   return out;

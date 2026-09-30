@@ -18,6 +18,7 @@ import { ROVER_CAMERA, coverageRoute, frameToProperty, headingTo, routeFromPath,
 import { LASER_ROVER_TYPES, type RobotTask, type WeedRobotState, type YardEvent } from './yardTypes';
 import { WEED_ROBOT_TYPES } from './weedSim';
 import { ROVER_ANIMALS, animalAlert, animalNear, waterPointAt, waterPoints, type WaterPoint } from './roverFindings';
+import { effectiveBoundary, insideBoundary } from './boundary';
 
 export const ROVER_SIM_EVENT = 'tendercells-rover-sim';
 const STORAGE_KEY = 'tendercells_rover_sim_v1';
@@ -35,6 +36,8 @@ interface SimRover {
   weeds: YardEvent[];
   robot: WeedRobotState;
   zones: ExclusionZone[];
+  /** Property boundary: the rover never plans or reports a point outside it. */
+  stayIn: (x: number, y: number) => boolean;
   items: Pick<PropertyItem, 'id' | 'name' | 'x' | 'y' | 'width' | 'depth' | 'kind'>[];
   water: WaterPoint[];
   next: number;
@@ -69,16 +72,18 @@ function laserFor(build: RoverBuild) {
  */
 export function simRover(item: PropertyItem, deviceId: string, layout: PropertyLayoutState): SimRover {
   const zones = zonesFromLayout(layout).filter((z) => z.id !== item.id);
+  const boundary = effectiveBoundary(layout);
+  const stayIn = (x: number, y: number) => insideBoundary(boundary, x, y);
   const items = layout.items.map(({ id, name, x, y, width, depth, kind }) => ({ id, name, x, y, width, depth, kind }));
   const water = waterPoints(layout.items);
   let r = rovers.get(item.id);
-  if (r) { r.zones = zones; r.items = items; r.water = water; r.itemName = item.name; return r; }
+  if (r) { r.zones = zones; r.stayIn = stayIn; r.items = items; r.water = water; r.itemName = item.name; return r; }
   const saved = load()[item.id];
   const canLaser = LASER_ROVER_TYPES.has(item.type);
   const build: RoverBuild = canLaser && saved?.build === 'rover-laser' ? 'rover-laser' : 'rover-scout';
   const safety = saved?.safety ?? { studentMode: true, burnEnabled: false, enclosureClosed: true };
   r = {
-    itemId: item.id, deviceId, itemName: item.name, canLaser, zones, items, water,
+    itemId: item.id, deviceId, itemName: item.name, canLaser, zones, stayIn, items, water,
     weeds: saved?.weeds ?? [], next: saved?.next ?? 1, lastFire: 0,
     robot: {
       state: 'idle', mode: 'simulation', estop: false, error: null, ts: Date.now(), robotType: build,
@@ -124,8 +129,8 @@ export function startRoverPass(item: PropertyItem, layout: PropertyLayoutState, 
   if (r.robot.pass.running) throw new Error('A pass is already running');
   const { widthFt, depthFt } = layout.property;
   const route = item.patrolPath && item.patrolPath.length > 1
-    ? routeFromPath(item.patrolPath, r.zones)
-    : coverageRoute({ x: MARGIN_FT, y: MARGIN_FT, width: widthFt - 2 * MARGIN_FT, depth: depthFt - 2 * MARGIN_FT }, r.zones);
+    ? routeFromPath(item.patrolPath, r.zones, 2, undefined, r.stayIn)
+    : coverageRoute({ x: MARGIN_FT, y: MARGIN_FT, width: widthFt - 2 * MARGIN_FT, depth: depthFt - 2 * MARGIN_FT }, r.zones, undefined, undefined, undefined, r.stayIn);
   if (!route.length) throw new Error('No drivable route - every point is inside an exclusion zone');
   const n = Math.min(10, Math.max(1, Math.round(passes)));
   r.robot = { ...r.robot, state: task === 'weed' ? 'scanning' : task, error: null, pass: { running: true, pass: 1, passes: n, waypoint: 0, waypoints: route.length, task } };
@@ -140,7 +145,7 @@ export function startRoverPass(item: PropertyItem, layout: PropertyLayoutState, 
     const now = Date.now();
     const frame = () => frameToProperty(pose, ROVER_CAMERA.aheadFt + (Math.random() - 0.5) * ROVER_CAMERA.frameFt.along,
       (Math.random() - 0.5) * ROVER_CAMERA.frameFt.across);
-    const inside = (p: Pt) => p.x > 0 && p.y > 0 && p.x < widthFt && p.y < depthFt;
+    const inside = (p: Pt) => p.x > 0 && p.y > 0 && p.x < widthFt && p.y < depthFt && r.stayIn(p.x, p.y);
     if (task === 'weed' && Math.random() < 0.1 / pass) {
       const p = frame();
       const dup = r.weeds.some((w) => w.propFt && w.status === 'pending_review' && Math.hypot(w.propFt.x - p.x, w.propFt.y - p.y) < 1.5);

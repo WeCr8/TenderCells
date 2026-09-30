@@ -9,6 +9,7 @@
 // Units: property feet, origin top-left, x right, y down (same as PropertyItem).
 // firmware/jetson-nano/zones.py enforces the same payload on the robot.
 import type { PropertyItem, PropertyLayoutState } from '../../components/property/propertyLayoutStore';
+import { effectiveBoundary, pathLeavesBoundary, type BoundarySource, type Pt } from './boundary';
 
 export type ZoneKind = 'no-go' | 'keep-out' | 'no-laser';
 
@@ -27,6 +28,11 @@ export interface ZonesPayload {
   /** The robot's own footprint on the property, so it can map its local frame to property feet. */
   self?: { itemId: string; x: number; y: number; width: number; depth: number };
   zones: ExclusionZone[];
+  /**
+   * The property boundary: the robot refuses any motion (and any laser) outside `poly` or within
+   * `marginFt` of its edge (lib/yard/boundary.ts). Robots without it only know the zones.
+   */
+  boundary?: { poly: Pt[]; marginFt: number; source: BoundarySource };
   ts: number;
 }
 
@@ -97,8 +103,12 @@ export function pathConflict(zones: ExclusionZone[], path: Array<{ x: number; y:
   return undefined;
 }
 
-/** Items that move on the property and should receive zones. */
-export const ZONE_ROBOT_TYPES = new Set(['roaming-roost', 'farmbot-genesis', 'farmbot-genesis-xl', 'rail-module']);
+/**
+ * Items that move on the property and receive zones + the boundary: mobile coops, rovers,
+ * native robot mowers, custom builds and the gantry robots.
+ * FIX(2026-09-30): rovers, mowers and custom builds were missing, so they got no zones at all.
+ */
+export const ZONE_ROBOT_TYPES = new Set(['roaming-roost', 'weed-rover', 'robot-mower', 'community-custom', 'farmbot-genesis', 'farmbot-genesis-xl', 'rail-module']);
 
 /** MQTT payload for one robot (its own footprint is not a zone for itself). */
 export function zonesPayload(layout: PropertyLayoutState, robot: PropertyItem, seq = Date.now()): ZonesPayload {
@@ -106,5 +116,17 @@ export function zonesPayload(layout: PropertyLayoutState, robot: PropertyItem, s
     v: 1, seq, units: 'ft', ts: Date.now(),
     self: { itemId: robot.id, x: robot.x, y: robot.y, width: robot.width, depth: robot.depth },
     zones: zonesFromLayout(layout).filter((z) => z.id !== robot.id),
+    boundary: (({ poly, marginFt, source }) => ({ poly, marginFt, source }))(effectiveBoundary(layout)),
   };
+}
+
+/**
+ * Route check for a patrol path: the first exclusion zone it enters, or the property edge
+ * (as a no-go "zone") where it leaves the boundary.
+ */
+export function routeConflict(layout: PropertyLayoutState, path: Array<{ x: number; y: number }>, ignoreId?: string): { zone: ExclusionZone; segment: number } | undefined {
+  const hit = pathConflict(zonesFromLayout(layout), path, ignoreId);
+  if (hit) return hit;
+  const out = pathLeavesBoundary(effectiveBoundary(layout), path);
+  return out ? { zone: { id: 'boundary', name: 'Property boundary', kind: 'no-go', poly: [] }, segment: out.segment } : undefined;
 }

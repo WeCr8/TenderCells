@@ -3,6 +3,7 @@
 import { MQTT_API_BASE, apiErrorMessage, hardwareAuthHeaders } from '../api/hardwareApi';
 import type { RobotTask, WeedRobotState, YardEvent } from './yardTypes';
 import type { ZonesPayload } from './exclusionZones';
+import type { Survey } from './boundary';
 
 export interface Presence { online: boolean; lastSeen: number; since: number; stale: boolean }
 
@@ -61,6 +62,14 @@ export async function fetchWeedState(deviceId: string): Promise<WeedRobotState |
   const res = await fetch(url(deviceId, 'state/weed'), { headers: await hardwareAuthHeaders() });
   if (!res.ok) return null;
   return ((await res.json()) as { data?: WeedRobotState }).data ?? null;
+}
+
+/** Latest boundary survey a mobile robot published (tc/{id}/state/survey), or null. */
+export async function fetchSurvey(deviceId: string): Promise<Survey | null> {
+  const res = await fetch(url(deviceId, 'state/survey'), { headers: await hardwareAuthHeaders() });
+  if (!res.ok) return null;
+  const s = ((await res.json()) as { data?: Survey }).data;
+  return s && Array.isArray(s.samples) && Array.isArray(s.edge) && s.stepFt > 0 ? s : null;
 }
 
 /** Send a robot its exclusion zones (retained on tc/{id}/cfg/zones; enforced on the robot). */

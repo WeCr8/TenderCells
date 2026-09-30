@@ -2,6 +2,7 @@ import type { TerrainLayers } from './terrain';
 import type { DrainageFix } from './watershed';
 import type { CameraMount } from '../../lib/yard/cameraMounts';
 import { auth } from '../../lib/firebase/firebaseApp';
+import type { PropertyBoundary } from '../../lib/yard/boundary';
 
 export type PropertyItemKind = 'hardware' | 'obstacle';
 export type HardwareType =
@@ -73,6 +74,9 @@ export interface PropertyConfig extends TerrainLayers {
   terrain?: 'lawn' | 'pasture' | 'dry' | 'snow';
   // Drainage changes the user is trying in Watershed & Drainage (planned, not built).
   drainagePlan?: DrainageFix[];
+  // Where every mobile product must stay (geofence). Absent = the property rectangle with a
+  // 2 ft margin. Owner-drawn or a reviewed robot survey (lib/yard/boundary.ts).
+  boundary?: PropertyBoundary;
 }
 
 export interface PropertyItem {

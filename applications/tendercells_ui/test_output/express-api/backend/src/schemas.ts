@@ -91,6 +91,16 @@ export function validateZones(body: unknown): string | null {
     if (!Array.isArray(poly) || poly.length < 3 || poly.length > 64) return `zones[${i}].poly needs 3-64 points`;
     if (!poly.every((p) => Array.isArray(p) && p.length === 2 && num(p[0]) && num(p[1]))) return `zones[${i}].poly points must be [x, y] numbers`;
   }
+  // Optional property boundary: the robot stays inside this polygon, marginFt in from its edges.
+  const bd = (body as { boundary?: Record<string, unknown> }).boundary;
+  if (bd !== undefined) {
+    if (!bd || typeof bd !== "object") return "boundary must be an object";
+    const poly = bd.poly as unknown[];
+    if (!Array.isArray(poly) || poly.length < 3 || poly.length > 256) return "boundary.poly needs 3-256 points";
+    if (!poly.every((p) => Array.isArray(p) && p.length === 2 && num(p[0]) && num(p[1]))) return "boundary.poly points must be [x, y] numbers";
+    if (!num(bd.marginFt) || (bd.marginFt as number) < 0 || (bd.marginFt as number) > 50) return "boundary.marginFt must be 0-50";
+    if (bd.source !== undefined && (typeof bd.source !== "string" || bd.source.length > 20)) return "boundary.source must be a short string";
+  }
   return null;
 }
 

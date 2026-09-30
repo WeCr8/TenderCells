@@ -157,6 +157,25 @@
     </div>
 
     <details class="card optional-intro">
+      <summary>Set up a Raspberry Pi or NVIDIA Jetson bridge</summary>
+      <p>A Pi or Jetson is a full Linux computer, so it does not use the ESP32 browser
+        installer below. Install the official operating system first, then add TenderCells.</p>
+      <div class="device-pick">
+        <a class="device" href="https://www.raspberrypi.com/software/" target="_blank" rel="noopener noreferrer">
+          <h3>Raspberry Pi</h3><small>Official Raspberry Pi Imager</small>
+        </a>
+        <a class="device" href="https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit" target="_blank" rel="noopener noreferrer">
+          <h3>Jetson Orin Nano</h3><small>Official NVIDIA SD-card setup</small>
+        </a>
+        <a class="device" href="https://github.com/WeCr8/TenderCells/blob/main/docs/EDGE_BRIDGE_INSTALL.md" target="_blank" rel="noopener noreferrer">
+          <h3>TenderCells bridge</h3><small>Install boundary and security checklist</small>
+        </a>
+      </div>
+      <p class="hint">TenderCells does not ask for the computer's administrator password or
+        school Wi-Fi password in this page. Bridge enrollment will use a short-lived claim code.</p>
+    </details>
+
+    <details class="card optional-intro">
       <summary>What can I build?</summary>
       <p class="hint">One Starter Node board + this flasher gets you a real, live device on the
         Tender Cells open-source stack in minutes. At WiFi setup (Step 4) set <strong>peripheral</strong>

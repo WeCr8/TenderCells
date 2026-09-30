@@ -159,6 +159,18 @@ describe('TenderCells OS contracts', () => {
     expect(firebaseConfig).toContain("frame-ancestors 'self'");
   });
 
+  it('routes Linux bridge computers through verified vendor imaging', () => {
+    const flasher = readProjectFile('../website/public/flash/index.html');
+    const guide = readProjectFile('../../../../docs/EDGE_BRIDGE_INSTALL.md');
+    expect(flasher).toContain('Official Raspberry Pi Imager');
+    expect(flasher).toContain('Official NVIDIA SD-card setup');
+    expect(flasher).toContain('short-lived claim code');
+    expect(guide).toContain('SHA-256 checksums plus release signatures');
+    expect(guide).toContain('no Firebase service-account file on a user device');
+    expect(guide).toContain('MQTT over TLS with a per-device identity');
+    expect(guide).toContain('Do not install the current camera bridge on a school device');
+  });
+
   it('uses the real cross-platform device provisioning flow', () => {
     const wizard = readProjectFile('src/components/products/ConnectionSetupWizard.tsx');
 

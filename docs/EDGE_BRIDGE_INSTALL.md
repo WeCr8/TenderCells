@@ -1,0 +1,101 @@
+# Raspberry Pi and Jetson edge bridges
+
+TenderCells uses a two-stage setup for Linux bridge computers:
+
+1. Install the vendor-supported operating system with the vendor's imaging workflow.
+2. Install and enroll the TenderCells bridge after the computer boots.
+
+Do not treat a Raspberry Pi or NVIDIA Jetson like an ESP32. The browser flasher is for
+microcontroller firmware only. It must not write arbitrary computer disks, collect an
+administrator password, embed Wi-Fi credentials, or download and run an unverified root
+script.
+
+## Supported starting paths
+
+| Computer | OS installation | Host computers | TenderCells use |
+|---|---|---|---|
+| Raspberry Pi 4 or 5 | Raspberry Pi OS 64-bit with Raspberry Pi Imager | Windows, macOS, Linux | MQTT bridge, local registry, camera gateway, light automation |
+| Jetson Orin Nano Developer Kit | Official JetPack SD-card image | Windows, macOS, Linux | Barn Brain, GPU vision, camera gateway, MQTT bridge |
+| Other Jetson Orin systems | NVIDIA SDK Manager or the board vendor's supported image | Depends on the exact module, carrier and JetPack release | Advanced Barn Brain deployment |
+
+Use the exact board and carrier-board instructions. A Jetson image is not portable across
+every Jetson model, storage target, or carrier board.
+
+## Raspberry Pi
+
+1. Download [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
+2. Select the exact Pi model and Raspberry Pi OS 64-bit.
+3. In OS customization, set a unique hostname and administrative user. Prefer SSH public-key
+   authentication. A school adult or IT administrator enters network credentials; students
+   should not receive a shared network password.
+4. Let Imager complete its write verification before removing the card.
+5. Boot the Pi, apply operating-system updates, and confirm its clock and hostname.
+
+Raspberry Pi documents that Imager can preconfigure hostname, account, Wi-Fi and SSH. Imager
+also supports SHA-256 verification and custom OS catalogs. TenderCells will not publish a
+custom catalog until its images are reproducible, checksummed and release-signed.
+
+## Jetson Orin Nano
+
+1. Follow NVIDIA's [Jetson Orin Nano getting-started guide](https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit).
+2. Check the board firmware prerequisite before writing a current JetPack 6.x image. Older
+   factory firmware may need NVIDIA's documented update first.
+3. Download the official Orin Nano Developer Kit SD-card image and write it using the method
+   NVIDIA lists for Windows, macOS or Linux.
+4. Complete the first-boot account and network setup locally.
+5. Install or update the matching JetPack components using NVIDIA's documented package path:
+   `sudo apt update && sudo apt install nvidia-jetpack`.
+
+For production hardware, use the current [SDK Manager documentation](https://docs.nvidia.com/sdk-manager/)
+and its compatibility matrix. Secure Boot and disk encryption are manufacturing/security
+operations, not child-facing setup switches. Keys and irreversible fuse operations belong to
+the device owner or school IT team.
+
+## TenderCells installation boundary
+
+The repository already contains the local MQTT/API runtime and an experimental camera relay
+bridge. They are suitable for developer testing, but a public one-click bridge installer is
+not yet released because enrollment must be device-scoped first.
+
+A production bridge package must provide all of the following:
+
+- A versioned Raspberry Pi `arm64` and Jetson `arm64` artifact from a tagged release.
+- SHA-256 checksums plus release signatures verified before installation.
+- A short-lived, single-use claim code generated while the owner is signed in.
+- A unique device key generated on the bridge; no Firebase service-account file on a user device.
+- MQTT over TLS with a per-device identity and topic ACLs such as `tc/<deviceId>/...`.
+- Least-privilege services, no privileged container, read-only filesystems where practical,
+  explicit camera/GPIO device access, and secrets outside images and source control.
+- Automatic security updates with a rollback path and a visible installed version.
+- Local-first operation. Cloud camera relay is opt-in, authenticated, encrypted and disabled
+  until enrollment and entitlement checks pass.
+- An extension directory or container profile for user software. Extensions declare required
+  cameras, GPIO, serial ports, network access and MQTT topics; they do not receive every host
+  permission by default.
+
+Until that package and claim API are complete, use [Connect a Device](CONNECT_A_DEVICE.md) for
+local MQTT development and [Camera Relay Bridge](CAMERA_RELAY_BRIDGE.md) only as an explicitly
+experimental developer workflow. Do not install the current camera bridge on a school device
+with a broad production Firebase service account.
+
+## Acceptance checklist
+
+- The downloaded OS came from Raspberry Pi or NVIDIA and its write completed verification.
+- The TenderCells artifact matches its published checksum and signature.
+- No default password, Wi-Fi password, private key or cloud administrator credential is in the image.
+- Enrollment codes expire quickly, work once and bind only the selected organization/device.
+- A student account cannot install extensions, reveal network credentials or widen device permissions.
+- Uninstall removes TenderCells services and credentials without damaging the vendor OS.
+- Revoking the device prevents new cloud sessions while local E-STOP and manual controls remain usable.
+- Pi and Jetson packages pass cold-boot, network-loss, update, rollback and power-loss tests.
+
+## Primary references
+
+- [Raspberry Pi getting started and Imager customization](https://www.raspberrypi.com/documentation/computers/getting-started.html)
+- [Raspberry Pi Imager custom repository and checksum fields](https://github.com/raspberrypi/rpi-imager/blob/main/doc/os-sublist-example.json)
+- [Raspberry Pi Imager CLI verification options](https://github.com/raspberrypi/rpi-imager/blob/main/doc/man/rpi-imager.1)
+- [NVIDIA Jetson Orin Nano getting started](https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit)
+- [NVIDIA JetPack setup for Orin Nano](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/setup_jetpack.html)
+- [NVIDIA SDK Manager](https://docs.nvidia.com/sdk-manager/)
+- [NVIDIA Jetson Secure Boot](https://docs.nvidia.com/jetson/archives/r36.4.4/DeveloperGuide/SD/Security/SecureBoot.html)
+- [NVIDIA Jetson disk encryption](https://docs.nvidia.com/jetson/archives/r36.2/DeveloperGuide/SD/Security/DiskEncryption.html)

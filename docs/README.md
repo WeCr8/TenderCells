@@ -27,6 +27,7 @@ Start here if you are browsing the repository docs.
 - [Classroom Quickstart](CLASSROOM_QUICKSTART.md) - run a real coop in 5 minutes, no hardware.
 - [Lesson pack template](lessons/_TEMPLATE.md) - instructor guide / workbook / wiring / BOM / AI prompts.
 - [Connect a Device](CONNECT_A_DEVICE.md) - full hardware runbook, MQTT topics, troubleshooting.
+- [Raspberry Pi and Jetson edge bridges](EDGE_BRIDGE_INSTALL.md) - vendor imaging, secure enrollment boundary, and Barn Brain requirements.
 - [Single Camera Node: First Build](CAMERA_NODE_FIRST_BUILD.md) - real XIAO ESP32-S3 Sense imagery, safe wiring, flashing, registry, MQTT, and UI onboarding.
 - Browser flasher: <https://tender-cells.web.app/flash> · 3D viewer: <https://tender-cells.web.app/viewer>
 - [Starter Node firmware](../firmware/starter-node/README.md) · [Flipper Field Kit](hardware/flipper-field-kit.md)

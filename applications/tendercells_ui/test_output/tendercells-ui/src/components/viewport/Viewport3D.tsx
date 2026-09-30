@@ -76,6 +76,8 @@ type Viewport3DProps = {
   hydrology?: HydrologyResult | null;
   /** Picture-in-picture views from the WatchTower's three cameras (default: on for predator-monitor). */
   towerCameras?: boolean;
+  /** Frame the whole property instead of the product's item (demo hero). */
+  overview?: boolean;
 };
 
 const CAM_ASPECT = 4 / 3;
@@ -1230,6 +1232,7 @@ export default function Viewport3D({
   showAttentionPanel = true,
   hydrology = null,
   towerCameras,
+  overview = false,
 }: Viewport3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [webglOk, setWebglOk] = useState(true);
@@ -1531,10 +1534,10 @@ export default function Viewport3D({
         : new THREE.PerspectiveCamera(55, aspect, 0.1, Math.max(1000, Math.max(layout.property.widthFt, layout.property.depthFt) * 8));
 
     // Camera target: focused on active product when in products/simulation mode
-    const focusX = activeItem && workspaceMode !== 'property'
+    const focusX = activeItem && workspaceMode !== 'property' && !overview
       ? activeItem.x + activeItem.width / 2 - layout.property.widthFt / 2
       : 0;
-    const focusZ = activeItem && workspaceMode !== 'property'
+    const focusZ = activeItem && workspaceMode !== 'property' && !overview
       ? activeItem.y + activeItem.depth / 2 - layout.property.depthFt / 2
       : 0;
 
@@ -1903,7 +1906,7 @@ export default function Viewport3D({
     };
   }, [
     loadedScene, model, viewMode, cameraPreset, controlMode,
-    workspaceMode, layout, product, enrichedItems, glbCacheVersion, activeItem, showYardFlags, focusItemId, autopilotActive,
+    workspaceMode, layout, product, enrichedItems, glbCacheVersion, activeItem, showYardFlags, focusItemId, autopilotActive, overview,
   ]);
 
   useEffect(() => {

@@ -6,7 +6,7 @@ import { Link, useParams } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
 import DocGroups from "../components/DocGroups";
-import MarkdownArticle from "../components/MarkdownArticle";
+import TutorialArticle from "../components/TutorialArticle";
 import { useMarkdown } from "../hooks/useMarkdown";
 import { siteDocBySlug } from "../data/docs";
 
@@ -36,26 +36,26 @@ function DocIndex() {
 function DocView({ slug }: { slug: string }) {
   const doc = siteDocBySlug(slug);
   const md = useMarkdown(`/docs/${slug}.md`);
+  const crumbs = <><Link to="/">Home</Link> › <Link to="/docs">Docs</Link>{doc ? ` › ${doc.title}` : ""}</>;
   return (
     <PageLayout>
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "1.5rem 1rem" }}>
-        <p style={{ fontSize: ".9rem", marginBottom: "1rem" }}>
-          <Link to="/">Home</Link> › <Link to="/docs">Docs</Link>{doc ? ` › ${doc.title}` : ""}
-        </p>
-        {(md === false || !doc) && (
+      {(md === false || !doc) && (
+        <div className="tut">
+          <p className="tut-crumbs">{crumbs}</p>
           <div className="prose">
             <h2>Page not found</h2>
             <p>That document isn't published here. See <Link to="/docs">all documentation</Link>.</p>
           </div>
-        )}
-        {doc && md === null && <p>Loading…</p>}
-        {doc && md && <MarkdownArticle md={md} className="doc-body" />}
-        {doc && (
-          <p style={{ fontSize: ".85rem", marginTop: "2rem", opacity: 0.75 }}>
-            Kept in step with <code>{doc.source}</code> in the open-source repository.
-          </p>
-        )}
-      </div>
+        </div>
+      )}
+      {doc && md === null && <div className="tut"><p className="tut-crumbs">{crumbs}</p><p>Loading…</p></div>}
+      {doc && md && (
+        <TutorialArticle
+          md={md}
+          crumbs={crumbs}
+          footer={<p className="tut-source">Kept in step with <code>{doc.source}</code> in the open-source repository.</p>}
+        />
+      )}
     </PageLayout>
   );
 }

@@ -1,0 +1,42 @@
+/* LessonsPage - "where do you start" chooser + the numbered learning path. */
+.lp-start { margin: 0.5rem 0 2rem; }
+.lp-start h2, .lp-h2 { font-size: 1.35rem; margin: 0 0 0.9rem; }
+.lp-start-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.9rem; }
+.lp-start-card {
+  display: flex; flex-direction: column; gap: 0.3rem; padding: 0.9rem 1rem; border-radius: 10px;
+  border: 1px solid #d1d9e0; background: #fff; color: #1f2328; text-decoration: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.lp-start-card:hover { border-color: #2e7d32; box-shadow: 0 2px 10px rgba(46, 125, 50, 0.12); }
+.lp-start-who { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #2e7d32; }
+.lp-start-card span:last-child { color: #59636e; font-size: 0.9rem; }
+
+.lp-path { list-style: none; margin: 0; padding: 0; position: relative; }
+.lp-path::before { content: ""; position: absolute; left: 19px; top: 8px; bottom: 8px; width: 2px; background: #d1d9e0; }
+.lp-step { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 1rem; margin-bottom: 1rem; }
+.lp-num {
+  position: relative; z-index: 1; width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center; font-weight: 700;
+  background: #fff; border: 2px solid #d1d9e0; color: #59636e;
+}
+.lp-step.is-going .lp-num { border-color: #2e7d32; color: #2e7d32; }
+.lp-step.is-done .lp-num { background: #2e7d32; border-color: #2e7d32; color: #fff; }
+.lp-card {
+  display: block; padding: 0.9rem 1.1rem; border: 1px solid #d1d9e0; border-radius: 10px;
+  background: #fff; color: #1f2328; text-decoration: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.lp-card:hover { border-color: #2e7d32; box-shadow: 0 2px 10px rgba(46, 125, 50, 0.12); }
+.lp-card-top { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: space-between; }
+.lp-card h3 { margin: 0; font-size: 1.1rem; }
+.lp-card p { margin: 0.35rem 0 0.75rem; color: #59636e; }
+.lp-card-foot { display: flex; align-items: center; gap: 1rem; }
+.lp-bar { flex: 1; height: 6px; border-radius: 99px; background: #eef1f4; overflow: hidden; }
+.lp-bar span { display: block; height: 100%; background: #2e7d32; }
+.lp-cta { font-weight: 600; color: #2e7d32; white-space: nowrap; font-size: 0.9rem; }
+
+.lp-map {
+  display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;
+  margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: 10px; background: #e8f3ea; border: 1px solid #c7e1cb;
+}
+.lp-map h3 { margin: 0 0 0.25rem; }
+.lp-map p { margin: 0; color: #3d4a41; }

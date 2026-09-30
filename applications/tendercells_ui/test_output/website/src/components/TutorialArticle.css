@@ -1,0 +1,149 @@
+/* TutorialArticle - lessons and docs laid out like a rendered .md file (GitHub-style
+   markdown body) with a tutorial outline beside it. */
+
+.tut {
+  --md-text: #1f2328;
+  --md-muted: #59636e;
+  --md-border: #d1d9e0;
+  --md-soft: #f6f8fa;
+  --md-accent: #2e7d32;
+  --md-accent-soft: #e8f3ea;
+  --md-link: #0969da;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  color: var(--md-text);
+}
+
+/* ── header: breadcrumb, title, meta, progress ─────────────────────────────── */
+.tut-crumbs { font-size: 0.9rem; color: var(--md-muted); margin: 0 0 0.75rem; }
+.tut-crumbs a { color: var(--md-link); }
+.tut-title {
+  font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+  line-height: 1.2;
+  margin: 0 0 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--md-border);
+}
+.tut-meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; color: var(--md-muted); font-size: 0.9rem; align-items: center; }
+.tut-meta .tag { margin: 0; }
+.tut-progress {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem;
+  margin-top: 1rem; padding: 0.75rem 1rem;
+  background: var(--md-accent-soft); border: 1px solid #c7e1cb; border-radius: 8px;
+}
+.tut-progress-bar { flex: 1 1 180px; height: 8px; background: #fff; border-radius: 99px; overflow: hidden; border: 1px solid #c7e1cb; }
+.tut-progress-bar span { display: block; height: 100%; background: var(--md-accent); transition: width 0.25s ease; }
+.tut-progress-text { font-size: 0.9rem; font-weight: 600; }
+.tut-progress-next { font-weight: 600; color: var(--md-accent); text-decoration: none; }
+.tut-progress-reset { background: none; border: none; color: var(--md-muted); cursor: pointer; font-size: 0.85rem; text-decoration: underline; }
+
+/* ── two columns: outline + body ───────────────────────────────────────────── */
+.tut-grid { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 2rem; margin-top: 1.5rem; align-items: start; }
+.tut-main { min-width: 0; }
+.tut-toc { position: sticky; top: 96px; max-height: calc(100vh - 120px); overflow-y: auto; font-size: 0.9rem; }
+.tut-toc-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--md-muted); margin: 0 0 0.5rem; }
+.tut-toc-list { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--md-border); }
+.tut-toc-list li a {
+  display: flex; gap: 0.4rem; align-items: baseline;
+  padding: 0.3rem 0.6rem; margin-left: -2px; border-left: 2px solid transparent;
+  color: var(--md-muted); text-decoration: none; line-height: 1.35;
+}
+.tut-toc-list li.lvl-3 a { padding-left: 1.4rem; font-size: 0.85rem; }
+.tut-toc-list li a:hover { color: var(--md-text); }
+.tut-toc-list li.is-active a { color: var(--md-accent); border-left-color: var(--md-accent); font-weight: 600; }
+.tut-toc-list li.is-done a { color: var(--md-accent); }
+.tut-toc-check { flex: none; width: 1em; text-align: center; }
+.tut-toc-mobile { display: none; }
+
+@media (max-width: 900px) {
+  .tut-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .tut-toc { display: none; }
+  .tut-toc-mobile {
+    display: block; position: sticky; top: 0; z-index: 5;
+    background: #fff; border: 1px solid var(--md-border); border-radius: 8px; padding: 0.5rem 0.75rem;
+  }
+  .tut-toc-mobile summary { cursor: pointer; font-weight: 600; font-size: 0.95rem; }
+  .tut-toc-mobile .tut-toc-list { margin-top: 0.5rem; max-height: 55vh; overflow-y: auto; }
+}
+
+/* ── markdown body (GitHub-style) ──────────────────────────────────────────── */
+.md-body { font-size: 1rem; line-height: 1.65; word-wrap: break-word; }
+.md-body > *:first-child { margin-top: 0; }
+.md-body p, .md-body ul, .md-body ol, .md-body table, .md-body pre, .md-body .md-code, .md-body .md-table { margin: 0 0 1rem; }
+.md-body a { color: var(--md-link); text-decoration: none; }
+.md-body a:hover { text-decoration: underline; }
+.md-body h2, .md-body h3, .md-body h4 {
+  position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
+  margin: 2rem 0 1rem; font-weight: 600; line-height: 1.3;
+}
+.md-body h2 { font-size: 1.5em; padding-bottom: 0.3em; border-bottom: 1px solid var(--md-border); }
+.md-body h3 { font-size: 1.25em; }
+.md-body h4 { font-size: 1em; }
+.md-heading-text { flex: 1 1 auto; min-width: 0; }
+.md-anchor {
+  position: absolute; left: -1.1em; opacity: 0; color: var(--md-muted) !important;
+  text-decoration: none !important; font-weight: 400; transition: opacity 0.15s;
+}
+.md-body h2:hover .md-anchor, .md-body h3:hover .md-anchor, .md-body h4:hover .md-anchor { opacity: 1; }
+
+/* A walkthrough step: a numbered card edge + its own "Mark done" toggle. */
+.md-body .md-step { padding-left: 0.75rem; border-left: 4px solid var(--md-border); }
+.md-body h2.md-step { border-bottom: none; background: var(--md-soft); padding: 0.55rem 0.75rem; border-radius: 0 6px 6px 0; }
+.md-body .md-step.is-done { border-left-color: var(--md-accent); }
+.md-body .md-step.is-done .md-heading-text { color: var(--md-accent); }
+.md-step-check {
+  flex: none; font-size: 0.8rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 99px; cursor: pointer;
+  border: 1px solid var(--md-border); background: #fff; color: var(--md-text);
+}
+.md-step-check[aria-pressed="true"] { background: var(--md-accent); border-color: var(--md-accent); color: #fff; }
+
+.md-body ul, .md-body ol { padding-left: 2em; }
+.md-body li + li { margin-top: 0.25em; }
+.md-body li > ul, .md-body li > ol { margin: 0.25em 0 0; }
+.md-body li:has(> input[type="checkbox"]) { list-style: none; margin-left: -1.4em; }
+.md-body input[type="checkbox"] { margin-right: 0.4em; }
+.md-body hr { height: 1px; border: 0; background: var(--md-border); margin: 1.75rem 0; }
+.md-body img { max-width: 100%; height: auto; border-radius: 6px; }
+.md-body strong { font-weight: 600; }
+
+.md-body code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 85%; background: rgba(175, 184, 193, 0.2); padding: 0.2em 0.4em; border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+.md-code { position: relative; }
+.md-code pre {
+  margin: 0; padding: 1rem; overflow-x: auto; background: var(--md-soft);
+  border: 1px solid var(--md-border); border-radius: 6px; font-size: 0.85rem; line-height: 1.45;
+}
+.md-code pre code { background: none; padding: 0; font-size: 100%; overflow-wrap: normal; white-space: pre; }
+.md-copy {
+  position: absolute; top: 0.4rem; right: 0.4rem; font-size: 0.75rem; padding: 0.2rem 0.55rem;
+  border: 1px solid var(--md-border); border-radius: 6px; background: #fff; color: var(--md-muted);
+  cursor: pointer; opacity: 0.85;
+}
+.md-copy:hover { opacity: 1; color: var(--md-text); }
+
+.md-table { overflow-x: auto; }
+.md-table table { border-collapse: collapse; width: max-content; max-width: 100%; }
+.md-body th, .md-body td { border: 1px solid var(--md-border); padding: 0.4rem 0.8rem; text-align: left; vertical-align: top; }
+.md-body th { background: var(--md-soft); font-weight: 600; }
+.md-body tr:nth-child(2n) td { background: #fbfcfd; }
+
+/* Callouts (blockquotes), coloured by what they are about. */
+.md-callout { margin: 0 0 1rem; padding: 0.6rem 1rem; border-left: 4px solid #0969da; background: #f1f7ff; border-radius: 0 6px 6px 0; }
+.md-callout > :last-child { margin-bottom: 0; }
+.md-callout p { margin: 0 0 0.5rem; }
+.md-callout-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #0969da; margin-bottom: 0.25rem; }
+.md-callout-safety { border-left-color: #cf222e; background: #fff5f5; }
+.md-callout-safety .md-callout-label { color: #cf222e; }
+.md-callout-grownup { border-left-color: #8250df; background: #faf6ff; }
+.md-callout-grownup .md-callout-label { color: #8250df; }
+.md-callout-idea { border-left-color: var(--md-accent); background: var(--md-accent-soft); }
+.md-callout-idea .md-callout-label { color: var(--md-accent); }
+.md-callout-tip { border-left-color: #bf8700; background: #fff8e5; }
+.md-callout-tip .md-callout-label { color: #9a6700; }
+
+.tut-footer { margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--md-border); }
+.tut-source { font-size: 0.85rem; color: var(--md-muted); margin-top: 1.5rem; }

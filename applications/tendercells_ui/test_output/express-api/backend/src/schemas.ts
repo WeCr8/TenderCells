@@ -101,7 +101,10 @@ export const SCHEMAS: Record<string, Schema> = {
   // Robot mower link / settings (full rules in mower.ts validateMowerLink).
   mowerLink: {
     name: { type: "string", required: true },
-    adapter: { type: "string", required: true, values: ["home-assistant", "mqtt"] },
+    adapter: { type: "string", required: true, values: ["home-assistant", "mqtt", "husqvarna", "gardena", "mammotion"] },
+    vendorId: { type: "string" },
+    locationId: { type: "string" },
+    autoResume: { type: "boolean" },
     entityId: { type: "string" },
     batteryEntityId: { type: "string" },
     deviceId: { type: "string" },
@@ -109,7 +112,25 @@ export const SCHEMAS: Record<string, Schema> = {
     noAnimalsConfirmed: { type: "boolean" },
     quietHours: { type: "object" },
   },
-  mowerCommand: { action: { type: "string", required: true, values: ["start", "pause", "dock"] } },
+  mowerCommand: {
+    action: { type: "string", required: true, values: ["start", "resume_schedule", "pause", "park_until_next_schedule", "dock"] },
+    durationMin: { type: "number", min: 1, max: 1440 },
+    workAreaId: { type: "number" },
+    vendorTask: { type: "string" },
+    pattern: { type: "string", values: ["auto", "stripes", "checkerboard", "diamond", "spiral", "perimeter"] },
+    angleDeg: { type: "number", min: 0, max: 179 },
+    edgePasses: { type: "number", min: 0, max: 5 },
+    overlapPct: { type: "number", min: 0, max: 50 },
+    cuttingHeightMm: { type: "number", min: 15, max: 120 },
+    area: { type: "object" },
+  },
+  mowerSettings: {
+    cuttingHeight: { type: "number", min: 1, max: 9 },
+    headlight: { type: "string", values: ["ALWAYS_ON", "ALWAYS_OFF", "EVENING_ONLY", "EVENING_AND_NIGHT"] },
+    schedule: { type: "array" },
+    stayOutZone: { type: "object" },
+    confirmError: { type: "boolean" },
+  },
   door:    { state:   { type: "string", required: true, values: ["open", "close"] } },
   // Basic Roaming Roost differential drive (classroom rover + real product share this).
   drive:   {

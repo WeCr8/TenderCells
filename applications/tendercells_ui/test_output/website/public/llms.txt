@@ -17,7 +17,13 @@ Maturity, stated precisely: the public demo is a simulated farm and its entities
 
 ## Bring Your Own Robot Mower
 
-Owners can link a robot mower they already have to Tender Cells OS: any mower Home Assistant controls as a lawn_mower entity (the hub calls Home Assistant with a token kept on the hub), or a DIY/bridged mower speaking tc/{id}/cmd/mower. Tender Cells refuses to start it and sends it home while a guarded coop door is open, an animal was seen in the last 15 minutes, during wildlife quiet hours (default 20:00-07:00) or E-STOP. It does not steer the mower or cut its power. Guide: https://tendercells.com/docs/robot-mowers
+Owners can link a robot mower they already have and run it from Tender Cells OS: mow now, advanced mowing where the connection supports it, park, resume schedule, cutting height, headlight, weekly schedule and stay-out zones.
+
+- Official vendor APIs (owner's own developer keys, kept on the hub): Husqvarna Automower Connect (work areas, schedule, cutting height, headlight, stay-out zones, errors, GPS), GARDENA smart system (SILENO), Mammotion Open API (LUBA / YUKA 2025+ models; saved plans).
+- Through Home Assistant: Segway Navimow (Segway's own integration), Ecovacs GOAT (Home Assistant core); community integrations for Worx / Kress / LandXcape, Dreame / MOVA, Bosch Indego, STIHL iMOW.
+- Open: OpenMower / DIY mowers via tc/{id}/cmd/mower, which accept mowing patterns (stripes, checkerboard, diamond, spiral, perimeter) with angle, edge passes, overlap, cutting height and area.
+
+Mowing patterns are only sent to mowers whose connection supports them; Husqvarna patterns stay per work area in its app, Mammotion patterns in its saved plans. Tender Cells refuses to start the mower, and holds it at home, while a guarded coop door is open, an animal was seen in the last 15 minutes, during wildlife quiet hours (default 20:00-07:00) or E-STOP. It does not steer the mower or cut its power. Guide: https://tendercells.com/docs/robot-mowers
 
 ## Canonical Definitions And Status
 

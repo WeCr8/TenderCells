@@ -160,6 +160,19 @@
     <endpoint method="GET" path="/api/mqtt/mowers" auth="signed-in">
       <summary>Linked robot mowers you own (bring your own: Home Assistant lawn_mower entities or native MQTT mowers), with state and why each may not mow right now.</summary>
     </endpoint>
+    <endpoint method="GET" path="/api/mqtt/mowers/vendors/{vendor}/discover" auth="signed-in">
+      <summary>Mowers on the owner&apos;s account for vendor husqvarna (Automower Connect), gardena (smart system), mammotion (Open API) or home-assistant (lawn_mower entities). Credentials stay in the hub environment.</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/mower/settings" auth="device-owner">
+      <summary>What the mower&apos;s own app changes: cuttingHeight, headlight, schedule (weekly tasks), stayOutZone {id, enabled}, confirmError. Checked against the mower&apos;s capabilities; never moves it.</summary>
+      <body schema="mowerSettings">
+        <field name="cuttingHeight" type="number" min="1" max="9"/>
+        <field name="headlight" type="string" values="ALWAYS_ON|ALWAYS_OFF|EVENING_ONLY|EVENING_AND_NIGHT"/>
+        <field name="schedule" type="array"/>
+        <field name="stayOutZone" type="object"/>
+        <field name="confirmError" type="boolean"/>
+      </body>
+    </endpoint>
     <endpoint method="GET" path="/api/mqtt/mowers/home-assistant/entities" auth="signed-in">
       <summary>lawn_mower entities on the hub&apos;s Home Assistant (HA_URL + HA_TOKEN in the hub environment; the token is never returned).</summary>
     </endpoint>
@@ -167,7 +180,10 @@
       <summary>Link a mower: must guard the coops whose animals can reach the lawn, or confirm no animals roam there. Claimed for the caller.</summary>
       <body schema="mowerLink">
         <field name="name" type="string" required="true"/>
-        <field name="adapter" type="string" required="true" values="home-assistant|mqtt"/>
+        <field name="adapter" type="string" required="true" values="home-assistant|mqtt|husqvarna|gardena|mammotion"/>
+        <field name="vendorId" type="string"/>
+        <field name="locationId" type="string"/>
+        <field name="autoResume" type="boolean"/>
         <field name="entityId" type="string"/>
         <field name="batteryEntityId" type="string"/>
         <field name="deviceId" type="string"/>
@@ -183,7 +199,10 @@
       <summary>Change a mower&apos;s guarded coops, quiet hours, name or entities.</summary>
       <body schema="mowerLink">
         <field name="name" type="string" required="true"/>
-        <field name="adapter" type="string" required="true" values="home-assistant|mqtt"/>
+        <field name="adapter" type="string" required="true" values="home-assistant|mqtt|husqvarna|gardena|mammotion"/>
+        <field name="vendorId" type="string"/>
+        <field name="locationId" type="string"/>
+        <field name="autoResume" type="boolean"/>
         <field name="entityId" type="string"/>
         <field name="batteryEntityId" type="string"/>
         <field name="deviceId" type="string"/>
@@ -196,9 +215,18 @@
       <summary>Unlink a mower.</summary>
     </endpoint>
     <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/mower/command" auth="device-owner" gated="mower" waits-for-ack="true">
-      <summary>start (interlocked: E-STOP, quiet hours, guarded coop door open or stale, animal seen in the last 15 min) | pause | dock (never refused). Home Assistant mowers: lawn_mower.start_mowing/pause/dock; native mowers: tc/{id}/cmd/mower with ack.</summary>
+      <summary>start | resume_schedule (both interlocked: E-STOP, quiet hours, guarded coop door open or stale, animal seen in the last 15 min) | pause | park_until_next_schedule | dock (never refused). Basic start takes durationMin; advanced start takes workAreaId (Husqvarna: pattern set per work area in its app), vendorTask (Mammotion saved plan) or, for native mowers, pattern auto|stripes|checkerboard|diamond|spiral|perimeter with angleDeg, edgePasses, overlapPct, cuttingHeightMm and area. Each mower&apos;s capabilities say which apply.</summary>
       <body schema="mowerCommand">
-        <field name="action" type="string" required="true" values="start|pause|dock"/>
+        <field name="action" type="string" required="true" values="start|resume_schedule|pause|park_until_next_schedule|dock"/>
+        <field name="durationMin" type="number" min="1" max="1440"/>
+        <field name="workAreaId" type="number"/>
+        <field name="vendorTask" type="string"/>
+        <field name="pattern" type="string" values="auto|stripes|checkerboard|diamond|spiral|perimeter"/>
+        <field name="angleDeg" type="number" min="0" max="179"/>
+        <field name="edgePasses" type="number" min="0" max="5"/>
+        <field name="overlapPct" type="number" min="0" max="50"/>
+        <field name="cuttingHeightMm" type="number" min="15" max="120"/>
+        <field name="area" type="object"/>
       </body>
       <publishes topic="tc/{id}/cmd/mower" qos="1"/>
     </endpoint>
@@ -290,7 +318,7 @@
       <note>Published by the hub&apos;s mower bridge for Home Assistant mowers, or by a native mower itself.</note>
     </topic>
     <topic pattern="tc/{id}/cmd/mower" direction="api-to-device" qos="1">
-      <payload>{action: start|pause|dock, seq, timestamp}</payload>
+      <payload>{action: start|resume_schedule|pause|park_until_next_schedule|dock, seq, timestamp, durationMin?, pattern?, angleDeg?, edgePasses?, overlapPct?, cuttingHeightMm?, area?:{x,y,width,depth}}</payload>
       <note>Native mowers reply on tc/{id}/ack. The hub sends pause + dock by itself when the interlock trips while mowing.</note>
     </topic>
     <topic pattern="tc/{id}/cmd/estop" direction="api-to-device" qos="2" retain="true">

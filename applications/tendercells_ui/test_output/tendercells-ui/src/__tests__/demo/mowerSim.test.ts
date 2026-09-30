@@ -42,19 +42,19 @@ describe('robot mower interlock (demo)', () => {
 
   it('refuses to start while the coop door is open, and says why', () => {
     seed('open');
-    expect(() => simCommand(DEMO_MOWER_ID, 'start', noon)).toThrow(/door is open/);
+    expect(() => simCommand(DEMO_MOWER_ID, 'start', {}, noon)).toThrow(/door is open/);
     expect(demoMower().state?.lastInterlock?.action).toBe('refused');
   });
 
   it('refuses at night (wildlife quiet hours)', () => {
     seed('closed');
     const night = new Date(2026, 8, 30, 22).getTime();
-    expect(() => simCommand(DEMO_MOWER_ID, 'start', night)).toThrow(/Quiet hours/);
+    expect(() => simCommand(DEMO_MOWER_ID, 'start', {}, night)).toThrow(/Quiet hours/);
   });
 
   it('sends a mowing mower home when the flock is let out', () => {
     seed('closed');
-    simCommand(DEMO_MOWER_ID, 'start', noon);
+    simCommand(DEMO_MOWER_ID, 'start', {}, noon);
     expect(demoMower().state?.activity).toBe('mowing');
     updateDemoEquipment('ct_001', { door: 'open' });
     const m = demoMower(noon + 1000);
@@ -66,9 +66,9 @@ describe('robot mower interlock (demo)', () => {
   it('E-STOP latches until cleared', () => {
     seed('closed');
     simEstop(DEMO_MOWER_ID, noon);
-    expect(() => simCommand(DEMO_MOWER_ID, 'start', noon)).toThrow(/E-STOP/);
+    expect(() => simCommand(DEMO_MOWER_ID, 'start', {}, noon)).toThrow(/E-STOP/);
     simClearEstop(DEMO_MOWER_ID);
-    simCommand(DEMO_MOWER_ID, 'start', noon);
+    simCommand(DEMO_MOWER_ID, 'start', {}, noon);
     expect(demoMower().state?.activity).toBe('mowing');
   });
 
@@ -100,5 +100,59 @@ describe('mower interlock rules', () => {
     expect(mowingBlockedReason(link, ctx({ habitat: () => ({ doorState: 'closed', ageMs: 120_000 }) }))).toMatch(/out of date/);
     expect(mowingBlockedReason(link, ctx({ animalsSeen: ['cat'] }))).toMatch(/cat/);
     expect(mowingBlockedReason(link, ctx())).toBeNull();
+  });
+});
+
+import { patternPaths, lanes, laneSpacingFt } from '../../lib/mower/patterns';
+import { DEMO_VENDOR_MOWER_ID, simSettings } from '../../lib/mower/mowerSim';
+import { MOWER_BRANDS } from '../../lib/mower/brands';
+
+describe('mowing patterns', () => {
+  const r = { x: 0, y: 0, width: 20, depth: 10 };
+  it('stripes are parallel lanes covering the area, alternating direction', () => {
+    const l = lanes(r, 0, 2);
+    expect(l).toHaveLength(10);
+    expect(l[0][0].y).toBeGreaterThan(l[0][1].y);
+    expect(l[1][0].y).toBeLessThan(l[1][1].y);
+  });
+  it('checkerboard is two perpendicular passes; spiral shrinks inward; edge passes come first', () => {
+    const stripes = patternPaths(r, 'stripes', 0, 0, 2).length;
+    expect(patternPaths(r, 'checkerboard', 0, 0, 2).length).toBe(stripes + lanes(r, 90, 2).length);
+    const spiral = patternPaths(r, 'spiral', 0, 0, 2);
+    expect(spiral.length).toBeGreaterThan(1);
+    const withEdges = patternPaths(r, 'stripes', 0, 2, 1);
+    expect(withEdges[0]).toHaveLength(5);
+    expect(laneSpacingFt(0)).toBeGreaterThan(laneSpacingFt(30));
+  });
+});
+
+describe('demo mowers: advanced mowing and vendor-app settings', () => {
+  beforeEach(() => { localStorage.clear(); });
+  it('the native demo mower runs a custom pattern plan', () => {
+    seed('closed');
+    simCommand(DEMO_MOWER_ID, 'start', { pattern: 'checkerboard', angleDeg: 30, edgePasses: 1 }, noon);
+    expect(demoMower().state?.plan).toMatchObject({ pattern: 'checkerboard', angleDeg: 30 });
+  });
+  it('the vendor-style demo mower changes cutting height, headlight and zones, and parks', () => {
+    seed('closed');
+    simSettings(DEMO_VENDOR_MOWER_ID, { cuttingHeight: 7, headlight: 'ALWAYS_OFF', stayOutZone: { id: 'z-coop', enabled: false } });
+    const v = simMowers(noon).find((m) => m.link.deviceId === DEMO_VENDOR_MOWER_ID)!;
+    expect(v.state?.details?.cuttingHeight).toBe(7);
+    expect(v.state?.details?.headlight).toBe('ALWAYS_OFF');
+    expect(v.state?.details?.stayOutZones?.find((z) => z.id === 'z-coop')?.enabled).toBe(false);
+    expect(v.capabilities?.patterns).toBe('vendor-area');
+    simCommand(DEMO_VENDOR_MOWER_ID, 'start', { workAreaId: 2 }, noon);
+    simCommand(DEMO_VENDOR_MOWER_ID, 'park_until_next_schedule', {}, noon);
+    expect(simMowers(noon + 10_000).find((m) => m.link.deviceId === DEMO_VENDOR_MOWER_ID)?.state?.activity).toBe('docked');
+  });
+  it('a mower refuses actions its connection cannot do', () => {
+    seed('closed');
+    const link = simLink({ name: 'GOAT', adapter: 'home-assistant', entityId: 'lawn_mower.goat', guardHabitats: [], noAnimalsConfirmed: true, quietHours: null }, noon);
+    expect(() => simCommand(link.deviceId, 'resume_schedule', {}, noon)).toThrow(/cannot resume schedule/);
+  });
+  it('every brand says how much to trust its connection', () => {
+    expect(MOWER_BRANDS.find((b) => b.id === 'husqvarna')?.trust).toBe('OFFICIAL');
+    expect(MOWER_BRANDS.find((b) => b.id === 'mammotion')?.adapter).toBe('mammotion');
+    expect(MOWER_BRANDS.find((b) => b.id === 'worx')?.trust).toBe('COMMUNITY');
   });
 });

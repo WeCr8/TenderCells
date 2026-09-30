@@ -111,6 +111,7 @@ jobs:
       - name: Type-check + build
         run: npm run build
 
+  express-api:
     name: "API — type-check + backend XML"
     needs: changes
     if: needs.changes.outputs.api == 'true'

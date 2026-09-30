@@ -78,6 +78,36 @@ local MQTT development and [Camera Relay Bridge](CAMERA_RELAY_BRIDGE.md) only as
 experimental developer workflow. Do not install the current camera bridge on a school device
 with a broad production Firebase service account.
 
+## Preflight checker
+
+After cloning a tagged TenderCells release onto the bridge, run:
+
+```bash
+node deploy/edge-bridge/check-readiness.mjs
+```
+
+For a future managed camera bridge, the same checker is deliberately stricter:
+
+```bash
+TC_EDGE_MANAGED=1 TC_EDGE_CAMERA=1 node deploy/edge-bridge/check-readiness.mjs
+```
+
+It blocks managed installation until a one-time claim code, an `mqtts://` broker and a
+password-file-backed MQTT identity are supplied. It also blocks every mode when it detects a
+Firebase Admin key on the bridge. The checker prints only presence/status information, never
+secret values.
+
+Custom workloads use `deploy/edge-bridge/extension.schema.json`. An extension image must be
+pinned by SHA-256 digest and declare MQTT publish/subscribe topics, host devices, network scope
+and GPU use. The eventual installer must validate this manifest and present the permissions to
+an adult or administrator before starting the workload.
+
+For camera specifically, prefer [`deploy/self-hosted-camera/`](../deploy/self-hosted-camera/README.md)
+on this bridge computer instead: it needs no TenderCells cloud account or Firebase credential
+of any kind (coturn + MediaMTX + ffmpeg, gated behind an HTTPS proxy or VPN you control). See
+[Camera relay deployment modes](CAMERA_RELAY_DEPLOYMENT_MODES.md) for how that compares to the
+TenderCells Cloud path above.
+
 ## Acceptance checklist
 
 - The downloaded OS came from Raspberry Pi or NVIDIA and its write completed verification.

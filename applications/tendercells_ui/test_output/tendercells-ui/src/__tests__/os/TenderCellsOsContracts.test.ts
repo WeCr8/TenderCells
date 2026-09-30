@@ -169,6 +169,14 @@ describe('TenderCells OS contracts', () => {
     expect(guide).toContain('no Firebase service-account file on a user device');
     expect(guide).toContain('MQTT over TLS with a per-device identity');
     expect(guide).toContain('Do not install the current camera bridge on a school device');
+    const preflight = readProjectFile('../../../../deploy/edge-bridge/check-readiness.mjs');
+    const extensionSchema = readProjectFile('../../../../deploy/edge-bridge/extension.schema.json');
+    expect(preflight).toContain("TC_EDGE_MANAGED");
+    expect(preflight).toContain("mqtts://");
+    expect(preflight).toContain("FIREBASE_ADMIN_SDK_PATH");
+    expect(extensionSchema).toContain('sha256:');
+    expect(extensionSchema).toContain('mqttPublish');
+    expect(extensionSchema).toContain('lan-camera');
   });
 
   it('uses the real cross-platform device provisioning flow', () => {

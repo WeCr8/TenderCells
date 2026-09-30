@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tendercells.com/schemas/edge-extension-v1.json",
+  "title": "TenderCells edge extension",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "name", "version", "image", "permissions"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,62}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([+-][A-Za-z0-9.-]+)?$" },
+    "image": { "type": "string", "pattern": "^.+@sha256:[a-f0-9]{64}$" },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mqttPublish", "mqttSubscribe", "devices", "network"],
+      "properties": {
+        "mqttPublish": { "type": "array", "maxItems": 20, "items": { "type": "string", "pattern": "^tc/[A-Za-z0-9_-]+/(sensors|state|event|alert)$" } },
+        "mqttSubscribe": { "type": "array", "maxItems": 20, "items": { "type": "string", "pattern": "^tc/[A-Za-z0-9_-]+/cmd/[A-Za-z0-9_-]+$" } },
+        "devices": { "type": "array", "maxItems": 20, "items": { "type": "string", "pattern": "^/dev/(video|tty|i2c-|gpiochip)[A-Za-z0-9._-]*$" } },
+        "network": { "enum": ["none", "mqtt-only", "lan-camera", "internet"] },
+        "gpu": { "type": "boolean", "default": false }
+      }
+    }
+  }
+}

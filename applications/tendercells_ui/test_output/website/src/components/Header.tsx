@@ -88,7 +88,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Smart Coop Guide",   to: "/guides/smart-chicken-coop" },
       { label: "Predator Monitoring", to: "/guides/predator-monitoring" },
       { label: "Pasture Rotation",   to: "/guides/pasture-rotation" },
-      { label: "Documentation",      to: "/learn#docs" },
+      { label: "Documentation",      to: "/docs" },
       { label: "FAQ",                to: "/learn/faq" },
       { label: "Community Forum",    to: "/learn#forum" },
       { label: "Support",            to: "/learn#support" },

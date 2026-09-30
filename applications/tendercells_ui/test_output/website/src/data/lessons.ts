@@ -1,6 +1,6 @@
 // Lesson manifest — drives the in-site lesson index + pages.
 // Markdown lives in /public/lessons/<slug>.md, generated from repo docs/ by
-// scripts/sync-lessons.mjs (LESSON_SOURCES) - add a lesson there and here.
+// scripts/sync-docs.mjs (LESSON_SOURCES) - add a lesson there and here.
 // Images can be added later under /public/lessons/img and referenced from the md.
 
 export interface LessonMeta {

@@ -1,4 +1,4 @@
-<!-- Generated from docs/CLASSROOM_FEEDER_AND_WATERER.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+<!-- Generated from docs/CLASSROOM_FEEDER_AND_WATERER.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
 
 # Classroom: Build a Feeder + a Waterer (and your own peripheral)
 

@@ -1,4 +1,4 @@
-<!-- Generated from docs/lessons/00-your-first-coop-brain.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+<!-- Generated from docs/lessons/00-your-first-coop-brain.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
 
 # 🐣 Your First Coop Brain — Start Here (ages 7+)
 
@@ -65,7 +65,7 @@ Open the "bag" and put each part in front of you. Count them. Check the box. ✅
 3. **What you see:** a green page that says **🐔 Tender Cells Flasher**.
 
 ✅ *You found the launch pad!* If you want, read the
-[full Flasher page guide](https://github.com/WeCr8/TenderCells/blob/main/applications/tendercells_ui/test_output/website/public/flash/index.html)
+[full Flasher page guide](/flash)
 later — but you don't need it. Just follow along here.
 
 ### Step 2 — Pick "Starter Node"
@@ -184,4 +184,4 @@ That's **real engineering**. The same steps put the brain in a real robot coop. 
 
 *Teachers: this lesson is the entry node. Keep the deep links live — every other lesson
 should link back here for "what is flashing?" and forward via "What's next." Full printable
-pack format: [lesson template](https://github.com/WeCr8/TenderCells/blob/main/docs/lessons/_TEMPLATE.md). Curriculum map: [Learning Tracks](/lessons/learning-tracks).*
+pack format: [lesson template](/docs/lesson-template). Curriculum map: [Learning Tracks](/lessons/learning-tracks).*

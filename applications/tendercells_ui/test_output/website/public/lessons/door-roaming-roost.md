@@ -1,4 +1,4 @@
-<!-- Generated from docs/CLASSROOM_DOOR_AND_ROAMING_ROOST.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+<!-- Generated from docs/CLASSROOM_DOOR_AND_ROAMING_ROOST.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
 
 # Classroom: Build a Door + a Basic Roaming Roost
 

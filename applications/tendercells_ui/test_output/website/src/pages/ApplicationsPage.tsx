@@ -139,7 +139,7 @@ export default function ApplicationsPage() {
         </ul>
         <p>
           Full topic reference and payload schemas: <a href="/api/tendercells-backend.xml">backend XML (every endpoint and topic)</a> and{" "}
-          <a href="https://github.com/WeCr8/TenderCells/blob/main/docs/MACHINE_READABLE_BACKEND.md" target="_blank" rel="noopener noreferrer">how to read it</a>
+          <Link to="/docs/machine-readable-backend">how to read it</Link>
         </p>
       </div>
 

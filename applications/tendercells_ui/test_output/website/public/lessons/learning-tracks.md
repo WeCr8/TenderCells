@@ -1,4 +1,4 @@
-<!-- Generated from docs/LEARNING_TRACKS.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+<!-- Generated from docs/LEARNING_TRACKS.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
 
 # Tender Cells — Learning Tracks
 
@@ -14,7 +14,7 @@ project: teaches a real skill, is **4-H / FFA friendly**, **leverages AI**, runs
 ## How tracks work
 - Each project flashes the **same Starter Node** firmware (one binary, pick the
   `peripheral`) and links to the **TenderCells OS** — claim it, see it live, schedule it.
-- Each lesson ships the **[printable pack](https://github.com/WeCr8/TenderCells/blob/main/docs/lessons/_TEMPLATE.md)**: Instructor Guide,
+- Each lesson ships the **[printable pack](/docs/lesson-template)**: Instructor Guide,
   Student Workbook, Wiring Sheet, BOM (with links), CAD files, AI Prompt Guide.
 - Skills compound across tiers: sense → actuate → automate → design → manufacture.
 
@@ -90,6 +90,6 @@ Most STEM stops before manufacturing. Tender Cells doesn't.
 - Free + open-source + printable = the combination teachers actually adopt and share.
 
 ## Every lesson ships the printable pack
-See **[lessons/_TEMPLATE.md](https://github.com/WeCr8/TenderCells/blob/main/docs/lessons/_TEMPLATE.md)** — Instructor Guide, Student
+See **[lessons/_TEMPLATE.md](/docs/lesson-template)** — Instructor Guide, Student
 Workbook, Wiring Sheet (color-coded), BOM (Amazon links + part numbers), CAD
 (Fusion/STEP/STL), AI Prompt Guide.

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
 import "./DevelopersPage.css";
@@ -112,7 +113,7 @@ const buildIdeas = [
     prompt: "Start from the Chicken Tender cell: document automatic doors, latches, feed/water modules, health/camera monitoring, and a swappable rail/arm service layer.",
     firstDoc: "docs/products/chicken-tendercell/README.md",
     productPage: "/shop/chicken-tender",
-    docsHref: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/chicken-tendercell",
+    docsHref: "/docs/chicken-tender",
   },
   {
     title: "Camera Inspection Node",
@@ -121,7 +122,7 @@ const buildIdeas = [
     prompt: "Create the WatchTower predator monitor: a solar pole-mounted 360-degree camera pod with ESP32, battery, and LoRa alerts.",
     firstDoc: "docs/products/watchtower-ai/README.md",
     productPage: "/shop/watchtower",
-    docsHref: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md",
+    docsHref: "/docs/product-ideas",
   },
   {
     title: "Nest Box Egg Sensor",
@@ -130,7 +131,7 @@ const buildIdeas = [
     prompt: "Document an IR, load-cell, or vision-based nest-box sensor that feeds the egg map and production history.",
     firstDoc: "docs/products/nest-box-egg-sensor/README.md",
     productPage: "/shop/chicken-tender",
-    docsHref: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md",
+    docsHref: "/docs/product-ideas",
   },
   {
     title: "Flock RFID Station",
@@ -139,7 +140,7 @@ const buildIdeas = [
     prompt: "Prototype a weigh/RFID checkpoint that updates per-animal profiles, last-seen status, and health notes.",
     firstDoc: "docs/products/flock-rfid-station/README.md",
     productPage: "/shop/chicken-tender",
-    docsHref: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md",
+    docsHref: "/docs/product-ideas",
   },
   {
     title: "Mobile Pasture Roost",
@@ -148,7 +149,7 @@ const buildIdeas = [
     prompt: "Turn Roaming Roost into a builder-friendly product folder with drive base, docking, GPS boundary, and safety docs.",
     firstDoc: "docs/products/roaming-roost/README.md",
     productPage: "/shop/roaming-roost",
-    docsHref: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/roaming-roost",
+    docsHref: "/docs/roaming-roost",
   },
 ];
 
@@ -342,7 +343,7 @@ tc estop ct_001           # emergency stop`}</pre>
             <p><code>{idea.firstDoc}</code></p>
             <div className="product-doc-links">
               <a href={idea.productPage}>Product page</a>
-              <a href={idea.docsHref} target="_blank" rel="noopener noreferrer">Docs</a>
+              <Link to={idea.docsHref}>Docs</Link>
             </div>
           </div>
         ))}
@@ -388,7 +389,7 @@ tc estop ct_001           # emergency stop`}</pre>
       </div>
 
       <div className="cta-bar">
-        <a href="https://github.com/WeCr8/TenderCells/tree/main/docs/developer" target="_blank" rel="noopener noreferrer" className="btn-primary">
+        <a href="/docs/developer" target="_blank" rel="noopener noreferrer" className="btn-primary">
           Open Developer Docs
         </a>
         <a href="https://github.com/WeCr8/TenderCells/tree/main/docs/products" target="_blank" rel="noopener noreferrer" className="btn-outline">

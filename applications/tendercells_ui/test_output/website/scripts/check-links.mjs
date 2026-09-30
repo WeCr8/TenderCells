@@ -6,7 +6,8 @@
 //   /path            a route in src/App.tsx, a file in public/, or /flash, /viewer
 //   /app/path        a route of the OS (tendercells-ui/src/routes/AppRoutes.tsx) or an OS public file
 //   /path#anchor     that id exists on the target page (page source, or the lesson's headings)
-//   docs.ts `path`   the repo file exists (shown on GitHub)
+//   /lessons, /docs  the generated markdown page exists (scripts/sync-docs.mjs)
+//   docs.ts `doc`    that doc is published; siteDocs.json sources exist in the repo
 // Dynamic links (template strings) are skipped. Exit 1 lists every broken link.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
@@ -44,8 +45,8 @@ const routeFor = (path) => routes.find((r) => toRe(r.path).test(path));
 const allSrc = walk(SRC).filter((f) => /\.(tsx?|css)$/.test(f));
 const idsIn = (text) => new Set([...text.matchAll(/\bid(?:=|:\s*)["'`{]+([A-Za-z0-9_-]+)["'`}]/g)].map((m) => m[1]));
 const globalIds = new Set(allSrc.flatMap((f) => [...idsIn(read(f))]));
-const lessonIds = (slug) => {
-  const f = join(WEBSITE, "public/lessons", `${slug}.md`);
+const mdIds = (dir, slug) => {
+  const f = join(WEBSITE, "public", dir, `${slug}.md`);
   if (!existsSync(f)) return null;
   const md = read(f).replace(/```[\s\S]*?```/g, "");
   return new Set([...md.matchAll(/^#{1,4}\s+(.+)$/gm)].map((m) => anchorKey(headingSlug(m[1].trim()))));
@@ -59,8 +60,8 @@ const RUNTIME_IDS = {
 function anchorOk(path, hash, route) {
   const key = anchorKey(hash);
   if ((RUNTIME_IDS[path] ?? []).some((id) => anchorKey(id) === key)) return true;
-  const lesson = /^\/lessons\/([^/]+)$/.exec(path);
-  if (lesson) return lessonIds(lesson[1])?.has(key) ?? false;
+  const md = /^\/(lessons|docs)\/([^/]+)$/.exec(path);
+  if (md) return mdIds(md[1], md[2])?.has(key) ?? false;
   const own = route?.file && existsSync(route.file) ? idsIn(read(route.file)) : new Set();
   // Page sections and shared components (DocGroups, AccountPage details) define ids.
   return [...own, ...globalIds].some((id) => anchorKey(id) === key);
@@ -83,6 +84,9 @@ function checkTarget(target, where) {
     return;
   }
   if (publicFile(join(WEBSITE, "public"), path) && path !== "/") return;
+  // Markdown pages: /lessons/<slug> and /docs/<slug> must have their generated file.
+  const mdPage = /^\/(lessons|docs)\/([^/]+)$/.exec(path);
+  if (mdPage && !existsSync(join(WEBSITE, "public", mdPage[1], `${mdPage[2]}.md`))) { problems.push(`${where}: ${target} - no published ${mdPage[1].slice(0, -1)}`); return; }
   const route = routeFor(path);
   if (!route) { problems.push(`${where}: ${target} - no route or file`); return; }
   if (hash && !anchorOk(path, hash, route)) problems.push(`${where}: ${target} - no #${hash} on that page`);
@@ -104,19 +108,23 @@ for (const f of allSrc.filter((x) => /\.tsx?$/.test(x))) {
   }
 }
 
-// Links in the synced lessons (markdown): internal ones must resolve too.
-for (const f of walk(join(WEBSITE, "public/lessons")).filter((x) => x.endsWith(".md"))) {
+// Links in the published lessons and docs (markdown): internal ones must resolve too.
+for (const dir of ["lessons", "docs"]) for (const f of walk(join(WEBSITE, "public", dir)).filter((x) => x.endsWith(".md"))) {
   const md = read(f).replace(/```[\s\S]*?```/g, "");
   const slug = f.split("/").pop().replace(/\.md$/, "");
   for (const m of md.matchAll(/\]\(((?:\/|#)[^)\s]*)\)/g)) {
-    const target = m[1].startsWith("#") ? `/lessons/${slug}${m[1]}` : m[1];
+    const target = m[1].startsWith("#") ? `/${dir}/${slug}${m[1]}` : m[1];
     checkTarget(target, relative(WEBSITE, f));
   }
 }
 
-// Repo docs listed on the Learn / Education pages.
-for (const m of read(join(SRC, "data/docs.ts")).matchAll(/path:\s*"([^"]+)"/g)) {
-  if (!existsSync(join(REPO, m[1]))) problems.push(`src/data/docs.ts: ${m[1]} - not in the repo`);
+// Doc cards (Docs / Learn / Education) point at published docs.
+for (const m of read(join(SRC, "data/docs.ts")).matchAll(/\bdoc:\s*"([^"]+)"/g)) {
+  if (!existsSync(join(WEBSITE, "public/docs", `${m[1]}.md`))) problems.push(`src/data/docs.ts: doc "${m[1]}" - not published (siteDocs.json)`);
+}
+// Every published doc's source must still exist in the repo.
+for (const d of JSON.parse(read(join(SRC, "data/siteDocs.json")))) {
+  if (!existsSync(join(REPO, d.source))) problems.push(`src/data/siteDocs.json: ${d.source} - not in the repo`);
 }
 
 if (problems.length) {

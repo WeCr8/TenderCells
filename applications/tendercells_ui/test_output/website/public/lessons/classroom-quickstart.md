@@ -1,4 +1,4 @@
-<!-- Generated from docs/CLASSROOM_QUICKSTART.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+<!-- Generated from docs/CLASSROOM_QUICKSTART.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
 
 # Classroom Quickstart — Run a Smart Coop in 5 Minutes
 
@@ -152,7 +152,7 @@ The sky's the limit.
 students flash an ESP32, invent a species + threat, and make a live alert fire.
 
 Want the deep version (real ESP32 hardware, the MQTT topics, the firmware contract)?
-See [CONNECT_A_DEVICE.md](https://github.com/WeCr8/TenderCells/blob/main/docs/CONNECT_A_DEVICE.md).
+See [CONNECT_A_DEVICE.md](/docs/connect-a-device).
 
 ---
 

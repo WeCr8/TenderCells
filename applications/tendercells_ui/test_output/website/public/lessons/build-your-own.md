@@ -1,4 +1,4 @@
-<!-- Generated from docs/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+<!-- Generated from docs/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
 
 # Classroom: Build Your Own Smart-Animal Device
 
@@ -103,7 +103,7 @@ No soldering. No accounts. Nothing leaves the local network.
 3. Pick **Starter Node**, click **Connect**, choose the board's serial port, **Install**.
 4. When it finishes, the board reboots and (first time) creates a WiFi setup network.
 
-See [`firmware/starter-node/README.md`](https://github.com/WeCr8/TenderCells/blob/main/firmware/starter-node/README.md) for the
+See [`firmware/starter-node/README.md`](/docs/starter-node-firmware) for the
 Arduino IDE path if you'd rather build from source.
 
 ### Part 2 — Name your animal + threat (10 min)
@@ -144,7 +144,7 @@ Discussion prompts (real engineering, not trivia):
 - **Design the real thing:** sketch an enclosure for your species in CAD; what
   sensors would it actually need? (See the hardware catalog in `docs/`.)
 - **Whole-class project:** every student's species becomes one device in a shared
-  "Barn Brain" edge hub (see [Barn Brain plan](https://github.com/WeCr8/TenderCells/blob/main/docs/products/barn-brain/IMPLEMENTATION_PLAN.md)).
+  "Barn Brain" edge hub (see [Barn Brain plan](/docs/barn-brain-implementation-plan)).
 
 ---
 

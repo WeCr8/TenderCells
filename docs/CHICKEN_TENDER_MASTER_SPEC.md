@@ -587,11 +587,9 @@ A successful Chicken Tender™ system shall meet ALL of the following:
 
 ## Related Documents
 
-- [CLAUDE.md](../CLAUDE.md) — Agent system prompts & implementation guide
-- [ADR-001: MQTT vs Firebase](./adr/001-mqtt-not-firebase-for-motion.md) — Control plane decisions
-- [ADR-002: 3D Model Loading](./adr/002-3d-model-loading.md) — Asset pipeline architecture
-- [CAD-TO-WEB.md](./CAD-TO-WEB.md) — SolidWorks export workflow
-- [hardware-bom.md](./hardware-bom.md) — Component sourcing & costs
+- [ADR-002: 3D Model Loading](../applications/tendercells_ui/test_output/tendercells-ui/docs/adr/002-3d-model-loading.md) — Asset pipeline architecture
+- [CAD-TO-WEB.md](../applications/tendercells_ui/test_output/tendercells-ui/docs/CAD-TO-WEB.md) — SolidWorks export workflow
+- [Hardware catalog](./CHICKEN_TENDER_HARDWARE_CATALOG.md) and [Gantry + BOMs](./CLASSROOM_GANTRY_AND_BOM.md) — Component sourcing & costs
 - Excel specs: [Master Product Workbook](./Tender_Cells_Master_Product_Workbook.xlsx)
 
 ---

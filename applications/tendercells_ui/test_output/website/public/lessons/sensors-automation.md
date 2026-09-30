@@ -1,4 +1,4 @@
-<!-- Generated from docs/CLASSROOM_SENSORS_AND_AUTOMATION.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+<!-- Generated from docs/CLASSROOM_SENSORS_AND_AUTOMATION.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
 
 # Classroom: Sensors → Automated Tasks (start with a light sensor)
 

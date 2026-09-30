@@ -753,8 +753,7 @@ Supports **quick-disconnect end effectors** for multi-function operation.
 ## Related Documents
 
 - [CHICKEN_TENDER_MASTER_SPEC.md](./CHICKEN_TENDER_MASTER_SPEC.md) — Product requirements
-- [hardware-bom.md](./hardware-bom.md) — Bill of materials by coop size
-- [ADR-001](./adr/001-mqtt-not-firebase-for-motion.md) — Control plane architecture
+- [Gantry + BOMs](./CLASSROOM_GANTRY_AND_BOM.md) — Bills of materials with parts lists
 - Excel: [Tender_Cells_Master_Product_Workbook.xlsx](./Tender_Cells_Master_Product_Workbook.xlsx)
 - Excel: [TenderCells_Predator_Monitor_Hardware_List.xlsx](./TenderCells_Predator_Monitor_Hardware_List.xlsx)
 

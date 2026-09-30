@@ -84,7 +84,7 @@ jobs:
         run: npm run quality:loop
 
   website:
-    name: "Website — type-check, lessons in sync, link audit, build"
+    name: "Website — type-check, docs in sync, link audit, build"
     needs: changes
     if: needs.changes.outputs.website == 'true'
     runs-on: ubuntu-latest
@@ -102,8 +102,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lessons match docs/ (run npm run sync:lessons to fix)
-        run: npm run check:lessons
+      - name: Lessons + docs pages match the repo (run npm run sync:docs to fix)
+        run: npm run check:docs
 
       - name: Link audit (routes, anchors, OS links, repo docs)
         run: npm run check:links

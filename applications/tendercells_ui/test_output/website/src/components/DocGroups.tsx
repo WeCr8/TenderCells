@@ -1,5 +1,5 @@
-// DocGroups - the current documentation and build guides as card groups (Learn, Education).
-// Site pages stay in the app; repo docs open on GitHub in a new tab.
+// DocGroups - the current documentation and build guides as card groups (Docs, Learn,
+// Education). Every card is a page on this site.
 import { Link } from "react-router-dom";
 import { DOC_GROUPS, docHref, type DocLink } from "../data/docs";
 
@@ -12,7 +12,7 @@ function DocCard({ d }: { d: DocLink }) {
     <>
       <h3>{d.title}</h3>
       <p>{d.desc}</p>
-      <span className="tag">{inSite || href.startsWith("/") ? "On this site" : "GitHub"}</span>
+      <span className="tag">{href.startsWith("/docs/") ? "Guide" : href.startsWith("/lessons/") ? "Lesson" : "Open"}</span>
     </>
   );
   if (inSite) return <Link className="card" to={href} style={cardStyle}>{body}</Link>;

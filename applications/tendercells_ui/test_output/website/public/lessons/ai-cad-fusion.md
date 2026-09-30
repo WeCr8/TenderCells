@@ -1,4 +1,4 @@
-<!-- Generated from docs/CLASSROOM_AI_CAD_FUSION_MCP.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+<!-- Generated from docs/CLASSROOM_AI_CAD_FUSION_MCP.md by website/scripts/sync-docs.mjs - edit the source, then run npm run sync:docs. -->
 
 # Classroom: AI-Driven Design & CAD with Fusion 360 + MCP
 

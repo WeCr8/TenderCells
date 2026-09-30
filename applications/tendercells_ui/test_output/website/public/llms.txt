@@ -108,11 +108,14 @@ Read these instead of scraping pages:
 
 ## Open Source Resources
 
-- GitHub: https://github.com/WeCr8/TenderCells
-- Developer docs: https://github.com/WeCr8/TenderCells/tree/main/docs/developer
-- Product docs: https://github.com/WeCr8/TenderCells/tree/main/docs/products
-- Hardware catalog: https://github.com/WeCr8/TenderCells/blob/main/docs/CHICKEN_TENDER_HARDWARE_CATALOG.md
-- Barn Brain concept docs: https://github.com/WeCr8/TenderCells/tree/main/docs/products/barn-brain
+- Documentation (build guides, references, school setup): https://tendercells.com/docs
+- Hands-on lessons: https://tendercells.com/lessons
+- Developer docs: https://tendercells.com/docs/developer
+- Product docs: https://tendercells.com/docs/products
+- Hardware catalog: https://tendercells.com/docs/hardware-catalog
+- Barn Brain concept docs: https://tendercells.com/docs/barn-brain
+- Backend API (every endpoint and MQTT topic, XML): https://tendercells.com/api/tendercells-backend.xml
+- Source code: https://github.com/WeCr8/TenderCells
 - NVIDIA Jetson Orin Nano Super Developer Kit: https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/nano-super-developer-kit/
 - NVIDIA Jetson Orin Nano setup guide: https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit
 - NVIDIA JetPack SDK: https://developer.nvidia.com/embedded/jetpack

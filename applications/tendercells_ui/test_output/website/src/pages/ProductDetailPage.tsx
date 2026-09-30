@@ -260,10 +260,10 @@ const PRODUCT_VISUALS: Record<string, {
       "The CAD concept source includes a 72-inch square cell, X/Y/Z rails, and a 6DOF mounting plate.",
     ],
     docs: [
-      { label: "Product docs", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/chicken-tendercell" },
-      { label: "CAD source", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/chicken-tendercell/cad" },
-      { label: "Hardware catalog", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/CHICKEN_TENDER_HARDWARE_CATALOG.md" },
-      { label: "Barn Brain edge hub", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/barn-brain" },
+      { label: "Product docs", href: "/docs/chicken-tender" },
+      { label: "CAD source", href: "/docs/chicken-tender-cad" },
+      { label: "Hardware catalog", href: "/docs/hardware-catalog" },
+      { label: "Barn Brain edge hub", href: "/docs/barn-brain" },
       { label: "NVIDIA Jetson setup", href: "https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit" },
     ],
     extraImages: [
@@ -289,9 +289,9 @@ const PRODUCT_VISUALS: Record<string, {
       "The concept shows the physical direction for a student or maker build: mobile frame, protected flock space, drive hardware, charging dock, and monitoring sensors.",
     ],
     docs: [
-      { label: "Product docs", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/products/roaming-roost" },
-      { label: "Hardware index", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/hardware.md" },
-      { label: "Product ideas", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md" },
+      { label: "Product docs", href: "/docs/roaming-roost" },
+      { label: "Hardware index", href: "/docs/developer-hardware" },
+      { label: "Product ideas", href: "/docs/product-ideas" },
     ],
     extraImages: [
       { image: "/app/assets/images/products/roaming-roost.svg", alt: "Earlier Roaming Roost mobile coop diagram", label: "Earlier app concept" },
@@ -308,9 +308,9 @@ const PRODUCT_VISUALS: Record<string, {
       "The detection visuals below are concept views of the intended workflow: classify species, separate threat from non-threat, and request human review before escalating routines.",
     ],
     docs: [
-      { label: "Hardware index", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/hardware.md" },
-      { label: "Product ideas", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md" },
-      { label: "Hardware catalog", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/CHICKEN_TENDER_HARDWARE_CATALOG.md#16-watchtower-ai-hardware" },
+      { label: "Hardware index", href: "/docs/developer-hardware" },
+      { label: "Product ideas", href: "/docs/product-ideas" },
+      { label: "Hardware catalog", href: "/docs/hardware-catalog#16-watchtower-ai-hardware" },
     ],
     extraImages: [
       { image: "/assets/images/products/predator-monitor-top-view.png", alt: "Top view sketch of three camera cradles around the predator monitor", label: "Top view camera carrier" },
@@ -337,8 +337,8 @@ const PRODUCT_VISUALS: Record<string, {
       "This image belongs specifically to Duck Dock and should not be reused for unrelated product pages.",
     ],
     docs: [
-      { label: "Developer docs", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/developer" },
-      { label: "Product ideas", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md" },
+      { label: "Developer docs", href: "/docs/developer" },
+      { label: "Product ideas", href: "/docs/product-ideas" },
       { label: "Open source repo", href: "https://github.com/WeCr8/TenderCells" },
     ],
   },
@@ -357,8 +357,8 @@ const PRODUCT_VISUALS: Record<string, {
       { label: "Jetson Orin Nano setup", href: "https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit" },
       { label: "JetPack SDK", href: "https://developer.nvidia.com/embedded/jetpack" },
       { label: "Jetson Nano legacy setup", href: "https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit" },
-      { label: "Developer docs", href: "https://github.com/WeCr8/TenderCells/tree/main/docs/developer" },
-      { label: "Product ideas", href: "https://github.com/WeCr8/TenderCells/blob/main/docs/developer/product-ideas.md" },
+      { label: "Developer docs", href: "/docs/developer" },
+      { label: "Product ideas", href: "/docs/product-ideas" },
       { label: "Open source repo", href: "https://github.com/WeCr8/TenderCells" },
     ],
     extraImages: [
@@ -450,9 +450,9 @@ export default function ProductDetailPage() {
             </ul>
             <div className="product-doc-links">
               {visual.docs.map((doc) => (
-                <a key={doc.href} href={doc.href} target="_blank" rel="noopener noreferrer">
-                  {doc.label}
-                </a>
+                doc.href.startsWith("/")
+                  ? <Link key={doc.href} to={doc.href}>{doc.label}</Link>
+                  : <a key={doc.href} href={doc.href} target="_blank" rel="noopener noreferrer">{doc.label}</a>
               ))}
             </div>
           </div>

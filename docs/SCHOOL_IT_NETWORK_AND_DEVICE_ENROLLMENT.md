@@ -24,6 +24,23 @@ Students must never receive a shared staff, classroom, or production network pas
 
 Many school networks use WPA2-Enterprise/802.1X. The starter firmware must not be assumed compatible with those networks. Use an approved IoT PSK/PPSK SSID unless district IT has validated an enterprise-auth firmware profile.
 
+### Alternative: LoRa mesh, no network credential at all
+
+`firmware/starter-node` supports a **mesh-only** mode (see its README, section
+5b): a board with a LoRa radio (~$5–10 SX127x module) joins the classroom mesh
+with **no WiFi credential whatsoever** - not even the board's own throwaway
+setup AP touches a real network. One other board with a radio *and* real WiFi
+(e.g. the teacher's own board) bridges the mesh to MQTT automatically. This
+avoids the per-device WiFi credential question entirely for every board
+except the one bridge, at the cost of adding LoRa hardware to the BOM and a
+short-hop range (a room/building, not campus-wide). The mesh protocol itself
+has no authentication - anyone with a matching radio in range can inject
+alert/heartbeat/E-STOP traffic - but E-STOP-over-mesh is deliberately
+enter-only (it can make a board safer, never start motion or clear a stop), so
+the realistic exposure is nuisance/false-alert spam, not a physical-safety
+gap. Treat it as a convenience for a supervised classroom, not a
+hardened production network.
+
 ## Teacher or IT enrollment
 
 1. Register the device in the teacher-owned TenderCells workspace.

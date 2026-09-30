@@ -39,6 +39,11 @@ There are two ways to flash it:
   it starts an embedded broker and prints its IP. You type that IP into the setup portal.
 - **Power** — USB power is plenty for a bare node. (A real coop controller needs its
   12 V 5 A supply; the node doesn't.)
+- **Optional: a LoRa SX127x module** (~$5–10, e.g. Ai-Thinker Ra-02/Ra-01, wired to
+  SPI + GPIO7/8/9) — only if this board will use the **mesh-only, no-password** mode
+  below, or act as a bridge for boards that do. Skip it entirely for a normal
+  WiFi-connected board; the firmware auto-detects a missing radio and just runs
+  without mesh.
 
 **Drivers (WROOM DevKits only — XIAO-S3 needs none):**
 
@@ -116,6 +121,39 @@ product-specific pinouts.
    blink. It now appears in `tc status` and the dashboard.
 
 > Settings are stored in NVS — you only do this once (until you re-flash, which erases it).
+
+---
+
+## 5b. No WiFi password? Join the classroom LoRa mesh instead
+
+For a classroom with **many boards**, giving every one of them the school WiFi
+password (or a per-device credential) is real per-device setup overhead — and
+`docs/SCHOOL_IT_NETWORK_AND_DEVICE_ENROLLMENT.md`'s own rule is that **students
+must never receive a shared staff, classroom, or production network password**.
+
+If a board has a LoRa radio wired (above), it can skip WiFi/MQTT **entirely**:
+
+1. In the setup portal (step 5), leave WiFi SSID/password **blank** and type
+   **`yes`** into **"Join classroom LoRa mesh only."**
+2. Save. This board will never open its own setup AP again after this one save
+   (re-flash to reconfigure) — every later boot goes straight to mesh, no
+   network of any kind, ever.
+3. **One other board nearby needs a LoRa radio too, and real WiFi** — that
+   one acts as the bridge automatically (no separate "bridge firmware" — any
+   board with a radio attached bridges mesh traffic to/from MQTT the moment it
+   has WiFi). A teacher's own board, already on the school network, is the
+   natural bridge for a whole room of mesh-only student boards.
+4. The mesh-only board's heartbeat, threat-button alerts, and E-STOP still
+   reach the dashboard exactly like a WiFi board's — the bridge relays them
+   onto the normal `tc/<id>/sensors` / `tc/<id>/state` / `tc/broadcast/alert`
+   topics. Door/drive/relay/gantry commands sent from the app reach it the
+   same way, in reverse.
+
+Range is short-hop LoRa (a school room/building, not campus-wide) and payloads
+are small JSON, same as MQTT — this isn't a replacement for WiFi at scale, just
+a way to onboard a room full of boards with zero passwords handed to students.
+See `firmware/shared/tc_mesh/tc_mesh.h` for the wire protocol if you want to
+read the code.
 
 ---
 

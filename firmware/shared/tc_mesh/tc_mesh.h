@@ -50,9 +50,21 @@
 // Message types (extend as needed; keep < 256).
 enum TcMeshType : uint8_t {
   TC_MSG_ALERT     = 1,   // predator/fault alert (payload = JSON)
-  TC_MSG_HEARTBEAT = 2,   // node liveness
-  TC_MSG_ESTOP     = 3,   // mesh-wide emergency stop fan-out
+  TC_MSG_HEARTBEAT = 2,   // node liveness + state (payload = JSON, includes "id"
+                          // and "addr" so a listening bridge can learn this
+                          // node's deviceId <-> mesh address without a topic)
+  TC_MSG_ESTOP     = 3,   // mesh-wide emergency stop fan-out - ENTER only, by
+                          // design: there is deliberately no "clear via broadcast"
+                          // message, so a spoofed packet on this shared, public
+                          // (open-source) sync word can only ever make a node
+                          // safer, never wake one up or start motion.
   TC_MSG_PING      = 4,   // link test
+  // A directed (sendTo, not broadcast) command from a bridge node to one mesh
+  // peer by address - a WiFi-less board's equivalent of an MQTT cmd/* topic.
+  // Payload = JSON {"topic": "door"|"drive"|"relay"|"gantry"|"estop", ...same
+  // fields the matching MQTT command already carries}, so a receiver can reuse
+  // its existing MQTT command-dispatch logic verbatim instead of a second copy.
+  TC_MSG_COMMAND   = 5,
 };
 
 struct __attribute__((packed)) TcMeshHeader {

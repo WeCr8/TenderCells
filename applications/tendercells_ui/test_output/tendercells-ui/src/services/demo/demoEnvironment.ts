@@ -290,8 +290,21 @@ function seedLayout(): void {
     }
   }
 
+  // Demo-only robots so the 3D farm has something mowing and scanning (removed with the demo).
+  for (const extra of DEMO_ROBOTS) {
+    if (items.some((it) => it.id === extra.id || it.deviceId === extra.deviceId)) continue;
+    const dims = PRODUCT_DIMENSIONS[extra.type as HardwareType];
+    items.push({ ...extra, kind: 'hardware', shape: dims?.shape, width: dims?.width ?? 3, depth: dims?.depth ?? 3 });
+    changed = true;
+  }
+
   if (changed) savePropertyLayout({ property: state.property, items });
 }
+
+const DEMO_ROBOTS: Array<Pick<PropertyItem, 'id' | 'name' | 'type' | 'x' | 'y' | 'deviceId'>> = [
+  { id: 'demo-rv_demo', name: 'Weed rover', type: 'weed-rover', x: 44, y: 4, deviceId: 'rv_demo' },
+  { id: 'demo-mw_demo', name: 'Robot mower', type: 'robot-mower', x: 70, y: 52, deviceId: 'mw_demo' }, // = mowerSim DEMO_MOWER_ID (mowerSim imports this module),
+];
 
 // ── Schedules (idempotent per device) ──────────────────────────────────────────
 async function seedSchedules(): Promise<void> {

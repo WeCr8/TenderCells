@@ -47,7 +47,7 @@ const useCases = [
   { label: "Command Center", detail: "All registered demo systems, alerts, and quick actions", path: "/dashboard", icon: <DashboardIcon /> },
   { label: "Chicken Tender", detail: "Coop automation, cameras, doors, feed, cleaning, and egg map", path: "/chicken-tender", icon: <PetsIcon /> },
   { label: "ChickenEye AI", detail: "Vision simulation, identity, health, and nest-box egg detection", path: "/chicken-eye", icon: <VisibilityIcon /> },
-  { label: "Property Layout", detail: "Full yard layout with every product family placed on the grid", path: "/layout", icon: <YardIcon /> },
+  { label: "Property Twin", detail: "Full yard layout with every product family placed on the grid", path: "/layout", icon: <YardIcon /> },
   { label: "Schedules", detail: "Automated doors, feed, cleaning, water, and routines", path: "/schedules", icon: <ScheduleIcon /> },
   { label: "WatchTower", detail: "Predator-monitor view and yard security scenario", path: "/predator-monitor", icon: <VisibilityIcon /> },
 ];
@@ -155,14 +155,15 @@ export default function DemoLandingPage() {
                 Tender Cells OS connects animals, sensors, cameras, automation, and robotics through one open platform.
               </Typography>
               <Typography sx={{ color: C.goldMuted, maxWidth: 760 }}>
-                This is a simulated Tender Cells property. Trigger events, inspect the system, and see how the
-                hardware and software work together.
+                Meet the demo farm: everything here has a digital identity - animals, habitats, cameras, sensors,
+                robots and automations. It runs entirely in simulation; connect real devices later and the same
+                entities can reflect what is physically happening.
               </Typography>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ pt: 0.5 }}>
                 <Button variant="contained" onClick={() => { trackDemo("demo_started", { via: "enter" }); navigate("/dashboard"); }}
                   sx={{ bgcolor: C.accent, color: C.white, fontWeight: 700 }}>Enter demo</Button>
                 <Button variant="contained" onClick={() => navigate("/simulator")} sx={{ bgcolor: C.gold, color: C.bg, fontWeight: 700 }}>Trigger an event</Button>
-                <Button variant="outlined" href="/os#how" sx={{ borderColor: C.accent, color: C.gold }}>How it works</Button>
+                <Button variant="outlined" href="/digital-twin" sx={{ borderColor: C.accent, color: C.gold }}>How digital twins work</Button>
                 <Button variant="outlined" href="/os#build" onClick={() => trackDemo("build_guide_opened", { from: "demo_hero" })}
                   sx={{ borderColor: C.accent, color: C.gold }}>Build a system</Button>
                 <Button variant="outlined" href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer"

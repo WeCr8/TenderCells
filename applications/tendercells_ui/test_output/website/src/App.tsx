@@ -23,6 +23,7 @@ import SeoHubPage from "./pages/SeoHubPage";
 import GuidesPage from "./pages/GuidesPage";
 import ScienceFairPage from "./pages/ScienceFairPage";
 import TenderCellsOsPage from "./pages/TenderCellsOsPage";
+import DigitalTwinPage from "./pages/DigitalTwinPage";
 import LLMDemoTestPage from "./pages/LLMDemoTestPage";
 import FarmAutomationPage from "./pages/FarmAutomationPage";
 import PublicDemoPage from "./pages/PublicDemoPage";
@@ -86,6 +87,7 @@ function App() {
         <Route path="/apps" element={<ApplicationsPage />} />
         <Route path="/demo" element={<PublicDemoPage />} />
         <Route path="/os" element={<TenderCellsOsPage />} />
+        <Route path="/digital-twin" element={<DigitalTwinPage />} />
 
         {/* Learn */}
         <Route path="/learn" element={<LearnPage />} />

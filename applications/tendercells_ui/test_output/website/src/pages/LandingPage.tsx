@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Header from "../components/Header";
@@ -126,15 +127,23 @@ export default function LandingPage() {
           <div className="hero-overlay" />
           <div className="hero-content">
             <h1>Tender Cells</h1>
-            <p>Open-source animal-care automation for homesteads, 4-H, FFA, makers, and young engineers.</p>
+            <p className="hero-tagline">Your farm. Its digital twin. One open operating system.</p>
+            <p>Tender Cells OS connects animals, habitats, sensors, cameras, robots and automation into a digital picture of your property. Start in simulation, connect real hardware when you're ready.</p>
             <div className="hero-buttons">
               <a
                 href={TENDERCELLS_DEMO_URL}
                 className="btn-order"
                 onClick={() => trackButtonClick("try-live-demo")}
               >
-                ▶ TRY THE LIVE DEMO — NO SIGNUP
+                ▶ TRY THE DIGITAL FARM — NO SIGNUP
               </a>
+              <Link
+                to="/digital-twin"
+                className="btn-watch"
+                onClick={() => trackButtonClick("see-how-it-works")}
+              >
+                SEE HOW IT WORKS
+              </Link>
               <button
                 type="button"
                 className="btn-watch"
@@ -186,10 +195,44 @@ export default function LandingPage() {
           document.body,
         )}
 
+        {/* ── Digital twin: the OS before the products ── */}
+        <section id="digital-twin" className="twin-intro">
+          <div className="section-inner">
+            <h2>See your whole property in one place</h2>
+            <p className="twin-lede">
+              Every coop, animal, camera, water point, gate, sensor and robot gets a place on one digital
+              property. Kept up to date by real devices, that picture is your farm's <strong>digital twin</strong> -
+              and Tender Cells OS is the open system that runs it.
+            </p>
+            <div className="twin-steps">
+              <Link to="/digital-twin#honest" className="twin-step">
+                <span className="twin-num">1</span>
+                <h3>Start without hardware</h3>
+                <p>Build your property digitally and trigger events in the free simulated farm.</p>
+              </Link>
+              <Link to="/os#build" className="twin-step">
+                <span className="twin-num">2</span>
+                <h3>Connect the physical farm</h3>
+                <p>ESP32 boards, sensors, cameras and motors join over MQTT on your own network.</p>
+              </Link>
+              <Link to="/digital-twin#what" className="twin-step">
+                <span className="twin-num">3</span>
+                <h3>One farm, many twins</h3>
+                <p>Property, animals, habitats, devices, robots and environment - each with identity, state and history.</p>
+              </Link>
+            </div>
+            <p className="twin-links">
+              <Link to="/digital-twin">What a farm digital twin is →</Link>
+              <Link to="/os">Explore Tender Cells OS →</Link>
+            </p>
+          </div>
+        </section>
+
         {/* ── Products ─────────────────────────────── */}
         <section id="products" className="products">
           <div className="section-inner">
-            <h2>Our Products</h2>
+            <h2>Connected systems</h2>
+            <p className="products-sub">Each product family is a node inside Tender Cells OS. None is sold yet - every page shows its honest status, and you can run each one in the simulation or build your own from the open docs.</p>
             <div className="product-grid">
               {PRODUCTS.map((p) => (
                 <a
@@ -212,9 +255,9 @@ export default function LandingPage() {
           <div className="section-inner">
             <h2>About Tender Cells</h2>
             <p>
-              We're building the future of automated animal care. Our platform combines
-              robotics, AI vision, and cloud intelligence to keep your animals healthy
-              and safe — so you spend time enjoying your homestead, not maintaining it.
+              Tender Cells is an open-source animal-care and agricultural automation ecosystem for
+              connecting sensors, cameras, robotics, automation and educational projects - with a
+              person confirming every action and E-STOP always within reach.
             </p>
           </div>
         </section>
@@ -224,9 +267,10 @@ export default function LandingPage() {
           <div className="section-inner">
             <h2>Animal Health Monitoring</h2>
             <p>
-              Real-time sensor data: temperature, humidity, ammonia levels, feed and water
-              status, and automated headcounts — all surfaced in one dashboard. Get alerted
-              before problems become emergencies.
+              Temperature, humidity, ammonia, feed and water levels, and headcounts - shown on the
+              animals' habitat twin and turned into alerts before small problems grow. Try it with
+              simulated readings in the demo today; connected sensors make the readings real.
+              Tender Cells surfaces observations - it does not diagnose illness.
             </p>
           </div>
         </section>

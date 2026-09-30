@@ -166,6 +166,7 @@ export default function TenderCellsOsPage() {
       <div className="cta-bar">
         <a href={demo("/simulator")} className="btn-outline">Trigger an event in the demo</a>
         <a href={demo("/missions")} className="btn-outline">Try a mission</a>
+        <Link to="/digital-twin" className="btn-outline">How the farm digital twin works</Link>
       </div>
 
       <h2 className="section-title" id="inside">What's inside</h2>

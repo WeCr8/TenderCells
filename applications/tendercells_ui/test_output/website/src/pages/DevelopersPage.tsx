@@ -218,6 +218,9 @@ cd ../tendercells-ui && npm install && npm run dev                              
           schedules, and egg maps in your browser — no signup, no backend.</p>
       </div>
 
+      <p className="twin-callout">
+        Tender Cells OS models the property as <Link to="/digital-twin">digital twins</Link> - entity, state, event, relationship, command, history, simulation - with stable IDs like <code>tc:habitat:chicken-tender:ct_001</code> and provenance on every value. See the <Link to="/docs/digital-twin">digital twin architecture</Link>.
+      </p>
       <h2 className="section-title" id="architecture">Architecture</h2>
       <div className="prose">
         <p>Local-first control: motion never routes through the cloud. Commands take the fast LAN path

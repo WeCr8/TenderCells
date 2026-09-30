@@ -76,6 +76,7 @@ import { WEED_ROVER_TYPES, YARD_LIVE } from '../lib/yard/yardTypes';
 import { saveModelFile } from '../lib/three/modelStore';
 import { hfModelUrl } from '../lib/three/huggingFace';
 import { useProducts } from '../hooks/useProducts';
+import { isDemoSeeded } from '../services/demo/demoEnvironment';
 import './PropertyLayoutBuilder.css';
 
 // ProductFamily values that map directly to HardwareType keys in PRODUCT_DIMENSIONS
@@ -663,10 +664,17 @@ export default function PropertyLayoutBuilder() {
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 0.5 }}>
               <LayersIcon sx={{ color: '#6BBF59', fontSize: 28 }} />
               <Typography variant="h4" sx={{ color: '#E4E7E5', fontWeight: 700, lineHeight: 1 }}>
-                Property Layout
+                Property Twin
               </Typography>
               <Chip label={property.name} size="small" sx={{ bgcolor: '#4A7C59', color: '#E4E7E5', fontWeight: 600, ml: 1 }} />
+              {/* Honest twin mode: demo data is a simulation; without live devices this is a design. */}
+              <Chip data-testid="twin-mode" label={isDemoSeeded() ? 'Simulation' : 'Design'} size="small" variant="outlined"
+                title={isDemoSeeded() ? 'Demo data from the simulator - nothing here is a live reading.' : 'Your layout. Connect devices to make parts of it live.'}
+                sx={{ color: '#C8B882', borderColor: '#C8B882', fontWeight: 700, letterSpacing: 0.5 }} />
             </Stack>
+            <Typography variant="body2" sx={{ ml: 0.5, color: '#C8B882' }}>
+              The digital representation of your property - every coop, device, robot and zone has an identity here.
+            </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
               {property.widthFt} × {property.depthFt} ft · {(property.widthFt * property.depthFt).toLocaleString()} sq ft ·{' '}
               {hardwareCount} products · {items.length - hardwareCount} obstacles

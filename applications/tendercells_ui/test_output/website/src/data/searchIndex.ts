@@ -14,6 +14,8 @@ export interface SearchEntry {
 
 export const SEARCH_INDEX: SearchEntry[] = [
   // Products
+  { title: "Farm Digital Twin", path: "/digital-twin", description: "Build the farm digitally, connect it physically: property, animal, habitat, device, robot and environment twins in Tender Cells OS.", keywords: ["digital twin", "farm", "twin", "simulation", "property", "livestock", "iot", "mqtt"] },
+  { title: "Tender Cells OS", path: "/os", description: "The open software and data layer that gives every property, animal, habitat, device and robot a digital identity and state.", keywords: ["os", "operating system", "platform", "demo", "status"] },
   { title: "Chicken Tender™", path: "/shop/chicken-tender", description: "Automated chicken coop concept — robot arm, cleaning, egg collection, feeding.", keywords: ["coop", "chicken", "robot arm", "eggs", "feeding", "cleaning", "automation"] },
   { title: "Roaming Roost™", path: "/shop/roaming-roost", description: "Mobile pasture coop concept with rotation and smart boundaries.", keywords: ["mobile", "pasture", "rotation", "roost", "octagon", "wheels"] },
   { title: "WatchTower AI™", path: "/shop/watchtower", description: "Solar predator monitor with cameras and LoRa mesh alerts.", keywords: ["predator", "camera", "lora", "solar", "security", "monitor", "watchtower"] },

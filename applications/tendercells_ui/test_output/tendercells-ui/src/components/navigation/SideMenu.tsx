@@ -100,7 +100,7 @@ const CORE: MenuItem[] = [
   { id: "library", label: "Animal & Plant Library", icon: <LocalLibraryIcon />, path: "/library" },
   { id: "projects", label: "DIY Projects", icon: <HandymanIcon />, path: "/projects" },
   { id: "products", label: "Products & Devices", icon: <DevicesIcon />, path: "/products" },
-  { id: "layout", label: "Property Layout", icon: <GridOnIcon />, path: "/layout" },
+  { id: "layout", label: "Property Twin", icon: <GridOnIcon />, path: "/layout" },
   { id: "setup", label: "Add Device", icon: <AddCircleOutlineIcon />, path: "/products?register=1" },
 ];
 const OPERATIONS: MenuItem[] = [

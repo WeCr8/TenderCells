@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
 
@@ -107,6 +108,9 @@ export default function OpenSourcePage() {
         <a href="https://github.com/FarmBot" target="_blank" rel="noopener noreferrer" className="btn-outline">FarmBot GitHub</a>
       </div>
 
+      <p className="twin-callout">
+        The open pieces add up to an open <Link to="/digital-twin">farm digital twin</Link>: property simulation, device contracts, firmware and CAD that let a simulated entity become a connected one. Read the <Link to="/docs/digital-twin">digital twin architecture</Link>.
+      </p>
       <h2 className="section-title">What We Are Building</h2>
       <div className="card-grid">
         {contributionAreas.map((area) => (

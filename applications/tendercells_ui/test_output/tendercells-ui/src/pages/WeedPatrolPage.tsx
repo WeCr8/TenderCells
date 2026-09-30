@@ -218,7 +218,7 @@ export default function WeedPatrolPage() {
         {!item ? (
           <Paper elevation={0} sx={card}>
             <Typography sx={{ mb: 1 }}>No weed robot on your property yet - add a garden bed robot or a Weed Rover (any mobile robot with a camera works too).</Typography>
-            <Button variant="contained" sx={{ bgcolor: C.accent }} onClick={() => navigate('/layout')}>Open Property Layout</Button>
+            <Button variant="contained" sx={{ bgcolor: C.accent }} onClick={() => navigate('/layout')}>Open Property Twin</Button>
           </Paper>
         ) : (
           <>

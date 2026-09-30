@@ -6,10 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Chip, Grid, Paper, Stack, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
-  EVENT_LOG_EVENT, SCENARIOS, clearEventLog, markExplained, readEventLog, runScenario, scenarioById,
+  DEMO_SOURCE, EVENT_LOG_EVENT, LIVE_SOURCE, SCENARIOS, clearEventLog, markExplained, readEventLog, runScenario, scenarioById,
   type ChainKind, type ChainStep, type EventLogEntry, type Scenario,
 } from "../lib/demo/eventSimulator";
 import { trackDemo } from "../lib/demo/track";
+import { SOURCE_LABEL } from "../lib/twin/twin";
 
 const C = {
   bg: "#0D2B1E", surface: "#1A3D2B", accent: "#4A7C59", gold: "#C8B882", goldMuted: "#8A7D55",
@@ -29,6 +30,15 @@ const KIND: Record<ChainKind, { label: string; color: string }> = {
 
 const STEP_MS = 450;
 
+/** Which twin changed and where the data came from (docs/TENDERCELLS_DIGITAL_TWIN_ARCHITECTURE.md). */
+function Provenance({ twin }: { twin?: string }) {
+  return (
+    <Typography data-testid="event-provenance" sx={{ color: C.goldMuted, fontSize: 12, fontFamily: "monospace", mb: 1, wordBreak: "break-all" }}>
+      {twin && <>Twin {twin} · </>}Source: {DEMO_SOURCE.source} · Mode: {DEMO_SOURCE.mode}
+    </Typography>
+  );
+}
+
 /** The cause -> effect chain, top to bottom. `shown` limits how many steps are visible. */
 function Chain({ steps, shown = steps.length }: { steps: ChainStep[]; shown?: number }) {
   return (
@@ -42,6 +52,10 @@ function Chain({ steps, shown = steps.length }: { steps: ChainStep[]; shown?: nu
               <Typography sx={{ color: C.white, fontWeight: 600, fontSize: 14 }}>{s.actor}</Typography>
               <Typography sx={{ color: C.goldMuted, fontSize: 13 }}>{s.detail}</Typography>
             </Box>
+            <Typography title={`Live: ${SOURCE_LABEL[LIVE_SOURCE[s.kind]]}. Here: ${SOURCE_LABEL.SIMULATED}.`}
+              sx={{ ml: "auto !important", color: C.goldMuted, fontSize: 11, fontFamily: "monospace", whiteSpace: "nowrap", display: { xs: "none", sm: "block" } }}>
+              {LIVE_SOURCE[s.kind]} · sim
+            </Typography>
           </Stack>
         </Box>
       ))}
@@ -122,12 +136,13 @@ export default function EventSimulatorPage() {
           <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2, position: { md: "sticky" }, top: 16 }}>
             {!playing && (
               <Typography sx={{ color: C.goldMuted }}>
-                Trigger an event to watch it move through the system: device → signal → rule → Tender Cells OS → action → alert.
+                Trigger an event to watch it move through the system: device → signal → rule → Tender Cells OS → action → alert. Each step shows where its data would come from on a live farm (sensed, inferred, calculated, command) - here, all of it is simulated.
               </Typography>
             )}
             {playing && (
               <Box data-testid="event-chain">
                 <Typography sx={{ color: C.gold, fontWeight: 700, mb: 1 }}>{playing.scenario.emoji} {playing.scenario.title}</Typography>
+                <Provenance twin={playing.scenario.twin} />
                 <Chain steps={playing.scenario.steps} shown={playing.shown} />
                 {done && (
                   <Box sx={{ mt: 1.5 }}>
@@ -162,6 +177,7 @@ export default function EventSimulatorPage() {
                 </Stack>
               </AccordionSummary>
               <AccordionDetails>
+                <Provenance twin={e.twin} />
                 <Chain steps={e.steps} />
                 {s && <Links s={s} />}
               </AccordionDetails>

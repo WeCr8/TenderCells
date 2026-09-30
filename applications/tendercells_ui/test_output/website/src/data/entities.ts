@@ -30,7 +30,11 @@ export const TENDERCELLS =
   "Tender Cells is an open-source animal-care and agricultural automation ecosystem for connecting sensors, cameras, robotics, automation and educational projects.";
 
 export const TENDERCELLS_OS =
-  "Tender Cells OS is the software layer used to model, monitor and automate compatible Tender Cells devices and animal-care systems.";
+  "Tender Cells OS is the software and data layer that gives every compatible property, animal, habitat, device and robot a digital identity and state, so it can be modelled, monitored and automated.";
+
+/** The search-friendly definition used at the top of /digital-twin, in llms.txt and structured data. */
+export const TWIN_DEFINITION =
+  "Tender Cells OS is an open-source agricultural digital-twin platform that models farms and homesteads as connected digital entities. A Tender Cells property can contain animals, habitats, sensors, cameras, robots, environmental data, schedules and automation. You can begin with simulated entities and progressively connect physical hardware so real-world state is represented in the digital property.";
 
 export const PRODUCTION_NOTE = "Production hardware is not yet available - you can run the simulation now and build your own from the open docs.";
 

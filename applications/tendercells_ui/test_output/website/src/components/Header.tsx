@@ -19,6 +19,19 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   {
+    label: "Tender Cells OS",
+    to: "/os",
+    children: [
+      { label: "What Tender Cells OS is", to: "/os" },
+      { label: "Farm Digital Twin",       to: "/digital-twin" },
+      { label: "Try the digital farm (demo)", href: "/app/demo" },
+      { label: "Trigger an event (demo)", href: "/app/demo?next=/simulator" },
+      { label: "Systems and their status", to: "/os#systems" },
+      { label: "Build a device for the OS", to: "/os#build" },
+      { label: "Digital twin architecture", to: "/docs/digital-twin" },
+    ],
+  },
+  {
     label: "Shop",
     to: "/shop",
     children: [
@@ -64,7 +77,6 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Mobile App (iOS)",        to: "/apps#ios" },
       { label: "Mobile App (Android)",    to: "/apps#android" },
       { label: "Tender Cells OS",         to: "/os" },
-      { label: "Build a Device for the OS", to: "/os#build" },
       { label: "Web Dashboard (OS)",      href: TENDERCELLS_OS_URL },
       { label: "Developer API",           to: "/apps#api" },
       { label: "MQTT Integration Guide",  to: "/apps#mqtt" },

@@ -717,6 +717,26 @@ const createHardwareMesh = (
       return g;
     }
 
+    case 'robot-mower': {
+      // Consumer robot mower: low rounded shell on four wheels with a stop button on top.
+      const g = new THREE.Group();
+      const shell = new THREE.Mesh(new THREE.BoxGeometry(W * 0.9, 0.45, D * 0.85), mat);
+      shell.position.set(x, 0.42, z);
+      shell.castShadow = true;
+      g.add(shell);
+      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+      [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => {
+        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(sz > 0 ? 0.3 : 0.2, sz > 0 ? 0.3 : 0.2, 0.18, 14), wheelMat);
+        wheel.rotation.z = Math.PI / 2;
+        wheel.position.set(x + sx * W * 0.47, sz > 0 ? 0.3 : 0.2, z + sz * D * 0.32);
+        g.add(wheel);
+      });
+      const stop = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.08, 16), new THREE.MeshStandardMaterial({ color: 0xcc3333 }));
+      stop.position.set(x, 0.69, z - D * 0.15);
+      g.add(stop);
+      return g;
+    }
+
     case 'water-point': {
       // Spigot / trough / tank the rover checks for leaks: a short post with a tap.
       const g = new THREE.Group();

@@ -15,6 +15,10 @@ Maturity, stated precisely: the public demo is a simulated farm and its entities
 - https://tendercells.com/digital-twin - what a farm digital twin is, twin kinds (property, habitat, animal, device, robot, environment), maturity ladder, provenance, simulation-to-reality path
 - https://tendercells.com/docs/digital-twin - architecture: twin IDs (tc:{kind}:{type}:{localId}, e.g. tc:habitat:chicken-tender:ct_001), provenance classes (SENSED, USER_ENTERED, INFERRED, SIMULATED, CALCULATED, EXTERNAL, COMMAND_STATE), MQTT state mapping, command safety, events/history, offline behaviour, planned twin API
 
+## Bring Your Own Robot Mower
+
+Owners can link a robot mower they already have to Tender Cells OS: any mower Home Assistant controls as a lawn_mower entity (the hub calls Home Assistant with a token kept on the hub), or a DIY/bridged mower speaking tc/{id}/cmd/mower. Tender Cells refuses to start it and sends it home while a guarded coop door is open, an animal was seen in the last 15 minutes, during wildlife quiet hours (default 20:00-07:00) or E-STOP. It does not steer the mower or cut its power. Guide: https://tendercells.com/docs/robot-mowers
+
 ## Canonical Definitions And Status
 
 Use these definitions. No Tender Cells product is sold yet: production hardware is not available for any family. Status words are exact - do not upgrade them.

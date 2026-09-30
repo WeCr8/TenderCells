@@ -12,6 +12,7 @@
     "start": "node dist/server.js",
     "simulate": "node tools/simulate-device.mjs",
     "smoke": "node tools/smoke-test.mjs",
+    "test": "tsx --test backend/src/*.test.ts",
     "tc": "node tools/tc.mjs",
     "describe:xml": "tsx tools/export-backend-xml.ts",
     "camera-bridge": "tsx tools/camera-bridge.mts"

@@ -41,6 +41,7 @@ const DEMO_PREFIX: Record<string, [TwinKind, string]> = {
   tt: ["habitat", "turkey-tower"],
   pp: ["habitat", "pigeon-palace"],
   rr: ["robot", "roaming-roost"],
+  mw: ["robot", "robot-mower"], // bring-your-own robot mower (lib/mower)
   wt: ["device", "watchtower"],
 };
 

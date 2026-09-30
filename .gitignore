@@ -131,3 +131,6 @@ docs/concept-packages/
 # Python
 __pycache__/
 .pytest_cache/
+
+# Hub runtime data (linked robot mowers, etc.) - no secrets, but local to each hub
+applications/tendercells_ui/test_output/express-api/.tendercells/

@@ -29,6 +29,30 @@ export class MQTTController {
   // When each device's last sensor packet arrived (server clock) - used to refuse
   // motion on a stale headcount.
   private static telemetryAt: Map<string, number> = new Map();
+  // E-STOPs this hub latched (a bridged mower has no firmware to hold the retained stop).
+  private static estops: Set<string> = new Set();
+  /** Called after an E-STOP is published (the mower bridge sends a mower home). */
+  static onEstopHooks: Array<(deviceId: string) => void | Promise<void>> = [];
+
+  /**
+   * Narrow read/publish access for hub services such as the mower bridge.
+   *
+   * @returns Accessors over the live device maps and the broker
+   */
+  static host() {
+    return {
+      publish: (topic: string, payload: Record<string, unknown>, retain: boolean): boolean => {
+        if (!MQTTController.client?.connected) return false;
+        MQTTController.client.publish(topic, JSON.stringify(payload), { qos: 1, retain });
+        return true;
+      },
+      command: (deviceId: string, suffix: string, payload: Record<string, unknown>) => MQTTController.publishWithSeq(deviceId, suffix, payload),
+      waitForAck: (deviceId: string, seq: number) => waitForAck(deviceId, seq, 3000),
+      telemetry: (deviceId: string) => ({ payload: MQTTController.telemetry.get(deviceId), at: MQTTController.telemetryAt.get(deviceId) ?? 0 }),
+      subState: (deviceId: string, sub: string) => MQTTController.subStates.get(`${deviceId}:${sub}`),
+      estopLatched: (deviceId: string) => MQTTController.estops.has(deviceId) || MQTTController.states.get(deviceId)?.state === "estop",
+    };
+  }
 
   /**
    * Safety gate for robot motion inside the coop (arm, cleaning, routines).
@@ -605,6 +629,11 @@ export class MQTTController {
       retain: true
     });
 
+    MQTTController.estops.add(deviceId);
+    for (const hook of MQTTController.onEstopHooks) {
+      void Promise.resolve(hook(deviceId)).catch((e) => console.error("E-STOP hook failed:", e));
+    }
+
     res.json({
       success: true,
       deviceId,
@@ -627,6 +656,7 @@ export class MQTTController {
       qos: 2,
       retain: true,
     });
+    MQTTController.estops.delete(deviceId);
     res.json({ success: true, deviceId, command: "estop_clear", message: "E-STOP cleared" });
   }
 

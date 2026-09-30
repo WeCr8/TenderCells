@@ -15,6 +15,7 @@ import EggIcon from "@mui/icons-material/Egg";
 import ExploreIcon from "@mui/icons-material/Explore";
 import FenceIcon from "@mui/icons-material/Fence";
 import GrassIcon from "@mui/icons-material/Grass";
+import AgricultureIcon from "@mui/icons-material/Agriculture";
 import GridOnIcon from "@mui/icons-material/GridOn";
 import HomeIcon from "@mui/icons-material/Home";
 import LockIcon from "@mui/icons-material/Lock";
@@ -137,6 +138,8 @@ function buildMenuGroups(products: Product[], currentProduct: string): MenuGroup
   if (families.has("chicken-tender")) care.push({ id: "chicken-eye", label: "ChickenEye AI", icon: <VisibilityIcon />, path: "/chicken-eye" });
   if (hasProducts) care.push({ id: "ai", label: "TenderAI", icon: <SmartToyIcon />, path: "/ai" });
   if (families.has("roaming-roost") || families.has("rail-system-modules")) care.push({ id: "weed-patrol", label: "Weed Patrol", icon: <GrassIcon />, path: "/weed-patrol" });
+  // Bring-your-own robot mowers (any family - a mower is useful before any Tender Cells product).
+  care.push({ id: "mowers", label: "Robot Mowers", icon: <AgricultureIcon />, path: "/mowers" });
   if (care.length) groups.push({ label: "Care & Automation", items: care });
   groups.push({ label: "Account", items: ACCOUNT });
   return groups;

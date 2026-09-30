@@ -124,6 +124,7 @@ const TYPE_LABELS: Record<string, string> = {
   'no-go-zone': 'No-Go Zone',
   'weed-rover': 'Weed Rover',
   'water-point': 'Water Point',
+  'robot-mower': 'Robot Mower',
   fence: 'Fence',
 };
 

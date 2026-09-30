@@ -15,6 +15,7 @@ import productsRoutes from './routes/products.routes.js';
 import { startScheduleRunner } from './schedule.runner.js';
 import { buildBackendXml, buildStateXml } from './describe.js';
 import { MQTTController } from './controllers/mqtt.controller.js';
+import { onEstop as mowerOnEstop, startMowerBridge } from './mowerBridge.js';
 import { ownedDeviceIds, requireAuth, type AuthedRequest } from './middleware/auth.js';
 
 /**
@@ -64,6 +65,9 @@ app.use('/api/products', productsRoutes);
 
 // Fire device schedules at their cron time (no-op without Firebase admin).
 startScheduleRunner();
+// Bring-your-own robot mowers: poll, interlock, and send a mower home on E-STOP.
+startMowerBridge(MQTTController.host());
+MQTTController.onEstopHooks.push(mowerOnEstop);
 
 // Machine-readable backend description for LLMs / tools (no scraping needed).
 type Layer = { route?: { path: string; methods: Record<string, boolean> }; name?: string; handle?: { stack?: Layer[] }; regexp?: RegExp };

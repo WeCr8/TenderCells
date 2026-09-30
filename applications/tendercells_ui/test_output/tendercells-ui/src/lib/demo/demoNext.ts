@@ -6,7 +6,7 @@
 const DEMO_PAGES = new Set([
   "dashboard", "layout", "weed-patrol", "projects", "library", "animals", "predator-monitor",
   "schedules", "analytics", "watershed", "products", "diagnostics", "chicken-tender", "egg-map",
-  "sensors", "resources", "ai", "chicken-eye", "simulator", "missions",
+  "sensors", "resources", "ai", "chicken-eye", "simulator", "missions", "mowers",
 ]);
 
 /**

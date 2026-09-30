@@ -5,6 +5,7 @@ import MainLayout from "./components/layout/MainLayout";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import AppRoutes from "./routes/AppRoutes";
+import DetectionAlerts from "./components/yard/DetectionAlerts";
 
 function AppContent() {
   const [product, setProduct] = useState("chicken-tender");
@@ -39,6 +40,7 @@ function AppContent() {
   return (
     <MainLayout title={product} product={product}>
       <AppRoutes />
+      <DetectionAlerts />
     </MainLayout>
   );
 }

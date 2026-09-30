@@ -44,6 +44,7 @@ export const DEFAULT_CAMERA_MOUNTS: Record<string, CameraMount[]> = {
     m('cam2', 'South-east', 0, 0, 3.2, 120, -12, false, 120),
     m('cam3', 'South-west', 0, 0, 3.2, 240, -12, false, 120),
   ],
+  'weed-rover': [m('cam1', 'Ground camera (weeds)', 0, -0.4, 1.7, 0, -55, false, 80), m('cam2', 'Rear view', 0, 0.45, 1.4, 180, -15, false)],
   'farmbot-genesis': [m('tool', 'Tool camera (down)', 0, 0, 2.5, 0, -89, false, 70), m('overview', 'Bed overview', 0, -0.7, 4, 180, -35, false)],
   'farmbot-genesis-xl': [m('tool', 'Tool camera (down)', 0, 0, 2.5, 0, -89, false, 70)],
   'bunny-burrow': [m('cam1', 'Hutch (inside)', -0.3, -0.3, 2.4, 135, -35, true, 110), m('cam2', 'Run (outside)', 0, 0.6, 2.5, 180, -15, false)],

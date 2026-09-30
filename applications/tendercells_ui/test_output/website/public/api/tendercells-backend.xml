@@ -132,7 +132,7 @@
       <publishes topic="tc/{id}/cmd/motion" qos="1"/>
     </endpoint>
     <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/weeds/pass" auth="device-owner" gated="weed" waits-for-ack="true">
-      <summary>Run 1-10 passes: task weed (detect weeds for review), plant_scan (crop health alerts) or patrol (snake / animal alerts). Detect only.</summary>
+      <summary>Run 1-10 passes: task weed (detect weeds for review), plant_scan (crop health alerts) or patrol (snake / animal alerts). Detect only. Rovers also take area {x,y,width,depth} or route [{x,y}] in property feet and report finds with propFt; on every pass they also report animals seen on the route and check waterPoints [{id,name,x,y,radiusFt}] for leaks (alert events with finding animal|leak).</summary>
       <body schema="weedPass">
         <field name="passes" type="number" min="1" max="10"/>
         <field name="task" type="string" values="weed|plant_scan|patrol"/>
@@ -266,6 +266,9 @@
     <field name="label" type="string"/>
     <field name="itemId" type="string"/>
     <field name="propFt" type="object" note="{x, y} property position in feet (mobile robot sightings)"/>
+    <field name="scout" type="boolean" note="weed found by a camera-only rover: pulled by hand, never lased"/>
+    <field name="finding" type="string" note="rover alerts: animal | leak | plant"/>
+    <field name="animalGroup" type="string" note="animal findings: flock | pet | wildlife | predator"/>
     <field name="count" type="number"/>
     <field name="confidence" type="number"/>
     <field name="bearingDeg" type="number"/>

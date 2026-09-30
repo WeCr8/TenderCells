@@ -204,11 +204,22 @@ describe('TenderCells OS contracts', () => {
   it('shows simple detections on selectable 2D and 3D maps and raises alerts', () => {
     const patrol = readProjectFile('src/pages/WeedPatrolPage.tsx');
     const map = readProjectFile('src/components/yard/WeedBedMap2D.tsx');
+    // Alerts are app-wide now (mounted in App.tsx), so a rover finding alerts on any page.
+    const alerts = readProjectFile('src/components/yard/DetectionAlerts.tsx');
+    expect(readProjectFile('src/App.tsx')).toContain('<DetectionAlerts />');
     expect(patrol).toContain('2D bed');
     expect(patrol).toContain('3D property');
     expect(patrol).toContain('<WeedBedMap2D');
-    expect(patrol).toContain('tendercells-detection-alert');
-    expect(patrol).toContain("Notification.permission === 'granted'");
+    expect(alerts).toContain('tendercells-detection-alert');
+    expect(alerts).toContain("Notification.permission === 'granted'");
+    // Rover weed patrol: property-wide 2D map with pins placed by property position.
+    expect(patrol).toContain('2D property');
+    expect(patrol).toContain('<WeedPropertyMap2D');
+    expect(readProjectFile('src/components/yard/DetectionsSvgLayer.tsx')).toContain('f.propFt');
+    // Rovers also report animals on the route and check water points for leaks.
+    expect(patrol).toContain('waterPoints: waterPoints(layout.items)');
+    expect(readProjectFile('src/components/yard/DetectionsSvgLayer.tsx')).toContain('leak-marker');
+    expect(readProjectFile('src/components/viewport/yardFlags.ts')).toContain("flag.finding === 'leak'");
     expect(map).toContain('data-testid="weed-bed-map-2d"');
     expect(map).toContain('flag.bedMm');
     expect(map).toContain('flag.confidence');

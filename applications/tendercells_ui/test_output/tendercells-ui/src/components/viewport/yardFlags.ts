@@ -9,6 +9,7 @@
 import * as THREE from 'three';
 import { makeTextSprite } from './labels';
 import { FLAG_COLORS, STATUS_COLORS, WATCHTOWER_RANGE_FT, roamingFrom, type YardFlag } from '../../lib/yard/yardTypes';
+import { findingColor } from '../../lib/yard/detections';
 
 const MM_PER_FT = 304.8;
 
@@ -70,9 +71,12 @@ function stationFlag(flag: YardFlag, item: FlagItem, layout: FlagLayout): THREE.
 }
 
 function weedPin(flag: YardFlag, item: FlagItem, layout: FlagLayout): THREE.Group | null {
-  if (!flag.bedMm) return null;
+  if (!flag.bedMm && !flag.propFt) return null;
   const g = new THREE.Group();
-  const p = bedMmToScene(item, layout, flag.bedMm);
+  // Bed robots report bed mm; rovers report the property position (feet) directly.
+  const p = flag.propFt
+    ? { x: flag.propFt.x - layout.property.widthFt / 2, z: flag.propFt.y - layout.property.depthFt / 2 }
+    : bedMmToScene(item, layout, flag.bedMm!);
   g.position.set(p.x, 0, p.z);
   const pending = flag.status === 'pending_review';
   const hex = pending ? FLAG_COLORS.weed_detected : (STATUS_COLORS[flag.status] ?? '#8A7D55');
@@ -205,18 +209,32 @@ function sightingMarker(flag: YardFlag, at: { x: number; z: number }, groundAt: 
   const g = new THREE.Group();
   const px = at.x, pz = at.z, py = groundAt(px, pz);
   const active = flag.status === 'active';
-  const plant = !!flag.label && ['Wilting', 'Yellow leaves', 'Pest damage'].includes(flag.label);
-  const color = new THREE.Color(active ? (plant ? FLAG_COLORS.weed_detected : FLAG_COLORS.alert) : '#8A7D55');
+  const leak = flag.finding === 'leak';
+  const color = new THREE.Color(active ? findingColor(flag) : '#8A7D55');
   if (from) {
     g.add(new THREE.Line(
       new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(from.x, groundAt(from.x, from.z) + 4, from.z), new THREE.Vector3(px, py + 0.6, pz)]),
       new THREE.LineDashedMaterial({ color, dashSize: 1, gapSize: 0.6, transparent: true, opacity: active ? 0.8 : 0.3 }),
     ).computeLineDistances());
   }
-  const body = new THREE.Mesh(new THREE.SphereGeometry(active ? 0.7 : 0.35, 16, 12),
-    new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: active ? 0.6 : 0.1 }));
-  body.position.set(px, py + 0.7, pz);
-  g.add(body);
+  if (leak) {
+    // A leak is a puddle on the ground plus a droplet above it.
+    const puddle = new THREE.Mesh(new THREE.CircleGeometry(active ? 1.6 : 0.8, 28),
+      new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.6, roughness: 0.05, metalness: 0.2, depthWrite: false }));
+    puddle.rotation.x = -Math.PI / 2;
+    puddle.position.set(px, py + 0.05, pz);
+    g.add(puddle);
+    const drop = new THREE.Mesh(new THREE.SphereGeometry(active ? 0.45 : 0.25, 16, 12),
+      new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: active ? 0.5 : 0.1 }));
+    drop.scale.y = 1.4;
+    drop.position.set(px, py + 1.1, pz);
+    g.add(drop);
+  } else {
+    const body = new THREE.Mesh(new THREE.SphereGeometry(active ? 0.7 : 0.35, 16, 12),
+      new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: active ? 0.6 : 0.1 }));
+    body.position.set(px, py + 0.7, pz);
+    g.add(body);
+  }
   if (active) {
     const ring = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.2, 32),
       new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false }));
@@ -228,7 +246,7 @@ function sightingMarker(flag: YardFlag, at: { x: number; z: number }, groundAt: 
     const label = makeTextSprite({
       title: `${flag.label ?? 'Predator'}${flag.confidence != null ? ` ${Math.round(flag.confidence * 100)}%` : ''}`,
       subtitle: `${mins ? `${mins} min ago` : 'just now'}${flag.distanceFt != null ? ` · ~${Math.round(flag.distanceFt)} ft` : ''}`,
-      accent: FLAG_COLORS.alert, screenSize: 0.045,
+      accent: active ? findingColor(flag) : FLAG_COLORS.alert, screenSize: 0.045,
     });
     label.position.set(px, py + 2.4, pz);
     label.userData.bob = { base: py + 2.4, phase: 1 };
@@ -275,7 +293,8 @@ export function buildYardFlags(flags: YardFlag[], items: FlagItem[], layout: Fla
     // Stand on the terrain: station flags / pins at their own spot, gardens level at the bed centre.
     if (flag.type !== 'headcount') {
       const c = center(item, layout);
-      obj.position.y = flag.type === 'weed_detected' ? groundAt(c.x, c.z) : groundAt(obj.position.x, obj.position.z);
+      // Bed weeds level with the bed centre; rover weeds stand on the ground where they grow.
+      obj.position.y = flag.type === 'weed_detected' && !flag.propFt ? groundAt(c.x, c.z) : groundAt(obj.position.x, obj.position.z);
     }
     group.add(obj);
   }

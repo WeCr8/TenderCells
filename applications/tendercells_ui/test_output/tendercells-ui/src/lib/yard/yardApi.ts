@@ -34,9 +34,20 @@ export async function fetchYardEvents(deviceId: string): Promise<{ events: YardE
 /** Mark a flag handled (eggs picked up); the device clears it. */
 export const ackYardEvent = (deviceId: string, eventId: string) => post(deviceId, `events/${encodeURIComponent(eventId)}/ack`);
 
-/** Start 1-10 passes over the bed (robot motion): weeds, plant health or a snake / predator patrol. */
-export const startWeedPass = (deviceId: string, passes: number, task: RobotTask = 'weed') =>
-  post(deviceId, 'weeds/pass', { passes, task });
+/** Where a rover should patrol (property feet): an area to cover in lanes, or a drawn route. */
+export interface RoverCoverage {
+  area?: { x: number; y: number; width: number; depth: number };
+  route?: { x: number; y: number }[];
+  /** Water points the rover checks for leaks on every pass (property feet). */
+  waterPoints?: { id: string; name: string; x: number; y: number; radiusFt: number }[];
+}
+
+/**
+ * Start 1-10 passes (robot motion): weeds, plant health or a snake / predator patrol. Bed
+ * robots cover their bed; rovers cover `coverage` (the whole property by default).
+ */
+export const startWeedPass = (deviceId: string, passes: number, task: RobotTask = 'weed', coverage?: RoverCoverage) =>
+  post(deviceId, 'weeds/pass', { passes, task, ...(coverage ?? {}) });
 
 /** Human approval for one weed: 'aim' points the aiming dot, 'burn' fires the laser (interlocked on the robot). */
 export const approveWeed = (deviceId: string, eventId: string, mode: 'aim' | 'burn') =>

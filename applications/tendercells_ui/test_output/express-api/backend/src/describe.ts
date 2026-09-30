@@ -56,7 +56,7 @@ export const ENDPOINTS: EndpointDoc[] = [
   { method: "POST", path: `${M}/devices/{deviceId}/routine`, auth: "device-owner", summary: "Run a predefined gantry + arm routine.", body: "routine", mqtt: { topic: "tc/{id}/cmd/motion", qos: 1 }, gated: "arm" },
   { method: "POST", path: `${M}/devices/{deviceId}/policy`, auth: "device-owner", summary: "Run a Hugging Face LeRobot policy on the arm (live) or in LeRobot sim.", body: "policy", mqtt: { topic: "tc/{id}/cmd/motion", qos: 1 }, gated: "arm" },
   { method: "POST", path: `${M}/devices/{deviceId}/policy/stop`, auth: "device-owner", summary: "Stop a running policy.", mqtt: { topic: "tc/{id}/cmd/motion", qos: 1 } },
-  { method: "POST", path: `${M}/devices/{deviceId}/weeds/pass`, auth: "device-owner", summary: "Run 1-10 passes: task weed (detect weeds for review), plant_scan (crop health alerts) or patrol (snake / animal alerts). Detect only.", body: "weedPass", mqtt: { topic: "tc/{id}/cmd/weed", qos: 1 }, gated: "weed", ack: true },
+  { method: "POST", path: `${M}/devices/{deviceId}/weeds/pass`, auth: "device-owner", summary: "Run 1-10 passes: task weed (detect weeds for review), plant_scan (crop health alerts) or patrol (snake / animal alerts). Detect only. Rovers also take area {x,y,width,depth} or route [{x,y}] in property feet and report finds with propFt; on every pass they also report animals seen on the route and check waterPoints [{id,name,x,y,radiusFt}] for leaks (alert events with finding animal|leak).", body: "weedPass", mqtt: { topic: "tc/{id}/cmd/weed", qos: 1 }, gated: "weed", ack: true },
   { method: "POST", path: `${M}/devices/{deviceId}/weeds/{eventId}/approve`, auth: "device-owner", summary: "Human approval for ONE weed: aim (aiming dot) or burn (laser, interlocked on the robot).", body: "weedApprove", mqtt: { topic: "tc/{id}/cmd/weed", qos: 2 }, gated: "weed", ack: true },
   { method: "POST", path: `${M}/devices/{deviceId}/weeds/{eventId}/reject`, auth: "device-owner", summary: "Not a weed / leave it.", mqtt: { topic: "tc/{id}/cmd/weed", qos: 1 }, ack: true },
   { method: "POST", path: `${M}/devices/{deviceId}/zones`, auth: "device-owner", summary: "Send a robot its exclusion zones (no-go, keep-out, no-laser near animals); enforced on the robot.", mqtt: { topic: "tc/{id}/cfg/zones", qos: 1, retain: true }, ack: true },
@@ -158,6 +158,9 @@ export function buildBackendXml(opts: { routes?: Array<{ method: string; path: s
   lines.push('    <field name="status" type="string" values="active|pending_review|approved|rejected|treated|cleared"/>');
   for (const f of ["title", "detail", "station", "label", "itemId"]) lines.push(`    <field name="${f}" type="string"/>`);
   lines.push('    <field name="propFt" type="object" note="{x, y} property position in feet (mobile robot sightings)"/>');
+  lines.push('    <field name="scout" type="boolean" note="weed found by a camera-only rover: pulled by hand, never lased"/>');
+  lines.push('    <field name="finding" type="string" note="rover alerts: animal | leak | plant"/>');
+  lines.push('    <field name="animalGroup" type="string" note="animal findings: flock | pet | wildlife | predator"/>');
   for (const f of ["count", "confidence", "bearingDeg", "distanceFt", "ts"]) lines.push(`    <field name="${f}" type="number"/>`);
   lines.push('    <field name="bedMm" type="object" note="{x (along the bed), y (across)} in mm from the bed origin corner"/>');
   lines.push("  </yard-events>");

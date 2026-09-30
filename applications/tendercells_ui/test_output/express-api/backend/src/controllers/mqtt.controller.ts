@@ -16,7 +16,7 @@ interface MQTTMessage {
   [key: string]: unknown;
 }
 
-import { HF_REPO_ID, MOTION_TELEMETRY_MAX_AGE_MS, SCHEMAS, validatePayload, validateZones } from "../schemas.js";
+import { HF_REPO_ID, MOTION_TELEMETRY_MAX_AGE_MS, SCHEMAS, validateCoverage, validatePayload, validateZones } from "../schemas.js";
 
 export class MQTTController {
   private static client: mqtt.MqttClient | null = null;
@@ -679,11 +679,14 @@ export class MQTTController {
       return res.status(400).json({ error: "passes must be an integer 1-10" });
     }
     const task = req.body?.task ?? "weed";
-    const err = validatePayload({ task }, SCHEMAS.weedPass);
+    const err = validatePayload({ task }, SCHEMAS.weedPass) ?? validateCoverage(req.body ?? {});
     if (err) return res.status(400).json({ error: err });
     const blocked = MQTTController.motionBlockedReason(deviceId, "weed");
     if (blocked) return res.status(409).json({ error: blocked });
-    const seq = MQTTController.publishWithSeq(deviceId, "weed", { action: "pass", passes, task });
+    // Rovers: optional area / route to cover and water points to check for leaks (property feet). Bed robots ignore them.
+    const coverage = { ...(req.body?.area ? { area: req.body.area } : {}), ...(req.body?.route ? { route: req.body.route } : {}),
+      ...(req.body?.waterPoints ? { waterPoints: req.body.waterPoints } : {}) };
+    const seq = MQTTController.publishWithSeq(deviceId, "weed", { action: "pass", passes, task, ...coverage });
     if (seq === null) return res.status(503).json({ error: "MQTT not connected" });
     return MQTTController.respondWithAck(res, deviceId, seq, { success: true, deviceId, command: "weed_pass", passes, task });
   }

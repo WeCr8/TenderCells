@@ -6,13 +6,14 @@
 // Demo: derives the same flags in the browser - eggs from the egg map, roost
 // headcount from the flock roster, weeds from the simulated weed patrol robot.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { PropertyItem } from '../components/property/propertyLayoutStore';
+import { loadPropertyLayout, type PropertyItem } from '../components/property/propertyLayoutStore';
 import { eggService, EGGS_UPDATED_EVENT, todayKey } from '../services/eggService';
 import { birdsService, BIRDS_UPDATED_EVENT } from '../services/birdsService';
 import { ackYardEvent, approveWeed, fetchWeedState, fetchYardEvents, rejectWeed, type Presence } from '../lib/yard/yardApi';
 import { ackSimAlert, decideSimWeed, simBed, simWeeds, WEED_SIM_EVENT } from '../lib/yard/weedSim';
+import { decideRoverWeed, ROVER_SIM_EVENT, simRover, simRoverWeeds } from '../lib/yard/roverSim';
 import {
-  DEFAULT_DEVICE_BY_TYPE, WEED_BED_TYPES, YARD_LIVE, weedDeviceFor,
+  DEFAULT_DEVICE_BY_TYPE, WEED_BED_TYPES, WEED_ROVER_TYPES, YARD_LIVE, weedDeviceFor,
   type WeedRobotState, type YardFlag,
 } from '../lib/yard/yardTypes';
 
@@ -101,13 +102,22 @@ function demoRoostPatrol(deviceId: string, item: PropertyItem, now: number): Yar
   return out;
 }
 
+/** Detections from a simulated rover weed patrol (only ones it actually made). */
+const isRoverSimFlag = (f: { id: string }) => f.id.startsWith('rweed-') || f.id.startsWith('robs-');
+
 async function demoFlags(items: PropertyItem[]): Promise<YardFlag[]> {
   const flags: YardFlag[] = [];
   const now = Date.now();
+  const layout = loadPropertyLayout();
   for (const item of items) {
     if (item.kind !== 'hardware') continue;
     const deviceId = deviceForItem(item);
     if (!deviceId) continue;
+    // Any mobile robot with a camera can run a property-wide weed patrol (roverSim).
+    if (WEED_ROVER_TYPES.has(item.type)) {
+      simRover(item, deviceId, layout);
+      simRoverWeeds(item.id).forEach((w) => flags.push({ ...w, itemId: item.id, source: 'demo' }));
+    }
     if (EGG_TYPES.has(item.type)) {
       const day = await eggService.getDay(deviceId, todayKey());
       const waiting = day.nestBoxes.filter((b) => b.hasEgg && b.collectedAt == null);
@@ -186,8 +196,9 @@ export function useYardEvents(items: PropertyItem[]) {
       }
     }));
     const bots: Record<string, WeedRobotState> = {};
-    await Promise.all(list.filter((i) => i.kind === 'hardware' && WEED_BED_TYPES.has(i.type)).map(async (i) => {
-      const st = await fetchWeedState(weedDeviceFor(i)).catch(() => null);
+    await Promise.all(list.filter((i) => i.kind === 'hardware' && (WEED_BED_TYPES.has(i.type) || WEED_ROVER_TYPES.has(i.type))).map(async (i) => {
+      const dev = deviceForItem(i);
+      const st = dev ? await fetchWeedState(dev).catch(() => null) : null;
       if (st) bots[i.id] = st;
     }));
     setFlags(next);
@@ -201,11 +212,11 @@ export function useYardEvents(items: PropertyItem[]) {
     const timer = setInterval(() => void refresh(), POLL_MS);
     const onLocal = () => void refresh();
     if (!YARD_LIVE) {
-      [EGGS_UPDATED_EVENT, BIRDS_UPDATED_EVENT, WEED_SIM_EVENT].forEach((e) => window.addEventListener(e, onLocal));
+      [EGGS_UPDATED_EVENT, BIRDS_UPDATED_EVENT, WEED_SIM_EVENT, ROVER_SIM_EVENT].forEach((e) => window.addEventListener(e, onLocal));
     }
     return () => {
       clearInterval(timer);
-      [EGGS_UPDATED_EVENT, BIRDS_UPDATED_EVENT, WEED_SIM_EVENT].forEach((e) => window.removeEventListener(e, onLocal));
+      [EGGS_UPDATED_EVENT, BIRDS_UPDATED_EVENT, WEED_SIM_EVENT, ROVER_SIM_EVENT].forEach((e) => window.removeEventListener(e, onLocal));
     };
   }, [refresh, itemsKey]);
 
@@ -217,7 +228,9 @@ export function useYardEvents(items: PropertyItem[]) {
   const act = useCallback(async (flag: YardFlag, action: YardAction): Promise<string> => {
     let message: string;
     if (flag.source === 'demo') {
-      if (action === 'ack' && flag.type === 'alert' && flag.bedMm) {
+      if (isRoverSimFlag(flag)) {
+        message = decideRoverWeed(flag.itemId, flag.id, action); // rover weeds + sightings
+      } else if (action === 'ack' && flag.type === 'alert' && flag.bedMm) {
         ackSimAlert(flag.itemId, flag.id); // garden robot sighting
         message = 'Marked as seen';
       } else if (action === 'ack' && flag.type === 'alert') {

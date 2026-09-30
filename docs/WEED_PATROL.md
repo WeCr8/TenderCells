@@ -97,6 +97,68 @@ A pass has a **task**. Choose it in Weed Patrol or on a scheduled "Weed pass":
 - **Command:** `POST /devices/:id/weeds/pass {passes, task}`, which publishes `tc/{id}/cmd/weed {action: "pass", task}`.
 - **"Seen it":** sends `tc/{id}/cmd/event {action: "ack"}`.
 
+## Weed patrol on a rover
+
+A mobile robot drives the **whole property** (or the route you drew for it in Property Layout)
+with a downward camera. It works in lawn-mower lanes, one camera swath (4 ft) apart, and skips
+every no-go / keep-out zone. Each find is reported with its property position (`propFt {x, y}`,
+in feet), so it lands as a pin on the **2D property map** (Weed Patrol → 2D property, and the
+Property Layout "Detections" layer) and on the **3D map**. You are told about it wherever you are
+in the OS (a pop-up with **View on map**, plus a browser notification when the tab is hidden).
+
+| Robot | Build | What you do with a weed |
+|---|---|---|
+| Weed Rover | `rover-scout` (camera only, default) | Pull it, then press **Pulled it** (`cmd/event ack`), or **Not a weed** |
+| Weed Rover | `rover-laser` | Aim / Burn after your approval. Refused in any zone and near animals (see below) |
+| Roaming Roost, Community Custom | `rover-scout` only | Pull it by hand. Robots that carry animals never get a laser |
+
+**On every pass, whatever the task, the rover also reports:**
+
+- **Animals on its route.** Each sighting is an `alert` with `finding: "animal"` and `animalGroup`:
+  - `flock`: your hens, ducks or goats outside the run ("Hen outside the run", **Back inside**)
+  - `pet`: a dog or cat
+  - `wildlife`: deer, rabbits, squirrels and so on (no action needed)
+  - `predator`: fox, raccoon, hawk, snake, rat (keep people and animals clear, close the coop)
+
+  The same animal seen again from the next stop is not re-reported for 2 minutes.
+- **Water leaks at water points.** Water points are **Water Point** items (spigot, trough, tank or
+  valve), animal housing with waterers, and aquaponics / hydroponics tanks. Natural ponds are not
+  water points. The first time the camera frame passes within 6 ft of a water point on a pass,
+  the rover looks at the ground there. A leak is an `alert` with `finding: "leak"` and `station`
+  set to the water point id, shown as a blue puddle / droplet on the maps. Press **Fixed** once
+  it is repaired. While a leak is open, that point is not re-reported.
+
+**Laser hold near animals:** a laser rover will not aim or fire within **15 ft** of an animal
+it saw in the **last 10 minutes**. This is on top of the no-laser zones around animal housing.
+
+**Live rover settings** (`WEED_ROBOT=rover-scout|rover-laser`, see `weed_patrol_service.py`):
+
+| Setting | Meaning |
+|---|---|
+| `ROVER_DRIVE=mqtt`, `ROVER_BASE_ID` | Base controller that takes `tc/{base}/cmd/goto {xFt,yFt}` and reports `tc/{base}/state/pose` |
+| `PROPERTY_WIDTH_FT`, `PROPERTY_DEPTH_FT` | Property size (the OS also sends the area with each pass) |
+| `ROVER_ANIMAL_MODEL` | YOLO weights for animals: `yolov8n.pt` (COCO: bird, cat, dog, …, default) or `hf://owner/repo/best.pt` (its class names become the labels, e.g. hen / fox / snake) |
+| `ROVER_LEAKS=off`, `ROVER_ANIMALS=off` | Turn the leak checks or animal sightings off |
+| `SIM_LEAKS=tap,trough` | Simulation: water point ids that show a leak |
+
+The leak check compares the share of "wet" pixels (dark soaked soil, or glare off standing
+water) around each water point with that point's own dry baseline, which it learns on earlier
+passes. A jump of more than 15 % is reported. It is a heuristic: on tricky ground (dark mulch,
+deep shade), plug in a segmentation model through the `LeakDetector` protocol in `rover_patrol.py`.
+
+**Pass command for rovers:**
+
+```json
+tc/{id}/cmd/weed {
+  "action": "pass", "passes": 1, "task": "weed",
+  "area": {"x": 0, "y": 0, "width": 80, "depth": 60},
+  "waterPoints": [{"id": "item-spigot", "name": "Garden spigot", "x": 20.5, "y": 30.5, "radiusFt": 6.5}]
+}
+```
+
+The pass takes either `area` or `route: [{x, y}, …]`. `state/weed` carries the rover's pose as
+`pose {xFt, yFt, headingDeg}` (heading is degrees clockwise from map north).
+
 ## Passes on a schedule
 
 In **Schedules**, add a **Weed pass** action for the robot's device id (e.g. dawn and dusk, 1–10

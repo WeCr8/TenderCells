@@ -27,8 +27,14 @@ export interface YardEvent {
   bearingDeg?: number;
   /** Estimated range from the device, feet (when the camera can estimate it). */
   distanceFt?: number;
-  /** Property position in feet (sightings from mobile robots such as Roaming Roost). */
+  /** Property position in feet (detections from mobile robots: weed rovers, Roaming Roost). */
   propFt?: { x: number; y: number };
+  /** Found by a camera-only robot: a person pulls it by hand (no aim / burn). */
+  scout?: boolean;
+  /** What an alert is about (rover findings): an animal on the route, a water leak, a plant. */
+  finding?: 'animal' | 'leak' | 'plant';
+  /** Animal findings: your own flock/pets, harmless wildlife, or a predator. */
+  animalGroup?: 'flock' | 'pet' | 'wildlife' | 'predator';
   ts: number;
   updatedAt: number;
 }
@@ -71,8 +77,11 @@ export const ROBOT_TASKS: Record<RobotTask, { label: string; help: string }> = {
   patrol: { label: 'Snake & predator patrol', help: 'Flags snakes and animals it sees. Alerts only - the laser is never used on animals.' },
 };
 
-/** Weed robot builds: FarmBot Genesis laser head, LiteWeed-style rover, arm-mounted laser. */
-export type WeedRobotType = 'genesis-laser' | 'rover-laser' | 'arm-laser';
+/**
+ * Weed robot builds: FarmBot Genesis laser head, LiteWeed-style laser rover, arm-mounted
+ * laser, and a camera-only rover scout (finds and maps weeds for a person to pull).
+ */
+export type WeedRobotType = 'genesis-laser' | 'rover-laser' | 'arm-laser' | 'rover-scout';
 
 /** Weed-patrol robot state published on tc/{id}/state/weed. */
 export interface WeedRobotState {
@@ -89,6 +98,8 @@ export interface WeedRobotState {
   tool?: { x: number; y: number; z: number; aim: boolean; laser: boolean };
   /** Robot build (demo robots; live robots may report it too). */
   robotType?: WeedRobotType;
+  /** Mobile robots: where the rover is on the property (feet) and which way it faces. */
+  pose?: { xFt: number; yFt: number; headingDeg: number };
   error: string | null;
   ts: number;
 }
@@ -104,6 +115,7 @@ export const DEFAULT_DEVICE_BY_TYPE: Record<string, string> = {
   'turkey-tower': 'tt_001',
   'pigeon-palace': 'pp_001',
   watchtower: 'wt_001',
+  'weed-rover': 'rover_001',
 };
 
 /** Detection radius drawn for a WatchTower when its item has no mapped radius (ft). */
@@ -111,6 +123,14 @@ export const WATCHTOWER_RANGE_FT = 40;
 
 /** Layout item types a weed-patrol robot (FarmBot-style gantry) works over. */
 export const WEED_BED_TYPES = new Set(['farmbot-genesis', 'farmbot-genesis-xl', 'greenhouse', 'aquaponics', 'hydroponics']);
+
+/**
+ * Mobile robots that can run a property-wide weed patrol with their camera. Only the
+ * dedicated Weed Rover may carry a laser; robots that house animals (Roaming Roost) and
+ * custom builds are camera-only scouts.
+ */
+export const WEED_ROVER_TYPES = new Set(['weed-rover', 'roaming-roost', 'community-custom']);
+export const LASER_ROVER_TYPES = new Set(['weed-rover']);
 
 /** Default weed robot device id for a garden item. */
 export const weedDeviceFor = (item: { id: string; deviceId?: string }): string => item.deviceId || 'garden_weeder';

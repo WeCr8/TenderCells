@@ -33,7 +33,15 @@ export const WEED_ROBOT_TYPES: Record<WeedRobotType, {
     label: 'Arm-mounted laser', motion: 'arm', note: 'Arm service (sim / UR / LeRobot) carrying the 500 mW module',
     laser: { profile: 'diode-500mw', laserClass: '3B', wavelengthNm: 405, powerW: 0.5, minMs: 2000, maxMs: 8000 },
   },
+  // Property-wide camera rover (roverSim.ts) - finds and maps weeds, never fires anything.
+  'rover-scout': {
+    label: 'Rover scout (camera only)', motion: 'rover', note: 'Drives the property, maps weeds for a person to pull',
+    laser: { profile: 'none', laserClass: 'none', wavelengthNm: 0, powerW: 0, minMs: 0, maxMs: 0 },
+  },
 };
+
+/** Builds offered for a garden bed (the camera-only scout works property-wide instead). */
+export const BED_ROBOT_TYPES = (Object.keys(WEED_ROBOT_TYPES) as WeedRobotType[]).filter((k) => WEED_ROBOT_TYPES[k].laser.powerW > 0);
 
 interface SimBed {
   itemId: string;

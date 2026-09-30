@@ -16,8 +16,9 @@ import { animateYardFlags, buildYardFlags, disposeYardFlags } from './yardFlags'
 import { buildHydrologyLayer } from './hydrologyLayer';
 import { createWeedRobot, placeWeedRobot } from './weedRobotMarker';
 import { getSimRobot } from '../../lib/yard/weedSim';
+import { getSimRover } from '../../lib/yard/roverSim';
 import { mountsFor, viewKey, type CameraMount } from '../../lib/yard/cameraMounts';
-import { WEED_BED_TYPES, YARD_LIVE, type WeedRobotState } from '../../lib/yard/yardTypes';
+import { WEED_BED_TYPES, WEED_ROVER_TYPES, YARD_LIVE, type WeedRobotState } from '../../lib/yard/yardTypes';
 import { PATROL_SIM_EVENT, computePatrolPose, type PatrolSimDetail } from '../../lib/yard/patrolSim';
 import type { HydrologyResult } from '../property/watershed';
 import { useYardEvents } from '../../hooks/useYardEvents';
@@ -688,6 +689,48 @@ const createHardwareMesh = (
       return g;
     }
 
+    case 'weed-rover': {
+      // Small camera rover: chassis, four wheels, a solar lid and a camera mast at the
+      // front (-z = the direction it drives when its heading is 0 / map north).
+      const g = new THREE.Group();
+      const chassis = new THREE.Mesh(new THREE.BoxGeometry(W * 0.8, 0.45, D * 0.9), mat);
+      chassis.position.set(x, 0.55, z);
+      chassis.castShadow = true;
+      g.add(chassis);
+      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+      [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => {
+        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.22, 16), wheelMat);
+        wheel.rotation.z = Math.PI / 2;
+        wheel.position.set(x + sx * W * 0.45, 0.32, z + sz * D * 0.3);
+        g.add(wheel);
+      });
+      const lid = new THREE.Mesh(new THREE.BoxGeometry(W * 0.7, 0.05, D * 0.7), new THREE.MeshStandardMaterial({ color: 0x1a2a4a, metalness: 0.4, roughness: 0.3 }));
+      lid.position.set(x, 0.8, z + D * 0.05);
+      g.add(lid);
+      const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.9, 8), new THREE.MeshStandardMaterial({ color: 0xcccccc }));
+      mast.position.set(x, 1.2, z - D * 0.35);
+      g.add(mast);
+      const cam = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.18, 0.22), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+      cam.position.set(x, 1.65, z - D * 0.4);
+      cam.rotation.x = -0.6; // looking down at the ground ahead
+      g.add(cam);
+      return g;
+    }
+
+    case 'water-point': {
+      // Spigot / trough / tank the rover checks for leaks: a short post with a tap.
+      const g = new THREE.Group();
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 1.1, 10), mat);
+      post.position.set(x, 0.55, z);
+      post.castShadow = true;
+      g.add(post);
+      const tap = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.35, 8), new THREE.MeshStandardMaterial({ color: 0xb0b0b0, metalness: 0.7, roughness: 0.3 }));
+      tap.rotation.x = Math.PI / 2;
+      tap.position.set(x, 0.95, z + 0.2);
+      g.add(tap);
+      return g;
+    }
+
     default: {
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(W, H, D), mat);
       mesh.position.set(x, H / 2, z);
@@ -1085,6 +1128,30 @@ const createYardItems = (
 };
 
 /** Lift each item group (built at y=0) onto the terrain height at its centre. */
+/**
+ * Give a mobile robot's item group a pivot at its own centre. Item meshes are built at
+ * absolute scene positions, so moving / turning the robot means offsetting the group from
+ * its parked spot and rotating this pivot - not setting an absolute position.
+ */
+const addMovePivot = (group: THREE.Object3D): void => {
+  const c = group.userData.sceneCenter as { x: number; z: number } | undefined;
+  if (!c || group.getObjectByName('move-pivot')) return;
+  const pivot = new THREE.Group();
+  pivot.name = 'move-pivot';
+  pivot.position.set(c.x, 0, c.z);
+  [...group.children].forEach((child) => { child.position.x -= c.x; child.position.z -= c.z; pivot.add(child); });
+  group.add(pivot);
+};
+
+/** Put a mobile robot (see addMovePivot) at a scene point, facing rotY (radians about +Y). */
+const placeMobileRobot = (group: THREE.Object3D, sx: number, sz: number, h: SceneHeightFn, rotY?: number): void => {
+  const c = group.userData.sceneCenter as { x: number; z: number } | undefined;
+  if (!c) return;
+  group.position.set(sx - c.x, h(sx, sz), sz - c.z);
+  const pivot = group.getObjectByName('move-pivot');
+  if (pivot && rotY != null) pivot.rotation.y = rotY;
+};
+
 const settleOnTerrain = (root: THREE.Object3D, h: SceneHeightFn): THREE.Object3D => {
   const settle = (o: THREE.Object3D) => {
     const c = o.userData.sceneCenter as { x: number; z: number } | undefined;
@@ -1539,7 +1606,10 @@ export default function Viewport3D({
       // can move each roaming-roost's actual body mesh, not a separate marker.
       yardItemsGroup.children.forEach((child) => {
         const itemId = child.userData.itemId as string | undefined;
-        if (itemId) yardGroupByItemIdRef.current.set(itemId, child);
+        if (!itemId) return;
+        yardGroupByItemIdRef.current.set(itemId, child);
+        const it = enrichedItems.find((i) => i.id === itemId);
+        if (it && MOBILE_ROBOT_TYPES.has(it.type as HardwareType)) addMovePivot(child);
       });
     }
 
@@ -1623,6 +1693,9 @@ export default function Viewport3D({
       renderer.setViewport(0, 0, cw, ch);
     };
 
+    // Mobile robots that can run a property-wide weed patrol (moved by their pose).
+    const roverItems = workspaceMode === 'property' ? [] : enrichedItems.filter((i) => i.kind === 'hardware' && WEED_ROVER_TYPES.has(i.type));
+
     // Weed robots on their garden beds (demo: simulated robot; live: state/weed).
     const weedRobots = workspaceMode === 'property' || !showYardFlags ? [] : enrichedItems
       .filter((i) => i.kind === 'hardware' && WEED_BED_TYPES.has(i.type))
@@ -1657,8 +1730,23 @@ export default function Viewport3D({
         if (!group) return;
         const pose = computePatrolPose(points, t);
         if (!pose) return;
-        group.position.set(pose.x, groundH(pose.x, pose.z), pose.z);
-        group.rotation.y = pose.heading;
+        // FIX(2026-09-30): was an absolute position on a group whose meshes are already at
+        // absolute positions (robot drawn at twice the offset, turning about the scene origin).
+        placeMobileRobot(group, pose.x, pose.z, groundH, pose.heading);
+      });
+      // Rover weed patrol: the robot's own body follows its reported / simulated pose.
+      roverItems.forEach((item) => {
+        const group = yardGroupByItemIdRef.current.get(item.id);
+        if (!group) return;
+        const st = YARD_LIVE ? liveRobotsRef.current[item.id] : getSimRover(item.id);
+        const moving = st?.pose && (YARD_LIVE || st.pass?.running);
+        if (moving && st?.pose) {
+          const sx = st.pose.xFt - layout.property.widthFt / 2, sz = st.pose.yFt - layout.property.depthFt / 2;
+          placeMobileRobot(group, sx, sz, groundH, (-st.pose.headingDeg * Math.PI) / 180);
+        } else if (!activePatrolIdsRef.current.has(item.id)) {
+          const c = group.userData.sceneCenter as { x: number; z: number } | undefined;
+          if (c) placeMobileRobot(group, c.x, c.z, groundH, 0);
+        }
       });
       controls.update();
       renderer.render(scene, camera);

@@ -29,9 +29,18 @@ export interface YardEvent {
   bearingDeg?: number;       // from the reporting device, 0 = map north (up), clockwise
   distanceFt?: number;       // estimated range from the device, when known
   propFt?: { x: number; y: number }; // property position (ft) - mobile robot sightings
+  scout?: boolean;           // weed found by a camera-only rover: pulled by hand, never lased
+  finding?: Finding;         // rover alerts: an animal on the route, a water leak, a plant
+  animalGroup?: AnimalGroup; // animal findings: own flock / pet / wildlife / predator
   ts: number;
   updatedAt: number;
 }
+
+export type Finding = "animal" | "leak" | "plant";
+export type AnimalGroup = "flock" | "pet" | "wildlife" | "predator";
+const FINDINGS: Finding[] = ["animal", "leak", "plant"];
+const ANIMAL_GROUPS: AnimalGroup[] = ["flock", "pet", "wildlife", "predator"];
+const oneOf = <T extends string>(v: unknown, allowed: T[]): T | undefined => (allowed.includes(v as T) ? (v as T) : undefined);
 
 const TYPES: YardEventType[] = ["egg_ready", "pickup_ready", "weed_detected", "headcount", "alert"];
 const STATUSES: YardEventStatus[] = ["active", "pending_review", "approved", "rejected", "treated", "cleared"];
@@ -81,6 +90,9 @@ export function ingestEvent(deviceId: string, payload: Record<string, unknown>):
     label: str(payload.label, 40) ?? prev?.label,
     bearingDeg: num(payload.bearingDeg) !== undefined ? (((payload.bearingDeg as number) % 360) + 360) % 360 : prev?.bearingDeg,
     distanceFt: num(payload.distanceFt) !== undefined ? Math.max(0, payload.distanceFt as number) : prev?.distanceFt,
+    scout: typeof payload.scout === "boolean" ? payload.scout : prev?.scout,
+    finding: oneOf(payload.finding, FINDINGS) ?? prev?.finding,
+    animalGroup: oneOf(payload.animalGroup, ANIMAL_GROUPS) ?? prev?.animalGroup,
     ts: prev?.ts ?? (num(payload.ts) ?? now),
     updatedAt: now,
   });

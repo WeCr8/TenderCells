@@ -41,6 +41,35 @@ const ZONE_KINDS = new Set(["no-go", "keep-out", "no-laser"]);
 const num = (v: unknown) => typeof v === "number" && Number.isFinite(v) && Math.abs(v) < 100_000;
 
 /**
+ * Validate a rover coverage request: optional area {x,y,width,depth} and/or route [{x,y}] (feet).
+ *
+ * @returns An error message, or null when valid (or absent)
+ */
+export function validateCoverage(body: { area?: unknown; route?: unknown; waterPoints?: unknown }): string | null {
+  if (body.area !== undefined) {
+    const a = body.area as Record<string, unknown> | null;
+    if (!a || !["x", "y", "width", "depth"].every((k) => num(a[k]))) return "area needs numeric x, y, width, depth (feet)";
+    if ((a.width as number) <= 0 || (a.depth as number) <= 0) return "area width and depth must be positive";
+  }
+  if (body.route !== undefined) {
+    const r = body.route as unknown[];
+    if (!Array.isArray(r) || r.length < 2 || r.length > 500) return "route needs 2-500 points";
+    if (!r.every((p) => p && num((p as Record<string, unknown>).x) && num((p as Record<string, unknown>).y))) return "route points need numeric x, y (feet)";
+  }
+  if (body.waterPoints !== undefined) {
+    const w = body.waterPoints as Array<Record<string, unknown>>;
+    if (!Array.isArray(w) || w.length > 50) return "waterPoints must be an array of at most 50 points";
+    for (const [i, p] of w.entries()) {
+      if (!p || typeof p.id !== "string" || !p.id || p.id.length > 64) return `waterPoints[${i}].id must be a string`;
+      if (p.name !== undefined && (typeof p.name !== "string" || p.name.length > 60)) return `waterPoints[${i}].name must be a string (max 60)`;
+      if (!num(p.x) || !num(p.y)) return `waterPoints[${i}] needs numeric x, y (feet)`;
+      if (p.radiusFt !== undefined && (!num(p.radiusFt) || (p.radiusFt as number) <= 0 || (p.radiusFt as number) > 100)) return `waterPoints[${i}].radiusFt must be 0-100 ft`;
+    }
+  }
+  return null;
+}
+
+/**
  * Validate an exclusion-zones payload ({v:1, units:'ft', self?, zones:[{id,name,kind,poly}]}).
  *
  * @returns An error message, or null when valid

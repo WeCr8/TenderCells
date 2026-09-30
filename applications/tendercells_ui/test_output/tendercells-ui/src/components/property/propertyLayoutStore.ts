@@ -37,7 +37,13 @@ export type HardwareType =
   // placeable/visible on the property map once registered (no
   // property_simulation_enabled opt-in needed, unlike community-custom -
   // a camera has no ambiguous non-ground-placement case to guard against).
-  | 'camera-kit';
+  | 'camera-kit'
+  // A small camera rover that drives the whole property finding weeds (weed patrol on a
+  // rover): camera-only scout, or the laser build with human approval per weed.
+  | 'weed-rover'
+  // A spigot, trough, tank or irrigation valve. Rovers check the ground around it for
+  // leaks (standing water / wet soil) on every pass.
+  | 'water-point';
 export type ObstacleType =
   | 'tree' | 'fence' | 'pond' | 'rock' | 'building' | 'garden' | 'no-go-zone'
   | 'bush' | 'crop-row';
@@ -118,14 +124,16 @@ export const HARDWARE_TYPES: HardwareType[] = [
   'sensor',
   ...GARDEN_TYPES,
   'community-custom',
+  'weed-rover',
   'camera-kit',
+  'water-point',
 ];
 
 // Mobile ground robots that can be given a hand-drawn patrol route and driven
 // through it in the 3D viewport (Draw Path / Simulate Route). A one-line
 // addition here is all a *new* mobile robot type needs to pick up that whole
 // feature - see PropertyLayoutBuilder.tsx and Viewport3D.tsx for the consumers.
-export const MOBILE_ROBOT_TYPES = new Set<HardwareType>(['roaming-roost', 'community-custom']);
+export const MOBILE_ROBOT_TYPES = new Set<HardwareType>(['roaming-roost', 'community-custom', 'weed-rover']);
 
 // Real-world footprint dimensions from product specs (CLAUDE.md)
 // width × depth in feet; height not used on 2D map
@@ -148,6 +156,8 @@ export const PRODUCT_DIMENSIONS: Record<HardwareType, { width: number; depth: nu
   'hydroponics':        { width: 2,  depth: 2,  shape: 'circle' }, // vertical tower
   'greenhouse':         { width: 8,  depth: 12, shape: 'rect' }, // enclosed grow house
   'community-custom':   { width: 4,  depth: 4,  shape: 'rect' }, // arbitrary - resize after adding
+  'weed-rover':         { width: 3,  depth: 2,  shape: 'rect' }, // small camera rover (LiteWeed-class)
+  'water-point':        { width: 1,  depth: 1,  shape: 'circle' }, // spigot / trough / tank
 };
 
 export const OBSTACLE_TYPES: ObstacleType[] = ['tree', 'bush', 'crop-row', 'fence', 'pond', 'rock', 'building', 'garden', 'no-go-zone'];
@@ -183,7 +193,9 @@ export const ITEM_COLORS: Record<string, string> = {
   hydroponics:          '#42A5B5',
   greenhouse:           '#9CCC65',
   'community-custom':   '#5AC8C8',
+  'weed-rover':         '#9CCC65',
   'camera-kit':         '#8AACC8',
+  'water-point':        '#4FC3F7',
   tree:             '#2F7D32',
   bush:             '#4C9A4C',
   'crop-row':       '#6B8E23',
@@ -232,7 +244,8 @@ export const DEFAULT_ITEMS: PropertyItem[] = [
   { id: 'item-garden-genesis', kind: 'hardware', name: 'Garden (Genesis)', type: 'farmbot-genesis', shape: 'rect',   x: 12, y: 30, width: 5,  depth: 10 },
   { id: 'item-tree',           kind: 'obstacle', name: 'Oak Tree',       type: 'tree',           shape: 'circle',  x: 28, y: 10, width: 8,  depth: 8  },
   { id: 'item-pond',           kind: 'obstacle', name: 'Pond',           type: 'pond',           shape: 'rounded', x: 52, y: 12, width: 14, depth: 10 },
-  { id: 'item-fence',          kind: 'obstacle', name: 'Fence Line',     type: 'fence',          shape: 'rect',    x: 4,  y: 48, width: 60, depth: 3  },
+  { id: 'item-spigot',         kind: 'hardware', name: 'Garden spigot',  type: 'water-point',    shape: 'circle',  x: 20, y: 30, width: 1,  depth: 1  },
+  { id: 'item-fence',         kind: 'obstacle', name: 'Fence Line',     type: 'fence',          shape: 'rect',    x: 4,  y: 48, width: 60, depth: 3  },
   // Restricted area robots must not enter (sent to them as exclusion zones).
   { id: 'item-septic-nogo',    kind: 'obstacle', name: 'Septic field',   type: 'no-go-zone',     shape: 'rect',    x: 24, y: 40, width: 10, depth: 6  },
 ];

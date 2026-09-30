@@ -44,5 +44,5 @@ No-go zones render as a red translucent curtain with outlined edges. The 2D layo
 ## Limits today
 
 - The Roaming Roost ESP32 firmware drives by velocity and has no position estimate yet. It cannot check zones on board.
-- Until it does, the OS checks patrol paths against zones before they are sent. When the rover reports a pose, it should subscribe to `cfg/zones` and stop at the boundary, using `zones.py`'s logic.
+- The rover weed patrol (`rover_patrol.py`) plans its lanes around no-go / keep-out zones, never reports finds inside them, and refuses the laser in any zone (including the no-laser buffer around animal housing). Other mobile robots: until they do, the OS checks patrol paths against zones before they are sent; when a rover reports a pose, it should subscribe to `cfg/zones` and stop at the boundary, using `zones.py`'s logic.
 - The Roaming Roost's own no-laser buffer is placed where it is parked on the map.

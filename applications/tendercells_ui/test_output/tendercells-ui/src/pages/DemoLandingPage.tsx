@@ -26,6 +26,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import { seedDemoEnvironment, type DemoReport } from "../services/demo/demoEnvironment";
 import { safeDemoNext } from "../lib/demo/demoNext";
+import { trackDemo } from "../lib/demo/track";
 
 const C = {
   bg: "#0D2B1E",
@@ -51,10 +52,30 @@ const useCases = [
   { label: "WatchTower", detail: "Predator-monitor view and yard security scenario", path: "/predator-monitor", icon: <VisibilityIcon /> },
 ];
 
-/** Fire a GA4 event if analytics is present. No-op otherwise. */
-function track(event: string, params?: Record<string, unknown>) {
-  const gtag = (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag;
-  if (typeof gtag === "function") gtag("event", event, params ?? {});
+const track = trackDemo;
+
+// Guided entrances into the same simulation (not separate apps). OS pages use the router;
+// website pages (same origin) load normally.
+const personas: { id: string; emoji: string; title: string; who: string; detail: string; cta: string; path?: string; href?: string }[] = [
+  { id: "run-the-farm", emoji: "🚜", title: "Run the farm", who: "Farmers · backyard flocks · homesteaders", detail: "Alerts, animals, feed, water, doors, schedules, predators and system health in one view.", cta: "Open the dashboard", path: "/dashboard" },
+  { id: "mission", emoji: "🏁", title: "Take a mission", who: "Kids · families · first-time visitors", detail: "Protect the flock, close the coop before sunset, find today's eggs, fix a low-water alert.", cta: "Pick a mission", path: "/missions" },
+  { id: "4h-ffa", emoji: "🎓", title: "Build a 4-H / FFA project", who: "4-H · FFA · schools · homeschool", detail: "Project plans with a question, variables, data to collect and the lessons that build the device.", cta: "See project plans", href: "/science-fair" },
+  { id: "hardware", emoji: "🔧", title: "Explore the hardware", who: "Makers · engineers · parents · teachers", detail: "Boards, wiring, flashing, the MQTT contract and how a device shows up here - step by step.", cta: "Build a device", href: "/os#build" },
+  { id: "code", emoji: "💻", title: "Hack the code", who: "Developers · robotics students · contributors", detail: "Topics and payloads, the backend API, firmware, simulation and how to contribute.", cta: "Developer path", href: "/os#developers" },
+  { id: "platform", emoji: "🧭", title: "Explore Tender Cells OS", who: "Partners · investors · media", detail: "The platform, product families, the shared device and event layer, and the open-source approach.", cta: "About the OS", href: "/os" },
+];
+
+const countFrom = (detail: string) => Number(/(\d+)/.exec(detail)?.[1] ?? 0);
+
+/** Real-world state of the demo property, from the seed report. */
+function demoStats(report: DemoReport | null) {
+  const devices = report?.devices ?? [];
+  return [
+    { label: "Systems online", value: devices.length },
+    { label: "Animals monitored", value: devices.reduce((n, d) => n + countFrom(d.flock.detail), 0) },
+    { label: "Nest boxes watched", value: devices.reduce((n, d) => n + (d.eggs.detail.includes("nest boxes") ? countFrom(d.eggs.detail) : 0), 0) },
+    { label: "Automations scheduled", value: devices.reduce((n, d) => n + countFrom(d.schedules.detail), 0) },
+  ];
 }
 
 export default function DemoLandingPage() {
@@ -121,28 +142,37 @@ export default function DemoLandingPage() {
         )}
 
         {phase === "ready" && (
-          <Stack spacing={2.5} sx={{ width: "min(1080px, 92vw)" }}>
-            <Stack spacing={1} alignItems="center">
+          <Stack spacing={3} sx={{ width: "min(1080px, 92vw)" }}>
+            <Stack spacing={1.25} alignItems="center" sx={{ textAlign: "center" }}>
               <Chip
-                label={report?.ok ? "Demo environment verified" : "Demo loaded with gaps"}
-                sx={{ bgcolor: report?.ok ? C.accent + "33" : C.warning + "33", color: report?.ok ? C.accent : C.warning, fontWeight: 700 }}
+                label={report?.ok ? "Simulated property · data stays in this browser" : "Demo loaded with gaps"}
+                sx={{ bgcolor: report?.ok ? C.accent + "33" : C.warning + "33", color: report?.ok ? C.gold : C.warning, fontWeight: 700 }}
               />
-              <Typography variant="h4" sx={{ color: C.gold, fontWeight: 800, textAlign: "center" }}>
-                Tender Cells Demo Yard
+              <Typography variant="h3" component="h1" sx={{ color: C.gold, fontWeight: 800, fontSize: { xs: 30, md: 44 } }}>
+                A farm that can sense, think, and act.
               </Typography>
-              <Typography sx={{ color: C.white, textAlign: "center", maxWidth: 760 }}>
-                Explore the full no-signup simulation: coops, animals, nest boxes, schedules,
-                property layout, vision AI, and predator monitoring. All data is local to this browser.
+              <Typography sx={{ color: C.white, fontWeight: 700, maxWidth: 760 }}>
+                Tender Cells OS connects animals, sensors, cameras, automation, and robotics through one open platform.
               </Typography>
+              <Typography sx={{ color: C.goldMuted, maxWidth: 760 }}>
+                This is a simulated Tender Cells property. Trigger events, inspect the system, and see how the
+                hardware and software work together.
+              </Typography>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ pt: 0.5 }}>
+                <Button variant="contained" onClick={() => { trackDemo("demo_started", { via: "enter" }); navigate("/dashboard"); }}
+                  sx={{ bgcolor: C.accent, color: C.white, fontWeight: 700 }}>Enter demo</Button>
+                <Button variant="contained" onClick={() => navigate("/simulator")} sx={{ bgcolor: C.gold, color: C.bg, fontWeight: 700 }}>Trigger an event</Button>
+                <Button variant="outlined" href="/os#how" sx={{ borderColor: C.accent, color: C.gold }}>How it works</Button>
+                <Button variant="outlined" href="/os#build" onClick={() => trackDemo("build_guide_opened", { from: "demo_hero" })}
+                  sx={{ borderColor: C.accent, color: C.gold }}>Build a system</Button>
+                <Button variant="outlined" href="https://github.com/WeCr8/TenderCells" target="_blank" rel="noopener noreferrer"
+                  onClick={() => trackDemo("github_clicked", { from: "demo_hero" })} sx={{ borderColor: C.accent, color: C.gold }}>View source</Button>
+              </Stack>
             </Stack>
 
+            {/* Real-world state of the simulated property (not internal verification labels). */}
             <Grid container spacing={1.5}>
-              {[
-                { label: "Systems", value: report?.devices.length ?? 0 },
-                { label: "Coherent", value: report?.devices.filter((d) => d.product.ok && d.layout.ok && d.equipment.ok).length ?? 0 },
-                { label: "Animal Packs", value: report?.devices.filter((d) => d.flock.detail !== "0 animals").length ?? 0 },
-                { label: "Egg Maps", value: report?.devices.filter((d) => d.eggs.detail.includes("nest boxes")).length ?? 0 },
-              ].map((item) => (
+              {demoStats(report).map((item) => (
                 <Grid item xs={6} sm={3} key={item.label}>
                   <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 1.5, textAlign: "center" }}>
                     <Typography sx={{ color: C.gold, fontSize: 26, fontWeight: 800, lineHeight: 1 }}>{item.value}</Typography>
@@ -158,29 +188,50 @@ export default function DemoLandingPage() {
               </Alert>
             )}
 
-            <Grid container spacing={1.5}>
-              {useCases.map((item) => (
-                <Grid item xs={12} sm={6} md={4} key={item.path}>
-                  <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2, height: "100%" }}>
-                    <Stack spacing={1.25} height="100%">
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Box sx={{ color: C.accent, display: "flex" }}>{item.icon}</Box>
-                        <Typography sx={{ color: C.gold, fontWeight: 700 }}>{item.label}</Typography>
+            <Box>
+              <Typography variant="h6" sx={{ color: C.gold, fontWeight: 700, mb: 1 }}>Choose how to explore</Typography>
+              <Grid container spacing={1.5}>
+                {personas.map((p) => (
+                  <Grid item xs={12} sm={6} md={4} key={p.id}>
+                    <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2, height: "100%" }}>
+                      <Stack spacing={1} height="100%">
+                        <Typography sx={{ color: C.gold, fontWeight: 800 }}>{p.emoji} {p.title}</Typography>
+                        <Typography sx={{ color: C.accent, fontSize: 12, fontWeight: 700 }}>{p.who}</Typography>
+                        <Typography sx={{ color: C.goldMuted, fontSize: 13, flex: 1 }}>{p.detail}</Typography>
+                        <Button variant="outlined"
+                          {...(p.path ? { onClick: () => { trackDemo("persona_selected", { persona: p.id }); navigate(p.path!); } }
+                            : { href: p.href, onClick: () => trackDemo("persona_selected", { persona: p.id }) })}
+                          sx={{ borderColor: C.accent, color: C.gold }}>{p.cta}</Button>
                       </Stack>
-                      <Typography sx={{ color: C.goldMuted, fontSize: 13, flex: 1 }}>{item.detail}</Typography>
-                      <Button variant="outlined" onClick={() => navigate(item.path)} sx={{ borderColor: C.accent, color: C.accent }}>
-                        Open
-                      </Button>
-                    </Stack>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+
+            <Box>
+              <Typography variant="h6" sx={{ color: C.gold, fontWeight: 700, mb: 1 }}>Jump to a system</Typography>
+              <Grid container spacing={1.5}>
+                {useCases.map((item) => (
+                  <Grid item xs={12} sm={6} md={4} key={item.path}>
+                    <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 2, height: "100%" }}>
+                      <Stack spacing={1.25} height="100%">
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Box sx={{ color: C.accent, display: "flex" }}>{item.icon}</Box>
+                          <Typography sx={{ color: C.gold, fontWeight: 700 }}>{item.label}</Typography>
+                        </Stack>
+                        <Typography sx={{ color: C.goldMuted, fontSize: 13, flex: 1 }}>{item.detail}</Typography>
+                        <Button variant="outlined" onClick={() => navigate(item.path)} sx={{ borderColor: C.accent, color: C.accent }}>
+                          Open
+                        </Button>
+                      </Stack>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
 
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} justifyContent="center">
-              <Button variant="contained" onClick={() => navigate("/dashboard")} sx={{ bgcolor: C.accent, color: C.white }}>
-                Start at Dashboard
-              </Button>
               <Button variant="outlined" onClick={() => window.location.reload()} sx={{ borderColor: C.goldMuted, color: C.gold }}>
                 Reload Demo
               </Button>

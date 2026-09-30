@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
+import EntityStatus from "../components/EntityStatus";
+import { entityBySlug } from "../data/entities";
 import { trackProductInterest, trackProductView } from "../utils/analytics";
 import { animalById } from "../../../shared/library/animals";
 import { speciesForProduct } from "../../../shared/library/links";
@@ -406,6 +408,7 @@ export default function ProductDetailPage() {
   const product = slug ? PRODUCTS[slug] : undefined;
   const visual = slug ? PRODUCT_VISUALS[slug] : undefined;
   const hubLinks = slug ? PRODUCT_HUB_LINKS[slug] : undefined;
+  const entity = slug ? entityBySlug(slug) : undefined;
   const species = slug ? speciesForProduct(slug).map(animalById).filter((a) => !!a) : [];
 
   useEffect(() => {
@@ -435,6 +438,7 @@ export default function ProductDetailPage() {
         <div style={{ fontSize: "2rem", fontWeight: 800, marginTop: "0.75rem" }}>{product.price}</div>
       </div>
 
+      {entity && <div className="prose"><EntityStatus entity={entity} /></div>}
       <div className="prose" style={{ marginBottom: "2rem" }}>
         <p>{product.desc}</p>
       </div>

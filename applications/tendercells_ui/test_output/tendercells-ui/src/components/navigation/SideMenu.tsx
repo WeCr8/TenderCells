@@ -3,7 +3,9 @@ import { Divider, List, ListSubheader } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import BoltIcon from "@mui/icons-material/Bolt";
 import BugReportIcon from "@mui/icons-material/BugReport";
+import FlagIcon from "@mui/icons-material/Flag";
 import BuildIcon from "@mui/icons-material/Build";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
@@ -92,6 +94,8 @@ const PRODUCT_ITEMS: Record<string, MenuItem[]> = {
 
 const CORE: MenuItem[] = [
   { id: "dashboard", label: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
+  { id: "simulator", label: "Trigger an Event", icon: <BoltIcon />, path: "/simulator" },
+  { id: "missions", label: "Missions", icon: <FlagIcon />, path: "/missions" },
   { id: "resources", label: "Resources", icon: <MenuBookIcon />, path: "/resources" },
   { id: "library", label: "Animal & Plant Library", icon: <LocalLibraryIcon />, path: "/library" },
   { id: "projects", label: "DIY Projects", icon: <HandymanIcon />, path: "/projects" },

@@ -7,6 +7,8 @@ import PageHero from "../components/PageHero";
 import RelatedContent, { ContentLinkItem } from "../components/RelatedContent";
 import { demo, type ContentLink } from "../data/contentGraph";
 import { TENDERCELLS_OS_URL } from "../config/appLinks";
+import EntityStatus from "../components/EntityStatus";
+import { ENTITIES, TENDERCELLS, TENDERCELLS_OS } from "../data/entities";
 import "./TenderCellsOsPage.css";
 
 const FEATURES: { title: string; img: string; body: string; tryIt: string; read: ContentLink }[] = [
@@ -156,6 +158,16 @@ export default function TenderCellsOsPage() {
         <a href="#build" className="btn-outline">Build a device for it</a>
       </div>
 
+      <h2 className="section-title" id="what">What it is</h2>
+      <div className="prose">
+        <p>{TENDERCELLS_OS}</p>
+        <p>{TENDERCELLS} The OS runs today as software and a public simulation; the hardware families below are at different stages, each labelled honestly.</p>
+      </div>
+      <div className="cta-bar">
+        <a href={demo("/simulator")} className="btn-outline">Trigger an event in the demo</a>
+        <a href={demo("/missions")} className="btn-outline">Try a mission</a>
+      </div>
+
       <h2 className="section-title" id="inside">What's inside</h2>
       <div className="os-features">
         {FEATURES.map((f) => (
@@ -180,6 +192,16 @@ export default function TenderCellsOsPage() {
         <li><strong>Tender Cells OS</strong><span>The map, schedules, reviews and alerts. Media goes device → browser; only small JSON goes through the cloud.</span></li>
         <li><strong>You</strong><span>Confirm every motion, approve every robot action, press E-STOP any time.</span></li>
       </ol>
+
+      <h2 className="section-title" id="systems">Systems and their status</h2>
+      <div className="os-systems">
+        {ENTITIES.map((e) => (
+          <section key={e.slug} className="os-system">
+            <h3>{e.page.startsWith("/os") ? e.name : <Link to={e.page}>{e.name}</Link>}</h3>
+            <EntityStatus entity={e} />
+          </section>
+        ))}
+      </div>
 
       <h2 className="section-title" id="build">Build a device for Tender Cells OS</h2>
       <div className="prose">

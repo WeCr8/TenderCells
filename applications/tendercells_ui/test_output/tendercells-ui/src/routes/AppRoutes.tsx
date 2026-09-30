@@ -36,6 +36,9 @@ import WeedPatrolPage from "../pages/WeedPatrolPage";
 import WatershedPage from "../pages/WatershedPage";
 import LibraryPage from "../pages/LibraryPage";
 import ProjectsPage from "../pages/ProjectsPage";
+import EventSimulatorPage from "../pages/EventSimulatorPage";
+import MissionsPage from "../pages/MissionsPage";
+import { markVisited } from "../lib/demo/missions";
 import ProductDashboardPage from "../pages/ProductDashboardPage";
 import CameraNodeFirstBuildPage from "../pages/guides/CameraNodeFirstBuildPage";
 
@@ -44,6 +47,7 @@ function RouteAnalytics() {
   const location = useLocation();
   useEffect(() => {
     void trackPageView(location.pathname + location.search);
+    markVisited(location.pathname); // demo missions tick off "visit" steps
   }, [location.pathname, location.search]);
   return null;
 }
@@ -94,6 +98,8 @@ export default function AppRoutes() {
       <Route path="/library" element={<LibraryPage />} />
       <Route path="/library/:kind/:id" element={<LibraryPage />} />
       <Route path="/projects" element={<ProjectsPage />} />
+      <Route path="/simulator" element={<EventSimulatorPage />} />
+      <Route path="/missions" element={<MissionsPage />} />
       <Route path="/specs" element={<ProductSpecsPage />} />
       <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
       <Route path="/product/:productId" element={<ProductDashboardPage />} />

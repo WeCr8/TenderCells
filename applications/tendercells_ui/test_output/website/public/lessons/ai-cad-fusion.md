@@ -1,9 +1,11 @@
+<!-- Generated from docs/CLASSROOM_AI_CAD_FUSION_MCP.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+
 # Classroom: AI-Driven Design & CAD with Fusion 360 + MCP
 
 **Advanced lesson.** How to use AI across the whole design loop — from a blank idea to
 a manufacturable part — and how to wire **Autodesk Fusion 360** to Claude over **MCP**
 so you model and iterate by talking to it. For students/makers who've done the
-[door + Roaming Roost build](CLASSROOM_DOOR_AND_ROAMING_ROOST.md) and want to design
+[door + Roaming Roost build](/lessons/door-roaming-roost) and want to design
 their *own* hardware.
 
 > **Big idea:** AI is useful at every stage — *before* a design (turn intent into
@@ -128,7 +130,7 @@ Make it fast and disciplined:
    Imperial, PETG, name it `TC-CT-DOOR-LINK-R1`."
 2. Have it emit OpenSCAD (or build it in Fusion via MCP).
 3. Run the DFM + animal-safety review on the result.
-4. Export STL, print, fit it to your [door build](CLASSROOM_DOOR_AND_ROAMING_ROOST.md).
+4. Export STL, print, fit it to your [door build](/lessons/door-roaming-roost).
 
 You just took a part from sentence → printed hardware with AI in every step. That's the
 Tender Cells engineering loop.

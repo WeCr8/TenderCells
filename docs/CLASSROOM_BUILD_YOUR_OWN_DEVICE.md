@@ -97,7 +97,7 @@ No soldering. No accounts. Nothing leaves the local network.
 
 ### Part 1 — Flash the board (10 min)
 1. Plug the board into the laptop with a **data** USB cable.
-2. Open the flash page in Chrome/Edge: **https://tender-cells.web.app/flash**
+2. Open the flash page in Chrome/Edge: **https://tendercells.com/flash**
 3. Pick **Starter Node**, click **Connect**, choose the board's serial port, **Install**.
 4. When it finishes, the board reboots and (first time) creates a WiFi setup network.
 

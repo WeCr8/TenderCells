@@ -1,3 +1,5 @@
+<!-- Generated from docs/CLASSROOM_DOOR_AND_ROAMING_ROOST.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+
 # Classroom: Build a Door + a Basic Roaming Roost
 
 A **teacher-led, hands-on lesson** where students 3D-print a coop door and a small
@@ -6,8 +8,8 @@ their account**, and then **open/close the door and drive the rover from the Ten
 Cells OS** — manually or on a schedule. Same firmware contract, same safety rules the
 real robot coops use.
 
-Builds directly on [Build Your Own Device](CLASSROOM_BUILD_YOUR_OWN_DEVICE.md) (threat
-alerts) and [Classroom Quickstart](CLASSROOM_QUICKSTART.md) (no-hardware first run).
+Builds directly on [Build Your Own Device](/lessons/build-your-own) (threat
+alerts) and [Classroom Quickstart](/lessons/classroom-quickstart) (no-hardware first run).
 Do those first if you've never flashed a board.
 
 > **One firmware, two actuators.** The same Starter Node binary becomes a *door* or a
@@ -18,9 +20,9 @@ Do those first if you've never flashed a board.
 
 ## 🧱 LEGO-style quick build (ages 7+)
 
-> New here? Do [🐣 Your First Coop Brain](lessons/00-your-first-coop-brain.md) first —
+> New here? Do [🐣 Your First Coop Brain](/lessons/your-first-coop-brain) first —
 > it shows how to **flash** a board. This lesson adds a **door that opens**. Hard words
-> live in that lesson's [Picture Dictionary](lessons/00-your-first-coop-brain.md#-picture-dictionary-hard-words-made-easy).
+> live in that lesson's [Picture Dictionary](/lessons/your-first-coop-brain#-picture-dictionary-hard-words-made-easy).
 
 **Parts list — lay them out first:**
 ```text
@@ -56,9 +58,9 @@ Do those first if you've never flashed a board.
 > everything — try it!
 
 **👉 What's next:** open it by itself at sunrise →
-[Sensors → Automated Tasks](CLASSROOM_SENSORS_AND_AUTOMATION.md) · add feeding →
-[Feeder + Waterer](CLASSROOM_FEEDER_AND_WATERER.md) · all projects →
-[Learning Tracks](LEARNING_TRACKS.md).
+[Sensors → Automated Tasks](/lessons/sensors-automation) · add feeding →
+[Feeder + Waterer](/lessons/feeder-waterer) · all projects →
+[Learning Tracks](/lessons/learning-tracks).
 
 ---
 
@@ -111,7 +113,7 @@ Signal wire to these GPIOs; servo power to **5V**, all grounds **common**.
 | `drive` | **GPIO4** (D3) | right drive servo signal |
 
 > Pins are defined at the top of
-> [firmware/starter-node/src/main.cpp](../firmware/starter-node/src/main.cpp) —
+> [firmware/starter-node/src/main.cpp](https://github.com/WeCr8/TenderCells/blob/main/firmware/starter-node/src/main.cpp) —
 > `PIN_DOOR_SERVO`, `PIN_DRIVE_LEFT`, `PIN_DRIVE_RIGHT`. Change them there if your
 > board breaks the pins out differently.
 
@@ -123,7 +125,7 @@ USB data port alone.
 
 ## Step 1 — Flash
 
-Open the web flasher at **tender-cells.web.app/flash** (Chrome/Edge), pick
+Open the web flasher at **tendercells.com/flash** (Chrome/Edge), pick
 **Starter Node**, **Connect & Install**. Full walkthrough on that page. One binary
 works for both lessons.
 
@@ -209,7 +211,7 @@ Try it: start the rover, then pull the laptop's WiFi — the rover stops on its 
 The board subscribes to `tc/<id>/cmd/door` and/or `tc/<id>/cmd/drive` **only for the
 peripheral you chose**, and reports `doorState` / `driveDir` in its 10 s heartbeat so
 the dashboard shows live position. The real
-[Chicken Tender](../firmware/chicken-tender/src/main.cpp) door and
-[Roaming Roost](../firmware/roaming-roost/src/main.cpp) drive use the **same MQTT
+[Chicken Tender](https://github.com/WeCr8/TenderCells/blob/main/firmware/chicken-tender/src/main.cpp) door and
+[Roaming Roost](https://github.com/WeCr8/TenderCells/blob/main/firmware/roaming-roost/src/main.cpp) drive use the **same MQTT
 topics** — your classroom servo and the real DC-motor rover are controlled identically.
 That's the whole point: start tiny, grow into the real thing.

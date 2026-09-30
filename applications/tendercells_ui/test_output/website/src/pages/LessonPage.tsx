@@ -1,11 +1,31 @@
 // LessonPage — renders a lesson's markdown (from /public/lessons/<slug>.md).
 // Images can be added later under /public/lessons/ and referenced from the md.
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import PageLayout from "../components/PageLayout";
 import { LESSONS, lessonBySlug } from "../data/lessons";
+import { headingSlug, textOf } from "../lib/slug";
+
+// Headings get GitHub-style ids so "#section" links in the lesson docs land on them; links
+// inside the site stay in the SPA, links out (GitHub, datasheets) open in a new tab.
+// Repo-relative links are rewritten when the lessons are synced (scripts/sync-lessons.mjs).
+const heading = (Tag: "h1" | "h2" | "h3" | "h4") =>
+  function Heading({ children }: { children?: ReactNode }) {
+    return <Tag id={headingSlug(textOf(children))}>{children}</Tag>;
+  };
+
+const MD_COMPONENTS: Components = {
+  h1: heading("h1"), h2: heading("h2"), h3: heading("h3"), h4: heading("h4"),
+  a({ href = "", children }) {
+    if (href.startsWith("/") && !href.startsWith("//") && !/\.(md|html|json|txt|xml)$/.test(href.split(/[?#]/)[0])) {
+      return <Link to={href}>{children}</Link>;
+    }
+    if (/^https?:/.test(href)) return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
+    return <a href={href}>{children}</a>;
+  },
+};
 
 export default function LessonPage() {
   const { slug = "" } = useParams();
@@ -44,7 +64,7 @@ export default function LessonPage() {
         {!err && !md && <p>Loading lesson…</p>}
         {md && (
           <article className="prose lesson-body">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{md}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>{md}</ReactMarkdown>
           </article>
         )}
 

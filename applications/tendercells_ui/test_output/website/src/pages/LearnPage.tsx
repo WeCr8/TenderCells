@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
+import { LESSONS } from "../data/lessons";
+import DocGroups from "../components/DocGroups";
 
 const FAQS = [
   { q: "Do I need internet to use Chicken Tender?", a: "No. All real-time control runs over MQTT on your local network via a Raspberry Pi 4. Internet is only needed for cloud sync, push notifications, and remote access." },
@@ -14,18 +16,7 @@ const FAQS = [
   { q: "How is the firmware updated?", a: "OTA (over-the-air) updates push from the app. You approve each update. Rollback to any previous version is supported. All firmware is open source — you can also compile and flash manually." },
 ];
 
-// Hands-on lessons live as markdown in the repo (docs/). Linked here so they're
-// discoverable from the site — no dead ends. Ordered as the learning path.
-const DOCS_BASE = "https://github.com/WeCr8/TenderCells/blob/main/docs";
-const LESSONS = [
-  { title: "🐣 Start Here — Your First Coop Brain", desc: "Ages 7+. Flash a board and watch it come alive. LEGO-style steps.", href: "/lessons/your-first-coop-brain", tag: "Ages 7+" },
-  { title: "🚪 Build a Door + Roaming Roost", desc: "Wire a servo, open/close a door and drive a rover from the OS.", href: "/lessons/door-roaming-roost", tag: "Beginner" },
-  { title: "🌡️ Sensors → Automation", desc: "Add a light sensor; auto-open the door at sunrise.", href: "/lessons/sensors-automation", tag: "Beginner" },
-  { title: "🍽️ Feeder + Waterer", desc: "Relay-driven feeding and watering, on a schedule.", href: "/lessons/feeder-waterer", tag: "Beginner" },
-  { title: "🦅 Build Your Own Device", desc: "Invent an animal + threat; fire a live alert. No extra wiring.", href: "/lessons/build-your-own", tag: "Beginner" },
-  { title: "🤖 Gantry + BOMs", desc: "Build an XY robot gantry (coop & duck dock) with parts lists.", href: "/lessons/gantry-bom", tag: "Advanced" },
-  { title: "🧠 AI + CAD with Fusion MCP", desc: "Design parts with AI, model in Fusion 360 over MCP.", href: "/lessons/ai-cad-fusion", tag: "Advanced" },
-];
+// Hands-on lessons: the same list as /lessons (src/data/lessons.ts), in learning-path order.
 
 export default function LearnPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -65,13 +56,12 @@ export default function LearnPage() {
           board to a full robot coop.</p>
       </div>
       <div className="card-grid">
-        {LESSONS.map((l) => (
-          <a key={l.title} className="card" href={l.href} target="_blank" rel="noopener noreferrer"
-            style={{ textDecoration: "none", color: "inherit" }}>
+        {LESSONS.filter((l) => l.tag !== "Map").map((l) => (
+          <Link key={l.slug} className="card" to={`/lessons/${l.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
             <h3>{l.title}</h3>
             <p>{l.desc}</p>
             <span className="tag">{l.tag}</span>
-          </a>
+          </Link>
         ))}
       </div>
       <div className="cta-bar" style={{ marginBottom: "2rem" }}>
@@ -98,23 +88,7 @@ export default function LearnPage() {
       </div>
 
       <h2 className="section-title" id="docs">Documentation</h2>
-      <div className="card-grid">
-        {[
-          { title: "User Guide",          desc: "Complete setup, operation, and maintenance guide for all Tender Cells products.", tag: "GitHub", href: `${DOCS_BASE}/README.md` },
-          { title: "API Reference",       desc: "Full REST API and MQTT topic reference with payload schemas and code examples.", tag: "GitHub", href: "https://github.com/WeCr8/TenderCells/blob/main/README.md" },
-          { title: "Firmware Guide",      desc: "PlatformIO build, OTA update, and custom firmware development guide.", tag: "GitHub", href: "https://github.com/WeCr8/TenderCells/tree/main/firmware" },
-          { title: "Hardware Catalog",    desc: "Master hardware, electronics, sensors, and components reference.", tag: "GitHub", href: `${DOCS_BASE}/CHICKEN_TENDER_HARDWARE_CATALOG.md` },
-          { title: "Troubleshooting",     desc: "Diagnostic codes, common errors, and resolution steps for every component.", tag: "GitHub", href: `${DOCS_BASE}/AUDIT_STUDENT_JOURNEY.md` },
-          { title: "Control Types & Arm Plan", desc: "Every control type the OS supports, printing tactics, robot-arm plan.", tag: "GitHub", href: `${DOCS_BASE}/CONTROL_TYPES_AND_ARM_PLAN.md` },
-        ].map((c) => (
-          <a key={c.title} className="card" href={c.href} target="_blank" rel="noopener noreferrer"
-            style={{ textDecoration: "none", color: "inherit" }}>
-            <h3>{c.title}</h3>
-            <p>{c.desc}</p>
-            <span className="tag">{c.tag}</span>
-          </a>
-        ))}
-      </div>
+      <DocGroups />
 
       <h2 className="section-title" id="faq">FAQ</h2>
       {FAQS.map((item, i) => (

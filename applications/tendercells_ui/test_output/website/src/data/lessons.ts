@@ -1,16 +1,18 @@
 // Lesson manifest — drives the in-site lesson index + pages.
-// Markdown source lives in /public/lessons/<slug>.md (copied from repo docs/).
+// Markdown lives in /public/lessons/<slug>.md, generated from repo docs/ by
+// scripts/sync-lessons.mjs (LESSON_SOURCES) - add a lesson there and here.
 // Images can be added later under /public/lessons/img and referenced from the md.
 
 export interface LessonMeta {
   slug: string;
   title: string;
   desc: string;
-  tag: "Ages 7+" | "Beginner" | "Advanced" | "Map";
+  tag: "Ages 7+" | "Teachers" | "Beginner" | "Advanced" | "Map";
 }
 
 export const LESSONS: LessonMeta[] = [
   { slug: "your-first-coop-brain", title: "🐣 Your First Coop Brain", desc: "Start here. Flash a board and watch it wake up — LEGO-style steps.", tag: "Ages 7+" },
+  { slug: "classroom-quickstart", title: "🏫 Classroom Quickstart", desc: "Teachers and clubs: run a simulated smart coop on a laptop in 5 minutes.", tag: "Teachers" },
   { slug: "door-roaming-roost", title: "🚪 Door + Basic Roaming Roost", desc: "Wire a servo; open/close a door and drive a rover from the OS.", tag: "Beginner" },
   { slug: "sensors-automation", title: "🌡️ Sensors → Automation", desc: "Add a light sensor; auto-open the door at sunrise.", tag: "Beginner" },
   { slug: "feeder-waterer", title: "🍽️ Feeder + Waterer", desc: "Relay-driven feeding and watering, on a schedule.", tag: "Beginner" },

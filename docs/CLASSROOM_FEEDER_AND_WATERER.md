@@ -94,7 +94,7 @@ active-HIGH; it boots **OFF** so nothing runs on power-up.
 ## Flash + pick the peripheral
 
 Already flashed the Starter Node? You **don't re-flash** — just re-open WiFi setup to
-change the peripheral. (New board: flash at **tender-cells.web.app/flash**, pick
+change the peripheral. (New board: flash at **tendercells.com/flash**, pick
 Starter Node — full steps on that page.)
 
 1. Power the board; join its `TenderNode-Setup` WiFi; the setup page opens.

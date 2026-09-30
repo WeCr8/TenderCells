@@ -123,7 +123,7 @@ USB data port alone.
 
 ## Step 1 — Flash
 
-Open the web flasher at **tender-cells.web.app/flash** (Chrome/Edge), pick
+Open the web flasher at **tendercells.com/flash** (Chrome/Edge), pick
 **Starter Node**, **Connect & Install**. Full walkthrough on that page. One binary
 works for both lessons.
 

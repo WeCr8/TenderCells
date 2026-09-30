@@ -49,7 +49,7 @@ Students, teachers & makers (see [For students, teachers & makers](#for-students
 - [Classroom Quickstart](docs/CLASSROOM_QUICKSTART.md) — no hardware, 5 minutes
 - [Build Your Own Smart-Animal Device](docs/CLASSROOM_BUILD_YOUR_OWN_DEVICE.md) — teacher-led ESP32 lesson
 - [Connect a Device](docs/CONNECT_A_DEVICE.md) — full hardware runbook
-- [Browser flasher](https://tender-cells.web.app/flash) + [Starter Node firmware](firmware/starter-node/README.md)
+- [Browser flasher](https://tendercells.com/flash) + [Starter Node firmware](firmware/starter-node/README.md)
 - [Flipper Field Kit](docs/hardware/flipper-field-kit.md) — field diagnostics
 - [Analytics Guide](docs/ANALYTICS_GUIDE.md) — privacy-safe tracking, no kid demographics
 
@@ -120,7 +120,7 @@ product. No accounts, no cloud signup, nothing leaves the local network.
 | A Flipper Zero | **[Flipper Field Kit](docs/hardware/flipper-field-kit.md)** — serial log reader, RF/WiFi survey, GPIO test |
 
 **Flash a board in the browser — no toolchain:**
-Open **<https://tender-cells.web.app/flash>** in Chrome or Edge, plug in an ESP32 with a
+Open **<https://tendercells.com/flash>** in Chrome or Edge, plug in an ESP32 with a
 **data** USB cable, pick **Starter Node**, and click Install. In the setup portal you
 name your species + threat and leave **Broker IP blank** to auto-find the teacher's
 laptop over the network. Prefer building from source? See the

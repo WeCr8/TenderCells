@@ -12,3 +12,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Sections reached by #anchor links stop below the sticky header (see ScrollManager). */
+[id] {
+  scroll-margin-top: 96px;
+}

@@ -29,6 +29,7 @@ import PartnersPage from "./pages/PartnersPage";
 import SearchPage from "./pages/SearchPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import CookieConsent from "./components/CookieConsent";
+import ScrollManager from "./components/ScrollManager";
 import { usePageTracking } from "./hooks/usePageTracking";
 import { useMarketingTelemetry } from "./hooks/useMarketingTelemetry";
 import { lazy, Suspense, useEffect } from "react";
@@ -60,6 +61,7 @@ function App() {
   return (
     <BrowserRouter>
       <PageTracker />
+      <ScrollManager />
       <Routes>
         <Route path="/" element={<LandingPage />} />
 

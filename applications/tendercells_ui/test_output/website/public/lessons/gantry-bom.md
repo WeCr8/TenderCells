@@ -1,3 +1,5 @@
+<!-- Generated from docs/CLASSROOM_GANTRY_AND_BOM.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+
 # Classroom: Build a Gantry (Coop + Duck Dock) — with BOMs
 
 **Advanced lesson.** A **gantry** moves a tool to any X/Y spot over the floor — it's how
@@ -5,8 +7,8 @@ the real Chicken Tender carries its arm to clean, collect eggs, and feed across 
 4×4 ft coop. Here you build a **small working gantry**, scale the idea to a **Duck Dock**
 over a pond, and get **bills of materials** for a cheap classroom rig and a real unit.
 
-Builds on the [sensors](CLASSROOM_SENSORS_AND_AUTOMATION.md) and
-[actuator](CLASSROOM_DOOR_AND_ROAMING_ROOST.md) lessons. Gantry control is the natural
+Builds on the [sensors](/lessons/sensors-automation) and
+[actuator](/lessons/door-roaming-roost) lessons. Gantry control is the natural
 "add your own peripheral" capstone (recipe in the feeder lesson).
 
 > **Build order:** 1 axis first (prove motion), then add the second (X+Y), then mount a
@@ -16,9 +18,9 @@ Builds on the [sensors](CLASSROOM_SENSORS_AND_AUTOMATION.md) and
 
 ## 🧱 LEGO-style quick build (ages 7+)
 
-> Advanced! Do [🐣 Your First Coop Brain](lessons/00-your-first-coop-brain.md) +
-> [Door lesson](CLASSROOM_DOOR_AND_ROAMING_ROOST.md) first. Hard words:
-> [Picture Dictionary](lessons/00-your-first-coop-brain.md#-picture-dictionary-hard-words-made-easy).
+> Advanced! Do [🐣 Your First Coop Brain](/lessons/your-first-coop-brain) +
+> [Door lesson](/lessons/door-roaming-roost) first. Hard words:
+> [Picture Dictionary](/lessons/your-first-coop-brain#-picture-dictionary-hard-words-made-easy).
 
 ```text
  ┌──────────────────────────────────────────────┐
@@ -37,7 +39,7 @@ Builds on the [sensors](CLASSROOM_SENSORS_AND_AUTOMATION.md) and
 
 > 🦺 Steppers turn **off** when idle (no heat); **E-STOP** freezes motion.
 
-**👉 Next:** add Y axis + a tool (below) · [Learning Tracks](LEARNING_TRACKS.md)
+**👉 Next:** add Y axis + a tool (below) · [Learning Tracks](/lessons/learning-tracks)
 
 ---
 
@@ -133,7 +135,7 @@ Gantry motion is the **"implement your own peripheral"** capstone. There is **no
    the stepper driver (EN) when idle** (project rule — no energized steppers at rest).
 2. **express-api:** add a `gantry` schema `{x:number, y:number, speed?:0-1}`, a
    `sendGantryCommand`, and an owner-gated `POST /devices/:id/gantry` — copy the `light`
-   command in [mqtt.controller.ts](../applications/tendercells_ui/test_output/express-api/backend/src/controllers/mqtt.controller.ts).
+   command in [mqtt.controller.ts](https://github.com/WeCr8/TenderCells/blob/main/applications/tendercells_ui/test_output/express-api/backend/src/controllers/mqtt.controller.ts).
 3. **OS:** click a grid cell → POST `{x,y}`. The MQTT topics `tc/<id>/cmd/gantry` and
    `tc/<id>/state/gantry` are already specced in CLAUDE.md §1.5 — follow that contract.
 

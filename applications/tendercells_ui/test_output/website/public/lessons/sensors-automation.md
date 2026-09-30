@@ -1,3 +1,5 @@
+<!-- Generated from docs/CLASSROOM_SENSORS_AND_AUTOMATION.md by website/scripts/sync-lessons.mjs - edit the source, then run npm run sync:lessons. -->
+
 # Classroom: Sensors → Automated Tasks (start with a light sensor)
 
 Outputs (door, feeder, relay) are half the system. The other half is **inputs** —
@@ -5,8 +7,8 @@ sensors that let the coop **decide for itself**. This lesson adds a **light sens
 uses it to automate the classic chicken-keeper task: **open the door at dawn, close it
 at dusk**. Then it generalizes to any sensor + any rule.
 
-Builds on [door + Roaming Roost](CLASSROOM_DOOR_AND_ROAMING_ROOST.md) and
-[feeder + waterer](CLASSROOM_FEEDER_AND_WATERER.md). Same board, same contract.
+Builds on [door + Roaming Roost](/lessons/door-roaming-roost) and
+[feeder + waterer](/lessons/feeder-waterer). Same board, same contract.
 
 > **Key idea:** a sensor is an *input you publish*; automation is *a rule that watches
 > inputs and fires commands*. Light low → close door. Temp low → heat lamp on. Water
@@ -16,8 +18,8 @@ Builds on [door + Roaming Roost](CLASSROOM_DOOR_AND_ROAMING_ROOST.md) and
 
 ## 🧱 LEGO-style quick build (ages 7+)
 
-> Do [🐣 Your First Coop Brain](lessons/00-your-first-coop-brain.md) first. Hard words:
-> [Picture Dictionary](lessons/00-your-first-coop-brain.md#-picture-dictionary-hard-words-made-easy).
+> Do [🐣 Your First Coop Brain](/lessons/your-first-coop-brain) first. Hard words:
+> [Picture Dictionary](/lessons/your-first-coop-brain#-picture-dictionary-hard-words-made-easy).
 
 ```text
  ┌──────────────────────────────────────────────┐
@@ -33,7 +35,7 @@ Builds on [door + Roaming Roost](CLASSROOM_DOOR_AND_ROAMING_ROOST.md) and
 3. **Step 3 of 3 — Watch.** Cover the sensor → number drops; shine light → it rises.
    *✓ the coop can feel daytime!* Use it to auto-open the door at sunrise (below).
 
-**👉 Next:** [Feeder + Waterer](CLASSROOM_FEEDER_AND_WATERER.md) · [Learning Tracks](LEARNING_TRACKS.md)
+**👉 Next:** [Feeder + Waterer](/lessons/feeder-waterer) · [Learning Tracks](/lessons/learning-tracks)
 
 ---
 
@@ -67,7 +69,7 @@ LDR divider: 3V3 — LDR — (junction → GPIO ADC) — 10kΩ — GND. Bright =
 
 ## Step 1 — Read the sensor (the input recipe)
 
-In [firmware/starter-node/src/main.cpp](../firmware/starter-node/src/main.cpp), read the
+In [firmware/starter-node/src/main.cpp](https://github.com/WeCr8/TenderCells/blob/main/firmware/starter-node/src/main.cpp), read the
 sensor inside `publishHeartbeat()` so it streams to the dashboard every 10 s. Average a
 few samples (project rule: smooth before publishing):
 

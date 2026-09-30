@@ -211,7 +211,12 @@ export default function ResourcesPage() {
           <Box sx={{ border: `1px solid ${C.border}`, borderRadius: '6px', bgcolor: C.surface, p: 2 }}>
             <Typography sx={{ color: C.gold, fontWeight: 700 }}>Hardware diagnostics</Typography>
             <Typography sx={{ color: C.muted, mt: 0.5, mb: 1.5 }}>Use live device status, MQTT checks, fault codes, and corrective steps without leaving the OS.</Typography>
-            <Button variant="outlined" href="/app/diagnostics">Open Diagnostics</Button>
+            {/* Bare route + navigate(), not href="/app/diagnostics" - the
+                router's own basename (BASE_URL, see App.tsx) already adds
+                any /app prefix; hardcoding it here both forced a full page
+                reload and pointed at the wrong URL under a different
+                base-path deployment (e.g. a plain "/" build). */}
+            <Button variant="outlined" onClick={() => navigate('/diagnostics')}>Open Diagnostics</Button>
           </Box>
         </Stack>
       )}

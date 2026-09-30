@@ -120,9 +120,10 @@ export default function ProductDashboardPage() {
                 name: product.product_name,
                 location: 'main-feed',
                 streamUrl: streamUrl || undefined,
-                resolution: '720p',
-                fps: 15,
+                // No camera firmware reports resolution/fps yet - omit rather
+                // than claim a fixed 720p/15fps no device actually confirmed.
                 connected: product.connection_status === 'online' && Boolean(streamUrl),
+                signal: telemetry.data?.wifiRssi ?? undefined,
               }} height="min(62dvh, 480px)" allowBrowserCamera={false} />
               {activeCameraIndex >= 0 && availableCameras.length > 1 && (
                 <Stack direction="row" spacing={1} alignItems="center">

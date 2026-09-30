@@ -8,8 +8,11 @@ export interface CameraFeed {
   name: string;
   location: CameraLocation;
   streamUrl?: string;
-  resolution: '1080p' | '720p' | '480p';
-  fps: number;
+  // Optional - no camera firmware in this codebase reports these today (checked
+  // firmware/ for a "resolution"/fps field: none exist). Omit rather than guess;
+  // CameraFeedViewer shows "Not reporting" instead of a fabricated value.
+  resolution?: '1080p' | '720p' | '480p';
+  fps?: number;
   connected: boolean;
   lastSeen?: string;
   signal?: number; // WiFi signal -100 to 0 dBm

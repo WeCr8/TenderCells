@@ -15,6 +15,8 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import FlipIcon from '@mui/icons-material/Flip';
 import SecurityIcon from '@mui/icons-material/Security';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { CameraFeed } from '../../types/camera';
 import { cameraTransform, classifyCameraStream } from '../../lib/camera/cameraStream';
 import { useCameraRelay } from '../../lib/camera/cameraRelay';
@@ -48,6 +50,23 @@ export default function CameraFeedViewer({
     }
   });
   const streamSecurity = classifyCameraStream(camera.streamUrl);
+
+  // Fullscreen - a real, always-available adjustment (works regardless of what
+  // the camera itself reports) that matters most on small phone/tablet screens.
+  const paperRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(document.fullscreenElement === paperRef.current);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+    } else if (paperRef.current) {
+      void paperRef.current.requestFullscreen().catch(() => {});
+    }
+  };
 
   // Authenticated HTTPS/WebRTC relay - an alternative to the raw local http://
   // stream below, for viewing a LAN-only camera without the browser's mixed-
@@ -170,10 +189,11 @@ export default function CameraFeedViewer({
 
   return (
     <Paper
+      ref={paperRef}
       elevation={2}
       sx={{
         width,
-        height,
+        height: isFullscreen ? '100%' : height,
         bgcolor: '#0D2B1E',
         position: 'relative',
         overflow: 'hidden',
@@ -327,6 +347,9 @@ export default function CameraFeedViewer({
           <Button aria-label="Rotate camera clockwise" title="Rotate 90 degrees" variant="contained" size="small" onClick={() => setOrientation(value => ({ ...value, rotation: (value.rotation + 90) % 360 }))} sx={{ minWidth: 44, minHeight: 44, p: 0.75 }}><RotateRightIcon fontSize="small" /></Button>
           <Button aria-label="Flip camera horizontally" title="Flip horizontally" variant="contained" size="small" onClick={() => setOrientation(value => ({ ...value, flipX: !value.flipX }))} sx={{ minWidth: 44, minHeight: 44, p: 0.75 }}><FlipIcon fontSize="small" /></Button>
           <Button aria-label="Flip camera vertically" title="Flip vertically" variant="contained" size="small" onClick={() => setOrientation(value => ({ ...value, flipY: !value.flipY }))} sx={{ minWidth: 44, minHeight: 44, p: 0.75, transform: 'rotate(90deg)' }}><FlipIcon fontSize="small" /></Button>
+          <Button aria-label={isFullscreen ? 'Exit fullscreen' : 'View fullscreen'} title={isFullscreen ? 'Exit fullscreen' : 'View fullscreen'} variant="contained" size="small" onClick={toggleFullscreen} sx={{ minWidth: 44, minHeight: 44, p: 0.75 }}>
+            {isFullscreen ? <FullscreenExitIcon fontSize="small" /> : <FullscreenIcon fontSize="small" />}
+          </Button>
         </Stack>
       )}
 
@@ -342,9 +365,9 @@ export default function CameraFeedViewer({
           zIndex: 5,
         }}
       >
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
           <Typography variant="caption" sx={{ color: '#F0EDE4' }}>
-            {camera.resolution} @ {camera.fps}fps
+            {camera.resolution && camera.fps ? `${camera.resolution} @ ${camera.fps}fps` : 'Resolution: Not reporting'}
           </Typography>
           {camera.signal && (
             <Chip

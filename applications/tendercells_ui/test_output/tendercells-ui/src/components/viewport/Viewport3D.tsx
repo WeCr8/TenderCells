@@ -23,6 +23,9 @@ import { PATROL_SIM_EVENT, computePatrolPose, type PatrolSimDetail } from '../..
 import type { HydrologyResult } from '../property/watershed';
 import { useYardEvents } from '../../hooks/useYardEvents';
 import YardAttentionPanel from '../yard/YardAttentionPanel';
+import { autopilotEnabled, buildAutopilot, jobAt, poseAt, setAutopilotEnabled, type AutopilotUnit } from '../../lib/demo/farmAutopilot';
+import { simCommand, simEstopActive, simMowers } from '../../lib/mower/mowerSim';
+import { DEMO_EVENT, isDemoSeeded } from '../../services/demo/demoEnvironment';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -73,6 +76,8 @@ type Viewport3DProps = {
   hydrology?: HydrologyResult | null;
   /** Picture-in-picture views from the WatchTower's three cameras (default: on for predator-monitor). */
   towerCameras?: boolean;
+  /** Frame the whole property instead of the product's item (demo hero). */
+  overview?: boolean;
 };
 
 const CAM_ASPECT = 4 / 3;
@@ -1227,6 +1232,7 @@ export default function Viewport3D({
   showAttentionPanel = true,
   hydrology = null,
   towerCameras,
+  overview = false,
 }: Viewport3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [webglOk, setWebglOk] = useState(true);
@@ -1275,6 +1281,33 @@ export default function Viewport3D({
   // Roaming Roost patrol playback toggles (Simulate Route button). Kept in a ref,
   // same reasoning as farmbotPosRef - flipping it must not rebuild the whole scene.
   const activePatrolIdsRef = useRef<Set<string>>(new Set());
+  // Demo farm autopilot: every unit keeps working in the viewer (lib/demo/farmAutopilot.ts).
+  const [autopilotOn, setAutopilotOn] = useState(() => autopilotEnabled());
+  const [demoSeeded, setDemoSeeded] = useState(() => isDemoSeeded());
+  const [autopilotRows, setAutopilotRows] = useState<Array<{ id: string; name: string; job: string; moving: boolean }>>([]);
+  useEffect(() => {
+    const onDemo = () => setDemoSeeded(isDemoSeeded());
+    window.addEventListener(DEMO_EVENT, onDemo);
+    return () => window.removeEventListener(DEMO_EVENT, onDemo);
+  }, []);
+  const autopilotActive = !YARD_LIVE && demoSeeded && autopilotOn && workspaceMode !== 'property';
+  // FIX(2026-09-30): the top toolbar wraps onto 2-3 lines in narrow viewers and covered the
+  // overlay panels (and their buttons). Measure it and place the panels below it.
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const [overlayTop, setOverlayTop] = useState(64);
+  const [viewerWide, setViewerWide] = useState(true);
+  useEffect(() => {
+    const bar = toolbarRef.current, box = containerRef.current;
+    if (!bar || !box || typeof ResizeObserver === 'undefined') return;
+    const measure = () => {
+      setOverlayTop(12 + bar.offsetHeight + 8);
+      setViewerWide(box.clientWidth >= 720);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(bar); ro.observe(box);
+    return () => ro.disconnect();
+  }, []);
   // Rebuilt every scene pass (see workspaceMode branch below) - the actual mesh
   // group per roaming-roost item, so the animate() loop can move the real body.
   const yardGroupByItemIdRef = useRef<Map<string, THREE.Object3D>>(new Map());
@@ -1501,10 +1534,10 @@ export default function Viewport3D({
         : new THREE.PerspectiveCamera(55, aspect, 0.1, Math.max(1000, Math.max(layout.property.widthFt, layout.property.depthFt) * 8));
 
     // Camera target: focused on active product when in products/simulation mode
-    const focusX = activeItem && workspaceMode !== 'property'
+    const focusX = activeItem && workspaceMode !== 'property' && !overview
       ? activeItem.x + activeItem.width / 2 - layout.property.widthFt / 2
       : 0;
-    const focusZ = activeItem && workspaceMode !== 'property'
+    const focusZ = activeItem && workspaceMode !== 'property' && !overview
       ? activeItem.y + activeItem.depth / 2 - layout.property.depthFt / 2
       : 0;
 
@@ -1721,6 +1754,40 @@ export default function Viewport3D({
       .filter((i) => i.kind === 'hardware' && WEED_BED_TYPES.has(i.type))
       .map((item) => ({ item, marker: null as THREE.Group | null }));
 
+    // Demo farm autopilot. The demo mower only mows when its interlock allows (its schedule
+    // "starts" it here); otherwise it stays docked and says why.
+    const autoUnits: AutopilotUnit[] = autopilotActive ? buildAutopilot(layout).units : [];
+    const autoDrive = new Set(autoUnits.filter((u) => u.role === 'drive').map((u) => u.itemId));
+    const autoBeds = new Map(autoUnits.filter((u) => u.role === 'bed').map((u) => [u.itemId, u]));
+    const mowerIdle = new Map<string, string>(); // itemId -> why it is not mowing
+    const autoStarted = new Set<string>();
+    const autoStart = performance.now();
+    const autoTick = () => {
+      const now = Date.now();
+      const mowers = autoUnits.some((u) => u.type === 'robot-mower') ? simMowers(now) : [];
+      for (const u of autoUnits) {
+        if (u.type !== 'robot-mower' || !u.deviceId) continue;
+        let m = mowers.find((v) => v.link.deviceId === u.deviceId);
+        // Start once per viewer open (its schedule); a later dock / pause by the owner or the
+        // interlock sticks - the autopilot never restarts it over them.
+        if (!autoStarted.has(u.itemId) && m && m.state?.activity === 'docked' && !m.blocked && !simEstopActive(u.deviceId)) {
+          try { simCommand(u.deviceId, 'start', { pattern: 'stripes' }, now); m = simMowers(now).find((v) => v.link.deviceId === u.deviceId); } catch { /* interlock refused */ }
+        }
+        autoStarted.add(u.itemId);
+        if (!m) mowerIdle.set(u.itemId, 'Not linked');
+        else if (m.state?.activity !== 'mowing') mowerIdle.set(u.itemId, `Docked · ${(m.blocked ?? m.state?.lastInterlock?.reason ?? m.state?.activity ?? 'waiting').split(/[:(]/)[0].trim()}`);
+        else mowerIdle.delete(u.itemId);
+      }
+      const t = (performance.now() - autoStart) / 1000;
+      setAutopilotRows(autoUnits.map((u) => ({
+        id: u.itemId, name: u.name,
+        job: mowerIdle.get(u.itemId) ?? jobAt(u, t),
+        moving: u.role !== 'station' && !mowerIdle.has(u.itemId),
+      })));
+    };
+    if (autoUnits.length) autoTick(); else setAutopilotRows([]);
+    const autoTimer = autoUnits.length ? window.setInterval(autoTick, 1000) : undefined;
+
     let animationId: number;
     const animate = () => {
       animationId = requestAnimationFrame(animate);
@@ -1728,7 +1795,18 @@ export default function Viewport3D({
       const t = timer.getElapsed();
       animateYardFlags(flagsHolder, t);
       weedRobots.forEach((r) => {
-        const st = YARD_LIVE ? liveRobotsRef.current[r.item.id] : getSimRobot(r.item.id);
+        let st = YARD_LIVE ? liveRobotsRef.current[r.item.id] : getSimRobot(r.item.id);
+        const auto = autoBeds.get(r.item.id);
+        if (auto?.route && !st?.pass.running) {
+          // Autopilot plant-health scan: tool head sweeps the bed, laser stays off.
+          const p = poseAt(auto.route, (performance.now() - autoStart) / 1000);
+          st = {
+            state: 'plant_scan', mode: 'simulation', estop: false, error: null, ts: 0, robotType: st?.robotType,
+            laser: { burnEnabled: false, studentMode: true, enclosureClosed: true, pulseMs: 0, estop: false },
+            pass: { running: true, pass: 1, passes: 1, waypoint: 0, waypoints: 0, task: 'plant_scan' },
+            tool: { x: p.x, y: p.y, z: 0, aim: false, laser: false },
+          };
+        }
         const type = st?.robotType ?? 'genesis-laser';
         if (!st || !st.tool) { if (r.marker) r.marker.visible = false; return; }
         if (!r.marker || r.marker.userData.type !== type) {
@@ -1754,6 +1832,20 @@ export default function Viewport3D({
         // absolute positions (robot drawn at twice the offset, turning about the scene origin).
         placeMobileRobot(group, pose.x, pose.z, groundH, pose.heading);
       });
+      // Autopilot drive routes (a hand-started patrol or weed pass takes over).
+      autoUnits.forEach((u) => {
+        if (u.role !== 'drive' || !u.route || activePatrolIdsRef.current.has(u.itemId)) return;
+        if (getSimRover(u.itemId)?.pass.running) return;
+        const group = yardGroupByItemIdRef.current.get(u.itemId);
+        if (!group) return;
+        if (mowerIdle.has(u.itemId)) {
+          const c = group.userData.sceneCenter as { x: number; z: number } | undefined;
+          if (c) placeMobileRobot(group, c.x, c.z, groundH, 0);
+          return;
+        }
+        const p = poseAt(u.route, t);
+        placeMobileRobot(group, p.x - layout.property.widthFt / 2, p.y - layout.property.depthFt / 2, groundH, (-p.headingDeg * Math.PI) / 180);
+      });
       // Rover weed patrol: the robot's own body follows its reported / simulated pose.
       roverItems.forEach((item) => {
         const group = yardGroupByItemIdRef.current.get(item.id);
@@ -1763,7 +1855,7 @@ export default function Viewport3D({
         if (moving && st?.pose) {
           const sx = st.pose.xFt - layout.property.widthFt / 2, sz = st.pose.yFt - layout.property.depthFt / 2;
           placeMobileRobot(group, sx, sz, groundH, (-st.pose.headingDeg * Math.PI) / 180);
-        } else if (!activePatrolIdsRef.current.has(item.id)) {
+        } else if (!activePatrolIdsRef.current.has(item.id) && !autoDrive.has(item.id)) {
           const c = group.userData.sceneCenter as { x: number; z: number } | undefined;
           if (c) placeMobileRobot(group, c.x, c.z, groundH, 0);
         }
@@ -1801,6 +1893,7 @@ export default function Viewport3D({
       resizeObserver?.disconnect();
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationId);
+      if (autoTimer) window.clearInterval(autoTimer);
       timer.dispose();
       flagsHolder.children.slice().forEach((c) => disposeYardFlags(c));
       if (flagsHolderRef.current === flagsHolder) flagsHolderRef.current = null;
@@ -1813,7 +1906,7 @@ export default function Viewport3D({
     };
   }, [
     loadedScene, model, viewMode, cameraPreset, controlMode,
-    workspaceMode, layout, product, enrichedItems, glbCacheVersion, activeItem, showYardFlags, focusItemId,
+    workspaceMode, layout, product, enrichedItems, glbCacheVersion, activeItem, showYardFlags, focusItemId, autopilotActive, overview,
   ]);
 
   useEffect(() => {
@@ -1917,7 +2010,7 @@ export default function Viewport3D({
       ))}
 
       {showYardFlags && showAttentionPanel && (
-        <Box sx={{ position: 'absolute', top: { xs: 60, sm: 64 }, right: 12, zIndex: 9, width: 'min(360px, calc(100% - 24px))',
+        <Box sx={{ position: 'absolute', top: overlayTop, right: 12, zIndex: 9, width: 'min(360px, calc(100% - 24px))',
           display: 'flex', justifyContent: 'flex-end' }}>
           <YardAttentionPanel
             flags={yardFlags}
@@ -1928,8 +2021,40 @@ export default function Viewport3D({
         </Box>
       )}
 
+      {/* Demo farm autopilot: what every unit is doing right now (simulated). */}
+      {!YARD_LIVE && demoSeeded && workspaceMode !== 'property' && (
+        <Box data-testid="autopilot-panel" sx={{
+          position: 'absolute', top: overlayTop, left: 12, zIndex: 8, width: viewerWide ? 290 : 'auto',
+          bgcolor: 'rgba(13,43,30,0.9)', border: '1px solid #4A7C59', borderRadius: 1, p: 1, color: '#F0EDE4',
+        }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: autopilotOn ? '#4CAF50' : '#8A7D55',
+              boxShadow: autopilotOn ? '0 0 6px #4CAF50' : 'none' }} />
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#C8B882', flex: 1 }}>
+              Autonomous farm · simulated
+            </Typography>
+            <Button size="small" data-testid="autopilot-toggle" sx={{ color: '#C8B882', minWidth: 0, py: 0, fontSize: 11 }}
+              onClick={() => { setAutopilotEnabled(!autopilotOn); setAutopilotOn(!autopilotOn); }}>
+              {autopilotOn ? 'Pause' : 'Run'}
+            </Button>
+          </Stack>
+          {autopilotOn && (
+            <Box component="ul" sx={{ display: viewerWide ? 'block' : 'none', listStyle: 'none', m: 0, mt: 0.5, p: 0, maxHeight: 190, overflowY: 'auto' }}>
+              {autopilotRows.map((r) => (
+                <Box component="li" key={r.id} data-testid="autopilot-row" sx={{ display: 'flex', gap: 0.75, fontSize: 11, lineHeight: 1.6 }}>
+                  <Box component="span" sx={{ color: r.moving ? '#6BBF59' : '#8A7D55' }}>{r.moving ? '▶' : '■'}</Box>
+                  <Box component="span" sx={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{r.name}</Box>
+                  <Box component="span" sx={{ color: '#A5B1A9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.job}</Box>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Box>
+      )}
+
       {/* Top controls */}
       <Box
+        ref={toolbarRef}
         sx={{
           position: 'absolute', top: 12, left: 12, right: 12,
           display: 'flex', flexWrap: { xs: 'nowrap', sm: 'wrap' },

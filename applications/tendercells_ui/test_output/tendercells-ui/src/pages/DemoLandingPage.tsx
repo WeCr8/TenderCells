@@ -27,6 +27,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import { seedDemoEnvironment, type DemoReport } from "../services/demo/demoEnvironment";
 import { safeDemoNext } from "../lib/demo/demoNext";
 import { trackDemo } from "../lib/demo/track";
+import Viewport3D from "../components/viewport/Viewport3D";
 
 const C = {
   bg: "#0D2B1E",
@@ -53,6 +54,17 @@ const useCases = [
 ];
 
 const track = trackDemo;
+
+// What the 3D Property Twin connects to. Status is honest: "sim" means the demo shows it running
+// in simulation; the page it opens explains how the real connection works.
+const connections: { id: string; label: string; detail: string; path?: string; href?: string }[] = [
+  { id: "robots", label: "🤖 Robots", detail: "Weed rover, robot mower and Roaming Roost - inside your boundary", path: "/weed-patrol" },
+  { id: "mowers", label: "🏠 Home Assistant", detail: "Bring your own robot mower (Home Assistant, Husqvarna, GARDENA, Mammotion)", path: "/mowers" },
+  { id: "devices", label: "📡 MQTT · ESP32 · Pi hub", detail: "Coops, doors, feeders and sensors on the local network", href: "/os#developers" },
+  { id: "garden", label: "🌱 FarmBot gardens", detail: "Garden beds and my.farm.bot on the same map", path: "/layout" },
+  { id: "cameras", label: "📷 Cameras & WatchTower", detail: "Predator watch with detections on the map", path: "/predator-monitor" },
+  { id: "sim", label: "🧪 Isaac Sim · Hugging Face", detail: "Export the yard as OpenUSD; run robot policies", href: "/os#developers" },
+];
 
 // Guided entrances into the same simulation (not separate apps). OS pages use the router;
 // website pages (same origin) load normally.
@@ -118,10 +130,10 @@ export default function DemoLandingPage() {
       sx={{
         minHeight: "60vh",
         display: "flex",
-        alignItems: "center",
+        alignItems: phase === "ready" ? "flex-start" : "center",
         justifyContent: "center",
         bgcolor: C.bg,
-        p: 4,
+        p: { xs: 2, sm: 3 },
       }}
     >
       <Stack spacing={3} alignItems="center" sx={{ maxWidth: 460, textAlign: "center" }}>
@@ -143,12 +155,48 @@ export default function DemoLandingPage() {
 
         {phase === "ready" && (
           <Stack spacing={3} sx={{ width: "min(1080px, 92vw)" }}>
+            {/* The first thing a visitor sees: the property itself, live, in 2D and 3D. */}
+            <Box data-testid="demo-hero-twin" sx={{ textAlign: "left" }}>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1} alignItems={{ sm: "flex-end" }} justifyContent="space-between" sx={{ mb: 1 }}>
+                <Box>
+                  <Typography variant="h4" component="h1" sx={{ color: C.gold, fontWeight: 800, fontSize: { xs: 24, md: 32 } }}>
+                    Your whole property, live in 2D and 3D
+                  </Typography>
+                  <Typography sx={{ color: C.goldMuted, fontSize: 14, maxWidth: 720 }}>
+                    A 3D property operating system: robots mow, scan and patrol inside your boundary while coops, docks
+                    and cameras run on their own. Switch 2D / 3D, drag to rotate, scroll to zoom. Everything here is simulated.
+                  </Typography>
+                </Box>
+                <Button variant="contained" onClick={() => { trackDemo("persona_selected", { persona: "property-twin" }); navigate("/layout"); }}
+                  sx={{ bgcolor: C.accent, color: C.white, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}>
+                  Open the Property Twin
+                </Button>
+              </Stack>
+              <Box sx={{ borderRadius: 2, overflow: "hidden", border: `1px solid ${C.accent}` }}>
+                <Viewport3D initialWorkspaceMode="products" overview showAttentionPanel={false}
+                  title="Demo farm" height={{ xs: "min(58dvh, 420px)", sm: "min(62dvh, 520px)", md: 560 }} />
+              </Box>
+              <Grid container spacing={1} sx={{ mt: 0.5 }} data-testid="demo-connections">
+                {connections.map((c) => (
+                  <Grid item xs={6} sm={4} md={2} key={c.id}>
+                    <Paper elevation={0} component="button" type="button"
+                      onClick={() => { trackDemo("persona_selected", { persona: `connect-${c.id}` }); if (c.path) navigate(c.path); else window.location.href = c.href!; }}
+                      sx={{ width: "100%", height: "100%", textAlign: "left", cursor: "pointer", bgcolor: C.surface, color: C.white,
+                        border: `1px solid ${C.accent}44`, borderRadius: 1.5, p: 1, font: "inherit", "&:hover": { borderColor: C.gold } }}>
+                      <Typography sx={{ color: C.gold, fontWeight: 700, fontSize: 13 }}>{c.label}</Typography>
+                      <Typography sx={{ color: C.goldMuted, fontSize: 11, lineHeight: 1.35 }}>{c.detail}</Typography>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+
             <Stack spacing={1.25} alignItems="center" sx={{ textAlign: "center" }}>
               <Chip
                 label={report?.ok ? "Simulated property · data stays in this browser" : "Demo loaded with gaps"}
                 sx={{ bgcolor: report?.ok ? C.accent + "33" : C.warning + "33", color: report?.ok ? C.gold : C.warning, fontWeight: 700 }}
               />
-              <Typography variant="h3" component="h1" sx={{ color: C.gold, fontWeight: 800, fontSize: { xs: 30, md: 44 } }}>
+              <Typography variant="h3" component="h2" sx={{ color: C.gold, fontWeight: 800, fontSize: { xs: 26, md: 36 } }}>
                 A farm that can sense, think, and act.
               </Typography>
               <Typography sx={{ color: C.white, fontWeight: 700, maxWidth: 760 }}>

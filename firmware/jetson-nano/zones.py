@@ -64,7 +64,12 @@ class ZoneGuard:
             if len(poly) < 3:
                 raise ValueError(f"zone {z.get('id')} needs at least 3 points")
             zones.append(Zone(str(z.get("id")), str(z.get("name", "")), z["kind"], poly))
-        return cls(zones, payload.get("self"), int(payload.get("seq", 0)))
+        frame = payload.get("self")
+        # FIX(2026-09-30): without its own footprint the robot cannot place bed points on the
+        # property, so every check would silently pass. Refuse the payload instead.
+        if zones and not (isinstance(frame, dict) and all(isinstance(frame.get(k), (int, float)) for k in ("x", "y", "width", "depth"))):
+            raise ValueError("zones payload needs 'self' (the robot footprint) to enforce zones")
+        return cls(zones, frame, int(payload.get("seq", 0)))
 
     # ── frames ────────────────────────────────────────────────────────────────
     def bed_to_property(self, x_mm: float, y_mm: float) -> Optional[Tuple[float, float]]:
@@ -90,7 +95,9 @@ class ZoneGuard:
         """Raise ZoneViolation if a bed point is inside a zone for this action."""
         p = self.bed_to_property(x_mm, y_mm)
         if p is None:
-            return  # no footprint yet: bed limits still apply on the robot
+            if self.zones:  # defensive: never treat unplaceable zones as "clear"
+                raise ZoneViolation("Zones are loaded but the robot footprint is unknown - refusing")
+            return
         z = self.blocking(p[0], p[1], action)
         if z:
             verb = "fire the laser" if action == "laser" else "move"

@@ -12,7 +12,8 @@ env:
 # Save build minutes: a newer push to the same PR / branch cancels the older run.
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # PRs: a newer push replaces the old run. main: every push is tested (deploys follow CI).
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # Which parts changed? Jobs below skip when their area is untouched (a skipped job

@@ -52,6 +52,8 @@ export function validateZones(body: unknown): string | null {
   if (b.units !== "ft") return "units must be 'ft'";
   if (!Array.isArray(b.zones) || b.zones.length > 200) return "zones must be an array of at most 200 zones";
   if (b.self !== undefined && !(b.self && ["x", "y", "width", "depth"].every((k) => num(b.self![k])))) return "self needs numeric x, y, width, depth";
+  // The robot cannot place zones without its own footprint (it would treat everything as clear).
+  if ((b.zones as unknown[]).length > 0 && b.self === undefined) return "self (the robot footprint) is required when zones are sent";
   for (const [i, z] of (b.zones as Array<Record<string, unknown>>).entries()) {
     if (!z || typeof z.id !== "string" || z.id.length > 80) return `zones[${i}].id must be a string`;
     if (typeof z.name !== "string" || z.name.length > 120) return `zones[${i}].name must be a string`;

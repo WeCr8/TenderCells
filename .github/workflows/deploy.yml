@@ -41,21 +41,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-          fetch-depth: 2
+          fetch-depth: 0
           filter: blob:none
       - id: check
         env:
           EVENT: ${{ github.event_name }}
+          SITE: ${{ vars.PUBLIC_APP_ORIGIN || 'https://tendercells.com' }}
         run: |
           if [ "$EVENT" = "workflow_dispatch" ]; then echo "deploy=true" >> "$GITHUB_OUTPUT"; exit 0; fi
-          # Merge / squash commits: everything the PR changed is in the first-parent diff.
-          if ! git rev-parse -q --verify HEAD^1 >/dev/null; then echo "deploy=true" >> "$GITHUB_OUTPUT"; exit 0; fi
-          FILES=$(git diff --name-only HEAD^1 HEAD)
-          echo "$FILES"
+          # FIX(2026-09-30): compare with what is LIVE, not just the last commit. Each deploy
+          # publishes the commit it shipped as /deploy-sha.txt, so a change is never lost when
+          # its own CI / deploy run was cancelled by a newer push (e.g. a docs-only merge).
+          LIVE=$(curl -fsS --max-time 10 "$SITE/deploy-sha.txt?t=$(date +%s)" | tr -dc '0-9a-f' | head -c 40 || true)
+          if [ ${#LIVE} -ne 40 ] || ! git cat-file -e "$LIVE^{commit}" 2>/dev/null; then
+            echo "Live commit unknown ('$LIVE') - deploying."; echo "deploy=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          FILES=$(git diff --name-only "$LIVE" HEAD)
+          echo "Changed since live $LIVE:"; echo "$FILES"
           if echo "$FILES" | grep -qE '^applications/tendercells_ui/test_output/(tendercells-ui|website|shared)/|^functions/|^firestore\.(rules|indexes\.json)$|^storage\.rules$|^firebase\.json$|^\.firebaserc$|^scripts/firebase-|^\.github/workflows/deploy\.yml$'; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Nothing this workflow deploys changed - skipping the build."
+            echo "Nothing this workflow deploys changed since the live commit - skipping the build."
             echo "deploy=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -154,15 +160,21 @@ jobs:
             exit 1
           fi
 
-      - name: Deploy Hosting and Firestore policy
-        working-directory: .
-        run: |
-          echo "Deploying to project: $FIREBASE_PROJECT"
-          firebase deploy --only hosting:main,firestore:rules,firestore:indexes --non-interactive --project "$FIREBASE_PROJECT"
-
+      # Functions first: if they fail, Hosting (and its deploy-sha.txt marker) is not
+      # updated, so the next run still sees these changes as undeployed and retries.
       - name: Deploy Cloud Functions
         working-directory: .
         run: firebase deploy --only functions --non-interactive --project "$FIREBASE_PROJECT"
+
+      - name: Deploy Hosting and Firestore policy
+        working-directory: .
+        env:
+          SHIPPED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          echo "Deploying to project: $FIREBASE_PROJECT"
+          # The commit this release was built from - read by should-deploy next time.
+          echo "$SHIPPED_SHA" > applications/tendercells_ui/test_output/website/dist/deploy-sha.txt
+          firebase deploy --only hosting:main,firestore:rules,firestore:indexes --non-interactive --project "$FIREBASE_PROJECT"
 
       - name: Remove credentials
         if: always()

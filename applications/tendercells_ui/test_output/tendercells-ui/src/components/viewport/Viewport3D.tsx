@@ -1155,6 +1155,10 @@ export default function Viewport3D({
     const tower = availableCams.filter((c) => c.key.includes('watchtower') || /North|South/.test(c.label));
     return (tower.length ? tower : availableCams).slice(0, 3).map((c) => c.key);
   }, [availableCams, pickedCams]);
+  // FIX(2026-09-30): the render loop reads the chosen views from this ref, so picking or
+  // toggling camera views never rebuilds the scene (it used to loop: the scene effect set
+  // availableCams -> shownCams changed -> the effect ran again).
+  const camViewRef = useRef<{ on: boolean; keys: string[] }>({ on: false, keys: [] });
   const [viewMode, setViewMode] = useState<ViewMode>('3d');
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('iso');
   const [controlMode, setControlMode] = useState<ControlMode>('orbit');
@@ -1598,11 +1602,12 @@ export default function Viewport3D({
         camRigs.set(key, cam);
       }
     }
-    setAvailableCams(views);
-    const towerCams: THREE.PerspectiveCamera[] = camsOn && viewMode === '3d'
-      ? shownCams.map((k) => camRigs.get(k)).filter((c): c is THREE.PerspectiveCamera => !!c)
-      : [];
+    // Only publish a new list when the views really changed (keys + labels).
+    setAvailableCams((prev) => (prev.length === views.length && prev.every((v, i) => v.key === views[i].key && v.label === views[i].label) ? prev : views));
     const renderTowerCams = () => {
+      const { on, keys } = camViewRef.current;
+      if (!on) return;
+      const towerCams = keys.map((k) => camRigs.get(k)).filter((c): c is THREE.PerspectiveCamera => !!c);
       if (!towerCams.length) return;
       const cw = renderer.domElement.clientWidth, ch = renderer.domElement.clientHeight;
       const w = Math.round(cw * 0.2), h = Math.round(w / CAM_ASPECT);
@@ -1700,9 +1705,12 @@ export default function Viewport3D({
     };
   }, [
     loadedScene, model, viewMode, cameraPreset, controlMode,
-    workspaceMode, layout, product, enrichedItems, glbCacheVersion, activeItem, camsOn, showYardFlags, focusItemId,
-    shownCams,
+    workspaceMode, layout, product, enrichedItems, glbCacheVersion, activeItem, showYardFlags, focusItemId,
   ]);
+
+  useEffect(() => {
+    camViewRef.current = { on: camsOn && viewMode === '3d', keys: shownCams };
+  }, [camsOn, viewMode, shownCams]);
 
   const deviceCount = products.length;
   const matchedCount = enrichedItems.filter((i) => i.kind === 'hardware' && i.product).length;

@@ -164,3 +164,14 @@ def test_sound_filter_alerts_once_per_cooldown_and_ignores_normal_sounds():
     assert [a["label"] for a in first] == ["Dog"] and first[0]["type"] == "predator"
     assert f.feed([("Dog", 0.8)], now=30) == []           # cooldown
     assert len(f.feed([("Dog", 0.8)], now=100)) == 1     # after cooldown
+
+
+def test_zones_without_robot_footprint_are_refused():
+    with pytest.raises(ValueError, match="self"):
+        ZoneGuard.from_payload({"v": 1, "units": "ft", "zones": [square("coop", "no-laser", 0, 0, 5, 5)]})
+    # Empty zone list without a footprint is fine (clears zones).
+    assert ZoneGuard.from_payload({"v": 1, "units": "ft", "zones": []}).zones == []
+    # Defensive path: zones but no frame never passes a laser check.
+    g = ZoneGuard([ZoneGuard.from_payload(payload(square("coop", "no-laser", 0, 0, 5, 5))).zones[0]], None)
+    with pytest.raises(ZoneViolation, match="footprint"):
+        g.check_bed(10, 10, "laser")

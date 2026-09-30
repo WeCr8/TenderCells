@@ -244,7 +244,7 @@ export const SCENARIOS: Scenario[] = [
       { kind: "signal", actor: "Door sensor", detail: "doorState: open (tc/ct_001/sensors)" },
       { kind: "rule", actor: "Mower interlock", detail: "A guarded coop is open and the mower is mowing" },
       { kind: "os", actor: "Tender Cells OS", detail: "Hub mower bridge acts on the linked mower" },
-      { kind: "actuator", actor: "Robot mower via Home Assistant", detail: "lawn_mower.pause, then lawn_mower.dock" },
+      { kind: "actuator", actor: "Robot mower (hub mower bridge)", detail: "Pause, then return to dock - and hold it there" },
       { kind: "action", actor: "Robot mower", detail: "Returning to its dock" },
       { kind: "notify", actor: "Owner alert", detail: "\"Mower sent home - the flock is out\"" },
     ],

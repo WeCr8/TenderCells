@@ -7,9 +7,10 @@ import type { Request, Response } from "express";
 import { MQTTController } from "../controllers/mqtt.controller.js";
 import { AUTH_ENABLED, ownedDeviceIds, requireAuth, requireDeviceOwner, type AuthedRequest } from "../middleware/auth.js";
 import { getFirestoreAdmin } from "../config/firebase-admin.js";
-import { validateMowerLink, type MowerAction } from "../mower.js";
+import { startOptions, validateCommand, validateMowerLink, validateSettings, type MowerAction } from "../mower.js";
 import {
-  HA_CONFIGURED, commandMower, createLink, getLink, listHaMowers, listLinks, mowerView, removeLink, updateLink,
+  capabilitiesOf, commandMower, createLink, discover, getLink, listHaMowers, listLinks, mowerView, removeLink, updateLink,
+  updateMowerSettings, vendorStatus,
 } from "../mowerBridge.js";
 
 const router = Router();
@@ -139,13 +140,18 @@ const fail = (res: Response, e: unknown) => {
 router.get("/mowers", requireAuth, async (req: Request, res: Response) => {
   try {
     const only = await ownedDeviceIds((req as AuthedRequest).uid);
-    res.json({ homeAssistant: HA_CONFIGURED, mowers: listLinks(only) });
+    res.json({ ...vendorStatus(), mowers: listLinks(only) });
   } catch (e) { fail(res, e); }
 });
 
 // lawn_mower entities Home Assistant knows (for the link picker). Never returns the token.
 router.get("/mowers/home-assistant/entities", requireAuth, async (_req: Request, res: Response) => {
   try { res.json({ entities: await listHaMowers() }); } catch (e) { fail(res, e); }
+});
+
+// Mowers on the owner's Husqvarna / GARDENA account or in Home Assistant (for the link picker).
+router.get("/mowers/vendors/:vendor/discover", requireAuth, async (req: Request, res: Response) => {
+  try { res.json({ vendor: req.params.vendor, mowers: await discover(req.params.vendor) }); } catch (e) { fail(res, e); }
 });
 
 // Link a mower. It is claimed for the caller so only they can command it.
@@ -187,13 +193,26 @@ router.delete("/devices/:deviceId/mower", ...owns, (req: Request, res: Response)
   res.json({ success: true });
 });
 
-// start is interlocked (E-STOP, quiet hours, flock out, animals seen); pause / dock never are.
+// start / resume_schedule are interlocked (E-STOP, quiet hours, flock out, animals seen);
+// pause, park_until_next_schedule and dock never are.
 router.post("/devices/:deviceId/mower/command", ...owns, async (req: Request, res: Response) => {
-  const action = req.body?.action as MowerAction;
-  if (!["start", "pause", "dock"].includes(action)) return res.status(400).json({ error: "action must be start, pause or dock" });
-  const out = await commandMower(req.params.deviceId, action);
+  if (!getLink(req.params.deviceId)) return res.status(404).json({ error: "This device is not a linked mower" });
+  const err = validateCommand(req.body, capabilitiesOf(req.params.deviceId));
+  if (err) return res.status(400).json({ error: err });
+  const action = req.body.action as MowerAction;
+  const out = await commandMower(req.params.deviceId, action, startOptions(req.body));
   const { status, ...body } = out;
   res.status(status).json({ deviceId: req.params.deviceId, command: `mower_${action}`, success: out.ok, ...body });
+});
+
+// What the mower's own app would change: cutting height, headlight, schedule, stay-out zones, errors.
+router.post("/devices/:deviceId/mower/settings", ...owns, async (req: Request, res: Response) => {
+  if (!getLink(req.params.deviceId)) return res.status(404).json({ error: "This device is not a linked mower" });
+  const err = validateSettings(req.body, capabilitiesOf(req.params.deviceId));
+  if (err) return res.status(400).json({ error: err });
+  const out = await updateMowerSettings(req.params.deviceId, req.body);
+  const { status, ...body } = out;
+  res.status(status).json({ deviceId: req.params.deviceId, command: "mower_settings", success: out.ok, ...body });
 });
 
 // MQTT broker status

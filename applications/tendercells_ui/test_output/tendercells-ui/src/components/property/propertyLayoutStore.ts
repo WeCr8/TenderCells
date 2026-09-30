@@ -268,3 +268,21 @@ export const savePropertyLayout = (state: PropertyLayoutState) => {
   localStorage.setItem(getPropertyLayoutStorageKey(), JSON.stringify(state));
   window.dispatchEvent(new CustomEvent<PropertyLayoutState>(PROPERTY_LAYOUT_EVENT, { detail: state }));
 };
+
+/**
+ * Where a camera mounted on another product (metadata.mounted_on_product_id -
+ * the "package" registration flow) should sit: the parent's top-right corner,
+ * centered on that edge. Pure/no React - PropertyLayoutBuilder's sync effect
+ * re-snaps a mounted camera to this every pass instead of remembering a
+ * free-standing position, and this function is what makes that math testable
+ * without mounting the whole builder.
+ */
+export function computeMountPosition(
+  parent: { x: number; y: number; width: number },
+  camera: { width: number; depth: number }
+): { x: number; y: number } {
+  return {
+    x: parent.x + parent.width - camera.width / 2,
+    y: parent.y - camera.depth / 2,
+  };
+}

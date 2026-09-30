@@ -54,6 +54,7 @@ import {
   savePropertyLayout,
   PROPERTY_LAYOUT_EVENT,
   MOBILE_ROBOT_TYPES,
+  computeMountPosition,
   type PropertyLayoutState,
   type HardwareType,
   type ItemShape,
@@ -308,10 +309,9 @@ export default function PropertyLayoutBuilder() {
         const parentItem = next.find(it => it.kind === 'hardware' && it.productId === parentProductId);
         if (cameraIdx < 0 || !parentItem) continue;
         const cameraItem = next[cameraIdx];
-        const mountX = parentItem.x + parentItem.width - cameraItem.width / 2;
-        const mountY = parentItem.y - cameraItem.depth / 2;
-        if (cameraItem.x !== mountX || cameraItem.y !== mountY) {
-          next[cameraIdx] = { ...cameraItem, x: mountX, y: mountY };
+        const mount = computeMountPosition(parentItem, cameraItem);
+        if (cameraItem.x !== mount.x || cameraItem.y !== mount.y) {
+          next[cameraIdx] = { ...cameraItem, x: mount.x, y: mount.y };
         }
       }
 

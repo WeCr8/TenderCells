@@ -54,6 +54,7 @@ import { useTheme, useMediaQuery } from '@mui/material';
 import QRCodeScanner from './QRCodeScanner';
 import ConnectionSetupWizard from './ConnectionSetupWizard';
 import type { BuildSource, HardwareSetupMode, Product, ProductFamily, ProductType, RegisterProductData, SimulationBackend } from '../../types/products';
+import { buildBundleCameraRegistration, type BundleCameraSpec } from '../../lib/products/cameraPackage';
 
 interface ProductRegistrationModalProps {
   isOpen: boolean;
@@ -90,21 +91,6 @@ const senseCapabilities = Object.keys(capabilityLabels);
 const genericCameraCapabilities = ['camera', 'wifi', 'ble', 'gpio'];
 const defaultCameraCapabilities = ['camera', 'wifi', 'ble', 'battery_power'];
 
-/**
- * A "package" template registers this camera as a SECOND, separate product
- * (a camera-kit is always its own physical ESP32 board - Seeed XIAO
- * ESP32-S3 Sense - never the same controller as the coop/unit it's mounted
- * on) right after the primary product, linked via
- * metadata.mounted_on_product_id. See handleSubmit.
- */
-interface BundleCameraSpec {
-  productName: string;
-  model: string;
-  controllerBoard: string;
-  cameraModule: string;
-  firmwareTarget: string;
-  enabledCapabilities: string[];
-}
 const capabilityPresets: Record<string, string[]> = {
   camera_only: defaultCameraCapabilities,
   camera_sound: [...defaultCameraCapabilities, 'microphone'],
@@ -881,24 +867,7 @@ export default function ProductRegistrationModal({
       // show its feed.
       const template = productTemplates.find((item) => item.id === selectedTemplateId);
       if (template && 'bundleCamera' in template && template.bundleCamera && result && 'id' in result) {
-        const bundle = template.bundleCamera;
-        await onRegister({
-          product_type: 'automation_device',
-          product_name: bundle.productName,
-          model: bundle.model,
-          metadata: {
-            product_family: 'camera-kit',
-            build_source: buildSource,
-            connection_type: 'tendercells-template',
-            controller_board: bundle.controllerBoard,
-            camera_module: bundle.cameraModule,
-            firmware_target: bundle.firmwareTarget,
-            hardware_capabilities: [...new Set([...senseCapabilities, ...bundle.enabledCapabilities])],
-            enabled_capabilities: bundle.enabledCapabilities,
-            capability_profile: 'camera_only',
-            mounted_on_product_id: result.id,
-          },
-        });
+        await onRegister(buildBundleCameraRegistration(template.bundleCamera, result.id, buildSource, senseCapabilities));
       }
 
       // If registration returns a product and we should show connection wizard, open it

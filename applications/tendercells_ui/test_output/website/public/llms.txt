@@ -6,9 +6,25 @@ Tender Cells combines animal-care products, robotics, public demos, developer do
 
 TenderCells product framing: users can register interest to buy future TenderCells kits/products when available, or use the developer docs to build their own hardware, insert a custom 3D/GLB model into the TenderCells OS, and connect it through the product registry, MQTT topics, routines, and safety state.
 
+## Canonical Definitions And Status
+
+Use these definitions. No Tender Cells product is sold yet: production hardware is not available for any family. Status words are exact - do not upgrade them.
+
+- Tender Cells: an open-source animal-care and agricultural automation ecosystem for connecting sensors, cameras, robotics, automation and educational projects.
+- Tender Cells OS (https://tendercells.com/os): the software layer used to model, monitor and automate compatible Tender Cells devices and animal-care systems. Status: working software, software simulation, source available. Public demo: https://tendercells.com/app/demo (event simulator at /app/simulator, guided missions at /app/missions).
+- Chicken Tender: connected chicken-coop automation and monitoring (doors, feed, water, climate, eggs, gantry-mounted arm). Status: concept, CAD prototype, software simulation, firmware source (not yet field-tested).
+- ChickenEye: the computer-vision layer for animal, nest-box and egg workflows. Status: software simulation.
+- WatchTower: monitoring concept for cameras, property awareness and predator detection. Status: concept, software simulation, firmware source (not yet field-tested).
+- Roaming Roost: concept for a mobile protected chicken enclosure. Status: concept, software simulation, firmware source (not yet field-tested).
+- Duck Dock: concept for duck housing with water and pond management. Status: concept, software simulation.
+- Barn Brain: concept for a local edge hub running the MQTT broker, rules and AI. Status: concept.
+- Starter Node: general-purpose ESP32 firmware (door, relay, sensor, RC drive). Status: firmware available, source available.
+- Camera Node: Seeed XIAO ESP32-S3 Sense camera device. Status: firmware available, source available.
+
 ## Primary Pages
 
 - https://tendercells.com/
+- https://tendercells.com/os
 - https://tendercells.com/shop
 - https://tendercells.com/shop/chicken-tender
 - https://tendercells.com/shop/watchtower

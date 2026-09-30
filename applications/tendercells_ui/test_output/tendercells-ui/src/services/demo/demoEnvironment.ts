@@ -189,6 +189,25 @@ export function getDemoEquipment(deviceId?: string): DemoEquipment[] {
   }
 }
 
+/**
+ * Change one demo device's equipment state (door, levels, sensors) - used by the demo event
+ * simulator so a triggered event visibly changes the device. No-op when the demo is not seeded.
+ *
+ * @returns The updated row, or undefined when the device has no equipment state
+ */
+export function updateDemoEquipment(
+  deviceId: string,
+  patch: Partial<Pick<DemoEquipment, 'door' | 'feedLevelPct' | 'waterLevelPct'>> & { sensors?: Partial<DemoEquipment['sensors']> },
+): DemoEquipment | undefined {
+  const rows = getDemoEquipment();
+  const row = rows.find((r) => r.deviceId === deviceId);
+  if (!row) return undefined;
+  Object.assign(row, { ...patch, sensors: { ...row.sensors, ...(patch.sensors ?? {}) }, updatedAt: new Date().toISOString() });
+  try { localStorage.setItem(DEMO_EQUIPMENT_KEY, JSON.stringify(rows)); } catch { /* storage unavailable */ }
+  window.dispatchEvent(new CustomEvent(DEMO_EVENT));
+  return row;
+}
+
 // ── Product factory for non-garage demo devices ────────────────────────────────
 function nowIso() { return new Date().toISOString(); }
 

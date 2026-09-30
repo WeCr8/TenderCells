@@ -1,0 +1,11 @@
+/* EntityStatus - definition + status chips + demo/docs links. */
+.es { border: 1px solid #d1d9e0; border-radius: 10px; padding: 0.9rem 1rem; background: #fff; margin: 0 0 1.5rem; }
+.es-compact { margin: 0; border: none; padding: 0; background: none; }
+.es-def { margin: 0 0 0.6rem; color: #1f2328; }
+.es-row { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+.es-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #59636e; margin-right: 0.25rem; }
+.es-chip { font-size: 0.78rem; padding: 0.15rem 0.55rem; border-radius: 99px; background: #eef1f4; color: #3d4650; border: 1px solid #d1d9e0; }
+.es-note { margin: 0.5rem 0 0; font-size: 0.85rem; color: #9a5b00; }
+.es-links { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.55rem; }
+.es-links a { font-weight: 600; color: #2e7d32; text-decoration: none; }
+.es-links a:hover { text-decoration: underline; }

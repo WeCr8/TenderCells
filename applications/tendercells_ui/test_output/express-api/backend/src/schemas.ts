@@ -37,6 +37,32 @@ export const KNOWN_ROUTINES = [
 // Hugging Face model id: <owner>/<name>.
 export const HF_REPO_ID = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,95}\/[A-Za-z0-9][A-Za-z0-9_.-]{0,95}$/;
 
+const ZONE_KINDS = new Set(["no-go", "keep-out", "no-laser"]);
+const num = (v: unknown) => typeof v === "number" && Number.isFinite(v) && Math.abs(v) < 100_000;
+
+/**
+ * Validate an exclusion-zones payload ({v:1, units:'ft', self?, zones:[{id,name,kind,poly}]}).
+ *
+ * @returns An error message, or null when valid
+ */
+export function validateZones(body: unknown): string | null {
+  const b = body as { v?: unknown; units?: unknown; zones?: unknown; self?: Record<string, unknown> } | null;
+  if (!b || typeof b !== "object") return "body must be a JSON object";
+  if (b.v !== 1) return "v must be 1";
+  if (b.units !== "ft") return "units must be 'ft'";
+  if (!Array.isArray(b.zones) || b.zones.length > 200) return "zones must be an array of at most 200 zones";
+  if (b.self !== undefined && !(b.self && ["x", "y", "width", "depth"].every((k) => num(b.self![k])))) return "self needs numeric x, y, width, depth";
+  for (const [i, z] of (b.zones as Array<Record<string, unknown>>).entries()) {
+    if (!z || typeof z.id !== "string" || z.id.length > 80) return `zones[${i}].id must be a string`;
+    if (typeof z.name !== "string" || z.name.length > 120) return `zones[${i}].name must be a string`;
+    if (!ZONE_KINDS.has(z.kind as string)) return `zones[${i}].kind must be no-go, keep-out or no-laser`;
+    const poly = z.poly as unknown[];
+    if (!Array.isArray(poly) || poly.length < 3 || poly.length > 64) return `zones[${i}].poly needs 3-64 points`;
+    if (!poly.every((p) => Array.isArray(p) && p.length === 2 && num(p[0]) && num(p[1]))) return `zones[${i}].poly points must be [x, y] numbers`;
+  }
+  return null;
+}
+
 // Headcount older than this cannot clear robot motion (sensors publish every 10s).
 export const MOTION_TELEMETRY_MAX_AGE_MS = 60_000;
 
@@ -71,7 +97,11 @@ export const SCHEMAS: Record<string, Schema> = {
     speed:  { type: "number", required: false, min: 0, max: 1 },
   },
   // Weed patrol (validated in the handlers; listed here so the API description has them).
-  weedPass:    { passes: { type: "number", required: false, min: 1, max: 10 } },
+  weedPass:    {
+    passes: { type: "number", required: false, min: 1, max: 10 },
+    // weed = find weeds for laser review; plant_scan = crop health; patrol = snakes / animals (alerts only)
+    task:   { type: "string", required: false, values: ["weed", "plant_scan", "patrol"] },
+  },
   weedApprove: { mode:   { type: "string", required: false, values: ["aim", "burn"] } },
   // Inbound sensor schema (for validation of received data)
   sensors: {

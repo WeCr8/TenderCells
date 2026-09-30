@@ -16,6 +16,7 @@ import { animateYardFlags, buildYardFlags, disposeYardFlags } from './yardFlags'
 import { buildHydrologyLayer } from './hydrologyLayer';
 import { createWeedRobot, placeWeedRobot } from './weedRobotMarker';
 import { getSimRobot } from '../../lib/yard/weedSim';
+import { mountsFor, viewKey, type CameraMount } from '../../lib/yard/cameraMounts';
 import { WEED_BED_TYPES, YARD_LIVE, type WeedRobotState } from '../../lib/yard/yardTypes';
 import type { HydrologyResult } from '../property/watershed';
 import { useYardEvents } from '../../hooks/useYardEvents';
@@ -30,6 +31,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
 import { useCoopModel } from '../../hooks/useCoopModel';
 import CoopModelSelector from './CoopModelSelector';
 import { getPresetModel } from '../../models/presets/coopPresets';
@@ -69,9 +71,12 @@ type Viewport3DProps = {
   towerCameras?: boolean;
 };
 
-const TOWER_CAM_ASPECT = 4 / 3;
-// 120° horizontal lens → vertical FOV for a 4:3 frame.
-const TOWER_CAM_VFOV = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(60)) / TOWER_CAM_ASPECT));
+const CAM_ASPECT = 4 / 3;
+/** Vertical FOV for a 4:3 frame from a horizontal lens FOV. */
+const vfovFor = (hfovDeg: number) =>
+  THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(hfovDeg / 2)) / CAM_ASPECT));
+
+interface CamView { key: string; label: string }
 
 const FAMILY_TO_ITEM_TYPE: Record<string, string> = {
   'chicken-tender': 'chicken-tender',
@@ -949,6 +954,24 @@ const createYardItem = (
     flat.position.set(x, 0.05, z);
     flat.name = item.name;
     group.add(flat);
+    if (item.type === 'no-go-zone') {
+      // Restricted area robots refuse to enter (sent to them as tc/{id}/cfg/zones): a red
+      // translucent curtain on the footprint edge plus corner posts, visible from any angle.
+      const curtainH = 2.5;
+      const curtain = new THREE.Mesh(
+        new THREE.BoxGeometry(item.width, curtainH, item.depth),
+        new THREE.MeshBasicMaterial({ color: 0xcc3333, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide }),
+      );
+      curtain.position.set(x, curtainH / 2, z);
+      curtain.userData.noGoZone = item.id;
+      group.add(curtain);
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.BoxGeometry(item.width, curtainH, item.depth)),
+        new THREE.LineBasicMaterial({ color: 0xff5555 }),
+      );
+      edges.position.copy(curtain.position);
+      group.add(edges);
+    }
   } else if (item.kind === 'hardware') {
     const hw = createHardwareMesh(item, x, z, selected, material);
     hw.name = item.product?.device_id || item.product?.id || item.name;
@@ -1083,7 +1106,17 @@ export default function Viewport3D({
   const containerRef = useRef<HTMLDivElement>(null);
   const [webglOk, setWebglOk] = useState(true);
   const [camsOn, setCamsOn] = useState(towerCameras ?? product === 'predator-monitor');
-  const [hasTower, setHasTower] = useState(false);
+  // Camera views: every mount on the placed products (inside / outside, robots, towers).
+  const [availableCams, setAvailableCams] = useState<CamView[]>([]);
+  const [pickedCams, setPickedCams] = useState<string[] | null>(null); // null = default
+  const [camMenu, setCamMenu] = useState<HTMLElement | null>(null);
+  const shownCams = useMemo(() => {
+    const keys = new Set(availableCams.map((c) => c.key));
+    const picked = (pickedCams ?? []).filter((k) => keys.has(k));
+    if (picked.length) return picked;
+    const tower = availableCams.filter((c) => c.key.includes('watchtower') || /North|South/.test(c.label));
+    return (tower.length ? tower : availableCams).slice(0, 3).map((c) => c.key);
+  }, [availableCams, pickedCams]);
   const [viewMode, setViewMode] = useState<ViewMode>('3d');
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('iso');
   const [controlMode, setControlMode] = useState<ControlMode>('orbit');
@@ -1464,27 +1497,35 @@ export default function Viewport3D({
     setSceneVersion((v) => v + 1); // (re)build flags into the new scene
     const clock = new THREE.Clock();
 
-    // WatchTower camera views: three 120° cameras at the dome, 0/120/240° from map north,
-    // tilted down a little - rendered as insets so the demo shows what the tower sees.
-    const towerItem = workspaceMode === 'property'
-      ? (product === 'predator-monitor' ? { x: 0, z: 0 } : null)
-      : (() => { const t = enrichedItems.find((i) => i.type === 'watchtower'); return t ? propertyToScenePosition(t, layout) : null; })();
-    setHasTower(!!towerItem);
-    const towerCams: THREE.PerspectiveCamera[] = [];
-    if (towerItem && camsOn && viewMode === '3d') {
-      const eyeY = groundH(towerItem.x, towerItem.z) + 1.3 * 2.4 + 0.1; // pole top (see createYardItem)
-      for (let i = 0; i < 3; i++) {
-        const cam = new THREE.PerspectiveCamera(TOWER_CAM_VFOV, TOWER_CAM_ASPECT, 0.3, camera.far);
-        const b = THREE.MathUtils.degToRad(i * 120);
-        cam.position.set(towerItem.x + Math.sin(b) * 0.5, eyeY, towerItem.z - Math.cos(b) * 0.5);
-        cam.lookAt(towerItem.x + Math.sin(b) * 20, eyeY - 4.5, towerItem.z - Math.cos(b) * 20);
-        towerCams.push(cam);
+    // Device camera views (WatchTower, inside / outside of coops, docks and roosts, robot
+    // tool cameras, custom mounts): a PerspectiveCamera per mount, rendered as insets.
+    const camItems: Array<{ id: string; name: string; type: string; cameras?: CameraMount[]; x: number; z: number; w: number; d: number }> =
+      workspaceMode === 'property'
+        ? (activeItem ? [{ ...activeItem, type: product === 'predator-monitor' ? 'watchtower' : activeItem.type, x: 0, z: 0, w: activeItem.width, d: activeItem.depth }] : [])
+        : enrichedItems.filter((i) => i.kind === 'hardware').map((i) => ({ ...i, ...propertyToScenePosition(i, layout), w: i.width, d: i.depth }));
+    const camRigs = new Map<string, THREE.PerspectiveCamera>();
+    const views: CamView[] = [];
+    for (const it of camItems) {
+      for (const mnt of mountsFor(it)) {
+        const key = viewKey(it.id, mnt.id);
+        views.push({ key, label: `${it.name} · ${mnt.label}` });
+        const cx = it.x + mnt.fx * it.w, cz = it.z + mnt.fz * it.d;
+        const cy = groundH(it.x, it.z) + mnt.heightFt;
+        const yaw = THREE.MathUtils.degToRad(mnt.yawDeg), pitch = THREE.MathUtils.degToRad(mnt.pitchDeg);
+        const cam = new THREE.PerspectiveCamera(vfovFor(mnt.hfovDeg), CAM_ASPECT, 0.2, camera.far);
+        cam.position.set(cx, cy, cz);
+        cam.lookAt(cx + Math.sin(yaw) * Math.cos(pitch) * 10, cy + Math.sin(pitch) * 10, cz - Math.cos(yaw) * Math.cos(pitch) * 10);
+        camRigs.set(key, cam);
       }
     }
+    setAvailableCams(views);
+    const towerCams: THREE.PerspectiveCamera[] = camsOn && viewMode === '3d'
+      ? shownCams.map((k) => camRigs.get(k)).filter((c): c is THREE.PerspectiveCamera => !!c)
+      : [];
     const renderTowerCams = () => {
       if (!towerCams.length) return;
       const cw = renderer.domElement.clientWidth, ch = renderer.domElement.clientHeight;
-      const w = Math.round(cw * 0.2), h = Math.round(w / TOWER_CAM_ASPECT);
+      const w = Math.round(cw * 0.2), h = Math.round(w / CAM_ASPECT);
       if (w < 60 || h + 60 > ch) return;
       renderer.setScissorTest(true);
       towerCams.forEach((cam, i) => {
@@ -1569,6 +1610,7 @@ export default function Viewport3D({
   }, [
     loadedScene, model, viewMode, cameraPreset, controlMode,
     workspaceMode, layout, product, enrichedItems, glbCacheVersion, activeItem, camsOn, showYardFlags, focusItemId,
+    shownCams,
   ]);
 
   const deviceCount = products.length;
@@ -1654,15 +1696,15 @@ export default function Viewport3D({
         </Box>
       )}
 
-      {/* Labels for the WatchTower camera insets drawn in the WebGL canvas (same layout math). */}
-      {hasTower && camsOn && viewMode === '3d' && webglOk && [0, 1, 2].map((i) => (
-        <Box key={i} data-testid="tower-cam-label" sx={{
+      {/* Labels for the camera insets drawn in the WebGL canvas (same layout math). */}
+      {camsOn && viewMode === '3d' && webglOk && shownCams.map((k, i) => (
+        <Box key={k} data-testid="tower-cam-label" sx={{
           position: 'absolute', bottom: 56, left: `calc(8px + ${i} * (20% + 6px))`, width: '20%', aspectRatio: '4 / 3',
           border: '1px solid rgba(204,51,51,0.8)', borderRadius: '2px', pointerEvents: 'none', zIndex: 5,
         }}>
           <Box component="span" sx={{ position: 'absolute', top: 2, left: 4, fontSize: 10, fontWeight: 700, color: '#F0EDE4',
             bgcolor: 'rgba(0,0,0,0.55)', px: 0.5, borderRadius: '2px', fontFamily: 'monospace' }}>
-            CAM {i + 1} · {['N', 'SE', 'SW'][i]} · SIM
+            {availableCams.find((c) => c.key === k)?.label ?? k} · SIM
           </Box>
         </Box>
       ))}
@@ -1787,11 +1829,28 @@ export default function Viewport3D({
               }}
             />
           )}
-          {hasTower && viewMode === '3d' && (
-            <Button size="small" variant={camsOn ? 'contained' : 'outlined'} onClick={() => setCamsOn((v) => !v)}
-              sx={camsOn ? { bgcolor: '#CC3333', '&:hover': { bgcolor: '#A82828' } } : undefined}>
-              Tower cams
-            </Button>
+          {availableCams.length > 0 && viewMode === '3d' && (
+            <>
+              <Button size="small" variant={camsOn ? 'contained' : 'outlined'} data-testid="cameras-button"
+                onClick={(e) => setCamMenu(e.currentTarget)}
+                sx={camsOn ? { bgcolor: '#CC3333', '&:hover': { bgcolor: '#A82828' } } : undefined}>
+                Cameras{camsOn ? ` (${shownCams.length})` : ''}
+              </Button>
+              <Menu anchorEl={camMenu} open={!!camMenu} onClose={() => setCamMenu(null)}>
+                <MenuItem onClick={() => { setCamsOn((v) => !v); setCamMenu(null); }}>
+                  {camsOn ? 'Hide camera views' : 'Show camera views'}
+                </MenuItem>
+                {availableCams.map((c) => (
+                  <MenuItem key={c.key} dense onClick={() => {
+                    setCamsOn(true);
+                    // Up to three views; picking a fourth drops the oldest.
+                    setPickedCams(shownCams.includes(c.key) ? shownCams.filter((k) => k !== c.key) : [...shownCams, c.key].slice(-3));
+                  }}>
+                    {shownCams.includes(c.key) && camsOn ? '✓ ' : '\u2003'}{c.label}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </>
           )}
           <Button size="small" variant="outlined" onClick={() => { setCameraPreset('iso'); setViewMode('3d'); setControlMode('orbit'); }}>
             Reset View

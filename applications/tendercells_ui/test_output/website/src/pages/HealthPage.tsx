@@ -1,5 +1,7 @@
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
+import { Link } from "react-router-dom";
+import { ANIMALS } from "../../../shared/library/animals";
 
 export default function HealthPage() {
   return (
@@ -57,7 +59,22 @@ export default function HealthPage() {
         </div>
       </div>
 
+      <div className="prose" data-testid="health-library-links">
+        <h2 className="section-title">Health by species</h2>
+        <p>
+          Daily checks, warning signs, common conditions and when to call a vet for every animal Tender Cells supports -
+          the same guide is inside the OS next to your flock roster.
+        </p>
+        <p>
+          {ANIMALS.map((a, i) => (
+            <span key={a.id}>{i ? " · " : ""}<Link to={`/library/animals/${a.id}`}>{a.emoji} {a.name}</Link></span>
+          ))}
+          {" · "}<Link to="/library#toxic">Plants toxic to animals</Link>
+        </p>
+      </div>
+
       <h2 className="section-title" id="chicken">Chicken Health Guide</h2>
+      <p className="prose">Conditions, warning signs and daily checks: <Link to="/library/animals/chicken">chicken health library</Link> · <Link to="/shop/chicken-tender">Chicken Tender</Link></p>
       <table className="info-table">
         <thead>
           <tr><th>Indicator</th><th>Normal Range</th><th>Warning</th><th>Critical</th></tr>
@@ -122,6 +139,7 @@ export default function HealthPage() {
       </div>
 
       <h2 className="section-title" id="nutrition">Nutrition &amp; Feed</h2>
+      <p className="prose">Keep these away from animals: <Link to="/library#toxic">plants toxic to animals</Link>.</p>
       <div className="prose">
         <p>
           The Tender Cells feed dispenser tracks daily consumption per flock. Here are the baseline

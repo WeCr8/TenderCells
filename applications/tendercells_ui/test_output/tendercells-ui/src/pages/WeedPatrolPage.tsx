@@ -33,7 +33,7 @@ import { loadPropertyLayout, PROPERTY_LAYOUT_EVENT, type PropertyItem } from '..
 import { useYardEvents } from '../hooks/useYardEvents';
 import { fetchWeedState, sendEstop, startWeedPass } from '../lib/yard/yardApi';
 import { setSimEstop, setSimRobotType, setSimSafety, simBed, startSimPass, clearSimHistory, WEED_ROBOT_TYPES, WEED_SIM_EVENT } from '../lib/yard/weedSim';
-import { WEED_BED_TYPES, YARD_LIVE, weedDeviceFor, type WeedRobotState, type WeedRobotType } from '../lib/yard/yardTypes';
+import { ROBOT_TASKS, WEED_BED_TYPES, YARD_LIVE, weedDeviceFor, type RobotTask, type WeedRobotState, type WeedRobotType } from '../lib/yard/yardTypes';
 
 const C = {
   bg: '#0D2B1E',
@@ -94,11 +94,14 @@ export default function WeedPatrolPage() {
   const bedItems = useMemo(() => (item ? [item] : []), [item]);
   const { flags, act, presence, error } = useYardEvents(bedItems);
   const [passes, setPasses] = useState(1);
+  const [task, setTask] = useState<RobotTask>('weed');
   const [confirmPass, setConfirmPass] = useState(false);
   const [snack, setSnack] = useState<{ msg: string; error?: boolean } | null>(null);
 
   const weeds = flags.filter((f) => f.type === 'weed_detected');
   const pending = weeds.filter((w) => w.status === 'pending_review');
+  // Plant-health and snake / predator sightings from this bed's robot (alerts, never lasered).
+  const sightings = flags.filter((f) => f.type === 'alert' && f.bedMm && f.status === 'active');
   const treated = weeds.filter((w) => w.status === 'treated').length;
   const rejected = weeds.filter((w) => w.status === 'rejected').length;
   const online = YARD_LIVE ? presence[deviceId]?.online ?? false : true;
@@ -108,16 +111,16 @@ export default function WeedPatrolPage() {
     if (!item) return;
     try {
       if (YARD_LIVE) {
-        const res = await startWeedPass(deviceId, passes);
+        const res = await startWeedPass(deviceId, passes, task);
         report(res.acked ? `Robot started ${passes} pass(es)` : res.message ?? 'Sent');
       } else {
-        startSimPass(item.id, passes);
+        startSimPass(item.id, passes, task);
         report(`Simulated robot started ${passes} pass(es)`);
       }
     } catch (err) {
       report(err instanceof Error ? err.message : String(err), true);
     }
-  }, [item, deviceId, passes]);
+  }, [item, deviceId, passes, task]);
 
   const estop = async () => {
     if (!item) return;
@@ -177,6 +180,11 @@ export default function WeedPatrolPage() {
                       ))}
                     </TextField>
                   )}
+                  <TextField select size="small" label="Task" value={task} onChange={(e) => setTask(e.target.value as RobotTask)}
+                    data-testid="robot-task" helperText={ROBOT_TASKS[task].help}
+                    sx={{ '& .MuiInputBase-root': { color: C.white }, '& label': { color: C.goldMuted }, '& .MuiFormHelperText-root': { color: C.goldMuted } }}>
+                    {(Object.keys(ROBOT_TASKS) as RobotTask[]).map((k) => <MenuItem key={k} value={k}>{ROBOT_TASKS[k].label}</MenuItem>)}
+                  </TextField>
                   <TextField size="small" type="number" label="Passes (1-10)" value={passes}
                     onChange={(e) => setPasses(Math.min(10, Math.max(1, Math.round(Number(e.target.value) || 1))))}
                     inputProps={{ min: 1, max: 10 }}
@@ -188,6 +196,9 @@ export default function WeedPatrolPage() {
                       Schedule
                     </Button>
                   </Stack>
+                  <Button size="small" onClick={() => navigate('/library#weed')} sx={{ alignSelf: 'flex-start', color: C.gold, p: 0 }}>
+                    Weed guide: pigweed, purslane, nutsedge…
+                  </Button>
                   <Typography variant="caption" sx={{ color: C.goldMuted }}>
                     For passes at set times (e.g. dawn and dusk), add a <strong>Weed pass</strong> schedule for {deviceId}.
                   </Typography>
@@ -257,7 +268,7 @@ export default function WeedPatrolPage() {
               </Box>
               <Paper elevation={0} sx={{ ...card, flex: 1, minWidth: 280 }}>
                 <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
-                  <Typography variant="subtitle2" sx={{ color: C.gold, flex: 1 }}>Review queue ({pending.length})</Typography>
+                  <Typography variant="subtitle2" sx={{ color: C.gold, flex: 1 }}>Review queue ({pending.length + sightings.length})</Typography>
                   {!YARD_LIVE && (treated + rejected) > 0 && (
                     <Button size="small" onClick={() => clearSimHistory(item.id)} sx={{ color: C.goldMuted }}>Clear history</Button>
                   )}
@@ -265,8 +276,8 @@ export default function WeedPatrolPage() {
                 <Typography variant="caption" sx={{ color: C.goldMuted, display: 'block', mb: 1 }}>
                   {treated} treated · {rejected} not weeds · amber pins on the map wait for you
                 </Typography>
-                {pending.length ? (
-                  <YardAttentionPanel flags={pending} act={act} maxRows={50} fill />
+                {pending.length + sightings.length ? (
+                  <YardAttentionPanel flags={[...pending, ...sightings]} act={act} maxRows={50} fill />
                 ) : (
                   <Typography variant="body2" sx={{ color: C.goldMuted }}>No weeds waiting. Run a pass to scan the bed.</Typography>
                 )}
@@ -277,9 +288,9 @@ export default function WeedPatrolPage() {
       </Stack>
 
       <Dialog open={confirmPass} onClose={() => setConfirmPass(false)} PaperProps={{ sx: { bgcolor: C.surface, color: C.white } }}>
-        <DialogTitle sx={{ color: C.gold }}>Start {passes} weed pass{passes > 1 ? 'es' : ''}?</DialogTitle>
+        <DialogTitle sx={{ color: C.gold }}>Start {passes} × {ROBOT_TASKS[task].label.toLowerCase()}?</DialogTitle>
         <DialogContent>
-          <Typography>The gantry will move over the whole bed with the camera. It only detects - nothing is treated without your approval. Keep hands and animals clear.</Typography>
+          <Typography>The robot will move over the whole bed with the camera. It only detects - nothing is treated without your approval, and the laser is never used on animals. Keep hands and animals clear.</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmPass(false)} sx={{ color: C.goldMuted }}>Cancel</Button>

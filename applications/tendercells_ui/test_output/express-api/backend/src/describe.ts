@@ -55,9 +55,11 @@ export const ENDPOINTS: EndpointDoc[] = [
   { method: "POST", path: `${M}/devices/{deviceId}/routine`, auth: "device-owner", summary: "Run a predefined gantry + arm routine.", body: "routine", mqtt: { topic: "tc/{id}/cmd/motion", qos: 1 }, gated: "arm" },
   { method: "POST", path: `${M}/devices/{deviceId}/policy`, auth: "device-owner", summary: "Run a Hugging Face LeRobot policy on the arm (live) or in LeRobot sim.", body: "policy", mqtt: { topic: "tc/{id}/cmd/motion", qos: 1 }, gated: "arm" },
   { method: "POST", path: `${M}/devices/{deviceId}/policy/stop`, auth: "device-owner", summary: "Stop a running policy.", mqtt: { topic: "tc/{id}/cmd/motion", qos: 1 } },
-  { method: "POST", path: `${M}/devices/{deviceId}/weeds/pass`, auth: "device-owner", summary: "Run 1-10 weed detection passes (detect only).", body: "weedPass", mqtt: { topic: "tc/{id}/cmd/weed", qos: 1 }, gated: "weed", ack: true },
+  { method: "POST", path: `${M}/devices/{deviceId}/weeds/pass`, auth: "device-owner", summary: "Run 1-10 passes: task weed (detect weeds for review), plant_scan (crop health alerts) or patrol (snake / animal alerts). Detect only.", body: "weedPass", mqtt: { topic: "tc/{id}/cmd/weed", qos: 1 }, gated: "weed", ack: true },
   { method: "POST", path: `${M}/devices/{deviceId}/weeds/{eventId}/approve`, auth: "device-owner", summary: "Human approval for ONE weed: aim (aiming dot) or burn (laser, interlocked on the robot).", body: "weedApprove", mqtt: { topic: "tc/{id}/cmd/weed", qos: 2 }, gated: "weed", ack: true },
   { method: "POST", path: `${M}/devices/{deviceId}/weeds/{eventId}/reject`, auth: "device-owner", summary: "Not a weed / leave it.", mqtt: { topic: "tc/{id}/cmd/weed", qos: 1 }, ack: true },
+  { method: "POST", path: `${M}/devices/{deviceId}/zones`, auth: "device-owner", summary: "Send a robot its exclusion zones (no-go, keep-out, no-laser near animals); enforced on the robot.", mqtt: { topic: "tc/{id}/cfg/zones", qos: 1, retain: true }, ack: true },
+  { method: "GET", path: `${M}/devices/{deviceId}/zones`, auth: "device-owner", summary: "Zones last sent to this robot." },
   { method: "POST", path: `${M}/devices/{deviceId}/estop`, auth: "device-owner", summary: "EMERGENCY STOP: latches on every subscriber.", mqtt: { topic: "tc/{id}/cmd/estop", qos: 2, retain: true } },
   { method: "POST", path: `${M}/devices/{deviceId}/estop/clear`, auth: "device-owner", summary: "Clear a latched E-STOP (replaces the retained stop).", mqtt: { topic: "tc/{id}/cmd/estop", qos: 2, retain: true } },
   { method: "GET", path: "/api/products", auth: "public", summary: "Registered products (demo registry)." },
@@ -85,6 +87,7 @@ export const MQTT_TOPICS: TopicDoc[] = [
   { pattern: "tc/broadcast/alert", direction: "device-to-api", qos: 2, payload: "alert", note: "WatchTower broadcast to every device (not stored as an event)." },
   { pattern: "tc/{id}/cmd/{command}", direction: "api-to-device", qos: 1, payload: "command body + {seq, timestamp}", note: "door, feed, clean, arm, motion, drive, light, gantry, weed, event" },
   { pattern: "tc/{id}/cmd/estop", direction: "api-to-device", qos: 2, retain: true, payload: "{active: boolean, source, ts}" },
+  { pattern: "tc/{id}/cfg/zones", direction: "api-to-device", qos: 1, retain: true, payload: "{v:1, seq, units:'ft', self?:{itemId,x,y,width,depth}, zones:[{id,name,kind:no-go|keep-out|no-laser,poly:[[x,y]...]}], ts}", note: "Property feet, origin top-left. Robots refuse motion into no-go / keep-out and lasing inside any zone." },
 ];
 
 const ROBOT_TYPES = [
@@ -153,6 +156,7 @@ export function buildBackendXml(opts: { routes?: Array<{ method: string; path: s
   lines.push('    <field name="type" type="string" required="true" values="egg_ready|pickup_ready|weed_detected|headcount|alert"/>');
   lines.push('    <field name="status" type="string" values="active|pending_review|approved|rejected|treated|cleared"/>');
   for (const f of ["title", "detail", "station", "label", "itemId"]) lines.push(`    <field name="${f}" type="string"/>`);
+  lines.push('    <field name="propFt" type="object" note="{x, y} property position in feet (mobile robot sightings)"/>');
   for (const f of ["count", "confidence", "bearingDeg", "distanceFt", "ts"]) lines.push(`    <field name="${f}" type="number"/>`);
   lines.push('    <field name="bedMm" type="object" note="{x (along the bed), y (across)} in mm from the bed origin corner"/>');
   lines.push("  </yard-events>");
@@ -173,6 +177,7 @@ export function buildBackendXml(opts: { routes?: Array<{ method: string; path: s
   lines.push("    <rule>E-STOP (QoS 2, retained) latches on every subscriber; motion is refused until cleared.</rule>");
   lines.push("    <rule>Arm / clean / routine / policy are refused in animal areas while chickens are detected or the headcount is older than 60 s.</rule>");
   lines.push("    <rule>Weed treatment needs a human approval per weed; the laser fires only with burn enabled, student mode off, enclosure closed and no E-STOP.</rule>");
+  lines.push("    <rule>Robots keep out of no-go and keep-out zones (tc/{id}/cfg/zones, retained) and never fire a laser inside any zone, including the no-laser buffer around animal housing.</rule>");
   lines.push("    <rule>Every hardware action in the UI goes through a confirmation dialog.</rule>");
   lines.push("  </safety>");
 

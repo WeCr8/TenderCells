@@ -1,7 +1,8 @@
 // sso.ts - school / district single sign-on and account types (PREPARED, NOT LIVE).
 //
-// Everything here renders as "Coming soon". Nothing starts a sign-in yet: the SSO
-// backend is not set up. What going live needs (see docs/SCHOOL_SSO_PLAN.md):
+// Google Workspace for Education works today (Google sign-in); Microsoft 365 works once
+// enabled in Firebase + VITE_SSO_MICROSOFT=1. Clever / ClassLink / SAML render as
+// "Coming soon" until the Identity Platform backend below is set up. What going live needs (see docs/SCHOOL_SSO_PLAN.md):
 //   1. Upgrade Firebase Auth to Identity Platform (multi-tenant, SAML + OIDC providers).
 //   2. One tenant per school district; register each district's IdP on its tenant.
 //   3. A blocking Cloud Function (beforeSignIn) that sets custom claims:
@@ -24,28 +25,39 @@ export interface SsoProvider {
   /** How classes and students would sync once connected. */
   rosterSource: string;
   status: SsoStatus;
+  /** What has to happen before a school can use it (us + the school's IT admin). */
+  setup: string;
 }
+
+/** Microsoft sign-in turns on once it is enabled in Firebase and the build sets VITE_SSO_MICROSOFT=1. */
+export const MICROSOFT_ENABLED = import.meta.env.VITE_SSO_MICROSOFT === "1";
 
 export const SSO_PROVIDERS: SsoProvider[] = [
   {
     id: 'google-workspace-edu', label: 'Google Workspace for Education', audience: 'Schools on Google (Chromebooks, Classroom)',
-    firebaseProviderId: 'google.com (hd = school domain)', protocol: 'OAuth / OIDC', rosterSource: 'Google Classroom API', status: 'coming-soon',
+    firebaseProviderId: 'google.com', protocol: 'OAuth / OIDC', rosterSource: 'Google Classroom API (later)', status: 'available',
+    setup: 'Works today with "Continue with Google". The school IT admin marks Tender Cells as Trusted in Google Admin console (required for students under 18).',
   },
   {
     id: 'microsoft-edu', label: 'Microsoft 365 Education', audience: 'Schools on Microsoft Entra ID / Teams',
-    firebaseProviderId: 'microsoft.com (tenant = district)', protocol: 'OAuth / OIDC', rosterSource: 'Microsoft School Data Sync', status: 'coming-soon',
+    firebaseProviderId: 'microsoft.com', protocol: 'OAuth / OIDC', rosterSource: 'Microsoft School Data Sync (later)',
+    status: MICROSOFT_ENABLED ? 'available' : 'coming-soon',
+    setup: 'We register one multi-tenant app in Microsoft Entra and enable Microsoft in Firebase; the school IT admin grants admin consent once.',
   },
   {
     id: 'clever', label: 'Clever', audience: 'K-12 districts using the Clever portal',
     firebaseProviderId: 'oidc.clever', protocol: 'OAuth / OIDC', rosterSource: 'Clever Secure Sync', status: 'coming-soon',
+    setup: 'Needs Firebase Identity Platform (OIDC) and a Clever district app approval.',
   },
   {
     id: 'classlink', label: 'ClassLink', audience: 'K-12 districts using ClassLink LaunchPad',
     firebaseProviderId: 'oidc.classlink / saml.classlink', protocol: 'OIDC or SAML', rosterSource: 'ClassLink Roster Server (OneRoster)', status: 'coming-soon',
+    setup: 'Needs Firebase Identity Platform (OIDC / SAML) and ClassLink app library listing.',
   },
   {
     id: 'district-saml', label: 'Other district sign-in (SAML)', audience: 'Colleges, FFA / 4-H programs, custom IdPs',
     firebaseProviderId: 'saml.<district>', protocol: 'SAML', rosterSource: 'OneRoster CSV upload', status: 'coming-soon',
+    setup: 'Needs Firebase Identity Platform (SAML) and the district IdP metadata.',
   },
 ];
 

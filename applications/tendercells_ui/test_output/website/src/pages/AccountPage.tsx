@@ -8,6 +8,7 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import {
   GoogleAuthProvider,
+  OAuthProvider,
   createUserWithEmailAndPassword,
   sendEmailVerification,
   sendPasswordResetEmail,
@@ -21,31 +22,37 @@ import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import { TENDERCELLS_OS_URL } from "../config/appLinks";
 import { useAuthUser } from "../hooks/useAuthUser";
-import { AUTH_CONFIGURED, auth } from "../lib/firebase";
+import { ACTION_CODE_SETTINGS, AUTH_CONFIGURED, auth } from "../lib/firebase";
 import { ACCOUNT_TYPES, SCHOOL_FEATURES, SSO_PROVIDERS } from "../lib/sso";
+import { EmailPreferences } from "./AccountSettings";
 import "./AccountPage.css";
 
 type Mode = "login" | "register";
 
 /** School / district sign-in options - shown, but not live until the SSO backend is set up. */
-function SchoolSignIn() {
+function SchoolSignIn({ onProvider, busy }: { onProvider: (id: string) => void; busy: boolean }) {
   return (
     <details className="account-sso">
       <summary className="account-sso-title">
-        School or district account <span className="account-soon">Coming soon</span>
+        School or district account
       </summary>
       <div className="account-sso-grid">
-        {SSO_PROVIDERS.map((p) => (
+        {SSO_PROVIDERS.map((p) => (p.status === "available" ? (
+          <button key={p.id} type="button" className="account-sso-btn account-sso-live" disabled={busy}
+            onClick={() => onProvider(p.id)} title={`${p.label} - ${p.audience}`}>
+            <span>Continue with {p.label}</span>
+          </button>
+        ) : (
           <button key={p.id} type="button" className="account-sso-btn" disabled aria-disabled="true"
             title={`${p.label} - ${p.audience}. Coming soon.`}>
             <span>{p.label}</span>
             <span className="account-soon">Coming soon</span>
           </button>
-        ))}
+        )))}
       </div>
       <p className="account-hint">
-        Students and teachers will sign in with their school account; rosters and class access come from the school.
-        Until then, teachers can use a personal account.
+        School Google accounts work now - your IT admin may need to approve Tender Cells first
+        (<Link to="/schools">setup for schools</Link>). Rosters and class access come from the school.
       </p>
     </details>
   );
@@ -154,7 +161,7 @@ function AccountDetails({ user }: { user: User }) {
   const handleVerify = async () => {
     setBusy(true);
     try {
-      await sendEmailVerification(user);
+      await sendEmailVerification(user, ACTION_CODE_SETTINGS);
       setNotice(`Verification email sent to ${user.email}.`);
     } catch (err) {
       setNotice(describeAuthError(err));
@@ -226,6 +233,7 @@ function AccountDetails({ user }: { user: User }) {
         The OS opens with this account already signed in. Your devices, flocks and schedules live there.
       </p>
 
+      <EmailPreferences user={user} />
       <AccountTypesAndSchool />
     </section>
   );
@@ -257,7 +265,7 @@ function SignInForm() {
       } else {
         const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
         // Best effort - the account works without it; the Account view offers a resend.
-        void sendEmailVerification(cred.user).catch(() => undefined);
+        void sendEmailVerification(cred.user, ACTION_CODE_SETTINGS).catch(() => undefined);
       }
     } catch (err) {
       setError(describeAuthError(err));
@@ -266,12 +274,22 @@ function SignInForm() {
     }
   };
 
-  const handleGoogle = async () => {
+  const handleGoogle = () => signInWith(new GoogleAuthProvider());
+
+  // Microsoft 365 / Entra ID school and work accounts (tenant "organizations" skips personal
+  // Microsoft accounts). Firebase's built-in Microsoft provider - no Identity Platform needed.
+  const handleSchoolProvider = (id: string) => {
+    if (id === "microsoft-edu") {
+      return signInWith(new OAuthProvider("microsoft.com"));
+    }
+    return handleGoogle();
+  };
+
+  const signInWith = async (provider: GoogleAuthProvider | OAuthProvider) => {
     if (!auth) return;
     setBusy(true);
     setError(null);
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
+    provider.setCustomParameters({ prompt: "select_account", ...(provider.providerId === "microsoft.com" ? { tenant: "organizations" } : {}) });
     try {
       await signInWithPopup(auth, provider);
     } catch (err) {
@@ -295,7 +313,7 @@ function SignInForm() {
     setBusy(true);
     setError(null);
     try {
-      await sendPasswordResetEmail(auth, email.trim());
+      await sendPasswordResetEmail(auth, email.trim(), ACTION_CODE_SETTINGS);
       setNotice(`If an account exists for ${email.trim()}, a reset link is on its way.`);
     } catch (err) {
       setError(describeAuthError(err));
@@ -328,7 +346,7 @@ function SignInForm() {
         <span aria-hidden="true" className="account-google-g">G</span> Continue with Google
       </button>
 
-      <SchoolSignIn />
+      <SchoolSignIn onProvider={(id) => void handleSchoolProvider(id)} busy={busy} />
 
       <div className="account-divider"><span>or use email</span></div>
 

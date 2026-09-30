@@ -276,3 +276,19 @@ button:disabled { opacity: 0.6; cursor: default; }
 .account-school { display: grid; gap: 0.5rem; }
 .account-school-btn span:first-child { display: grid; gap: 0.1rem; }
 .account-school-btn strong { color: #33403a; font-size: 0.9rem; }
+
+/* Newsletter topics + preference toggles */
+.account-topics { border: 1px solid #e3e7e4; border-radius: 8px; padding: 0.6rem 0.8rem; display: grid; gap: 0.35rem; }
+.account-topics legend { font-size: 0.85rem; color: #5b6760; padding: 0 0.3rem; }
+.account-check { display: flex !important; flex-direction: row !important; align-items: center; gap: 0.5rem; font-weight: 400 !important; }
+.account-check input { width: auto !important; }
+.account-prefs { display: grid; gap: 0.45rem; }
+.account-prefs .account-check small { color: #6b766f; display: block; }
+.account-sso-btn.account-sso-live { cursor: pointer; border-style: solid; border-color: #b7c4bc; background: #fff; color: #15201b; font-weight: 600; justify-content: center; }
+.account-sso-btn.account-sso-live:hover { background: #f3f7f4; }
+.account-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 0.5rem 0 1rem; }
+.account-table th, .account-table td { text-align: left; padding: 0.45rem 0.5rem; border-bottom: 1px solid #e3e7e4; vertical-align: top; }
+.account-card h2 { margin-top: 1.4rem; font-size: 1.15rem; }
+.account-card h3 { margin-top: 0.8rem; font-size: 1rem; }
+.account-card ul, .account-card ol { padding-left: 1.2rem; display: grid; gap: 0.35rem; }
+@media (max-width: 560px) { .account-table { display: block; overflow-x: auto; } }

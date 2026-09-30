@@ -239,3 +239,33 @@ def test_state_reports_tool_position_aim_and_laser_for_the_3d_view():
     assert (snap["tool"]["x"], snap["tool"]["y"]) == (round(weed["x"], 1), round(weed["y"], 1))
     patrol.estop()
     assert svc.snapshot()["tool"]["aim"] is False
+
+
+def test_patrol_and_plant_scan_raise_located_alerts_that_are_never_laser_targets():
+    patrol, events, log = make_patrol(student_mode=False, burn_enabled=True)
+    found = patrol.run_passes(1, task="patrol")
+    assert [a["label"] for a in found] == ["Snake"]
+    ev = events[-1]
+    assert ev["type"] == "alert" and ev["label"] == "Snake" and "bedMm" in ev and ev["itemId"] == "item-garden-genesis"
+    with pytest.raises(KeyError):
+        patrol.approve(found[0]["id"], "burn")  # sightings are not weeds: no laser path
+    assert log["laser"] == []
+    patrol.ack_alert(found[0]["id"])
+    assert events[-1]["status"] == "cleared"
+    stressed = patrol.run_passes(1, task="plant_scan")
+    assert stressed and all(a["label"] in ("Wilting", "Yellow leaves", "Pest damage") for a in stressed)
+    with pytest.raises(ValueError):
+        patrol.run_passes(1, task="laser_everything")
+
+
+def test_service_validates_task_and_acks_sightings():
+    published = []
+    patrol, _events, _log = make_patrol()
+    svc = WeedPatrolService("garden_weeder", patrol, lambda t, b, q, r: published.append((t, b)))
+    svc.handle("tc/garden_weeder/cmd/weed", json.dumps({"seq": 1, "action": "pass", "passes": 1, "task": "nope"}))
+    assert published[-1][1] == {"seq": 1, "ok": False, "error": "task must be one of weed, plant_scan, patrol"}
+    svc.handle("tc/garden_weeder/cmd/weed", json.dumps({"seq": 2, "action": "pass", "passes": 1, "task": "patrol"}))
+    svc.wait_idle()
+    alert_id = next(iter(patrol.alerts))
+    svc.handle("tc/garden_weeder/cmd/event", json.dumps({"seq": 3, "action": "ack", "eventId": alert_id}))
+    assert ("tc/garden_weeder/ack", {"seq": 3, "ok": True}) in published

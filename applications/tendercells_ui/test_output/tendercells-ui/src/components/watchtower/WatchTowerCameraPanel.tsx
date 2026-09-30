@@ -69,7 +69,7 @@ export default function WatchTowerCameraPanel({ towerId = 'wt_001' }: { towerId?
         </Box>
       ) : (
         <Typography variant="body2" sx={{ color: '#A5B1A9' }}>
-          The 3D view above shows what each of the tower&apos;s three 120° cameras sees (Tower cams). With hardware, each camera
+          The 3D view above shows what each of the tower&apos;s three 120° cameras sees (Cameras menu). With hardware, each camera
           node streams MJPEG from the tower and its feed appears here.
         </Typography>
       )}

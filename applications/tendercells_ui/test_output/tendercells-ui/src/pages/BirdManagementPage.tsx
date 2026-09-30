@@ -1,5 +1,6 @@
 // BirdManagementPage.tsx — Flock roster: list, add, edit individual birds
 import { useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Box, Paper, Stack, Typography, Button, Grid, Chip, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField,
@@ -65,6 +66,8 @@ function BirdCard({ bird, onEdit, onDelete }: { bird: Bird; onEdit: () => void; 
 
       <Stack direction="row" spacing={1} mt={1.5} flexWrap="wrap">
         <Chip label={bird.health} size="small" sx={{ bgcolor: hc + '22', color: hc, border: `1px solid ${hc}44`, fontSize: 10, fontWeight: 700 }} />
+        <Chip component={RouterLink} to={`/library/animals/${bird.species}`} clickable label="Health guide" size="small"
+          sx={{ bgcolor: C.bg, color: C.gold, border: `1px solid ${C.gold}44`, fontSize: 10 }} />
         {bird.eggColor && bird.sex === 'hen' && (
           <Chip icon={<EggIcon sx={{ fontSize: 12 }} />} label={bird.eggColor} size="small" sx={{ bgcolor: C.bg, color: C.goldMuted, fontSize: 10 }} />
         )}

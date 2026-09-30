@@ -27,6 +27,8 @@ export interface YardEvent {
   bearingDeg?: number;
   /** Estimated range from the device, feet (when the camera can estimate it). */
   distanceFt?: number;
+  /** Property position in feet (sightings from mobile robots such as Roaming Roost). */
+  propFt?: { x: number; y: number };
   ts: number;
   updatedAt: number;
 }
@@ -57,6 +59,18 @@ export const STATUS_COLORS: Partial<Record<YardEventStatus, string>> = {
   cleared: '#8A7D55',
 };
 
+/**
+ * What a robot pass looks for. Only weeds are ever offered for laser treatment; plant-health
+ * and animal sightings (snakes, predators) are alerts for a person.
+ */
+export type RobotTask = 'weed' | 'plant_scan' | 'patrol';
+
+export const ROBOT_TASKS: Record<RobotTask, { label: string; help: string }> = {
+  weed: { label: 'Weed pass', help: 'Find weeds; you approve each one (aim / burn / not a weed).' },
+  plant_scan: { label: 'Plant health scan', help: 'Flags wilting, yellowing or pest-damaged crops to check.' },
+  patrol: { label: 'Snake & predator patrol', help: 'Flags snakes and animals it sees. Alerts only - the laser is never used on animals.' },
+};
+
 /** Weed robot builds: FarmBot Genesis laser head, LiteWeed-style rover, arm-mounted laser. */
 export type WeedRobotType = 'genesis-laser' | 'rover-laser' | 'arm-laser';
 
@@ -70,7 +84,7 @@ export interface WeedRobotState {
     /** Laser profile (fixed | diode-500mw | diode-4w), class and wavelength - newer robots only. */
     profile?: string; laserClass?: string; wavelengthNm?: number; powerW?: number;
   };
-  pass: { running: boolean; pass: number; passes: number; waypoint: number; waypoints: number };
+  pass: { running: boolean; pass: number; passes: number; waypoint: number; waypoints: number; task?: RobotTask };
   /** Tool head position in bed mm (x along, y across, z down) + aiming dot / laser output. */
   tool?: { x: number; y: number; z: number; aim: boolean; laser: boolean };
   /** Robot build (demo robots; live robots may report it too). */

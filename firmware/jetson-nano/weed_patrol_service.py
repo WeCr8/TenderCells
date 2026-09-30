@@ -3,8 +3,12 @@
     WEED_MODE=simulation|live  DEVICE_ID=garden_weeder  ITEM_ID=item-garden-genesis \\
     MQTT_BROKER=mqtt://192.168.1.50:1883  python3 weed_patrol_service.py
 
-Subscribes:  tc/{id}/cmd/weed   {"seq", "action": "pass"|"approve"|"reject", "passes", "eventId", "mode"}
+Subscribes:  tc/{id}/cmd/weed   {"seq", "action": "pass"|"approve"|"reject", "passes", "task", "eventId", "mode"}
+                                  task: weed (default) | plant_scan | patrol (snakes / animals)
+             tc/{id}/cmd/event  {"seq", "action": "ack", "eventId"}  (a person saw a sighting)
              tc/{id}/cmd/estop  {"active": bool}   (QoS 2, retained)
+             tc/{id}/cfg/zones  exclusion zones from the OS (retained) - no driving into no-go /
+                                keep-out, no aiming dot or laser inside any zone (zones.py)
 Publishes:   tc/{id}/event      weed_detected flags (pending_review -> approved -> treated/rejected)
              tc/{id}/state/weed {state, mode, estop, laser{...}, pass{...}, animalSafetyGate}
              tc/{id}/ack        {"seq", "ok", "error"}  for every command with a seq
@@ -29,7 +33,8 @@ import time
 from typing import Callable, Dict, Optional
 from urllib.parse import urlparse
 
-from weed_patrol import (BedConfig, InterlockError, LaserController, SimDetector, SimGantry, WeedPatrol)
+from weed_patrol import (TASKS, BedConfig, InterlockError, LaserController, SimDetector, SimGantry, WeedPatrol)
+from zones import ZoneGuard, ZoneViolation
 
 
 class WeedPatrolService:
@@ -46,13 +51,15 @@ class WeedPatrolService:
         return f"tc/{self.device_id}/{suffix}"
 
     def subscriptions(self):
-        return [(self.topic("cmd/weed"), 2), (self.topic("cmd/estop"), 2)]
+        return [(self.topic("cmd/weed"), 2), (self.topic("cmd/estop"), 2), (self.topic("cmd/event"), 1),
+                (self.topic("cfg/zones"), 1)]
 
     def snapshot(self) -> dict:
         laser = self.patrol.laser
         return {"state": "estop" if laser.estop_active else self.state, "mode": self.mode, "estop": laser.estop_active,
                 "laser": laser.status(), "pass": dict(self.patrol.progress), "error": self.error,
                 "robotType": self.robot_type, "tool": self._tool(),
+                "zones": self.patrol.zones.summary() if self.patrol.zones else None,
                 # Gardens have no chicken headcount; the per-weed human approval (with
                 # "people and animals clear" confirmation in the UI) is the gate.
                 "animalSafetyGate": False, "ts": int(time.time() * 1000)}
@@ -90,22 +97,47 @@ class WeedPatrolService:
             self._ack(seq, True)
             return self.publish_state()
 
+        if topic.endswith("cfg/zones"):
+            try:
+                self.patrol.zones = ZoneGuard.from_payload(msg)
+                self._ack(seq, True)
+            except (ValueError, TypeError, KeyError, IndexError) as err:
+                self._ack(seq, False, f"Bad zones: {err}")  # keep the previous zones
+            return self.publish_state()
+
+        if topic.endswith("cmd/event"):  # "Seen it" on a plant / animal sighting
+            try:
+                self.patrol.ack_alert(str(msg.get("eventId", "")))
+                self._ack(seq, True)
+            except KeyError as err:
+                self._ack(seq, False, str(err))
+            return None
+
         action = msg.get("action")
         if self.patrol.laser.estop_active and action in ("pass", "approve"):
             self._ack(seq, False, "E-STOP is active")
             return
         if action == "pass":
             passes = int(msg.get("passes", 1))
+            task = str(msg.get("task", "weed"))
             if not 1 <= passes <= 10:
                 return self._ack(seq, False, "passes must be 1-10")
+            if task not in TASKS:
+                return self._ack(seq, False, f"task must be one of {', '.join(TASKS)}")
             if self.patrol.progress.get("running"):
                 return self._ack(seq, False, "A pass is already running")
             self._ack(seq, True)  # accepted; the pass itself runs in the worker
-            self._jobs.put(lambda: self._run("scanning", lambda: self.patrol.run_passes(passes)))
+            self._jobs.put(lambda: self._run("scanning" if task == "weed" else task, lambda: self.patrol.run_passes(passes, task)))
         elif action == "approve":
             event_id, mode = str(msg.get("eventId", "")), msg.get("mode", "aim")
             if event_id not in self.patrol.weeds:
                 return self._ack(seq, False, f"Unknown weed {event_id}")
+            if self.patrol.zones:
+                weed = self.patrol.weeds[event_id]
+                try:
+                    self.patrol.zones.check_bed(weed["x"], weed["y"], "laser")  # refuse up front with the reason
+                except ZoneViolation as err:
+                    return self._ack(seq, False, str(err))
             if mode == "burn":
                 try:
                     self.patrol.laser.check_burn_allowed()  # refuse up front with the reason
@@ -127,7 +159,7 @@ class WeedPatrolService:
         self.publish_state()
         try:
             job()
-        except InterlockError as err:
+        except (InterlockError, ZoneViolation) as err:
             self.error = str(err)
         except Exception as err:  # noqa: BLE001 - report and keep serving
             self.error = f"{state} failed: {err}"

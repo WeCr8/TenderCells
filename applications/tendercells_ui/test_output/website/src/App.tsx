@@ -36,6 +36,10 @@ import { identifyVisitor } from "./utils/analytics";
 
 // Lazy so the Firebase Auth SDK only loads for visitors who open /account.
 const AccountPage = lazy(() => import("./pages/AccountPage"));
+const AuthActionPage = lazy(() => import("./pages/AuthActionPage"));
+const NewsletterPage = lazy(() => import("./pages/NewsletterPage"));
+const SchoolsPage = lazy(() => import("./pages/SchoolsPage"));
+const LibraryPage = lazy(() => import("./pages/LibraryPage"));
 
 // Fires GA4 page_view on every route change — must be inside <BrowserRouter>
 function PageTracker() {
@@ -117,6 +121,13 @@ function App() {
 
         {/* Account (website sign-in; the OS launches only from its button) */}
         <Route path="/account" element={<Suspense fallback={null}><AccountPage /></Suspense>} />
+        <Route path="/account/action" element={<Suspense fallback={null}><AuthActionPage /></Suspense>} />
+        <Route path="/newsletter" element={<Suspense fallback={null}><NewsletterPage /></Suspense>} />
+        <Route path="/newsletter/confirm" element={<Suspense fallback={null}><NewsletterPage mode="confirm" /></Suspense>} />
+        <Route path="/newsletter/unsubscribe" element={<Suspense fallback={null}><NewsletterPage mode="unsubscribe" /></Suspense>} />
+        <Route path="/schools" element={<Suspense fallback={null}><SchoolsPage /></Suspense>} />
+        <Route path="/library" element={<Suspense fallback={null}><LibraryPage /></Suspense>} />
+        <Route path="/library/:kind/:id" element={<Suspense fallback={null}><LibraryPage /></Suspense>} />
 
         {/* Search */}
         <Route path="/search" element={<SearchPage />} />

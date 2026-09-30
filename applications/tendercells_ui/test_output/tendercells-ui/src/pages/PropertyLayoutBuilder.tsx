@@ -65,6 +65,7 @@ import { TerrainEditorPanel, TerrainSvgLayer } from '../components/property/Terr
 import WatchTowerSvgLayer from '../components/property/WatchTowerLayer';
 import { useYardEvents } from '../hooks/useYardEvents';
 import FarmBotBridgePanel from '../components/garden/FarmBotBridgePanel';
+import RobotZonesDialog from '../components/property/RobotZonesDialog';
 import { saveModelFile } from '../lib/three/modelStore';
 import { hfModelUrl } from '../lib/three/huggingFace';
 import { useProducts } from '../hooks/useProducts';
@@ -672,6 +673,7 @@ export default function PropertyLayoutBuilder() {
             >
               Add Obstacle
             </Button>
+            <RobotZonesDialog layout={{ property, items }} />
           </Stack>
         </Stack>
       </Paper>

@@ -1,5 +1,5 @@
 // Tender Cells Firebase Cloud Functions
-// Node 18 · CommonJS · firebase-functions v5 (v1 compat API)
+// Node 20 · CommonJS · firebase-functions v5 (v1 compat API)
 
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
@@ -554,3 +554,11 @@ export const health = functions.https.onRequest((_req, res) => {
 });
 
 console.log("[TenderCells] Cloud Functions initialized");
+
+// ============================================================================
+// ORGANIZATIONS (schools / districts / farms) + EMAIL
+// ============================================================================
+export {
+  syncClassAccess, syncMemberAccess, enforceOrgPropertyLimit, enforceOrgProductLimit, onUserCreated,
+} from "./orgs";
+export { onNewsletterSignup, confirmNewsletter, unsubscribeNewsletter, syncEmailPreferences } from "./email";

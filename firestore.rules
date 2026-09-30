@@ -44,6 +44,36 @@ service cloud.firestore {
              request.resource.data.deviceId == deviceId;
     }
 
+    // ── Organizations (schools, districts, farms) - see shared/org/orgModel.ts ──
+    // An org owns properties/products (docs carry orgId). Members read what their
+    // classes allow; the allowed* lists on the member doc are kept in sync by the
+    // syncClassAccess Cloud Function (admin SDK). Students never create their own.
+    function memberPath(orgId) {
+      return /databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid);
+    }
+    function isOrgMember(orgId) {
+      return isAuthenticated() && exists(memberPath(orgId));
+    }
+    function isOrgStaff(orgId) {
+      return isOrgMember(orgId) && get(memberPath(orgId)).data.role in ['owner', 'admin'];
+    }
+    function orgAllows(orgId, listField, id) {
+      return isOrgMember(orgId) && id in get(memberPath(orgId)).data.get(listField, []);
+    }
+    function orgCanRead(listField, id) {
+      return isAuthenticated() && resource.data.get('orgId', null) != null &&
+             (isOrgStaff(resource.data.orgId) || orgAllows(resource.data.orgId, listField, id));
+    }
+    // School-managed student accounts (custom claim set by the SSO backend).
+    function isStudentAccount() {
+      return isAuthenticated() && request.auth.token.get('accountType', '') == 'student';
+    }
+    // Personal create (userId = me, no orgId) or org create by that org's staff.
+    function canCreateAsset() {
+      return isCreatingOwnData() && !isStudentAccount() &&
+             (request.resource.data.get('orgId', null) == null || isOrgStaff(request.resource.data.orgId));
+    }
+
     function deviceItemKeepsDevice(deviceId) {
       return ownsDevice(deviceId) &&
              resource.data.deviceId == deviceId &&
@@ -53,11 +83,11 @@ service cloud.firestore {
     // Properties collection
     // Users can only read/write their own properties
     match /properties/{propertyId} {
-      // Allow read only for the property owner.
-      allow read: if isOwnedResource();
-      
-      // Allow create if user is authenticated and sets their own userId
-      allow create: if isCreatingOwnData();
+      // Owner, or a member of the owning org whose classes include this property.
+      allow read: if isOwnedResource() || orgCanRead('allowedPropertyIds', propertyId);
+
+      // Personal property, or an org property created by org staff. Never students.
+      allow create: if canCreateAsset();
       
       // Allow update if user owns the property
       allow update: if keepsOwner();
@@ -121,8 +151,8 @@ service cloud.firestore {
     // Products collection (if stored in Firestore)
     // Users can manage products associated with their properties
     match /products/{productId} {
-      allow read: if isOwnedResource();
-      allow create: if isCreatingOwnData();
+      allow read: if isOwnedResource() || orgCanRead('allowedProductIds', productId);
+      allow create: if canCreateAsset();
       allow update: if keepsOwner();
       allow delete: if isOwnedResource();
     }
@@ -130,10 +160,10 @@ service cloud.firestore {
     // Devices collection (if stored in Firestore)
     // Users can manage their own devices
     match /devices/{deviceId} {
-      allow read: if isOwnedResource();
-      
-      // Allow create if user sets their own userId
-      allow create: if isCreatingOwnData();
+      allow read: if isOwnedResource() || orgCanRead('allowedProductIds', deviceId);
+
+      // Allow create if user sets their own userId (org devices: org staff; never students)
+      allow create: if canCreateAsset();
       
       // Allow update if user owns the device
       allow update: if keepsOwner();
@@ -190,6 +220,88 @@ service cloud.firestore {
       allow read, delete: if ownsDevice(deviceId);
       allow create: if deviceItemCreateMatches(deviceId);
       allow update: if deviceItemKeepsDevice(deviceId);
+    }
+
+    // Organizations. Plans change only through billing (server), never from clients.
+    match /orgs/{orgId} {
+      allow read: if isOrgMember(orgId);
+      allow create: if isAuthenticated() && !isStudentAccount() &&
+                       request.resource.data.ownerUid == request.auth.uid &&
+                       request.resource.data.plan == 'free';
+      allow update: if isOrgStaff(orgId) &&
+                       request.resource.data.plan == resource.data.plan &&
+                       request.resource.data.ownerUid == resource.data.ownerUid;
+      allow delete: if false;
+
+      match /members/{uid} {
+        allow read: if isOwner(uid) || isOrgStaff(orgId);
+        // The org's creator adds themself as owner; staff manage everyone else.
+        allow create: if (isOwner(uid) && request.resource.data.role == 'owner' &&
+                          get(/databases/$(database)/documents/orgs/$(orgId)).data.ownerUid == request.auth.uid) ||
+                         (isOrgStaff(orgId) && request.resource.data.role != 'owner');
+        allow update: if isOrgStaff(orgId) && request.resource.data.role != 'owner' && resource.data.role != 'owner';
+        allow delete: if isOrgStaff(orgId) && resource.data.role != 'owner';
+      }
+
+      match /classes/{classId} {
+        allow read: if isOrgMember(orgId);
+        allow write: if isOrgStaff(orgId);
+      }
+
+      // Plan-limit and other notices written by Cloud Functions.
+      match /notices/{noticeId} {
+        allow read: if isOrgStaff(orgId);
+        allow write: if false;
+      }
+
+      // Accounts whose email domain matches the org, waiting for staff to approve.
+      match /joinRequests/{uid} {
+        allow read: if isOwner(uid) || isOrgStaff(orgId);
+        allow delete: if isOrgStaff(orgId);
+        allow create, update: if false; // written by the onUserCreated Cloud Function
+      }
+    }
+
+    // Newsletter sign-up (double opt-in): anyone may request; nobody reads from a client.
+    match /newsletterSignups/{signupId} {
+      allow create: if request.resource.data.keys().hasOnly(['email', 'topics', 'source', 'status', 'createdAt']) &&
+                       request.resource.data.email is string &&
+                       request.resource.data.email.size() <= 254 &&
+                       request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$') &&
+                       request.resource.data.topics is list && request.resource.data.topics.size() <= 10 &&
+                       request.resource.data.status == 'pending' &&
+                       request.resource.data.createdAt == request.time;
+      allow read, update, delete: if false;
+    }
+
+    // Confirmed newsletter subscribers - managed by Cloud Functions only.
+    match /newsletterSubscribers/{subscriberId} {
+      allow read, write: if false;
+    }
+
+    // School pilot / sign-up inquiries from tendercells.com/schools.
+    match /schoolInquiries/{inquiryId} {
+      allow create: if request.resource.data.keys().hasOnly(['school', 'district', 'contactName', 'email', 'role',
+                         'students', 'sso', 'notes', 'createdAt', 'uid']) &&
+                       request.resource.data.school is string && request.resource.data.school.size() > 1 &&
+                       request.resource.data.school.size() <= 200 &&
+                       request.resource.data.email is string && request.resource.data.email.size() <= 254 &&
+                       request.resource.data.get('notes', '').size() <= 2000 &&
+                       request.resource.data.createdAt == request.time &&
+                       (request.resource.data.get('uid', null) == null ||
+                        (request.auth != null && request.resource.data.uid == request.auth.uid));
+      allow read, update, delete: if false;
+    }
+
+    // Billing records are written by the billing backend only; owners can read theirs.
+    match /billing/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
+    // Outgoing email queue (Firebase "Trigger Email" extension). Server-only.
+    match /mail/{mailId} {
+      allow read, write: if false;
     }
 
     // Fallback: Deny access to any other collections by default

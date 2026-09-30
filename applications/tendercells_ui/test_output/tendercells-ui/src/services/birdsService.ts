@@ -11,10 +11,12 @@
 // static import adds no bundle cost and avoids the mixed static/dynamic-import
 // warning. The firestore query SDK below stays dynamic to keep it lazy.
 import { FIRESTORE_DATA_ENABLED, db } from '../lib/firebase/firebaseApp';
+import { ANIMALS, type SpeciesId } from '../../../shared/library/animals';
 
 export type Sex = 'hen' | 'rooster' | 'doe' | 'buck' | 'wether' | 'unknown';
 export type HealthStatus = 'healthy' | 'watch' | 'sick' | 'quarantine';
-export type Species = 'chicken' | 'duck' | 'turkey' | 'goose' | 'quail' | 'pigeon' | 'rabbit' | 'goat';
+// Every species in the shared library can be on the roster (poultry, rodents, livestock, fish, reptiles).
+export type Species = SpeciesId;
 
 export interface Bird {
   id: string;
@@ -41,10 +43,7 @@ export const EMPTY_BIRD: CreateBirdData = {
   eggColor: '', avgEggsPerWeek: 0, bandId: '', device: 'ct_001',
 };
 
-export const SPECIES_EMOJI: Record<Species, string> = {
-  chicken: '🐔', duck: '🦆', turkey: '🦃', goose: '🪿',
-  quail: '🐦', pigeon: '🕊️', rabbit: '🐇', goat: '🐐',
-};
+export const SPECIES_EMOJI = Object.fromEntries(ANIMALS.map((a) => [a.id, a.emoji])) as Record<Species, string>;
 
 export const BREEDS_BY_SPECIES: Record<Species, string[]> = {
   chicken: ['Rhode Island Red', 'Barred Rock', 'Buff Orpington', 'Leghorn', 'Easter Egger', 'Silkie', 'Australorp', 'Plymouth Rock', 'Other'],
@@ -55,6 +54,20 @@ export const BREEDS_BY_SPECIES: Record<Species, string[]> = {
   pigeon: ['Racing Homer', 'King', 'Fantail', 'Roller', 'Other'],
   rabbit: ['Rex', 'Holland Lop', 'Flemish Giant', 'New Zealand', 'Other'],
   goat: ['Boer', 'Nubian', 'LaMancha', 'Nigerian Dwarf', 'Other'],
+  'guinea-pig': ['American', 'Abyssinian', 'Peruvian', 'Teddy', 'Other'],
+  chinchilla: ['Standard grey', 'Beige', 'Ebony', 'Other'],
+  hamster: ['Syrian', 'Roborovski', 'Winter white', 'Campbell', 'Other'],
+  rat: ['Standard', 'Dumbo', 'Rex', 'Other'],
+  mouse: ['Fancy mouse', 'Other'],
+  sheep: ['Katahdin', 'Dorper', 'Suffolk', 'Babydoll Southdown', 'Other'],
+  pig: ['Kunekune', 'Berkshire', 'Hampshire', 'Pot-bellied', 'Other'],
+  alpaca: ['Huacaya', 'Suri', 'Other'],
+  'pond-fish': ['Koi', 'Comet goldfish', 'Shubunkin', 'Other'],
+  tortoise: ['Russian', 'Hermann\'s', 'Sulcata', 'Greek', 'Other'],
+  turtle: ['Red-eared slider', 'Painted turtle', 'Musk turtle', 'Other'],
+  'bearded-dragon': ['Central bearded dragon', 'Other'],
+  'leopard-gecko': ['Normal', 'Tangerine', 'Albino', 'Other'],
+  'ball-python': ['Normal', 'Pastel', 'Banana', 'Other'],
 };
 
 // Demo flock — written to storage ONLY when the user opts in (seedDemoFlock),

@@ -28,6 +28,7 @@ export interface YardEvent {
   label?: string;            // what was seen, e.g. "fox" (predator alerts)
   bearingDeg?: number;       // from the reporting device, 0 = map north (up), clockwise
   distanceFt?: number;       // estimated range from the device, when known
+  propFt?: { x: number; y: number }; // property position (ft) - mobile robot sightings
   ts: number;
   updatedAt: number;
 }
@@ -60,6 +61,8 @@ export function ingestEvent(deviceId: string, payload: Record<string, unknown>):
   if (!STATUSES.includes(status)) return `event.status must be one of ${STATUSES.join(", ")}`;
   const bed = payload.bedMm as { x?: unknown; y?: unknown } | undefined;
   const bedMm = bed && num(bed.x) !== undefined && num(bed.y) !== undefined ? { x: bed.x as number, y: bed.y as number } : undefined;
+  const pf = payload.propFt as { x?: unknown; y?: unknown } | undefined;
+  const propFt = pf && num(pf.x) !== undefined && num(pf.y) !== undefined ? { x: pf.x as number, y: pf.y as number } : undefined;
   const now = Date.now();
 
   const byId = events.get(deviceId) ?? new Map<string, YardEvent>();
@@ -73,6 +76,7 @@ export function ingestEvent(deviceId: string, payload: Record<string, unknown>):
     confidence: num(payload.confidence) ?? prev?.confidence,
     itemId: str(payload.itemId, 64) ?? prev?.itemId,
     bedMm: bedMm ?? prev?.bedMm,
+    propFt: propFt ?? prev?.propFt,
     station: str(payload.station) ?? prev?.station,
     label: str(payload.label, 40) ?? prev?.label,
     bearingDeg: num(payload.bearingDeg) !== undefined ? (((payload.bearingDeg as number) % 360) + 360) % 360 : prev?.bearingDeg,

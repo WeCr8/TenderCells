@@ -82,6 +82,21 @@ blue (450 nm) beam when a burn fires.
 Live robots report the same fields in `tc/{id}/state/weed`: `robotType` (from the `WEED_ROBOT`
 setting) and `tool {x, y, z, aim, laser}`.
 
+## Tasks: more than weeding
+
+A pass has a **task**. Choose it in Weed Patrol or on a scheduled "Weed pass":
+
+| Task | Finds | What you do |
+|---|---|---|
+| `weed` (default) | Weeds (`weed_detected`, pending review) | Aim / Burn / Not a weed |
+| `plant_scan` | Wilting, yellowing or pest-damaged crops (`alert` + `bedMm`) | Check the plant → **Seen it** |
+| `patrol` | Snakes and other animals in the bed (`alert` + `bedMm`) | Keep people and animals clear → **Seen it** |
+
+- **Sightings are never laser targets.** `approve()` only accepts weeds, and the API only approves `weed_detected` events.
+- **Mobile robots:** a Roaming Roost on patrol reports sightings with `propFt {x, y}` (property feet), so they land where the robot saw them.
+- **Command:** `POST /devices/:id/weeds/pass {passes, task}`, which publishes `tc/{id}/cmd/weed {action: "pass", task}`.
+- **"Seen it":** sends `tc/{id}/cmd/event {action: "ack"}`.
+
 ## Passes on a schedule
 
 In **Schedules**, add a **Weed pass** action for the robot's device id (e.g. dawn and dusk, 1–10

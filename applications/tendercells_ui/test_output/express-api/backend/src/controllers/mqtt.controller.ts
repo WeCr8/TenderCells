@@ -16,7 +16,7 @@ interface MQTTMessage {
   [key: string]: unknown;
 }
 
-import { HF_REPO_ID, MOTION_TELEMETRY_MAX_AGE_MS, SCHEMAS, validatePayload } from "../schemas.js";
+import { HF_REPO_ID, MOTION_TELEMETRY_MAX_AGE_MS, SCHEMAS, validatePayload, validateZones } from "../schemas.js";
 
 export class MQTTController {
   private static client: mqtt.MqttClient | null = null;
@@ -660,11 +660,14 @@ export class MQTTController {
     if (typeof passes !== "number" || !Number.isInteger(passes) || passes < 1 || passes > 10) {
       return res.status(400).json({ error: "passes must be an integer 1-10" });
     }
+    const task = req.body?.task ?? "weed";
+    const err = validatePayload({ task }, SCHEMAS.weedPass);
+    if (err) return res.status(400).json({ error: err });
     const blocked = MQTTController.motionBlockedReason(deviceId, "weed");
     if (blocked) return res.status(409).json({ error: blocked });
-    const seq = MQTTController.publishWithSeq(deviceId, "weed", { action: "pass", passes });
+    const seq = MQTTController.publishWithSeq(deviceId, "weed", { action: "pass", passes, task });
     if (seq === null) return res.status(503).json({ error: "MQTT not connected" });
-    return MQTTController.respondWithAck(res, deviceId, seq, { success: true, deviceId, command: "weed_pass", passes });
+    return MQTTController.respondWithAck(res, deviceId, seq, { success: true, deviceId, command: "weed_pass", passes, task });
   }
 
   /**
@@ -704,6 +707,31 @@ export class MQTTController {
 
   getPresence(req: Request, res: Response) {
     res.json({ deviceId: req.params.deviceId, ...getPresence(req.params.deviceId) });
+  }
+
+  // ── exclusion zones (no-go / keep-out / no-laser) ───────────────────────────
+  /** Last zones sent per device (the broker also retains them). */
+  static zones = new Map<string, Record<string, unknown>>();
+
+  /**
+   * Send a robot its exclusion zones. Published retained (QoS 1) on tc/{id}/cfg/zones so
+   * the robot gets them on every reconnect and enforces them on-board, offline too.
+   */
+  async sendZones(req: Request, res: Response) {
+    const { deviceId } = req.params;
+    const err = validateZones(req.body);
+    if (err) return res.status(400).json({ error: err });
+    if (!MQTTController.client?.connected) return res.status(503).json({ error: "MQTT not connected" });
+    const payload = { ...req.body, seq: nextSeq(), ts: Date.now() };
+    MQTTController.client.publish(`tc/${deviceId}/cfg/zones`, JSON.stringify(payload), { qos: 1, retain: true });
+    MQTTController.zones.set(deviceId, payload);
+    return MQTTController.respondWithAck(res, deviceId, payload.seq, { success: true, deviceId, command: "zones", zones: req.body.zones.length });
+  }
+
+  getZones(req: Request, res: Response) {
+    const z = MQTTController.zones.get(req.params.deviceId);
+    if (!z) return res.status(404).json({ error: "No zones sent to this device yet" });
+    res.json(z);
   }
 
   /** Everything known about every device, for /api/state.xml. */

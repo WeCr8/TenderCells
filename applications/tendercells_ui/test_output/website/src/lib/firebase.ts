@@ -3,7 +3,8 @@
 // The site and the Tender Cells OS (/app) share one origin and one Firebase
 // project, so Firebase's per-origin persisted session is shared too: signing in
 // here means the OS opens already signed in, without the OS having to load just
-// to log in. Only Auth is used on the site - no Firestore, no Storage.
+// to log in. Auth is loaded up front; Firestore and Functions are loaded lazily
+// (lib/firestore.ts) only on pages that save preferences or forms.
 //
 // Config comes from the same VITE_FIREBASE_* keys the OS build uses (repo-root
 // .env locally; exported by the deploy workflow in CI).
@@ -23,7 +24,18 @@ export const AUTH_CONFIGURED = Boolean(
   firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId,
 );
 
-const app: FirebaseApp | undefined = AUTH_CONFIGURED ? initializeApp(firebaseConfig) : undefined;
+/** The Firebase app, or undefined when the build has no Firebase config. */
+export const app: FirebaseApp | undefined = AUTH_CONFIGURED ? initializeApp(firebaseConfig) : undefined;
+
+/**
+ * Where Firebase's auth emails (verify, reset) send people back to after the action.
+ * Pair with the console setting Authentication → Templates → Customize action URL =
+ * https://tendercells.com/account/action so the whole flow stays on our domain.
+ */
+export const ACTION_CODE_SETTINGS = {
+  url: typeof window !== "undefined" ? `${window.location.origin}/account` : "https://tendercells.com/account",
+  handleCodeInApp: false,
+};
 
 /** Firebase Auth instance, or undefined when the build has no Firebase config. */
 export const auth: Auth | undefined = app ? getAuth(app) : undefined;

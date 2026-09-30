@@ -145,14 +145,15 @@ export default function AccountPage() {
               Continue with Google
             </Button>
 
-            {/* School / district SSO is prepared on the website account page but not live yet. */}
+            {/* School sign-in (Google Workspace today, Microsoft 365 when enabled) lives on the website
+                account page; the session is shared with the OS on the same origin. */}
             <Button
               fullWidth
               variant="outlined"
-              disabled
+              href={WEBSITE_ACCOUNT_URL}
               startIcon={<SchoolIcon />}
-              sx={{ mb: 1, justifyContent: 'space-between', '&.Mui-disabled': { borderColor: '#4A7C59', color: '#8A7D55' } }}
-              endIcon={<Chip label="Coming soon" size="small" sx={{ height: 20, fontSize: 10, bgcolor: '#0D2B1E', color: '#C8B882' }} />}
+              sx={{ mb: 1, justifyContent: 'space-between', borderColor: '#4A7C59', color: '#C8B882' }}
+              endIcon={<Chip label="Google · Microsoft" size="small" sx={{ height: 20, fontSize: 10, bgcolor: '#0D2B1E', color: '#C8B882' }} />}
             >
               School or district sign-in
             </Button>

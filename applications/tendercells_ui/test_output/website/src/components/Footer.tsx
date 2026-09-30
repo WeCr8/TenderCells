@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import "./PageLayout.css";
+import NewsletterSignup from "./NewsletterSignup";
 
 const footerGroups = [
   {
@@ -21,6 +22,7 @@ const footerGroups = [
       { label: "Smart Coop Guide", to: "/guides/smart-chicken-coop" },
       { label: "Predator Monitoring", to: "/guides/predator-monitoring" },
       { label: "Pasture Rotation", to: "/guides/pasture-rotation" },
+      { label: "Animal & Plant Library", to: "/library" },
     ],
   },
   {
@@ -41,6 +43,8 @@ const footerGroups = [
     links: [
       { label: "About", to: "/about" },
       { label: "Contact", to: "/contact" },
+      { label: "For Schools", to: "/schools" },
+      { label: "Newsletter", to: "/newsletter" },
       { label: "Partners", to: "/partners" },
       { label: "Privacy", to: "/privacy" },
       { label: "Cookie Policy", to: "/cookie-policy" },
@@ -61,6 +65,7 @@ export default function Footer() {
             Open-source agricultural engineering for smart animal care, STEM education,
             homesteaders, makers, and young engineers.
           </p>
+          <NewsletterSignup />
         </div>
         {footerGroups.map((group) => (
           <nav key={group.title} aria-label={group.title}>

@@ -12,6 +12,8 @@ import RestaurantIcon from "@mui/icons-material/Restaurant";
 import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 import EggIcon from "@mui/icons-material/Egg";
 import GrassIcon from "@mui/icons-material/Grass";
+import HandymanIcon from "@mui/icons-material/Handyman";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import TuneIcon from "@mui/icons-material/Tune";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -127,6 +129,8 @@ const SHARED_ITEMS: MenuItem[] = [
   { id: "schedules", label: "Schedules", icon: <ScheduleIcon />, path: "/schedules" },
   { id: "weed-patrol", label: "Weed Patrol", icon: <GrassIcon />, path: "/weed-patrol" },
   { id: "watershed", label: "Watershed", icon: <WaterIcon />, path: "/watershed" },
+  { id: "library", label: "Animal & Plant Library", icon: <MenuBookIcon />, path: "/library" },
+  { id: "projects", label: "DIY Projects", icon: <HandymanIcon />, path: "/projects" },
   { id: "products", label: "Products", icon: <DevicesIcon />, path: "/products" },
   { id: "specs", label: "Product Specs", icon: <DescriptionIcon />, path: "/specs" },
   { id: "layout", label: "Property Layout", icon: <GridOnIcon />, path: "/layout" },

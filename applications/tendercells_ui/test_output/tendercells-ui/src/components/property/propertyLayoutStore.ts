@@ -1,5 +1,6 @@
 import type { TerrainLayers } from './terrain';
 import type { DrainageFix } from './watershed';
+import type { CameraMount } from '../../lib/yard/cameraMounts';
 
 export type PropertyItemKind = 'hardware' | 'obstacle';
 export type HardwareType =
@@ -77,6 +78,9 @@ export interface PropertyItem {
   // purpose (one rendering/animation path can consume either), but a distinct
   // field since the two never mean the same thing at the same time.
   patrolPath?: Array<{ x: number; y: number }>;
+  // Camera mounts for a custom build (inside / outside views). Empty = product defaults
+  // (lib/yard/cameraMounts.ts).
+  cameras?: CameraMount[];
 }
 
 export type PropertyLayoutState = {
@@ -203,6 +207,8 @@ export const DEFAULT_ITEMS: PropertyItem[] = [
   { id: 'item-tree',           kind: 'obstacle', name: 'Oak Tree',       type: 'tree',           shape: 'circle',  x: 28, y: 10, width: 8,  depth: 8  },
   { id: 'item-pond',           kind: 'obstacle', name: 'Pond',           type: 'pond',           shape: 'rounded', x: 52, y: 12, width: 14, depth: 10 },
   { id: 'item-fence',          kind: 'obstacle', name: 'Fence Line',     type: 'fence',          shape: 'rect',    x: 4,  y: 48, width: 60, depth: 3  },
+  // Restricted area robots must not enter (sent to them as exclusion zones).
+  { id: 'item-septic-nogo',    kind: 'obstacle', name: 'Septic field',   type: 'no-go-zone',     shape: 'rect',    x: 24, y: 40, width: 10, depth: 6  },
 ];
 
 export const loadPropertyLayout = (): PropertyLayoutState => {

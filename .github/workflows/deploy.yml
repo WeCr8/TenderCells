@@ -29,9 +29,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    # Deploy only commits whose CI passed (or a manual run).
+  # Save build minutes: only rebuild + publish when something that ships to Hosting
+  # changed in this commit (site, app, shared data, hosting config, this workflow).
+  # Firmware / Python / docs-only merges skip the ~2 min build. Manual runs always deploy.
+  should-deploy:
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.check.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+          filter: blob:none
+      - id: check
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then echo "deploy=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          # Merge / squash commits: everything the PR changed is in the first-parent diff.
+          if ! git rev-parse -q --verify HEAD^1 >/dev/null; then echo "deploy=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          FILES=$(git diff --name-only HEAD^1 HEAD)
+          echo "$FILES"
+          if echo "$FILES" | grep -qE '^applications/tendercells_ui/test_output/(tendercells-ui|website|shared)/|^firebase\.json$|^\.firebaserc$|^scripts/firebase-|^\.github/workflows/deploy\.yml$'; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Nothing that ships to Hosting changed - skipping the build."
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: should-deploy
+    if: needs.should-deploy.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -77,6 +107,13 @@ jobs:
             node scripts/firebase-auth-check.mjs --project "$FIREBASE_PROJECT"
 
       - name: Build site + app + snapshot
+        env:
+          # Optional repo variables for school sign-in (docs/SCHOOL_SSO_PLAN.md):
+          # SSO_MICROSOFT=1 once Microsoft is enabled in Firebase Auth; client IDs are shown
+          # to school IT admins on /schools (they are public identifiers, not secrets).
+          VITE_SSO_MICROSOFT: ${{ vars.SSO_MICROSOFT }}
+          VITE_GOOGLE_OAUTH_CLIENT_ID: ${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
+          VITE_MICROSOFT_CLIENT_ID: ${{ vars.MICROSOFT_CLIENT_ID }}
         run: npm --prefix website run build:with-app
 
       # Refuse to publish an app whose sign-in cannot work: the built /app bundle

@@ -10,7 +10,7 @@ import type { PropertyItem } from '../components/property/propertyLayoutStore';
 import { eggService, EGGS_UPDATED_EVENT, todayKey } from '../services/eggService';
 import { birdsService, BIRDS_UPDATED_EVENT } from '../services/birdsService';
 import { ackYardEvent, approveWeed, fetchWeedState, fetchYardEvents, rejectWeed, type Presence } from '../lib/yard/yardApi';
-import { decideSimWeed, simBed, simWeeds, WEED_SIM_EVENT } from '../lib/yard/weedSim';
+import { ackSimAlert, decideSimWeed, simBed, simWeeds, WEED_SIM_EVENT } from '../lib/yard/weedSim';
 import {
   DEFAULT_DEVICE_BY_TYPE, WEED_BED_TYPES, YARD_LIVE, weedDeviceFor,
   type WeedRobotState, type YardFlag,
@@ -72,6 +72,35 @@ export function deviceForItem(item: PropertyItem): string | undefined {
   return item.deviceId || DEFAULT_DEVICE_BY_TYPE[item.type];
 }
 
+/**
+ * Demo Roaming Roost patrol: now and then a snake (or other visitor) is seen around the
+ * roost, placed on the property by the robot's own position (propFt).
+ */
+function demoRoostPatrol(deviceId: string, item: PropertyItem, now: number): YardFlag[] {
+  const acked = readAcked();
+  const out: YardFlag[] = [];
+  const SLOT = 240_000;
+  const slot = Math.floor(now / SLOT);
+  for (let s = slot - 2; s <= slot; s++) {
+    const r = rand(`patrol:${deviceId}:${s}`);
+    if (r() > 0.5) continue;
+    const ts = s * SLOT + Math.floor(r() * SLOT * 0.4);
+    if (ts > now) continue;
+    const label = r() < 0.7 ? 'Snake' : 'Rat';
+    const angle = r() * Math.PI * 2, dist = 5 + r() * 10;
+    const id = `patrol-${ts}`;
+    out.push({
+      id, deviceId, itemId: item.id, source: 'demo', type: 'alert', label,
+      status: acked.has(`${deviceId}:${id}`) ? 'cleared' : 'active',
+      title: `${label} near the roost`, detail: 'Seen on patrol - check before letting birds out',
+      confidence: Math.round((0.8 + r() * 0.15) * 100) / 100,
+      propFt: { x: item.x + item.width / 2 + Math.cos(angle) * dist, y: item.y + item.depth / 2 + Math.sin(angle) * dist },
+      ts, updatedAt: ts,
+    });
+  }
+  return out;
+}
+
 async function demoFlags(items: PropertyItem[]): Promise<YardFlag[]> {
   const flags: YardFlag[] = [];
   const now = Date.now();
@@ -95,6 +124,7 @@ async function demoFlags(items: PropertyItem[]): Promise<YardFlag[]> {
       const birds = await birdsService.getBirds(deviceId);
       const total = birds.length || DEMO_ROOST_FLOCK;
       // Birds drift in and out over a ~4 minute cycle so the map shows movement.
+      flags.push(...demoRoostPatrol(deviceId, item, now));
       const phase = (Math.sin(now / 38_000) + 1) / 2;
       const roaming = Math.min(total, Math.round(total * phase * 0.8));
       flags.push({
@@ -183,7 +213,10 @@ export function useYardEvents(items: PropertyItem[]) {
   const act = useCallback(async (flag: YardFlag, action: YardAction): Promise<string> => {
     let message: string;
     if (flag.source === 'demo') {
-      if (action === 'ack' && flag.type === 'alert') {
+      if (action === 'ack' && flag.type === 'alert' && flag.bedMm) {
+        ackSimAlert(flag.itemId, flag.id); // garden robot sighting
+        message = 'Marked as seen';
+      } else if (action === 'ack' && flag.type === 'alert') {
         const acked = readAcked();
         acked.add(`${flag.deviceId}:${flag.id}`);
         writeAcked(acked);

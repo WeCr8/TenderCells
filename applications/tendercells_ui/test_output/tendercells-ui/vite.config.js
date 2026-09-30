@@ -118,6 +118,8 @@ export default defineConfig(function (_a) {
         server: {
             port: 5173,
             strictPort: true,
+            // ../shared holds data both apps import (org model, animal + plant libraries).
+            fs: { allow: ['..'] },
         },
         test: {
             include: ['src/**/*.test.{ts,tsx}'],

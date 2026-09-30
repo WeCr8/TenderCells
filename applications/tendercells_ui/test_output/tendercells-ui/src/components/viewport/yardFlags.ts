@@ -189,19 +189,30 @@ function watchtowerCoverage(item: FlagItem, layout: FlagLayout, groundAt: (x: nu
 
 /** A predator detection placed by bearing (and distance) from its tower. */
 function predatorMarker(flag: YardFlag, item: FlagItem, layout: FlagLayout, groundAt: (x: number, z: number) => number): THREE.Group {
-  const g = new THREE.Group();
   const { x, z } = center(item, layout);
   const range = item.scan?.radiusFt ?? WATCHTOWER_RANGE_FT;
   const d = flag.distanceFt ?? range * 0.6;
   const dir = bearingDir(flag.bearingDeg ?? 0);
-  const px = x + dir.x * d, pz = z + dir.z * d, py = groundAt(px, pz);
+  return sightingMarker(flag, { x: x + dir.x * d, z: z + dir.z * d }, groundAt, { x, z });
+}
+
+/**
+ * An animal / plant sighting at a scene position, with an optional dashed sight line
+ * from the device that saw it (a WatchTower).
+ */
+function sightingMarker(flag: YardFlag, at: { x: number; z: number }, groundAt: (x: number, z: number) => number,
+  from?: { x: number; z: number }): THREE.Group {
+  const g = new THREE.Group();
+  const px = at.x, pz = at.z, py = groundAt(px, pz);
   const active = flag.status === 'active';
-  const color = new THREE.Color(active ? FLAG_COLORS.alert : '#8A7D55');
-  // Sight line from the tower (distance is an estimate when the camera has no range).
-  g.add(new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, groundAt(x, z) + 4, z), new THREE.Vector3(px, py + 0.6, pz)]),
-    new THREE.LineDashedMaterial({ color, dashSize: 1, gapSize: 0.6, transparent: true, opacity: active ? 0.8 : 0.3 }),
-  ).computeLineDistances());
+  const plant = !!flag.label && ['Wilting', 'Yellow leaves', 'Pest damage'].includes(flag.label);
+  const color = new THREE.Color(active ? (plant ? FLAG_COLORS.weed_detected : FLAG_COLORS.alert) : '#8A7D55');
+  if (from) {
+    g.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(from.x, groundAt(from.x, from.z) + 4, from.z), new THREE.Vector3(px, py + 0.6, pz)]),
+      new THREE.LineDashedMaterial({ color, dashSize: 1, gapSize: 0.6, transparent: true, opacity: active ? 0.8 : 0.3 }),
+    ).computeLineDistances());
+  }
   const body = new THREE.Mesh(new THREE.SphereGeometry(active ? 0.7 : 0.35, 16, 12),
     new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: active ? 0.6 : 0.1 }));
   body.position.set(px, py + 0.7, pz);
@@ -247,6 +258,14 @@ export function buildYardFlags(flags: YardFlag[], items: FlagItem[], layout: Fla
     let obj: THREE.Object3D | null = null;
     if (flag.type === 'alert' && flag.bearingDeg != null && item.type === 'watchtower') {
       group.add(predatorMarker(flag, item, layout, groundAt)); // placed in scene coords already
+      continue;
+    }
+    // Sightings from robots: by property position (mobile robots) or bed position (garden robots).
+    if (flag.type === 'alert' && (flag.propFt || flag.bedMm)) {
+      const at = flag.propFt
+        ? { x: flag.propFt.x - layout.property.widthFt / 2, z: flag.propFt.y - layout.property.depthFt / 2 }
+        : bedMmToScene(item, layout, flag.bedMm!);
+      group.add(sightingMarker(flag, at, groundAt));
       continue;
     }
     if (flag.type === 'weed_detected') obj = weedPin(flag, item, layout);

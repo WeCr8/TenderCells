@@ -447,3 +447,11 @@
   .page-hero.has-visual .page-hero-visual { order: -1; }
   .page-hero-visual img { aspect-ratio: 16 / 9; }
 }
+
+/* Footer newsletter sign-up */
+.footer-newsletter { margin-top: 1rem; display: grid; gap: 0.4rem; max-width: 320px; }
+.footer-newsletter label { font-weight: 700; font-size: 0.9rem; }
+.footer-newsletter div { display: flex; gap: 0.4rem; }
+.footer-newsletter input { flex: 1; min-width: 0; padding: 0.5rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.08); color: inherit; font: inherit; }
+.footer-newsletter button { padding: 0.5rem 0.8rem; border-radius: 6px; border: 0; background: #c8b882; color: #15201b; font-weight: 700; cursor: pointer; }
+.footer-newsletter p { font-size: 0.85rem; margin: 0; }

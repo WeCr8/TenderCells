@@ -80,8 +80,11 @@ dist-ssr
 .env.test
 .env.staging
 .env.local
-.env.example
-.env.example.production
+# .env.example / .env.example.production are deliberately NOT ignored - they
+# are placeholder-only templates meant to be committed (README's own
+# "cp .env.example .env" step needs them to exist in a fresh clone). Verify
+# any new one before committing: it must contain no real key, secret, or
+# personal local path - placeholders only.
 
 # Editor directories and files
 .vscode/*

@@ -59,8 +59,9 @@ export default function CameraGrid({
       location: newCamera.location,
       resolution: newCamera.resolution,
       fps: newCamera.fps,
-      connected: false,
-      signal: -60,
+      connected: false, // newly added - never contacted yet
+      // No signal reading exists for a camera that's never connected -
+      // omit rather than fabricate one.
     };
 
     onAddCamera?.(camera);

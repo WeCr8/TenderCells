@@ -1,5 +1,5 @@
 // ChickenTenderDashboard.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Grid from "@mui/material/Grid";
 import Viewport3D from "../components/viewport/Viewport3D";
 import TelemetryPanel from "../components/telemetry/TelemetryPanel";
@@ -25,7 +25,14 @@ import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
 import { ProductDetailsPanel, ProductHero } from "../components/products/ProductOverview";
 import type { CameraFeed } from "../types/camera";
 import { useProducts } from "../hooks/useProducts";
+import { FIRESTORE_DATA_ENABLED } from "../lib/firebase/firebaseApp";
 
+// Demo/sim-only seed (VITE_SIM_DATA_ONLY / no Firebase config) - three
+// plausible cameras with a non-functional "placeholder://" stream so the
+// layout has something to show with zero setup. A real, signed-in account
+// gets its actual registered camera(s) instead (see the seeding effect
+// below) - never these fabricated names/states/signal levels passed off as
+// live readings from a device nobody has registered.
 const DEFAULT_CAMERAS: CameraFeed[] = [
   {
     id: "cam-main-feed",
@@ -70,14 +77,39 @@ export default function ChickenTenderDashboard() {
   const [deviceId, setDeviceId] = useState("ct_001"); // Default device ID
   const [apiStatus, setApiStatus] = useState<"ok" | "error" | "loading">("loading");
   const [cameraViewEnabled, setCameraViewEnabled] = useState(false);
-  const [cameras, setCameras] = useState<CameraFeed[]>(DEFAULT_CAMERAS);
-  const [selectedCameraId, setSelectedCameraId] = useState(DEFAULT_CAMERAS[0].id);
+  const [cameras, setCameras] = useState<CameraFeed[]>(FIRESTORE_DATA_ENABLED ? [] : DEFAULT_CAMERAS);
+  const [selectedCameraId, setSelectedCameraId] = useState(FIRESTORE_DATA_ENABLED ? '' : DEFAULT_CAMERAS[0].id);
 
   const selectedCamera = cameras.find((camera) => camera.id === selectedCameraId) || cameras[0];
   const chickenTender = products.find((product) =>
     product.metadata?.product_family === "chicken-tender" ||
     product.device_id?.toLowerCase().startsWith("ct_")
   );
+  // A camera can be its own registered product mounted on this coop (the
+  // "Chicken Tender + Camera" package) or a direct camera_stream_url on the
+  // coop's own product doc - check both, same as ProductDashboardPage.
+  const attachedCamera = products.find((product) => product.metadata?.mounted_on_product_id === chickenTender?.id);
+  const realStreamUrl = String(chickenTender?.metadata?.camera_stream_url || attachedCamera?.metadata?.camera_stream_url || '');
+
+  // Seed `cameras` from the real registered device exactly once, when it
+  // first becomes available - never overwrites cameras the user has since
+  // added/removed locally via CameraGrid.
+  const seededRealCameras = useRef(false);
+  useEffect(() => {
+    if (!FIRESTORE_DATA_ENABLED || seededRealCameras.current || !chickenTender) return;
+    seededRealCameras.current = true;
+    if (!realStreamUrl) return; // no camera registered yet - leave the empty state
+    const realCamera: CameraFeed = {
+      id: `cam-${attachedCamera?.device_id || chickenTender.device_id || chickenTender.id}`,
+      deviceId: attachedCamera?.device_id || chickenTender.device_id || chickenTender.id,
+      name: attachedCamera?.product_name || 'Coop Camera',
+      location: 'main-feed',
+      streamUrl: realStreamUrl,
+      connected: (attachedCamera?.connection_status ?? chickenTender.connection_status) === 'online',
+    };
+    setCameras([realCamera]);
+    setSelectedCameraId(realCamera.id);
+  }, [chickenTender, attachedCamera, realStreamUrl]);
 
   useEffect(() => {
     const shouldProbeLocalApi =

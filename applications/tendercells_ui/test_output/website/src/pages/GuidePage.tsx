@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import PageHero from "../components/PageHero";
+import RelatedContent from "../components/RelatedContent";
 
 const guides = {
   "smart-chicken-coop": {
@@ -79,7 +80,10 @@ export default function GuidePage({ slug }: GuidePageProps) {
         ))}
       </div>
 
-      <h2 className="section-title">Related Resources</h2>
+      {/* Guides -> lessons -> reference -> the OS for this guide's topics (data/contentGraph.ts). */}
+      <RelatedContent />
+
+      <h2 className="section-title">Related pages</h2>
       <div className="card-grid">
         {guide.links.map((link) => (
           <Link key={link.href} to={link.href} className="card" style={{ textDecoration: "none" }}>

@@ -1,0 +1,29 @@
+/* /os - Tender Cells OS page. */
+.os-features { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.1rem; }
+.os-feature { border: 1px solid #d1d9e0; border-radius: 10px; overflow: hidden; background: #fff; display: flex; flex-direction: column; }
+.os-feature img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; display: block; border-bottom: 1px solid #eef1f4; }
+.os-feature-body { padding: 0.9rem 1rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; flex: 1; }
+.os-feature-body h3 { margin: 0; font-size: 1.05rem; }
+.os-feature-body p { margin: 0; color: #59636e; font-size: 0.93rem; flex: 1; }
+.os-feature-links { display: flex; flex-direction: column; gap: 0.1rem; margin-top: 0.4rem; }
+.os-try { font-weight: 600; color: #2e7d32; text-decoration: none; }
+.os-try:hover { text-decoration: underline; }
+
+.os-flow { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; counter-reset: flow; }
+.os-flow li { position: relative; padding: 0.9rem 1rem; border-radius: 10px; background: #f6f8fa; border: 1px solid #d1d9e0; display: flex; flex-direction: column; gap: 0.25rem; }
+.os-flow li strong { font-size: 1rem; }
+.os-flow li span { color: #59636e; font-size: 0.9rem; }
+
+.os-steps { list-style: none; margin: 0; padding: 0; position: relative; }
+.os-steps::before { content: ""; position: absolute; left: 17px; top: 10px; bottom: 10px; width: 2px; background: #d1d9e0; }
+.os-steps > li { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 1rem; margin-bottom: 1.1rem; scroll-margin-top: 96px; }
+.os-step-num {
+  position: relative; z-index: 1; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  background: #2e7d32; color: #fff; font-weight: 700;
+}
+.os-steps h3 { margin: 0.3rem 0 0.25rem; font-size: 1.1rem; }
+.os-steps p { margin: 0 0 0.4rem; color: #3d4650; }
+.os-step-links { list-style: none; margin: 0; padding: 0; }
+
+.os-paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+.os-paths .rc-topic ul { list-style: none; margin: 0; padding: 0; }

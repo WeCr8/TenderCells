@@ -1,0 +1,29 @@
+/* /science-fair */
+.sf-method { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.75rem; }
+.sf-method li { display: flex; gap: 0.75rem; padding: 0.8rem 0.9rem; border: 1px solid #d1d9e0; border-radius: 10px; background: #fff; }
+.sf-method p { margin: 0.2rem 0 0; color: #59636e; font-size: 0.92rem; }
+.sf-num { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #2e7d32; color: #fff; font-weight: 700; font-size: 0.9rem; }
+
+.sf-projects { display: flex; flex-direction: column; gap: 0.75rem; }
+.sf-project { border: 1px solid #d1d9e0; border-radius: 10px; background: #fff; scroll-margin-top: 96px; }
+.sf-project[open] { border-color: #2e7d32; }
+.sf-project summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; justify-content: space-between; padding: 0.9rem 1.1rem; list-style: none; }
+.sf-project summary::-webkit-details-marker { display: none; }
+.sf-project summary::before { content: "▸"; color: #2e7d32; margin-right: 0.25rem; }
+.sf-project[open] summary::before { content: "▾"; }
+.sf-title { flex: 1 1 320px; font-weight: 600; font-size: 1.05rem; }
+.sf-meta { color: #59636e; font-size: 0.88rem; display: flex; gap: 0.5rem; align-items: center; }
+.sf-meta .tag { margin: 0; }
+.sf-body { padding: 0 1.1rem 1rem; }
+.sf-body p { margin: 0 0 0.6rem; }
+.sf-sub { font-weight: 700; margin-top: 0.8rem !important; }
+.sf-links { list-style: none; margin: 0 0 0.8rem; padding: 0; }
+.sf-safety { background: #fff5f5; border-left: 4px solid #cf222e; padding: 0.5rem 0.75rem; border-radius: 0 6px 6px 0; }
+
+.sf-vars, .sf-timeline { border-collapse: collapse; width: 100%; margin: 0 0 0.8rem; }
+.sf-vars th, .sf-vars td, .sf-timeline th, .sf-timeline td { border: 1px solid #d1d9e0; padding: 0.45rem 0.7rem; text-align: left; vertical-align: top; }
+.sf-vars th, .sf-timeline th { background: #f6f8fa; width: 9rem; white-space: nowrap; }
+
+.sf-present { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+.sf-list { margin: 0; padding-left: 1.1rem; }
+.sf-list li + li { margin-top: 0.3rem; }

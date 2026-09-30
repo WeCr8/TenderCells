@@ -29,31 +29,6 @@ const hubs = {
       },
     ],
   },
-  guides: {
-    title: "TenderCells Guides",
-    subtitle: "Original learning guides for smart coops, predator monitoring, pasture rotation, and open animal-care automation.",
-    intro:
-      "These guides add practical context around the products and education paths. They are written to help students and builders understand problems before they automate them.",
-    groups: [
-      {
-        title: "Core Guides",
-        links: [
-          { label: "Smart Chicken Coop Guide", href: "/guides/smart-chicken-coop", desc: "Plan sensors, records, safety, manual override, and open-source coop automation." },
-          { label: "Predator Monitoring Guide", href: "/guides/predator-monitoring", desc: "Understand cameras, alerts, solar design, and safe monitoring workflows." },
-          { label: "Mobile Coop and Pasture Rotation", href: "/guides/pasture-rotation", desc: "Study routes, docking, safe movement, and pasture care." },
-          { label: "ESP32-S3 Camera Node", href: "/guides/camera-node-first-build", desc: "Wire, flash, register, and control the first battery-powered TenderCells device." },
-        ],
-      },
-      {
-        title: "Related Product Pages",
-        links: [
-          { label: "Chicken Tender", href: "/shop/chicken-tender", desc: "Automated smart chicken coop product concept." },
-          { label: "WatchTower AI", href: "/shop/watchtower", desc: "Solar predator monitor and camera concept." },
-          { label: "Roaming Roost", href: "/shop/roaming-roost", desc: "Mobile pasture coop concept for route and rotation learning." },
-        ],
-      },
-    ],
-  },
 };
 
 interface SeoHubPageProps {

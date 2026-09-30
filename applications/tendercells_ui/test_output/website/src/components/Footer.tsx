@@ -28,6 +28,9 @@ const footerGroups = [
   {
     title: "Build",
     links: [
+      { label: "Tender Cells OS", to: "/os" },
+      { label: "Build a Device", to: "/os#build" },
+      { label: "Guides", to: "/guides" },
       { label: "Developers", to: "/developers" },
       { label: "Open Source", to: "/open-source" },
       { label: "Flash a Device", href: "/flash" },

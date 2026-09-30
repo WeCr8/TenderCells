@@ -1,5 +1,5 @@
 // PropertyLayoutBuilder.tsx - Yard/property CRUD and simulation layout editor
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -28,6 +28,7 @@ import {
   Grass as GrassIcon,
   Gesture as GestureIcon,
   PlayArrow as PlayArrowIcon,
+  Stop as StopIcon,
   ArrowUpward as ArrowUpIcon,
   ArrowDownward as ArrowDownIcon,
   ArrowBack as ArrowLeftIcon,
@@ -52,6 +53,7 @@ import {
   loadPropertyLayout,
   savePropertyLayout,
   PROPERTY_LAYOUT_EVENT,
+  MOBILE_ROBOT_TYPES,
   type PropertyLayoutState,
   type HardwareType,
   type ItemShape,
@@ -61,6 +63,7 @@ import {
   type PropertyItemKind,
 } from '../components/property/propertyLayoutStore';
 import Viewport3D from '../components/viewport/Viewport3D';
+import { setPatrolSimActive } from '../lib/yard/patrolSim';
 import { TerrainEditorPanel, TerrainSvgLayer } from '../components/property/TerrainLayer';
 import WatchTowerSvgLayer from '../components/property/WatchTowerLayer';
 import { useYardEvents } from '../hooks/useYardEvents';
@@ -103,6 +106,7 @@ const TYPE_LABELS: Record<string, string> = {
   aquaponics: 'Garden — Aquaponics',
   hydroponics: 'Garden — Hydroponics',
   greenhouse: 'Garden — Greenhouse',
+  'community-custom': 'Community Custom',
   tree: 'Tree',
   bush: 'Bush',
   'crop-row': 'Crop Row',
@@ -129,12 +133,41 @@ const MAX_MODEL_BYTES = 60 * 1024 * 1024;
 /** Type-specific copy for the "attach a 3D model" block in the item editor. */
 function modelAttachCopy(type: string, label: string): { title: string; fallback: string } {
   if (GARDEN_HW_TYPES.has(type)) return { title: '🌱 Import full 3D scene (Genesis world)', fallback: `the built-in ${label}` };
-  if (type === 'roaming-roost') return { title: '🤖 Attach robot model', fallback: 'the built-in Roaming Roost shape' };
+  if (MOBILE_ROBOT_TYPES.has(type as HardwareType)) return { title: '🤖 Attach robot model', fallback: `the built-in ${label} shape` };
   return { title: `📦 Attach ${label} 3D model`, fallback: `the built-in ${label} shape` };
 }
 
 // Obstacle types that the Roaming Roost must avoid
 const ROAMING_BLOCKED_TYPES = new Set(['tree', 'rock', 'pond', 'fence', 'no-go-zone']);
+
+type FtPoint = { x: number; y: number };
+type FtRect = { x: number; y: number; width: number; depth: number };
+
+const cross2d = (a: FtPoint, b: FtPoint, c: FtPoint) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+
+const segmentsIntersect = (p1: FtPoint, p2: FtPoint, p3: FtPoint, p4: FtPoint): boolean => {
+  const d1 = cross2d(p3, p4, p1);
+  const d2 = cross2d(p3, p4, p2);
+  const d3 = cross2d(p1, p2, p3);
+  const d4 = cross2d(p1, p2, p4);
+  return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
+};
+
+const pointInRect = (p: FtPoint, r: FtRect): boolean =>
+  p.x >= r.x && p.x <= r.x + r.width && p.y >= r.y && p.y <= r.y + r.depth;
+
+/** True if the drawn segment p1→p2 crosses (or lands inside) a no-go/obstacle footprint. */
+const segmentIntersectsRect = (p1: FtPoint, p2: FtPoint, r: FtRect): boolean => {
+  if (pointInRect(p1, r) || pointInRect(p2, r)) return true;
+  const corners: FtPoint[] = [
+    { x: r.x, y: r.y }, { x: r.x + r.width, y: r.y },
+    { x: r.x + r.width, y: r.y + r.depth }, { x: r.x, y: r.y + r.depth },
+  ];
+  for (let i = 0; i < 4; i++) {
+    if (segmentsIntersect(p1, p2, corners[i], corners[(i + 1) % 4])) return true;
+  }
+  return false;
+};
 
 export default function PropertyLayoutBuilder() {
   const initial = useMemo(loadPropertyLayout, []);
@@ -162,11 +195,28 @@ export default function PropertyLayoutBuilder() {
   // it commits onto the selected item's PropertyItem.patrolPath on pointer-up.
   const [isDrawingPath, setIsDrawingPath] = useState(false);
   const [drawnPath, setDrawnPath] = useState<Array<{ x: number; y: number }>>([]);
+  // Items whose patrol route is currently playing back in the 3D viewport
+  // (Simulate Route button). Transient - mirrored into patrolSim.ts so
+  // Viewport3D's animation loop can read it without this component re-rendering it.
+  const [simulatingIds, setSimulatingIds] = useState<Set<string>>(new Set());
 
   const { products } = useProducts();
   // Predator detections for the WatchTower layer (only polled while the layer is on).
   const watchtowerItems = useMemo(() => (showPredatorLayer ? items.filter((i) => i.type === 'watchtower') : []), [items, showPredatorLayer]);
   const { flags: towerFlags } = useYardEvents(watchtowerItems);
+
+  // Stop any running patrol playback when leaving simulation mode (or unmounting) -
+  // otherwise a rover would keep "driving" in the 3D view after the button that
+  // started it is no longer on screen. Reads the ref (not the `simulatingIds` state)
+  // so this effect only reacts to `layoutMode`, never to a sim it just started/stopped.
+  const simulatingIdsRef = useRef(simulatingIds);
+  simulatingIdsRef.current = simulatingIds;
+  useEffect(() => {
+    if (layoutMode === 'simulation') return;
+    simulatingIdsRef.current.forEach((id) => setPatrolSimActive(id, false));
+    setSimulatingIds(new Set());
+  }, [layoutMode]);
+  useEffect(() => () => { simulatingIdsRef.current.forEach((id) => setPatrolSimActive(id, false)); }, []);
 
   // Sync layout items to registered Firestore products.
   // Match priority: 1) existing item with matching productId (stable 1:1 link)
@@ -182,7 +232,13 @@ export default function PropertyLayoutBuilder() {
 
       for (const product of products) {
         const family = product.metadata?.product_family as string | undefined;
-        const hwType = family ? FAMILY_TO_HW_TYPE[family] : undefined;
+        let hwType = family ? FAMILY_TO_HW_TYPE[family] : undefined;
+        // No built-in family (community-custom, or anything else the registration
+        // modal's "DIY" templates set) - place it generically IF the user checked
+        // "Property Simulation" for it. That checkbox is the actual opt-in; the
+        // family string alone can't be, since community-custom also covers things
+        // that were never meant to sit on the yard map (e.g. a drone monitor).
+        if (!hwType && product.metadata?.property_simulation_enabled) hwType = 'community-custom';
         if (!hwType || !(hwType in PRODUCT_DIMENSIONS)) continue;
 
         const spec = PRODUCT_DIMENSIONS[hwType];
@@ -405,9 +461,14 @@ export default function PropertyLayoutBuilder() {
 
     if (isDrawingPath && event.buttons === 1) {
       const point = { x: Math.round(pointer.x * 10) / 10, y: Math.round(pointer.y * 10) / 10 };
-      setDrawnPath((prev) => (prev.length && prev[prev.length - 1].x === point.x && prev[prev.length - 1].y === point.y
-        ? prev
-        : [...prev, point]));
+      const blockedRects = items.filter((it) => it.kind === 'obstacle' && ROAMING_BLOCKED_TYPES.has(it.type));
+      setDrawnPath((prev) => {
+        if (prev.length && prev[prev.length - 1].x === point.x && prev[prev.length - 1].y === point.y) return prev;
+        // Reject a segment that would cross a no-go zone / obstacle - stops the drawn
+        // path at the obstacle's edge instead of cutting through it.
+        if (prev.length && blockedRects.some((r) => segmentIntersectsRect(prev[prev.length - 1], point, r))) return prev;
+        return [...prev, point];
+      });
       return;
     }
 
@@ -914,8 +975,8 @@ export default function PropertyLayoutBuilder() {
                   </>
                 )}
 
-                {/* Saved patrol path for the selected roaming-roost, when not actively (re)drawing */}
-                {!isDrawingPath && selectedItem?.type === 'roaming-roost' && selectedItem.patrolPath && selectedItem.patrolPath.length > 1 && (
+                {/* Saved patrol path for the selected mobile robot, when not actively (re)drawing */}
+                {!isDrawingPath && selectedItem && MOBILE_ROBOT_TYPES.has(selectedItem.type as HardwareType) && selectedItem.patrolPath && selectedItem.patrolPath.length > 1 && (
                   <polyline
                     points={selectedItem.patrolPath.map((p) => `${p.x * scaleX},${p.y * scaleY}`).join(' ')}
                     fill="none" stroke="#E8A020" strokeWidth={3} strokeDasharray="10 6" opacity={0.85}
@@ -1183,8 +1244,12 @@ export default function PropertyLayoutBuilder() {
                   </Button>
                 </Stack>
 
-                {layoutMode === 'simulation' && selectedItem.type === 'roaming-roost' && (
-                  <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                {layoutMode === 'simulation' && MOBILE_ROBOT_TYPES.has(selectedItem.type as HardwareType) && (
+                  <>
+                    <Typography variant="caption" sx={{ color: '#A5B1A9', display: 'block', mt: 1 }}>
+                      🖊️ Draw where it should drive, then ▶ press play to watch it go.
+                    </Typography>
+                    <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
                     <Button
                       size="small" fullWidth startIcon={<GestureIcon fontSize="small" />}
                       variant={isDrawingPath ? 'contained' : 'outlined'}
@@ -1195,16 +1260,37 @@ export default function PropertyLayoutBuilder() {
                     >
                       {isDrawingPath ? 'Drag on map…' : 'Draw Path'}
                     </Button>
-                    {/* Disabled until the patrol animation lands (TASKS.md: Robot OS Milestone 1
-                        step 3 wires this onClick) - it was a clickable no-op before. */}
-                    <Tooltip title="Route playback is coming in the next Robot OS milestone">
-                      <span style={{ flex: 1, display: 'flex' }}>
-                        <Button size="small" variant="contained" fullWidth startIcon={<PlayArrowIcon />} disabled sx={{ bgcolor: '#4A7C59' }}>
-                          Simulate Route
+                    {(() => {
+                      const hasRoute = !!selectedItem.patrolPath && selectedItem.patrolPath.length > 1;
+                      const isSimulating = simulatingIds.has(selectedItem.id);
+                      const toggle = () => {
+                        const next = !isSimulating;
+                        setPatrolSimActive(selectedItem.id, next);
+                        setSimulatingIds((prev) => {
+                          const copy = new Set(prev);
+                          if (next) copy.add(selectedItem.id); else copy.delete(selectedItem.id);
+                          return copy;
+                        });
+                      };
+                      const button = (
+                        <Button
+                          size="small" variant="contained" fullWidth
+                          startIcon={isSimulating ? <StopIcon /> : <PlayArrowIcon />}
+                          disabled={!hasRoute}
+                          onClick={toggle}
+                          sx={{ bgcolor: isSimulating ? '#E8A020' : '#4A7C59', color: isSimulating ? '#0A2118' : undefined }}
+                        >
+                          {isSimulating ? 'Stop Route' : 'Simulate Route'}
                         </Button>
-                      </span>
-                    </Tooltip>
-                  </Stack>
+                      );
+                      return hasRoute ? button : (
+                        <Tooltip title="Draw a path first, then simulate it">
+                          <span style={{ flex: 1, display: 'flex' }}>{button}</span>
+                        </Tooltip>
+                      );
+                    })()}
+                    </Stack>
+                  </>
                 )}
               </Paper>
             )}

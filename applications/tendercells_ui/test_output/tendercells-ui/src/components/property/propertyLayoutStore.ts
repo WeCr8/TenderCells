@@ -23,7 +23,14 @@ export type HardwareType =
   | 'farmbot-genesis-xl'
   | 'aquaponics'
   | 'hydroponics'
-  | 'greenhouse';
+  | 'greenhouse'
+  // A user's own registered device with no built-in product family (Product
+  // Registration Modal's "DIY RC Vehicle" / "Community Custom" templates, or
+  // anything else with property_simulation_enabled checked). Renders its own
+  // uploaded GLB when the product has one (see Viewport3D's product glbCache,
+  // keyed by product.id - same path already used for a linked built-in
+  // product's custom_device_asset_url), otherwise a plain placeholder box.
+  | 'community-custom';
 export type ObstacleType =
   | 'tree' | 'fence' | 'pond' | 'rock' | 'building' | 'garden' | 'no-go-zone'
   | 'bush' | 'crop-row';
@@ -100,7 +107,14 @@ export const HARDWARE_TYPES: HardwareType[] = [
   'rail-module',
   'sensor',
   ...GARDEN_TYPES,
+  'community-custom',
 ];
+
+// Mobile ground robots that can be given a hand-drawn patrol route and driven
+// through it in the 3D viewport (Draw Path / Simulate Route). A one-line
+// addition here is all a *new* mobile robot type needs to pick up that whole
+// feature - see PropertyLayoutBuilder.tsx and Viewport3D.tsx for the consumers.
+export const MOBILE_ROBOT_TYPES = new Set<HardwareType>(['roaming-roost', 'community-custom']);
 
 // Real-world footprint dimensions from product specs (CLAUDE.md)
 // width × depth in feet; height not used on 2D map
@@ -121,6 +135,7 @@ export const PRODUCT_DIMENSIONS: Record<HardwareType, { width: number; depth: nu
   'aquaponics':         { width: 4,  depth: 8,  shape: 'rect' }, // tank + grow bed
   'hydroponics':        { width: 2,  depth: 2,  shape: 'circle' }, // vertical tower
   'greenhouse':         { width: 8,  depth: 12, shape: 'rect' }, // enclosed grow house
+  'community-custom':   { width: 4,  depth: 4,  shape: 'rect' }, // arbitrary - resize after adding
 };
 
 export const OBSTACLE_TYPES: ObstacleType[] = ['tree', 'bush', 'crop-row', 'fence', 'pond', 'rock', 'building', 'garden', 'no-go-zone'];
@@ -155,6 +170,7 @@ export const ITEM_COLORS: Record<string, string> = {
   aquaponics:           '#26A69A',
   hydroponics:          '#42A5B5',
   greenhouse:           '#9CCC65',
+  'community-custom':   '#5AC8C8',
   tree:             '#2F7D32',
   bush:             '#4C9A4C',
   'crop-row':       '#6B8E23',

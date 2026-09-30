@@ -70,14 +70,22 @@ gaps.
       repo's root gate only typechecks the root tsconfig.app.json/
       tsconfig.node.json, never this nested subproject, so always verify
       this config directly here too), 22/22 vitest, eslint clean.
-- [ ] Once path-drawing lands: animate `item.modelUrl`'s loaded mesh along
-      `patrolPath` in `Viewport3D.tsx` using simple interpolation (no physics
-      engine needed for "basic tasks" per Zach's own framing) and wire the
-      dead "Simulate Route" button (`PropertyLayoutBuilder.tsx:1059-1063`,
-      currently no onClick) to trigger it.
-- [ ] Respect `ROAMING_BLOCKED_TYPES` during the patrol (skip/avoid
-      no-go-zone footprints) — data already exists, just needs consuming in
-      the movement step.
+- [x] Animate the item's mesh along `patrolPath` in `Viewport3D.tsx` (linear
+      lerp between waypoints, fixed 2.5s/segment, loops, faces travel
+      direction) and wire "Simulate Route" to trigger/stop it. Gated by a new
+      transient flag module (`src/lib/yard/patrolSim.ts`) rather than a prop
+      or store field, so toggling playback doesn't rebuild the scene — mirrors
+      the existing `FARMBOT_POSITION_EVENT` ref pattern already in this file.
+      Done 2026-09-29. Verified: nested `tsc --noEmit` 0 errors, eslint 0
+      errors/warnings, `demoEnvironment.test.ts` 7/7. Not verified: an actual
+      browser click-through (no browser tool in that session) — do one before
+      trusting this further.
+- [x] Respect `ROAMING_BLOCKED_TYPES` during path authoring (not the
+      animation step — simpler and matches the milestone's own "simplest
+      correct approach" note): `PropertyLayoutBuilder.tsx`'s draw-path handler
+      now rejects a new point if the segment to it crosses a blocked item's
+      bounding box, so a patrol path can never be drawn through one. Done
+      2026-09-29.
 - [ ] Bind the patrol to whatever scheduling primitive `SchedulesPage.tsx`
       already uses for hardware tasks (audit that file before designing a
       new one — likely reuse-only, per Zach's instruction).
@@ -87,13 +95,37 @@ gaps.
       a placeholder), place 2-3 waypoints, run on a schedule, confirm it
       moves and avoids a no-go zone.
 
-## Milestone 2 — generalize beyond one robot type (not started)
+## Milestone 2 — generalize beyond one robot type (in progress)
 
-- [ ] Formalize the "robot package" as its own product family (not just
-      `community-custom`) if usage grows beyond one type: real capability
-      manifest (what functions a robot exposes — `move_to`, `patrol`,
-      `dock`) alongside the GLB, so the schedule UI can offer real
-      functions per robot instead of one hardcoded patrol behavior.
+- [x] `community-custom` now a real `PropertyItem`/`HardwareType`
+      (`propertyLayoutStore.ts`), not just a Firestore `product_family`
+      string that the layout sync silently dropped. The sync effect
+      (`PropertyLayoutBuilder.tsx`) places a product with no built-in family
+      IF its "Property Simulation" checkbox is on (`property_simulation_enabled`
+      — the actual opt-in; `community-custom` alone can't be, since that same
+      family also covers non-ground things like the registration modal's
+      Drone Monitor template). Done 2026-09-29.
+- [x] Draw Path / Simulate Route / obstacle-avoidance and the patrol
+      animation are no longer hardcoded to `item.type === 'roaming-roost'` —
+      all four gate on a new `MOBILE_ROBOT_TYPES` set (`propertyLayoutStore.ts`,
+      currently `{'roaming-roost', 'community-custom'}`). Adding a future
+      ground-robot type is a one-line addition to that set. Done 2026-09-29.
+- [x] Hugging Face Hub models (`🤗 owner/repo/model.glb`, `lib/three/huggingFace.ts`)
+      were already wired generically to *every* hardware item's model-attach
+      block (`kind === 'hardware'`, not type-gated) before this pass — so a
+      community-custom robot's GLB can come from an upload or a Hub link the
+      same way Roaming Roost's can. Verified by reading that code path, not
+      changed. Known small gap either way: the "scanned coverage disc" ground
+      decal only draws for the procedural placeholder mesh, not once a
+      GLB/HF model is attached (`Viewport3D.tsx`'s `if (loadedGlb)` branch
+      returns before reaching it) — cosmetic only; the actual patrol drive
+      animation moves the item's group regardless of which mesh it holds.
+- [ ] Formalize the "robot package" as its own product family with a real
+      capability manifest (what functions a robot exposes — `move_to`,
+      `patrol`, `dock`) alongside the GLB, so the schedule UI can offer real
+      functions per robot instead of one hardcoded patrol behavior. Not
+      started — today's fix makes `community-custom` *appear* and *drive*,
+      it doesn't give it a declared capability set.
 - [ ] Investigate whether `nvidia_isaac` backend (already selectable in
       registration) is real/wired anywhere, or purely aspirational config
       today — do not assume; check before building against it.

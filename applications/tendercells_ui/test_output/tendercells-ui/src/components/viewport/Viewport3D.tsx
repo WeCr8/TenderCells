@@ -17,6 +17,7 @@ import { buildHydrologyLayer } from './hydrologyLayer';
 import { createWeedRobot, placeWeedRobot } from './weedRobotMarker';
 import { getSimRobot } from '../../lib/yard/weedSim';
 import { WEED_BED_TYPES, YARD_LIVE, type WeedRobotState } from '../../lib/yard/yardTypes';
+import { PATROL_SIM_EVENT, computePatrolPose, type PatrolSimDetail } from '../../lib/yard/patrolSim';
 import type { HydrologyResult } from '../property/watershed';
 import { useYardEvents } from '../../hooks/useYardEvents';
 import YardAttentionPanel from '../yard/YardAttentionPanel';
@@ -40,9 +41,11 @@ import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../types/products';
 import {
   ITEM_COLORS,
+  MOBILE_ROBOT_TYPES,
   PROPERTY_LAYOUT_EVENT,
   loadPropertyLayout,
   savePropertyLayout,
+  type HardwareType,
   type PropertyItem,
   type PropertyLayoutState,
 } from '../property/propertyLayoutStore';
@@ -957,11 +960,12 @@ const createYardItem = (
     });
     group.add(hw);
 
-    // Terrain-tracking robots (Roaming Roost) map/patrol an area — draw the zone
-    // they've covered as a scanned-grass disc + a boundary ring on the ground. This
-    // is driven by item.scan when a real rover reports its mapped polygon; until
-    // then it's derived from the placement (patrol radius from footprint).
-    if (item.type === 'roaming-roost') {
+    // Mobile ground robots (Roaming Roost, or a user's own via MOBILE_ROBOT_TYPES)
+    // map/patrol an area — draw the zone they've covered as a scanned-grass disc +
+    // a boundary ring on the ground. This is driven by item.scan when a real rover
+    // reports its mapped polygon; until then it's derived from the placement
+    // (patrol radius from footprint).
+    if (MOBILE_ROBOT_TYPES.has(item.type as HardwareType)) {
       const patrolR = (item.scan?.radiusFt ?? Math.max(item.width, item.depth) * 3.5);
       const disc = new THREE.Mesh(
         new THREE.CircleGeometry(patrolR, 56),
@@ -1002,6 +1006,7 @@ const createYardItem = (
 
   group.name = item.product?.device_id || item.product?.id || item.id;
   group.userData.sceneCenter = { x, z }; // settleOnTerrain() lifts the item onto the ground
+  group.userData.itemId = item.id; // stable lookup key, independent of the label above
   return group;
 };
 
@@ -1109,6 +1114,21 @@ export default function Viewport3D({
     };
     window.addEventListener(FARMBOT_POSITION_EVENT, onPosition);
     return () => window.removeEventListener(FARMBOT_POSITION_EVENT, onPosition);
+  }, []);
+  // Roaming Roost patrol playback toggles (Simulate Route button). Kept in a ref,
+  // same reasoning as farmbotPosRef - flipping it must not rebuild the whole scene.
+  const activePatrolIdsRef = useRef<Set<string>>(new Set());
+  // Rebuilt every scene pass (see workspaceMode branch below) - the actual mesh
+  // group per roaming-roost item, so the animate() loop can move the real body.
+  const yardGroupByItemIdRef = useRef<Map<string, THREE.Object3D>>(new Map());
+  useEffect(() => {
+    const onPatrolSim = (event: Event) => {
+      const { itemId, active } = (event as CustomEvent<PatrolSimDetail>).detail;
+      if (active) activePatrolIdsRef.current.add(itemId);
+      else activePatrolIdsRef.current.delete(itemId);
+    };
+    window.addEventListener(PATROL_SIM_EVENT, onPatrolSim);
+    return () => window.removeEventListener(PATROL_SIM_EVENT, onPatrolSim);
   }, []);
   const [modelErrors, setModelErrors] = useState<string[]>([]);
   const recordModelError = (key: string, label: string, err: unknown) => {
@@ -1407,6 +1427,7 @@ export default function Viewport3D({
     scene.add(createPropertyGrid(layout));
 
     const glbCache = glbCacheRef.current;
+    yardGroupByItemIdRef.current.clear();
 
     if (workspaceMode === 'property') {
       // Obstacles only + featured product model centered
@@ -1442,12 +1463,34 @@ export default function Viewport3D({
       }
     } else {
       // Products / simulation: all items with product-specific geometry
-      scene.add(settleOnTerrain(createYardItems(enrichedItems, layout, product, glbCache), groundH));
+      const yardItemsGroup = createYardItems(enrichedItems, layout, product, glbCache);
+      scene.add(settleOnTerrain(yardItemsGroup, groundH));
+      // Index by userData.itemId (see createYardItem) so the patrol animation below
+      // can move each roaming-roost's actual body mesh, not a separate marker.
+      yardItemsGroup.children.forEach((child) => {
+        const itemId = child.userData.itemId as string | undefined;
+        if (itemId) yardGroupByItemIdRef.current.set(itemId, child);
+      });
     }
 
     if (workspaceMode === 'simulation') {
       scene.add(createSimulationOverlay(layout, groundH));
     }
+
+    // Roaming Roost patrol playback: a fixed-duration lerp between the item's own
+    // hand-drawn waypoints (PropertyItem.patrolPath, property-ft), converted once to
+    // scene coordinates here (same origin shift as propertyToScenePosition, but for
+    // a bare point with no width/depth). "Basic" simulation per product owner - linear
+    // interpolation, no physics.
+    const patrolRoutes = (workspaceMode === 'property' ? [] : enrichedItems)
+      .filter((item) => MOBILE_ROBOT_TYPES.has(item.type as HardwareType) && item.patrolPath && item.patrolPath.length > 1)
+      .map((item) => ({
+        itemId: item.id,
+        points: item.patrolPath!.map((p) => ({
+          x: p.x - layout.property.widthFt / 2,
+          z: p.y - layout.property.depthFt / 2,
+        })),
+      }));
 
     // Live FarmBot tool-head markers over garden beds (hidden until a position arrives).
     const farmbotMarkers = workspaceMode === 'property' ? [] : layout.items
@@ -1528,6 +1571,15 @@ export default function Viewport3D({
         const pos = farmbotPosRef.current.get(item.id);
         marker.visible = !!pos;
         if (pos) placeFarmBotMarker(marker, item, layout, pos, groundH);
+      });
+      patrolRoutes.forEach(({ itemId, points }) => {
+        if (!activePatrolIdsRef.current.has(itemId)) return;
+        const group = yardGroupByItemIdRef.current.get(itemId);
+        if (!group) return;
+        const pose = computePatrolPose(points, t);
+        if (!pose) return;
+        group.position.set(pose.x, groundH(pose.x, pose.z), pose.z);
+        group.rotation.y = pose.heading;
       });
       controls.update();
       renderer.render(scene, camera);

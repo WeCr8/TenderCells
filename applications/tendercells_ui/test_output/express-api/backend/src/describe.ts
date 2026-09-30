@@ -40,7 +40,7 @@ export const ENDPOINTS: EndpointDoc[] = [
   { method: "POST", path: `${M}/devices/{deviceId}/claim`, auth: "signed-in", summary: "Claim a device for the signed-in account." },
   { method: "GET", path: `${M}/devices/{deviceId}/telemetry`, auth: "device-owner", summary: "Latest tc/{id}/sensors payload." },
   { method: "GET", path: `${M}/devices/{deviceId}/state`, auth: "device-owner", summary: "Latest tc/{id}/state payload (idle | running | error | estop)." },
-  { method: "GET", path: `${M}/devices/{deviceId}/state/{sub}`, auth: "device-owner", summary: "Latest sub-state: arm | gantry | weed (tc/{id}/state/{sub})." },
+  { method: "GET", path: `${M}/devices/{deviceId}/state/{sub}`, auth: "device-owner", summary: "Latest sub-state: arm | gantry | weed | mower | survey (tc/{id}/state/{sub})." },
   { method: "GET", path: `${M}/devices/{deviceId}/alerts`, auth: "device-owner", summary: "Last 100 alerts (predator, fault, health)." },
   { method: "GET", path: `${M}/devices/{deviceId}/events`, auth: "device-owner", summary: "Yard events / station flags plus presence (see <yard-events>)." },
   { method: "GET", path: `${M}/devices/{deviceId}/presence`, auth: "device-owner", summary: "Online / last seen (stale after 90 s of silence)." },
@@ -99,7 +99,8 @@ export const MQTT_TOPICS: TopicDoc[] = [
   { pattern: "tc/{id}/state/mower", direction: "device-to-api", qos: 1, retain: true, payload: "{activity: mowing|docked|paused|returning|error|unknown, battery?, error?, online, source: home-assistant|device, entityId?, estop?, lastInterlock?: {reason, at, action: refused|sent-home}, ts}", note: "Published by the hub's mower bridge for Home Assistant mowers, or by a native mower itself." },
   { pattern: "tc/{id}/cmd/mower", direction: "api-to-device", qos: 1, payload: "{action: start|resume_schedule|pause|park_until_next_schedule|dock, seq, timestamp, durationMin?, pattern?, angleDeg?, edgePasses?, overlapPct?, cuttingHeightMm?, area?:{x,y,width,depth}}", note: "Native mowers reply on tc/{id}/ack. The hub sends pause + dock by itself when the interlock trips while mowing." },
   { pattern: "tc/{id}/cmd/estop", direction: "api-to-device", qos: 2, retain: true, payload: "{active: boolean, source, ts}" },
-  { pattern: "tc/{id}/cfg/zones", direction: "api-to-device", qos: 1, retain: true, payload: "{v:1, seq, units:'ft', self?:{itemId,x,y,width,depth}, zones:[{id,name,kind:no-go|keep-out|no-laser,poly:[[x,y]...]}], ts}", note: "Property feet, origin top-left. Robots refuse motion into no-go / keep-out and lasing inside any zone." },
+  { pattern: "tc/{id}/cfg/zones", direction: "api-to-device", qos: 1, retain: true, payload: "{v:1, seq, units:'ft', self?:{itemId,x,y,width,depth}, zones:[{id,name,kind:no-go|keep-out|no-laser,poly:[[x,y]...]}], boundary?:{poly:[[x,y]...], marginFt, source:layout|drawn|survey}, ts}", note: "Property feet, origin top-left. Robots refuse motion into no-go / keep-out, lasing inside any zone, and any motion or lasing outside the property boundary (or within marginFt of its edge)." },
+  { pattern: "tc/{id}/state/survey", direction: "device-to-api", qos: 1, retain: true, payload: "{deviceId, at, edge:[[x,y]...], stepFt, samples:[{x,y,z,depthFt?}]}", note: "A mobile robot's boundary survey: fence line it sensed plus elevation / water-depth samples taken inside the current boundary. The owner reviews it as a proposal; it never widens the boundary on its own." },
 ];
 
 const ROBOT_TYPES = [
@@ -193,6 +194,7 @@ export function buildBackendXml(opts: { routes?: Array<{ method: string; path: s
   lines.push("    <rule>Arm / clean / routine / policy are refused in animal areas while chickens are detected or the headcount is older than 60 s.</rule>");
   lines.push("    <rule>Weed treatment needs a human approval per weed; the laser fires only with burn enabled, student mode off, enclosure closed and no E-STOP.</rule>");
   lines.push("    <rule>Robots keep out of no-go and keep-out zones (tc/{id}/cfg/zones, retained) and never fire a laser inside any zone, including the no-laser buffer around animal housing.</rule>");
+  lines.push("    <rule>Robots stay inside the property boundary in tc/{id}/cfg/zones, marginFt in from its edge. A survey can propose a better boundary, but only the owner can accept it, and widening needs their explicit confirmation.</rule>");
   lines.push("    <rule>Robot mowers (bring your own) are refused a start, and sent home (pause + dock) while mowing, during E-STOP, in quiet hours (default 20:00-07:00, wildlife), while a guarded coop door is open or its state is missing or stale, or for 15 min after an animal is seen. The mower keeps its own blade, lift and boundary safety; Tender Cells cannot cut a third-party mower's power.</rule>");
   lines.push("    <rule>Every hardware action in the UI goes through a confirmation dialog.</rule>");
   lines.push("  </safety>");

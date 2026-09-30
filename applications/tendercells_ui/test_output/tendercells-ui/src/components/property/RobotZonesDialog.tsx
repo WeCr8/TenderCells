@@ -15,7 +15,8 @@ import Typography from '@mui/material/Typography';
 import BlockIcon from '@mui/icons-material/Block';
 import ViewInArIcon from '@mui/icons-material/ViewInAr';
 import type { PropertyLayoutState } from './propertyLayoutStore';
-import { ZONE_ROBOT_TYPES, pathConflict, zonesFromLayout, zonesPayload } from '../../lib/yard/exclusionZones';
+import { ZONE_ROBOT_TYPES, routeConflict, zonesFromLayout, zonesPayload } from '../../lib/yard/exclusionZones';
+import { effectiveBoundary, itemsOutside } from '../../lib/yard/boundary';
 import { sendZones } from '../../lib/yard/yardApi';
 import { YARD_LIVE } from '../../lib/yard/yardTypes';
 import { downloadUsda } from '../../lib/yard/usdExport';
@@ -30,9 +31,11 @@ export default function RobotZonesDialog({ layout }: { layout: PropertyLayoutSta
   const robots = layout.items.filter((i) => ZONE_ROBOT_TYPES.has(i.type) && i.deviceId);
   const conflicts = layout.items
     .filter((i) => i.patrolPath && i.patrolPath.length > 1)
-    .map((i) => ({ item: i, hit: pathConflict(zones, i.patrolPath!, i.id) }))
+    .map((i) => ({ item: i, hit: routeConflict(layout, i.patrolPath!, i.id) }))
     .filter((c) => c.hit);
 
+  const boundary = effectiveBoundary(layout);
+  const outside = itemsOutside(layout, boundary);
   const send = async () => {
     setBusy(true);
     const out: string[] = [];
@@ -68,19 +71,26 @@ export default function RobotZonesDialog({ layout }: { layout: PropertyLayoutSta
             aiming dot inside any zone - including the <strong>no-laser</strong> buffer around every animal house. Zones are stored on the
             robot, so they still apply if the network drops.
           </Typography>
+          <Typography variant="body2" sx={{ mb: 1 }} data-testid="zones-boundary">
+            <strong>Property boundary</strong> ({boundary.source === 'layout' ? 'property rectangle' : boundary.source === 'drawn' ? 'drawn by you' : 'robot survey you accepted'},{' '}
+            {boundary.poly.length} corners): robots never drive or aim outside it, or within {boundary.marginFt} ft of its edge.
+          </Typography>
+          {outside.map((it) => (
+            <Typography key={it.id} variant="body2" sx={{ color: '#E8A020' }}>⚠ {it.name} sits partly outside the boundary - move it or widen the boundary.</Typography>
+          ))}
           <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mb: 1.5 }}>
             {zones.map((z) => <Chip key={z.id} size="small" label={`${z.name} · ${z.kind}`} sx={{ border: `1px solid ${KIND_COLOR[z.kind]}` }} />)}
             {zones.length === 0 && <Typography variant="caption">No zones yet - add a No-Go Zone or obstacles to the map.</Typography>}
           </Stack>
           {conflicts.map(({ item, hit }) => (
             <Typography key={item.id} variant="body2" sx={{ color: '#E8A020' }} data-testid="zone-conflict">
-              ⚠ {item.name}&apos;s patrol path crosses {hit!.zone.kind} zone &quot;{hit!.zone.name}&quot; (segment {hit!.segment + 1}) - the robot will stop there. Redraw the path.
+              ⚠ {item.name}&apos;s patrol path {hit!.zone.id === 'boundary' ? 'leaves the property boundary' : <>crosses {hit!.zone.kind} zone &quot;{hit!.zone.name}&quot;</>} (segment {hit!.segment + 1}) - the robot will stop there. Redraw the path.
             </Typography>
           ))}
           <Box sx={{ mt: 1.5 }}>
             <Typography variant="subtitle2">Robots ({robots.length})</Typography>
             {robots.length === 0
-              ? <Typography variant="caption">Link a device ID to a Roaming Roost, garden robot or rail module to send it zones.</Typography>
+              ? <Typography variant="caption">Link a device ID to a Roaming Roost, rover, robot mower, custom robot, garden robot or rail module to send it zones and the boundary.</Typography>
               : robots.map((r) => <Typography key={r.id} variant="body2">• {r.name} ({r.deviceId})</Typography>)}
           </Box>
           {!YARD_LIVE && <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#8A7D55' }}>Demo mode: connect the hardware API to send zones.</Typography>}

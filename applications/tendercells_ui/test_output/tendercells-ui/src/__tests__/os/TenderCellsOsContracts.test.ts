@@ -201,6 +201,19 @@ describe('TenderCells OS contracts', () => {
     ].forEach((marker) => expect(controls).toContain(marker));
   });
 
+  it('shows simple detections on selectable 2D and 3D maps and raises alerts', () => {
+    const patrol = readProjectFile('src/pages/WeedPatrolPage.tsx');
+    const map = readProjectFile('src/components/yard/WeedBedMap2D.tsx');
+    expect(patrol).toContain('2D bed');
+    expect(patrol).toContain('3D property');
+    expect(patrol).toContain('<WeedBedMap2D');
+    expect(patrol).toContain('tendercells-detection-alert');
+    expect(patrol).toContain("Notification.permission === 'granted'");
+    expect(map).toContain('data-testid="weed-bed-map-2d"');
+    expect(map).toContain('flag.bedMm');
+    expect(map).toContain('flag.confidence');
+  });
+
   it('keeps demo animal packs product-aware beyond Chicken Tender', () => {
     const birds = readProjectFile('src/services/birdsService.ts');
     [

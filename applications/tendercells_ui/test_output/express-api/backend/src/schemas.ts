@@ -98,6 +98,18 @@ export function validateZones(body: unknown): string | null {
 export const MOTION_TELEMETRY_MAX_AGE_MS = 60_000;
 
 export const SCHEMAS: Record<string, Schema> = {
+  // Robot mower link / settings (full rules in mower.ts validateMowerLink).
+  mowerLink: {
+    name: { type: "string", required: true },
+    adapter: { type: "string", required: true, values: ["home-assistant", "mqtt"] },
+    entityId: { type: "string" },
+    batteryEntityId: { type: "string" },
+    deviceId: { type: "string" },
+    guardHabitats: { type: "array" },
+    noAnimalsConfirmed: { type: "boolean" },
+    quietHours: { type: "object" },
+  },
+  mowerCommand: { action: { type: "string", required: true, values: ["start", "pause", "dock"] } },
   door:    { state:   { type: "string", required: true, values: ["open", "close"] } },
   // Basic Roaming Roost differential drive (classroom rover + real product share this).
   drive:   {

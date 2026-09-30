@@ -43,7 +43,10 @@ export type HardwareType =
   | 'weed-rover'
   // A spigot, trough, tank or irrigation valve. Rovers check the ground around it for
   // leaks (standing water / wet soil) on every pass.
-  | 'water-point';
+  | 'water-point'
+  // A robot mower the owner already has (Robot Mowers page: Home Assistant lawn_mower entity or
+  // the Tender Cells MQTT contract). Tender Cells keeps it docked while the flock is out.
+  | 'robot-mower';
 export type ObstacleType =
   | 'tree' | 'fence' | 'pond' | 'rock' | 'building' | 'garden' | 'no-go-zone'
   | 'bush' | 'crop-row';
@@ -127,13 +130,14 @@ export const HARDWARE_TYPES: HardwareType[] = [
   'weed-rover',
   'camera-kit',
   'water-point',
+  'robot-mower',
 ];
 
 // Mobile ground robots that can be given a hand-drawn patrol route and driven
 // through it in the 3D viewport (Draw Path / Simulate Route). A one-line
 // addition here is all a *new* mobile robot type needs to pick up that whole
 // feature - see PropertyLayoutBuilder.tsx and Viewport3D.tsx for the consumers.
-export const MOBILE_ROBOT_TYPES = new Set<HardwareType>(['roaming-roost', 'community-custom', 'weed-rover']);
+export const MOBILE_ROBOT_TYPES = new Set<HardwareType>(['roaming-roost', 'community-custom', 'weed-rover', 'robot-mower']);
 
 // Real-world footprint dimensions from product specs (CLAUDE.md)
 // width × depth in feet; height not used on 2D map
@@ -158,6 +162,7 @@ export const PRODUCT_DIMENSIONS: Record<HardwareType, { width: number; depth: nu
   'community-custom':   { width: 4,  depth: 4,  shape: 'rect' }, // arbitrary - resize after adding
   'weed-rover':         { width: 3,  depth: 2,  shape: 'rect' }, // small camera rover (LiteWeed-class)
   'water-point':        { width: 1,  depth: 1,  shape: 'circle' }, // spigot / trough / tank
+  'robot-mower':        { width: 2,  depth: 3,  shape: 'rounded' }, // consumer robot mower (~0.6 x 0.9 m)
 };
 
 export const OBSTACLE_TYPES: ObstacleType[] = ['tree', 'bush', 'crop-row', 'fence', 'pond', 'rock', 'building', 'garden', 'no-go-zone'];
@@ -196,6 +201,7 @@ export const ITEM_COLORS: Record<string, string> = {
   'weed-rover':         '#9CCC65',
   'camera-kit':         '#8AACC8',
   'water-point':        '#4FC3F7',
+  'robot-mower':        '#FF8A65',
   tree:             '#2F7D32',
   bush:             '#4C9A4C',
   'crop-row':       '#6B8E23',

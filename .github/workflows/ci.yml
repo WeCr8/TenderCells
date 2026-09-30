@@ -133,6 +133,9 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit -p .
 
+      - name: Unit tests (mower bridge + interlocks)
+        run: npm test
+
       - name: Backend XML is up to date (website/public/api/tendercells-backend.xml)
         run: npm run describe:xml -- --check
 

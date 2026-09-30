@@ -157,6 +157,51 @@
     <endpoint method="GET" path="/api/mqtt/devices/{deviceId}/zones" auth="device-owner">
       <summary>Zones last sent to this robot.</summary>
     </endpoint>
+    <endpoint method="GET" path="/api/mqtt/mowers" auth="signed-in">
+      <summary>Linked robot mowers you own (bring your own: Home Assistant lawn_mower entities or native MQTT mowers), with state and why each may not mow right now.</summary>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/mowers/home-assistant/entities" auth="signed-in">
+      <summary>lawn_mower entities on the hub&apos;s Home Assistant (HA_URL + HA_TOKEN in the hub environment; the token is never returned).</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/mowers" auth="signed-in">
+      <summary>Link a mower: must guard the coops whose animals can reach the lawn, or confirm no animals roam there. Claimed for the caller.</summary>
+      <body schema="mowerLink">
+        <field name="name" type="string" required="true"/>
+        <field name="adapter" type="string" required="true" values="home-assistant|mqtt"/>
+        <field name="entityId" type="string"/>
+        <field name="batteryEntityId" type="string"/>
+        <field name="deviceId" type="string"/>
+        <field name="guardHabitats" type="array"/>
+        <field name="noAnimalsConfirmed" type="boolean"/>
+        <field name="quietHours" type="object"/>
+      </body>
+    </endpoint>
+    <endpoint method="GET" path="/api/mqtt/devices/{deviceId}/mower" auth="device-owner">
+      <summary>One mower: settings, state and interlock reason.</summary>
+    </endpoint>
+    <endpoint method="PUT" path="/api/mqtt/devices/{deviceId}/mower" auth="device-owner">
+      <summary>Change a mower&apos;s guarded coops, quiet hours, name or entities.</summary>
+      <body schema="mowerLink">
+        <field name="name" type="string" required="true"/>
+        <field name="adapter" type="string" required="true" values="home-assistant|mqtt"/>
+        <field name="entityId" type="string"/>
+        <field name="batteryEntityId" type="string"/>
+        <field name="deviceId" type="string"/>
+        <field name="guardHabitats" type="array"/>
+        <field name="noAnimalsConfirmed" type="boolean"/>
+        <field name="quietHours" type="object"/>
+      </body>
+    </endpoint>
+    <endpoint method="DELETE" path="/api/mqtt/devices/{deviceId}/mower" auth="device-owner">
+      <summary>Unlink a mower.</summary>
+    </endpoint>
+    <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/mower/command" auth="device-owner" gated="mower" waits-for-ack="true">
+      <summary>start (interlocked: E-STOP, quiet hours, guarded coop door open or stale, animal seen in the last 15 min) | pause | dock (never refused). Home Assistant mowers: lawn_mower.start_mowing/pause/dock; native mowers: tc/{id}/cmd/mower with ack.</summary>
+      <body schema="mowerCommand">
+        <field name="action" type="string" required="true" values="start|pause|dock"/>
+      </body>
+      <publishes topic="tc/{id}/cmd/mower" qos="1"/>
+    </endpoint>
     <endpoint method="POST" path="/api/mqtt/devices/{deviceId}/estop" auth="device-owner">
       <summary>EMERGENCY STOP: latches on every subscriber.</summary>
       <publishes topic="tc/{id}/cmd/estop" qos="2" retain="true"/>
@@ -201,7 +246,7 @@
       <status code="400">Body failed schema validation (error says which field)</status>
       <status code="401">Missing / invalid Firebase ID token (auth enabled)</status>
       <status code="403">Signed-in user does not own the device</status>
-      <status code="409">Refused for safety (E-STOP, animals present, stale headcount) or by the device (reason in error)</status>
+      <status code="409">Refused for safety (E-STOP, animals present, stale headcount, mower interlock) or by the device (reason in error)</status>
       <status code="503">MQTT broker not connected</status>
     </responses>
   </http>
@@ -239,6 +284,14 @@
     <topic pattern="tc/{id}/cmd/{command}" direction="api-to-device" qos="1">
       <payload>command body + {seq, timestamp}</payload>
       <note>door, feed, clean, arm, motion, drive, light, camera/config, gantry, weed, event</note>
+    </topic>
+    <topic pattern="tc/{id}/state/mower" direction="device-to-api" qos="1" retain="true">
+      <payload>{activity: mowing|docked|paused|returning|error|unknown, battery?, error?, online, source: home-assistant|device, entityId?, estop?, lastInterlock?: {reason, at, action: refused|sent-home}, ts}</payload>
+      <note>Published by the hub&apos;s mower bridge for Home Assistant mowers, or by a native mower itself.</note>
+    </topic>
+    <topic pattern="tc/{id}/cmd/mower" direction="api-to-device" qos="1">
+      <payload>{action: start|pause|dock, seq, timestamp}</payload>
+      <note>Native mowers reply on tc/{id}/ack. The hub sends pause + dock by itself when the interlock trips while mowing.</note>
     </topic>
     <topic pattern="tc/{id}/cmd/estop" direction="api-to-device" qos="2" retain="true">
       <payload>{active: boolean, source, ts}</payload>
@@ -296,6 +349,7 @@
     <rule>Arm / clean / routine / policy are refused in animal areas while chickens are detected or the headcount is older than 60 s.</rule>
     <rule>Weed treatment needs a human approval per weed; the laser fires only with burn enabled, student mode off, enclosure closed and no E-STOP.</rule>
     <rule>Robots keep out of no-go and keep-out zones (tc/{id}/cfg/zones, retained) and never fire a laser inside any zone, including the no-laser buffer around animal housing.</rule>
+    <rule>Robot mowers (bring your own) are refused a start, and sent home (pause + dock) while mowing, during E-STOP, in quiet hours (default 20:00-07:00, wildlife), while a guarded coop door is open or its state is missing or stale, or for 15 min after an animal is seen. The mower keeps its own blade, lift and boundary safety; Tender Cells cannot cut a third-party mower's power.</rule>
     <rule>Every hardware action in the UI goes through a confirmation dialog.</rule>
   </safety>
   <client-analysis>

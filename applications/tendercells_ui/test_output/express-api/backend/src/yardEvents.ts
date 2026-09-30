@@ -116,6 +116,11 @@ export function listEvents(deviceId: string): YardEvent[] {
     .sort((a, b) => b.ts - a.ts);
 }
 
+/** Open events from every device (e.g. "was an animal seen on the lawn?" for the mower interlock). */
+export function listAllEvents(): YardEvent[] {
+  return [...events.keys()].flatMap((id) => listEvents(id));
+}
+
 export function getEvent(deviceId: string, id: string): YardEvent | undefined {
   return events.get(deviceId)?.get(id);
 }

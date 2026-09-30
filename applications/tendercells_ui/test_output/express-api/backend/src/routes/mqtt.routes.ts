@@ -5,7 +5,12 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import { MQTTController } from "../controllers/mqtt.controller.js";
-import { requireAuth, requireDeviceOwner } from "../middleware/auth.js";
+import { AUTH_ENABLED, ownedDeviceIds, requireAuth, requireDeviceOwner, type AuthedRequest } from "../middleware/auth.js";
+import { getFirestoreAdmin } from "../config/firebase-admin.js";
+import { validateMowerLink, type MowerAction } from "../mower.js";
+import {
+  HA_CONFIGURED, commandMower, createLink, getLink, listHaMowers, listLinks, mowerView, removeLink, updateLink,
+} from "../mowerBridge.js";
 
 const router = Router();
 const controller = new MQTTController();
@@ -122,6 +127,73 @@ router.post("/devices/:deviceId/policy", ...owns, (req: Request, res: Response) 
 });
 router.post("/devices/:deviceId/policy/stop", ...owns, (req: Request, res: Response) => {
   controller.sendPolicyStop(req, res);
+});
+
+// ── bring-your-own robot mowers (mowerBridge.ts, docs/ROBOT_MOWERS.md) ──────
+const fail = (res: Response, e: unknown) => {
+  const err = e as Error & { status?: number };
+  res.status(err.status ?? 500).json({ error: err.message || "Mower bridge error" });
+};
+
+// Linked mowers the caller owns, with state and the interlock reason.
+router.get("/mowers", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const only = await ownedDeviceIds((req as AuthedRequest).uid);
+    res.json({ homeAssistant: HA_CONFIGURED, mowers: listLinks(only) });
+  } catch (e) { fail(res, e); }
+});
+
+// lawn_mower entities Home Assistant knows (for the link picker). Never returns the token.
+router.get("/mowers/home-assistant/entities", requireAuth, async (_req: Request, res: Response) => {
+  try { res.json({ entities: await listHaMowers() }); } catch (e) { fail(res, e); }
+});
+
+// Link a mower. It is claimed for the caller so only they can command it.
+router.post("/mowers", requireAuth, async (req: Request, res: Response) => {
+  const err = validateMowerLink(req.body);
+  if (err) return res.status(400).json({ error: err });
+  try {
+    const link = await createLink(req.body);
+    const uid = (req as AuthedRequest).uid;
+    if (AUTH_ENABLED && uid) {
+      await getFirestoreAdmin().collection("devices").doc(link.deviceId)
+        .set({ ownerId: uid, claimedAt: Date.now(), unclaimed: false, productType: "robot-mower", nickname: link.name }, { merge: true });
+    }
+    res.status(201).json({ success: true, ...mowerView(link.deviceId) });
+  } catch (e) { fail(res, e); }
+});
+
+router.get("/devices/:deviceId/mower", ...owns, (req: Request, res: Response) => {
+  const v = mowerView(req.params.deviceId);
+  if (!v) return res.status(404).json({ error: "This device is not a linked mower" });
+  res.json(v);
+});
+
+router.put("/devices/:deviceId/mower", ...owns, (req: Request, res: Response) => {
+  const err = validateMowerLink(req.body, true);
+  if (err) return res.status(400).json({ error: err });
+  const current = getLink(req.params.deviceId);
+  if (!current) return res.status(404).json({ error: "This device is not a linked mower" });
+  const guards = (req.body.guardHabitats as string[] | undefined) ?? current.guardHabitats;
+  const confirmed = (req.body.noAnimalsConfirmed as boolean | undefined) ?? current.noAnimalsConfirmed;
+  if (guards.length === 0 && !confirmed) {
+    return res.status(400).json({ error: "Pick the coops whose animals can reach this lawn, or confirm no animals ever roam where it mows" });
+  }
+  res.json({ success: true, link: updateLink(req.params.deviceId, req.body) });
+});
+
+router.delete("/devices/:deviceId/mower", ...owns, (req: Request, res: Response) => {
+  if (!removeLink(req.params.deviceId)) return res.status(404).json({ error: "This device is not a linked mower" });
+  res.json({ success: true });
+});
+
+// start is interlocked (E-STOP, quiet hours, flock out, animals seen); pause / dock never are.
+router.post("/devices/:deviceId/mower/command", ...owns, async (req: Request, res: Response) => {
+  const action = req.body?.action as MowerAction;
+  if (!["start", "pause", "dock"].includes(action)) return res.status(400).json({ error: "action must be start, pause or dock" });
+  const out = await commandMower(req.params.deviceId, action);
+  const { status, ...body } = out;
+  res.status(status).json({ deviceId: req.params.deviceId, command: `mower_${action}`, success: out.ok, ...body });
 });
 
 // MQTT broker status

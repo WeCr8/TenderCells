@@ -3,6 +3,7 @@
   { "slug": "hardware-testing-motors", "source": "docs/HARDWARE_TESTING_MOTORS.md", "title": "Motors, axis & drives testing" },
   { "slug": "device-testing-setup", "source": "docs/DEVICE_TESTING_SETUP.md", "title": "Device testing setup" },
   { "slug": "hardware-catalog", "source": "docs/CHICKEN_TENDER_HARDWARE_CATALOG.md", "title": "Chicken Tender hardware catalog" },
+  { "slug": "robot-mowers", "source": "docs/ROBOT_MOWERS.md", "title": "Bring your own robot mower" },
   { "slug": "weed-patrol", "source": "docs/WEED_PATROL.md", "title": "Weed patrol (bed + rover)" },
   { "slug": "arm-service", "source": "docs/ARM_SERVICE.md", "title": "Robot arm service" },
   { "slug": "diy-habitat-projects", "source": "docs/DIY_HABITAT_PROJECTS.md", "title": "DIY habitat projects" },

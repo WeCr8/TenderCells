@@ -23,7 +23,7 @@ export interface EndpointDoc {
   /** MQTT publish the endpoint triggers. */
   mqtt?: { topic: string; qos: 0 | 1 | 2; retain?: boolean };
   /** Refused while E-STOP is latched / chickens are in the work area (see <safety>). */
-  gated?: "arm" | "weed";
+  gated?: "arm" | "weed" | "mower";
   /** Waits up to 3 s for the device ack: 200 accepted, 409 refused (with reason), 202 no ack yet. */
   ack?: boolean;
 }
@@ -61,6 +61,13 @@ export const ENDPOINTS: EndpointDoc[] = [
   { method: "POST", path: `${M}/devices/{deviceId}/weeds/{eventId}/reject`, auth: "device-owner", summary: "Not a weed / leave it.", mqtt: { topic: "tc/{id}/cmd/weed", qos: 1 }, ack: true },
   { method: "POST", path: `${M}/devices/{deviceId}/zones`, auth: "device-owner", summary: "Send a robot its exclusion zones (no-go, keep-out, no-laser near animals); enforced on the robot.", mqtt: { topic: "tc/{id}/cfg/zones", qos: 1, retain: true }, ack: true },
   { method: "GET", path: `${M}/devices/{deviceId}/zones`, auth: "device-owner", summary: "Zones last sent to this robot." },
+  { method: "GET", path: `${M}/mowers`, auth: "signed-in", summary: "Linked robot mowers you own (bring your own: Home Assistant lawn_mower entities or native MQTT mowers), with state and why each may not mow right now." },
+  { method: "GET", path: `${M}/mowers/home-assistant/entities`, auth: "signed-in", summary: "lawn_mower entities on the hub's Home Assistant (HA_URL + HA_TOKEN in the hub environment; the token is never returned)." },
+  { method: "POST", path: `${M}/mowers`, auth: "signed-in", summary: "Link a mower: must guard the coops whose animals can reach the lawn, or confirm no animals roam there. Claimed for the caller.", body: "mowerLink" },
+  { method: "GET", path: `${M}/devices/{deviceId}/mower`, auth: "device-owner", summary: "One mower: settings, state and interlock reason." },
+  { method: "PUT", path: `${M}/devices/{deviceId}/mower`, auth: "device-owner", summary: "Change a mower's guarded coops, quiet hours, name or entities.", body: "mowerLink" },
+  { method: "DELETE", path: `${M}/devices/{deviceId}/mower`, auth: "device-owner", summary: "Unlink a mower." },
+  { method: "POST", path: `${M}/devices/{deviceId}/mower/command`, auth: "device-owner", summary: "start (interlocked: E-STOP, quiet hours, guarded coop door open or stale, animal seen in the last 15 min) | pause | dock (never refused). Home Assistant mowers: lawn_mower.start_mowing/pause/dock; native mowers: tc/{id}/cmd/mower with ack.", body: "mowerCommand", mqtt: { topic: "tc/{id}/cmd/mower", qos: 1 }, gated: "mower", ack: true },
   { method: "POST", path: `${M}/devices/{deviceId}/estop`, auth: "device-owner", summary: "EMERGENCY STOP: latches on every subscriber.", mqtt: { topic: "tc/{id}/cmd/estop", qos: 2, retain: true } },
   { method: "POST", path: `${M}/devices/{deviceId}/estop/clear`, auth: "device-owner", summary: "Clear a latched E-STOP (replaces the retained stop).", mqtt: { topic: "tc/{id}/cmd/estop", qos: 2, retain: true } },
   { method: "GET", path: "/api/products", auth: "public", summary: "Registered products (demo registry)." },
@@ -87,6 +94,8 @@ export const MQTT_TOPICS: TopicDoc[] = [
   { pattern: "tc/{id}/alert", direction: "device-to-api", qos: 2, payload: "{type: predator|fault|health, label?, confidence, camera?, bearingDeg?, distanceFt?, ts}", note: "Predator alerts become located yard events." },
   { pattern: "tc/broadcast/alert", direction: "device-to-api", qos: 2, payload: "alert", note: "WatchTower broadcast to every device (not stored as an event)." },
   { pattern: "tc/{id}/cmd/{command}", direction: "api-to-device", qos: 1, payload: "command body + {seq, timestamp}", note: "door, feed, clean, arm, motion, drive, light, camera/config, gantry, weed, event" },
+  { pattern: "tc/{id}/state/mower", direction: "device-to-api", qos: 1, retain: true, payload: "{activity: mowing|docked|paused|returning|error|unknown, battery?, error?, online, source: home-assistant|device, entityId?, estop?, lastInterlock?: {reason, at, action: refused|sent-home}, ts}", note: "Published by the hub's mower bridge for Home Assistant mowers, or by a native mower itself." },
+  { pattern: "tc/{id}/cmd/mower", direction: "api-to-device", qos: 1, payload: "{action: start|pause|dock, seq, timestamp}", note: "Native mowers reply on tc/{id}/ack. The hub sends pause + dock by itself when the interlock trips while mowing." },
   { pattern: "tc/{id}/cmd/estop", direction: "api-to-device", qos: 2, retain: true, payload: "{active: boolean, source, ts}" },
   { pattern: "tc/{id}/cfg/zones", direction: "api-to-device", qos: 1, retain: true, payload: "{v:1, seq, units:'ft', self?:{itemId,x,y,width,depth}, zones:[{id,name,kind:no-go|keep-out|no-laser,poly:[[x,y]...]}], ts}", note: "Property feet, origin top-left. Robots refuse motion into no-go / keep-out and lasing inside any zone." },
 ];
@@ -138,7 +147,7 @@ export function buildBackendXml(opts: { routes?: Array<{ method: string; path: s
   lines.push('      <status code="400">Body failed schema validation (error says which field)</status>');
   lines.push('      <status code="401">Missing / invalid Firebase ID token (auth enabled)</status>');
   lines.push('      <status code="403">Signed-in user does not own the device</status>');
-  lines.push('      <status code="409">Refused for safety (E-STOP, animals present, stale headcount) or by the device (reason in error)</status>');
+  lines.push('      <status code="409">Refused for safety (E-STOP, animals present, stale headcount, mower interlock) or by the device (reason in error)</status>');
   lines.push('      <status code="503">MQTT broker not connected</status>');
   lines.push("    </responses>");
   lines.push("  </http>");
@@ -182,6 +191,7 @@ export function buildBackendXml(opts: { routes?: Array<{ method: string; path: s
   lines.push("    <rule>Arm / clean / routine / policy are refused in animal areas while chickens are detected or the headcount is older than 60 s.</rule>");
   lines.push("    <rule>Weed treatment needs a human approval per weed; the laser fires only with burn enabled, student mode off, enclosure closed and no E-STOP.</rule>");
   lines.push("    <rule>Robots keep out of no-go and keep-out zones (tc/{id}/cfg/zones, retained) and never fire a laser inside any zone, including the no-laser buffer around animal housing.</rule>");
+  lines.push("    <rule>Robot mowers (bring your own) are refused a start, and sent home (pause + dock) while mowing, during E-STOP, in quiet hours (default 20:00-07:00, wildlife), while a guarded coop door is open or its state is missing or stale, or for 15 min after an animal is seen. The mower keeps its own blade, lift and boundary safety; Tender Cells cannot cut a third-party mower's power.</rule>");
   lines.push("    <rule>Every hardware action in the UI goes through a confirmation dialog.</rule>");
   lines.push("  </safety>");
 

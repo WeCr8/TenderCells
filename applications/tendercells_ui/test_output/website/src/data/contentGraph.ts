@@ -71,6 +71,8 @@ export const TOPICS: Record<TopicId, Topic> = {
       { kind: "lesson", title: "Door + Basic Roaming Roost (drive a rover)", to: "/lessons/door-roaming-roost" },
       { kind: "doc", title: "Weed patrol on a rover", to: "/docs/weed-patrol#weed-patrol-on-a-rover" },
       { kind: "doc", title: "Robot exclusion zones", to: "/docs/robot-exclusion-zones" },
+      { kind: "doc", title: "Bring your own robot mower", to: "/docs/robot-mowers" },
+      { kind: "os", title: "Robot mowers", to: demo("/mowers") },
       { kind: "doc", title: "Roaming Roost product doc", to: "/docs/roaming-roost" },
       { kind: "os", title: "Property layout (2D / 3D, routes, zones)", to: demo("/layout") },
       { kind: "os", title: "Weed patrol with a rover", to: demo("/weed-patrol") },

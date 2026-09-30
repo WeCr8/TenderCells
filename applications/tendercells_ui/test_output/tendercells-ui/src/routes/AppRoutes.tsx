@@ -33,6 +33,7 @@ import ChickenEyeDashboardPage from "../pages/ChickenEyeDashboardPage";
 import ChickenEyeBirdPage from "../pages/ChickenEyeBirdPage";
 import DemoLandingPage from "../pages/DemoLandingPage";
 import WeedPatrolPage from "../pages/WeedPatrolPage";
+import MowersPage from "../pages/MowersPage";
 import WatershedPage from "../pages/WatershedPage";
 import LibraryPage from "../pages/LibraryPage";
 import ProjectsPage from "../pages/ProjectsPage";
@@ -94,6 +95,7 @@ export default function AppRoutes() {
       <Route path="/layout" element={<PropertyLayoutBuilder />} />
       <Route path="/schedules" element={<SchedulesPage />} />
       <Route path="/weed-patrol" element={<WeedPatrolPage />} />
+      <Route path="/mowers" element={<MowersPage />} />
       <Route path="/watershed" element={<WatershedPage />} />
       <Route path="/library" element={<LibraryPage />} />
       <Route path="/library/:kind/:id" element={<LibraryPage />} />

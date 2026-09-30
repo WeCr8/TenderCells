@@ -11,6 +11,7 @@
 import { updateDemoEquipment, DEMO_DEVICES } from "../../services/demo/demoEnvironment";
 import { eggService } from "../../services/eggService";
 import { DEMO_PROPERTY_ID, deviceTwinId, type SourceType } from "../twin/twin";
+import { DEMO_MOWER_ID, simForceMowing, simMowers } from "../mower/mowerSim";
 
 export type ChainKind = "device" | "signal" | "ai" | "rule" | "os" | "actuator" | "action" | "notify";
 
@@ -231,6 +232,32 @@ export const SCENARIOS: Scenario[] = [
     see: { label: "Weed patrol", path: "/weed-patrol" },
     learn: { label: "Rover patrol: animals and leaks", href: "/docs/weed-patrol#weed-patrol-on-a-rover" },
     build: { label: "Build a device for the OS", href: "/os#build" },
+  },
+  {
+    id: "mower-flock",
+    twin: deviceTwinId(DEMO_MOWER_ID),
+    title: "Hens let out while the mower runs",
+    emoji: "🚜",
+    summary: "Your own robot mower is out on its schedule when the coop door opens; Tender Cells sends it home.",
+    steps: [
+      { kind: "device", actor: "Chicken Tender door", detail: "Opened - the flock can reach the lawn" },
+      { kind: "signal", actor: "Door sensor", detail: "doorState: open (tc/ct_001/sensors)" },
+      { kind: "rule", actor: "Mower interlock", detail: "A guarded coop is open and the mower is mowing" },
+      { kind: "os", actor: "Tender Cells OS", detail: "Hub mower bridge acts on the linked mower" },
+      { kind: "actuator", actor: "Robot mower via Home Assistant", detail: "lawn_mower.pause, then lawn_mower.dock" },
+      { kind: "action", actor: "Robot mower", detail: "Returning to its dock" },
+      { kind: "notify", actor: "Owner alert", detail: "\"Mower sent home - the flock is out\"" },
+    ],
+    outcome: "Mower sent home; it cannot start again until the door is closed.",
+    concepts: ["interlocks", "integrations", "animal safety"],
+    see: { label: "Robot mowers", path: "/mowers" },
+    learn: { label: "Bring your own robot mower", href: "/docs/robot-mowers" },
+    build: { label: "Link your mower", href: "/docs/robot-mowers#link-a-home-assistant-mower" },
+    apply: () => {
+      simForceMowing();
+      updateDemoEquipment(CT, { door: "open" });
+      simMowers(); // the interlock sends the mowing mower home
+    },
   },
   {
     id: "offline",

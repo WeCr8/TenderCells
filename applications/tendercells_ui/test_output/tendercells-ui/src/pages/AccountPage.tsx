@@ -381,7 +381,11 @@ export default function AccountPage() {
       </Card>
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={activeTab} onChange={handleTabChange}>
+        {/* FIX: without variant="scrollable", MUI clips (not wraps) tabs that
+            don't fit the container width - on a narrow/mobile viewport, with
+            4 tabs and 2 carrying icons, "Billing"/"Products" could be
+            clipped off-screen with no way to reach or scroll to them at all. */}
+        <Tabs value={activeTab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile>
           <Tab label="Profile" />
           <Tab label="Security" />
           <Tab label="Billing" icon={<CreditCard />} iconPosition="start" />

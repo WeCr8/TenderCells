@@ -3,7 +3,9 @@ import * as admin from "firebase-admin";
 import Stripe from "stripe";
 
 const db = admin.firestore();
-const APP_URL = "https://tendercells.com/app/account";
+// A self-hoster's deployment lives at their own domain - see the same
+// PUBLIC_APP_ORIGIN convention in schoolPlatform.ts.
+const APP_URL = `${process.env.PUBLIC_APP_ORIGIN || "https://tendercells.com"}/app/account`;
 
 type Plan = "starter_monthly" | "school_annual";
 

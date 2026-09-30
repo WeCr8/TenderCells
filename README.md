@@ -362,6 +362,25 @@ npm run functions:deploy
 # Or use emulator locally: npm run firebase:emulate
 ```
 
+### 5. Self-hosting on your own domain
+
+If the OS is served from anywhere other than `tendercells.com` (your own
+domain, a different `*.web.app` site, or localhost during development), set
+this Cloud Functions env var to your real origin — otherwise the browser
+camera relay (`cameraRelaySignal`) and Stripe billing return-URLs stay
+pointed at `tendercells.com` and silently fail (CORS-blocked / wrong
+redirect) on your deployment:
+
+Add to `functions/.env` (same file as `ANTHROPIC_API_KEY`/`STRIPE_SECRET_KEY`):
+
+```env
+PUBLIC_APP_ORIGIN=https://your-domain.example
+```
+
+Everything else (Firebase project id, hosting site, MQTT broker) is already
+per-deployment via your own `.env` / Firebase project — this is the one
+value that was hardcoded to the production domain in source.
+
 ---
 
 ## Architecture Overview

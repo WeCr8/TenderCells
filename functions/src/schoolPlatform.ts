@@ -7,6 +7,12 @@ if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
 
+// A self-hoster's own deployment serves its OS from its own domain, not
+// tendercells.com - hardcoding that here would CORS-block their camera relay
+// with no way to fix it short of forking this file. Set PUBLIC_APP_ORIGIN
+// (Cloud Functions env config) to your own origin; defaults to production.
+const PUBLIC_APP_ORIGIN = process.env.PUBLIC_APP_ORIGIN || "https://tendercells.com";
+
 type ProviderKind = "google-workspace" | "microsoft-education" | "clever" | "classlink" | "saml";
 
 interface RosterEntry {
@@ -418,7 +424,7 @@ export const createCameraRelaySession = functions.runWith({ secrets: ["TURN_SHAR
  * This carries offers/answers/ICE only; camera media remains encrypted by WebRTC.
  */
 export const cameraRelaySignal = functions.https.onRequest(async (req, res) => {
-  res.set("Access-Control-Allow-Origin", "https://tendercells.com");
+  res.set("Access-Control-Allow-Origin", PUBLIC_APP_ORIGIN);
   res.set("Vary", "Origin");
   res.set("Cache-Control", "no-store");
   if (req.method === "OPTIONS") {
@@ -427,7 +433,7 @@ export const cameraRelaySignal = functions.https.onRequest(async (req, res) => {
     res.status(204).send("");
     return;
   }
-  if (req.get("origin") && req.get("origin") !== "https://tendercells.com") {
+  if (req.get("origin") && req.get("origin") !== PUBLIC_APP_ORIGIN) {
     res.status(403).json({ error: "origin_denied" });
     return;
   }

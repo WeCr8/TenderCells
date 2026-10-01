@@ -48,6 +48,7 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
 4. **Demo video.**
    - Nudge the caption times onto the vocal in `docs/video/anthem-cues.json`, then run `npm run video:cues`.
    - For the final edit, add real hardware b-roll where available.
+   - Audio is the song only: never add voice-over, narration or sound effects over it.
    - To regenerate the rough cut, run `npm run video:shots` and then `npm run video:roughcut`. Both need the dev servers on :5173 and :5176, plus ffmpeg with libass.
 5. **Phone layout of the 3D viewer's bottom bar.** In the `/demo` hero on phones it wraps to two lines.
 6. **Older open PRs not from today:** #106 (Copilot auth flow) and the Dependabot bumps #96–#103. Review or merge them separately.

@@ -13,6 +13,7 @@ import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import DevicesIcon from "@mui/icons-material/Devices";
 import EggIcon from "@mui/icons-material/Egg";
+import ExtensionIcon from "@mui/icons-material/Extension";
 import ExploreIcon from "@mui/icons-material/Explore";
 import FenceIcon from "@mui/icons-material/Fence";
 import GrassIcon from "@mui/icons-material/Grass";
@@ -114,6 +115,7 @@ const OPERATIONS: MenuItem[] = [
 const ACCOUNT: MenuItem[] = [
   { id: "custom", label: "Settings", icon: <TuneIcon />, path: "/settings" },
   { id: "account", label: "Account", icon: <AccountCircleIcon />, path: "/account" },
+  { id: "assistants", label: "Claude & ChatGPT", icon: <ExtensionIcon />, path: "/assistants" },
 ];
 const familyOf = (product: Product) => String(product.metadata?.product_family || "");
 

@@ -100,7 +100,11 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
      - the no-sign-in demo `/mcp/demo`;
      - store icons from our logo (`website/public/brand/`);
      - the privacy-policy section;
-     - the listing kit (`docs/CONNECTOR_LISTING.md`).
+     - the listing kit (`docs/CONNECTOR_LISTING.md`);
+     - customer self-service:
+       - website how-to page `/assistants`;
+       - OS page `/app/assistants` (Account → Claude & ChatGPT) to see and disconnect connected assistants (`/oauth/connections`);
+       - the Claude Code plugin defaults to the hosted connector with sign-in.
    - **Next:**
      - the pre-submission checklist in `docs/CONNECTOR_LISTING.md` (TTL policies, reviewer account, real screenshots);
      - submit to the Claude and ChatGPT directories;

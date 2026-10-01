@@ -58,6 +58,8 @@ The MCP server advertises these icons in `serverInfo.icons`, so clients that sup
 - **Documentation:** https://tendercells.com/docs/ai-assistant-plugin
 - **Privacy policy:** https://tendercells.com/privacy (it has a section on AI assistant connectors)
 - **Terms:** https://tendercells.com/terms
+- **Customer how-to page:** https://tendercells.com/assistants
+- **Manage connections (customers):** Tender Cells app → Account → Claude & ChatGPT (`/app/assistants`)
 - **Support:** support@wecr8.info
 - **Developer:** WeCr8 Solutions
 
@@ -93,6 +95,10 @@ All tools on the hosted connectors are read-only.
   - refresh tokens last 30 days, rotate on every use, and can be revoked at `/oauth/revoke`.
   - Only SHA-256 hashes are stored (`oauthGrants`; server-only by Firestore rules).
 - **Consent:** `https://tendercells.com/connect`. The person signs in with their Tender Cells account (Firebase Auth) and sees exactly what the assistant can and cannot do.
+- **Self-service revocation:** `GET /oauth/connections` and `POST /oauth/connections/revoke`.
+  - Both are authenticated with the person's own Firebase ID token, never a connector token.
+  - The OS page `/app/assistants` uses them.
+- **Isolation:** every grant is bound to one person's uid. Data is read only from `devices` where `ownerId == uid`. There are no admin, platform or Firebase-management capabilities anywhere in the connector.
 
 ## Reviewer access
 

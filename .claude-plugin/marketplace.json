@@ -11,8 +11,8 @@
     {
       "name": "tendercells",
       "source": "./plugins/tendercells",
-      "description": "Tender Cells farm tools for Claude Code: readings, alerts, yard events, E-STOP and confirm-twice actions (MCP).",
-      "version": "0.3.0"
+      "description": "Tender Cells farm connector for Claude Code: your farm's readings, health flags and alerts, signed in with your Tender Cells account (read-only).",
+      "version": "0.4.0"
     }
   ]
 }

@@ -13,14 +13,15 @@ let cached: Promise<string> | undefined;
 /**
  * Build the farm card into one self-contained HTML page (script and styles inline).
  *
- * @param viewDir - Folder holding farm-card.ts and farm-card.css
+ * @param viewDir   - Folder holding farm-card.ts and farm-card.css
+ * @param nodePaths - Extra module folders (the Firebase Function build resolves from its own)
  * @returns The HTML page
  */
-export async function buildFarmCard(viewDir = VIEW_DIR): Promise<string> {
+export async function buildFarmCard(viewDir = VIEW_DIR, nodePaths: string[] = []): Promise<string> {
   const { build } = await import("esbuild");
   const js = await build({
     entryPoints: [join(viewDir, "farm-card.ts")], bundle: true, minify: true, format: "iife",
-    platform: "browser", target: "es2020", write: false, legalComments: "none",
+    platform: "browser", target: "es2020", write: false, legalComments: "none", nodePaths,
   });
   const css = readFileSync(join(viewDir, "farm-card.css"), "utf8");
   const script = js.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");

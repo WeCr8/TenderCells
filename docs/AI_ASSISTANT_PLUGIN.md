@@ -2,10 +2,33 @@
 
 Ask an AI assistant about your farm in plain words: "How are the chickens doing?", "Any predator alerts tonight?", "Close the coop door." Tender Cells ships one **MCP server** (Model Context Protocol). Claude and ChatGPT both connect to it, so there is one tool set and one set of safety rules for both.
 
-> **Status: preview (v0.2).**
-> - Reading the farm, the farm card, the demo farm and E-STOP all work today.
-> - Hardware actions are off unless you turn them on, and each one needs your explicit "yes".
-> - Per-user sign-in (OAuth) and app-directory listings are next.
+> **Status: preview (v0.3).**
+> - **For customers:** add the hosted **Tender Cells** connector at `https://tendercells.com/mcp` in Claude or ChatGPT and sign in with your Tender Cells account. It's read-only. There's also a no-sign-in **demo farm** at `https://tendercells.com/mcp/demo`.
+> - **On the farm network:** the local plugin adds E-STOP, and hardware actions that are off unless you turn them on; each one needs your explicit "yes".
+> - Store listings are being prepared (`docs/CONNECTOR_LISTING.md`).
+
+## Quick start for customers (Claude or ChatGPT)
+
+1. Open your assistant's connector settings:
+   - **Claude:** Settings → Connectors → *Add custom connector*.
+   - **ChatGPT:** with developer mode on, create a connector. Once Tender Cells is in the directory, just search for it.
+2. Enter the URL `https://tendercells.com/mcp`.
+3. The assistant opens tendercells.com/connect. Sign in with your Tender Cells account and choose **Allow read-only access**.
+4. Ask "How is my farm?". You'll get readings, health flags, alerts and the farm card.
+
+**What it reads:** devices on your account that your hub syncs to the cloud. A hub syncs only when it's signed in to your account.
+
+**What it can't do:** open doors, feed, move robots or press E-STOP. For an emergency, use E-STOP in the Tender Cells app or on the device.
+
+**Disconnecting:** remove the connector in your assistant, or email hello@wecr8.info to revoke every connection.
+
+| | Hosted connector (`tendercells.com/mcp`) | Local plugin (on your farm network) |
+|---|---|---|
+| Works from | Claude.ai, ChatGPT, mobile apps | Claude Desktop, Claude Code, your own HTTPS tunnel |
+| Sign-in | OAuth with your Tender Cells account | Hub token or none (LAN) |
+| Readings, alerts, farm card | yes (cloud mirror) | yes (live from the hub, incl. yard flags) |
+| E-STOP | no: use the app or the device | yes |
+| Door / feed / relay | no | confirm-twice, off by default |
 
 ## What the assistant can do
 
@@ -203,8 +226,13 @@ With no hardware, use the demo farm (`npm run mcp:demo`). To exercise the real h
   2. Add a test.
   3. Never add motion that needs the chicken-presence check.
 - **Farm card:** rendered through the MCP Apps host bridge (`AppBridge`) in a browser. It shows the device cards, attention list and SIMULATED badge, and Refresh calls back to the server.
+- **Hosted connector:**
+  - `hosted.ts` (OAuth 2.1 + MCP), `oauth.ts` (PKCE, stores), `firestoreHub.ts` (read-only farm data) and `connector.ts` (the Firebase Function entry).
+  - `functions/scripts/build-connector.mjs` bundles it into the `mcp` function.
+  - `firebase.json` rewrites `/mcp`, `/mcp/demo`, `/oauth/**` and `/.well-known/oauth-*` to it.
+  - The consent page is `website/src/pages/ConnectPage.tsx`.
+  - `hosted.test.ts` runs the whole OAuth flow over HTTP.
 - **Next:**
-  - OAuth 2.1 sign-in, so each person sees only their devices without `TC_TOKEN`;
-  - a hosted demo endpoint for reviewers;
-  - ChatGPT app and Claude connector directory listings (app icon, screenshots, privacy policy, test account = demo farm);
-  - a signed `.mcpb` attached to GitHub releases.
+  - list in the Claude and ChatGPT directories (`docs/CONNECTOR_LISTING.md`);
+  - a signed `.mcpb` attached to GitHub releases;
+  - mirror yard flags to the cloud so the hosted connector can show them.

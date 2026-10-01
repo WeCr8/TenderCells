@@ -310,6 +310,18 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // AI assistant connector (OAuth clients, pending sign-ins, hashed codes / tokens):
+    // server-only, written by the `mcp` function with the Admin SDK.
+    match /oauthClients/{clientId} {
+      allow read, write: if false;
+    }
+    match /oauthRequests/{requestId} {
+      allow read, write: if false;
+    }
+    match /oauthGrants/{grantHash} {
+      allow read, write: if false;
+    }
+
     // Fallback: Deny access to any other collections by default
     // Add specific rules above for any new collections you create
     match /{document=**} {

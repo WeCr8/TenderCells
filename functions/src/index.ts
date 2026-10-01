@@ -533,6 +533,28 @@ export const health = functions.https.onRequest((_req, res) => {
   });
 });
 
+// ============================================================================
+// AI ASSISTANT CONNECTOR (Claude, ChatGPT)
+// ============================================================================
+
+type ConnectorHandler = (req: unknown, res: unknown) => void;
+let connector: ConnectorHandler | undefined;
+
+/**
+ * Hosted Tender Cells connector for Claude and ChatGPT (MCP + OAuth 2.1), served through
+ * Hosting rewrites at tendercells.com/mcp, /mcp/demo, /oauth/* and /.well-known/oauth-*.
+ * Read-only by design: it reads devices the signed-in person owns and never moves hardware.
+ * Source: express-api/backend/src/mcp/ (bundled into lib/connector by scripts/build-connector.mjs).
+ */
+export const mcp = functions
+  .runWith({ memory: "512MB", timeoutSeconds: 60, maxInstances: 10 })
+  .https.onRequest((req, res) => {
+    // Loaded on first request so the other functions' cold starts don't pay for it.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    connector ??= require("./connector/index.js").createConnectorApp(admin) as ConnectorHandler;
+    connector(req, res);
+  });
+
 console.log("[TenderCells] Cloud Functions initialized");
 
 export {

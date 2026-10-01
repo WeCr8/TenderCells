@@ -329,3 +329,12 @@ button:disabled { opacity: 0.6; cursor: default; }
 .account-doc h3 { margin-top: 0.8rem; font-size: 1rem; }
 .account-doc ul, .account-doc ol { padding-left: 1.2rem; display: grid; gap: 0.35rem; }
 @media (max-width: 560px) { .account-table { display: block; overflow-x: auto; } }
+
+/* /connect - AI assistant consent (ConnectPage.tsx) */
+.connect-card { text-align: left; }
+.connect-logo { display: block; border-radius: 14px; margin-bottom: 0.75rem; }
+.connect-h2 { font-size: 1rem; margin: 1.1rem 0 0.4rem; }
+.connect-list { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.3rem; }
+.connect-can li::marker { content: "✓  "; color: #147C38; }
+.connect-cannot li::marker { content: "✕  "; color: #9b1c1c; }
+.connect-card .account-actions { margin-top: 1.25rem; }

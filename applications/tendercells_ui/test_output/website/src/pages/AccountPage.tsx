@@ -456,9 +456,21 @@ function SignInForm() {
   );
 }
 
+/** Same-site path to return to after sign-in (?next=/connect?...), or null. */
+function safeNext(): string | null {
+  const next = new URLSearchParams(window.location.search).get("next");
+  return next && next.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : null;
+}
+
 export default function AccountPage() {
   const { user, loading } = useAuthUser();
   const [redirectError, setRedirectError] = useState("");
+
+  // Back to where sign-in was asked for (e.g. the AI assistant consent page).
+  useEffect(() => {
+    const next = safeNext();
+    if (user && !loading && next) window.location.replace(next);
+  }, [user, loading]);
 
   useEffect(() => {
     if (!app || !auth) return;

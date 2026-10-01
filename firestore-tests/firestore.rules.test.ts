@@ -278,3 +278,15 @@ describe("newsletterSignups / schoolInquiries - create-only public forms", () =>
     await assertFails(addDoc(collection(anonCtx().firestore(), "schoolInquiries"), { ...base, isAdmin: true }));
   });
 });
+
+describe("AI assistant connector OAuth collections - server-only", () => {
+  it("denies every client read and write, even to the signed-in owner", async () => {
+    for (const ctx of [ownerCtx(), anonCtx()]) {
+      const db = ctx.firestore();
+      for (const path of ["oauthClients/c1", "oauthRequests/r1", "oauthGrants/abc"]) {
+        await assertFails(getDoc(doc(db, path)));
+        await assertFails(setDoc(doc(db, path), { uid: "owner-uid" }));
+      }
+    }
+  });
+});

@@ -23,7 +23,23 @@ import { assessReading, type HealthFlag, type Reading } from "./health.js";
 import type { HubFetch, HubResponse } from "./hubClient.js";
 
 export const MCP_NAME = "tendercells";
-export const MCP_VERSION = "0.2.0";
+export const MCP_VERSION = "0.3.0";
+export const SITE = "https://tendercells.com";
+/** Store / client icons (the Tender Cells mark), served by the website. */
+export const MCP_ICONS = [
+  { src: `${SITE}/brand/tendercells-icon-512.png`, mimeType: "image/png", sizes: ["512x512"] },
+  { src: `${SITE}/brand/tendercells-icon-128.png`, mimeType: "image/png", sizes: ["128x128"] },
+  { src: `${SITE}/brand/tendercells-icon.svg`, mimeType: "image/svg+xml", sizes: ["any"] },
+];
+
+/**
+ * Where the server runs, which decides what it may do:
+ *   local        on the farm network, talking to the hub: reads, E-STOP, optional actions
+ *   hosted       tendercells.com connector for signed-in customers: reads only (the cloud
+ *                never moves hardware; E-STOP and actions stay on the farm network)
+ *   hosted-demo  tendercells.com demo connector: the simulated farm, reads only
+ */
+export type McpMode = "local" | "hosted" | "hosted-demo";
 /** The farm card (MCP Apps view) rendered inline by Claude and ChatGPT. */
 export const FARM_CARD_URI = "ui://tendercells/farm-card.html";
 const MAX_OVERVIEW_DEVICES = 20;
@@ -165,14 +181,28 @@ const OVERVIEW_SHAPE = {
   })),
 };
 
-const INSTRUCTIONS = `Tender Cells runs a backyard farm: coops, sensors, robots and cameras, controlled by a local hub.
-Rules for assistants:
-- Animal safety first. If readings suggest a health risk (temperature below 35°F or above 85°F, ammonia above 10 ppm, water below 15%), say so before anything else.
-- If anything looks dangerous to an animal or a person, call emergency_stop. Stopping never needs confirmation.
-- You can never actuate in one step. Use request_action, show the person the summary and the "check first" list, and call confirm_action only after they clearly agree. Never confirm on your own.
-- Arm, gantry, Roaming Roost driving, routines, laser weeding, mowers, zones and clearing an E-STOP are not available here. Send the person to the Tender Cells OS for those.
-- Say "simulated" when a device id starts with sim_ or ends with _demo, or the data says it is simulated.
-- For "how is the farm?" questions, start with get_farm_overview: it flags animal-health issues and shows a farm card.`;
+const RULES_COMMON = [
+  "- Animal safety first. If readings suggest a health risk (temperature below 35°F or above 85°F, ammonia above 10 ppm, water below 15%), say so before anything else.",
+  "- Say \"simulated\" when a device id starts with sim_ or ends with _demo, or the data says it is simulated.",
+  "- For \"how is the farm?\" questions, start with get_farm_overview: it flags animal-health issues and shows a farm card.",
+];
+const RULES_LOCAL = [
+  "- If anything looks dangerous to an animal or a person, call emergency_stop. Stopping never needs confirmation.",
+  "- You can never actuate in one step. Use request_action, show the person the summary and the \"check first\" list, and call confirm_action only after they clearly agree. Never confirm on your own.",
+  "- Arm, gantry, Roaming Roost driving, routines, laser weeding, mowers, zones and clearing an E-STOP are not available here. Send the person to the Tender Cells OS for those.",
+];
+const RULES_HOSTED = [
+  "- This connector runs in the cloud and is read-only: it can never move hardware or stop it. If anything looks dangerous to an animal or a person, tell the person to press E-STOP in the Tender Cells app or on the device right away.",
+  "- For door, feed or any other action, send the person to the Tender Cells app (https://tendercells.com/app) or the local plugin on their farm network.",
+];
+
+/** Server instructions for a mode. */
+export function instructionsFor(mode: McpMode): string {
+  const intro = mode === "hosted-demo"
+    ? "Tender Cells runs backyard farms: coops, sensors, robots and cameras. This is the simulated demo farm - nothing here is real."
+    : "Tender Cells runs a backyard farm: coops, sensors, robots and cameras, controlled by a local hub.";
+  return [intro, "Rules for assistants:", ...RULES_COMMON.slice(0, 1), ...(mode === "local" ? RULES_LOCAL : RULES_HOSTED), ...RULES_COMMON.slice(1)].join("\n");
+}
 
 export interface McpOptions {
   hub: HubFetch;
@@ -181,6 +211,8 @@ export interface McpOptions {
   confirmations?: ConfirmStore<ActionRequest>;
   /** E-STOPs sent through this server (shared across HTTP requests). */
   estopSentAt?: Map<string, number>;
+  /** Where the server runs (default local). Hosted modes are read-only. */
+  mode?: McpMode;
 }
 
 /**
@@ -190,10 +222,15 @@ export interface McpOptions {
  * @returns An MCP server ready to connect to a transport
  */
 export function createTenderCellsMcp(opts: McpOptions): McpServer {
-  const { hub, allowActions = false } = opts;
+  const { hub, mode = "local" } = opts;
+  const hosted = mode !== "local";
+  const allowActions = !hosted && (opts.allowActions ?? false);
   const confirmations = opts.confirmations ?? new ConfirmStore<ActionRequest>();
   const estopSentAt = opts.estopSentAt ?? new Map<string, number>();
-  const server = new McpServer({ name: MCP_NAME, version: MCP_VERSION }, { instructions: INSTRUCTIONS });
+  const server = new McpServer(
+    { name: MCP_NAME, title: mode === "hosted-demo" ? "Tender Cells (demo farm)" : "Tender Cells", version: MCP_VERSION, websiteUrl: SITE, icons: MCP_ICONS },
+    { instructions: instructionsFor(mode) },
+  );
   const deviceId = z.string().min(1).max(64).regex(/^[A-Za-z0-9_.-]+$/, "letters, digits, _ . - only").describe("Device id, e.g. ct_001 or sim_001");
   const READ = { readOnlyHint: true, openWorldHint: false } as const;
 
@@ -262,7 +299,7 @@ export function createTenderCellsMcp(opts: McpOptions): McpServer {
     argsSchema: { deviceId: z.string().describe("Coop device id, e.g. ct_001") },
   }, ({ deviceId: id }) => ({ messages: [{ role: "user", content: { type: "text", text: `Help me lock up coop ${id} for the night. 1) Call get_device for ${id}: report the chicken count, door state, water and temperature. 2) Call get_alerts for ${id} and mention any predator alerts from the last hour. 3) If the door is open, ask whether every bird is inside; only if I say yes, call request_action with door_close, show me the summary and the check-first list, and wait for my yes before confirm_action. If request_action is not available (actions are off), tell me to close it in the Tender Cells OS instead. Never close the door without my yes.` } }] }));
 
-  server.registerTool("emergency_stop", {
+  if (!hosted) server.registerTool("emergency_stop", {
     title: "EMERGENCY STOP",
     description: "Immediately stop every actuator on a device (QoS 2, retained). Use whenever an animal or person could be hurt. Never needs confirmation. Clearing it is only possible in the Tender Cells OS.",
     inputSchema: { deviceId },

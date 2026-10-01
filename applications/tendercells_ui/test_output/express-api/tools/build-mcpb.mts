@@ -21,7 +21,7 @@ await build({
 });
 writeFileSync(`${STAGE}/server/farm-card.html`, await buildFarmCard("mcp-view"));
 copyFileSync("mcpb/manifest.json", `${STAGE}/manifest.json`);
-copyFileSync("../tendercells-ui/public/assets/images/tender_cells_logo.png", `${STAGE}/icon.png`);
+copyFileSync("../website/public/brand/tendercells-icon-512.png", `${STAGE}/icon.png`); // the store icon (512×512)
 
 const mcpb = (...args: string[]) => execFileSync(process.platform === "win32" ? "npx.cmd" : "npx", ["mcpb", ...args], { stdio: "inherit" });
 mcpb("validate", `${STAGE}/manifest.json`);

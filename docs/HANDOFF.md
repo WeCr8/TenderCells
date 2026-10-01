@@ -92,10 +92,15 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
      - the `farm_check` and `evening_lockup` prompts;
      - the demo farm (`npm run mcp:demo`, `TC_MCP_DEMO=1`);
      - the Claude Desktop extension (`npm run mcp:pack` → `dist/tendercells.mcpb`, packed in CI).
+   - **Done (v0.3, customer-facing):**
+     - the hosted connector `https://tendercells.com/mcp`: Firebase Function `mcp`, OAuth 2.1 (dynamic client registration, PKCE S256, rotating refresh tokens), consent page `/connect`, read-only from the Firestore device mirror;
+     - the no-sign-in demo `/mcp/demo`;
+     - store icons from our logo (`website/public/brand/`);
+     - the privacy-policy section;
+     - the listing kit (`docs/CONNECTOR_LISTING.md`).
    - **Next:**
-     - OAuth 2.1 instead of `TC_TOKEN` and URL keys;
-     - a hosted demo endpoint;
-     - ChatGPT app and Claude directory listings;
-     - a signed `.mcpb` on GitHub releases.
+     - the pre-submission checklist in `docs/CONNECTOR_LISTING.md` (TTL policies, reviewer account, real screenshots);
+     - submit to the Claude and ChatGPT directories;
+     - a signed `.mcpb` on releases.
    - Never add arm / drive / laser / mower motion or E-STOP clear to the assistant tools.
 9. **Older open PRs not from today:** #106 (Copilot auth flow) and the Dependabot bumps #96–#103. Review or merge them separately.

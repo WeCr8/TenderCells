@@ -38,6 +38,7 @@ import WatershedPage from "../pages/WatershedPage";
 import LibraryPage from "../pages/LibraryPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import EventSimulatorPage from "../pages/EventSimulatorPage";
+import AssistantsPage from "../pages/AssistantsPage";
 import MissionsPage from "../pages/MissionsPage";
 import BuilderLibraryPage from "../features/builder/pages/BuilderLibraryPage";
 import BuilderStepPage from "../features/builder/pages/BuilderStepPage";
@@ -121,6 +122,7 @@ export default function AppRoutes() {
       <Route path="/chicken-eye/:birdId" element={<ChickenEyeBirdPage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/account" element={<AccountPage />} />
+      <Route path="/assistants" element={<AssistantsPage />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
     </>

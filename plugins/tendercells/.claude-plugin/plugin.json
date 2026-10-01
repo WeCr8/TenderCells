@@ -1,12 +1,12 @@
 {
   "name": "tendercells",
-  "version": "0.3.0",
-  "description": "Ask Claude about your Tender Cells farm: farm overview with animal-health flags and an inline farm card, readings, alerts, yard events, E-STOP and confirm-twice door / feed / relay actions.",
+  "version": "0.4.0",
+  "description": "Ask Claude about your Tender Cells farm: sign in with your Tender Cells account and get readings, animal-health flags, alerts and a farm card (read-only, your farm only).",
   "author": {
     "name": "WeCr8 Solutions",
     "url": "https://tendercells.com"
   },
-  "homepage": "https://tendercells.com/docs/ai-assistant-plugin",
+  "homepage": "https://tendercells.com/assistants",
   "repository": "https://github.com/WeCr8/TenderCells",
   "license": "SEE LICENSE IN LICENSE",
   "keywords": [

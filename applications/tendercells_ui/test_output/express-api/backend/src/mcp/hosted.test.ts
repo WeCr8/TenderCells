@@ -135,6 +135,18 @@ test("full OAuth flow, then /mcp sees only my devices, read-only", async () => {
     assert.ok(r1.access_token);
     assert.equal((await tokenReq({ grant_type: "refresh_token", refresh_token: tokens.refresh_token, client_id: reg.client_id })).status, 400);
 
+    // The person sees the connection in their settings and can disconnect it.
+    const asApp = { Authorization: "Bearer good-id-token" };
+    assert.equal((await fetch(`${base}/oauth/connections`)).status, 401, "needs the person's own sign-in");
+    assert.equal((await fetch(`${base}/oauth/connections`, { headers: { Authorization: `Bearer ${r1.access_token}` } })).status, 401, "a connector token cannot manage connections");
+    const conns = await (await fetch(`${base}/oauth/connections`, { headers: asApp })).json() as { connections: Array<{ clientId: string; name: string; host: string }> };
+    assert.deepEqual(conns.connections.map((c) => [c.name, c.host]), [["Claude", "claude.ai"]]);
+    const extra = await (await tokenReq({ grant_type: "refresh_token", refresh_token: (r1 as unknown as { refresh_token: string }).refresh_token, client_id: reg.client_id })).json() as { access_token: string };
+    const revoked = await (await fetch(`${base}/oauth/connections/revoke`, { method: "POST", headers: { ...asApp, "Content-Type": "application/json" }, body: JSON.stringify({ clientId: conns.connections[0].clientId }) })).json() as { revoked: number };
+    assert.ok(revoked.revoked >= 2);
+    assert.equal((await rpc(base, "/mcp", "tools/list", extra.access_token)).status, 401, "disconnecting kills every token for that assistant");
+    assert.deepEqual((await (await fetch(`${base}/oauth/connections`, { headers: asApp })).json() as { connections: unknown[] }).connections, []);
+
     // Revocation.
     await fetch(`${base}/oauth/revoke`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ token: r1.access_token }) });
     assert.equal((await rpc(base, "/mcp", "tools/list", r1.access_token)).status, 401);

@@ -78,6 +78,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Mobile App (Android)",    to: "/apps#android" },
       { label: "Tender Cells OS",         to: "/os" },
       { label: "Web Dashboard (OS)",      href: TENDERCELLS_OS_URL },
+      { label: "🤖 Claude & ChatGPT connector", to: "/assistants" },
       { label: "Developer API",           to: "/apps#api" },
       { label: "MQTT Integration Guide",  to: "/apps#mqtt" },
       { label: "⚡ Flash a Device",        href: "/flash" },

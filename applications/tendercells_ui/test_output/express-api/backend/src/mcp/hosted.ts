@@ -5,6 +5,7 @@
 //   POST /mcp/demo   the simulated demo farm, no sign-in (reviewers, try-before-you-buy)
 //   /.well-known/oauth-protected-resource[/mcp], /.well-known/oauth-authorization-server
 //   /oauth/register | authorize | request/:id | approve | token | revoke
+//   /oauth/connections[/revoke]   a signed-in person's connected assistants (Firebase ID token)
 //
 // The cloud never moves hardware: hosted modes register no actions and no E-STOP, and the
 // Firestore source refuses every write. Actions stay on the farm network (local plugin / OS).
@@ -46,7 +47,7 @@ h2{font-size:18px;margin:24px 0 6px}ol{padding-left:22px}li{margin:4px 0}.note{c
 <code>${u}</code>
 <h2>Claude</h2><ol><li>Open <strong>Settings → Connectors</strong> and choose <strong>Add custom connector</strong>.</li><li>Name it <em>Tender Cells</em> and paste the address above.</li><li>${demo ? "Click Add" : "Click Connect, sign in on tendercells.com and allow read-only access"}.</li><li>In a chat, switch the connector on and ask <em>“How is my farm?”</em></li></ol>
 <h2>ChatGPT</h2><ol><li>Open <strong>Settings → Apps &amp; Connectors</strong> (developer mode may need to be on) and create a connector.</li><li>Paste the address above${demo ? " and choose no authentication" : " and choose OAuth"}.</li><li>Ask <em>“How is my farm?”</em></li></ol>
-<p class="note">Menu names change from time to time. Full guide: <a href="/docs/ai-assistant-plugin">tendercells.com/docs/ai-assistant-plugin</a></p>
+<p class="note">Menu names change from time to time. Step-by-step with pictures: <a href="/assistants">tendercells.com/assistants</a> · manage connected assistants in the Tender Cells app under Account → Claude &amp; ChatGPT.</p>
 </main></body></html>`;
 }
 
@@ -169,17 +170,19 @@ export function createHostedApp(opts: HostedOptions) {
       return;
     }
     const code = secret();
-    await store.putGrant(sha256(code), { kind: "code", uid, clientId: r.clientId, scope: r.scope, resource: r.resource, redirectUri: r.redirectUri, codeChallenge: r.codeChallenge, expiresAt: now() + CODE_TTL_MS });
+    await store.putGrant(sha256(code), { kind: "code", uid, clientId: r.clientId, scope: r.scope, resource: r.resource, redirectUri: r.redirectUri, codeChallenge: r.codeChallenge, expiresAt: now() + CODE_TTL_MS, issuedAt: now() });
     u.searchParams.set("code", code);
     res.json({ redirect: u.toString() });
   });
 
   // ── token ─────────────────────────────────────────────────────────────────────
-  const issueTokens = async (g: Pick<Grant, "uid" | "clientId" | "scope" | "resource">) => {
+  const issueTokens = async (g: Pick<Grant, "uid" | "clientId" | "scope" | "resource" | "issuedAt">) => {
     const access = secret();
     const refresh = secret();
-    await store.putGrant(sha256(access), { ...g, kind: "access", expiresAt: now() + ACCESS_TTL_MS });
-    await store.putGrant(sha256(refresh), { ...g, kind: "refresh", expiresAt: now() + REFRESH_TTL_MS });
+    // issuedAt = when the person first approved this assistant (kept across refreshes).
+    const base = { uid: g.uid, clientId: g.clientId, scope: g.scope, resource: g.resource, issuedAt: g.issuedAt ?? now() };
+    await store.putGrant(sha256(access), { ...base, kind: "access", expiresAt: now() + ACCESS_TTL_MS });
+    await store.putGrant(sha256(refresh), { ...base, kind: "refresh", expiresAt: now() + REFRESH_TTL_MS });
     return { access_token: access, token_type: "Bearer", expires_in: Math.floor(ACCESS_TTL_MS / 1000), refresh_token: refresh, scope: g.scope };
   };
   app.post("/oauth/token", async (req, res) => {
@@ -207,6 +210,46 @@ export function createHostedApp(opts: HostedOptions) {
     const token = (req.body as { token?: string } | undefined)?.token;
     if (token) await store.deleteGrant(sha256(token));
     res.status(200).end();
+  });
+
+  // ── connected assistants: the person manages their own connections ────────────
+  // Authenticated with the person's own Firebase ID token (from the Tender Cells app),
+  // never with a connector token, so an assistant cannot list or revoke connections.
+  const signedIn = async (req: Request, res: Response): Promise<string | null> => {
+    const header = String(req.headers.authorization ?? "");
+    const idToken = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+    try {
+      if (!idToken) throw new Error("missing");
+      return (await opts.verifyIdToken(idToken)).uid;
+    } catch {
+      res.status(401).json({ error: "Sign in to Tender Cells to manage connected assistants." });
+      return null;
+    }
+  };
+  app.get("/oauth/connections", async (req, res) => {
+    const uid = await signedIn(req, res);
+    if (!uid) return;
+    const live = (await store.listGrantsForUid(uid)).filter(({ grant }) => grant.kind !== "code" && grant.expiresAt > now());
+    const byClient = new Map<string, { connectedAt: number; until: number }>();
+    for (const { grant } of live) {
+      const prev = byClient.get(grant.clientId);
+      const connectedAt = Math.min(prev?.connectedAt ?? Infinity, grant.issuedAt ?? grant.expiresAt);
+      byClient.set(grant.clientId, { connectedAt, until: Math.max(prev?.until ?? 0, grant.expiresAt) });
+    }
+    const connections = await Promise.all([...byClient].map(async ([clientId, v]) => {
+      const client = await store.getClient(clientId);
+      const host = client?.redirectUris[0] ? new URL(client.redirectUris[0]).host : "";
+      return { clientId, name: client?.name ?? "AI assistant", host, scope: SCOPE, connectedAt: v.connectedAt, until: v.until };
+    }));
+    res.json({ connections: connections.sort((a, b) => b.connectedAt - a.connectedAt) });
+  });
+  app.post("/oauth/connections/revoke", async (req, res) => {
+    const uid = await signedIn(req, res);
+    if (!uid) return;
+    const clientId = String((req.body as { clientId?: string } | undefined)?.clientId ?? "");
+    const mine = (await store.listGrantsForUid(uid)).filter(({ grant }) => !clientId || grant.clientId === clientId);
+    await Promise.all(mine.map(({ hash }) => store.deleteGrant(hash)));
+    res.json({ revoked: mine.length });
   });
 
   // ── MCP ───────────────────────────────────────────────────────────────────────

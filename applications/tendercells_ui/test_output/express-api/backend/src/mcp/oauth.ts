@@ -16,7 +16,7 @@ export const REQUEST_TTL_MS = 10 * 60_000;
 
 export interface OAuthClient { id: string; name: string; redirectUris: string[]; createdAt: number }
 export interface AuthRequest { id: string; clientId: string; redirectUri: string; state?: string; codeChallenge: string; scope: string; resource: string; expiresAt: number }
-export interface Grant { kind: "code" | "access" | "refresh"; uid: string; clientId: string; scope: string; resource: string; expiresAt: number; redirectUri?: string; codeChallenge?: string }
+export interface Grant { kind: "code" | "access" | "refresh"; uid: string; clientId: string; scope: string; resource: string; expiresAt: number; redirectUri?: string; codeChallenge?: string; issuedAt?: number }
 
 /** Persistence for clients, pending requests and grants (Firestore in production). */
 export interface OAuthStore {
@@ -31,6 +31,8 @@ export interface OAuthStore {
   takeGrant(hash: string): Promise<Grant | null>;
   getGrant(hash: string): Promise<Grant | null>;
   deleteGrant(hash: string): Promise<void>;
+  /** Every grant a person holds (for "connected assistants" in their settings). */
+  listGrantsForUid(uid: string): Promise<Array<{ hash: string; grant: Grant }>>;
 }
 
 export const sha256 = (v: string) => createHash("sha256").update(v).digest("hex");
@@ -71,11 +73,15 @@ export class MemoryOAuthStore implements OAuthStore {
   async takeGrant(h: string) { const g = this.grants.get(h) ?? null; this.grants.delete(h); return g; }
   async getGrant(h: string) { return this.grants.get(h) ?? null; }
   async deleteGrant(h: string) { this.grants.delete(h); }
+  async listGrantsForUid(uid: string) { return [...this.grants].filter(([, g]) => g.uid === uid).map(([hash, grant]) => ({ hash, grant })); }
 }
 
 /** The slice of Firestore (Admin SDK) the production store uses. */
 export interface FirestoreDocs {
-  collection(path: string): { doc(id: string): { get(): Promise<{ exists: boolean; data(): Record<string, unknown> | undefined }>; set(v: Record<string, unknown>): Promise<unknown>; delete(): Promise<unknown> } };
+  collection(path: string): {
+    doc(id: string): { get(): Promise<{ exists: boolean; data(): Record<string, unknown> | undefined }>; set(v: Record<string, unknown>): Promise<unknown>; delete(): Promise<unknown> };
+    where(field: string, op: "==", value: unknown): { get(): Promise<{ docs: Array<{ id: string; data(): Record<string, unknown> }> }> };
+  };
   runTransaction<T>(fn: (tx: { get(ref: unknown): Promise<{ exists: boolean; data(): Record<string, unknown> | undefined }>; delete(ref: unknown): unknown }) => Promise<T>): Promise<T>;
 }
 
@@ -106,5 +112,6 @@ export function firestoreOAuthStore(db: FirestoreDocs): OAuthStore {
     }),
     getGrant: (h) => read<Grant>("oauthGrants", h),
     deleteGrant: async (h) => { await col("oauthGrants").doc(h).delete(); },
+    listGrantsForUid: async (uid) => (await col("oauthGrants").where("uid", "==", uid).get()).docs.map((d) => ({ hash: d.id, grant: d.data() as unknown as Grant })),
   };
 }

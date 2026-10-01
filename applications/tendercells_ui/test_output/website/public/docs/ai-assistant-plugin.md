@@ -22,7 +22,14 @@ Ask an AI assistant about your farm in plain words: "How are the chickens doing?
 
 **What it can't do:** open doors, feed, move robots or press E-STOP. For an emergency, use E-STOP in the Tender Cells app or on the device.
 
-**Disconnecting:** remove the connector in your assistant, or email hello@wecr8.info to revoke every connection.
+**Managing connections:** in the Tender Cells app, open **Account → Claude & ChatGPT** (`/app/assistants`).
+- It lists every assistant connected to your farm.
+- **Disconnect** stops an assistant immediately, because all of its tokens are revoked.
+- You can also remove the connector inside the assistant itself.
+
+The public how-to page is https://tendercells.com/assistants.
+
+**Access is per person.** Each customer signs in with their own account, and the connector sees only that person's devices. No assistant can reach other farms, Firebase, platform or admin settings.
 
 | | Hosted connector (`tendercells.com/mcp`) | Local plugin (on your farm network) |
 |---|---|---|
@@ -153,14 +160,14 @@ Add this to `claude_desktop_config.json` and restart Claude Desktop:
   claude mcp add tendercells -e TC_API=http://localhost:4000 -- npx tsx /path/to/express-api/backend/src/mcp/stdio.ts
   ```
 
-- **Option 2, the plugin (adds the farm-check skill too):** start the remote server (below), then run:
+- **Option 2, the plugin (adds the farm-check skill too):**
 
   ```bash
   /plugin marketplace add WeCr8/TenderCells
   /plugin install tendercells@tendercells
   ```
 
-  The plugin connects to `TC_MCP_URL` (default `http://127.0.0.1:8787/mcp`) and sends `TC_MCP_KEY` when it is set.
+  By default the plugin connects to the hosted connector `https://tendercells.com/mcp`, and Claude Code asks you to sign in with your Tender Cells account. To use a local hub instead, set `TC_MCP_URL` (e.g. `http://127.0.0.1:8787/mcp`) before starting Claude Code.
 
 ### ChatGPT and Claude on the web (remote connector)
 

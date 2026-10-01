@@ -92,11 +92,13 @@ function script() {
 
 **Format:** 16:9, 1920×1080, 30 fps. The whole song is the video.
 
-**Audio: the song only.** No voice-over, narration or speech anywhere over the song, and no app sounds or sound effects. The lyrics tell the story, and the on-screen text names what is shown. Any spoken explanation belongs in a separate video, never in this one.
+**Audio: the song only.** No voice-over, narration, app sounds or sound effects. There is no closed-caption or lyric overlay track; the song and moving pictures carry the story. Any spoken explanation belongs in a separate video.
 
 **Rules for the edit:**
 - **Every screen is the real demo** (\`/app/demo\` in the OS, or the website). Keep the "Simulation" / "simulated" labels visible. Never show a simulated robot as real hardware.
 - **Cut on the downbeat.** Snap each cut to the nearest bar line in your editor.
+- **Motion first.** Every UI take includes a deliberate orbit, push, scroll, pointer move, control change, or simulated event. Never hold a browser screenshot for a lyric.
+- **No closed captions.** SRT/LRC/ASS files are timing references only and are not imported or burned into the film. Brief product-name or end-card graphics are editorial titles, not lyric transcription.
 - **Timing.** ${cues.timingNote}
 - **No claims the product can't back up.** The bridge lyric "From California out to Texas" plays over the property map, with no pins or claims about where customers are.
 
@@ -110,7 +112,7 @@ function script() {
 | \`tender-cells-anthem.ass\` | Lyrics plus on-screen titles, styled in the brand colours (ffmpeg / Aegisub) |
 | \`anthem-markers.csv\` | Section and shot markers with 30 fps timecodes |
 
-To capture every shot from the demo and assemble a rough cut with the song and captions burned in, run \`npm run video:shots\` and then \`npm run video:roughcut\` (see the end of this page).
+To record every motion take and assemble a caption-free review film with the song, run \`npm run video:shots\` and then \`npm run video:roughcut\` (see the end of this page).
 
 ## Song structure
 
@@ -135,19 +137,19 @@ ${cues.sections.map((s) => `| ${s.name} | ${mmss(s.start)} | ${mmss(s.end)} | ${
 \`\`\`bash
 # In applications/tendercells_ui/test_output/tendercells-ui, with the OS on :5173 and the website on :5176:
 npm run video:shots      # records one clip per shot (Playwright, 1920x1080) into video-out/shots/
-npm run video:roughcut   # trims the clips to the script, adds the song + lyrics + titles -> video-out/anthem-rough-cut.mp4
+npm run video:roughcut   # trims motion clips and adds the song only -> video-out/tender-cells-anthem-film.mp4
 \`\`\`
 
 Screen actions used above:
 
 | Action | What it does |
 |---|---|
-| \`page\` | Open the page, as it is. |
+| \`page\` | Open the page and perform a smooth editorial scroll or pointer move. |
 | \`hero3d\` / \`hero2d\` | The live Property Twin at the top of \`/demo\`, in 3D or 2D. |
 | \`viewer\` / \`viewer2d\` | The page's 3D viewer, with the autonomous-farm panel, in 3D or 2D top view. |
 | \`trigger\` | The event simulator runs its predator event. |
 
-Title cards (\`CARD\`) are made in the editor. The rough cut shows them as text on black.
+Instrumental cards (\`CARD\`) use the rendered 3D property film in the automated cut. Add only a minimal opening identity and final URL in Premiere Pro.
 `);
   return out.join('\n');
 }

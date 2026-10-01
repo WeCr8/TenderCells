@@ -40,7 +40,8 @@
     "test:coverage": "vitest --coverage",
     "video:cues": "node scripts/video/anthem-cues.mjs",
     "video:shots": "node scripts/video/capture-anthem-shots.mjs",
-    "video:roughcut": "node scripts/video/rough-cut.mjs"
+    "video:roughcut": "node scripts/video/rough-cut.mjs",
+    "video:produce": "npm run video:shots && npm run video:roughcut"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",

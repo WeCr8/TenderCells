@@ -3,8 +3,10 @@
 // the Model Context Protocol. Transports live in stdio.ts (local) and http.ts (remote).
 //
 // What an assistant can do:
-//   read      hub status, a device's telemetry / state / presence, alerts, yard events and
-//             the whole-farm snapshot - always available
+//   read      hub status, a device's telemetry / state / presence, alerts, yard events,
+//             the whole-farm snapshot and the farm overview (structured, with animal-health
+//             flags, shown as an inline farm card) - always available
+//   prompts   farm_check, evening_lockup
 //   stop      emergency_stop - always available; stopping is never gated
 //   act       request_action → (person agrees) → confirm_action, only when actions are
 //             enabled (TC_MCP_ALLOW_ACTIONS=1). A short allow-list: door, feed, relay,
@@ -13,12 +15,18 @@
 // policies, approve a laser burn, drive a mower, change zones or clear an E-STOP. Those
 // stay in the OS, behind its own confirmations and the chicken-presence interlocks.
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { RESOURCE_MIME_TYPE, registerAppResource, registerAppTool } from "@modelcontextprotocol/ext-apps/server";
 import { z } from "zod";
 import { ConfirmStore } from "./confirm.js";
+import { farmCardHtml } from "./farmCard.js";
+import { assessReading, type HealthFlag, type Reading } from "./health.js";
 import type { HubFetch, HubResponse } from "./hubClient.js";
 
 export const MCP_NAME = "tendercells";
-export const MCP_VERSION = "0.1.0";
+export const MCP_VERSION = "0.2.0";
+/** The farm card (MCP Apps view) rendered inline by Claude and ChatGPT. */
+export const FARM_CARD_URI = "ui://tendercells/farm-card.html";
+const MAX_OVERVIEW_DEVICES = 20;
 
 export const ACTIONS = ["door_open", "door_close", "feed", "relay_on", "relay_off", "cleaning_stop", "mark_event_handled"] as const;
 export type ActionKind = (typeof ACTIONS)[number];
@@ -73,13 +81,98 @@ const text = (v: unknown) => ({ content: [{ type: "text" as const, text: typeof 
 const fail = (msg: string) => ({ ...text(msg), isError: true });
 const hubResult = (r: HubResponse) => (r.ok ? text(r.body) : fail(`Hub answered ${r.status || "nothing"}: ${JSON.stringify(r.body)}`));
 
+export interface DeviceOverview {
+  id: string;
+  online: boolean | null;
+  state: string | null;
+  reading: Reading & Record<string, unknown>;
+  flags: HealthFlag[];
+  openEvents: Array<{ id: string; title: string; detail?: string }>;
+  recentAlerts: Array<{ type: string; label?: string; confidence?: number; ts?: number }>;
+}
+
+export interface FarmOverview {
+  simulated: boolean;
+  generatedAt: string;
+  devices: DeviceOverview[];
+  attention: Array<HealthFlag & { deviceId: string }>;
+  hubError?: string;
+}
+
+const unwrap = (body: unknown): Record<string, unknown> => {
+  const b = (body ?? {}) as { data?: unknown };
+  return (b.data && typeof b.data === "object" ? b.data : body ?? {}) as Record<string, unknown>;
+};
+
+/**
+ * Read every device the hub knows (up to 20) and flag what needs attention.
+ *
+ * @param hub - Hub client
+ * @returns The overview; `hubError` is set when the hub could not be reached
+ */
+export async function farmOverview(hub: HubFetch): Promise<FarmOverview> {
+  const status = await hub(`${M}/mqtt/status`);
+  const generatedAt = new Date().toISOString();
+  if (!status.ok) return { simulated: false, generatedAt, devices: [], attention: [], hubError: JSON.stringify(status.body) };
+  const sb = status.body as { devices?: Array<string | { id: string }>; simulated?: boolean };
+  const ids = (sb.devices ?? []).map((d) => (typeof d === "string" ? d : d.id)).slice(0, MAX_OVERVIEW_DEVICES);
+  const devices = await Promise.all(ids.map(async (id): Promise<DeviceOverview> => {
+    const [tel, st, pres, al, ev] = await Promise.all(["telemetry", "state", "presence", "alerts", "events"].map((s) => hub(`${dev(id)}/${s}`)));
+    const reading = (tel.ok ? unwrap(tel.body) : {}) as DeviceOverview["reading"];
+    delete reading.ts;
+    const state = st.ok ? String(unwrap(st.body).state ?? "") || null : null;
+    const online = pres.ok ? Boolean((pres.body as { online?: boolean }).online) : null;
+    const flags = assessReading(reading, state ?? undefined);
+    if (online === false) flags.push({ level: "warning", text: "Offline - no data recently" });
+    const alerts = al.ok ? ((al.body as { alerts?: Array<Record<string, unknown>> }).alerts ?? []) : [];
+    const events = ev.ok ? ((ev.body as { events?: Array<Record<string, unknown>> }).events ?? []) : [];
+    return {
+      id, online, state, reading, flags,
+      openEvents: events.filter((e) => e.status !== "handled").slice(0, 5).map((e) => ({ id: String(e.id), title: String(e.title ?? e.type), detail: e.detail as string | undefined })),
+      recentAlerts: alerts.slice(-3).reverse().map((a) => ({ type: String(a.type), label: a.label as string | undefined, confidence: a.confidence as number | undefined, ts: a.ts as number | undefined })),
+    };
+  }));
+  const attention = devices.flatMap((d) => d.flags.map((f) => ({ ...f, deviceId: d.id })))
+    .sort((a, b) => (a.level === b.level ? 0 : a.level === "critical" ? -1 : 1));
+  return { simulated: Boolean(sb.simulated) || ids.length > 0 && ids.every((i) => i.startsWith("sim_") || i.endsWith("_demo")), generatedAt, devices, attention };
+}
+
+/** Plain-language summary of an overview (what the model reads; the card shows the rest). */
+export function overviewSummary(o: FarmOverview): string {
+  if (o.hubError) return `The hub is not reachable: ${o.hubError}`;
+  if (!o.devices.length) return "The hub is up but has not heard from any device yet.";
+  const head = `${o.devices.length} device${o.devices.length > 1 ? "s" : ""}${o.simulated ? " (simulated)" : ""}.`;
+  const need = o.attention.length ? ` Needs attention: ${o.attention.map((a) => `[${a.level}] ${a.deviceId}: ${a.text}`).join("; ")}.` : " Nothing needs attention.";
+  const flagsOpen = o.devices.flatMap((d) => d.openEvents.map((e) => `${d.id}: ${e.title}${e.detail ? ` (${e.detail})` : ""}`));
+  const alerts = o.devices.flatMap((d) => d.recentAlerts.map((a) => `${d.id}: ${a.label ?? a.type}${a.confidence ? ` ${Math.round(a.confidence * 100)}%` : ""}`));
+  return `${head}${need}${flagsOpen.length ? ` Open flags: ${flagsOpen.join("; ")}.` : ""}${alerts.length ? ` Recent alerts: ${alerts.join("; ")}.` : ""}`;
+}
+
+const flagSchema = z.object({ level: z.enum(["critical", "warning"]), text: z.string() });
+const OVERVIEW_SHAPE = {
+  simulated: z.boolean(),
+  generatedAt: z.string(),
+  hubError: z.string().optional(),
+  attention: z.array(flagSchema.extend({ deviceId: z.string() })),
+  devices: z.array(z.object({
+    id: z.string(),
+    online: z.boolean().nullable(),
+    state: z.string().nullable(),
+    reading: z.record(z.string(), z.unknown()),
+    flags: z.array(flagSchema),
+    openEvents: z.array(z.object({ id: z.string(), title: z.string(), detail: z.string().optional() })),
+    recentAlerts: z.array(z.object({ type: z.string(), label: z.string().optional(), confidence: z.number().optional(), ts: z.number().optional() })),
+  })),
+};
+
 const INSTRUCTIONS = `Tender Cells runs a backyard farm: coops, sensors, robots and cameras, controlled by a local hub.
 Rules for assistants:
 - Animal safety first. If readings suggest a health risk (temperature below 35°F or above 85°F, ammonia above 10 ppm, water below 15%), say so before anything else.
 - If anything looks dangerous to an animal or a person, call emergency_stop. Stopping never needs confirmation.
 - You can never actuate in one step. Use request_action, show the person the summary and the "check first" list, and call confirm_action only after they clearly agree. Never confirm on your own.
 - Arm, gantry, Roaming Roost driving, routines, laser weeding, mowers, zones and clearing an E-STOP are not available here. Send the person to the Tender Cells OS for those.
-- Say "simulated" when a device id starts with sim_ or the data says it is simulated.`;
+- Say "simulated" when a device id starts with sim_ or ends with _demo, or the data says it is simulated.
+- For "how is the farm?" questions, start with get_farm_overview: it flags animal-health issues and shows a farm card.`;
 
 export interface McpOptions {
   hub: HubFetch;
@@ -140,6 +233,34 @@ export function createTenderCellsMcp(opts: McpOptions): McpServer {
     description: "Every device at once (XML): presence, telemetry, state and yard events. Use for 'how is the farm doing?'.",
     annotations: READ,
   }, async () => hubResult(await hub("/api/state.xml")));
+
+  registerAppTool(server, "get_farm_overview", {
+    title: "Farm overview",
+    description: "Every device with its key readings, online / state, open yard flags, recent alerts and animal-health flags (critical first). Shows a farm card in apps that support it. Best first call for 'how is the farm doing?'.",
+    outputSchema: OVERVIEW_SHAPE,
+    annotations: READ,
+    _meta: { ui: { resourceUri: FARM_CARD_URI } },
+  }, async () => {
+    const o = await farmOverview(hub);
+    return { content: [{ type: "text" as const, text: overviewSummary(o) }], structuredContent: o as unknown as Record<string, unknown>, isError: Boolean(o.hubError) || undefined };
+  });
+
+  registerAppResource(server, "farm-card", FARM_CARD_URI, {
+    title: "Tender Cells farm card",
+    description: "Inline view of the farm overview: readings, health flags, yard flags and alerts. Read-only.",
+    mimeType: RESOURCE_MIME_TYPE,
+  }, async () => ({ contents: [{ uri: FARM_CARD_URI, mimeType: RESOURCE_MIME_TYPE, text: await farmCardHtml() }] }));
+
+  server.registerPrompt("farm_check", {
+    title: "Farm check",
+    description: "Daily check: animal-health risks first, then open flags and alerts, then up to three suggested next steps. Read-only.",
+  }, () => ({ messages: [{ role: "user", content: { type: "text", text: "Run a Tender Cells farm check. Call get_farm_overview. Report animal-health risks first (device and number), then open yard flags and predator alerts from the last 24 hours, then up to three plain-language next steps. Do not request or confirm any hardware action during the check." } }] }));
+
+  server.registerPrompt("evening_lockup", {
+    title: "Evening lock-up",
+    description: "Before closing a coop for the night: headcount, door, water, temperature and predator check, then offer to close the door (confirm-twice).",
+    argsSchema: { deviceId: z.string().describe("Coop device id, e.g. ct_001") },
+  }, ({ deviceId: id }) => ({ messages: [{ role: "user", content: { type: "text", text: `Help me lock up coop ${id} for the night. 1) Call get_device for ${id}: report the chicken count, door state, water and temperature. 2) Call get_alerts for ${id} and mention any predator alerts from the last hour. 3) If the door is open, ask whether every bird is inside; only if I say yes, call request_action with door_close, show me the summary and the check-first list, and wait for my yes before confirm_action. If request_action is not available (actions are off), tell me to close it in the Tender Cells OS instead. Never close the door without my yes.` } }] }));
 
   server.registerTool("emergency_stop", {
     title: "EMERGENCY STOP",

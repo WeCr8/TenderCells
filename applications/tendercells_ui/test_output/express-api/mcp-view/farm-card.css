@@ -1,0 +1,30 @@
+:root { --bg: #0D2B1E; --surface: #1A3D2B; --accent: #4A7C59; --gold: #C8B882; --gold-muted: #8A7D55; --danger: #CC3333; --warning: #E8A020; --text: #F0EDE4; }
+:root[data-theme="light"] { --bg: #F0EDE4; --surface: #FFFFFF; --gold: #4A5A2E; --gold-muted: #6B6243; --text: #0D2B1E; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+#root { padding: 12px; }
+.top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+h2 { margin: 0; font-size: 16px; color: var(--gold); flex: 1; }
+h3 { margin: 0; font-size: 14px; color: var(--gold); font-family: ui-monospace, monospace; }
+button { background: var(--accent); color: #F0EDE4; border: 0; border-radius: 6px; padding: 6px 10px; font-weight: 700; cursor: pointer; }
+button:disabled { opacity: .6; cursor: default; }
+.pill { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--accent); text-transform: uppercase; }
+.pill.sim { color: var(--warning); border-color: var(--warning); }
+.pill.estop, .pill.error { color: var(--danger); border-color: var(--danger); }
+.pill.offline { color: var(--gold-muted); }
+.attention { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 4px; }
+.flag { padding: 6px 8px; border-radius: 6px; border-left: 4px solid var(--warning); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+.flag.critical { border-left-color: var(--danger); background: color-mix(in srgb, var(--danger) 16%, transparent); }
+.ok { color: var(--gold); margin: 0 0 10px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.card { background: var(--surface); border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); border-radius: 8px; padding: 10px; }
+.card.warn { border-color: var(--warning); }
+.card.crit { border-color: var(--danger); }
+.card header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; }
+.kv { display: flex; justify-content: space-between; gap: 6px; }
+.kv span { color: var(--gold-muted); }
+.kv b { white-space: nowrap; }
+.list { margin: 6px 0 0; padding-left: 0; list-style: none; font-size: 13px; }
+.muted { color: var(--gold-muted); }
+.foot { font-size: 12px; margin: 10px 0 0; }

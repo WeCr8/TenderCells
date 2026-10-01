@@ -2,12 +2,16 @@
 
 Ask an AI assistant about your farm in plain words: "How are the chickens doing?", "Any predator alerts tonight?", "Close the coop door." Tender Cells ships one **MCP server** (Model Context Protocol). Claude and ChatGPT both connect to it, so there is one tool set and one set of safety rules for both.
 
-> **Status: early preview (v0.1).** Reading the farm and E-STOP work today. Hardware actions are off unless you turn them on, and each one needs your explicit "yes". Per-user sign-in (OAuth) and app-store listings are next.
+> **Status: preview (v0.2).**
+> - Reading the farm, the farm card, the demo farm and E-STOP all work today.
+> - Hardware actions are off unless you turn them on, and each one needs your explicit "yes".
+> - Per-user sign-in (OAuth) and app-directory listings are next.
 
 ## What the assistant can do
 
 | Tool | What it does | When |
 |---|---|---|
+| `get_farm_overview` | Every device with key readings, animal-health flags (critical first), open yard flags and recent alerts. Shows the **farm card** inline in Claude and ChatGPT. | always |
 | `get_hub_status` | Is the hub connected, and which devices has it heard from? | always |
 | `get_device` | Temperature, humidity, ammonia, feed, water, chicken count, door, state, online | always |
 | `get_alerts` | Last 100 predator / fault / health alerts | always |
@@ -17,7 +21,33 @@ Ask an AI assistant about your farm in plain words: "How are the chickens doing?
 | `request_action` | Step 1 of 2: prepares an action **without touching hardware** and returns a summary, a "check first" list and a 6-digit code | only with `TC_MCP_ALLOW_ACTIONS=1` |
 | `confirm_action` | Step 2 of 2: runs it, only after you say yes | only with `TC_MCP_ALLOW_ACTIONS=1` |
 
-The backend description (API, MQTT topics, safety rules) is also published as the resource `tendercells://describe.xml`.
+**Prompts** (Claude shows them as slash commands):
+- `farm_check`: the daily check;
+- `evening_lockup`: headcount, door, water, temperature and predators, then an offer to close the door with confirm-twice.
+
+**Resources:**
+- the backend description `tendercells://describe.xml`;
+- the farm card `ui://tendercells/farm-card.html`.
+
+### The farm card
+
+The farm card is an [MCP Apps](https://github.com/modelcontextprotocol/ext-apps) view, the shared inline-UI format Claude and ChatGPT both render, returned by `get_farm_overview`.
+- It shows each device's readings, what needs attention, yard flags and alerts, plus a Refresh button.
+- It has **no hardware buttons** on purpose: actions go through the chat and your confirmation.
+- In apps without MCP Apps support, the assistant gets the same data as text and structured output.
+
+**Health flags** use the project thresholds:
+- **Warning:** temperature below 35°F or above 85°F, ammonia above 10 ppm, water below 15%, feed below 20%, or a device that's offline or in error.
+- **Critical:** E-STOP latched, temperature below 32°F or above 90°F, or ammonia above 25 ppm.
+
+### Demo farm (no hub needed)
+
+`npm run mcp:demo`, or set `TC_MCP_DEMO=1`, serves a simulated farm:
+- **Devices:** a coop with low water and eggs waiting, a Duck Dock, and a WatchTower that saw a raccoon.
+- **Actions:** confirm-twice actions are on and change only the simulated devices.
+- **Labels:** every id ends in `_demo` and is labelled SIMULATED.
+
+It's the easy way to try the plugin, and to give app-directory reviewers something to test.
 
 **Actions on the allow-list:**
 - open or close the door;
@@ -52,11 +82,29 @@ Everything runs from the hub (`applications/tendercells_ui/test_output/express-a
 |---|---|---|
 | `TC_API` | Hub URL | `http://localhost:4000` |
 | `TC_TOKEN` | Firebase ID token, if your hub enforces accounts. It expires after an hour; OAuth replaces this next. | none |
-| `TC_MCP_ALLOW_ACTIONS` | `1` turns on `request_action` / `confirm_action` | off |
+| `TC_MCP_ALLOW_ACTIONS` | `1` turns on `request_action` / `confirm_action` | off (on for the demo farm unless `0`) |
+| `TC_MCP_DEMO` | `1`, or the `--demo` flag, serves the simulated farm instead of a hub | off |
 | `TC_MCP_HOST` / `TC_MCP_PORT` | Remote server bind address | `127.0.0.1:8787` |
 | `TC_MCP_KEY` | Access key for the remote server. Required beyond loopback; at least 24 characters. | none |
 
-### Claude Desktop (same computer as the hub)
+### Claude Desktop: one-click extension
+
+1. Build the extension in the hub folder:
+
+   ```bash
+   npm run mcp:pack     # → dist/tendercells.mcpb
+   ```
+
+2. Double-click `tendercells.mcpb`, or drag it into Claude Desktop's Extensions settings.
+3. Fill in the settings:
+   - **Hub URL**, e.g. `http://192.168.1.50:4000`;
+   - **Hub sign-in token**, only if your hub enforces accounts;
+   - **Demo farm**, to try it with no hub;
+   - **Allow hardware actions**.
+
+The extension bundles the server (Node 20+) and a prebuilt farm card.
+
+### Claude Desktop: manual config
 
 Add this to `claude_desktop_config.json` and restart Claude Desktop:
 
@@ -91,6 +139,8 @@ Add this to `claude_desktop_config.json` and restart Claude Desktop:
 
 ### ChatGPT and Claude on the web (remote connector)
 
+To try it without a hub, start the remote server with `--demo` (`npx tsx backend/src/mcp/http.ts --demo`).
+
 These connect to a URL, so the server must be reachable over HTTPS.
 
 1. Start the remote server with a long random key:
@@ -111,6 +161,7 @@ The menu names in both apps change often; follow each app's current help page fo
 
 ## Try it
 
+- "How's the farm?" → `get_farm_overview` and the farm card
 - "What's the temperature and ammonia in the coop?" → `get_device`
 - "Anything I should worry about tonight?" → `get_alerts` and `get_yard_events`
 - "Give the hens 100 grams of feed."
@@ -119,19 +170,29 @@ The menu names in both apps change often; follow each app's current help page fo
   3. `confirm_action` runs it.
 - "Stop everything!" → `emergency_stop`
 
-With no hardware, run the simulated coop: `npm run dev` plus `npm run simulate` in the hub folder. Device ids that start with `sim_` are simulated.
+With no hardware, use the demo farm (`npm run mcp:demo`). To exercise the real hub path, run the simulated coop instead: `npm run dev` plus `npm run simulate` in the hub folder. Device ids that start with `sim_` are simulated.
 
 ## For developers
 
 - **Code:**
   - `express-api/backend/src/mcp/`:
-    - `server.ts`: tools and rules;
+    - `server.ts`: tools, prompts, the farm overview and the rules;
+    - `health.ts`: animal-health thresholds;
     - `confirm.ts`: confirmation codes;
     - `hubClient.ts`: hub REST client;
+    - `demoHub.ts`: the simulated farm;
+    - `env.ts`: environment switches;
+    - `farmCard.ts`: builds the farm card from `express-api/mcp-view/`;
     - `stdio.ts` and `http.ts`: transports.
+  - The Claude Desktop extension is the manifest `express-api/mcpb/manifest.json` plus `tools/build-mcpb.mts` (`npm run mcp:pack`). CI packs and validates it.
   - The Claude Code plugin lives in `plugins/tendercells/`, with the marketplace entry in `.claude-plugin/marketplace.json`.
 - **Tests:** run `npm test` in the hub. `mcp.test.ts` uses an in-memory MCP client and a fake hub, and covers:
   - read-only by default;
+  - health thresholds;
+  - the demo farm overview and actions;
+  - the farm card resource;
+  - prompts;
+  - environment switches;
   - nothing moves on request;
   - single-use, expiring codes;
   - E-STOP latch and re-check at confirm;
@@ -141,9 +202,9 @@ With no hardware, run the simulated coop: `npm run dev` plus `npm run simulate` 
   1. Add it to `ACTIONS`, `actionCall` and `actionPreview` (with a "check first" list).
   2. Add a test.
   3. Never add motion that needs the chicken-presence check.
+- **Farm card:** rendered through the MCP Apps host bridge (`AppBridge`) in a browser. It shows the device cards, attention list and SIMULATED badge, and Refresh calls back to the server.
 - **Next:**
   - OAuth 2.1 sign-in, so each person sees only their devices without `TC_TOKEN`;
-  - a hosted endpoint;
-  - ChatGPT app and Claude connector directory listings;
-  - a widget UI (farm card) for ChatGPT apps;
-  - demo-farm tools that work with no hub.
+  - a hosted demo endpoint for reviewers;
+  - ChatGPT app and Claude connector directory listings (app icon, screenshots, privacy policy, test account = demo farm);
+  - a signed `.mcpb` attached to GitHub releases.

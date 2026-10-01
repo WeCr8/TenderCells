@@ -139,6 +139,9 @@ jobs:
       - name: Backend XML is up to date (website/public/api/tendercells-backend.xml)
         run: npm run describe:xml -- --check
 
+      - name: Claude Desktop extension packs (MCP server bundle + manifest)
+        run: npm run mcp:pack
+
   functions:
     name: "Cloud Functions — build"
     needs: changes

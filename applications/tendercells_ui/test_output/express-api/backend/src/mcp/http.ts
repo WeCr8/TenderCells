@@ -9,6 +9,7 @@
 //                               send it as "Authorization: Bearer <key>", or - for clients
 //                               that cannot set headers - in the URL: /mcp/<key>
 //   TC_MCP_ALLOW_ACTIONS=1      enable request_action / confirm_action (off by default)
+//   TC_MCP_DEMO=1               serve the built-in simulated farm instead of a hub
 //   TC_API, TC_TOKEN            how to reach the hub (hubClient.ts)
 //
 // Expose it to the internet only through an HTTPS tunnel or reverse proxy, with a long
@@ -18,7 +19,8 @@ import { pathToFileURL } from "node:url";
 import express, { type Request, type Response } from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { ConfirmStore } from "./confirm.js";
-import { hubClient, type HubFetch } from "./hubClient.js";
+import { describeEnv, mcpEnv } from "./env.js";
+import type { HubFetch } from "./hubClient.js";
 import { createTenderCellsMcp, type ActionRequest } from "./server.js";
 
 const LOOPBACK = new Set(["127.0.0.1", "::1", "localhost"]);
@@ -81,8 +83,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   const key = process.env.TC_MCP_KEY || undefined;
   const problem = checkBind(host, key);
   if (problem) { console.error(`[tendercells-mcp] ${problem}`); process.exit(1); }
-  const allowActions = process.env.TC_MCP_ALLOW_ACTIONS === "1";
-  createMcpHttpApp({ hub: hubClient(), key, allowActions }).listen(port, host, () => {
-    console.log(`[tendercells-mcp] http://${host}:${port}/mcp · key ${key ? "required" : "off (loopback only)"} · actions ${allowActions ? "enabled (confirm-twice)" : "off (read + E-STOP only)"}`);
+  const env = mcpEnv();
+  createMcpHttpApp({ hub: env.hub, key, allowActions: env.allowActions }).listen(port, host, () => {
+    console.log(`[tendercells-mcp] http://${host}:${port}/mcp · key ${key ? "required" : "off (loopback only)"} · ${describeEnv(env)}`);
   });
 }

@@ -38,6 +38,7 @@ Start here if you are browsing the repository docs.
 - [Chicken Tender master spec](CHICKEN_TENDER_MASTER_SPEC.md)
 - [Device testing setup](DEVICE_TESTING_SETUP.md)
 - [Hardware motor testing](HARDWARE_TESTING_MOTORS.md)
+- [Tender Cells for Claude and ChatGPT (MCP plugin)](AI_ASSISTANT_PLUGIN.md)
 - [Roadmap](ROADMAP.md)
 - [Open source launch](OPEN_SOURCE_LAUNCH.md)
 

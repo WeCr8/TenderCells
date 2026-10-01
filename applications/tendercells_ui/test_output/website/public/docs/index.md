@@ -40,6 +40,7 @@ Start here if you are browsing the repository docs.
 - [Chicken Tender master spec](/docs/chicken-tender-master-spec)
 - [Device testing setup](/docs/device-testing-setup)
 - [Hardware motor testing](/docs/hardware-testing-motors)
+- [Tender Cells for Claude and ChatGPT (MCP plugin)](/docs/ai-assistant-plugin)
 - [Roadmap](/docs/roadmap)
 - [Open source launch](https://github.com/WeCr8/TenderCells/blob/main/docs/OPEN_SOURCE_LAUNCH.md)
 

@@ -1,0 +1,18 @@
+{
+  "name": "tendercells",
+  "owner": {
+    "name": "WeCr8 Solutions",
+    "url": "https://tendercells.com"
+  },
+  "metadata": {
+    "description": "Tender Cells plugins for Claude Code: talk to your farm hub over MCP."
+  },
+  "plugins": [
+    {
+      "name": "tendercells",
+      "source": "./plugins/tendercells",
+      "description": "Tender Cells farm tools for Claude Code: readings, alerts, yard events, E-STOP and confirm-twice actions (MCP).",
+      "version": "0.1.0"
+    }
+  ]
+}

@@ -12,12 +12,15 @@
     "start": "node dist/server.js",
     "simulate": "node tools/simulate-device.mjs",
     "smoke": "node tools/smoke-test.mjs",
-    "test": "tsx --test backend/src/*.test.ts",
+    "test": "tsx --test backend/src/*.test.ts backend/src/mcp/*.test.ts",
     "tc": "node tools/tc.mjs",
     "describe:xml": "tsx tools/export-backend-xml.ts",
-    "camera-bridge": "tsx tools/camera-bridge.mts"
+    "camera-bridge": "tsx tools/camera-bridge.mts",
+    "mcp": "tsx backend/src/mcp/stdio.ts",
+    "mcp:http": "tsx backend/src/mcp/http.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "aedes": "^0.51.3",
     "bonjour-service": "^1.4.1",
     "cors": "^2.8.5",
@@ -25,7 +28,8 @@
     "express": "^4.18.2",
     "firebase-admin": "^12.0.0",
     "mqtt": "^5.15.1",
-    "werift": "^0.24.4"
+    "werift": "^0.24.4",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

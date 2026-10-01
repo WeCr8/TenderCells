@@ -104,6 +104,7 @@
   <url><loc>https://tendercells.com/docs/product-documentation-standard</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tendercells.com/docs/roadmap</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tendercells.com/docs/contributing</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/ai-assistant-plugin</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tendercells.com/docs/security</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tendercells.com/docs/index</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <!-- generated:docs end -->

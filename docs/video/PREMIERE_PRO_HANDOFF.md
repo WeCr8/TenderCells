@@ -14,6 +14,8 @@ Stock sources, creators, licenses and the distinction between illustrative learn
 
 The automated review render is `video-out/tender-cells-anthem-film.mp4`. Editable takes are in `video-out/shots/`; exact song and shot timing is in `anthem-markers.csv` and `anthem-cues.json`.
 
+For a quick editable Premiere assembly, run `assemble-tender-cells-anthem.jsx` from Premiere Pro using **File > Scripts > Run Script File...**. It imports the generated `video-out/segments/S01.mp4` through `S70.mp4`, places `tender-cells-anthem.mp3`, and adds section markers.
+
 ## Sequence setup
 
 1. Create a 1920x1080, 30 fps sequence.
@@ -23,3 +25,16 @@ The automated review render is `video-out/tender-cells-anthem-film.mp4`. Editabl
 5. Do not add a subtitle or closed-caption track. Do not import the SRT, LRC, or ASS files.
 6. Product-name graphics may appear briefly at the opening, end, or a chorus hit; they must not transcribe lyrics.
 7. Export H.264, 1920x1080, 30 fps, VBR 2-pass at 18-25 Mb/s, AAC 256 kb/s, with fast start enabled.
+
+
+## Story cut v2
+
+Review export: `video-out/tender-cells-anthem-story-v2.mp4` (1080p, 30 fps, original anthem audio, no subtitle track). This is a separate export; the earlier film and marketing edit remain available.
+
+Rebuild from the repository root with `python scripts/video/render-story.py`. Requires ffmpeg, ffprobe and Pillow (`python -m pip install Pillow`), the existing `video-out/segments/S*.mp4` captures, and the stock sources listed in the manifest. The renderer fails if an asset is missing. `anthem-cues.json` is the source of truth for stock selections, offsets and reuse of captured shots. Some reused demo takes are slowed slightly to fill their slots.
+
+Import `video-out/story-v2/S01.mp4` through `S70.mp4` in filename order onto a 30 fps sequence and place the original anthem at zero. `video-out/story-v2/edit.json` records frame counts and source selections. These clips contain editorial context labels and five brief titles; no lyric captions. Use this folder for v2 rather than the earlier assembly JSX, which targets the original segments.
+
+The story opens with real land, introduces its simulated twin, connects care views and robot workflows, returns to animal life, then holds the application URL. Stock is atmosphere rather than proof of product operation. The invitation is `tendercells.com/app/demo`.
+
+The opening and ending use the official `tender_cells_logo.png` asset. The opening holds the logo and the line “Building the future of animal care,” then dissolves into the farm aerial. The ending holds the logo, “Building the future, one flock at a time,” the application URL and “An open-source project by WeCr8 Solutions.” Keep these cards full-frame and uncluttered; do not place stock-license or simulation labels over the brand lockups.

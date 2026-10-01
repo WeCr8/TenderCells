@@ -107,12 +107,18 @@ function script() {
 | File | Use |
 |---|---|
 | \`tender-cells-anthem.mp3\` | The song (the master audio) |
-| \`tender-cells-anthem.srt\` | Lyric captions: import into Premiere, Resolve, CapCut or YouTube |
+| \`tender-cells-anthem.srt\` | Lyric timing reference only; do not import into the film |
 | \`tender-cells-anthem.lrc\` | Timed lyrics |
 | \`tender-cells-anthem.ass\` | Lyrics plus on-screen titles, styled in the brand colours (ffmpeg / Aegisub) |
 | \`anthem-markers.csv\` | Section and shot markers with 30 fps timecodes |
 
 To record every motion take and assemble a caption-free review film with the song, run \`npm run video:shots\` and then \`npm run video:roughcut\` (see the end of this page).
+
+## Story
+
+${cues.story}
+
+Stock clips and source takes are specified per shot in the JSON. Render the stock-inclusive story cut with \`python scripts/video/render-story.py\` from the repository root.
 
 ## Song structure
 
@@ -127,7 +133,7 @@ ${cues.sections.map((s) => `| ${s.name} | ${mmss(s.start)} | ${mmss(s.end)} | ${
     out.push('|---|---|---|---|---|---|');
     for (const s of shots) {
       const lyr = cues.lines.filter((l) => l.start < s.end - 0.01 && l.end > s.start + 0.01).map((l) => md(l.text));
-      const screen = s.app === 'card' ? 'Title card' : `${s.app === 'web' ? 'Website' : 'OS'} \`${s.route}\`${s.action && s.action !== 'page' ? ` · ${s.action}` : ''}`;
+      const screen = s.stock ? `Stock: ${s.stock}` : s.app === 'card' ? 'Title card' : `${s.app === 'web' ? 'Website' : 'OS'} \`${s.route}\`${s.action && s.action !== 'page' ? ` · ${s.action}` : ''}`;
       out.push(`| ${mmss(s.start)}–${mmss(s.end)} | ${lyr.join(' / ') || '*(instrumental)*'} | ${s.id} | ${screen} | ${md(s.onScreen || '')} | ${md(s.visual || '')} |`);
     }
     out.push('');
@@ -145,7 +151,7 @@ Screen actions used above:
 | Action | What it does |
 |---|---|
 | \`page\` | Open the page and perform a smooth editorial scroll or pointer move. |
-| \`hero3d\` / \`hero2d\` | The live Property Twin at the top of \`/demo\`, in 3D or 2D. |
+| \`hero3d\` / \`hero2d\` | The simulated Property Twin at the top of \`/demo\`, in 3D or 2D. |
 | \`viewer\` / \`viewer2d\` | The page's 3D viewer, with the autonomous-farm panel, in 3D or 2D top view. |
 | \`trigger\` | The event simulator runs its predator event. |
 

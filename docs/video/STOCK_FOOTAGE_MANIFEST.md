@@ -37,3 +37,26 @@ Stock is optional B-roll. It supports the story without implying that a depicted
 - Do not imply that stock subjects use, own, recommend, or tested Tender Cells.
 - Never use stock to prove a working Tender Cells feature. Product claims use captured demo footage labeled Simulation.
 - Crop, grade, and intercut footage; never redistribute an unaltered source file.
+
+## Future Farming marketing sequence — 2026-09-30
+
+Used in the Premiere sequence `Tender Cells - Future Farming Marketing`. Item pages were checked individually for the Mixkit Stock Video Free License (commercial use); page snapshots are saved alongside downloaded sources in `video-out/stock/`. Individual creator names were not displayed on these item pages; provider: Mixkit. Sources are 720p, scaled to the 1080p sequence.
+
+| Asset | Item page | License | Use |
+|---|---|---|---|
+| agriculture-field-from-above-820 | https://mixkit.co/free-stock-video/agriculture-field-from-above-820/ | Mixkit Stock Video Free License | Opening, future farming bridge, closing CTA |
+| a-person-sowing-a-seed-2851 | https://mixkit.co/free-stock-video/a-person-sowing-a-seed-2851/ | Mixkit Stock Video Free License | Growing and hands-on farming |
+| landscape-of-a-large-open-field-on-a-sunny-afternoon-21577 | https://mixkit.co/free-stock-video/landscape-of-a-large-open-field-on-a-sunny-afternoon-21577/ | Mixkit Stock Video Free License | Property context and closing montage |
+| countryside-meadow-4075 | https://mixkit.co/free-stock-video/countryside-meadow-4075/ | Mixkit Stock Video Free License | Nature and farm context |
+| hens-farm-12012874 | https://www.pexels.com/video/hens-in-farm-12012874/ | [Pexels License](https://www.pexels.com/license/) | Morning flock and animal-care context |
+| chickens-roaming-34450566 | https://www.pexels.com/video/chickens-roaming-freely-on-a-rural-farm-34450566/ | [Pexels License](https://www.pexels.com/license/) | Flock context before the property map and final invitation |
+| robot-arm-factory-32386532 | https://www.pexels.com/video/industrial-robot-arm-in-high-tech-factory-32386532/ | [Pexels License](https://www.pexels.com/license/) | General robotics context; never presented as Tender Cells hardware |
+
+Tender Cells robotics remains existing application simulation footage with explicit simulation labeling. The industrial robot clip is illustrative context only and cuts into the application simulation; it is not presented as deployed Tender Cells hardware. Original sequence and anthem audio are preserved. The marketing overlays are on Video 2; exact placements are in `video-out/marketing/edit.json`.
+
+
+## Story cut v2 - 2026-09-30
+
+The exported `video-out/tender-cells-anthem-story-v2.mp4` uses the four previously downloaded Mixkit clips above plus [Ducks Gliding on Blue Water](https://mixkit.co/free-stock-video/ducks-gliding-on-blue-water-101500/). The duck item page explicitly permits commercial and personal use under the Mixkit Stock Video Free License; provider Mixkit, no individual creator displayed. Its page snapshot and 1080p source are saved in `video-out/stock/`. The previous four sources are 720p upscaled; the ducks source is 1080p.
+
+Exact selections and source offsets are in `anthem-cues.json` (`stock`, `stockOffset`). Frame counts and source paths for the rendered cut are in `video-out/story-v2/edit.json`. Stock is labeled illustrative; captured application footage is labeled simulated. No stock robotics is presented as Tender Cells hardware. Source footage is used only within this edited song film.

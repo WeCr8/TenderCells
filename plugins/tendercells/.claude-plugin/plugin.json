@@ -1,0 +1,10 @@
+{
+  "name": "tendercells",
+  "version": "0.1.0",
+  "description": "Ask Claude about your Tender Cells farm: coop readings, alerts, yard events and E-STOP, plus confirm-twice door / feed / relay actions.",
+  "author": { "name": "WeCr8 Solutions", "url": "https://tendercells.com" },
+  "homepage": "https://tendercells.com/docs/ai-assistant-plugin",
+  "repository": "https://github.com/WeCr8/TenderCells",
+  "license": "SEE LICENSE IN LICENSE",
+  "keywords": ["farm", "chickens", "iot", "mqtt", "home-automation"]
+}

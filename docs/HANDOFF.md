@@ -80,4 +80,17 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
      - printable export from the same step data;
      - teacher / classroom mode;
      - mirror into the Python generator once stable.
-8. **Older open PRs not from today:** #106 (Copilot auth flow) and the Dependabot bumps #96–#103. Review or merge them separately.
+8. **AI assistant plugin: Claude and ChatGPT** (`docs/AI_ASSISTANT_PLUGIN.md`).
+   - **Done (v0.1):** one MCP server in the hub (`express-api/backend/src/mcp/`).
+     - Read tools and `emergency_stop` are always available.
+     - Door, feed, relay, stop-cleaning and mark-handled are confirm-twice actions (`request_action` → person says yes → `confirm_action`). They are off unless `TC_MCP_ALLOW_ACTIONS=1`.
+     - Transports: stdio (`npm run mcp`) and HTTP (`npm run mcp:http`, with an access key).
+     - A Claude Code plugin (`plugins/tendercells`, farm-check skill) and its marketplace entry.
+   - **Next:**
+     - OAuth 2.1 instead of `TC_TOKEN` and URL keys;
+     - a hosted endpoint;
+     - ChatGPT app and Claude directory listings;
+     - a farm-card widget;
+     - demo-farm tools that work with no hub.
+   - Never add arm / drive / laser / mower motion or E-STOP clear to the assistant tools.
+9. **Older open PRs not from today:** #106 (Copilot auth flow) and the Dependabot bumps #96–#103. Review or merge them separately.

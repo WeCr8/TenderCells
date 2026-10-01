@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "tendercells": {
+      "type": "http",
+      "url": "${TC_MCP_URL:-http://127.0.0.1:8787/mcp}",
+      "headers": { "Authorization": "Bearer ${TC_MCP_KEY:-}" }
+    }
+  }
+}

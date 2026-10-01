@@ -55,7 +55,7 @@ Stock clips and source takes are specified per shot in the JSON. Render the stoc
 | Time | Lyric | Shot | Screen | On-screen text | Visual |
 |---|---|---|---|---|---|
 | 0:00.0–0:07.1 | *(instrumental)* | S01 | Stock: agriculture-field-from-above-820.mp4 | Official Tender Cells logo / BUILDING THE FUTURE OF ANIMAL CARE | Open on the official Tender Cells brand card, dissolve into real farmland, then reveal the digital twin so the application feels grounded in the work it supports. |
-| 0:07.1–0:14.2 | *(instrumental)* | S02 | OS `/demo` · hero2d | Your whole property in 2D and 3D | Same hero, flip to 2D top-down plan on the downbeat at 0:07.1. |
+| 0:07.1–0:14.2 | *(instrumental)* | S02 | OS `/demo` · hero2d | Your whole property in 2D and 3D | Reveal the 2D property plan while four bordered story windows enter sequentially: hens, ducks, an outdoor rover and hands-on STEM robotics. |
 
 ## Verse 1 (0:14.2–0:48.3)
 
@@ -84,7 +84,7 @@ Stock clips and source takes are specified per shot in the JSON. Render the stoc
 | Time | Lyric | Shot | Screen | On-screen text | Visual |
 |---|---|---|---|---|---|
 | 0:56.1–0:58.0 | Hey! Tender Cells, let's go! | S15 | OS `/demo` · hero3d | TENDER CELLS — LET'S GO! | Big title slam on the downbeat over the 3D farm. |
-| 0:58.0–1:01.7 | Chicken Tender keeps the flock alright | S16 | OS `/chicken-tender?section=coop` | Chicken Tender™ | Chicken Tender dashboard. |
+| 0:58.0–1:01.7 | Chicken Tender keeps the flock alright | S16 | OS `/chicken-tender?section=coop` | Chicken Tender™ | Open on the Chicken Tender dashboard, then cut inside the same beat to the real flock behind the care workflow. |
 | 1:01.7–1:05.4 | Duck Dock keeps the water shining bright | S17 | Stock: ducks-gliding-on-blue-water-101500.mp4 |  | Real ducks on water give Duck Dock a living context; the later watershed view returns to the application. |
 | 1:05.4–1:09.1 | Roaming Roost moving through the field | S18 | OS `/roaming-roost` | Roaming Roost™ | Roaming Roost dashboard (3D viewer shows it moving). |
 | 1:09.1–1:12.8 | Future farming's finally been revealed | S19 | Stock: robot-mower-grass-42015-prepared.mp4 |  | A robotic mower rolls across grass after the Roaming Roost simulation; show a different outdoor surface as general robotics context. |
@@ -99,12 +99,12 @@ Stock clips and source takes are specified per shot in the JSON. Render the stoc
 
 | Time | Lyric | Shot | Screen | On-screen text | Visual |
 |---|---|---|---|---|---|
-| 1:31.4–1:35.7 | Eggs get counted, data flows | S26 | OS `/egg-map` | Egg Map - demo records | Egg Map. |
+| 1:31.4–1:35.7 | Eggs get counted, data flows | S26 | OS `/egg-map` | Egg Map - demo records | Read the Egg Map briefly, then return to hens before the next sensor workflow. |
 | 1:35.7–1:39.9 | Every day the system grows | S27 | Stock: hens-farm-12012874.mp4 |  | Return from the egg map to real hens: connect the recorded care task to the flock. |
 | 1:39.9–1:44.2 | Sensors watching day and night | S28 | OS `/sensors` | Sensor readings - demo data | Sensors. |
 | 1:44.2–1:48.4 | Keeping every animal safe and right | S29 | Stock: rabbit-grass-4377851.mp4 |  | Observe a rabbit grazing before the learning sequence; caring starts with looking closely at an animal. |
 | 1:48.4–1:52.7 | 4-H kids are learning too | S30 | Stock: stem-robot-build-7868280-4k.mp4 | 4-H project ideas: observe, build, share | 4-H project ideas: connect animal observation to hands-on robotics. Use a non-identifying hands-and-robot crop of a supervised classroom activity; these are illustrative project ideas, not footage of a named 4-H club. |
-| 1:52.7–1:56.9 | Building things and seeing them through | S31 | OS `/projects` | Build it yourself | DIY projects. |
+| 1:52.7–1:56.9 | Building things and seeing them through | S31 | OS `/projects` | Build it yourself | Move from the DIY Projects page into close circuit work within the same beat. |
 | 1:56.9–2:01.2 | Makers, farmers, engineers | S32 | Stock: harvest-lettuce-7456581.mp4 |  | Return from project planning to harvesting: show the practical farm work that inspires the build. |
 | 2:01.2–2:05.4 | Creating tomorrow through the years | S33 | Stock: stem-circuit-5736195.mp4 | From curiosity to a working circuit | Close circuit-board work completes the observe, plan, build sequence before the open-source resources. |
 
@@ -126,8 +126,8 @@ Stock clips and source takes are specified per shot in the JSON. Render the stoc
 | 2:18.7–2:22.4 | Duck Dock keeps the water shining bright | S40 | OS `/watershed` | Duck Dock™ · water | Watershed & drainage (water on the map). |
 | 2:22.4–2:26.1 | Roaming Roost moving through the field | S41 | Stock: robot-mower-grass-42015-prepared.mp4 |  | A close outdoor mower pass across grass adds physical movement between the water map and farm machinery detail; label as stock robotics reference. |
 | 2:26.1–2:29.8 | Future farming's finally been revealed | S42 | Stock: tractor-tire-7456455.mp4 |  | Farm machinery and tread texture bridge physical terrain into the simulated event-and-response workflow. |
-| 2:29.8–2:33.5 | Hey! Everybody sing along | S43 | OS `/simulator` · trigger | Trigger an event | Event simulator: predator event runs its chain. |
-| 2:33.5–2:37.2 | Tender Cells all day long | S44 | OS `/mowers` | Explore supported mower integrations | Mowers page. |
+| 2:29.8–2:33.5 | Hey! Everybody sing along | S43 | OS `/simulator` · trigger | Trigger an event | Trigger the simulated predator response, then cut to chickens outdoors to show who the response is designed to protect. |
+| 2:33.5–2:37.2 | Tender Cells all day long | S44 | OS `/mowers` | Explore supported mower integrations | Introduce mower integrations in the application, then show a robot mower moving on grass. |
 | 2:37.2–2:40.9 | Teaching kids and helping farms | S45 | Stock: stem-robot-build-7868280-4k.mp4 | Build. Test. Learn together. | Return to the student-built robot: inspecting wheels and sensors connects STEM projects to the application robotics pages. |
 | 2:40.9–2:44.6 | Building better barns and robot arms | S46 | OS `/weed-patrol` | Weed patrol robots | Weed Patrol. |
 | 2:44.6–2:47.2 | Tender Cells! Whoa-oh-oh! | S47 | Stock: rover-park-8566714.mp4 |  | Outdoor rover movement continues the robotics story after Weed Patrol. |
@@ -142,7 +142,7 @@ Stock clips and source takes are specified per shot in the JSON. Render the stoc
 | 2:55.9–2:59.0 | Solar power, sensors too | S51 | OS `/predator-monitor` | WatchTower and sensor workflow - demo | WatchTower. |
 | 2:59.0–3:02.1 | There's nothing that we cannot do | S52 | Stock: harvest-lettuce-7456581.mp4 |  | After sensors and vision, show a real harvest as the human purpose behind the engineering. |
 | 3:02.1–3:05.1 | From California out to Texas | S53 | OS `/layout` · viewer2d | Your property, your boundary | 2D map with the property boundary. No map pins or claims about where users are. |
-| 3:05.1–3:08.2 | Helping every farmer next us | S54 | OS `/mowers` | Supported integrations; setup required | Mowers page. |
+| 3:05.1–3:08.2 | Helping every farmer next us | S54 | OS `/mowers` | Supported integrations; setup required | Show the supported-integration view, then cut immediately to outdoor mower movement before the small-beginnings farming beat. |
 | 3:08.2–3:11.3 | Big ideas from small beginnings | S55 | Stock: a-person-sowing-a-seed-2851.mp4 |  | Small beginnings: one seed and one practical task. |
 | 3:11.3–3:14.4 | Tender Cells is just beginning | S56 | OS `/demo` · hero3d |  | Return to the simulated twin: this is the application viewers can explore. |
 
@@ -164,7 +164,7 @@ Stock clips and source takes are specified per shot in the JSON. Render the stoc
 | 3:23.0–3:23.9 | Chicken Tender! Duck Dock! Roaming Roost! Don't stop! | S63 | Stock: ducks-gliding-on-blue-water-101500.mp4 |  | Return to real ducks on the repeated Duck Dock callout. |
 | 3:23.9–3:24.8 | Chicken Tender! Duck Dock! Roaming Roost! Don't stop! | S64 | OS `/layout` · viewer | ROAMING ROOST! |  |
 | 3:24.8–3:25.7 | Chicken Tender! Duck Dock! Roaming Roost! Don't stop! | S65 | Stock: goats-pasture-29711030.mp4 |  | A quick pasture beat expands the final animal montage. |
-| 3:25.7–3:29.4 | Tender Cells! Building the future one flock at a time! | S66 | OS `/demo` · hero3d | Explore your farm in 2D and 3D | Whole farm in 3D. |
+| 3:25.7–3:29.4 | Tender Cells! Building the future one flock at a time! | S66 | OS `/demo` · hero3d | Explore your farm in 2D and 3D | Use the 3D property as the center of a four-corner recap: goats, rabbit care, harvesting and an outdoor mower appear in sequence. |
 | 3:29.4–3:33.0 | Tender Cells! Building the future one flock at a time! | S67 | Stock: harvest-lettuce-7456581.mp4 |  | Close with the harvest before returning to the flock and the final application invitation. |
 | 3:33.0–3:36.7 | Whoa-oh-oh-oh! Tender Cells! | S68 | Stock: chickens-roaming-34450566.mp4 |  | Return to the flock before the final invitation, completing the journey from animals to application and back. |
 | 3:36.7–3:40.3 | Whoa-oh-oh-oh! Tender Cells! | S69 | OS `/demo` · hero3d | TENDER CELLS |  |

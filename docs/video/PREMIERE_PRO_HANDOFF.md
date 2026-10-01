@@ -8,6 +8,8 @@ The story now alternates animal care with application workflows, connects outdoo
 
 Rebuild with `python scripts/video/render-story.py` from the repository root. Edit `anthem-cues.json`, then regenerate the matching script and markers with `node applications/tendercells_ui/test_output/tendercells-ui/scripts/video/anthem-cues.mjs`.
 
+If the prepared mower source is missing, first run `python scripts/video/prepare-mower-stock.py`. To revise only specific shots while reusing existing v3 segments, run e.g. `python scripts/video/render-story.py --shots S19 S41 S57`; the final film and edit manifest are reassembled afterward.
+
 For an editable Premiere sequence, use `assemble-tender-cells-story-v3.jsx` with the existing Premiere script bridge, or import `video-out/story-v3/S01.mp4` through `S70.mp4` in filename order and place `docs/video/tender-cells-anthem.mp3` at frame zero. This new assembly targets the v3 renders; the older JSX targets the earlier cut. `video-out/story-v3/edit.json` contains exact frame counts, source offsets, crops and labels. Assembly clips have baked editorial graphics; the original downloaded sources and JSON retain the inputs for changing them.
 
 Stock sources, creators, licenses and the distinction between illustrative learning footage and an affiliated 4-H program are documented in `STOCK_FOOTAGE_MANIFEST.md`.

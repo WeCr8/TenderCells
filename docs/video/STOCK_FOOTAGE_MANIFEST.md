@@ -1,5 +1,13 @@
 # Stock footage manifest
 
+## Story cut v5 - brand and editorial transitions
+
+V5 reuses the approved sources in two four-corner layouts. S02 introduces hens, ducks, an outdoor rover and hands-on robotics over the property application; S66 recaps goats, rabbit care, harvesting and a robotic mower. Panels fade in sequentially with white editorial borders. Existing internal cutaways now use story-specific dissolves, wipes, slides and reveals. No new source or license was introduced.
+
+## Story cut v4 - timestamp gap repair
+
+The v4 edit reuses the approved v3 sources and adds internal cutaways inside S16, S26, S31, S43, S44 and S54. These repairs target the application-heavy passages near 1:00, 1:30, 2:00, 2:30 and 3:10. No new stock source or license was introduced. Exact insert timing is in `anthem-cues.json` under `storyInsert`.
+
 ## Story cut v3 - expanded farm, robotics and STEM edit
 
 Review export: `video-out/tender-cells-anthem-story-v3.mp4`. The 70-shot edit uses approximately 109 seconds of stock footage (49% of the film), intercut with the existing application captures. Original anthem audio and timing remain intact. No lyric captions are burned in.

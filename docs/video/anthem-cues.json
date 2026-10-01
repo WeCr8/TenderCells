@@ -457,9 +457,41 @@
    "app": "os",
    "route": "/demo",
    "action": "hero2d",
+  "quadMontage": {
+    "starts": [
+     0.45,
+     1.35,
+     2.25,
+     3.15
+    ],
+    "panels": [
+     {
+      "stock": "hens-farm-12012874.mp4",
+      "stockOffset": 1.0
+     },
+     {
+      "stock": "ducks-gliding-on-blue-water-101500.mp4",
+      "stockOffset": 2.0
+     },
+     {
+      "stock": "rover-park-8566714.mp4",
+      "stockOffset": 2.0
+     },
+     {
+      "stock": "stem-robot-build-7868280-4k.mp4",
+      "stockOffset": 3.0,
+      "sourceCrop": [
+       1920,
+       1080,
+       0,
+       1080
+      ]
+     }
+    ]
+   },
    "onScreen": "Your whole property in 2D and 3D",
-   "visual": "Same hero, flip to 2D top-down plan on the downbeat at 0:07.1.",
-   "purpose": "Same hero, flip to 2D top-down plan on the downbeat at 0:07.1."
+  "visual": "Reveal the 2D property plan while four bordered story windows enter sequentially: hens, ducks, an outdoor rover and hands-on STEM robotics.",
+  "purpose": "State animal care, outdoor robotics and 4-H/STEM over the application within the first 15 seconds."
   },
   {
    "id": "S03",
@@ -626,9 +658,16 @@
    "app": "os",
    "route": "/chicken-tender?section=coop",
    "action": "page",
+  "storyInsert": {
+    "stock": "hens-farm-12012874.mp4",
+    "stockOffset": 1.0,
+    "seconds": 1.85,
+    "label": "The flock behind the dashboard",
+    "transition": "fade"
+   },
    "onScreen": "Chicken Tender™",
-   "visual": "Chicken Tender dashboard.",
-   "purpose": "Chicken Tender dashboard."
+  "visual": "Open on the Chicken Tender dashboard, then cut inside the same beat to the real flock behind the care workflow.",
+  "purpose": "Connect the product name and application view directly to the animals it serves."
   },
   {
    "id": "S17",
@@ -757,9 +796,16 @@
    "app": "os",
    "route": "/egg-map",
    "action": "page",
+  "storyInsert": {
+    "stock": "hens-farm-12012874.mp4",
+    "stockOffset": 5.7,
+    "seconds": 2.1,
+    "label": "From egg records back to the flock",
+    "transition": "wipeleft"
+   },
    "onScreen": "Egg Map - demo records",
-   "visual": "Egg Map.",
-   "purpose": "Egg Map."
+  "visual": "Read the Egg Map briefly, then return to hens before the next sensor workflow.",
+  "purpose": "Turn the egg record into an animal-care story rather than a standalone UI screen."
   },
   {
    "id": "S27",
@@ -826,9 +872,16 @@
    "app": "os",
    "route": "/projects",
    "action": "page",
+  "storyInsert": {
+    "stock": "stem-circuit-5736195.mp4",
+    "stockOffset": 0.5,
+    "seconds": 2.1,
+    "label": "Plan the project. Build the circuit.",
+    "transition": "slideup"
+   },
    "onScreen": "Build it yourself",
-   "visual": "DIY projects.",
-   "purpose": "DIY projects."
+  "visual": "Move from the DIY Projects page into close circuit work within the same beat.",
+  "purpose": "Show a project moving from planning in the application to hands-on STEM work."
   },
   {
    "id": "S32",
@@ -973,9 +1026,16 @@
    "app": "os",
    "route": "/simulator",
    "action": "trigger",
+  "storyInsert": {
+    "stock": "chickens-roaming-34450566.mp4",
+    "stockOffset": 2.0,
+    "seconds": 1.8,
+    "label": "The response protects real animals",
+    "transition": "circleopen"
+   },
    "onScreen": "Trigger an event",
-   "visual": "Event simulator: predator event runs its chain.",
-   "purpose": "Event simulator: predator event runs its chain."
+  "visual": "Trigger the simulated predator response, then cut to chickens outdoors to show who the response is designed to protect.",
+  "purpose": "Give the event simulation a clear animal-care outcome."
   },
   {
    "id": "S44",
@@ -984,9 +1044,16 @@
    "app": "os",
    "route": "/mowers",
    "action": "page",
+  "storyInsert": {
+    "stock": "robot-mower-grass-42015-prepared.mp4",
+    "stockOffset": 24.0,
+    "seconds": 2.0,
+    "label": "Outdoor robotics reference - stock",
+    "transition": "smoothleft"
+   },
    "onScreen": "Explore supported mower integrations",
-   "visual": "Mowers page.",
-   "purpose": "Mowers page."
+  "visual": "Introduce mower integrations in the application, then show a robot mower moving on grass.",
+  "purpose": "Carry the interface concept into a physical outdoor robotics reference."
   },
   {
    "id": "S45",
@@ -1112,9 +1179,16 @@
    "app": "os",
    "route": "/mowers",
    "action": "page",
+  "storyInsert": {
+    "stock": "robot-mower-grass-42015-prepared.mp4",
+    "stockOffset": 28.0,
+    "seconds": 1.55,
+    "label": "Integration idea to outdoor movement",
+    "transition": "slideright"
+   },
    "onScreen": "Supported integrations; setup required",
-   "visual": "Mowers page.",
-   "purpose": "Mowers page."
+  "visual": "Show the supported-integration view, then cut immediately to outdoor mower movement before the small-beginnings farming beat.",
+  "purpose": "Link integration setup to movement on the property while retaining the setup-required qualifier."
   },
   {
    "id": "S55",
@@ -1259,9 +1333,35 @@
    "app": "os",
    "route": "/demo",
    "action": "hero3d",
+  "quadMontage": {
+    "starts": [
+     0.1,
+     0.65,
+     1.2,
+     1.75
+    ],
+    "panels": [
+     {
+      "stock": "goats-pasture-29711030.mp4",
+      "stockOffset": 1.0
+     },
+     {
+      "stock": "rabbit-grass-4377851.mp4",
+      "stockOffset": 6.0
+     },
+     {
+      "stock": "harvest-lettuce-7456581.mp4",
+      "stockOffset": 2.0
+     },
+     {
+      "stock": "robot-mower-grass-42015-prepared.mp4",
+      "stockOffset": 27.0
+     }
+    ]
+   },
    "onScreen": "Explore your farm in 2D and 3D",
-   "visual": "Whole farm in 3D.",
-   "purpose": "Whole farm in 3D."
+  "visual": "Use the 3D property as the center of a four-corner recap: goats, rabbit care, harvesting and an outdoor mower appear in sequence.",
+  "purpose": "Recap the full animal-care, farming and robotics ecosystem without dropping the application invitation."
   },
   {
    "id": "S67",

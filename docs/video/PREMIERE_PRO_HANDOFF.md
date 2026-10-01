@@ -1,6 +1,18 @@
 # Premiere Pro handoff
 
-## Current cut: Story v3
+## Current cut: Story v5
+
+Watch `video-out/tender-cells-anthem-story-v5.mp4`. The opening now holds the official Tender Cells logo for approximately 3.4 seconds at a larger scale, with the explicit framing **Animal care | Outdoor robotics | 4-H + STEM**. The first 15 seconds then move through farmland and the application while four bordered story windows introduce hens, ducks, an outdoor rover and hands-on robotics one by one.
+
+V5 also adds a second four-corner ecosystem recap near the final chorus, plus purpose-specific transitions: dissolves for animal care, wipes and slides for application-to-field movement, a circular reveal for the protection story, and the existing tire-to-wheel match cuts. Editable renders are in `video-out/story-v5/`; use `assemble-tender-cells-story-v5.jsx` or import S01-S70 directly.
+
+The installed Finzar-style library was reviewed against this cut. For a native Premiere refinement, use **Pop Motion** for the staggered corner panels, **Motion Camera** or **Whip** for rover movement, **Shape Flow** for the protection reveal, and a restrained **Light Leak** on one major section change. Keep animal-care moments on clean dissolves. Avoid stacking Glitch, VHS Damage, or Earthquake effects over the UI because they weaken legibility and the calm farm tone. The automated render uses equivalent fades, wipes, slides, and reveals so the review MP4 remains portable.
+
+## Current cut: Story v4
+
+Watch `video-out/tender-cells-anthem-story-v4.mp4`. This revision specifically repairs the story gaps near 1:00, 1:30, 2:00, 2:30 and 3:10. Six application shots now contain internal story cuts, moving from the interface to a real flock, circuit building, protected animals, or outdoor robot movement inside the same musical beat. The longest uninterrupted application-only passage in those repaired areas is approximately 2.2 seconds.
+
+Editable per-shot renders are in `video-out/story-v4/`. `edit.json` records each internal `storyInsert` with its source, offset and duration. Use `assemble-tender-cells-story-v4.jsx` for a quick Premiere sequence or import the S01-S70 renders directly.
 
 Watch `video-out/tender-cells-anthem-story-v3.mp4`: the actual updated 1920x1080, 30 fps film with the original anthem. It adds nine source clips, changes 27 shot selections, and gives approximately half the runtime to farm, animal, outdoor robotics and STEM footage. Prior exports remain available.
 

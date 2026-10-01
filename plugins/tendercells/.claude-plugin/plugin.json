@@ -1,6 +1,6 @@
 {
   "name": "tendercells",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Ask Claude about your Tender Cells farm: farm overview with animal-health flags and an inline farm card, readings, alerts, yard events, E-STOP and confirm-twice door / feed / relay actions.",
   "author": {
     "name": "WeCr8 Solutions",

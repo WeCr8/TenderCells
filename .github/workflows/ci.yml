@@ -53,7 +53,8 @@ jobs:
           APPS='^applications/tendercells_ui/test_output'
           echo "ui=$(has "$APPS/(tendercells-ui|website|shared)/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
           echo "api=$(has "$APPS/express-api/|$APPS/website/public/api/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
-          echo "functions=$(has '^functions/|^\.github/workflows/ci\.yml')" >> "$GITHUB_OUTPUT"
+          # The hosted AI-assistant connector is bundled into functions from the hub's mcp/ sources.
+          echo "functions=$(has "^functions/|$APPS/express-api/backend/src/mcp/|$APPS/express-api/mcp-view/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
           echo "firmware=$(has '^firmware/(chicken-tender|watchtower|camera-node|shared|roaming-roost|starter-node)/|^\.github/workflows/ci\.yml')" >> "$GITHUB_OUTPUT"
           echo "python=$(has '^firmware/jetson-nano/|^\.github/workflows/ci\.yml')" >> "$GITHUB_OUTPUT"
           # Website: its own code, the OS routes it links into, and the docs its lessons / doc list come from.

@@ -58,7 +58,7 @@ jobs:
           fi
           FILES=$(git diff --name-only "$LIVE" HEAD)
           echo "Changed since live $LIVE:"; echo "$FILES"
-          if echo "$FILES" | grep -qE '^applications/tendercells_ui/test_output/(tendercells-ui|website|shared)/|^functions/|^firestore\.(rules|indexes\.json)$|^storage\.rules$|^firebase\.json$|^\.firebaserc$|^scripts/firebase-|^\.github/workflows/deploy\.yml$'; then
+          if echo "$FILES" | grep -qE '^applications/tendercells_ui/test_output/(tendercells-ui|website|shared)/|^applications/tendercells_ui/test_output/express-api/(backend/src/mcp|mcp-view)/|^functions/|^firestore\.(rules|indexes\.json)$|^storage\.rules$|^firebase\.json$|^\.firebaserc$|^scripts/firebase-|^\.github/workflows/deploy\.yml$'; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           else
             echo "Nothing this workflow deploys changed since the live commit - skipping the build."

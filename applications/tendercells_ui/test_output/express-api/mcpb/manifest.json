@@ -2,21 +2,35 @@
   "manifest_version": "0.3",
   "name": "tendercells",
   "display_name": "Tender Cells",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Ask Claude about your Tender Cells farm: coop readings, animal-health flags, alerts, yard events, a live farm card and E-STOP.",
   "long_description": "Connects Claude Desktop to your Tender Cells hub on your own network. Read your coop's temperature, ammonia, feed, water and headcount; see predator alerts and yard flags; get a farm card with what needs attention. E-STOP is always available. Hardware actions (door, feed, relay) are off unless you turn them on, and each one needs your explicit yes with a single-use code. No hub yet? Turn on Demo farm to try it with a simulated farm.",
-  "author": { "name": "WeCr8 Solutions", "url": "https://tendercells.com" },
+  "author": {
+    "name": "WeCr8 Solutions",
+    "url": "https://tendercells.com"
+  },
   "homepage": "https://tendercells.com",
   "documentation": "https://tendercells.com/docs/ai-assistant-plugin",
-  "repository": { "type": "git", "url": "https://github.com/WeCr8/TenderCells" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WeCr8/TenderCells"
+  },
   "icon": "icon.png",
-  "keywords": ["farm", "chickens", "coop", "iot", "home-automation"],
+  "keywords": [
+    "farm",
+    "chickens",
+    "coop",
+    "iot",
+    "home-automation"
+  ],
   "server": {
     "type": "node",
     "entry_point": "server/index.mjs",
     "mcp_config": {
       "command": "node",
-      "args": ["${__dirname}/server/index.mjs"],
+      "args": [
+        "${__dirname}/server/index.mjs"
+      ],
       "env": {
         "TC_API": "${user_config.hub_url}",
         "TC_TOKEN": "${user_config.hub_token}",
@@ -26,26 +40,100 @@
     }
   },
   "tools": [
-    { "name": "get_farm_overview", "description": "Every device with readings, animal-health flags, yard flags and alerts; shows the farm card." },
-    { "name": "get_hub_status", "description": "Hub connection and known devices." },
-    { "name": "get_device", "description": "One device's telemetry, state and presence." },
-    { "name": "get_alerts", "description": "Predator, fault and health alerts." },
-    { "name": "get_yard_events", "description": "Eggs ready, weeds, headcount and other yard flags." },
-    { "name": "get_farm_snapshot", "description": "Every device at once (XML)." },
-    { "name": "emergency_stop", "description": "Stop every actuator on a device. Always available." },
-    { "name": "request_action", "description": "Step 1 of 2 for door / feed / relay actions (only when actions are on)." },
-    { "name": "confirm_action", "description": "Step 2 of 2, after your explicit yes (only when actions are on)." }
+    {
+      "name": "get_farm_overview",
+      "description": "Every device with readings, animal-health flags, yard flags and alerts; shows the farm card."
+    },
+    {
+      "name": "get_hub_status",
+      "description": "Hub connection and known devices."
+    },
+    {
+      "name": "get_device",
+      "description": "One device's telemetry, state and presence."
+    },
+    {
+      "name": "get_alerts",
+      "description": "Predator, fault and health alerts."
+    },
+    {
+      "name": "get_yard_events",
+      "description": "Eggs ready, weeds, headcount and other yard flags."
+    },
+    {
+      "name": "get_farm_snapshot",
+      "description": "Every device at once (XML)."
+    },
+    {
+      "name": "emergency_stop",
+      "description": "Stop every actuator on a device. Always available."
+    },
+    {
+      "name": "request_action",
+      "description": "Step 1 of 2 for door / feed / relay actions (only when actions are on)."
+    },
+    {
+      "name": "confirm_action",
+      "description": "Step 2 of 2, after your explicit yes (only when actions are on)."
+    }
   ],
   "prompts": [
-    { "name": "farm_check", "description": "Daily check: animal-health risks first, then flags, alerts and next steps.", "text": "Run a Tender Cells farm check." },
-    { "name": "evening_lockup", "description": "Headcount, door, water, temperature and predator check before night.", "arguments": ["deviceId"], "text": "Help me lock up coop ${arguments.deviceId} for the night." }
+    {
+      "name": "farm_check",
+      "description": "Daily check: animal-health risks first, then flags, alerts and next steps.",
+      "text": "Run a Tender Cells farm check."
+    },
+    {
+      "name": "evening_lockup",
+      "description": "Headcount, door, water, temperature and predator check before night.",
+      "arguments": [
+        "deviceId"
+      ],
+      "text": "Help me lock up coop ${arguments.deviceId} for the night."
+    }
   ],
   "user_config": {
-    "hub_url": { "type": "string", "title": "Hub URL", "description": "Your Tender Cells hub on your network, e.g. http://192.168.1.50:4000", "default": "http://localhost:4000", "required": false },
-    "hub_token": { "type": "string", "title": "Hub sign-in token", "description": "Only if your hub requires accounts: a Firebase ID token (expires after an hour).", "sensitive": true, "required": false },
-    "demo": { "type": "boolean", "title": "Demo farm", "description": "Use a simulated farm instead of a hub - try it with no hardware.", "default": false, "required": false },
-    "allow_actions": { "type": "boolean", "title": "Allow hardware actions", "description": "Let Claude prepare door / feed / relay actions. Each still needs your yes and a single-use code. Off by default. On the demo farm they only move simulated devices.", "default": false, "required": false }
+    "hub_url": {
+      "type": "string",
+      "title": "Hub URL",
+      "description": "Your Tender Cells hub on your network, e.g. http://192.168.1.50:4000",
+      "default": "http://localhost:4000",
+      "required": false
+    },
+    "hub_token": {
+      "type": "string",
+      "title": "Hub sign-in token",
+      "description": "Only if your hub requires accounts: a Firebase ID token (expires after an hour).",
+      "sensitive": true,
+      "required": false
+    },
+    "demo": {
+      "type": "boolean",
+      "title": "Demo farm",
+      "description": "Use a simulated farm instead of a hub - try it with no hardware.",
+      "default": false,
+      "required": false
+    },
+    "allow_actions": {
+      "type": "boolean",
+      "title": "Allow hardware actions",
+      "description": "Let Claude prepare door / feed / relay actions. Each still needs your yes and a single-use code. Off by default. On the demo farm they only move simulated devices.",
+      "default": false,
+      "required": false
+    }
   },
-  "compatibility": { "platforms": ["darwin", "win32", "linux"], "runtimes": { "node": ">=20.0.0" } },
-  "license": "SEE LICENSE IN LICENSE"
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "privacy_policies": [
+    "https://tendercells.com/privacy"
+  ]
 }

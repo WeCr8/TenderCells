@@ -1,0 +1,18 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"TenderCells Builder Part Asset",
+  "type":"object",
+  "required":["asset_id","name","category","validation_status"],
+  "properties":{
+    "asset_id":{"type":"string"},
+    "name":{"type":"string"},
+    "manufacturer":{"type":"string"},
+    "model":{"type":"string"},
+    "revision":{"type":"string"},
+    "category":{"type":"string"},
+    "validation_status":{"enum":["draft","reference-checked","instruction-ready"]},
+    "reference_sources":{"type":"array","items":{"type":"string"}},
+    "files":{"type":"object"},
+    "pin_metadata":{"type":"object"}
+  }
+}

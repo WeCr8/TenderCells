@@ -1,0 +1,93 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "TenderCells Builder Project",
+ "type": "object",
+ "required": [
+  "id",
+  "title",
+  "version",
+  "stages"
+ ],
+ "properties": {
+  "id": {
+   "type": "string"
+  },
+  "title": {
+   "type": "string"
+  },
+  "version": {
+   "type": "string"
+  },
+  "audience": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "difficulty": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 5
+  },
+  "estimated_minutes": {
+   "type": "integer"
+  },
+  "source_docs": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "stages": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/stage"
+   }
+  },
+  "bridge": {
+   "type": "object",
+   "description": "Where to go after finishing: the next lesson, project or OS page.",
+   "properties": {
+    "label": {
+     "type": "string"
+    },
+    "path": {
+     "type": "string"
+    },
+    "href": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "label"
+   ]
+  },
+  "milestone": {
+   "type": "string"
+  }
+ },
+ "$defs": {
+  "stage": {
+   "type": "object",
+   "required": [
+    "id",
+    "title",
+    "steps"
+   ],
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    },
+    "steps": {
+     "type": "array",
+     "items": {
+      "$ref": "builder-step.schema.json"
+     }
+    }
+   }
+  }
+ }
+}

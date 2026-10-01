@@ -1,0 +1,75 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "TenderCells Builder Mission",
+ "type": "object",
+ "required": [
+  "id",
+  "title",
+  "version",
+  "milestone",
+  "steps"
+ ],
+ "properties": {
+  "id": {
+   "type": "string"
+  },
+  "title": {
+   "type": "string"
+  },
+  "version": {
+   "type": "string"
+  },
+  "milestone": {
+   "type": "string"
+  },
+  "phase": {
+   "enum": [
+    "OBSERVE",
+    "DECIDE",
+    "AUTOMATE",
+    "BUILD",
+    "CONNECT",
+    "INVENT"
+   ]
+  },
+  "prerequisites": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "hardware_required": {
+   "type": "boolean"
+  },
+  "learning_outcomes": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "steps": {
+   "type": "array",
+   "items": {
+    "$ref": "builder-step.schema.json"
+   }
+  },
+  "bridge": {
+   "type": "object",
+   "description": "Where to go after finishing: the next lesson, project or OS page.",
+   "properties": {
+    "label": {
+     "type": "string"
+    },
+    "path": {
+     "type": "string"
+    },
+    "href": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "label"
+   ]
+  }
+ }
+}

@@ -1,0 +1,122 @@
+{
+ "id": "mission.00-explore-the-farm",
+ "title": "Explore the Farm",
+ "version": "0.2.0",
+ "milestone": "Property Explorer",
+ "phase": "OBSERVE",
+ "hardware_required": false,
+ "audience_layers": [
+  "young",
+  "beginner",
+  "advanced",
+  "teacher"
+ ],
+ "learning_outcomes": [
+  "One Property Twin holds animals, habitats, monitoring and robots",
+  "Every twin has a state and a source"
+ ],
+ "steps": [
+  {
+   "id": "00-explore-the-farm.look",
+   "type": "concept",
+   "action": "Look at the farm",
+   "instruction": "This is one simulated property. Find the animals, the homes they live in, the cameras that watch and the robots that work.",
+   "instruction_layers": {
+    "young": "This is a whole farm on the screen. Can you spot the chickens, the ducks and the robots?",
+    "beginner": "This is one simulated property. Find the animals, the homes they live in, the cameras that watch and the robots that work.",
+    "advanced": "Everything on the map is a twin on one Property Twin (tc:property:demo-farm): habitats, devices and robots, each with an ID, a state and a source - SIMULATED here.",
+    "teacher": "Ask: how many kinds of things can you find? Which ones move? Which ones sense?"
+   },
+   "image": {
+    "base_asset": "scene.demo-farm.overview",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "scene.demo-farm.overview"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/layout",
+    "label": "Open the Property Twin"
+   }
+  },
+  {
+   "id": "00-explore-the-farm.open",
+   "type": "mission",
+   "action": "Open one system",
+   "instruction": "Select Chicken Tender on the map. Its card shows the door, the temperature and the water.",
+   "instruction_layers": {
+    "young": "Tap the chicken house to see what it knows.",
+    "beginner": "Select Chicken Tender on the map. Its card shows the door, the temperature and the water.",
+    "advanced": "Select Chicken Tender: the inspector shows its twin ID, state, source, why it is in that state and how it becomes real hardware.",
+    "teacher": "Have learners read one value aloud and say where it would come from on a real farm."
+   },
+   "image": {
+    "base_asset": "system.chicken-tender.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "system.chicken-tender.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/layout",
+    "label": "Open the Property Twin"
+   }
+  },
+  {
+   "id": "00-explore-the-farm.check",
+   "type": "checkpoint",
+   "action": "Check your idea",
+   "instruction": "One property, many connected systems - and they can share what they know.",
+   "instruction_layers": {
+    "young": "Lots of helpers, one farm!",
+    "beginner": "One property, many connected systems - and they can share what they know.",
+    "advanced": "Shared state on one twin lets one system's event change another's decision (see Robot Traffic Jam).",
+    "teacher": "Check: can the learner name one thing that senses and one thing that acts?"
+   },
+   "image": {
+    "base_asset": "scene.demo-farm.overview",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "correct",
+      "target": "scene.demo-farm.overview"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": true,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  }
+ ],
+ "bridge": {
+  "label": "Next: Protect the Chickens",
+  "path": "/builder/mission.01-protect-the-chickens"
+ }
+}

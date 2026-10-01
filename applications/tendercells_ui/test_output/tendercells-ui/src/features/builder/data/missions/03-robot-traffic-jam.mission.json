@@ -1,0 +1,258 @@
+{
+ "id": "mission.03-robot-traffic-jam",
+ "title": "Robot Traffic Jam",
+ "version": "0.2.0",
+ "milestone": "Robot Coordinator",
+ "phase": "DECIDE",
+ "hardware_required": false,
+ "audience_layers": [
+  "young",
+  "beginner",
+  "advanced",
+  "teacher"
+ ],
+ "learning_outcomes": [
+  "Systems share context through the Property Twin",
+  "A safety guard can hold a scheduled action"
+ ],
+ "steps": [
+  {
+   "id": "03-robot-traffic-jam.zone",
+   "type": "concept",
+   "action": "Find the mower zone",
+   "instruction": "See where the simulated mower plans to work: the lawn around its dock.",
+   "instruction_layers": {
+    "young": "Find the lawn where the robot mower works.",
+    "beginner": "See where the simulated mower plans to work: the lawn around its dock.",
+    "advanced": "The mower's work area is 32 × 24 ft around its dock on the Property Twin (mowerWorkArea).",
+    "teacher": "Ask: why should a mower know where the animals are?"
+   },
+   "image": {
+    "base_asset": "ui.zone.mower-work-area",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "ui.zone.mower-work-area"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/layout",
+    "label": "Open the Property Twin"
+   }
+  },
+  {
+   "id": "03-robot-traffic-jam.roost",
+   "type": "mission",
+   "action": "A roost enters the zone",
+   "instruction": "Trigger the traffic jam: the Roaming Roost parks on the mower's lawn.",
+   "instruction_layers": {
+    "young": "The chickens' moving house drives onto the lawn!",
+    "beginner": "Trigger the traffic jam: the Roaming Roost parks on the mower's lawn.",
+    "advanced": "The roost's footprint now overlaps the mower's work area; workAreaOccupants() returns \"Roaming Roost\".",
+    "teacher": "Ask: what could go wrong if the mower ignored this?"
+   },
+   "image": {
+    "base_asset": "robot.roaming-roost.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "arrow",
+      "target": "robot.roaming-roost.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "run": "traffic-jam",
+    "label": "Start the traffic jam"
+   }
+  },
+  {
+   "id": "03-robot-traffic-jam.schedule",
+   "type": "mission",
+   "action": "The mower wants to start",
+   "instruction": "The mower's schedule becomes due.",
+   "instruction_layers": {
+    "young": "Time to mow! The mower wants to go.",
+    "beginner": "The mower's schedule becomes due.",
+    "advanced": "A start request reaches the interlock before any command is sent to the mower.",
+    "teacher": "Discuss: who decides - the mower's schedule or Tender Cells?"
+   },
+   "image": {
+    "base_asset": "robot.mower.generic.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "robot.mower.generic.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  },
+  {
+   "id": "03-robot-traffic-jam.hold",
+   "type": "concept",
+   "action": "TenderCells holds the mower",
+   "instruction": "Mowing is held: the lawn is not confirmed clear of animals.",
+   "instruction_layers": {
+    "young": "The mower waits. Chickens might be on the grass!",
+    "beginner": "Mowing is held: the lawn is not confirmed clear of animals.",
+    "advanced": "mowingBlockedReason() returns the occupancy reason; the start is refused and logged as an interlock event.",
+    "teacher": "Ask: why is waiting the safe choice?"
+   },
+   "image": {
+    "base_asset": "robot.mower.generic.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "incorrect",
+      "target": "robot.mower.generic.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/mowers",
+    "label": "See the held mower"
+   }
+  },
+  {
+   "id": "03-robot-traffic-jam.why",
+   "type": "mission",
+   "action": "Ask why",
+   "instruction": "Trace schedule → zone → animal context → HOLD.",
+   "instruction_layers": {
+    "young": "Ask \"Why?\" and follow the steps.",
+    "beginner": "Trace schedule → zone → animal context → HOLD.",
+    "advanced": "Engineer view: device → OS → signal (Property Twin) → rule → actuator (start refused) → notify.",
+    "teacher": "Have learners explain the hold to a younger student."
+   },
+   "image": {
+    "base_asset": "ui.zone.mower-work-area",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "path",
+      "target": "ui.zone.mower-work-area"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/demo",
+    "label": "Open \"Why did this happen?\""
+   }
+  },
+  {
+   "id": "03-robot-traffic-jam.clear",
+   "type": "mission",
+   "action": "Clear the conflict in simulation",
+   "instruction": "Move the Roaming Roost off the lawn (simulated).",
+   "instruction_layers": {
+    "young": "Drive the moving house back to fresh grass.",
+    "beginner": "Move the Roaming Roost off the lawn (simulated).",
+    "advanced": "Run \"Roaming Roost moves on\": the roost returns to its spot and the work area is clear.",
+    "teacher": "Ask: is there another way to clear the conflict? (mow a different area)"
+   },
+   "image": {
+    "base_asset": "robot.roaming-roost.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "arrow",
+      "target": "robot.roaming-roost.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "run": "roost-moves-on",
+    "label": "Move the Roaming Roost"
+   }
+  },
+  {
+   "id": "03-robot-traffic-jam.ready",
+   "type": "checkpoint",
+   "action": "Check the result",
+   "instruction": "The mower can start only after the guard clears.",
+   "instruction_layers": {
+    "young": "The lawn is clear - the mower may go now.",
+    "beginner": "The mower can start only after the guard clears.",
+    "advanced": "The hold lifts when the interlock clears; the mower stays parked until it is started (no auto-resume by default).",
+    "teacher": "Check: can the learner name the two systems and the shared fact that connected them?"
+   },
+   "image": {
+    "base_asset": "robot.mower.generic.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "correct",
+      "target": "robot.mower.generic.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": true,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/mowers",
+    "label": "Check the mower"
+   }
+  }
+ ],
+ "bridge": {
+  "label": "Bring your own robot mower",
+  "href": "/docs/robot-mowers"
+ }
+}

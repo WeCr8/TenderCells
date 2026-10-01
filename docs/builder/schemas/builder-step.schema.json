@@ -1,0 +1,143 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "TenderCells Builder Step",
+ "type": "object",
+ "required": [
+  "id",
+  "type",
+  "action",
+  "instruction"
+ ],
+ "properties": {
+  "id": {
+   "type": "string"
+  },
+  "type": {
+   "enum": [
+    "assembly",
+    "electronics",
+    "concept",
+    "flash",
+    "test",
+    "checkpoint",
+    "safety",
+    "mission"
+   ]
+  },
+  "action": {
+   "type": "string"
+  },
+  "instruction": {
+   "type": "string"
+  },
+  "parts": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "asset_id",
+     "qty"
+    ],
+    "properties": {
+     "asset_id": {
+      "type": "string"
+     },
+     "qty": {
+      "type": "integer",
+      "minimum": 1
+     }
+    }
+   }
+  },
+  "image": {
+   "type": "object",
+   "properties": {
+    "base_asset": {
+     "type": "string"
+    },
+    "step_asset": {
+     "type": "string"
+    },
+    "view": {
+     "type": "string"
+    },
+    "cues": {
+     "type": "array",
+     "items": {
+      "$ref": "image-cue.schema.json"
+     }
+    }
+   }
+  },
+  "safety": {
+   "type": "array",
+   "items": {
+    "enum": [
+     "CHILD_OK",
+     "SUPERVISION_RECOMMENDED",
+     "ADULT_REQUIRED",
+     "POWER_OFF_REQUIRED",
+     "MOTION_LOCKOUT_REQUIRED"
+    ]
+   }
+  },
+  "concept": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string"
+    },
+    "text": {
+     "type": "string"
+    }
+   }
+  },
+  "checkpoint": {
+   "type": "boolean"
+  },
+  "source_refs": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "instruction_layers": {
+   "type": "object",
+   "properties": {
+    "young": {
+     "type": "string"
+    },
+    "beginner": {
+     "type": "string"
+    },
+    "advanced": {
+     "type": "string"
+    },
+    "teacher": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "beginner"
+   ]
+  },
+  "demo": {
+   "type": "object",
+   "description": "Optional link into the live demo: run a demo event (eventSimulator SCENARIOS id) or open an OS page.",
+   "properties": {
+    "run": {
+     "type": "string"
+    },
+    "open": {
+     "type": "string"
+    },
+    "label": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "label"
+   ]
+  }
+ }
+}

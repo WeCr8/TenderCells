@@ -1,0 +1,177 @@
+{
+ "id": "mission.04-build-a-coop-brain",
+ "title": "Build a Coop Brain",
+ "version": "0.2.0",
+ "milestone": "Automation Builder",
+ "phase": "AUTOMATE",
+ "hardware_required": false,
+ "audience_layers": [
+  "young",
+  "beginner",
+  "advanced",
+  "teacher"
+ ],
+ "learning_outcomes": [
+  "A rule has a trigger (WHEN), a condition (IF) and an action (DO)"
+ ],
+ "steps": [
+  {
+   "id": "04-build-a-coop-brain.when",
+   "type": "concept",
+   "action": "Choose WHEN",
+   "instruction": "Select sunset as the trigger.",
+   "instruction_layers": {
+    "young": "WHEN: the sun goes down.",
+    "beginner": "Select sunset as the trigger.",
+    "advanced": "Trigger: light below 40 lux for 5 minutes (a light sensor), or a clock time.",
+    "teacher": "Ask: what else could be a WHEN? (a time, a button, a sensor)"
+   },
+   "image": {
+    "base_asset": "ui.rule.when-if-do",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "ui.rule.when-if-do"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  },
+  {
+   "id": "04-build-a-coop-brain.if",
+   "type": "concept",
+   "action": "Choose IF",
+   "instruction": "Require the chickens to be inside.",
+   "instruction_layers": {
+    "young": "IF: all the chickens are inside.",
+    "beginner": "Require the chickens to be inside.",
+    "advanced": "Condition: headcount inside equals flock size (door RFID count).",
+    "teacher": "Ask: what happens if one hen is still out?"
+   },
+   "image": {
+    "base_asset": "ui.rule.when-if-do",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "ui.rule.when-if-do"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  },
+  {
+   "id": "04-build-a-coop-brain.do",
+   "type": "concept",
+   "action": "Choose DO",
+   "instruction": "Select close door.",
+   "instruction_layers": {
+    "young": "DO: close the door.",
+    "beginner": "Select close door.",
+    "advanced": "Action: door controller closes; the limit switch confirms closed.",
+    "teacher": "Ask: how would you know the door really closed?"
+   },
+   "image": {
+    "base_asset": "ui.rule.when-if-do",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "ui.rule.when-if-do"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  },
+  {
+   "id": "04-build-a-coop-brain.run",
+   "type": "mission",
+   "action": "Run the rule in simulation",
+   "instruction": "Run sunset in the simulator and watch the rule decide.",
+   "instruction_layers": {
+    "young": "Press the button and watch your rule work!",
+    "beginner": "Run sunset in the simulator and watch the rule decide.",
+    "advanced": "The sunset scenario evaluates trigger → condition → action and logs the chain.",
+    "teacher": "Then run \"Hen missing at dusk\": what changes?"
+   },
+   "image": {
+    "base_asset": "ui.rule.when-if-do",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "correct",
+      "target": "ui.rule.when-if-do"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "run": "sunset",
+    "label": "Run sunset"
+   }
+  },
+  {
+   "id": "04-build-a-coop-brain.explain",
+   "type": "checkpoint",
+   "action": "Explain your automation",
+   "instruction": "WHEN + IF + DO made one rule.",
+   "instruction_layers": {
+    "young": "WHEN + IF + DO = a rule!",
+    "beginner": "WHEN + IF + DO made one rule.",
+    "advanced": "One automation = trigger + condition + action, with a confirmed result.",
+    "teacher": "Assessment: the learner writes their own WHEN / IF / DO rule."
+   },
+   "image": {
+    "base_asset": "ui.rule.when-if-do",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "path",
+      "target": "ui.rule.when-if-do"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": true,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  }
+ ],
+ "bridge": {
+  "label": "Build your first coop brain",
+  "path": "/builder/starter-node-first-coop-brain"
+ }
+}

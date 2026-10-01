@@ -1,0 +1,186 @@
+{
+ "id": "mission.05-sensor-detective",
+ "title": "Sensor Detective",
+ "version": "0.2.0",
+ "milestone": "Sensor Detective",
+ "phase": "OBSERVE",
+ "hardware_required": false,
+ "audience_layers": [
+  "young",
+  "beginner",
+  "advanced",
+  "teacher"
+ ],
+ "learning_outcomes": [
+  "Telemetry is a reading with a unit and a time",
+  "Comparing readings shows a trend"
+ ],
+ "steps": [
+  {
+   "id": "05-sensor-detective.read",
+   "type": "concept",
+   "action": "Read one sensor",
+   "instruction": "Find the temperature in the coop's sensor readings.",
+   "instruction_layers": {
+    "young": "Find the temperature number.",
+    "beginner": "Find the temperature in the coop's sensor readings.",
+    "advanced": "Telemetry arrives every 10 s on tc/ct_001/sensors as temp, humidity, ammonia and more.",
+    "teacher": "Ask learners to write the number down."
+   },
+   "image": {
+    "base_asset": "sensor.temperature.generic",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "sensor.temperature.generic"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/chicken-tender?section=sensors",
+    "label": "Open the coop sensors"
+   }
+  },
+  {
+   "id": "05-sensor-detective.again",
+   "type": "mission",
+   "action": "Look again",
+   "instruction": "Change the simulation, then read the next value.",
+   "instruction_layers": {
+    "young": "Make it hot, then look again!",
+    "beginner": "Change the simulation, then read the next value.",
+    "advanced": "Run \"Coop too hot\" and compare the reading after the cooling routine.",
+    "teacher": "Ask: did it change? By how much?"
+   },
+   "image": {
+    "base_asset": "sensor.temperature.generic",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "arrow",
+      "target": "sensor.temperature.generic"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "run": "heat",
+    "label": "Change the temperature (simulated)"
+   }
+  },
+  {
+   "id": "05-sensor-detective.compare",
+   "type": "mission",
+   "action": "Compare readings",
+   "instruction": "Use the history to see what changed.",
+   "instruction_layers": {
+    "young": "Was it hotter or cooler before?",
+    "beginner": "Use the history to see what changed.",
+    "advanced": "A trend needs at least two readings with times; averaging three samples removes noise.",
+    "teacher": "Ask learners to sketch the two points on a line."
+   },
+   "image": {
+    "base_asset": "sensor.temperature.generic",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "measure",
+      "target": "sensor.temperature.generic"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/analytics",
+    "label": "Look at the history"
+   }
+  },
+  {
+   "id": "05-sensor-detective.unit",
+   "type": "concept",
+   "action": "Notice the unit",
+   "instruction": "A number needs a unit to have meaning.",
+   "instruction_layers": {
+    "young": "84 what? 84 degrees!",
+    "beginner": "A number needs a unit to have meaning.",
+    "advanced": "°F vs °C, % for humidity, ppm for ammonia - the unit travels with the value.",
+    "teacher": "Ask: what if we forgot the unit?"
+   },
+   "image": {
+    "base_asset": "sensor.temperature.generic",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "sensor.temperature.generic"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  },
+  {
+   "id": "05-sensor-detective.story",
+   "type": "checkpoint",
+   "action": "Tell the story",
+   "instruction": "Describe whether the value rose, fell or stayed about the same.",
+   "instruction_layers": {
+    "young": "Did it go up, go down or stay the same?",
+    "beginner": "Describe whether the value rose, fell or stayed about the same.",
+    "advanced": "Report: value, unit, time and change between readings.",
+    "teacher": "Assessment: the learner tells the reading's story in one sentence."
+   },
+   "image": {
+    "base_asset": "sensor.temperature.generic",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "path",
+      "target": "sensor.temperature.generic"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": true,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  }
+ ],
+ "bridge": {
+  "label": "Make a light blink (first build)",
+  "path": "/builder/electronics-blink-xiao"
+ }
+}

@@ -39,6 +39,8 @@ import LibraryPage from "../pages/LibraryPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import EventSimulatorPage from "../pages/EventSimulatorPage";
 import MissionsPage from "../pages/MissionsPage";
+import BuilderLibraryPage from "../features/builder/pages/BuilderLibraryPage";
+import BuilderStepPage from "../features/builder/pages/BuilderStepPage";
 import { markVisited } from "../lib/demo/missions";
 import ProductDashboardPage from "../pages/ProductDashboardPage";
 import CameraNodeFirstBuildPage from "../pages/guides/CameraNodeFirstBuildPage";
@@ -102,6 +104,8 @@ export default function AppRoutes() {
       <Route path="/projects" element={<ProjectsPage />} />
       <Route path="/simulator" element={<EventSimulatorPage />} />
       <Route path="/missions" element={<MissionsPage />} />
+      <Route path="/builder" element={<BuilderLibraryPage />} />
+      <Route path="/builder/:id" element={<BuilderStepPage />} />
       <Route path="/specs" element={<ProductSpecsPage />} />
       <Route path="/device/:deviceId" element={<DeviceDetailPage />} />
       <Route path="/product/:productId" element={<ProductDashboardPage />} />

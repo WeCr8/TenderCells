@@ -1,0 +1,13 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"TenderCells Builder Image Cue",
+  "type":"object",
+  "required":["type"],
+  "properties":{
+    "type":{"enum":["arrow","rotate","target","path","correct","incorrect","measure","power_off","tool"]},
+    "from":{"type":"array","items":{"type":"number"},"minItems":2,"maxItems":2},
+    "to":{"type":"array","items":{"type":"number"},"minItems":2,"maxItems":2},
+    "target":{"type":"string"},
+    "label":{"type":"string"}
+  }
+}

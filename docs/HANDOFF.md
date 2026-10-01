@@ -66,4 +66,18 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
      - generic simulated irrigation (Orbit B-hyve, labelled COMMUNITY until official access is verified) and hive-monitor twins, with the irrigation ↔ mower hold;
      - mobile / Safari QA;
      - update `demo-manifest.json` / `snapshot.json` to match.
-7. **Older open PRs not from today:** #106 (Copilot auth flow) and the Dependabot bumps #96–#103. Review or merge them separately.
+7. **Builder** (`/builder`, `docs/builder/README.md`).
+   - **Done:**
+     - the mission ladder M0–M5, Blink (M6), Starter Node (M7);
+     - four depths, safety gates, demo bindings, local milestones and content validation;
+     - mission cover art;
+     - the Chicken Tender Door concept book (21 illustrated pages, labelled concept);
+     - a draft parts catalog of 67 ids.
+   - **Next:**
+     - verify the door book against real parts, then drop `concept`;
+     - reference-checked part art for the catalog ids;
+     - M8 (sensor) and M9 (invent);
+     - printable export from the same step data;
+     - teacher / classroom mode;
+     - mirror into the Python generator once stable.
+8. **Older open PRs not from today:** #106 (Copilot auth flow) and the Dependabot bumps #96–#103. Review or merge them separately.

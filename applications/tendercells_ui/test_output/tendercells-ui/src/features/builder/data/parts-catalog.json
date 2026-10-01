@@ -1,0 +1,408 @@
+{
+ "version": "0.3.0",
+ "note": "Reusable part ids from the Builder Master Package v3. No reference-checked art yet (status draft); add files under public/builder-assets/parts/<category>/<id>/ when verified.",
+ "parts": [
+  {
+   "asset_id": "actuator.dc-motor",
+   "name": "DC motor",
+   "category": "actuators",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "actuator.fan",
+   "name": "DC cooling fan",
+   "category": "actuators",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "actuator.linear.12v",
+   "name": "12 V linear actuator",
+   "category": "actuators",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "actuator.motor-driver",
+   "name": "Motor driver module",
+   "category": "actuators",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "actuator.relay",
+   "name": "Relay module",
+   "category": "actuators",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "actuator.servo",
+   "name": "Servo motor",
+   "category": "actuators",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "board.esp32.devkit",
+   "name": "Generic ESP32 development board",
+   "category": "boards",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "board.raspberry-pi.pico",
+   "name": "Raspberry Pi Pico",
+   "category": "boards",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "board.seeed.xiao-esp32s3-sense",
+   "name": "Seeed Studio XIAO ESP32-S3 Sense",
+   "category": "boards",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "board.seeed.xiao-esp32s3",
+   "name": "Seeed Studio XIAO ESP32-S3",
+   "category": "boards",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "breadboard.halfsize",
+   "name": "Half-size solderless breadboard",
+   "category": "breadboards",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "breadboard.mini",
+   "name": "Mini solderless breadboard",
+   "category": "breadboards",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "cable.dc-barrel.5521",
+   "name": "5.5x2.1 mm DC barrel lead",
+   "category": "cables",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "cable.usb-a.usb-c",
+   "name": "USB-A to USB-C cable",
+   "category": "cables",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "cable.usb-c.usb-c",
+   "name": "USB-C to USB-C cable",
+   "category": "cables",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "wire.jumper.ff",
+   "name": "Female-to-female jumper wire set",
+   "category": "cables",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "wire.jumper.mf",
+   "name": "Male-to-female jumper wire set",
+   "category": "cables",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "wire.jumper.mm",
+   "name": "Male-to-male jumper wire set",
+   "category": "cables",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "wire.sensor.3pin",
+   "name": "3-pin sensor lead",
+   "category": "cables",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "wire.sensor.4pin",
+   "name": "4-pin sensor lead",
+   "category": "cables",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "wire.silicone.red-black",
+   "name": "Red/black silicone power wire",
+   "category": "cables",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "connector.dupont.1pin",
+   "name": "Dupont 1-pin housing/pin",
+   "category": "connectors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "connector.ferrule",
+   "name": "Wire ferrule",
+   "category": "connectors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "connector.heatshrink",
+   "name": "Heat-shrink tubing",
+   "category": "connectors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "connector.jst-ph.2",
+   "name": "JST-PH 2-pin connector",
+   "category": "connectors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "connector.jst-ph.3",
+   "name": "JST-PH 3-pin connector",
+   "category": "connectors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "connector.jst-xh.2",
+   "name": "JST-XH 2-pin connector",
+   "category": "connectors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "connector.terminal.screw",
+   "name": "Screw terminal block",
+   "category": "connectors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "connector.wago.lever",
+   "name": "Lever connector",
+   "category": "connectors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "enclosure.weatherproof",
+   "name": "Weatherproof electronics enclosure",
+   "category": "enclosures",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "mount.cable-gland",
+   "name": "Cable gland",
+   "category": "enclosures",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "mount.l-bracket",
+   "name": "L bracket",
+   "category": "enclosures",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "mount.printed",
+   "name": "3D-printed mounting bracket",
+   "category": "enclosures",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "fastener.heatset",
+   "name": "Heat-set threaded insert",
+   "category": "fasteners",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "fastener.m2",
+   "name": "M2 screw",
+   "category": "fasteners",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "fastener.m25",
+   "name": "M2.5 screw",
+   "category": "fasteners",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "fastener.m3",
+   "name": "M3 screw",
+   "category": "fasteners",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "fastener.standoff",
+   "name": "Standoff",
+   "category": "fasteners",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "fastener.ziptie",
+   "name": "Zip tie",
+   "category": "fasteners",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "component.button.tactile",
+   "name": "Tactile pushbutton",
+   "category": "passives",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "component.buzzer",
+   "name": "Buzzer",
+   "category": "passives",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "component.diode",
+   "name": "Diode",
+   "category": "passives",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "component.led.5mm",
+   "name": "5 mm LED",
+   "category": "passives",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "component.potentiometer",
+   "name": "Potentiometer",
+   "category": "passives",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "component.resistor.1k",
+   "name": "1 kOhm resistor",
+   "category": "passives",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "component.resistor.220",
+   "name": "220 ohm resistor",
+   "category": "passives",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "power.battery.liion",
+   "name": "Li-ion battery pack",
+   "category": "power",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "power.cn3065",
+   "name": "CN3065 solar charger module",
+   "category": "power",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "power.regulator",
+   "name": "Voltage regulator/buck module",
+   "category": "power",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "power.solar.6v3w",
+   "name": "6 V 3 W solar panel",
+   "category": "power",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "power.supply.12v",
+   "name": "12 V DC power supply",
+   "category": "power",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "power.usb-c.5v",
+   "name": "5 V USB-C power source",
+   "category": "power",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "sensor.bme280",
+   "name": "BME280 environmental sensor",
+   "category": "sensors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "sensor.dht22",
+   "name": "DHT22 temperature/humidity sensor",
+   "category": "sensors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "sensor.ds18b20",
+   "name": "DS18B20 temperature probe",
+   "category": "sensors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "sensor.hx711",
+   "name": "HX711 load-cell amplifier",
+   "category": "sensors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "sensor.limit",
+   "name": "Limit switch",
+   "category": "sensors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "sensor.loadcell",
+   "name": "Load cell",
+   "category": "sensors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "sensor.pir",
+   "name": "PIR motion sensor",
+   "category": "sensors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "sensor.reed",
+   "name": "Reed switch",
+   "category": "sensors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "sensor.soil",
+   "name": "Soil moisture sensor",
+   "category": "sensors",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "tool.flush-cutter",
+   "name": "Flush/wire cutter",
+   "category": "tools",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "tool.multimeter",
+   "name": "Digital multimeter",
+   "category": "tools",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "tool.pliers",
+   "name": "Needle-nose pliers",
+   "category": "tools",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "tool.screwdriver.phillips",
+   "name": "Phillips screwdriver",
+   "category": "tools",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "tool.soldering-iron",
+   "name": "Soldering iron",
+   "category": "tools",
+   "validation_status": "draft"
+  },
+  {
+   "asset_id": "tool.wire-stripper",
+   "name": "Wire stripper",
+   "category": "tools",
+   "validation_status": "draft"
+  }
+ ]
+}

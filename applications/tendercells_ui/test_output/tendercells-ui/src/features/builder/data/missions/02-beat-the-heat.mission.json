@@ -1,0 +1,250 @@
+{
+ "id": "mission.02-beat-the-heat",
+ "title": "Beat the Heat",
+ "version": "0.2.0",
+ "milestone": "Heat Helper",
+ "phase": "DECIDE",
+ "hardware_required": false,
+ "audience_layers": [
+  "young",
+  "beginner",
+  "advanced",
+  "teacher"
+ ],
+ "learning_outcomes": [
+  "A sensor value crosses a threshold",
+  "An actuator changes the next sensor value (feedback)"
+ ],
+ "steps": [
+  {
+   "id": "02-beat-the-heat.check",
+   "type": "concept",
+   "action": "Check the habitat",
+   "instruction": "Look at the coop temperature on Chicken Tender.",
+   "instruction_layers": {
+    "young": "How warm is the chickens' house?",
+    "beginner": "Look at the coop temperature on Chicken Tender.",
+    "advanced": "Temperature comes from the coop's temperature / humidity sensor (tc/ct_001/sensors, °F, SENSED on a real farm).",
+    "teacher": "Ask: what temperature feels too hot for you? For a chicken?"
+   },
+   "image": {
+    "base_asset": "system.chicken-tender.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "system.chicken-tender.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/chicken-tender?section=sensors",
+    "label": "See the coop sensors"
+   }
+  },
+  {
+   "id": "02-beat-the-heat.rise",
+   "type": "mission",
+   "action": "The temperature rises",
+   "instruction": "Trigger \"Coop too hot\": the coop reaches 92°F.",
+   "instruction_layers": {
+    "young": "Oh no, it's getting hot! Press the button.",
+    "beginner": "Trigger \"Coop too hot\": the coop reaches 92°F.",
+    "advanced": "92°F crosses the 85°F heat-stress threshold in the heat rule.",
+    "teacher": "Discuss thresholds: why 85°F and not 100°F?"
+   },
+   "image": {
+    "base_asset": "sensor.temperature.generic",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "arrow",
+      "target": "sensor.temperature.generic"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "run": "heat",
+    "label": "Make the coop hot (simulated)"
+   }
+  },
+  {
+   "id": "02-beat-the-heat.choose",
+   "type": "mission",
+   "action": "Choose a response",
+   "instruction": "The safe response is to ventilate: turn the fan on and warn the owner.",
+   "instruction_layers": {
+    "young": "What cools a hot room? A fan!",
+    "beginner": "The safe response is to ventilate: turn the fan on and warn the owner.",
+    "advanced": "Actuator: fan relay. Misting or shade need water or other hardware; this rule picks the fan.",
+    "teacher": "Let learners suggest other responses and their trade-offs."
+   },
+   "image": {
+    "base_asset": "ui.state.heat-high",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "ui.state.heat-high"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  },
+  {
+   "id": "02-beat-the-heat.run",
+   "type": "mission",
+   "action": "Run the simulation",
+   "instruction": "The fan runs and the coop starts to cool.",
+   "instruction_layers": {
+    "young": "The fan is on!",
+    "beginner": "The fan runs and the coop starts to cool.",
+    "advanced": "COMMAND_STATE says fan on; only the next SENSED reading shows it worked.",
+    "teacher": "Ask: how do we know the fan really worked?"
+   },
+   "image": {
+    "base_asset": "system.chicken-tender.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "correct",
+      "target": "system.chicken-tender.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/simulator",
+    "label": "See the event chain"
+   }
+  },
+  {
+   "id": "02-beat-the-heat.watch",
+   "type": "concept",
+   "action": "Watch what happens next",
+   "instruction": "Compare: 92°F before, 84°F after.",
+   "instruction_layers": {
+    "young": "Now it is cooler: 84°F.",
+    "beginner": "Compare: 92°F before, 84°F after.",
+    "advanced": "Feedback: the new reading closes the loop; the fan stops once it is safely below the threshold.",
+    "teacher": "Introduce the word feedback."
+   },
+   "image": {
+    "base_asset": "sensor.temperature.generic",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "measure",
+      "target": "sensor.temperature.generic"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/chicken-tender?section=sensors",
+    "label": "Check the new temperature"
+   }
+  },
+  {
+   "id": "02-beat-the-heat.loop",
+   "type": "checkpoint",
+   "action": "Explain the loop",
+   "instruction": "Sensor → decision → action → new sensor value.",
+   "instruction_layers": {
+    "young": "Feel → think → do → feel again!",
+    "beginner": "Sensor → decision → action → new sensor value.",
+    "advanced": "Closed-loop control: measure, compare with a setpoint, act, measure again.",
+    "teacher": "Assessment: the learner draws the loop and labels each part."
+   },
+   "image": {
+    "base_asset": "ui.state.heat-high",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "path",
+      "target": "ui.state.heat-high"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": true,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  },
+  {
+   "id": "02-beat-the-heat.later",
+   "type": "concept",
+   "action": "Build it later",
+   "instruction": "Next: wire a real temperature sensor and send its reading to Tender Cells.",
+   "instruction_layers": {
+    "young": "You can build a real temperature sensor!",
+    "beginner": "Next: wire a real temperature sensor and send its reading to Tender Cells.",
+    "advanced": "Sensors → automation lesson: a DHT22 on a Starter Node publishing tc/{id}/sensors.",
+    "teacher": "Bridge to the sensor build lesson."
+   },
+   "image": {
+    "base_asset": "sensor.temperature.generic",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "tool",
+      "target": "sensor.temperature.generic"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/lessons/sensors-automation"
+   ]
+  }
+ ],
+ "bridge": {
+  "label": "Sensors → automation lesson",
+  "href": "/lessons/sensors-automation"
+ },
+ "cover": "missions/02-beat-the-heat.webp"
+}

@@ -1,0 +1,51 @@
+{
+ "version": "0.2.0",
+ "missions": [
+  {
+   "id": "mission.00-explore-the-farm",
+   "file": "00-explore-the-farm.mission.json",
+   "title": "Explore the Farm",
+   "milestone": "Property Explorer",
+   "phase": "OBSERVE"
+  },
+  {
+   "id": "mission.01-protect-the-chickens",
+   "file": "01-protect-the-chickens.mission.json",
+   "title": "Protect the Chickens",
+   "milestone": "Safety Scout",
+   "phase": "DECIDE"
+  },
+  {
+   "id": "mission.02-beat-the-heat",
+   "file": "02-beat-the-heat.mission.json",
+   "title": "Beat the Heat",
+   "milestone": "Heat Helper",
+   "phase": "DECIDE"
+  },
+  {
+   "id": "mission.03-robot-traffic-jam",
+   "file": "03-robot-traffic-jam.mission.json",
+   "title": "Robot Traffic Jam",
+   "milestone": "Robot Coordinator",
+   "phase": "DECIDE"
+  },
+  {
+   "id": "mission.04-build-a-coop-brain",
+   "file": "04-build-a-coop-brain.mission.json",
+   "title": "Build a Coop Brain",
+   "milestone": "Automation Builder",
+   "phase": "AUTOMATE"
+  },
+  {
+   "id": "mission.05-sensor-detective",
+   "file": "05-sensor-detective.mission.json",
+   "title": "Sensor Detective",
+   "milestone": "Sensor Detective",
+   "phase": "OBSERVE"
+  }
+ ],
+ "next_hardware_projects": [
+  "electronics-blink-xiao",
+  "starter-node-first-coop-brain"
+ ]
+}

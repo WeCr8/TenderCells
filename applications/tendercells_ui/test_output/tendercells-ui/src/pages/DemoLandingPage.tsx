@@ -72,7 +72,7 @@ const connections: { id: string; label: string; detail: string; path?: string; h
 // website pages (same origin) load normally.
 const personas: { id: string; emoji: string; title: string; who: string; detail: string; cta: string; path?: string; href?: string }[] = [
   { id: "run-the-farm", emoji: "🐔", title: "Run the farm", who: "Farmers · backyard flocks · homesteaders", detail: "Alerts, animals, feed, water, doors, schedules, predators and system health in one view.", cta: "Open the dashboard", path: "/dashboard" },
-  { id: "mission", emoji: "🎮", title: "Try a mission", who: "Kids · families · first-time visitors", detail: "Protect the flock, beat the heat, untangle a robot traffic jam, build a coop brain.", cta: "Pick a mission", path: "/missions" },
+  { id: "mission", emoji: "🎮", title: "Try a mission", who: "Kids · families · first-time visitors", detail: "Explore the farm, protect the chickens, beat the heat, untangle a robot traffic jam, build a coop brain.", cta: "Start the Builder", path: "/builder" },
   { id: "4h-ffa", emoji: "🎓", title: "Build a 4-H / FFA project", who: "4-H · FFA · schools · homeschool", detail: "Project plans with a question, variables, data to collect and the lessons that build the device.", cta: "See project plans", href: "/science-fair" },
   { id: "hardware", emoji: "🧑‍🔧", title: "Build hardware", who: "Makers · engineers · parents · teachers", detail: "Boards, wiring, flashing, the MQTT contract and how a device shows up here - step by step.", cta: "Build a device", href: "/os#build" },
   { id: "code", emoji: "💻", title: "Explore the code", who: "Developers · robotics students · contributors", detail: "Topics and payloads, the backend API, firmware, simulation and how to contribute.", cta: "Developer path", href: "/os#developers" },
@@ -205,7 +205,7 @@ export default function DemoLandingPage() {
                     sx={{ bgcolor: C.accent, color: C.white, fontWeight: 800, whiteSpace: "nowrap" }}>
                     Enter the farm
                   </Button>
-                  <Button variant="outlined" onClick={() => { trackDemo("persona_selected", { persona: "mission" }); navigate("/missions"); }}
+                  <Button variant="outlined" onClick={() => { trackDemo("persona_selected", { persona: "mission" }); navigate("/builder"); }}
                     sx={{ borderColor: C.gold, color: C.gold, fontWeight: 700, whiteSpace: "nowrap" }}>
                     Try a mission
                   </Button>

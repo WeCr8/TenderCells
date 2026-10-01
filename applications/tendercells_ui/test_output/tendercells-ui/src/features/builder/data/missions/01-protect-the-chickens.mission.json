@@ -1,0 +1,217 @@
+{
+ "id": "mission.01-protect-the-chickens",
+ "title": "Protect the Chickens",
+ "version": "0.2.0",
+ "milestone": "Safety Scout",
+ "phase": "DECIDE",
+ "hardware_required": false,
+ "audience_layers": [
+  "young",
+  "beginner",
+  "advanced",
+  "teacher"
+ ],
+ "learning_outcomes": [
+  "An event starts from a sensor observation",
+  "A rule turns an observation into a safe action"
+ ],
+ "steps": [
+  {
+   "id": "01-protect-the-chickens.quiet",
+   "type": "concept",
+   "action": "Start with a quiet farm",
+   "instruction": "WatchTower watches the property with three cameras, day and night.",
+   "instruction_layers": {
+    "young": "The farm is calm. The WatchTower is keeping watch.",
+    "beginner": "WatchTower watches the property with three cameras, day and night.",
+    "advanced": "WatchTower (tc:device:watchtower:wt_001) runs a predator model on the device and publishes alerts on tc/wt_001/alert.",
+    "teacher": "Ask: what could a camera notice at night that a person might miss?"
+   },
+   "image": {
+    "base_asset": "scene.demo-farm.overview",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "scene.demo-farm.overview"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  },
+  {
+   "id": "01-protect-the-chickens.detect",
+   "type": "mission",
+   "action": "Something was detected",
+   "instruction": "Trigger the event: the WatchTower camera spots a fox near the coop.",
+   "instruction_layers": {
+    "young": "Uh oh! The camera saw something. Press the button to find out.",
+    "beginner": "Trigger the event: the WatchTower camera spots a fox near the coop.",
+    "advanced": "The camera classifies a fox at 87% confidence; the predator rule needs at least 80% and dusk or animals outside.",
+    "teacher": "Discuss confidence: why not act at 50%?"
+   },
+   "image": {
+    "base_asset": "system.watchtower.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "target",
+      "target": "system.watchtower.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "run": "predator",
+    "label": "Trigger the predator event"
+   }
+  },
+  {
+   "id": "01-protect-the-chickens.affected",
+   "type": "mission",
+   "action": "Find who may be affected",
+   "instruction": "Find the Chicken Tender coop near the camera - its flock is at risk.",
+   "instruction_layers": {
+    "young": "Which house are the chickens in? That's the one to protect.",
+    "beginner": "Find the Chicken Tender coop near the camera - its flock is at risk.",
+    "advanced": "The rule maps the detection to the nearest guarded habitat twin (Chicken Tender, ct_001).",
+    "teacher": "Ask learners to point to it on the map and explain why it was chosen."
+   },
+   "image": {
+    "base_asset": "system.chicken-tender.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "arrow",
+      "target": "system.chicken-tender.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/layout",
+    "label": "Find it on the map"
+   }
+  },
+  {
+   "id": "01-protect-the-chickens.why",
+   "type": "concept",
+   "action": "Ask why",
+   "instruction": "Open \"Why did this happen?\" and follow camera → rule → door.",
+   "instruction_layers": {
+    "young": "Ask \"Why?\" - the computer tells you each step.",
+    "beginner": "Open \"Why did this happen?\" and follow camera → rule → door.",
+    "advanced": "Read the engineer chain: device → AI → rule → OS → actuator → action → notify, each with its live source type.",
+    "teacher": "Have learners retell the chain in their own words."
+   },
+   "image": {
+    "base_asset": "ui.event.predator",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "path",
+      "target": "ui.event.predator"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ],
+   "demo": {
+    "open": "/simulator",
+    "label": "Open the event and its Why"
+   }
+  },
+  {
+   "id": "01-protect-the-chickens.respond",
+   "type": "mission",
+   "action": "Choose the safe simulated response",
+   "instruction": "The safe response is to close the coop door - and tell the owner.",
+   "instruction_layers": {
+    "young": "The door closes to keep the chickens safe.",
+    "beginner": "The safe response is to close the coop door - and tell the owner.",
+    "advanced": "The OS checks E-STOP is clear, commands the door and only counts it closed when the limit switch confirms.",
+    "teacher": "Ask: what should happen if the door does not confirm it closed?"
+   },
+   "image": {
+    "base_asset": "ui.event.predator",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "correct",
+      "target": "ui.event.predator"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": false,
+   "source_refs": [
+    "/demo",
+    "/digital-twin"
+   ]
+  },
+  {
+   "id": "01-protect-the-chickens.real",
+   "type": "checkpoint",
+   "action": "How would this become real?",
+   "instruction": "Next: build a camera node that does this for real.",
+   "instruction_layers": {
+    "young": "You can build a real camera like this one!",
+    "beginner": "Next: build a camera node that does this for real.",
+    "advanced": "Camera Node: XIAO ESP32-S3 Sense, flashed from /flash, streams on your network (no upload).",
+    "teacher": "Bridge to the camera / sensor build path."
+   },
+   "image": {
+    "base_asset": "system.watchtower.iso",
+    "view": "instruction",
+    "cues": [
+     {
+      "type": "tool",
+      "target": "system.watchtower.iso"
+     }
+    ]
+   },
+   "safety": [
+    "CHILD_OK"
+   ],
+   "checkpoint": true,
+   "source_refs": [
+    "/guides/camera-node-first-build",
+    "/flash?target=camera-node"
+   ]
+  }
+ ],
+ "bridge": {
+  "label": "Build a camera node",
+  "href": "/guides/camera-node-first-build"
+ },
+ "cover": "missions/01-protect-the-chickens.webp"
+}

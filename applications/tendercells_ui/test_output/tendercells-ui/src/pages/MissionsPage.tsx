@@ -2,7 +2,7 @@
 // and first-time visitors. Steps tick themselves off (event triggered, "Why?" opened, page
 // visited); each mission ends with how to build it for real.
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { Box, Button, Chip, Grid, LinearProgress, Paper, Stack, Typography } from "@mui/material";
 import { EVENT_LOG_EVENT, readEventLog } from "../lib/demo/eventSimulator";
 import { MISSIONS, missionProgress, readVisited, stepDone, type Mission } from "../lib/demo/missions";
@@ -68,6 +68,10 @@ export default function MissionsPage() {
         <Typography sx={{ maxWidth: 820 }}>
           Short challenges in the demo farm. Trigger events, find out why things happened, then see how to build
           the real device. Steps tick off by themselves as you go.
+        </Typography>
+        <Typography sx={{ maxWidth: 820, color: C.goldMuted, fontSize: 14 }}>
+          Want it one step at a time, with explanations for kids, beginners, engineers and teachers - and a path to
+          real hardware? <Button size="small" component={RouterLink} to="/builder" sx={{ color: C.gold }}>Open the Builder →</Button>
         </Typography>
       </Stack>
       <Grid container spacing={1.5}>

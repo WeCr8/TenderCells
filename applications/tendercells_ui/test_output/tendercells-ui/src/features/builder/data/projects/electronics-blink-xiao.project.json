@@ -1,0 +1,293 @@
+{
+ "id": "electronics-blink-xiao",
+ "title": "Make a Light Blink",
+ "version": "0.2.0",
+ "milestone": "Circuit Builder",
+ "phase": "BUILD",
+ "audience": [
+  "student",
+  "maker"
+ ],
+ "difficulty": 1,
+ "estimated_minutes": 35,
+ "source_docs": [
+  "docs/builder/README.md"
+ ],
+ "stages": [
+  {
+   "id": "breadboard",
+   "title": "Build the circuit",
+   "steps": [
+    {
+     "id": "b001",
+     "type": "safety",
+     "action": "Power off",
+     "instruction": "Unplug the USB cable before you change any wiring.",
+     "safety": [
+      "POWER_OFF_REQUIRED",
+      "SUPERVISION_RECOMMENDED"
+     ],
+     "image": {
+      "base_asset": "cable.usbc.data.generic",
+      "cues": [
+       {
+        "type": "power_off",
+        "label": "Unplugged"
+       }
+      ]
+     }
+    },
+    {
+     "id": "b002",
+     "type": "concept",
+     "action": "Identify",
+     "instruction": "This is a breadboard. It lets us connect parts without soldering.",
+     "parts": [
+      {
+       "asset_id": "breadboard.halfsize.generic",
+       "qty": 1
+      }
+     ],
+     "safety": [
+      "CHILD_OK"
+     ],
+     "image": {
+      "base_asset": "breadboard.halfsize.generic",
+      "cues": [
+       {
+        "type": "target",
+        "label": "Breadboard"
+       }
+      ]
+     }
+    },
+    {
+     "id": "b003",
+     "type": "concept",
+     "action": "Inspect",
+     "instruction": "Each short row of five holes is connected underneath.",
+     "safety": [
+      "CHILD_OK"
+     ],
+     "image": {
+      "base_asset": "breadboard.halfsize.generic",
+      "cues": [
+       {
+        "type": "target",
+        "target": "breadboard:row",
+        "label": "One row = one connection"
+       }
+      ]
+     }
+    },
+    {
+     "id": "b004",
+     "type": "assembly",
+     "action": "Place",
+     "instruction": "Press the XIAO into the breadboard so it straddles the centre gap.",
+     "parts": [
+      {
+       "asset_id": "board.seeed.xiao-esp32s3.rev1",
+       "qty": 1
+      }
+     ],
+     "safety": [
+      "POWER_OFF_REQUIRED"
+     ],
+     "image": {
+      "base_asset": "board.seeed.xiao-esp32s3.rev1",
+      "cues": [
+       {
+        "type": "arrow",
+        "target": "breadboard:center",
+        "label": "Across the gap"
+       }
+      ]
+     }
+    },
+    {
+     "id": "b005",
+     "type": "electronics",
+     "action": "Find polarity",
+     "instruction": "Find the LED's long leg. The long leg is the positive (+) side.",
+     "parts": [
+      {
+       "asset_id": "component.led.5mm.red.generic",
+       "qty": 1
+      }
+     ],
+     "safety": [
+      "CHILD_OK"
+     ],
+     "image": {
+      "base_asset": "component.led.5mm.red.generic",
+      "cues": [
+       {
+        "type": "target",
+        "label": "Long leg = +"
+       }
+      ]
+     }
+    },
+    {
+     "id": "b006",
+     "type": "electronics",
+     "action": "Place",
+     "instruction": "Put the LED's long leg in a row wired to an output pin, and its short leg in an empty row.",
+     "safety": [
+      "POWER_OFF_REQUIRED"
+     ],
+     "image": {
+      "base_asset": "component.led.5mm.red.generic",
+      "cues": [
+       {
+        "type": "arrow",
+        "label": "Long leg → output row"
+       }
+      ]
+     }
+    },
+    {
+     "id": "b007",
+     "type": "electronics",
+     "action": "Place",
+     "instruction": "Connect the 220 Ω resistor from the LED's short-leg row to the GND row.",
+     "parts": [
+      {
+       "asset_id": "component.resistor.220ohm.axial",
+       "qty": 1
+      }
+     ],
+     "safety": [
+      "POWER_OFF_REQUIRED"
+     ],
+     "image": {
+      "base_asset": "component.resistor.220ohm.axial",
+      "cues": [
+       {
+        "type": "arrow",
+        "label": "Short leg → resistor → GND"
+       }
+      ]
+     }
+    },
+    {
+     "id": "b008",
+     "type": "checkpoint",
+     "action": "Verify",
+     "instruction": "Check your circuit with an adult before adding power: output pin → LED (long leg) → LED (short leg) → resistor → GND.",
+     "checkpoint": true,
+     "safety": [
+      "SUPERVISION_RECOMMENDED",
+      "POWER_OFF_REQUIRED"
+     ],
+     "image": {
+      "base_asset": "breadboard.halfsize.generic",
+      "cues": [
+       {
+        "type": "correct",
+        "label": "Pin → LED → resistor → GND"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "code",
+   "title": "Make it blink",
+   "steps": [
+    {
+     "id": "b010",
+     "type": "assembly",
+     "action": "Connect",
+     "instruction": "Plug in the USB data cable.",
+     "parts": [
+      {
+       "asset_id": "cable.usbc.data.generic",
+       "qty": 1
+      }
+     ],
+     "safety": [
+      "SUPERVISION_RECOMMENDED"
+     ],
+     "image": {
+      "base_asset": "cable.usbc.data.generic",
+      "cues": [
+       {
+        "type": "arrow",
+        "label": "USB-C"
+       }
+      ]
+     }
+    },
+    {
+     "id": "b011",
+     "type": "concept",
+     "action": "Learn",
+     "instruction": "A tiny program turns the output pin on, waits, turns it off, waits - forever.",
+     "safety": [
+      "CHILD_OK"
+     ],
+     "concept": {
+      "title": "GPIO",
+      "text": "A general-purpose pin the program can switch on (3.3 V) or off (0 V)."
+     },
+     "image": {
+      "base_asset": "board.seeed.xiao-esp32s3.rev1",
+      "cues": [
+       {
+        "type": "path",
+        "label": "on → wait → off → wait"
+       }
+      ]
+     }
+    },
+    {
+     "id": "b012",
+     "type": "test",
+     "action": "Watch",
+     "instruction": "Upload the blink sketch from the Arduino IDE and watch the LED blink.",
+     "safety": [
+      "SUPERVISION_RECOMMENDED"
+     ],
+     "source_refs": [
+      "/lessons/your-first-coop-brain"
+     ],
+     "image": {
+      "base_asset": "component.led.5mm.red.generic",
+      "cues": [
+       {
+        "type": "correct",
+        "label": "Blinking!"
+       }
+      ]
+     }
+    },
+    {
+     "id": "b013",
+     "type": "checkpoint",
+     "action": "Check",
+     "instruction": "Is it blinking? If not: is the LED the right way round, and is the resistor in the GND row?",
+     "checkpoint": true,
+     "safety": [
+      "CHILD_OK"
+     ],
+     "image": {
+      "base_asset": "component.led.5mm.red.generic",
+      "cues": [
+       {
+        "type": "correct",
+        "label": "Blinking = done"
+       }
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "bridge": {
+  "label": "Next: Your First Coop Brain",
+  "path": "/builder/starter-node-first-coop-brain"
+ }
+}

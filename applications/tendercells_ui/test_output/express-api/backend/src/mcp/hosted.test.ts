@@ -166,7 +166,14 @@ test("demo endpoint works without sign-in and is labelled simulated", async () =
     assert.match(String(init.result.serverInfo.title), /demo farm/);
     const ov = await (await rpc(base, "/mcp/demo", "tools/call", undefined, { name: "get_farm_overview", arguments: {} })).json() as { result: { structuredContent: { simulated: boolean } } };
     assert.equal(ov.result.structuredContent.simulated, true);
-    assert.equal((await fetch(`${base}/mcp/demo`)).status, 405);
+    assert.equal((await fetch(`${base}/mcp/demo`)).status, 405, "MCP clients still get the JSON-RPC 405");
+    const page = await fetch(`${base}/mcp/demo`, { headers: { Accept: "text/html,application/xhtml+xml" } });
+    assert.equal(page.status, 200);
+    const html = await page.text();
+    assert.match(html, /Tender Cells connector - demo farm/);
+    assert.match(html, /https:\/\/tendercells\.example\/mcp\/demo/);
+    const main = await (await fetch(`${base}/mcp`, { headers: { Accept: "text/html" } })).text();
+    assert.match(main, /sign in with your Tender Cells account/);
   } finally {
     srv.close();
   }

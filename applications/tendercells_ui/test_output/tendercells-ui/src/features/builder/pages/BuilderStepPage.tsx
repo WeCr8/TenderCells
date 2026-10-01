@@ -60,9 +60,11 @@ export default function BuilderStepPage() {
   const [help, setHelp] = useState(false);
   const [demoDone, setDemoDone] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
+  const [ticked, setTicked] = useState<Set<number>>(() => new Set());
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => { if (item) trackDemo('mission_started', { mission: item.id, kind: item.kind }); }, [item]);
-  useEffect(() => { setAcked(false); setHelp(false); setDemoDone(null); }, [index]);
+  useEffect(() => { setAcked(false); setHelp(false); setDemoDone(null); setTicked(new Set()); setCopied(false); }, [index]);
 
   const step = item?.steps[index];
   const gates = (step?.safety ?? []).filter((g) => GATE[g].ack);
@@ -198,6 +200,65 @@ export default function BuilderStepPage() {
           </Paper>
         )}
       </Box>
+
+      {index === 0 && item.partsList && item.partsList.length > 0 && (
+        <Paper elevation={0} data-testid="parts-list" sx={{ mt: 2, p: 1.5, bgcolor: C.surface, color: C.white, border: `1px solid ${C.gold}66` }}>
+          <Typography sx={{ color: C.gold, fontWeight: 800, mb: 0.5 }}>What you need for this build</Typography>
+          <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
+            {item.partsList.map((p) => (
+              <li key={p.asset_id}><strong>{p.qty}×</strong> {assetFor(p.asset_id)?.label ?? p.asset_id}{p.note ? <Box component="span" sx={{ color: C.goldMuted }}> - {p.note}</Box> : null}</li>
+            ))}
+          </Box>
+        </Paper>
+      )}
+
+      {step.details && step.details.length > 0 && (
+        <Box sx={{ mt: 2 }} data-testid="step-details">
+          <Typography sx={{ color: C.goldMuted, fontSize: 13, fontWeight: 800, letterSpacing: 1 }}>STEP BY STEP</Typography>
+          <Box component="ol" sx={{ m: 0, mt: 0.5, p: 0, listStyle: 'none', display: 'grid', gap: 0.75 }}>
+            {step.details.map((d, i) => {
+              const on = ticked.has(i);
+              return (
+                <Box component="li" key={i}>
+                  <Box component="label" sx={{ display: 'flex', gap: 1.25, alignItems: 'flex-start', cursor: 'pointer', p: 1, borderRadius: 1.5,
+                    bgcolor: on ? `${C.accent}33` : C.surface, border: `1px solid ${on ? C.gold : `${C.accent}55`}` }}>
+                    <Box component="span" aria-hidden sx={{ flex: '0 0 30px', height: 30, borderRadius: '50%', display: 'grid', placeItems: 'center', fontWeight: 900,
+                      bgcolor: on ? C.gold : C.accent, color: on ? C.bg : C.white }}>{on ? '✓' : i + 1}</Box>
+                    <input type="checkbox" checked={on} aria-label={`Done: ${d}`} style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+                      onChange={() => setTicked((t) => { const n = new Set(t); if (n.has(i)) n.delete(i); else n.add(i); return n; })} />
+                    <Typography sx={{ color: C.white, fontSize: { xs: 15, sm: 17 }, lineHeight: 1.45, textDecoration: on ? 'line-through' : 'none', opacity: on ? 0.75 : 1 }}>{d}</Typography>
+                  </Box>
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
+      )}
+
+      {step.code && (
+        <Box sx={{ mt: 2, position: 'relative' }} data-testid="step-code">
+          <Box component="pre" sx={{ m: 0, p: 1.5, pr: 9, bgcolor: '#08170F', color: '#E8F0E8', borderRadius: 1.5, overflowX: 'auto', fontSize: 15, lineHeight: 1.5, border: `1px solid ${C.accent}66` }}>{step.code}</Box>
+          <Button size="small" variant="outlined" onClick={() => { void navigator.clipboard?.writeText(step.code!).then(() => setCopied(true)).catch(() => {}); }}
+            sx={{ position: 'absolute', top: 8, right: 8, borderColor: C.accent, color: C.gold }}>{copied ? 'Copied ✓' : 'Copy'}</Button>
+        </Box>
+      )}
+
+      {(step.look_for || step.watch_out) && (
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 1.5 }}>
+          {step.look_for && (
+            <Paper elevation={0} data-testid="step-look-for" sx={{ flex: 1, p: 1.25, bgcolor: `${C.accent}26`, color: C.white, border: `1px solid ${C.accent}` }}>
+              <Typography sx={{ color: C.gold, fontWeight: 800, fontSize: 13 }}>✓ YOU SHOULD SEE</Typography>
+              <Typography sx={{ fontSize: 15 }}>{step.look_for}</Typography>
+            </Paper>
+          )}
+          {step.watch_out && (
+            <Paper elevation={0} data-testid="step-watch-out" sx={{ flex: 1, p: 1.25, bgcolor: `${C.warning}1A`, color: C.white, border: `1px solid ${C.warning}88` }}>
+              <Typography sx={{ color: C.warning, fontWeight: 800, fontSize: 13 }}>⚠ WATCH OUT</Typography>
+              <Typography sx={{ fontSize: 15 }}>{step.watch_out}</Typography>
+            </Paper>
+          )}
+        </Stack>
+      )}
 
       {(step.safety ?? []).length > 0 && (
         <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }} data-testid="safety">

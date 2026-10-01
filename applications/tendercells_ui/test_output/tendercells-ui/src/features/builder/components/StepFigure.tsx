@@ -30,7 +30,12 @@ export default function StepFigure({ step, concept = false }: { step: BuilderSte
       <Box component="figure" data-testid="step-figure" sx={{ m: 0, position: 'relative', bgcolor: C.bg, border: `1px solid ${C.accent}`, borderRadius: 2, p: 1 }}>
         <Box component="img" src={assetUrl(page)} data-testid="step-image" loading="lazy"
           alt={`${step.action}: ${asset?.label ?? 'step illustration'}${cues.length ? ` - ${cues.map((c) => c.label ?? CUE[c.type].words).join(', ')}` : ''}`}
-          sx={{ display: 'block', width: '100%', maxHeight: { xs: 320, sm: 440 }, objectFit: 'contain', borderRadius: 1, bgcolor: C.white }} />
+          sx={{ display: 'block', width: '100%', maxHeight: { xs: 360, sm: 520 }, objectFit: 'contain', borderRadius: 1, bgcolor: C.white }} />
+        {!concept && page.startsWith('steps/') && page.endsWith('.webp') && (
+          <Typography sx={{ position: 'absolute', top: 14, left: 14, bgcolor: `${C.bg}E6`, color: C.gold, fontSize: 11, fontWeight: 800, px: 1, py: 0.25, borderRadius: 1 }}>
+            SCREENSHOT · simulated farm
+          </Typography>
+        )}
         {concept && (
           <Typography data-testid="step-image-concept" sx={{ position: 'absolute', top: 14, left: 14, bgcolor: `${C.warning}E6`, color: C.bg, fontSize: 11, fontWeight: 800, px: 1, py: 0.25, borderRadius: 1 }}>
             CONCEPT ART · not a wiring reference

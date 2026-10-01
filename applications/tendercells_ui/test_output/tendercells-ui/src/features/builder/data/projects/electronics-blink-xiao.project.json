@@ -9,279 +9,440 @@
   "maker"
  ],
  "difficulty": 1,
- "estimated_minutes": 35,
+ "estimated_minutes": 40,
  "source_docs": [
   "docs/builder/README.md"
  ],
  "stages": [
   {
-   "id": "breadboard",
-   "title": "Build the circuit",
+   "title": "Get ready",
    "steps": [
     {
      "id": "b001",
      "type": "safety",
      "action": "Power off",
      "instruction": "Unplug the USB cable before you change any wiring.",
+     "details": [
+      "Find the USB-C cable that goes into the XIAO board.",
+      "Pull it out of the board (hold the plug, not the wire).",
+      "Lay the cable to one side - you will plug it back in at step 12.",
+      "Clear a space on the table so small parts don't roll away."
+     ],
+     "look_for": "Nothing is plugged into the board and no light is on.",
+     "watch_out": "Changing wires while the board has power can short a pin and damage the board.",
      "safety": [
       "POWER_OFF_REQUIRED",
       "SUPERVISION_RECOMMENDED"
      ],
      "image": {
-      "base_asset": "cable.usbc.data.generic",
-      "cues": [
-       {
-        "type": "power_off",
-        "label": "Unplugged"
-       }
-      ]
-     }
+      "step_asset": "steps/electronics-blink-xiao/b001-power-off.svg"
+     },
+     "checkpoint": false
     },
     {
      "id": "b002",
      "type": "concept",
      "action": "Identify",
      "instruction": "This is a breadboard. It lets us connect parts without soldering.",
+     "details": [
+      "Turn the breadboard so the long edges run left to right.",
+      "Find the red + line and the blue − line along the top edge - these are the power rails.",
+      "Find the same two rails along the bottom edge.",
+      "Find the numbers 1, 5, 10 … across the top: these number the columns.",
+      "Find the letters a to j down the left side: these name the rows."
+     ],
+     "look_for": "Two rails at the top, two at the bottom, and a groove (the centre gap) across the middle.",
+     "watch_out": "Some breadboards split each rail in the middle - if yours has a gap in the red/blue line, treat the halves as separate.",
+     "safety": [
+      "CHILD_OK"
+     ],
+     "image": {
+      "step_asset": "steps/electronics-blink-xiao/b002-breadboard.svg",
+      "base_asset": "breadboard.halfsize.generic"
+     },
+     "checkpoint": false,
      "parts": [
       {
        "asset_id": "breadboard.halfsize.generic",
        "qty": 1
       }
-     ],
-     "safety": [
-      "CHILD_OK"
-     ],
-     "image": {
-      "base_asset": "breadboard.halfsize.generic",
-      "cues": [
-       {
-        "type": "target",
-        "label": "Breadboard"
-       }
-      ]
-     }
+     ]
     },
     {
      "id": "b003",
      "type": "concept",
      "action": "Inspect",
-     "instruction": "Each short row of five holes is connected underneath.",
+     "instruction": "In each column, the five holes a–e are joined underneath - and so are f–j.",
+     "details": [
+      "Put your finger on column 10, row a.",
+      "Slide down to row e: those five holes are one connection.",
+      "Cross the centre gap to row f: f to j is a different connection.",
+      "Each long rail row (+ or −) is joined all the way along."
+     ],
+     "look_for": "You can say which holes are joined: same column, same side of the gap.",
+     "watch_out": "Holes in the same ROW (left to right) are NOT joined - only columns and rails are.",
      "safety": [
       "CHILD_OK"
      ],
      "image": {
-      "base_asset": "breadboard.halfsize.generic",
-      "cues": [
-       {
-        "type": "target",
-        "target": "breadboard:row",
-        "label": "One row = one connection"
-       }
-      ]
+      "step_asset": "steps/electronics-blink-xiao/b003-columns.svg",
+      "base_asset": "breadboard.halfsize.generic"
+     },
+     "checkpoint": false,
+     "concept": {
+      "title": "Connected strips",
+      "text": "Metal clips under each column join a–e together and f–j together. The centre gap separates them."
      }
-    },
+    }
+   ]
+  },
+  {
+   "title": "Build the circuit",
+   "steps": [
     {
      "id": "b004",
      "type": "assembly",
      "action": "Place",
-     "instruction": "Press the XIAO into the breadboard so it straddles the centre gap.",
+     "instruction": "Press the XIAO across the centre gap, USB-C end at the left, pins in columns 1–7.",
+     "details": [
+      "Hold the XIAO with the USB-C socket pointing LEFT and the chip facing up.",
+      "Line up the left-most pins with column 1 - one row of pins above the gap, one below.",
+      "Check the pin labels: the top row reads 5V, GND, 3V3, D10, D9, D8, D7; the bottom row reads D0 to D6.",
+      "Press down gently and evenly with two fingers until the pins sink in.",
+      "Leave the holes above and below the board in each column free - you'll use them next."
+     ],
+     "look_for": "The board sits flat across the gap; no pin is bent; D0 is the bottom-left pin.",
+     "watch_out": "Never press a board in along one row only - both rows of pins in the same strip would short every pin together.",
+     "safety": [
+      "POWER_OFF_REQUIRED"
+     ],
+     "image": {
+      "step_asset": "steps/electronics-blink-xiao/b004-place-xiao.svg",
+      "base_asset": "board.seeed.xiao-esp32s3.rev1"
+     },
+     "checkpoint": false,
      "parts": [
       {
        "asset_id": "board.seeed.xiao-esp32s3.rev1",
        "qty": 1
       }
-     ],
-     "safety": [
-      "POWER_OFF_REQUIRED"
-     ],
-     "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "cues": [
-       {
-        "type": "arrow",
-        "target": "breadboard:center",
-        "label": "Across the gap"
-       }
-      ]
-     }
+     ]
     },
     {
      "id": "b005",
      "type": "electronics",
-     "action": "Find polarity",
-     "instruction": "Find the LED's long leg. The long leg is the positive (+) side.",
-     "parts": [
-      {
-       "asset_id": "component.led.5mm.red.generic",
-       "qty": 1
-      }
+     "action": "Place",
+     "instruction": "Black wire: from the GND column (above the board) to the top − rail.",
+     "details": [
+      "Find GND: the second pin from the left on the TOP row (column 2).",
+      "Push one end of a black jumper wire into a free hole in column 2 ABOVE the board.",
+      "Push the other end into the blue − rail along the top edge.",
+      "Tug gently - both ends should stay put."
      ],
+     "look_for": "A black wire from column 2 (above the XIAO) into the top blue − rail.",
+     "watch_out": "Use the blue − rail, not the red + rail - mixing them up connects ground to power.",
      "safety": [
-      "CHILD_OK"
+      "POWER_OFF_REQUIRED"
      ],
      "image": {
-      "base_asset": "component.led.5mm.red.generic",
-      "cues": [
-       {
-        "type": "target",
-        "label": "Long leg = +"
-       }
-      ]
-     }
+      "step_asset": "steps/electronics-blink-xiao/b005-gnd-wire.svg",
+      "base_asset": "wire.jumper.mm"
+     },
+     "checkpoint": false,
+     "parts": [
+      {
+       "asset_id": "wire.jumper.mm",
+       "qty": 1
+      }
+     ]
     },
     {
      "id": "b006",
      "type": "electronics",
      "action": "Place",
-     "instruction": "Put the LED's long leg in a row wired to an output pin, and its short leg in an empty row.",
+     "instruction": "Black wire: join the top − rail to the bottom − rail at column 24.",
+     "details": [
+      "Take a second black jumper wire.",
+      "Push one end into the top blue − rail near column 24.",
+      "Run it down the right side and push the other end into the bottom blue − rail near column 24.",
+      "Now both − rails are ground."
+     ],
+     "look_for": "A black wire running straight down the right side, rail to rail.",
+     "watch_out": "Blue to blue only. If one end lands in a red + rail, move it.",
      "safety": [
       "POWER_OFF_REQUIRED"
      ],
      "image": {
-      "base_asset": "component.led.5mm.red.generic",
-      "cues": [
-       {
-        "type": "arrow",
-        "label": "Long leg → output row"
-       }
-      ]
-     }
+      "step_asset": "steps/electronics-blink-xiao/b006-rail-wire.svg",
+      "base_asset": "wire.jumper.mm"
+     },
+     "checkpoint": false,
+     "parts": [
+      {
+       "asset_id": "wire.jumper.mm",
+       "qty": 1
+      }
+     ]
     },
     {
      "id": "b007",
      "type": "electronics",
+     "action": "Find polarity",
+     "instruction": "Find the LED's long leg. The long leg is the positive (+) side.",
+     "details": [
+      "Hold the LED with its legs pointing down.",
+      "Compare the two legs: one is longer. That is + (the anode).",
+      "Feel the rim of the red dome: one side is flat. The leg on the flat side is − (the cathode).",
+      "Keep holding it this way for the next steps."
+     ],
+     "look_for": "You can point to the long (+) leg and the short (−) leg.",
+     "watch_out": "An LED only lights one way round. If the legs were trimmed, use the flat edge to find −.",
+     "safety": [
+      "CHILD_OK"
+     ],
+     "image": {
+      "step_asset": "steps/electronics-blink-xiao/b007-led-legs.svg",
+      "base_asset": "component.led.5mm.red.generic"
+     },
+     "checkpoint": false,
+     "parts": [
+      {
+       "asset_id": "component.led.5mm.red.generic",
+       "qty": 1
+      }
+     ]
+    },
+    {
+     "id": "b008",
+     "type": "electronics",
      "action": "Place",
-     "instruction": "Connect the 220 Ω resistor from the LED's short-leg row to the GND row.",
+     "instruction": "Yellow wire: from the D0 column (below the board) to column 12, row j.",
+     "details": [
+      "Find D0: the bottom-left pin of the XIAO (column 1).",
+      "Push one end of the yellow jumper wire into a free hole in column 1 BELOW the board (row j).",
+      "Push the other end into column 12, row j.",
+      "Column 12 is now connected to pin D0."
+     ],
+     "look_for": "A yellow wire from column 1 (below the XIAO) to column 12, row j.",
+     "watch_out": "Stay on the bottom half (rows f–j) for both ends - the top half of column 12 is a different connection.",
+     "safety": [
+      "POWER_OFF_REQUIRED"
+     ],
+     "image": {
+      "step_asset": "steps/electronics-blink-xiao/b008-yellow-wire.svg",
+      "base_asset": "wire.jumper.mm"
+     },
+     "checkpoint": false,
+     "parts": [
+      {
+       "asset_id": "wire.jumper.mm",
+       "qty": 1
+      }
+     ]
+    },
+    {
+     "id": "b009",
+     "type": "electronics",
+     "action": "Place",
+     "instruction": "LED: long leg in column 12, short leg in column 13 (row h).",
+     "details": [
+      "Hold the LED long leg on the left.",
+      "Push the LONG leg into column 12, row h - the same column as the yellow wire.",
+      "Push the SHORT leg into column 13, row h.",
+      "The LED should stand up straight with the red dome on top."
+     ],
+     "look_for": "LED legs in 12 and 13, long leg in 12.",
+     "watch_out": "Long leg in 13 by mistake? The LED won't light - swap the legs.",
+     "safety": [
+      "POWER_OFF_REQUIRED"
+     ],
+     "image": {
+      "step_asset": "steps/electronics-blink-xiao/b009-place-led.svg",
+      "base_asset": "component.led.5mm.red.generic"
+     },
+     "checkpoint": false
+    },
+    {
+     "id": "b010",
+     "type": "electronics",
+     "action": "Place",
+     "instruction": "Resistor: from column 13 (row j) to the bottom − rail.",
+     "details": [
+      "Find the 220 Ω resistor: its colour bands are red, red, brown (then gold).",
+      "Bend both legs down so they fit the holes.",
+      "Push one leg into column 13, row j - the same column as the LED's short leg.",
+      "Push the other leg into the bottom blue − rail.",
+      "Either way round is fine: resistors have no + or −."
+     ],
+     "look_for": "Resistor from column 13 into the bottom − rail.",
+     "watch_out": "Don't skip the resistor: without it too much current flows and the LED (or the pin) can burn out.",
+     "safety": [
+      "POWER_OFF_REQUIRED"
+     ],
+     "image": {
+      "step_asset": "steps/electronics-blink-xiao/b010-resistor.svg",
+      "base_asset": "component.resistor.220ohm.axial"
+     },
+     "checkpoint": false,
      "parts": [
       {
        "asset_id": "component.resistor.220ohm.axial",
        "qty": 1
       }
      ],
-     "safety": [
-      "POWER_OFF_REQUIRED"
-     ],
-     "image": {
-      "base_asset": "component.resistor.220ohm.axial",
-      "cues": [
-       {
-        "type": "arrow",
-        "label": "Short leg → resistor → GND"
-       }
-      ]
+     "concept": {
+      "title": "Why a resistor?",
+      "text": "It limits the current through the LED to a safe few milliamps."
      }
     },
     {
-     "id": "b008",
+     "id": "b011",
      "type": "checkpoint",
      "action": "Verify",
-     "instruction": "Check your circuit with an adult before adding power: output pin → LED (long leg) → LED (short leg) → resistor → GND.",
-     "checkpoint": true,
+     "instruction": "Check the whole path with an adult before power: D0 → yellow wire → LED + … LED − → resistor → − rail → black wire → GND.",
+     "details": [
+      "Trace with your finger from D0 along the yellow wire to column 12.",
+      "Up through the LED's long leg, out of its short leg into column 13.",
+      "Through the resistor into the bottom − rail.",
+      "Along the rail-to-rail black wire, up to the top − rail, and through the first black wire to GND.",
+      "Count: 3 wires, 1 LED, 1 resistor, the XIAO - nothing else on the board."
+     ],
+     "look_for": "One unbroken loop from D0 back to GND.",
+     "watch_out": "If any part touches a red + rail, move it before you plug in.",
      "safety": [
       "SUPERVISION_RECOMMENDED",
       "POWER_OFF_REQUIRED"
      ],
      "image": {
-      "base_asset": "breadboard.halfsize.generic",
-      "cues": [
-       {
-        "type": "correct",
-        "label": "Pin → LED → resistor → GND"
-       }
-      ]
-     }
+      "step_asset": "steps/electronics-blink-xiao/b011-check.svg"
+     },
+     "checkpoint": true
     }
    ]
   },
   {
-   "id": "code",
    "title": "Make it blink",
    "steps": [
     {
-     "id": "b010",
+     "id": "b012",
      "type": "assembly",
      "action": "Connect",
-     "instruction": "Plug in the USB data cable.",
+     "instruction": "Plug the USB-C data cable into the XIAO, then into the computer.",
+     "details": [
+      "Plug the small USB-C end into the XIAO.",
+      "Plug the other end into your computer.",
+      "A small light on the XIAO may flicker - that's normal."
+     ],
+     "look_for": "The board has power (a tiny on-board light may glow).",
+     "watch_out": "Use a DATA cable - some cables only charge and the computer won't see the board.",
+     "safety": [
+      "SUPERVISION_RECOMMENDED"
+     ],
+     "image": {
+      "step_asset": "steps/electronics-blink-xiao/b012-plug-in.svg",
+      "base_asset": "cable.usbc.data.generic"
+     },
+     "checkpoint": false,
      "parts": [
       {
        "asset_id": "cable.usbc.data.generic",
        "qty": 1
       }
-     ],
-     "safety": [
-      "SUPERVISION_RECOMMENDED"
-     ],
-     "image": {
-      "base_asset": "cable.usbc.data.generic",
-      "cues": [
-       {
-        "type": "arrow",
-        "label": "USB-C"
-       }
-      ]
-     }
+     ]
     },
     {
-     "id": "b011",
+     "id": "b013",
      "type": "concept",
      "action": "Learn",
-     "instruction": "A tiny program turns the output pin on, waits, turns it off, waits - forever.",
+     "instruction": "The program switches pin D0 on, waits half a second, switches it off, waits - forever.",
+     "details": [
+      "Read the first line: const int LED = D0; gives pin D0 a name.",
+      "setup() runs once: pinMode makes D0 an output.",
+      "loop() runs forever: HIGH turns D0 on (3.3 V), LOW turns it off (0 V).",
+      "delay(500) waits 500 milliseconds - half a second."
+     ],
+     "look_for": "You can say what each of the 4 important lines does.",
+     "watch_out": "Real Tender Cells firmware never waits with delay(); it uses timers so it can keep listening for E-STOP. For a first blink, delay() keeps it simple.",
      "safety": [
       "CHILD_OK"
      ],
+     "image": {
+      "step_asset": "steps/electronics-blink-xiao/b013-code.svg"
+     },
+     "checkpoint": false,
      "concept": {
       "title": "GPIO",
       "text": "A general-purpose pin the program can switch on (3.3 V) or off (0 V)."
      },
-     "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "cues": [
-       {
-        "type": "path",
-        "label": "on → wait → off → wait"
-       }
-      ]
-     }
+     "code": "const int LED = D0;\nvoid setup() {\n  pinMode(LED, OUTPUT);\n}\nvoid loop() {\n  digitalWrite(LED, HIGH); delay(500);\n  digitalWrite(LED, LOW);  delay(500);\n}"
     },
     {
-     "id": "b012",
-     "type": "test",
-     "action": "Watch",
-     "instruction": "Upload the blink sketch from the Arduino IDE and watch the LED blink.",
+     "id": "b014",
+     "type": "flash",
+     "action": "Upload",
+     "instruction": "Upload the sketch from the Arduino IDE.",
+     "details": [
+      "Open the Arduino IDE and paste the program from the last step into a new sketch.",
+      "Tools → Board → esp32 → XIAO_ESP32S3 (install the esp32 boards package first if it isn't listed).",
+      "Tools → USB CDC On Boot → Enabled.",
+      "Tools → Port → choose the port that appeared when you plugged in.",
+      "Click Upload (the → arrow) and wait for \"Done uploading\"."
+     ],
+     "look_for": "\"Done uploading\" at the bottom of the IDE.",
+     "watch_out": "No port? Try another cable or USB socket. Still nothing: hold B (boot), tap R (reset), release B, then upload again.",
      "safety": [
       "SUPERVISION_RECOMMENDED"
      ],
-     "source_refs": [
-      "/lessons/your-first-coop-brain"
-     ],
      "image": {
-      "base_asset": "component.led.5mm.red.generic",
-      "cues": [
-       {
-        "type": "correct",
-        "label": "Blinking!"
-       }
-      ]
-     }
+      "step_asset": "steps/electronics-blink-xiao/b014-upload.svg"
+     },
+     "checkpoint": false,
+     "source_refs": [
+      "/lessons/your-first-coop-brain",
+      "firmware/starter-node/README.md"
+     ]
     },
     {
-     "id": "b013",
-     "type": "checkpoint",
-     "action": "Check",
-     "instruction": "Is it blinking? If not: is the LED the right way round, and is the resistor in the GND row?",
-     "checkpoint": true,
+     "id": "b015",
+     "type": "test",
+     "action": "Watch",
+     "instruction": "Watch the LED: on for half a second, off for half a second.",
+     "details": [
+      "Look at the red LED on the breadboard.",
+      "Count: on, off, on, off - about once a second.",
+      "Change 500 to 100 in both delays and upload again: it blinks faster."
+     ],
+     "look_for": "A steady blink, about once a second.",
+     "watch_out": "Nothing changes when you edit the delays? You probably didn't upload - click Upload again.",
      "safety": [
       "CHILD_OK"
      ],
      "image": {
-      "base_asset": "component.led.5mm.red.generic",
-      "cues": [
-       {
-        "type": "correct",
-        "label": "Blinking = done"
-       }
-      ]
-     }
+      "step_asset": "steps/electronics-blink-xiao/b015-blink.svg"
+     },
+     "checkpoint": false
+    },
+    {
+     "id": "b016",
+     "type": "checkpoint",
+     "action": "Check",
+     "instruction": "Not blinking? Check the LED direction, the resistor and both black wires.",
+     "details": [
+      "Unplug the USB cable first.",
+      "LED: long leg in column 12 (with the yellow wire)? If not, turn it round.",
+      "Resistor: one leg in column 13, the other in the bottom − rail?",
+      "Black wires: GND (column 2) → top − rail, and top − rail → bottom − rail?",
+      "Press every part in firmly, plug back in and watch again."
+     ],
+     "look_for": "The LED blinks. You built your first circuit!",
+     "watch_out": "If it still won't blink, try another LED - they can arrive faulty.",
+     "safety": [
+      "CHILD_OK"
+     ],
+     "image": {
+      "step_asset": "steps/electronics-blink-xiao/b016-troubleshoot.svg"
+     },
+     "checkpoint": true
     }
    ]
   }
@@ -289,5 +450,32 @@
  "bridge": {
   "label": "Next: Your First Coop Brain",
   "path": "/builder/starter-node-first-coop-brain"
- }
+ },
+ "parts_list": [
+  {
+   "asset_id": "breadboard.halfsize.generic",
+   "qty": 1
+  },
+  {
+   "asset_id": "board.seeed.xiao-esp32s3.rev1",
+   "qty": 1
+  },
+  {
+   "asset_id": "component.led.5mm.red.generic",
+   "qty": 1
+  },
+  {
+   "asset_id": "component.resistor.220ohm.axial",
+   "qty": 1
+  },
+  {
+   "asset_id": "wire.jumper.mm",
+   "qty": 3,
+   "note": "2 black, 1 yellow (any colours work - these match the pictures)"
+  },
+  {
+   "asset_id": "cable.usbc.data.generic",
+   "qty": 1
+  }
+ ]
 }

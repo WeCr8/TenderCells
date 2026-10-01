@@ -30,12 +30,7 @@
    "image": {
     "base_asset": "system.chicken-tender.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "system.chicken-tender.iso"
-     }
-    ]
+    "step_asset": "steps/02-beat-the-heat/check.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -46,9 +41,21 @@
     "/digital-twin"
    ],
    "demo": {
-    "open": "/chicken-tender?section=sensors",
-    "label": "See the coop sensors"
-   }
+    "open": "/layout",
+    "label": "Open the coop card"
+   },
+   "shot": {
+    "path": "/layout",
+    "target": "[data-testid=twin-inspector]",
+    "label": "Temperature on the coop's card"
+   },
+   "details": [
+    "Press 'Open the coop card' below (or Property Twin in the menu).",
+    "Find the DEMO CHICKEN TENDER 001 card.",
+    "Read the Temperature row and write the number down."
+   ],
+   "look_for": "Temperature in °F on the coop's card.",
+   "watch_out": "Chickens get heat-stressed above about 85 °F."
   },
   {
    "id": "02-beat-the-heat.rise",
@@ -64,12 +71,7 @@
    "image": {
     "base_asset": "sensor.temperature.generic",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "arrow",
-      "target": "sensor.temperature.generic"
-     }
-    ]
+    "step_asset": "steps/02-beat-the-heat/rise.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -82,7 +84,20 @@
    "demo": {
     "run": "heat",
     "label": "Make the coop hot (simulated)"
-   }
+   },
+   "shot": {
+    "path": "/simulator",
+    "target": "[data-testid=trigger-heat]",
+    "label": "Press Trigger on Coop too hot",
+    "press": true
+   },
+   "details": [
+    "Press 'Make the coop hot (simulated)' below - or open Trigger an Event.",
+    "Find the card 'Coop too hot'.",
+    "Press its Trigger button."
+   ],
+   "look_for": "A new event: the coop reaches 92 °F.",
+   "watch_out": "92 °F is dangerous for chickens - that's why the farm reacts."
   },
   {
    "id": "02-beat-the-heat.choose",
@@ -98,12 +113,7 @@
    "image": {
     "base_asset": "ui.state.heat-high",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "ui.state.heat-high"
-     }
-    ]
+    "step_asset": "steps/02-beat-the-heat/choose.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -112,7 +122,22 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "shot": {
+    "path": "/simulator",
+    "run": [
+     "heat"
+    ],
+    "target": "[data-testid=event-chain]",
+    "label": "Fan on, owner warned"
+   },
+   "details": [
+    "Look at the event chain on the right.",
+    "Find the Heat rule: 'Above 85 °F → ventilate and warn'.",
+    "Find what it chose: Fan relay ON and an owner alert."
+   ],
+   "look_for": "Fan on, owner warned.",
+   "watch_out": "The rule only acts above its threshold - a warm 80 °F day does nothing."
   },
   {
    "id": "02-beat-the-heat.run",
@@ -128,12 +153,7 @@
    "image": {
     "base_asset": "system.chicken-tender.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "correct",
-      "target": "system.chicken-tender.iso"
-     }
-    ]
+    "step_asset": "steps/02-beat-the-heat/run.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -146,7 +166,23 @@
    "demo": {
     "open": "/simulator",
     "label": "See the event chain"
-   }
+   },
+   "shot": {
+    "path": "/simulator",
+    "run": [
+     "heat"
+    ],
+    "target": "[data-testid=why-panel]",
+    "label": "Follow the chain",
+    "click": "text=Why did this happen?"
+   },
+   "details": [
+    "Scroll to the Event log.",
+    "Open the newest line: 'Fan on; coop cooling from 92°F to 84°F'.",
+    "Click 'Why did this happen?' and read the farmer explanation."
+   ],
+   "look_for": "Coop at 92 °F (over 85 °F) - fan on, cooling to 84 °F.",
+   "watch_out": "Read the whole chain, not just the first line."
   },
   {
    "id": "02-beat-the-heat.watch",
@@ -162,12 +198,7 @@
    "image": {
     "base_asset": "sensor.temperature.generic",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "measure",
-      "target": "sensor.temperature.generic"
-     }
-    ]
+    "step_asset": "steps/02-beat-the-heat/watch.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -178,9 +209,24 @@
     "/digital-twin"
    ],
    "demo": {
-    "open": "/chicken-tender?section=sensors",
-    "label": "Check the new temperature"
-   }
+    "open": "/layout",
+    "label": "Open the coop card"
+   },
+   "shot": {
+    "path": "/layout",
+    "run": [
+     "heat"
+    ],
+    "target": "[data-testid=twin-inspector]",
+    "label": "Read the temperature again"
+   },
+   "details": [
+    "Go back to the Property Twin.",
+    "Read the Temperature on the coop's card again.",
+    "Compare it with the number you wrote down."
+   ],
+   "look_for": "A new, lower temperature (84 °F) after the fan ran.",
+   "watch_out": "If the number didn't change, trigger 'Coop too hot' again and wait a moment."
   },
   {
    "id": "02-beat-the-heat.loop",
@@ -196,12 +242,7 @@
    "image": {
     "base_asset": "ui.state.heat-high",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "path",
-      "target": "ui.state.heat-high"
-     }
-    ]
+    "step_asset": "steps/02-beat-the-heat/loop.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -210,7 +251,22 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "shot": {
+    "path": "/simulator",
+    "run": [
+     "heat"
+    ],
+    "target": "[data-testid=event-chain]",
+    "label": "Sensor → decide → act"
+   },
+   "details": [
+    "Look at the event chain one more time.",
+    "Point to each part: sensor (temperature) → decision (heat rule) → action (fan) → new sensor value.",
+    "Say the loop in your own words."
+   ],
+   "look_for": "Sensor → decide → act → measure again.",
+   "watch_out": "A loop always checks again after acting - that's what makes it safe."
   },
   {
    "id": "02-beat-the-heat.later",
@@ -226,12 +282,7 @@
    "image": {
     "base_asset": "sensor.temperature.generic",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "tool",
-      "target": "sensor.temperature.generic"
-     }
-    ]
+    "step_asset": "steps/02-beat-the-heat/later.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -239,7 +290,20 @@
    "checkpoint": false,
    "source_refs": [
     "/lessons/sensors-automation"
-   ]
+   ],
+   "shot": {
+    "path": "/layout",
+    "click": "[data-testid=twin-hardware]",
+    "target": "[data-testid=hardware-chain]",
+    "label": "Real sensor → real coop"
+   },
+   "details": [
+    "On the Property Twin card, press 'See hardware'.",
+    "Find the real parts: ESP32 controller, sensor, relay.",
+    "Next: the Sensors & Automation lesson shows how to wire a real temperature sensor."
+   ],
+   "look_for": "The path from the twin to real hardware.",
+   "watch_out": "Mains-powered fans and heaters need an adult and a proper relay module."
   }
  ],
  "bridge": {

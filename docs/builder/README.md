@@ -43,6 +43,36 @@ OBSERVE → DECIDE → AUTOMATE → BUILD → CONNECT → INVENT
   - Cues carry words as well as colour.
   - ← / → keys move between steps.
 
+## The LEGO standard (every ladder step)
+
+Every step of every mission and hardware build is a full instruction page, and the tests enforce this (`validateItem(..., { lego: true })`). Each step has:
+
+- **Its own picture** (`image.step_asset`):
+  - **Missions:** a real screenshot of the simulated farm in the OS. The exact control or panel is spotlighted, numbered and labelled.
+  - **Hardware builds:** a drawing of the build so far, with the new part glowing gold and called out, like a LEGO page.
+- **`details`:** two or more small physical actions, in order. The learner can tick each one off.
+- **`look_for`:** what you should see when the step is done right.
+- **`watch_out`:** the most common mistake or safety point.
+- **Optional extras:**
+  - `code`, a program to type or paste, shown with a Copy button;
+  - `parts_list` on a project, shown on step 1 as "What you need".
+
+The pin names in the Blink build are the real Seeed XIAO ESP32-S3 labels (D0 = GPIO1 … D10 = GPIO9, the same mapping as `firmware/starter-node`). The LED is driven from **D0**.
+
+### Making the pictures
+
+**Mission screenshots:** `npm run builder:shots` (`scripts/builder/capture-steps.mjs`).
+- It needs the OS running (`npm run build && npx vite preview --port 4317`, or `TC_OS_URL`). For website shots it also needs `TC_WEB_URL`.
+- Each step's `shot` says how to take its picture: `{ path, target, label, run?, click?, press?, app? }`.
+  - `run` triggers demo events first.
+  - `target` is the element to spotlight.
+- Pictures land in `public/builder-assets/steps/<item>/<step>.webp`, and the script sets `step_asset` for you.
+- Re-run it after a UI change, then look at the pictures.
+
+**Hardware drawings and WHEN · IF · DO cards:** `npm run builder:draw` (`scripts/builder/draw-steps.mjs`).
+- It writes SVGs to `public/builder-assets/steps/`.
+- Each breadboard scene lists the parts in the build so far, and the newest one is highlighted.
+
 ## Images
 
 Steps reference **stable asset ids** (e.g. `board.seeed.xiao-esp32s3.rev1`), never file names.

@@ -34,6 +34,21 @@ describe('builder content', () => {
     for (const item of ALL_ITEMS) expect(validateItem(item, scenarios, hasFile), item.id).toEqual([]);
   });
 
+  it('every ladder step is a full LEGO-style page: its own picture, small actions, what to look for', () => {
+    for (const item of LADDER) expect(validateItem(item, scenarios, hasFile, { lego: true }), item.id).toEqual([]);
+    const steps = LADDER.flatMap((i) => i.steps);
+    expect(steps.length).toBeGreaterThan(50);
+    expect(steps.every((s) => (s.details?.length ?? 0) >= 2 && s.watch_out)).toBe(true);
+  });
+
+  it('the Blink build names real XIAO pins and keeps every wiring step power-off', () => {
+    const blink = builderItem('electronics-blink-xiao')!;
+    const text = blink.steps.map((s) => [s.instruction, ...(s.details ?? [])].join(' ')).join(' ');
+    for (const pin of ['D0', 'GND']) expect(text).toContain(pin);
+    expect(blink.steps.find((s) => s.code)?.code).toMatch(/const int LED = D0;/);
+    expect(blink.partsList?.length).toBeGreaterThan(3);
+  });
+
   it('every mission has a published cover image', () => {
     for (const m of LADDER.filter((i) => i.kind === 'mission')) expect(m.cover && hasFile(m.cover), m.id).toBeTruthy();
   });
@@ -58,6 +73,8 @@ describe('builder content', () => {
 
   it('the validator reports missing images', () => {
     const errs = validateItem({ ...builderItem('chicken-tender-door-book')!, cover: 'nope.webp' }, scenarios, () => false).join('\n');
+    const lego = validateItem({ ...builderItem('chicken-tender-door-book')! }, scenarios, () => true, { lego: true }).join('\n');
+    expect(lego).toMatch(/at least 2 detailed actions/);
     expect(errs).toMatch(/missing cover/);
     expect(errs).toMatch(/missing image/);
   });

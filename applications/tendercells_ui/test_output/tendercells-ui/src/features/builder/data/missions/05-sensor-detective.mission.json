@@ -30,12 +30,7 @@
    "image": {
     "base_asset": "sensor.temperature.generic",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "sensor.temperature.generic"
-     }
-    ]
+    "step_asset": "steps/05-sensor-detective/read.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -46,9 +41,21 @@
     "/digital-twin"
    ],
    "demo": {
-    "open": "/chicken-tender?section=sensors",
-    "label": "Open the coop sensors"
-   }
+    "open": "/layout",
+    "label": "Open the coop card"
+   },
+   "shot": {
+    "path": "/layout",
+    "target": "[data-testid=twin-inspector]",
+    "label": "Find the temperature"
+   },
+   "details": [
+    "Press 'Open the coop card' below (Property Twin).",
+    "Find the Temperature row on the coop's card.",
+    "Write down the number AND the unit."
+   ],
+   "look_for": "Temperature with its unit, e.g. 61 °F.",
+   "watch_out": "Writing the unit matters: 61 °F and 61 °C are very different."
   },
   {
    "id": "05-sensor-detective.again",
@@ -64,12 +71,7 @@
    "image": {
     "base_asset": "sensor.temperature.generic",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "arrow",
-      "target": "sensor.temperature.generic"
-     }
-    ]
+    "step_asset": "steps/05-sensor-detective/again.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -82,7 +84,20 @@
    "demo": {
     "run": "heat",
     "label": "Change the temperature (simulated)"
-   }
+   },
+   "shot": {
+    "path": "/simulator",
+    "target": "[data-testid=trigger-heat]",
+    "label": "Change the simulation",
+    "press": true
+   },
+   "details": [
+    "Press 'Change the temperature (simulated)' below - or open Trigger an Event.",
+    "Press Trigger on 'Coop too hot'.",
+    "Wait a moment for the reading to update."
+   ],
+   "look_for": "A new temperature event.",
+   "watch_out": "Each Trigger is a new reading; they don't add together."
   },
   {
    "id": "05-sensor-detective.compare",
@@ -98,12 +113,7 @@
    "image": {
     "base_asset": "sensor.temperature.generic",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "measure",
-      "target": "sensor.temperature.generic"
-     }
-    ]
+    "step_asset": "steps/05-sensor-detective/compare.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -116,7 +126,22 @@
    "demo": {
     "open": "/analytics",
     "label": "Look at the history"
-   }
+   },
+   "shot": {
+    "path": "/analytics",
+    "run": [
+     "heat"
+    ],
+    "target": "[data-testid=ThermostatIcon] >> xpath=ancestor::div[contains(@class,'MuiPaper-root')][1]",
+    "label": "Temperature history"
+   },
+   "details": [
+    "Open Analytics in the menu.",
+    "Find the Temperature card.",
+    "Read the line: Average, Min and Max over the last 24 hours."
+   ],
+   "look_for": "The temperature history line with min and max.",
+   "watch_out": "History shows a trend - one reading alone can mislead."
   },
   {
    "id": "05-sensor-detective.unit",
@@ -132,12 +157,7 @@
    "image": {
     "base_asset": "sensor.temperature.generic",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "sensor.temperature.generic"
-     }
-    ]
+    "step_asset": "steps/05-sensor-detective/unit.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -146,7 +166,22 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "shot": {
+    "path": "/layout",
+    "run": [
+     "heat"
+    ],
+    "target": "[data-testid=twin-inspector]",
+    "label": "°F is the unit"
+   },
+   "details": [
+    "Go back to the coop's card.",
+    "Look at the unit after the number: °F (degrees Fahrenheit).",
+    "Find other units on the page: % for water, ppm for ammonia."
+   ],
+   "look_for": "°F after the temperature.",
+   "watch_out": "A number without a unit has no meaning."
   },
   {
    "id": "05-sensor-detective.story",
@@ -162,12 +197,7 @@
    "image": {
     "base_asset": "sensor.temperature.generic",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "path",
-      "target": "sensor.temperature.generic"
-     }
-    ]
+    "step_asset": "steps/05-sensor-detective/story.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -176,7 +206,22 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "shot": {
+    "path": "/analytics",
+    "run": [
+     "heat"
+    ],
+    "target": "[data-testid=ThermostatIcon] >> xpath=ancestor::div[contains(@class,'MuiPaper-root')][1]",
+    "label": "Rose, fell or stayed?"
+   },
+   "details": [
+    "Look at the Temperature history in Analytics.",
+    "Did it rise, fall or stay about the same?",
+    "Tell the story in one sentence, with a number and a unit."
+   ],
+   "look_for": "Your sentence, e.g. 'It rose from 61 °F to 92 °F, then cooled to 84 °F.'",
+   "watch_out": "Say what changed AND by how much."
   }
  ],
  "bridge": {

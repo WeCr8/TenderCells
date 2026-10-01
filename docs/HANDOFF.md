@@ -72,7 +72,10 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
      - four depths, safety gates, demo bindings, local milestones and content validation;
      - mission cover art;
      - the Chicken Tender Door concept book (21 illustrated pages, labelled concept);
-     - a draft parts catalog of 67 ids.
+     - a draft parts catalog of 67 ids;
+     - **the LEGO standard**: every ladder step (59) has its own picture, plus `details`, `look_for` and `watch_out`, enforced by tests:
+       - mission pictures are spotlighted OS screenshots (`npm run builder:shots`);
+       - Blink, Starter Node and WHEN · IF · DO pictures are generated drawings (`npm run builder:draw`).
    - **Next:**
      - verify the door book against real parts, then drop `concept`;
      - reference-checked part art for the catalog ids;

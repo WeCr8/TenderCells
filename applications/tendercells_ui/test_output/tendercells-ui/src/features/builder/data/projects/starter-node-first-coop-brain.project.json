@@ -17,230 +17,262 @@
  ],
  "stages": [
   {
-   "id": "meet-board",
-   "title": "Meet the board",
+   "title": "Get to know the board",
    "steps": [
     {
      "id": "s001",
      "type": "concept",
      "action": "Identify",
-     "instruction": "This is the XIAO ESP32-S3 - the tiny computer for this build.",
+     "instruction": "This is the XIAO ESP32-S3 - the tiny computer for this build. It has Wi-Fi built in.",
+     "details": [
+      "Take the XIAO out of its bag and hold it by the edges.",
+      "Find the silver metal can: that's the chip with the Wi-Fi radio.",
+      "Count the gold pins: 7 on each long side.",
+      "Keep it away from metal tables and coins - the pins can short."
+     ],
+     "look_for": "You can point to the chip, the pins and the USB-C socket.",
+     "watch_out": "Hold it by the edges - fingers on the chip can carry static.",
+     "safety": [
+      "CHILD_OK"
+     ],
+     "image": {
+      "step_asset": "steps/starter-node-first-coop-brain/s001-board.svg",
+      "base_asset": "board.seeed.xiao-esp32s3.rev1"
+     },
+     "checkpoint": false,
      "parts": [
       {
        "asset_id": "board.seeed.xiao-esp32s3.rev1",
        "qty": 1
       }
-     ],
-     "safety": [
-      "CHILD_OK"
-     ],
-     "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "view": "front",
-      "cues": [
-       {
-        "type": "target",
-        "label": "XIAO ESP32-S3"
-       }
-      ]
-     }
+     ]
     },
     {
      "id": "s002",
      "type": "concept",
      "action": "Identify",
-     "instruction": "Find the USB-C connector.",
+     "instruction": "Find the USB-C port, the B (boot) and R (reset) buttons and the little user LED.",
+     "details": [
+      "USB-C: the metal socket on the short end.",
+      "B: the tiny button marked B - you only need it if uploading fails.",
+      "R: the button marked R restarts the board.",
+      "The user LED is the small light near the socket - it shows what the board is doing."
+     ],
+     "look_for": "You can find all four.",
+     "watch_out": "Press buttons gently with a fingertip, not a pen.",
      "safety": [
       "CHILD_OK"
      ],
      "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "cues": [
-       {
-        "type": "target",
-        "target": "usb-c",
-        "label": "USB-C"
-       }
-      ]
-     }
-    }
-   ]
-  },
-  {
-   "id": "flash",
-   "title": "Bring it to life",
-   "steps": [
+      "step_asset": "steps/starter-node-first-coop-brain/s002-usb.svg",
+      "base_asset": "board.seeed.xiao-esp32s3.rev1"
+     },
+     "checkpoint": false
+    },
     {
      "id": "s010",
      "type": "assembly",
      "action": "Connect",
-     "instruction": "Connect the board with a USB data cable (some cables only charge).",
+     "instruction": "Connect the board to your computer with a USB-C DATA cable.",
+     "details": [
+      "Plug the small USB-C end into the XIAO.",
+      "Plug the other end into a laptop or desktop with Chrome or Edge.",
+      "Some cables only charge - if nothing happens in the next step, try another cable."
+     ],
+     "look_for": "The board has power.",
+     "watch_out": "Use Chrome or Edge on a computer - phones and Safari can't flash boards.",
+     "safety": [
+      "CHILD_OK"
+     ],
+     "image": {
+      "step_asset": "steps/starter-node-first-coop-brain/s003-cable.svg",
+      "base_asset": "cable.usbc.data.generic"
+     },
+     "checkpoint": false,
      "parts": [
       {
        "asset_id": "cable.usbc.data.generic",
        "qty": 1
       }
-     ],
-     "safety": [
-      "CHILD_OK"
-     ],
-     "image": {
-      "base_asset": "cable.usbc.data.generic",
-      "cues": [
-       {
-        "type": "arrow",
-        "target": "usb-c",
-        "label": "Data cable"
-       }
-      ]
-     }
-    },
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Put the brain on the board",
+   "steps": [
     {
      "id": "s011",
      "type": "flash",
      "action": "Flash",
-     "instruction": "Open the Tender Cells browser flasher and choose Starter Node.",
-     "source_refs": [
-      "/flash?target=starter-node",
-      "firmware/starter-node/README.md"
+     "instruction": "Open the Tender Cells browser flasher and pick the Starter Node.",
+     "details": [
+      "Open tendercells.com/flash in Chrome or Edge.",
+      "Choose a Starter Node card, such as 'Open/close a door' or 'Lamp / pump / fan'.",
+      "Click Connect / Install, then choose the port that appeared when you plugged in.",
+      "Click Install and wait until it says done (about a minute). Don't unplug while it runs."
      ],
+     "look_for": "The flasher says the install is complete.",
+     "watch_out": "Port missing? Try another DATA cable, or hold B, tap R, release B, and try again.",
      "safety": [
       "CHILD_OK"
      ],
      "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "cues": [
-       {
-        "type": "tool",
-        "label": "Browser flasher"
-       }
-      ]
+      "step_asset": "steps/starter-node-first-coop-brain/s004-flasher.webp"
+     },
+     "checkpoint": false,
+     "source_refs": [
+      "/flash?target=starter-node",
+      "firmware/starter-node/README.md"
+     ],
+     "shot": {
+      "app": "web",
+      "path": "/flash/index.html",
+      "target": ".device[data-device='/flash/manifest-starter-node.json']",
+      "label": "Pick a Starter Node"
      }
     },
     {
      "id": "s012",
      "type": "checkpoint",
      "action": "Verify",
-     "instruction": "The board restarts after flashing. Check that it powers on.",
-     "checkpoint": true,
+     "instruction": "The board restarts by itself after flashing; its LED starts blinking quickly (setup mode).",
+     "details": [
+      "Wait a few seconds after the install finishes.",
+      "Look at the user LED: a fast blink means it's waiting to be set up.",
+      "Nothing at all? Press R once to restart it."
+     ],
+     "look_for": "A fast-blinking user LED.",
+     "watch_out": "Keep the cable plugged in: the board needs power for the next steps.",
      "safety": [
       "SUPERVISION_RECOMMENDED"
      ],
      "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "cues": [
-       {
-        "type": "correct",
-        "label": "Powered on"
-       }
-      ]
-     }
+      "step_asset": "steps/starter-node-first-coop-brain/s005-restart.svg"
+     },
+     "checkpoint": true
     }
    ]
   },
   {
-   "id": "connect",
-   "title": "Join your farm",
+   "title": "Connect it to your farm",
    "steps": [
     {
      "id": "s020",
      "type": "concept",
      "action": "Join setup",
-     "instruction": "On a phone or laptop, join the Wi-Fi network called TenderNode-Setup. A setup page opens.",
+     "instruction": "On a phone or laptop, join the Wi-Fi network called TenderNode-Setup.",
+     "details": [
+      "Open Wi-Fi settings on a phone or laptop.",
+      "Pick TenderNode-Setup from the list (it has no password).",
+      "A setup page opens by itself. If it doesn't, open a browser and go to 192.168.4.1."
+     ],
+     "look_for": "The TenderNode-Setup page is open.",
+     "watch_out": "This network only exists while the board is in setup mode - if it's missing, press R on the board.",
      "safety": [
       "SUPERVISION_RECOMMENDED"
      ],
+     "image": {
+      "step_asset": "steps/starter-node-first-coop-brain/s006-join.svg"
+     },
+     "checkpoint": false,
      "source_refs": [
       "firmware/starter-node/README.md"
-     ],
-     "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "cues": [
-       {
-        "type": "path",
-        "label": "TenderNode-Setup"
-       }
-      ]
-     }
+     ]
     },
     {
      "id": "s021",
      "type": "concept",
      "action": "Enter Wi-Fi",
-     "instruction": "Enter your 2.4 GHz Wi-Fi name and password (ESP32 boards cannot see 5 GHz networks).",
+     "instruction": "Choose your home Wi-Fi (2.4 GHz) and type its password.",
+     "details": [
+      "Tap Configure WiFi on the setup page.",
+      "Pick your home network from the list.",
+      "Type the Wi-Fi password carefully (letters are case-sensitive).",
+      "Ask the owner of the Wi-Fi before using it. Never use a school or office password."
+     ],
+     "look_for": "Your network name and password are filled in.",
+     "watch_out": "ESP32 boards can't see 5 GHz networks. If yours only shows '-5G', use the 2.4 GHz one.",
      "safety": [
       "SUPERVISION_RECOMMENDED"
      ],
      "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "cues": [
-       {
-        "type": "target",
-        "label": "2.4 GHz only"
-       }
-      ]
-     }
+      "step_asset": "steps/starter-node-first-coop-brain/s007-wifi.svg"
+     },
+     "checkpoint": false
     },
     {
      "id": "s022",
      "type": "concept",
      "action": "Enter broker",
-     "instruction": "Enter the broker IP your Tender Cells hub printed, port 1883, and pick a product type. Save.",
+     "instruction": "Fill in Broker IP, Broker port 1883, Device ID and Product type, then Save.",
+     "details": [
+      "Broker IP: the address your Tender Cells hub printed when it started (e.g. 192.168.1.50). Leave it blank to let the board search.",
+      "Broker port: 1883.",
+      "Device ID: keep the suggested node_XXXX, or give it a name.",
+      "Product type: chicken-tender (or starter, duck-dock, …).",
+      "Tap Save. The setup network disappears - that's expected."
+     ],
+     "look_for": "The page says it saved and TenderNode-Setup goes away.",
+     "watch_out": "Typo in the broker IP? The board won't appear. Press R and run setup again.",
      "safety": [
       "SUPERVISION_RECOMMENDED"
      ],
+     "image": {
+      "step_asset": "steps/starter-node-first-coop-brain/s008-broker.svg"
+     },
+     "checkpoint": false,
      "source_refs": [
       "/docs/connect-a-device"
-     ],
-     "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "cues": [
-       {
-        "type": "target",
-        "label": "Broker IP : 1883"
-       }
-      ]
-     }
+     ]
     },
     {
      "id": "s023",
      "type": "test",
      "action": "Watch",
-     "instruction": "Watch the LED: a slow blink means it joined Wi-Fi and the broker.",
+     "instruction": "Watch the user LED: a slow blink (½ s on, ½ s off) means it joined Wi-Fi and the broker.",
+     "details": [
+      "Look at the user LED for about 20 seconds.",
+      "Slow, steady blink = online and sending a heartbeat every 10 seconds.",
+      "Fast blink again = it couldn't join; check the Wi-Fi password and broker IP."
+     ],
+     "look_for": "A slow, steady blink.",
+     "watch_out": "Make sure your hub is running (npm run dev or npm run demo) before you expect it to connect.",
      "safety": [
       "CHILD_OK"
      ],
      "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "cues": [
-       {
-        "type": "correct",
-        "label": "Slow blink = alive"
-       }
-      ]
-     }
+      "step_asset": "steps/starter-node-first-coop-brain/s009-alive.svg"
+     },
+     "checkpoint": false
     },
     {
      "id": "s024",
      "type": "checkpoint",
      "action": "Find it",
-     "instruction": "Find your node_XXXX in the dashboard. Its heartbeat arrives on tc/{id}/sensors.",
-     "checkpoint": true,
+     "instruction": "Open the Tender Cells dashboard and find your node_XXXX.",
+     "details": [
+      "Open the Tender Cells OS and go to Dashboard.",
+      "Look in the device list for your Device ID (node_XXXX or the name you chose).",
+      "Open it: its heartbeat arrives on tc/{id}/sensors every 10 seconds."
+     ],
+     "look_for": "Your node is listed and online. You built a live device!",
+     "watch_out": "Not there after a minute? Check the hub is running on the same network and the broker IP matches.",
      "safety": [
       "CHILD_OK"
      ],
+     "image": {
+      "step_asset": "steps/starter-node-first-coop-brain/s010-dashboard.webp"
+     },
+     "checkpoint": true,
      "source_refs": [
       "/dashboard",
       "/docs/connect-a-device"
      ],
-     "image": {
-      "base_asset": "board.seeed.xiao-esp32s3.rev1",
-      "cues": [
-       {
-        "type": "correct",
-        "label": "DEVICE FOUND"
-       }
-      ]
+     "shot": {
+      "path": "/dashboard",
+      "target": "text=View Dashboard",
+      "label": "Your node shows up in this list"
      }
     }
    ]
@@ -249,5 +281,15 @@
  "bridge": {
   "label": "See it on the Property Twin",
   "path": "/layout"
- }
+ },
+ "parts_list": [
+  {
+   "asset_id": "board.seeed.xiao-esp32s3.rev1",
+   "qty": 1
+  },
+  {
+   "asset_id": "cable.usbc.data.generic",
+   "qty": 1
+  }
+ ]
 }

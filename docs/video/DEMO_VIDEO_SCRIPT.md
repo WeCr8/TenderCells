@@ -87,7 +87,7 @@ Stock clips and source takes are specified per shot in the JSON. Render the stoc
 | 0:58.0–1:01.7 | Chicken Tender keeps the flock alright | S16 | OS `/chicken-tender?section=coop` | Chicken Tender™ | Chicken Tender dashboard. |
 | 1:01.7–1:05.4 | Duck Dock keeps the water shining bright | S17 | Stock: ducks-gliding-on-blue-water-101500.mp4 |  | Real ducks on water give Duck Dock a living context; the later watershed view returns to the application. |
 | 1:05.4–1:09.1 | Roaming Roost moving through the field | S18 | OS `/roaming-roost` | Roaming Roost™ | Roaming Roost dashboard (3D viewer shows it moving). |
-| 1:09.1–1:12.8 | Future farming's finally been revealed | S19 | Stock: robot-mower-grass-42015.mp4 |  | A robotic mower rolls across grass after the Roaming Roost simulation; show a different outdoor surface as general robotics context. |
+| 1:09.1–1:12.8 | Future farming's finally been revealed | S19 | Stock: robot-mower-grass-42015-prepared.mp4 |  | A robotic mower rolls across grass after the Roaming Roost simulation; show a different outdoor surface as general robotics context. |
 | 1:12.8–1:16.5 | Hey! Everybody sing along | S20 | OS `/missions` | Missions for kids and families | Missions page. |
 | 1:16.5–1:20.2 | Tender Cells all day long | S21 | Stock: goats-pasture-29711030.mp4 |  | Goats grazing broaden the animal-care story beyond poultry, following the missions view. |
 | 1:20.2–1:23.9 | Teaching kids and helping farms | S22 | Stock: stem-robot-build-7868280-4k.mp4 |  | Hands adjust wiring on a small wheeled robot, connecting practical STEM learning to the robot-arm workflow. |
@@ -124,7 +124,7 @@ Stock clips and source takes are specified per shot in the JSON. Render the stoc
 | 2:13.1–2:15.0 | Hey! Tender Cells, let's go! | S38 | OS `/layout` · viewer | TENDER CELLS — LET'S GO! | Title slam over the Property Twin viewer. |
 | 2:15.0–2:18.7 | Chicken Tender keeps the flock alright | S39 | OS `/chicken-tender?section=eggs` | Chicken Tender™ | Egg Map section. |
 | 2:18.7–2:22.4 | Duck Dock keeps the water shining bright | S40 | OS `/watershed` | Duck Dock™ · water | Watershed & drainage (water on the map). |
-| 2:22.4–2:26.1 | Roaming Roost moving through the field | S41 | Stock: robot-mower-grass-42015.mp4 |  | A close outdoor mower pass across grass adds physical movement between the water map and farm machinery detail; label as stock robotics reference. |
+| 2:22.4–2:26.1 | Roaming Roost moving through the field | S41 | Stock: robot-mower-grass-42015-prepared.mp4 |  | A close outdoor mower pass across grass adds physical movement between the water map and farm machinery detail; label as stock robotics reference. |
 | 2:26.1–2:29.8 | Future farming's finally been revealed | S42 | Stock: tractor-tire-7456455.mp4 |  | Farm machinery and tread texture bridge physical terrain into the simulated event-and-response workflow. |
 | 2:29.8–2:33.5 | Hey! Everybody sing along | S43 | OS `/simulator` · trigger | Trigger an event | Event simulator: predator event runs its chain. |
 | 2:33.5–2:37.2 | Tender Cells all day long | S44 | OS `/mowers` | Explore supported mower integrations | Mowers page. |
@@ -150,7 +150,7 @@ Stock clips and source takes are specified per shot in the JSON. Render the stoc
 
 | Time | Lyric | Shot | Screen | On-screen text | Visual |
 |---|---|---|---|---|---|
-| 3:14.4–3:18.4 | *(instrumental)* | S57 | Stock: robot-mower-grass-42015.mp4 |  | A moving mower crosses grass and paving at its dock, leading into the final montage. |
+| 3:14.4–3:18.4 | *(instrumental)* | S57 | Stock: robot-mower-grass-42015-prepared.mp4 |  | A moving mower crosses grass and paving at its dock, leading into the final montage. |
 
 ## Final chorus (3:18.4–3:40.3)
 

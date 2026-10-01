@@ -4,6 +4,7 @@ Run from any directory: python scripts/video/render-story.py
 Requires ffmpeg/ffprobe on PATH and the previously captured video-out/segments.
 """
 import json
+import argparse
 import shutil
 import subprocess
 from pathlib import Path
@@ -62,6 +63,9 @@ def make_brand_cards():
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--shots', nargs='+', help='Re-render only these shots, reusing other existing v3 segments')
+    selected = parser.parse_args().shots
     if not FF or not PROBE:
         raise RuntimeError('ffmpeg and ffprobe must be on PATH')
     OUT.mkdir(parents=True, exist_ok=True)
@@ -101,7 +105,10 @@ def main():
         if shot['id'] == 'S70':
             filters.append(f'fade=t=out:st={seconds-0.4}:d=0.4')
         target = OUT / (shot['id'] + '.mp4')
-        if shot['id'] == 'S01':
+        if selected and shot['id'] not in selected:
+            if not target.exists():
+                raise FileNotFoundError(target)
+        elif shot['id'] == 'S01':
             # Begin with the official mark, then dissolve into the real-world farm image.
             stock_filters = ','.join(filters[:-1] + [filters[-1].replace("drawtext=", "drawtext=enable='gte(t,1.7)':")])
             run(['-loop', '1', '-t', '2.2', '-i', str(OUT / 'opening-card.png'), '-ss', str(offset), '-i', str(source),

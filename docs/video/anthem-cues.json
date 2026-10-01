@@ -664,7 +664,7 @@
    "onScreen": "",
    "visual": "A robotic mower rolls across grass after the Roaming Roost simulation; show a different outdoor surface as general robotics context.",
    "purpose": "A robotic mower rolls across grass after the Roaming Roost simulation; show a different outdoor surface as general robotics context.",
-   "stock": "robot-mower-grass-42015.mp4",
+   "stock": "robot-mower-grass-42015-prepared.mp4",
    "stockOffset": 24,
    "contextLabel": "Outdoor robotics reference - stock"
   },
@@ -949,7 +949,7 @@
    "onScreen": "",
    "visual": "A close outdoor mower pass across grass adds physical movement between the water map and farm machinery detail; label as stock robotics reference.",
    "purpose": "A close outdoor mower pass across grass adds physical movement between the water map and farm machinery detail; label as stock robotics reference.",
-   "stock": "robot-mower-grass-42015.mp4",
+   "stock": "robot-mower-grass-42015-prepared.mp4",
    "stockOffset": 29,
    "contextLabel": "Outdoor robotics reference - stock"
   },
@@ -1151,7 +1151,7 @@
    "onScreen": "",
    "visual": "A moving mower crosses grass and paving at its dock, leading into the final montage.",
    "purpose": "A moving mower crosses grass and paving at its dock, leading into the final montage.",
-   "stock": "robot-mower-grass-42015.mp4",
+   "stock": "robot-mower-grass-42015-prepared.mp4",
    "stockOffset": 20,
    "contextLabel": "Outdoor robotics reference - stock"
   },

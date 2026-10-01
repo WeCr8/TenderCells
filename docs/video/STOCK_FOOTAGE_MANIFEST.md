@@ -22,6 +22,8 @@ The education title is **4-H project ideas: observe, build, share**. It introduc
 
 All new sources are 1080p or higher. Existing 720p farm establishing shots remain upscaled. Exact source offsets, crops and editorial titles are recorded in `anthem-cues.json` and `video-out/story-v3/edit.json`. The source footage stays outside Git.
 
+The mower selections use `robot-mower-grass-42015-prepared.mp4`, prepared from the retained original with manufacturer badges obscured. Reproduce this input with `python scripts/video/prepare-mower-stock.py` (OpenCV, NumPy and ffmpeg); only the reviewed 20-33 second range is used. The preparation does not remove a stock-provider watermark.
+
 Stock is optional B-roll. It supports the story without implying that a depicted person, school, farm, or brand endorses Tender Cells. Downloaded media stays outside Git under `video-out/stock/`; record each final clip here before publishing.
 
 | Story beat | Preferred footage | Source | License | Status |

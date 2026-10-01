@@ -134,3 +134,7 @@ __pycache__/
 
 # Hub runtime data (linked robot mowers, etc.) - no secrets, but local to each hub
 applications/tendercells_ui/test_output/express-api/.tendercells/
+
+# Claude Desktop extension build (npm run mcp:pack)
+dist-mcpb/
+*.mcpb

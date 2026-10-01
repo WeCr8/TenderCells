@@ -86,11 +86,16 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
      - Door, feed, relay, stop-cleaning and mark-handled are confirm-twice actions (`request_action` → person says yes → `confirm_action`). They are off unless `TC_MCP_ALLOW_ACTIONS=1`.
      - Transports: stdio (`npm run mcp`) and HTTP (`npm run mcp:http`, with an access key).
      - A Claude Code plugin (`plugins/tendercells`, farm-check skill) and its marketplace entry.
+   - **Done (v0.2):**
+     - `get_farm_overview`, with animal-health flags and structured output;
+     - the inline farm card (MCP Apps view, `express-api/mcp-view/`) for Claude and ChatGPT;
+     - the `farm_check` and `evening_lockup` prompts;
+     - the demo farm (`npm run mcp:demo`, `TC_MCP_DEMO=1`);
+     - the Claude Desktop extension (`npm run mcp:pack` → `dist/tendercells.mcpb`, packed in CI).
    - **Next:**
      - OAuth 2.1 instead of `TC_TOKEN` and URL keys;
-     - a hosted endpoint;
+     - a hosted demo endpoint;
      - ChatGPT app and Claude directory listings;
-     - a farm-card widget;
-     - demo-farm tools that work with no hub.
+     - a signed `.mcpb` on GitHub releases.
    - Never add arm / drive / laser / mower motion or E-STOP clear to the assistant tools.
 9. **Older open PRs not from today:** #106 (Copilot auth flow) and the Dependabot bumps #96–#103. Review or merge them separately.

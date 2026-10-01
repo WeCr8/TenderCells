@@ -24,11 +24,11 @@ export type HubFetch = (path: string, init?: { method?: string; body?: unknown }
  * @returns A function that calls one hub path and returns status + parsed body
  */
 export function hubClient(
-  base = process.env.TC_API || `http://localhost:${process.env.PORT || 4000}`,
-  token = process.env.TC_TOKEN,
+  base: string | undefined = process.env.TC_API,
+  token: string | undefined = process.env.TC_TOKEN,
   fetchImpl: typeof fetch = fetch,
 ): HubFetch {
-  const root = base.replace(/\/$/, "");
+  const root = (base || `http://localhost:${process.env.PORT || 4000}`).replace(/\/$/, "");
   return async (path, init = {}) => {
     const headers: Record<string, string> = {};
     if (init.body !== undefined) headers["Content-Type"] = "application/json";

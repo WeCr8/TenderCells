@@ -9,6 +9,11 @@ import { ConfirmStore } from "./confirm.js";
 import type { HubFetch } from "./hubClient.js";
 import { createTenderCellsMcp, type ActionRequest } from "./server.js";
 import { checkBind, createMcpHttpApp, hasKey } from "./http.js";
+import { RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/server";
+import { demoHub } from "./demoHub.js";
+import { mcpEnv } from "./env.js";
+import { assessReading } from "./health.js";
+import { FARM_CARD_URI } from "./server.js";
 
 interface Call { method: string; path: string; body?: unknown }
 
@@ -40,7 +45,7 @@ test("read-only by default: no action tools, E-STOP always there", async () => {
   const { hub } = fakeHub();
   const client = await connect(hub, false);
   const names = (await client.listTools()).tools.map((t) => t.name).sort();
-  assert.deepEqual(names, ["emergency_stop", "get_alerts", "get_device", "get_farm_snapshot", "get_hub_status", "get_yard_events"]);
+  assert.deepEqual(names, ["emergency_stop", "get_alerts", "get_device", "get_farm_overview", "get_farm_snapshot", "get_hub_status", "get_yard_events"]);
   const tools = (await client.listTools()).tools;
   for (const t of tools.filter((t) => t.name.startsWith("get_"))) assert.equal(t.annotations?.readOnlyHint, true, t.name);
 });
@@ -168,4 +173,71 @@ test("http: key guard and bind guard", async () => {
   } finally {
     srv.close();
   }
+});
+
+test("health flags: thresholds from CLAUDE.md, critical first", () => {
+  assert.deepEqual(assessReading({ temp: 70, ammonia: 4, feedLevel: 60, waterLevel: 60 }), []);
+  const f = assessReading({ temp: 33, ammonia: 30, waterLevel: 10, feedLevel: 5 }, "estop");
+  assert.equal(f[0].level, "critical");
+  assert.ok(f.some((x) => /E-STOP/.test(x.text)) && f.some((x) => /Ammonia 30/.test(x.text)));
+  assert.ok(f.some((x) => x.level === "warning" && /Cold: 33/.test(x.text)));
+  assert.ok(f.some((x) => /Water low/.test(x.text)) && f.some((x) => /Feed low/.test(x.text)));
+  assert.ok(assessReading({ temp: 95 }).some((x) => x.level === "critical"));
+  assert.ok(assessReading({ ammonia: 12 }).some((x) => x.level === "warning"));
+});
+
+test("demo farm: overview is structured, simulated, flags low water, and links the farm card", async () => {
+  const client = await connect(demoHub(), true);
+  const tool = (await client.listTools()).tools.find((t) => t.name === "get_farm_overview")!;
+  assert.equal((tool._meta as { ui?: { resourceUri?: string } }).ui?.resourceUri, FARM_CARD_URI);
+  assert.ok(tool.outputSchema, "declares an output schema");
+  const r = await client.callTool({ name: "get_farm_overview", arguments: {} });
+  const o = r.structuredContent as { simulated: boolean; devices: Array<{ id: string; openEvents: unknown[]; recentAlerts: unknown[] }>; attention: Array<{ deviceId: string; text: string }> };
+  assert.equal(o.simulated, true);
+  assert.deepEqual(o.devices.map((d) => d.id), ["ct_demo", "dd_demo", "wt_demo"]);
+  assert.ok(o.attention.some((a) => a.deviceId === "ct_demo" && /Water low: 12%/.test(a.text)));
+  assert.equal(o.devices[0].openEvents.length, 1);
+  assert.equal(o.devices[2].recentAlerts.length, 1);
+  assert.match((r.content as Array<{ text: string }>)[0].text, /3 devices \(simulated\)/);
+});
+
+test("demo farm: confirm-twice really changes the simulated door, E-STOP latches", async () => {
+  const client = await connect(demoHub(), true);
+  const req = json(await client.callTool({ name: "request_action", arguments: { deviceId: "ct_demo", action: "door_close" } }));
+  await client.callTool({ name: "confirm_action", arguments: { confirmationCode: req.confirmationCode } });
+  const dev = json(await client.callTool({ name: "get_device", arguments: { deviceId: "ct_demo" } }));
+  assert.equal(dev.telemetry.data.doorState, "closed");
+  await client.callTool({ name: "emergency_stop", arguments: { deviceId: "dd_demo" } });
+  const o = (await client.callTool({ name: "get_farm_overview", arguments: {} })).structuredContent as { attention: Array<{ deviceId: string; level: string }> };
+  assert.deepEqual(o.attention[0], { ...o.attention[0], deviceId: "dd_demo", level: "critical" });
+  const unknown = await client.callTool({ name: "get_device", arguments: { deviceId: "nope_demo" } });
+  assert.equal(unknown.isError, true);
+});
+
+test("farm card resource is a self-contained MCP Apps page", async () => {
+  const client = await connect(demoHub(), false);
+  const res = await client.readResource({ uri: FARM_CARD_URI });
+  const c = res.contents[0] as { mimeType?: string; text?: string };
+  assert.equal(c.mimeType, RESOURCE_MIME_TYPE);
+  assert.match(String(c.text), /^<!doctype html>/);
+  assert.match(String(c.text), /Tender Cells farm/);
+  assert.doesNotMatch(String(c.text), /<script src=/, "no external scripts");
+});
+
+test("prompts: farm_check and evening_lockup", async () => {
+  const client = await connect(demoHub(), false);
+  const names = (await client.listPrompts()).prompts.map((p) => p.name).sort();
+  assert.deepEqual(names, ["evening_lockup", "farm_check"]);
+  const p = await client.getPrompt({ name: "evening_lockup", arguments: { deviceId: "ct_demo" } });
+  const text = (p.messages[0].content as { text: string }).text;
+  assert.match(text, /ct_demo/);
+  assert.match(text, /Never close the door without my yes/);
+});
+
+test("env: demo mode turns actions on (simulated only) unless switched off; real hub keeps them off", () => {
+  assert.equal(mcpEnv({}, ["node", "x"]).allowActions, false);
+  assert.equal(mcpEnv({}, ["node", "x"]).demo, false);
+  assert.equal(mcpEnv({}, ["node", "x", "--demo"]).allowActions, true);
+  assert.equal(mcpEnv({ TC_MCP_DEMO: "1", TC_MCP_ALLOW_ACTIONS: "0" }, []).allowActions, false);
+  assert.equal(mcpEnv({ TC_MCP_ALLOW_ACTIONS: "1" }, []).allowActions, true);
 });

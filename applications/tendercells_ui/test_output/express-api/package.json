@@ -17,14 +17,18 @@
     "describe:xml": "tsx tools/export-backend-xml.ts",
     "camera-bridge": "tsx tools/camera-bridge.mts",
     "mcp": "tsx backend/src/mcp/stdio.ts",
-    "mcp:http": "tsx backend/src/mcp/http.ts"
+    "mcp:http": "tsx backend/src/mcp/http.ts",
+    "mcp:demo": "tsx backend/src/mcp/stdio.ts --demo",
+    "mcp:pack": "tsx tools/build-mcpb.mts"
   },
   "dependencies": {
+    "@modelcontextprotocol/ext-apps": "~1.7.5",
     "@modelcontextprotocol/sdk": "^1.31.0",
     "aedes": "^0.51.3",
     "bonjour-service": "^1.4.1",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
+    "esbuild": "^0.25.12",
     "express": "^4.18.2",
     "firebase-admin": "^12.0.0",
     "mqtt": "^5.15.1",
@@ -32,6 +36,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@anthropic-ai/mcpb": "^2.1.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^20.10.0",

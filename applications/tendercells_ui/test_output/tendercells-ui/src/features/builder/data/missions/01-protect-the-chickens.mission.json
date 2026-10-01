@@ -212,5 +212,6 @@
  "bridge": {
   "label": "Build a camera node",
   "href": "/guides/camera-node-first-build"
- }
+ },
+ "cover": "missions/01-protect-the-chickens.webp"
 }

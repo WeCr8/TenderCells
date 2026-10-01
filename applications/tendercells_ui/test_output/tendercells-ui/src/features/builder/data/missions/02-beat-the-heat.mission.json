@@ -245,5 +245,6 @@
  "bridge": {
   "label": "Sensors → automation lesson",
   "href": "/lessons/sensors-automation"
- }
+ },
+ "cover": "missions/02-beat-the-heat.webp"
 }

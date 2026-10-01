@@ -151,6 +151,12 @@ export default function BuilderStepPage() {
       <LinearProgress variant="determinate" value={((index + 1) / total) * 100} aria-hidden
         sx={{ mb: 1.5, bgcolor: C.surface, '& .MuiLinearProgress-bar': { bgcolor: C.accent } }} />
 
+      {item.concept && (
+        <Alert severity="warning" sx={{ mb: 1.5 }} data-testid="builder-concept-note">
+          {item.conceptNote}
+        </Alert>
+      )}
+
       {item.kind === 'mission' && (
         <ToggleButtonGroup exclusive size="small" value={depth} onChange={(_, v: LearnerDepth | null) => v && chooseDepth(v)}
           aria-label="Explanation depth" sx={{ mb: 1.5, flexWrap: 'wrap' }}>
@@ -172,7 +178,7 @@ export default function BuilderStepPage() {
         </Box>
       )}
 
-      <StepFigure step={step} />
+      <StepFigure step={step} concept={item.concept} />
 
       <Box sx={{ mt: 2 }}>
         {step.stage && <Typography sx={{ color: C.goldMuted, fontSize: 12 }}>{step.stage}</Typography>}

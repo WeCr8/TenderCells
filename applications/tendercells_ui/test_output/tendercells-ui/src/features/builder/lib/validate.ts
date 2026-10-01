@@ -14,9 +14,11 @@ const PHASES = new Set(['OBSERVE', 'DECIDE', 'AUTOMATE', 'BUILD', 'CONNECT', 'IN
  *
  * @param item     - Mission or project
  * @param scenarios - Known demo event ids (demo.run must be one of them)
+ * @param hasFile   - Whether a path under public/builder-assets/ exists (tests pass the real check)
  */
-export function validateItem(item: BuilderItem, scenarios: Set<string>): string[] {
+export function validateItem(item: BuilderItem, scenarios: Set<string>, hasFile: (path: string) => boolean = () => true): string[] {
   const errs: string[] = [];
+  if (item.cover && !hasFile(item.cover)) errs.push(`${item.id}: missing cover builder-assets/${item.cover}`);
   if (!item.id || !item.title || !item.milestone) errs.push(`${item.id}: needs id, title and milestone`);
   if (!PHASES.has(item.phase)) errs.push(`${item.id}: bad phase ${item.phase}`);
   if (!item.steps.length) errs.push(`${item.id}: no steps`);
@@ -30,7 +32,7 @@ export function validateItem(item: BuilderItem, scenarios: Set<string>): string[
     for (const g of s.safety ?? []) if (!GATES.has(g)) errs.push(`${at}: bad safety gate ${g}`);
     for (const c of s.image?.cues ?? []) if (!CUE_TYPES.has(c.type)) errs.push(`${at}: bad cue ${c.type}`);
     if (s.image?.base_asset && !ASSETS[s.image.base_asset]) errs.push(`${at}: unknown asset ${s.image.base_asset}`);
-    if (s.image?.step_asset) errs.push(`${at}: step_asset files are not published yet - use base_asset`);
+    if (s.image?.step_asset && !hasFile(s.image.step_asset)) errs.push(`${at}: missing image builder-assets/${s.image.step_asset}`);
     for (const p of s.parts ?? []) {
       if (!ASSETS[p.asset_id]) errs.push(`${at}: unknown part ${p.asset_id}`);
       if (!(p.qty >= 1)) errs.push(`${at}: part qty must be ≥ 1`);

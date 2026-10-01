@@ -254,5 +254,6 @@
  "bridge": {
   "label": "Bring your own robot mower",
   "href": "/docs/robot-mowers"
- }
+ },
+ "cover": "missions/03-robot-traffic-jam.webp"
 }

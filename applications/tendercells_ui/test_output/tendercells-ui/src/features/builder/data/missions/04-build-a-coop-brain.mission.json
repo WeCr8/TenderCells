@@ -173,5 +173,6 @@
  "bridge": {
   "label": "Build your first coop brain",
   "path": "/builder/starter-node-first-coop-brain"
- }
+ },
+ "cover": "missions/04-build-a-coop-brain.webp"
 }

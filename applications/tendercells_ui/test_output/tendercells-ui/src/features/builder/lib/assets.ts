@@ -2,6 +2,8 @@
 // Until reference-checked art exists under public/builder-assets/, each ID has an
 // illustrated fallback (icon + name). Technical parts (boards, components) are marked so the UI
 // never presents a placeholder as an authoritative pinout.
+import catalog from '../data/parts-catalog.json';
+
 export interface AssetEntry { label: string; icon: string; technical?: boolean; file?: string }
 
 export const ASSETS: Record<string, AssetEntry> = {
@@ -23,4 +25,16 @@ export const ASSETS: Record<string, AssetEntry> = {
   'cable.usbc.data.generic': { label: 'USB-C data cable', icon: '🔌', technical: true },
 };
 
+// The reusable parts catalog (data/parts-catalog.json): every stable part id authors can use.
+const CATEGORY_ICON: Record<string, string> = {
+  actuators: '⚙️', boards: '🟦', breadboards: '🔲', cables: '🔌', connectors: '🔗', enclosures: '📦',
+  fasteners: '🔩', passives: '〰️', power: '🔋', sensors: '🌡️', tools: '🛠️',
+};
+for (const p of catalog.parts) {
+  if (!ASSETS[p.asset_id]) ASSETS[p.asset_id] = { label: p.name, icon: CATEGORY_ICON[p.category] ?? '🧩', technical: true };
+}
+
 export const assetFor = (id?: string): AssetEntry | undefined => (id ? ASSETS[id] : undefined);
+
+/** URL of a published file under public/builder-assets/ (works under the app's base path). */
+export const assetUrl = (path: string): string => `${import.meta.env.BASE_URL ?? '/'}builder-assets/${path}`;

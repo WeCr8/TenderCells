@@ -67,9 +67,15 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
      - mobile / Safari QA;
      - update `demo-manifest.json` / `snapshot.json` to match.
 7. **Builder** (`/builder`, `docs/builder/README.md`).
-   - **Done:** the mission ladder M0–M5, Blink (M6), Starter Node (M7), four depths, safety gates, demo bindings, local milestones and content validation.
+   - **Done:**
+     - the mission ladder M0–M5, Blink (M6), Starter Node (M7);
+     - four depths, safety gates, demo bindings, local milestones and content validation;
+     - mission cover art;
+     - the Chicken Tender Door concept book (21 illustrated pages, labelled concept);
+     - a draft parts catalog of 67 ids.
    - **Next:**
-     - reference-checked part art in `public/builder-assets/`;
+     - verify the door book against real parts, then drop `concept`;
+     - reference-checked part art for the catalog ids;
      - M8 (sensor) and M9 (invent);
      - printable export from the same step data;
      - teacher / classroom mode;

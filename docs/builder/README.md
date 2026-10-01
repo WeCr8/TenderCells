@@ -19,6 +19,7 @@ OBSERVE → DECIDE → AUTOMATE → BUILD → CONNECT → INVENT
 | M6 | Make a Light Blink | BUILD | yes | Circuit Builder |
 | M7 | Your First Coop Brain (Starter Node) | CONNECT | yes | Live Device Builder |
 | M8–M9 | Replace the button with a sensor · Invent a TenderCell | CONNECT · INVENT | yes | coming next |
+| Book | Chicken Tender Door Controller (21 illustrated steps) | BUILD | yes | concept preview, shown apart from the ladder |
 
 ## How it works
 
@@ -49,6 +50,17 @@ Steps reference **stable asset ids** (e.g. `board.seeed.xiao-esp32s3.rev1`), nev
 - Until reference-checked art is published under `public/builder-assets/`, each id renders an illustrated fallback (`lib/assets.ts`).
 - Technical parts are flagged so the UI tells learners to check pin positions against the official pinout.
 - Never use generated art as an authoritative pinout.
+
+### Covers, books and the parts catalog (Builder Master Package v3)
+
+- **Mission covers.** Each mission has `"cover": "missions/<id>.webp"`, a path under `public/builder-assets/`. They are concept scenes (no wiring), shown on the library cards.
+- **Build books.** `projects/chicken-tender-door-book.project.json` is a picture-book walkthrough. Each step shows a page from `public/builder-assets/books/chicken-tender-door/` via `image.step_asset`.
+  - The project is `"concept": true`, so the library lists it under **Build books · concept preview**, outside the ladder.
+  - Its step page shows the `concept_note` banner, and each page is labelled "CONCEPT ART · not a wiring reference".
+  - The pictured XIAO ESP32-S3 runs the Starter Node firmware today, so the flash step points at `/flash?target=starter-node`. The dedicated Chicken Tender firmware targets an ESP32-WROOM-32.
+- **Parts catalog.** `data/parts-catalog.json` lists 67 part ids by category, all `validation_status: "draft"`. `lib/assets.ts` merges them into the asset registry as technical parts, so they get the pinout warning.
+- **Reference sheets.** The concept sheets the art came from are in `docs/builder/references/`. They are for direction only, never for pinouts.
+- **Checks.** The validator takes a `hasFile` check. The tests confirm that every cover and page image exists, every catalog id resolves, and books stay concept and out of the ladder.
 
 ## Hardware handoff
 

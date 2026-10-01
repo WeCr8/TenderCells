@@ -64,6 +64,18 @@
   },
   "milestone": {
    "type": "string"
+  },
+  "cover": {
+   "type": "string",
+   "description": "Cover image path under public/builder-assets/"
+  },
+  "concept": {
+   "type": "boolean",
+   "description": "Concept preview: art not verified against real parts; listed apart from the ladder"
+  },
+  "concept_note": {
+   "type": "string",
+   "description": "Shown as a warning banner on every step of a concept project"
   }
  },
  "$defs": {

@@ -33,11 +33,17 @@ export interface BuilderProject {
   id: string; title: string; version: string; milestone: string; phase: MissionPhase;
   audience?: string[]; difficulty?: number; estimated_minutes?: number; source_docs?: string[];
   stages: BuilderStage[]; bridge?: Bridge;
+  /** Path under public/builder-assets/ for the cover image. */
+  cover?: string;
+  /** Concept preview: art and labels are not verified; never wire from it. */
+  concept?: boolean;
+  concept_note?: string;
 }
 export interface BuilderMission {
   id: string; title: string; version: string; milestone: string; phase: MissionPhase; hardware_required: boolean;
   audience_layers?: LearnerDepth[]; prerequisites?: string[]; learning_outcomes?: string[];
   steps: BuilderStep[]; bridge?: Bridge;
+  cover?: string;
 }
 
 /** A mission or project flattened for the step player. */
@@ -53,4 +59,7 @@ export interface BuilderItem {
   bridge?: Bridge;
   minutes?: number;
   difficulty?: number;
+  cover?: string;
+  concept?: boolean;
+  conceptNote?: string;
 }

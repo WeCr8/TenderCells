@@ -70,6 +70,10 @@
    "required": [
     "label"
    ]
+  },
+  "cover": {
+   "type": "string",
+   "description": "Cover image path under public/builder-assets/"
   }
  }
 }

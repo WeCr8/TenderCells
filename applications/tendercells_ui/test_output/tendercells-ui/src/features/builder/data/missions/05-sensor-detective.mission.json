@@ -182,5 +182,6 @@
  "bridge": {
   "label": "Make a light blink (first build)",
   "path": "/builder/electronics-blink-xiao"
- }
+ },
+ "cover": "missions/05-sensor-detective.webp"
 }

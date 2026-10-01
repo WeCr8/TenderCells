@@ -2,7 +2,8 @@
 // simulated farm), then build real electronics and connect a live device.
 //   OBSERVE → DECIDE → AUTOMATE → BUILD → CONNECT → INVENT
 // Every item is one action per screen with four explanation depths; progress and milestones
-// stay in this browser (no account needed).
+// stay in this browser (no account needed). Cards show their cover art; concept books (illustrated
+// step-by-step previews, not yet verified against real parts) sit in their own section.
 import { useMemo } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
@@ -12,11 +13,13 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { LADDER, NEXT_MILESTONES } from '../lib/registry';
+import { BOOKS, LADDER, NEXT_MILESTONES } from '../lib/registry';
+import { assetUrl } from '../lib/assets';
 import { isComplete, readProgress } from '../lib/progress';
 import type { MissionPhase } from '../types';
 
 const C = { bg: '#0D2B1E', surface: '#1A3D2B', accent: '#4A7C59', gold: '#C8B882', goldMuted: '#8A7D55', white: '#F0EDE4' };
+const C2 = { warning: '#E8A020' };
 const PHASES: MissionPhase[] = ['OBSERVE', 'DECIDE', 'AUTOMATE', 'BUILD', 'CONNECT', 'INVENT'];
 
 export default function BuilderLibraryPage() {
@@ -60,6 +63,10 @@ export default function BuilderLibraryPage() {
             <Grid item xs={12} sm={6} md={4} key={item.id}>
               <Paper elevation={0} data-testid="builder-card"
                 sx={{ p: 2, height: '100%', bgcolor: C.surface, color: C.white, border: `1px solid ${done ? C.gold : `${C.accent}55`}`, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                {item.cover && (
+                  <Box component="img" src={assetUrl(item.cover)} alt="" loading="lazy" data-testid="builder-cover"
+                    sx={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover', borderRadius: 1, border: `1px solid ${C.accent}55` }} />
+                )}
                 <Stack direction="row" spacing={0.75} alignItems="center">
                   <Typography sx={{ color: C.goldMuted, fontFamily: 'monospace', fontSize: 12 }}>M{n}</Typography>
                   <Chip size="small" label={item.phase} sx={{ height: 20, fontSize: 10, bgcolor: `${C.accent}33`, color: C.gold }} />
@@ -90,6 +97,43 @@ export default function BuilderLibraryPage() {
           </Grid>
         ))}
       </Grid>
+
+      {BOOKS.length > 0 && (
+        <Box sx={{ mt: 3 }} data-testid="builder-books">
+          <Typography sx={{ color: C.gold, fontWeight: 800 }}>Build books · concept preview</Typography>
+          <Typography sx={{ color: C.goldMuted, fontSize: 13, mb: 1, maxWidth: 760 }}>
+            Picture-book walkthroughs of a whole build. The art is concept only - follow the real wiring guide and the
+            board's pinout when you build.
+          </Typography>
+          <Grid container spacing={1.5}>
+            {BOOKS.map((item) => {
+              const done = isComplete(progress, item.id);
+              const at = progress[item.id]?.step;
+              return (
+                <Grid item xs={12} sm={6} md={4} key={item.id}>
+                  <Paper elevation={0} data-testid="builder-book"
+                    sx={{ p: 2, height: '100%', bgcolor: C.surface, color: C.white, border: `1px dashed ${C2.warning}88`, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                    {item.cover && (
+                      <Box component="img" src={assetUrl(item.cover)} alt="" loading="lazy"
+                        sx={{ width: '100%', aspectRatio: '4 / 3', objectFit: 'cover', objectPosition: 'top', borderRadius: 1, bgcolor: C.white }} />
+                    )}
+                    <Stack direction="row" spacing={0.75}>
+                      <Chip size="small" label="CONCEPT" sx={{ height: 20, fontSize: 10, fontWeight: 800, bgcolor: `${C2.warning}26`, color: C2.warning }} />
+                      <Chip size="small" label="Hardware" sx={{ height: 20, fontSize: 10, bgcolor: 'transparent', border: `1px solid ${C.accent}`, color: C.goldMuted }} />
+                    </Stack>
+                    <Typography sx={{ color: C.gold, fontWeight: 800, fontSize: 17 }}>{item.title}</Typography>
+                    <Typography sx={{ color: C.goldMuted, fontSize: 13, flex: 1 }}>{item.steps.length} illustrated steps · milestone: {item.milestone}</Typography>
+                    {done && <Typography sx={{ color: C.gold, fontWeight: 700, fontSize: 13 }}>🏅 {item.milestone} earned</Typography>}
+                    <Button variant="outlined" component={RouterLink} to={`/builder/${item.id}`} sx={{ borderColor: C.accent, color: C.gold }}>
+                      {done ? 'Review' : at !== undefined ? 'Continue' : 'Open the book'}
+                    </Button>
+                  </Paper>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </Box>
+      )}
 
       {earned.length > 0 && (
         <Box sx={{ mt: 2 }} data-testid="builder-milestones">

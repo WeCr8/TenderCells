@@ -118,5 +118,6 @@
  "bridge": {
   "label": "Next: Protect the Chickens",
   "path": "/builder/mission.01-protect-the-chickens"
- }
+ },
+ "cover": "missions/00-explore-the-farm.webp"
 }

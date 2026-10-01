@@ -1,11 +1,12 @@
 // StepFigure.tsx - the instruction image for one Builder step: the asset (illustrated fallback
 // until reference-checked art is published) with its cues drawn on top - a target ring, an
 // arrow, a path, ✓ / ✕, a measure, power-off or tool mark - each with a text label, so no
-// cue relies on colour alone.
+// cue relies on colour alone. A step with its own page image (image.step_asset, e.g. a concept
+// book page) shows that image with the cues listed under it; concept art is labelled as such.
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import type { BuilderStep, ImageCueType } from '../types';
-import { assetFor } from '../lib/assets';
+import { assetFor, assetUrl } from '../lib/assets';
 
 const C = { bg: '#0D2B1E', surface: '#1A3D2B', accent: '#4A7C59', gold: '#C8B882', goldMuted: '#8A7D55', white: '#F0EDE4', danger: '#CC3333', warning: '#E8A020' };
 const CUE: Record<ImageCueType, { glyph: string; words: string; color: string }> = {
@@ -20,9 +21,31 @@ const CUE: Record<ImageCueType, { glyph: string; words: string; color: string }>
   tool: { glyph: '🛠', words: 'Tool', color: C.gold },
 };
 
-export default function StepFigure({ step }: { step: BuilderStep }) {
+export default function StepFigure({ step, concept = false }: { step: BuilderStep; concept?: boolean }) {
   const asset = assetFor(step.image?.base_asset ?? step.parts?.[0]?.asset_id);
   const cues = step.image?.cues ?? [];
+  const page = step.image?.step_asset;
+  if (page) {
+    return (
+      <Box component="figure" data-testid="step-figure" sx={{ m: 0, position: 'relative', bgcolor: C.bg, border: `1px solid ${C.accent}`, borderRadius: 2, p: 1 }}>
+        <Box component="img" src={assetUrl(page)} data-testid="step-image" loading="lazy"
+          alt={`${step.action}: ${asset?.label ?? 'step illustration'}${cues.length ? ` - ${cues.map((c) => c.label ?? CUE[c.type].words).join(', ')}` : ''}`}
+          sx={{ display: 'block', width: '100%', maxHeight: { xs: 320, sm: 440 }, objectFit: 'contain', borderRadius: 1, bgcolor: C.white }} />
+        {concept && (
+          <Typography data-testid="step-image-concept" sx={{ position: 'absolute', top: 14, left: 14, bgcolor: `${C.warning}E6`, color: C.bg, fontSize: 11, fontWeight: 800, px: 1, py: 0.25, borderRadius: 1 }}>
+            CONCEPT ART · not a wiring reference
+          </Typography>
+        )}
+        {cues.length > 0 && (
+          <Box component="figcaption" sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mt: 1, px: 0.5 }}>
+            {cues.map((c, i) => (
+              <Typography key={i} sx={{ color: CUE[c.type].color, fontSize: 14, fontWeight: 700 }}>{CUE[c.type].glyph} {c.label ?? CUE[c.type].words}</Typography>
+            ))}
+          </Box>
+        )}
+      </Box>
+    );
+  }
   return (
     <Box role="img" aria-label={`${asset?.label ?? 'Step illustration'}${cues.length ? ` - ${cues.map((c) => c.label ?? CUE[c.type].words).join(', ')}` : ''}`}
       data-testid="step-figure"

@@ -25,9 +25,10 @@ export default function TelemetryPanel({ deviceId = "ct_001" }: TelemetryPanelPr
       {data && (
         <Grid container spacing={1}>
           <Grid item xs={6}>
+            {/* FIX(2026-10-01): telemetry temperature is °F (TelemetryDoc), not °C */}
             <TelemetryItem
               label="Temp"
-              value={data.temperature ? `${data.temperature.toFixed(1)}°C` : "N/A"}
+              value={data.temperature ? `${data.temperature.toFixed(1)}°F` : "N/A"}
             />
           </Grid>
           <Grid item xs={6}>

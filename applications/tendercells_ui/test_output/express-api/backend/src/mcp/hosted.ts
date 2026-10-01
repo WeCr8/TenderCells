@@ -29,6 +29,27 @@ export interface HostedOptions {
   now?: () => number;
 }
 
+const esc = (v: string) => v.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+
+/** What a browser shows at /mcp or /mcp/demo: this is a connector URL, here is how to add it. */
+export function landingPage(url: string, demo: boolean): string {
+  const u = esc(url);
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tender Cells connector${demo ? " (demo farm)" : ""}</title><meta name="robots" content="noindex">
+<style>body{margin:0;background:#F7F4EE;color:#0D2B1E;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:0 auto;padding:32px 20px}img{border-radius:16px}h1{font-size:26px;margin:12px 0 4px}
+code{display:block;background:#fff;border:1px solid #c9c2b0;border-radius:8px;padding:10px 12px;font-size:15px;word-break:break-all;margin:8px 0 16px}
+h2{font-size:18px;margin:24px 0 6px}ol{padding-left:22px}li{margin:4px 0}.note{color:#5b5440;font-size:14px}a{color:#147C38}</style></head>
+<body><main><img src="/brand/tendercells-icon-128.png" width="64" height="64" alt="Tender Cells">
+<h1>Tender Cells connector${demo ? " - demo farm" : ""}</h1>
+<p>This address is for <strong>Claude</strong> or <strong>ChatGPT</strong>, not for a web browser. ${demo ? "It serves a simulated farm, so no sign-in is needed." : "You'll sign in with your Tender Cells account when you connect, and it can only read your farm (it never moves hardware)."}</p>
+<code>${u}</code>
+<h2>Claude</h2><ol><li>Open <strong>Settings → Connectors</strong> and choose <strong>Add custom connector</strong>.</li><li>Name it <em>Tender Cells</em> and paste the address above.</li><li>${demo ? "Click Add" : "Click Connect, sign in on tendercells.com and allow read-only access"}.</li><li>In a chat, switch the connector on and ask <em>“How is my farm?”</em></li></ol>
+<h2>ChatGPT</h2><ol><li>Open <strong>Settings → Apps &amp; Connectors</strong> (developer mode may need to be on) and create a connector.</li><li>Paste the address above${demo ? " and choose no authentication" : " and choose OAuth"}.</li><li>Ask <em>“How is my farm?”</em></li></ol>
+<p class="note">Menu names change from time to time. Full guide: <a href="/docs/ai-assistant-plugin">tendercells.com/docs/ai-assistant-plugin</a></p>
+</main></body></html>`;
+}
+
 const rpcError = (res: Response, status: number, message: string) =>
   res.status(status).json({ jsonrpc: "2.0", error: { code: -32000, message }, id: null });
 
@@ -212,6 +233,14 @@ export function createHostedApp(opts: HostedOptions) {
       return;
     }
     await serve(req, res, opts.hubFor(g.uid), "hosted");
+  });
+  // A person who opens the URL in a browser gets a short "how to add this" page; MCP
+  // clients (which never ask for text/html) keep getting the JSON-RPC 405.
+  app.get(["/mcp", "/mcp/demo"], (req, res, next) => {
+    const accept = String(req.headers.accept ?? "");
+    if (!accept.includes("text/html") || accept.includes("text/event-stream")) return next();
+    res.set("Content-Security-Policy", "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'none'");
+    res.type("html").send(landingPage(`${issuer}${req.path}`, req.path.endsWith("/demo")));
   });
   app.all(["/mcp", "/mcp/demo"], (_req, res) => { res.set("Allow", "POST"); rpcError(res, 405, "Method not allowed (stateless server: POST only)"); });
 

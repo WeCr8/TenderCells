@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" width="960" height="660" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" role="img" aria-label="Step 13: The blink program">
+<defs><filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#F2B92C" flood-opacity="1"/><feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#F2B92C" flood-opacity="1"/></filter>
+<marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1E2A22"/></marker></defs>
+<rect width="960" height="660" fill="#F6F2E9"/>
+<circle cx="52" cy="40" r="28" fill="#147C38"/><text x="52" y="50" font-size="28" font-weight="900" fill="#fff" text-anchor="middle">13</text>
+<text x="94" y="50" font-size="26" font-weight="800" fill="#1E2A22">The blink program</text>
+<g transform="translate(150 110)"><rect width="660" height="330" rx="14" fill="#14261B"/><text font-family="ui-monospace, Menlo, monospace" font-size="21" fill="#E8F0E8">
+<tspan x="28" y="52" fill="#9FD3A8">// blink - D0 is the pin with the yellow wire</tspan><tspan x="28" y="92">const int LED = D0;</tspan><tspan x="28" y="132">void setup() {</tspan><tspan x="60" y="166">pinMode(LED, OUTPUT);</tspan><tspan x="28" y="200">}</tspan><tspan x="28" y="236">void loop() {</tspan><tspan x="60" y="270">digitalWrite(LED, HIGH); delay(500);  <tspan fill="#F2B92C">// on</tspan></tspan><tspan x="60" y="304">digitalWrite(LED, LOW);  delay(500);  <tspan fill="#F2B92C">// off</tspan></tspan></text><text x="28" y="326" font-family="ui-monospace, monospace" font-size="21" fill="#E8F0E8">}</text></g>
+<text x="944" y="648" font-size="12" fill="#6B6650" text-anchor="end">Arduino sketch - board: XIAO_ESP32S3</text></svg>

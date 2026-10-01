@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" width="960" height="660" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" role="img" aria-label="Step 16: Not blinking? Check these three">
+<defs><filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#F2B92C" flood-opacity="1"/><feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#F2B92C" flood-opacity="1"/></filter>
+<marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1E2A22"/></marker></defs>
+<rect width="960" height="660" fill="#F6F2E9"/>
+<circle cx="52" cy="40" r="28" fill="#147C38"/><text x="52" y="50" font-size="28" font-weight="900" fill="#fff" text-anchor="middle">16</text>
+<text x="94" y="50" font-size="26" font-weight="800" fill="#1E2A22">Not blinking? Check these three</text>
+<g font-size="20" font-weight="800" fill="#1E2A22"><text x="110" y="170">1  LED backwards? Long leg must be in column 12.</text><text x="110" y="250">2  Resistor in column 13 AND the bottom − rail?</text><text x="110" y="330">3  Both black wires in place (GND → rail, rail → rail)?</text><text x="110" y="410" fill="#6B6650" font-weight="600">Still nothing? Unplug, re-seat each part firmly, try again.</text></g>
+<text x="944" y="648" font-size="12" fill="#6B6650" text-anchor="end">Illustration - not to scale. Match it to your real parts.</text></svg>

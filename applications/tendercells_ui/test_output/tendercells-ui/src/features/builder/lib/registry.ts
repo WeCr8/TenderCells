@@ -23,7 +23,7 @@ const fromMission = (m: BuilderMission): BuilderItem => ({
 const fromProject = (p: BuilderProject): BuilderItem => ({
   kind: 'project', id: p.id, title: p.title, milestone: p.milestone, phase: p.phase, hardware: true,
   steps: p.stages.flatMap((s) => s.steps.map((st) => ({ ...st, stage: s.title }))), outcomes: [], bridge: p.bridge,
-  minutes: p.estimated_minutes, difficulty: p.difficulty, cover: p.cover, concept: p.concept, conceptNote: p.concept_note,
+  minutes: p.estimated_minutes, difficulty: p.difficulty, cover: p.cover, concept: p.concept, conceptNote: p.concept_note, partsList: p.parts_list,
 });
 
 /** The whole ladder: missions in manifest order, then hardware projects. */

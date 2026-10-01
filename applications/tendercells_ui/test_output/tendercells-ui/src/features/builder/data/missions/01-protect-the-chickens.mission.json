@@ -30,12 +30,7 @@
    "image": {
     "base_asset": "scene.demo-farm.overview",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "scene.demo-farm.overview"
-     }
-    ]
+    "step_asset": "steps/01-protect-the-chickens/quiet.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -44,7 +39,20 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "shot": {
+    "path": "/demo",
+    "target": "text=Scanning 360° for predators",
+    "label": "WatchTower is watching for predators"
+   },
+   "details": [
+    "Open the Demo page.",
+    "Find the list on the 3D view called 'Autonomous farm - simulated'.",
+    "Find the WatchTower line: 'Scanning 360° for predators'.",
+    "That's the camera tower watching the property, day and night."
+   ],
+   "look_for": "WatchTower - Scanning 360° for predators.",
+   "watch_out": "WatchTower only sees; it never chases animals away by itself."
   },
   {
    "id": "01-protect-the-chickens.detect",
@@ -60,12 +68,7 @@
    "image": {
     "base_asset": "system.watchtower.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "system.watchtower.iso"
-     }
-    ]
+    "step_asset": "steps/01-protect-the-chickens/detect.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -78,7 +81,21 @@
    "demo": {
     "run": "predator",
     "label": "Trigger the predator event"
-   }
+   },
+   "shot": {
+    "path": "/simulator",
+    "target": "[data-testid=trigger-predator]",
+    "label": "Press Trigger",
+    "press": true
+   },
+   "details": [
+    "Press 'Trigger the predator event' below - or open Trigger an Event in the left menu.",
+    "Find the card 'Predator detected' (top left).",
+    "Press its Trigger button.",
+    "Watch the panel on the right fill with the event chain."
+   ],
+   "look_for": "A new event: the camera spotted a fox near the coop.",
+   "watch_out": "Press Trigger once and wait a second - each press makes a new event."
   },
   {
    "id": "01-protect-the-chickens.affected",
@@ -94,12 +111,7 @@
    "image": {
     "base_asset": "system.chicken-tender.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "arrow",
-      "target": "system.chicken-tender.iso"
-     }
-    ]
+    "step_asset": "steps/01-protect-the-chickens/affected.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -112,7 +124,23 @@
    "demo": {
     "open": "/layout",
     "label": "Find it on the map"
-   }
+   },
+   "shot": {
+    "path": "/layout",
+    "run": [
+     "predator"
+    ],
+    "target": "text=Needs attention",
+    "label": "The coop is on the list"
+   },
+   "details": [
+    "Open the Property Twin (left menu).",
+    "Find the 'Needs attention' list on the 3D view.",
+    "Find the fox alert and the coop it is near.",
+    "Ask: who could get hurt? (the chickens in that coop)"
+   ],
+   "look_for": "The predator alert listed under Needs attention.",
+   "watch_out": "Several alerts can be listed - look for the fox one."
   },
   {
    "id": "01-protect-the-chickens.why",
@@ -128,12 +156,7 @@
    "image": {
     "base_asset": "ui.event.predator",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "path",
-      "target": "ui.event.predator"
-     }
-    ]
+    "step_asset": "steps/01-protect-the-chickens/why.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -146,7 +169,24 @@
    "demo": {
     "open": "/simulator",
     "label": "Open the event and its Why"
-   }
+   },
+   "shot": {
+    "path": "/simulator",
+    "run": [
+     "predator"
+    ],
+    "target": "[data-testid=why-panel]",
+    "label": "Why did this happen?",
+    "click": "text=Why did this happen?"
+   },
+   "details": [
+    "On Trigger an Event, scroll down to the Event log.",
+    "Find the newest line: 'Chicken Tender door closed and you were alerted'.",
+    "Click 'Why did this happen?' to open it.",
+    "Try the three buttons: For kids, For farmers, For engineers."
+   ],
+   "look_for": "An explanation that names the camera, the rule and the door.",
+   "watch_out": "Pick 'For kids' for the simplest words."
   },
   {
    "id": "01-protect-the-chickens.respond",
@@ -162,12 +202,7 @@
    "image": {
     "base_asset": "ui.event.predator",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "correct",
-      "target": "ui.event.predator"
-     }
-    ]
+    "step_asset": "steps/01-protect-the-chickens/respond.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -176,7 +211,22 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "shot": {
+    "path": "/simulator",
+    "run": [
+     "predator"
+    ],
+    "target": "[data-testid=event-chain]",
+    "label": "Door closed, owner told"
+   },
+   "details": [
+    "Look at the event chain on the right of Trigger an Event.",
+    "Read it from top to bottom: WatchTower camera → Vision model → Predator rule → Tender Cells OS → door controller → coop door.",
+    "Find the last line: the door closed and the owner was alerted."
+   ],
+   "look_for": "The chain ends with the coop door closed and an owner alert.",
+   "watch_out": "The 'Physical action' row is simulated here - nothing real moves."
   },
   {
    "id": "01-protect-the-chickens.real",
@@ -192,12 +242,7 @@
    "image": {
     "base_asset": "system.watchtower.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "tool",
-      "target": "system.watchtower.iso"
-     }
-    ]
+    "step_asset": "steps/01-protect-the-chickens/real.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -206,7 +251,21 @@
    "source_refs": [
     "/guides/camera-node-first-build",
     "/flash?target=camera-node"
-   ]
+   ],
+   "shot": {
+    "path": "/layout",
+    "click": "[data-testid=twin-hardware]",
+    "target": "[data-testid=hardware-chain]",
+    "label": "How it becomes real"
+   },
+   "details": [
+    "Open the Property Twin and the Chicken Tender card.",
+    "Press 'See hardware'.",
+    "Read the chain from the twin down to the real coop door.",
+    "Next mission: build a camera node that does this for real."
+   ],
+   "look_for": "How Demo Chicken Tender 001 becomes real - a list from twin to real door.",
+   "watch_out": "Real builds need an adult's help with tools and power."
   }
  ],
  "bridge": {

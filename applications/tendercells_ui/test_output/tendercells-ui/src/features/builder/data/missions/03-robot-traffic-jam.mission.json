@@ -30,12 +30,7 @@
    "image": {
     "base_asset": "ui.zone.mower-work-area",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "ui.zone.mower-work-area"
-     }
-    ]
+    "step_asset": "steps/03-robot-traffic-jam/zone.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -48,7 +43,19 @@
    "demo": {
     "open": "/layout",
     "label": "Open the Property Twin"
-   }
+   },
+   "shot": {
+    "path": "/mowers",
+    "target": "[data-testid=mower-mw_demo]",
+    "label": "The mower and its lawn"
+   },
+   "details": [
+    "Press 'Open the Property Twin' below - or open Robot Mowers in the menu.",
+    "Find the card 'Demo robot mower'.",
+    "Read its status chips: Docked, Online, and its schedule."
+   ],
+   "look_for": "The demo mower, docked and ready to mow its lawn.",
+   "watch_out": "This mower is simulated; a real one is linked from its own app."
   },
   {
    "id": "03-robot-traffic-jam.roost",
@@ -64,12 +71,7 @@
    "image": {
     "base_asset": "robot.roaming-roost.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "arrow",
-      "target": "robot.roaming-roost.iso"
-     }
-    ]
+    "step_asset": "steps/03-robot-traffic-jam/roost.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -82,7 +84,20 @@
    "demo": {
     "run": "traffic-jam",
     "label": "Start the traffic jam"
-   }
+   },
+   "shot": {
+    "path": "/simulator",
+    "target": "[data-testid=trigger-traffic-jam]",
+    "label": "Press Trigger",
+    "press": true
+   },
+   "details": [
+    "Press 'Start the traffic jam' below - or open Trigger an Event.",
+    "Find the card 'Robot traffic jam'.",
+    "Press its Trigger button."
+   ],
+   "look_for": "The Roaming Roost parks on the mower's lawn.",
+   "watch_out": "Only one traffic jam at a time - if one is running, it just updates."
   },
   {
    "id": "03-robot-traffic-jam.schedule",
@@ -98,12 +113,7 @@
    "image": {
     "base_asset": "robot.mower.generic.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "robot.mower.generic.iso"
-     }
-    ]
+    "step_asset": "steps/03-robot-traffic-jam/schedule.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -112,7 +122,22 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "shot": {
+    "path": "/mowers",
+    "run": [
+     "traffic-jam"
+    ],
+    "target": "[data-testid=mower-start]",
+    "label": "It's mowing time - but Mow now is blocked"
+   },
+   "details": [
+    "Open Robot Mowers.",
+    "Look at the Demo robot mower card.",
+    "Find 'Mow now…' - it is blocked while the mower is held."
+   ],
+   "look_for": "It's mowing time, but Mow now is blocked.",
+   "watch_out": "Don't look for a way around the hold - it's there to protect the animals."
   },
   {
    "id": "03-robot-traffic-jam.hold",
@@ -128,12 +153,7 @@
    "image": {
     "base_asset": "robot.mower.generic.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "incorrect",
-      "target": "robot.mower.generic.iso"
-     }
-    ]
+    "step_asset": "steps/03-robot-traffic-jam/hold.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -146,7 +166,22 @@
    "demo": {
     "open": "/mowers",
     "label": "See the held mower"
-   }
+   },
+   "shot": {
+    "path": "/mowers",
+    "run": [
+     "traffic-jam"
+    ],
+    "target": "[data-testid=mower-interlock]",
+    "label": "Not clear to mow: animals on the lawn"
+   },
+   "details": [
+    "Stay on Robot Mowers.",
+    "Find the box 'Not clear to mow'.",
+    "Read why: the Roaming Roost is in the mower's work area, and its animals may be on the lawn."
+   ],
+   "look_for": "Not clear to mow - animals may be on the lawn.",
+   "watch_out": "A held mower stays in its dock until the lawn is clear."
   },
   {
    "id": "03-robot-traffic-jam.why",
@@ -162,12 +197,7 @@
    "image": {
     "base_asset": "ui.zone.mower-work-area",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "path",
-      "target": "ui.zone.mower-work-area"
-     }
-    ]
+    "step_asset": "steps/03-robot-traffic-jam/why.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -180,7 +210,22 @@
    "demo": {
     "open": "/demo",
     "label": "Open \"Why did this happen?\""
-   }
+   },
+   "shot": {
+    "path": "/demo",
+    "run": [
+     "traffic-jam"
+    ],
+    "target": "[data-testid=why-panel]",
+    "label": "Why is it held?"
+   },
+   "details": [
+    "Open the Demo page.",
+    "Find 'Happening now' and the message 'Mowing held: the Roaming Roost is on the mower's lawn'.",
+    "Read the explanation; switch between For kids, For farmers and For engineers."
+   ],
+   "look_for": "The schedule → zone → animals → HOLD explanation.",
+   "watch_out": "The engineer view shows the rule name and data the system used."
   },
   {
    "id": "03-robot-traffic-jam.clear",
@@ -196,12 +241,7 @@
    "image": {
     "base_asset": "robot.roaming-roost.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "arrow",
-      "target": "robot.roaming-roost.iso"
-     }
-    ]
+    "step_asset": "steps/03-robot-traffic-jam/clear.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -214,7 +254,23 @@
    "demo": {
     "run": "roost-moves-on",
     "label": "Move the Roaming Roost"
-   }
+   },
+   "shot": {
+    "path": "/simulator",
+    "run": [
+     "traffic-jam"
+    ],
+    "target": "[data-testid=trigger-roost-moves-on]",
+    "label": "Move the Roaming Roost",
+    "press": true
+   },
+   "details": [
+    "Press 'Move the Roaming Roost' below - or open Trigger an Event.",
+    "Find the card 'Roaming Roost moves on'.",
+    "Press its Trigger button."
+   ],
+   "look_for": "The roost drives off the lawn.",
+   "watch_out": "In real life someone checks the lawn is clear before moving a roost."
   },
   {
    "id": "03-robot-traffic-jam.ready",
@@ -230,12 +286,7 @@
    "image": {
     "base_asset": "robot.mower.generic.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "correct",
-      "target": "robot.mower.generic.iso"
-     }
-    ]
+    "step_asset": "steps/03-robot-traffic-jam/ready.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -248,7 +299,23 @@
    "demo": {
     "open": "/mowers",
     "label": "Check the mower"
-   }
+   },
+   "shot": {
+    "path": "/mowers",
+    "run": [
+     "traffic-jam",
+     "roost-moves-on"
+    ],
+    "target": "[data-testid=mower-interlock]",
+    "label": "Clear to mow"
+   },
+   "details": [
+    "Open Robot Mowers again.",
+    "Find the green box: '✓ Clear to mow'.",
+    "Mow now is available again."
+   ],
+   "look_for": "Clear to mow - the guard has cleared.",
+   "watch_out": "The mower resumes only on its schedule or when someone presses Mow now."
   }
  ],
  "bridge": {

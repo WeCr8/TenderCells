@@ -27,12 +27,24 @@ export interface BuilderStep {
   checkpoint?: boolean;
   source_refs?: string[];
   demo?: DemoBinding;
+  /** LEGO-style detail: the small physical actions that make up this one step, in order. */
+  details?: string[];
+  /** What the learner should see when the step is done right. */
+  look_for?: string;
+  /** The most common mistake or safety point for this step. */
+  watch_out?: string;
+  /** Program text to type or paste (shown with a Copy button). */
+  code?: string;
+  /** How scripts/builder/capture-steps.mjs takes this step's screenshot. */
+  shot?: { path: string; target: string; label: string; run?: string[]; click?: string; press?: boolean; app?: 'web' };
 }
 export interface BuilderStage { id: string; title: string; steps: BuilderStep[] }
 export interface BuilderProject {
   id: string; title: string; version: string; milestone: string; phase: MissionPhase;
   audience?: string[]; difficulty?: number; estimated_minutes?: number; source_docs?: string[];
   stages: BuilderStage[]; bridge?: Bridge;
+  /** Everything to gather before step 1 (shown on the first step). */
+  parts_list?: Array<BuilderPartRef & { note?: string }>;
   /** Path under public/builder-assets/ for the cover image. */
   cover?: string;
   /** Concept preview: art and labels are not verified; never wire from it. */
@@ -62,4 +74,5 @@ export interface BuilderItem {
   cover?: string;
   concept?: boolean;
   conceptNote?: string;
+  partsList?: Array<BuilderPartRef & { note?: string }>;
 }

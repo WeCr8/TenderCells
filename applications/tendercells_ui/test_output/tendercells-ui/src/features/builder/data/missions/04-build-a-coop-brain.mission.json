@@ -29,12 +29,7 @@
    "image": {
     "base_asset": "ui.rule.when-if-do",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "ui.rule.when-if-do"
-     }
-    ]
+    "step_asset": "steps/04-build-a-coop-brain/when.svg"
    },
    "safety": [
     "CHILD_OK"
@@ -43,7 +38,14 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "details": [
+    "Look at the rule card: WHEN · IF · DO.",
+    "Choose the WHEN: Sunset.",
+    "WHEN is the trigger - the moment the rule wakes up."
+   ],
+   "look_for": "WHEN: 🌅 Sunset.",
+   "watch_out": "One rule, one trigger. Morning would be a different rule."
   },
   {
    "id": "04-build-a-coop-brain.if",
@@ -59,12 +61,7 @@
    "image": {
     "base_asset": "ui.rule.when-if-do",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "ui.rule.when-if-do"
-     }
-    ]
+    "step_asset": "steps/04-build-a-coop-brain/if.svg"
    },
    "safety": [
     "CHILD_OK"
@@ -73,7 +70,14 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "details": [
+    "Now choose the IF: All chickens inside.",
+    "IF is the check - the rule only acts if it's true.",
+    "Ask: what could go wrong without this check? (a hen locked outside)"
+   ],
+   "look_for": "IF: 🐔 All chickens inside.",
+   "watch_out": "Never skip the safety check - it protects the animals."
   },
   {
    "id": "04-build-a-coop-brain.do",
@@ -89,12 +93,7 @@
    "image": {
     "base_asset": "ui.rule.when-if-do",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "ui.rule.when-if-do"
-     }
-    ]
+    "step_asset": "steps/04-build-a-coop-brain/do.svg"
    },
    "safety": [
     "CHILD_OK"
@@ -103,7 +102,14 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "details": [
+    "Choose the DO: Close the door.",
+    "DO is the action the rule takes.",
+    "Read the whole rule: WHEN sunset, IF all chickens are inside, DO close the door."
+   ],
+   "look_for": "DO: 🚪 Close the door.",
+   "watch_out": "An action should always be something you could also undo by hand."
   },
   {
    "id": "04-build-a-coop-brain.run",
@@ -119,12 +125,7 @@
    "image": {
     "base_asset": "ui.rule.when-if-do",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "correct",
-      "target": "ui.rule.when-if-do"
-     }
-    ]
+    "step_asset": "steps/04-build-a-coop-brain/run.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -137,7 +138,20 @@
    "demo": {
     "run": "sunset",
     "label": "Run sunset"
-   }
+   },
+   "shot": {
+    "path": "/simulator",
+    "target": "[data-testid=trigger-sunset]",
+    "label": "Press Trigger on Sunset",
+    "press": true
+   },
+   "details": [
+    "Press 'Run sunset' below - or open Trigger an Event.",
+    "Find the card 'Sunset - close the coop'.",
+    "Press its Trigger button."
+   ],
+   "look_for": "The sunset event runs your rule.",
+   "watch_out": "If a hen is missing the door waits - try 'Hen missing at dusk' to see."
   },
   {
    "id": "04-build-a-coop-brain.explain",
@@ -153,12 +167,7 @@
    "image": {
     "base_asset": "ui.rule.when-if-do",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "path",
-      "target": "ui.rule.when-if-do"
-     }
-    ]
+    "step_asset": "steps/04-build-a-coop-brain/explain.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -167,7 +176,22 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "shot": {
+    "path": "/simulator",
+    "run": [
+     "sunset"
+    ],
+    "target": "[data-testid=event-chain]",
+    "label": "WHEN + IF + DO"
+   },
+   "details": [
+    "Read the event chain on the right.",
+    "Find WHEN (light sensor: sunset), IF (headcount: all inside) and DO (door closes).",
+    "Explain your rule to someone in one sentence."
+   ],
+   "look_for": "Light sensor → headcount → dusk rule → door closed.",
+   "watch_out": "Rules run in order: trigger first, check second, action last."
   }
  ],
  "bridge": {

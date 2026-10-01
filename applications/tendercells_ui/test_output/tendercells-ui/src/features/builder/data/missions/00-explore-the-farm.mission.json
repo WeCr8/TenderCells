@@ -30,12 +30,7 @@
    "image": {
     "base_asset": "scene.demo-farm.overview",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "scene.demo-farm.overview"
-     }
-    ]
+    "step_asset": "steps/00-explore-the-farm/look.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -48,7 +43,20 @@
    "demo": {
     "open": "/layout",
     "label": "Open the Property Twin"
-   }
+   },
+   "shot": {
+    "path": "/layout",
+    "target": "canvas",
+    "label": "This is the whole farm, in 3D"
+   },
+   "details": [
+    "Press 'Open the Property Twin' below, or choose Property Twin in the left menu.",
+    "Find the 3D view of the farm in the middle of the page.",
+    "Drag with one finger or the mouse to turn the farm; pinch or scroll to zoom.",
+    "Spot the coop, the duck pond, the WatchTower, the robots and the garden beds."
+   ],
+   "look_for": "A 3D farm with buildings, animals and robots.",
+   "watch_out": "Everything here is simulated - no real animals or machines move."
   },
   {
    "id": "00-explore-the-farm.open",
@@ -64,12 +72,7 @@
    "image": {
     "base_asset": "system.chicken-tender.iso",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "target",
-      "target": "system.chicken-tender.iso"
-     }
-    ]
+    "step_asset": "steps/00-explore-the-farm/open.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -82,7 +85,20 @@
    "demo": {
     "open": "/layout",
     "label": "Open the Property Twin"
-   }
+   },
+   "shot": {
+    "path": "/layout",
+    "target": "[data-testid=twin-inspector]",
+    "label": "Chicken Tender's card"
+   },
+   "details": [
+    "Stay on the Property Twin page.",
+    "Look at the card on the right called DEMO CHICKEN TENDER 001 (click the coop on the map if it isn't showing).",
+    "Read the rows: Door, Temperature, Water, Feed, Size.",
+    "Find the three buttons: Open system, Why this state? and See hardware."
+   ],
+   "look_for": "The coop's card with its door, temperature and water.",
+   "watch_out": "If you see a different device's card, click the Chicken Tender coop on the map."
   },
   {
    "id": "00-explore-the-farm.check",
@@ -98,12 +114,7 @@
    "image": {
     "base_asset": "scene.demo-farm.overview",
     "view": "instruction",
-    "cues": [
-     {
-      "type": "correct",
-      "target": "scene.demo-farm.overview"
-     }
-    ]
+    "step_asset": "steps/00-explore-the-farm/check.webp"
    },
    "safety": [
     "CHILD_OK"
@@ -112,7 +123,19 @@
    "source_refs": [
     "/demo",
     "/digital-twin"
-   ]
+   ],
+   "shot": {
+    "path": "/demo",
+    "target": "[data-testid=demo-status]",
+    "label": "Many systems, one property"
+   },
+   "details": [
+    "Go to the Demo page (Demo Farm in the menu, or the home screen).",
+    "Read the status strip: how many animals, how many systems, and whether all are online.",
+    "Say it out loud: one property, many systems, one map."
+   ],
+   "look_for": "The strip: animals · systems · all systems online · active events.",
+   "watch_out": "The numbers change as the simulation runs - that's fine."
   }
  ],
  "bridge": {

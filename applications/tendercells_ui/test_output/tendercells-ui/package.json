@@ -41,7 +41,9 @@
     "video:cues": "node scripts/video/anthem-cues.mjs",
     "video:shots": "node scripts/video/capture-anthem-shots.mjs",
     "video:roughcut": "node scripts/video/rough-cut.mjs",
-    "video:produce": "npm run video:shots && npm run video:roughcut"
+    "video:produce": "npm run video:shots && npm run video:roughcut",
+    "builder:shots": "node scripts/builder/capture-steps.mjs",
+    "builder:draw": "node scripts/builder/draw-steps.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",

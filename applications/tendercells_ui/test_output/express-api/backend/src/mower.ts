@@ -592,6 +592,9 @@ export interface InterlockContext {
   habitat: (deviceId: string) => { doorState?: unknown; ageMs: number } | undefined;
   /** Animals seen on the property recently: labels for the message. */
   animalsSeen: string[];
+  /** Mobile animal housing (e.g. a Roaming Roost) parked in the mower's work area, as the OS
+   *  Property Twin reports it. Optional: not every hub knows where things are parked. */
+  occupiedBy?: string[];
 }
 
 /**
@@ -618,6 +621,10 @@ export function mowingBlockedReason(link: MowerLink, ctx: InterlockContext): str
     if (!h || h.doorState === undefined) return `Cannot confirm the animals from ${id} are inside: no door state from it yet.`;
     if (h.ageMs > HABITAT_STATE_MAX_AGE_MS) return `Cannot confirm the animals from ${id} are inside: its door state is out of date.`;
     if (h.doorState !== "closed") return `${id}: the door is ${String(h.doorState)} - the animals may be on the lawn.`;
+  }
+  if (ctx.occupiedBy?.length) {
+    const who = [...new Set(ctx.occupiedBy)].join(" and ");
+    return `${who} ${ctx.occupiedBy.length > 1 ? "are" : "is"} in the mower's work area - its animals may be on the lawn. Move it, or mow another area.`;
   }
   if (ctx.animalsSeen.length) {
     const what = [...new Set(ctx.animalsSeen)].slice(0, 3).join(", ");

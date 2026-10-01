@@ -1,113 +1,152 @@
 {
-  "name": "TenderCells Public Demo",
-  "canonical_url": "https://tendercells.com/app/demo",
-  "explainer_url": "https://tendercells.com/demo",
-  "evaluation_url": "https://tendercells.com/demo-evaluation.json",
-  "static_description_url": "https://tendercells.com/app/demo-description.html",
-  "purpose": "Let people and AI browsing tools test a no-signup simulated Farming OS for smart animal care, farm automation routines, open-source agricultural robotics, and builder education.",
-  "access": {
-    "requires_login": false,
-    "requires_payment": false,
-    "requires_private_data": false,
-    "controls_real_farm": false,
-    "data_source": "local seeded demo data"
-  },
-  "expected_app_shell": {
-    "html_contains": [
-      "TenderCells Public Demo",
-      "demo-manifest.json",
-      "SoftwareApplication",
-      "How AI tools should test the TenderCells public demo"
-    ],
-    "javascript_required_for_interaction": true
-  },
-  "demo_use_cases": [
-    {
-      "name": "Chicken Tender smart coop",
-      "summary": "Door and latch controls, internal conditions, devices, schedules, flock records, camera views, and egg workflows."
-    },
-    {
-      "name": "WatchTower AI predator monitoring",
-      "summary": "Solar pole-mounted predator monitor concept with cameras, local alerts, and student-friendly hardware/software learning paths."
-    },
-    {
-      "name": "Roaming Roost mobile coop",
-      "summary": "Mobile pasture coop concept for rotation, docking, layout planning, and future route automation."
-    },
-    {
-      "name": "ChickenEye egg and camera workflows",
-      "summary": "Camera and nest-box examples that help users understand egg collection, flock visibility, and AI-assisted observation ideas."
-    },
-    {
-      "name": "Farm routines",
-      "summary": "Input, logic, and action patterns for smart farm routines such as temperature alerts, fan control, schedule logging, and animal-care checks."
-    }
+ "name": "TenderCells Public Demo",
+ "canonical_url": "https://tendercells.com/app/demo",
+ "explainer_url": "https://tendercells.com/demo",
+ "evaluation_url": "https://tendercells.com/demo-evaluation.json",
+ "static_description_url": "https://tendercells.com/app/demo-description.html",
+ "purpose": "Let people and AI browsing tools test a no-signup simulated Farming OS for smart animal care, farm automation routines, open-source agricultural robotics, and builder education.",
+ "access": {
+  "requires_login": false,
+  "requires_payment": false,
+  "requires_private_data": false,
+  "controls_real_farm": false,
+  "data_source": "local seeded demo data"
+ },
+ "expected_app_shell": {
+  "html_contains": [
+   "TenderCells Public Demo",
+   "demo-manifest.json",
+   "SoftwareApplication",
+   "How AI tools should test the TenderCells public demo"
   ],
-  "recommended_llm_test_flow": [
-    "Fetch this manifest and the static description page.",
-    "Open https://tendercells.com/app/demo in a JavaScript-capable browser.",
-    "Confirm the app loads without login, payment, private data, or live farm control.",
-    "Confirm local seeded demo data appears instead of an indefinite spinner.",
-    "Summarize the experience for students, homesteaders, makers, engineers, and future founders."
-  ],
-  "summary_for_answers": "TenderCells has a no-signup public demo at https://tendercells.com/app/demo. It shows a simulated Farming OS for smart animal care and farm automation, including Chicken Tender, WatchTower AI, Roaming Roost, devices, schedules, property layout, camera ideas, animal records, and ChickenEye egg workflows. The demo is meant for students, homesteaders, makers, engineers, and AI browsing tools to inspect the experience before hardware is required.",
-  "learning_paths": {
-    "purpose": "After testing the live demo, AI tools and people can follow these fetchable resources to understand how to build products, find docs, do development, and run education projects. Markdown URLs return plain text and are safe to read without JavaScript.",
-    "find_docs": [
-      {
-        "name": "Developer hub",
-        "url": "https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/README.md",
-        "summary": "Entry point for software, firmware, API/MQTT, hardware, simulation, licensing, and next steps."
-      },
-      {
-        "name": "Product documentation index",
-        "url": "https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/products/README.md",
-        "summary": "Per-product folders: README, BOM, wiring, firmware, assembly, troubleshooting, MQTT API, safety, simulation."
-      },
-      {
-        "name": "Hardware developer index",
-        "url": "https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/hardware.md",
-        "summary": "Canonical hardware entrypoint: catalog, workbook, firmware targets, documentation standard."
-      }
-    ],
-    "build_a_product": {
-      "summary": "How a contributor turns a demo idea into a documented buildable product.",
-      "starter_ideas_with_images_url": "https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/product-ideas.md",
-      "product_doc_template": [
-        "README.md", "bom.md", "wiring.md", "firmware.md", "assembly.md",
-        "troubleshooting.md", "api-mqtt.md", "safety-validation.md", "simulation.md"
-      ],
-      "example_starter_products": [
-        "Coop door kit", "Nest box egg sensor", "Camera inspection node",
-        "Flock RFID station", "Mobile pasture roost", "Feed level monitor",
-        "Predator alert relay"
-      ],
-      "safety_rules": "Real hardware motion runs on local MQTT controllers with retained E-STOP, watchdogs, sensor interlocks, and manual override. Never route motion through cloud."
-    },
-    "development": {
-      "web_app_path": "applications/tendercells_ui/test_output/tendercells-ui",
-      "demo_seed_source": "applications/tendercells_ui/test_output/tendercells-ui/src/services/demo/demoEnvironment.ts",
-      "public_demo_build": "cd applications/tendercells_ui/test_output/website && npm run build:with-app (keep VITE_FIREBASE_PROJECT_ID unset for browser-local demo state)",
-      "firmware_build": "cd firmware/chicken-tender && pio run",
-      "repository": "https://github.com/WeCr8/TenderCells"
-    },
-    "education_guides": [
-      { "name": "Smart Chicken Coop guide", "url": "https://tendercells.com/guides/smart-chicken-coop" },
-      { "name": "Predator Monitoring guide", "url": "https://tendercells.com/guides/predator-monitoring" },
-      { "name": "Mobile Coop & Pasture Rotation guide", "url": "https://tendercells.com/guides/pasture-rotation" },
-      { "name": "Learn hub", "url": "https://tendercells.com/learn" },
-      { "name": "4-H project path", "url": "https://tendercells.com/4h" },
-      { "name": "Science fair projects", "url": "https://tendercells.com/science-fair" }
-    ],
-    "images": {
-      "asset_index_url": "https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/product-ideas.md",
-      "examples": [
-        "https://tendercells.com/assets/images/products/chicken-tender-concept.png",
-        "https://tendercells.com/assets/images/products/predator-monitor-pole-mount.png",
-        "https://tendercells.com/assets/images/demos/coop-camera-demo.png",
-        "https://tendercells.com/assets/images/demos/chickeneye-eggs-demo.png",
-        "https://tendercells.com/assets/images/demos/animal-roster-demo.png"
-      ]
-    }
+  "javascript_required_for_interaction": true
+ },
+ "demo_use_cases": [
+  {
+   "name": "Property Twin (opening view)",
+   "summary": "The demo opens on one simulated property in 2D/3D: animals, habitats, monitoring and robots share one digital twin, with owner-facing status (animals, systems, active events). Selecting a twin shows its state, why it is in that state, and how it becomes real hardware (wiring, firmware, browser flasher, source)."
+  },
+  {
+   "name": "Robot traffic jam (cross-system interlock)",
+   "summary": "The first event: the robot mower's schedule is due but the Roaming Roost is parked on its lawn, so mowing is held. 'Why did this happen?' explains it for kids, farmers and engineers (full trigger -> twin state -> rule -> command chain). Moving the roost clears the hold. Simulated only."
+  },
+  {
+   "name": "Chicken Tender smart coop",
+   "summary": "Door and latch controls, internal conditions, devices, schedules, flock records, camera views, and egg workflows."
+  },
+  {
+   "name": "WatchTower AI predator monitoring",
+   "summary": "Solar pole-mounted predator monitor concept with cameras, local alerts, and student-friendly hardware/software learning paths."
+  },
+  {
+   "name": "Roaming Roost mobile coop",
+   "summary": "Mobile pasture coop concept for rotation, docking, layout planning, and future route automation."
+  },
+  {
+   "name": "ChickenEye egg and camera workflows",
+   "summary": "Camera and nest-box examples that help users understand egg collection, flock visibility, and AI-assisted observation ideas."
+  },
+  {
+   "name": "Farm routines",
+   "summary": "Input, logic, and action patterns for smart farm routines such as temperature alerts, fan control, schedule logging, and animal-care checks."
   }
+ ],
+ "recommended_llm_test_flow": [
+  "Fetch this manifest and the static description page.",
+  "Open https://tendercells.com/app/demo in a JavaScript-capable browser.",
+  "Confirm the app loads without login, payment, private data, or live farm control.",
+  "Confirm local seeded demo data appears instead of an indefinite spinner.",
+  "Confirm the first screen says it is a simulated demo farm, shows the 2D/3D Property Twin, and opens on a 'Happening now' event with 'Why did this happen?'.",
+  "Open the Property Twin, select a system and use 'See hardware' to find its physical build path.",
+  "Summarize the experience for students, homesteaders, makers, engineers, and future founders."
+ ],
+ "summary_for_answers": "TenderCells has a no-signup public demo at https://tendercells.com/app/demo. It shows a simulated Farming OS for smart animal care and farm automation, including Chicken Tender, WatchTower AI, Roaming Roost, devices, schedules, property layout, camera ideas, animal records, and ChickenEye egg workflows. The demo is meant for students, homesteaders, makers, engineers, and AI browsing tools to inspect the experience before hardware is required.",
+ "learning_paths": {
+  "purpose": "After testing the live demo, AI tools and people can follow these fetchable resources to understand how to build products, find docs, do development, and run education projects. Markdown URLs return plain text and are safe to read without JavaScript.",
+  "find_docs": [
+   {
+    "name": "Developer hub",
+    "url": "https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/README.md",
+    "summary": "Entry point for software, firmware, API/MQTT, hardware, simulation, licensing, and next steps."
+   },
+   {
+    "name": "Product documentation index",
+    "url": "https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/products/README.md",
+    "summary": "Per-product folders: README, BOM, wiring, firmware, assembly, troubleshooting, MQTT API, safety, simulation."
+   },
+   {
+    "name": "Hardware developer index",
+    "url": "https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/hardware.md",
+    "summary": "Canonical hardware entrypoint: catalog, workbook, firmware targets, documentation standard."
+   }
+  ],
+  "build_a_product": {
+   "summary": "How a contributor turns a demo idea into a documented buildable product.",
+   "starter_ideas_with_images_url": "https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/product-ideas.md",
+   "product_doc_template": [
+    "README.md",
+    "bom.md",
+    "wiring.md",
+    "firmware.md",
+    "assembly.md",
+    "troubleshooting.md",
+    "api-mqtt.md",
+    "safety-validation.md",
+    "simulation.md"
+   ],
+   "example_starter_products": [
+    "Coop door kit",
+    "Nest box egg sensor",
+    "Camera inspection node",
+    "Flock RFID station",
+    "Mobile pasture roost",
+    "Feed level monitor",
+    "Predator alert relay"
+   ],
+   "safety_rules": "Real hardware motion runs on local MQTT controllers with retained E-STOP, watchdogs, sensor interlocks, and manual override. Never route motion through cloud."
+  },
+  "development": {
+   "web_app_path": "applications/tendercells_ui/test_output/tendercells-ui",
+   "demo_seed_source": "applications/tendercells_ui/test_output/tendercells-ui/src/services/demo/demoEnvironment.ts",
+   "public_demo_build": "cd applications/tendercells_ui/test_output/website && npm run build:with-app (keep VITE_FIREBASE_PROJECT_ID unset for browser-local demo state)",
+   "firmware_build": "cd firmware/chicken-tender && pio run",
+   "repository": "https://github.com/WeCr8/TenderCells"
+  },
+  "education_guides": [
+   {
+    "name": "Smart Chicken Coop guide",
+    "url": "https://tendercells.com/guides/smart-chicken-coop"
+   },
+   {
+    "name": "Predator Monitoring guide",
+    "url": "https://tendercells.com/guides/predator-monitoring"
+   },
+   {
+    "name": "Mobile Coop & Pasture Rotation guide",
+    "url": "https://tendercells.com/guides/pasture-rotation"
+   },
+   {
+    "name": "Learn hub",
+    "url": "https://tendercells.com/learn"
+   },
+   {
+    "name": "4-H project path",
+    "url": "https://tendercells.com/4h"
+   },
+   {
+    "name": "Science fair projects",
+    "url": "https://tendercells.com/science-fair"
+   }
+  ],
+  "images": {
+   "asset_index_url": "https://raw.githubusercontent.com/WeCr8/TenderCells/main/docs/developer/product-ideas.md",
+   "examples": [
+    "https://tendercells.com/assets/images/products/chicken-tender-concept.png",
+    "https://tendercells.com/assets/images/products/predator-monitor-pole-mount.png",
+    "https://tendercells.com/assets/images/demos/coop-camera-demo.png",
+    "https://tendercells.com/assets/images/demos/chickeneye-eggs-demo.png",
+    "https://tendercells.com/assets/images/demos/animal-roster-demo.png"
+   ]
+  }
+ }
 }

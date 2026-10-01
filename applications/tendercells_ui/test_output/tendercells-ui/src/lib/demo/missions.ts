@@ -21,6 +21,20 @@ export interface Mission {
 
 export const MISSIONS: Mission[] = [
   {
+    id: "robot-traffic-jam",
+    title: "Robot traffic jam",
+    emoji: "🚦",
+    goal: "The mower wants to start, but the Roaming Roost is on its lawn. Find out who wins - and why.",
+    steps: [
+      { kind: "trigger", scenario: "traffic-jam", text: "Trigger \"Robot traffic jam\"" },
+      { kind: "explain", scenario: "traffic-jam", text: "Open \"Why did this happen?\" - try the kid, farmer and engineer answers" },
+      { kind: "trigger", scenario: "roost-moves-on", text: "Move the Roaming Roost off the lawn (\"Roaming Roost moves on\")" },
+      { kind: "visit", path: "/mowers", text: "Check the mower: is it allowed to start now?" },
+    ],
+    concepts: ["interlocks", "shared context between systems", "animal safety", "digital twins"],
+    build: { label: "Bring your own robot mower", href: "/docs/robot-mowers" },
+  },
+  {
     id: "protect-the-flock",
     title: "Protect the flock",
     emoji: "🛡️",
@@ -70,6 +84,32 @@ export const MISSIONS: Mission[] = [
     ],
     concepts: ["sensors", "analog signals", "thresholds", "alerts", "relays"],
     build: { label: "Feeder + Waterer lesson", href: "/lessons/feeder-waterer" },
+  },
+  {
+    id: "beat-the-heat",
+    title: "Beat the heat",
+    emoji: "🌡️",
+    goal: "The coop is getting hot. See what Tender Cells does and how it keeps the birds safe.",
+    steps: [
+      { kind: "trigger", scenario: "heat", text: "Trigger \"Coop too hot\"" },
+      { kind: "explain", scenario: "heat", text: "Open \"Why did this happen?\" - which temperature starts the fan?" },
+      { kind: "visit", path: "/chicken-tender", text: "See the coop temperature on Chicken Tender" },
+    ],
+    concepts: ["temperature sensing", "animal welfare thresholds", "relays"],
+    build: { label: "Your First Coop Brain", href: "/lessons/your-first-coop-brain" },
+  },
+  {
+    id: "build-a-coop-brain",
+    title: "Build a coop brain",
+    emoji: "🧠",
+    goal: "WHEN it is sunset, IF the chickens are inside, DO close the door - then build it for real.",
+    steps: [
+      { kind: "trigger", scenario: "sunset", text: "Trigger \"Sunset - close the coop\" (the WHEN)" },
+      { kind: "explain", scenario: "sunset", text: "Open \"Why did this happen?\" and find the IF and the DO" },
+      { kind: "visit", path: "/schedules", text: "Find the rule in Schedules" },
+    ],
+    concepts: ["WHEN / IF / DO rules", "sensors", "actuators", "microcontrollers"],
+    build: { label: "Your First Coop Brain (Starter Node)", href: "/lessons/your-first-coop-brain" },
   },
   {
     id: "find-missing-chicken",

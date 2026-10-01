@@ -9,8 +9,9 @@
 //             cutting height, headlight, weekly schedule, stay-out zones, park modes, errors
 // Everything lives in this browser (localStorage) and is labelled simulated.
 import { DEMO_DEVICES, getDemoEquipment, isDemoSeeded } from "../../services/demo/demoEnvironment";
+import { loadPropertyLayout } from "../../components/property/propertyLayoutStore";
 import {
-  ADAPTER_CAPABILITIES, DEFAULT_QUIET_HOURS, GO_ACTIONS, mowingBlockedReason,
+  ADAPTER_CAPABILITIES, DEFAULT_QUIET_HOURS, GO_ACTIONS, mowingBlockedReason, workAreaOccupants,
   type MowerAction, type MowerLink, type MowerSettingsPatch, type MowerState, type MowerView, type ScheduleTask, type StartOptions,
 } from "./mower";
 import type { NewMower } from "./mowerApi";
@@ -78,6 +79,7 @@ function blocked(s: Store, link: MowerLink, now: number): string | null {
       return eq ? { doorState: eq.door, ageMs: 0 } : undefined;
     },
     animalsSeen: [],
+    occupiedBy: workAreaOccupants(loadPropertyLayout(), link.deviceId),
   });
 }
 

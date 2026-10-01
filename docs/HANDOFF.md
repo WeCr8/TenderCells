@@ -51,4 +51,19 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
    - Audio is the song only: never add voice-over, narration or sound effects over it.
    - To regenerate the rough cut, run `npm run video:shots` and then `npm run video:roughcut`. Both need the dev servers on :5173 and :5176, plus ffmpeg with libass.
 5. **Phone layout of the 3D viewer's bottom bar.** In the `/demo` hero on phones it wraps to two lines.
-6. **Older open PRs not from today:** #106 (Copilot auth flow) and the Dependabot bumps #96–#103. Review or merge them separately.
+6. **Demo follow-up pack (2026-10-01).**
+   - **Done:**
+     - property-first opening copy and owner-facing status;
+     - the first visit opens on the robot traffic jam (mower ↔ Roaming Roost work-area interlock, in the OS and the hub rule);
+     - "Why?" at kid / farmer / engineer depth (`components/demo/WhyPanel.tsx`);
+     - the Robot traffic jam, Beat the heat and Build a coop brain missions;
+     - the Property Twin inspector with "How this becomes real" (`lib/twin/physical.ts`);
+     - funnel analytics (`lib/demo/track.ts`).
+   - **Next:**
+     - highlight the affected twin on the 3D map when an event fires;
+     - requested → acknowledged → confirmed command states in the UI;
+     - the OS sends roost positions so the hub enforces `occupiedBy` live;
+     - generic simulated irrigation (Orbit B-hyve, labelled COMMUNITY until official access is verified) and hive-monitor twins, with the irrigation ↔ mower hold;
+     - mobile / Safari QA;
+     - update `demo-manifest.json` / `snapshot.json` to match.
+7. **Older open PRs not from today:** #106 (Copilot auth flow) and the Dependabot bumps #96–#103. Review or merge them separately.

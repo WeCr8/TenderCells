@@ -160,6 +160,8 @@ export interface InterlockContext {
   /** Door state of a guarded habitat, or undefined when unknown. */
   habitat: (deviceId: string) => { doorState?: string; ageMs: number } | undefined;
   animalsSeen: string[];
+  /** Mobile animal housing (e.g. a Roaming Roost) parked in the mower's work area. */
+  occupiedBy?: string[];
 }
 
 /**
@@ -184,8 +186,42 @@ export function mowingBlockedReason(link: MowerLink, ctx: InterlockContext): str
     if (h.ageMs > 60_000) return `Cannot confirm the animals from ${id} are inside: its door state is out of date.`;
     if (h.doorState !== "closed") return `${id}: the door is ${h.doorState} - the animals may be on the lawn.`;
   }
+  if (ctx.occupiedBy?.length) {
+    const who = [...new Set(ctx.occupiedBy)].join(" and ");
+    return `${who} ${ctx.occupiedBy.length > 1 ? "are" : "is"} in the mower's work area - its animals may be on the lawn. Move it, or mow another area.`;
+  }
   if (ctx.animalsSeen.length) {
     return `An animal was seen on the property in the last 15 minutes (${[...new Set(ctx.animalsSeen)].slice(0, 3).join(", ")}). Check the lawn is clear.`;
   }
   return null;
+}
+
+// ── work area (Property Twin) ─────────────────────────────────────────────────
+/** Animal housing that moves around the lawn; parked in a mower's work area it holds mowing. */
+export const MOBILE_ANIMAL_HOUSING = new Set(["roaming-roost"]);
+type LayoutItemLike = { id: string; name: string; type: string; x: number; y: number; width: number; depth: number; deviceId?: string };
+type LayoutLike = { property: { widthFt: number; depthFt: number }; items: LayoutItemLike[] };
+
+/**
+ * The lawn a mower works on the Property Twin: the area around its dock (32 x 24 ft),
+ * clipped to the property. Used by the interlock and the demo farm's mowing route.
+ */
+export function mowerWorkArea(layout: LayoutLike, mower: LayoutItemLike): { x: number; y: number; width: number; depth: number } {
+  const cx = mower.x + mower.width / 2, cy = mower.y + mower.depth / 2;
+  const x0 = Math.max(0, cx - 16), y0 = Math.max(0, cy - 12);
+  return { x: x0, y: y0, width: Math.min(layout.property.widthFt, cx + 16) - x0, depth: Math.min(layout.property.depthFt, cy + 12) - y0 };
+}
+
+/**
+ * Names of mobile animal housing parked (even partly) in the work area of the mower with
+ * this device id - empty when the mower is not on the Property Twin.
+ */
+export function workAreaOccupants(layout: LayoutLike, mowerDeviceId: string): string[] {
+  const mower = layout.items.find((i) => i.type === "robot-mower" && i.deviceId === mowerDeviceId);
+  if (!mower) return [];
+  const a = mowerWorkArea(layout, mower);
+  return layout.items
+    .filter((i) => MOBILE_ANIMAL_HOUSING.has(i.type)
+      && i.x < a.x + a.width && i.x + i.width > a.x && i.y < a.y + a.depth && i.y + i.depth > a.y)
+    .map((i) => i.name);
 }

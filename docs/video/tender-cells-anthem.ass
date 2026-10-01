@@ -13,68 +13,43 @@ Style: Card,DejaVu Sans,84,&H0082B8C8,&H0082B8C8,&H001E2B0D,&H001E2B0D,-1,0,0,0,
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 2,0:00:00.00,0:00:07.05,Title,,0,0,0,,{\fad(120,120)}TENDER CELLS\NThe Tender Cells Anthem
+Dialogue: 2,0:00:00.00,0:00:07.05,Title,,0,0,0,,{\fad(120,120)}Official Tender Cells logo / BUILDING THE FUTURE OF ANIMAL CARE
 Dialogue: 2,0:00:07.10,0:00:14.15,Title,,0,0,0,,{\fad(120,120)}Your whole property in 2D and 3D
-Dialogue: 2,0:00:14.20,0:00:18.41,Title,,0,0,0,,{\fad(120,120)}6:30 AM · coop door opens on schedule
 Dialogue: 2,0:00:18.46,0:00:22.68,Title,,0,0,0,,{\fad(120,120)}Doors, feed, water and cleaning on schedules
-Dialogue: 2,0:00:22.73,0:00:26.94,Title,,0,0,0,,{\fad(120,120)}Feed and water levels, live
-Dialogue: 2,0:00:26.99,0:00:31.20,Title,,0,0,0,,{\fad(120,120)}Autonomous farm · simulated
-Dialogue: 2,0:00:31.25,0:00:35.46,Title,,0,0,0,,{\fad(120,120)}Every bird has a profile
+Dialogue: 2,0:00:22.73,0:00:26.94,Title,,0,0,0,,{\fad(120,120)}Feed and water levels - demo data
 Dialogue: 2,0:00:35.51,0:00:39.73,Title,,0,0,0,,{\fad(120,120)}Everything connected on one map
-Dialogue: 2,0:00:39.78,0:00:43.99,Title,,0,0,0,,{\fad(120,120)}Open source · github.com/WeCr8/TenderCells
-Dialogue: 2,0:00:44.04,0:00:48.25,Title,,0,0,0,,{\fad(120,120)}A digital twin of your farm
 Dialogue: 2,0:00:48.30,0:00:50.20,Title,,0,0,0,,{\fad(120,120)}From the backyard coop…
-Dialogue: 2,0:00:50.25,0:00:52.15,Title,,0,0,0,,{\fad(120,120)}…to the family farm
-Dialogue: 2,0:00:52.20,0:00:54.10,Title,,0,0,0,,{\fad(120,120)}Vision that watches over the flock
-Dialogue: 2,0:00:54.15,0:00:56.05,Title,,0,0,0,,{\fad(120,120)}Robot arm + gantry
+Dialogue: 2,0:00:52.20,0:00:54.10,Title,,0,0,0,,{\fad(120,120)}Explore the vision dashboard
 Dialogue: 2,0:00:56.10,0:00:57.95,Title,,0,0,0,,{\fad(120,120)}TENDER CELLS — LET'S GO!
 Dialogue: 2,0:00:58.00,0:01:01.65,Title,,0,0,0,,{\fad(120,120)}Chicken Tender™
-Dialogue: 2,0:01:01.70,0:01:05.35,Title,,0,0,0,,{\fad(120,120)}Duck Dock™
 Dialogue: 2,0:01:05.40,0:01:09.05,Title,,0,0,0,,{\fad(120,120)}Roaming Roost™
-Dialogue: 2,0:01:09.10,0:01:12.75,Title,,0,0,0,,{\fad(120,120)}Tender Cells OS
 Dialogue: 2,0:01:12.80,0:01:16.45,Title,,0,0,0,,{\fad(120,120)}Missions for kids and families
-Dialogue: 2,0:01:16.50,0:01:20.15,Title,,0,0,0,,{\fad(120,120)}Automations day and night
-Dialogue: 2,0:01:20.20,0:01:23.85,Title,,0,0,0,,{\fad(120,120)}4-H · FFA · schools
 Dialogue: 2,0:01:23.90,0:01:27.55,Title,,0,0,0,,{\fad(120,120)}6DOF arm + XYZ gantry (simulated)
-Dialogue: 2,0:01:31.40,0:01:35.60,Title,,0,0,0,,{\fad(120,120)}Egg Map · eggs counted automatically
-Dialogue: 2,0:01:35.65,0:01:39.85,Title,,0,0,0,,{\fad(120,120)}One OS, many product families
-Dialogue: 2,0:01:39.90,0:01:44.10,Title,,0,0,0,,{\fad(120,120)}Sensors, day and night
-Dialogue: 2,0:01:44.15,0:01:48.35,Title,,0,0,0,,{\fad(120,120)}WatchTower AI · predator watch
-Dialogue: 2,0:01:48.40,0:01:52.60,Title,,0,0,0,,{\fad(120,120)}Projects for 4-H and science fairs
+Dialogue: 2,0:01:31.40,0:01:35.60,Title,,0,0,0,,{\fad(120,120)}Egg Map - demo records
+Dialogue: 2,0:01:39.90,0:01:44.10,Title,,0,0,0,,{\fad(120,120)}Sensor readings - demo data
+Dialogue: 2,0:01:48.40,0:01:52.60,Title,,0,0,0,,{\fad(120,120)}4-H project ideas: observe, build, share
 Dialogue: 2,0:01:52.65,0:01:56.85,Title,,0,0,0,,{\fad(120,120)}Build it yourself
-Dialogue: 2,0:01:56.90,0:02:01.10,Title,,0,0,0,,{\fad(120,120)}Makers · farmers · engineers
-Dialogue: 2,0:02:01.15,0:02:05.35,Title,,0,0,0,,{\fad(120,120)}Tender Cells OS
-Dialogue: 2,0:02:05.40,0:02:07.28,Title,,0,0,0,,{\fad(120,120)}Open source
-Dialogue: 2,0:02:07.33,0:02:09.20,Title,,0,0,0,,{\fad(120,120)}Built by many hands
+Dialogue: 2,0:02:01.15,0:02:05.35,Title,,0,0,0,,{\fad(120,120)}From curiosity to a working circuit
 Dialogue: 2,0:02:09.25,0:02:11.13,Title,,0,0,0,,{\fad(120,120)}Animal & plant library
 Dialogue: 2,0:02:13.10,0:02:14.95,Title,,0,0,0,,{\fad(120,120)}TENDER CELLS — LET'S GO!
 Dialogue: 2,0:02:15.00,0:02:18.65,Title,,0,0,0,,{\fad(120,120)}Chicken Tender™
 Dialogue: 2,0:02:18.70,0:02:22.35,Title,,0,0,0,,{\fad(120,120)}Duck Dock™ · water
-Dialogue: 2,0:02:22.40,0:02:26.05,Title,,0,0,0,,{\fad(120,120)}Roaming Roost™
-Dialogue: 2,0:02:26.10,0:02:29.75,Title,,0,0,0,,{\fad(120,120)}Future farming
 Dialogue: 2,0:02:29.80,0:02:33.45,Title,,0,0,0,,{\fad(120,120)}Trigger an event
-Dialogue: 2,0:02:33.50,0:02:37.15,Title,,0,0,0,,{\fad(120,120)}Bring your own robot mower
-Dialogue: 2,0:02:37.20,0:02:40.85,Title,,0,0,0,,{\fad(120,120)}Teaching kids and helping farms
+Dialogue: 2,0:02:33.50,0:02:37.15,Title,,0,0,0,,{\fad(120,120)}Explore supported mower integrations
+Dialogue: 2,0:02:37.20,0:02:40.85,Title,,0,0,0,,{\fad(120,120)}Build. Test. Learn together.
 Dialogue: 2,0:02:40.90,0:02:44.55,Title,,0,0,0,,{\fad(120,120)}Weed patrol robots
-Dialogue: 2,0:02:49.70,0:02:52.74,Title,,0,0,0,,{\fad(120,120)}Robot arm · simulated today
-Dialogue: 2,0:02:52.79,0:02:55.83,Title,,0,0,0,,{\fad(120,120)}Computer vision
-Dialogue: 2,0:02:55.88,0:02:58.91,Title,,0,0,0,,{\fad(120,120)}Solar WatchTower + sensors
+Dialogue: 2,0:02:49.70,0:02:52.74,Title,,0,0,0,,{\fad(120,120)}Robot arm workflow - simulated
+Dialogue: 2,0:02:52.79,0:02:55.83,Title,,0,0,0,,{\fad(120,120)}Vision dashboard - demo
+Dialogue: 2,0:02:55.88,0:02:58.91,Title,,0,0,0,,{\fad(120,120)}WatchTower and sensor workflow - demo
 Dialogue: 2,0:03:02.05,0:03:05.09,Title,,0,0,0,,{\fad(120,120)}Your property, your boundary
-Dialogue: 2,0:03:05.14,0:03:08.18,Title,,0,0,0,,{\fad(120,120)}Works with the gear you already have
-Dialogue: 2,0:03:08.23,0:03:11.26,Title,,0,0,0,,{\fad(120,120)}Big ideas, small beginnings
-Dialogue: 2,0:03:11.31,0:03:14.35,Title,,0,0,0,,{\fad(120,120)}Just beginning
-Dialogue: 2,0:03:14.40,0:03:18.35,Card,,0,0,0,,{\fad(120,120)}Chicken Tender · Duck Dock · Roaming Roost
+Dialogue: 2,0:03:05.14,0:03:08.18,Title,,0,0,0,,{\fad(120,120)}Supported integrations; setup required
 Dialogue: 2,0:03:18.40,0:03:19.26,Title,,0,0,0,,{\fad(120,120)}CHICKEN TENDER!
-Dialogue: 2,0:03:19.31,0:03:20.18,Title,,0,0,0,,{\fad(120,120)}DUCK DOCK!
 Dialogue: 2,0:03:20.23,0:03:21.09,Title,,0,0,0,,{\fad(120,120)}ROAMING ROOST!
-Dialogue: 2,0:03:21.14,0:03:22.00,Title,,0,0,0,,{\fad(120,120)}DON'T STOP!
 Dialogue: 2,0:03:22.05,0:03:22.91,Title,,0,0,0,,{\fad(120,120)}CHICKEN TENDER!
-Dialogue: 2,0:03:22.96,0:03:23.83,Title,,0,0,0,,{\fad(120,120)}DUCK DOCK!
 Dialogue: 2,0:03:23.88,0:03:24.74,Title,,0,0,0,,{\fad(120,120)}ROAMING ROOST!
-Dialogue: 2,0:03:24.79,0:03:25.65,Title,,0,0,0,,{\fad(120,120)}DON'T STOP!
-Dialogue: 2,0:03:25.70,0:03:29.30,Title,,0,0,0,,{\fad(120,120)}Building the future, one flock at a time
+Dialogue: 2,0:03:25.70,0:03:29.30,Title,,0,0,0,,{\fad(120,120)}Explore your farm in 2D and 3D
 Dialogue: 2,0:03:36.65,0:03:40.25,Title,,0,0,0,,{\fad(120,120)}TENDER CELLS
-Dialogue: 2,0:03:40.30,0:03:44.83,Card,,0,0,0,,{\fad(120,120)}tendercells.com/demo\NOpen source on GitHub · WeCr8 Solutions
+Dialogue: 2,0:03:40.30,0:03:44.83,Card,,0,0,0,,{\fad(120,120)}Official Tender Cells logo / BUILDING THE FUTURE, ONE FLOCK AT A TIME / tendercells.com/app/demo / WeCr8 Solutions
 Dialogue: 1,0:00:14.20,0:00:18.41,Lyric,,0,0,0,,Sun comes up and the birds wake too
 Dialogue: 1,0:00:18.46,0:00:22.67,Lyric,,0,0,0,,Got a smarter way to do what farmers do
 Dialogue: 1,0:00:22.72,0:00:26.94,Lyric,,0,0,0,,Feeders running, gates all clear

@@ -5,7 +5,7 @@
  "durationSec": 224.88,
  "bpm": 129.2,
  "firstBeatSec": 0.37,
- "timingNote": "Section starts come from audio analysis (repeated sections matched: chorus 0:56.1 = 2:13.1, pre-chorus 0:48.3 = 2:05.4, verse 0:14.2 = 1:31.4; final chorus 3:18.4). Line times inside a section are spread evenly - nudge each caption to the vocal in the editor.",
+ "timingNote": "Section starts follow the existing anthem edit. Cuts retain the established timing; lyric files are timing references only and are not included in the film.",
  "sections": [
   {
    "id": "intro",
@@ -444,8 +444,11 @@
    "app": "os",
    "route": "/demo",
    "action": "hero3d",
-   "onScreen": "TENDER CELLS\nThe Tender Cells Anthem",
-   "visual": "Open on the live 3D demo farm (landing hero). Slow push-in; the autopilot panel shows every unit working."
+   "onScreen": "Official Tender Cells logo / BUILDING THE FUTURE OF ANIMAL CARE",
+   "visual": "Open on the official Tender Cells brand card, dissolve into real farmland, then reveal the digital twin so the application feels grounded in the work it supports.",
+   "stock": "agriculture-field-from-above-820.mp4",
+   "stockOffset": 0,
+   "purpose": "Establish the brand, the land and the promise before introducing the software."
   },
   {
    "id": "S02",
@@ -455,7 +458,8 @@
    "route": "/demo",
    "action": "hero2d",
    "onScreen": "Your whole property in 2D and 3D",
-   "visual": "Same hero, flip to 2D top-down plan on the downbeat at 0:07.1."
+   "visual": "Same hero, flip to 2D top-down plan on the downbeat at 0:07.1.",
+   "purpose": "Same hero, flip to 2D top-down plan on the downbeat at 0:07.1."
   },
   {
    "id": "S03",
@@ -464,8 +468,11 @@
    "app": "os",
    "route": "/chicken-tender?section=coop",
    "action": "page",
-   "onScreen": "6:30 AM · coop door opens on schedule",
-   "visual": "Chicken Tender coop dashboard: temperature, humidity, occupancy."
+   "onScreen": "",
+   "visual": "Real hens moving through a farmyard at first light: establish who the system is built to care for.",
+   "stock": "hens-farm-12012874.mp4",
+   "stockOffset": 1,
+   "purpose": "Ground the first care workflow in real animal life."
   },
   {
    "id": "S04",
@@ -475,7 +482,8 @@
    "route": "/schedules",
    "action": "page",
    "onScreen": "Doors, feed, water and cleaning on schedules",
-   "visual": "Schedules list."
+   "visual": "Schedules list.",
+   "purpose": "Schedules list."
   },
   {
    "id": "S05",
@@ -484,8 +492,9 @@
    "app": "os",
    "route": "/chicken-tender?section=feed",
    "action": "page",
-   "onScreen": "Feed and water levels, live",
-   "visual": "Feeding & Water section."
+   "onScreen": "Feed and water levels - demo data",
+   "visual": "Feeding & Water section.",
+   "purpose": "Feeding & Water section."
   },
   {
    "id": "S06",
@@ -494,8 +503,12 @@
    "app": "os",
    "route": "/layout",
    "action": "viewer",
-   "onScreen": "Autonomous farm · simulated",
-   "visual": "3D viewer with the autopilot panel: rover, mower and Roaming Roost moving. Optional real b-roll: owner relaxing on the porch with the app."
+   "onScreen": "",
+   "visual": "An outdoor rover moves along a park path; connect the care schedule to the idea of movement across a property.",
+   "purpose": "An outdoor rover moves along a park path; connect the care schedule to the idea of movement across a property.",
+   "stock": "rover-park-8566714.mp4",
+   "stockOffset": 3,
+   "contextLabel": "Outdoor robotics reference - stock"
   },
   {
    "id": "S07",
@@ -504,8 +517,11 @@
    "app": "os",
    "route": "/flock",
    "action": "page",
-   "onScreen": "Every bird has a profile",
-   "visual": "Flock roster."
+   "onScreen": "",
+   "visual": "Free-roaming chickens connect the flock data to real animal life before the property map appears.",
+   "stock": "chickens-roaming-34450566.mp4",
+   "stockOffset": 8,
+   "purpose": "Connect flock records to the animals the application is designed to support."
   },
   {
    "id": "S08",
@@ -515,27 +531,33 @@
    "route": "/layout",
    "action": "viewer2d",
    "onScreen": "Everything connected on one map",
-   "visual": "2D top view of the whole property with the boundary line."
+   "visual": "2D top view of the whole property with the boundary line.",
+   "purpose": "2D top view of the whole property with the boundary line."
   },
   {
    "id": "S09",
    "start": 39.78,
    "end": 44.04,
-   "app": "web",
-   "route": "/open-source",
-   "action": "page",
-   "onScreen": "Open source · github.com/WeCr8/TenderCells",
-   "visual": "Website open-source page (or a screen capture of the GitHub repo)."
+   "app": "os",
+   "route": "/layout",
+   "action": "viewer2d",
+   "onScreen": "",
+   "visual": "Hands harvest greens between the property map and the digital twin: the map serves everyday farm work.",
+   "purpose": "Hands harvest greens between the property map and the digital twin: the map serves everyday farm work.",
+   "stock": "harvest-lettuce-7456581.mp4",
+   "stockOffset": 0
   },
   {
    "id": "S10",
    "start": 44.04,
    "end": 48.3,
-   "app": "web",
-   "route": "/digital-twin",
-   "action": "page",
-   "onScreen": "A digital twin of your farm",
-   "visual": "Website digital-twin page."
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "",
+   "visual": "Reveal the same property in 3D: the digital twin gives the map a spatial purpose.",
+   "sourceShot": "S01",
+   "purpose": "Reveal the same property in 3D: the digital twin gives the map a spatial purpose."
   },
   {
    "id": "S11",
@@ -545,7 +567,8 @@
    "route": "/chicken-tender?section=coop",
    "action": "page",
    "onScreen": "From the backyard coop…",
-   "visual": "Coop close-up."
+   "visual": "Coop close-up.",
+   "purpose": "Coop close-up."
   },
   {
    "id": "S12",
@@ -554,8 +577,11 @@
    "app": "os",
    "route": "/demo",
    "action": "hero3d",
-   "onScreen": "…to the family farm",
-   "visual": "Wide 3D farm."
+   "onScreen": "",
+   "visual": "Widen from an individual enclosure to the land around it.",
+   "stock": "landscape-of-a-large-open-field-on-a-sunny-afternoon-21577.mp4",
+   "stockOffset": 2,
+   "purpose": "Widen from an individual enclosure to the land around it."
   },
   {
    "id": "S13",
@@ -564,8 +590,9 @@
    "app": "os",
    "route": "/chicken-eye",
    "action": "page",
-   "onScreen": "Vision that watches over the flock",
-   "visual": "ChickenEye AI vision."
+   "onScreen": "Explore the vision dashboard",
+   "visual": "ChickenEye AI vision.",
+   "purpose": "ChickenEye AI vision."
   },
   {
    "id": "S14",
@@ -574,8 +601,12 @@
    "app": "os",
    "route": "/chicken-tender?section=robot",
    "action": "page",
-   "onScreen": "Robot arm + gantry",
-   "visual": "Robot Arm section."
+   "onScreen": "",
+   "visual": "Low wheel-level view of an outdoor rover: show tire contact and steering before the product chorus.",
+   "stock": "rover-wheels-8566727.mp4",
+   "stockOffset": 0,
+   "purpose": "Low wheel-level view of an outdoor rover: show tire contact and steering before the product chorus.",
+   "contextLabel": "Outdoor robotics reference - stock"
   },
   {
    "id": "S15",
@@ -585,7 +616,8 @@
    "route": "/demo",
    "action": "hero3d",
    "onScreen": "TENDER CELLS — LET'S GO!",
-   "visual": "Big title slam on the downbeat over the 3D farm."
+   "visual": "Big title slam on the downbeat over the 3D farm.",
+   "purpose": "Big title slam on the downbeat over the 3D farm."
   },
   {
    "id": "S16",
@@ -595,7 +627,8 @@
    "route": "/chicken-tender?section=coop",
    "action": "page",
    "onScreen": "Chicken Tender™",
-   "visual": "Chicken Tender dashboard."
+   "visual": "Chicken Tender dashboard.",
+   "purpose": "Chicken Tender dashboard."
   },
   {
    "id": "S17",
@@ -604,8 +637,11 @@
    "app": "os",
    "route": "/duck-dock",
    "action": "page",
-   "onScreen": "Duck Dock™",
-   "visual": "Duck Dock dashboard."
+   "onScreen": "",
+   "visual": "Real ducks on water give Duck Dock a living context; the later watershed view returns to the application.",
+   "purpose": "Real ducks on water give Duck Dock a living context; the later watershed view returns to the application.",
+   "stock": "ducks-gliding-on-blue-water-101500.mp4",
+   "stockOffset": 2
   },
   {
    "id": "S18",
@@ -615,7 +651,8 @@
    "route": "/roaming-roost",
    "action": "page",
    "onScreen": "Roaming Roost™",
-   "visual": "Roaming Roost dashboard (3D viewer shows it moving)."
+   "visual": "Roaming Roost dashboard (3D viewer shows it moving).",
+   "purpose": "Roaming Roost dashboard (3D viewer shows it moving)."
   },
   {
    "id": "S19",
@@ -624,8 +661,12 @@
    "app": "os",
    "route": "/demo",
    "action": "hero3d",
-   "onScreen": "Tender Cells OS",
-   "visual": "Whole farm in 3D."
+   "onScreen": "",
+   "visual": "A robotic mower rolls across grass after the Roaming Roost simulation; show a different outdoor surface as general robotics context.",
+   "purpose": "A robotic mower rolls across grass after the Roaming Roost simulation; show a different outdoor surface as general robotics context.",
+   "stock": "robot-mower-grass-42015-prepared.mp4",
+   "stockOffset": 24,
+   "contextLabel": "Outdoor robotics reference - stock"
   },
   {
    "id": "S20",
@@ -635,7 +676,8 @@
    "route": "/missions",
    "action": "page",
    "onScreen": "Missions for kids and families",
-   "visual": "Missions page."
+   "visual": "Missions page.",
+   "purpose": "Missions page."
   },
   {
    "id": "S21",
@@ -644,8 +686,11 @@
    "app": "os",
    "route": "/dashboard",
    "action": "page",
-   "onScreen": "Automations day and night",
-   "visual": "Command Center dashboard."
+   "onScreen": "",
+   "visual": "Goats grazing broaden the animal-care story beyond poultry, following the missions view.",
+   "purpose": "Goats grazing broaden the animal-care story beyond poultry, following the missions view.",
+   "stock": "goats-pasture-29711030.mp4",
+   "stockOffset": 0.5
   },
   {
    "id": "S22",
@@ -654,8 +699,18 @@
    "app": "web",
    "route": "/4h",
    "action": "page",
-   "onScreen": "4-H · FFA · schools",
-   "visual": "Website 4-H page."
+   "onScreen": "",
+   "visual": "Hands adjust wiring on a small wheeled robot, connecting practical STEM learning to the robot-arm workflow.",
+   "stock": "stem-robot-build-7868280-4k.mp4",
+   "stockOffset": 0,
+   "purpose": "Hands adjust wiring on a small wheeled robot, connecting practical STEM learning to the robot-arm workflow.",
+   "sourceCrop": [
+    1920,
+    1080,
+    0,
+    1080
+   ],
+   "contextLabel": "Hands-on STEM - illustrative footage"
   },
   {
    "id": "S23",
@@ -665,7 +720,8 @@
    "route": "/chicken-tender?section=robot",
    "action": "page",
    "onScreen": "6DOF arm + XYZ gantry (simulated)",
-   "visual": "Robot Arm section."
+   "visual": "Robot Arm section.",
+   "purpose": "Robot Arm section."
   },
   {
    "id": "S24",
@@ -675,7 +731,10 @@
    "route": "/demo",
    "action": "hero3d",
    "onScreen": "",
-   "visual": "Whoa 1: 3D."
+   "visual": "A tight farm-tire detail starts a match cut from agricultural tread to small rover wheels.",
+   "purpose": "A tight farm-tire detail starts a match cut from agricultural tread to small rover wheels.",
+   "stock": "tractor-tire-7456455.mp4",
+   "stockOffset": 0.5
   },
   {
    "id": "S25",
@@ -685,7 +744,11 @@
    "route": "/demo",
    "action": "hero2d",
    "onScreen": "",
-   "visual": "Whoa 2: 2D."
+   "visual": "Match the tractor tire to outdoor rover wheels rolling on pavement, then return to egg records.",
+   "purpose": "Match the tractor tire to outdoor rover wheels rolling on pavement, then return to egg records.",
+   "stock": "rover-wheels-8566727.mp4",
+   "stockOffset": 4,
+   "contextLabel": "Outdoor robotics reference - stock"
   },
   {
    "id": "S26",
@@ -694,18 +757,22 @@
    "app": "os",
    "route": "/egg-map",
    "action": "page",
-   "onScreen": "Egg Map · eggs counted automatically",
-   "visual": "Egg Map."
+   "onScreen": "Egg Map - demo records",
+   "visual": "Egg Map.",
+   "purpose": "Egg Map."
   },
   {
    "id": "S27",
    "start": 95.65,
    "end": 99.9,
    "app": "os",
-   "route": "/products",
+   "route": "/egg-map",
    "action": "page",
-   "onScreen": "One OS, many product families",
-   "visual": "Products & Devices."
+   "onScreen": "",
+   "visual": "Return from the egg map to real hens: connect the recorded care task to the flock.",
+   "purpose": "Return from the egg map to real hens: connect the recorded care task to the flock.",
+   "stock": "hens-farm-12012874.mp4",
+   "stockOffset": 5.5
   },
   {
    "id": "S28",
@@ -714,8 +781,9 @@
    "app": "os",
    "route": "/sensors",
    "action": "page",
-   "onScreen": "Sensors, day and night",
-   "visual": "Sensors."
+   "onScreen": "Sensor readings - demo data",
+   "visual": "Sensors.",
+   "purpose": "Sensors."
   },
   {
    "id": "S29",
@@ -724,8 +792,11 @@
    "app": "os",
    "route": "/predator-monitor",
    "action": "page",
-   "onScreen": "WatchTower AI · predator watch",
-   "visual": "WatchTower dashboard / camera views."
+   "onScreen": "",
+   "visual": "Observe a rabbit grazing before the learning sequence; caring starts with looking closely at an animal.",
+   "purpose": "Observe a rabbit grazing before the learning sequence; caring starts with looking closely at an animal.",
+   "stock": "rabbit-grass-4377851.mp4",
+   "stockOffset": 5
   },
   {
    "id": "S30",
@@ -734,8 +805,19 @@
    "app": "web",
    "route": "/science-fair",
    "action": "page",
-   "onScreen": "Projects for 4-H and science fairs",
-   "visual": "Website science-fair page."
+   "onScreen": "4-H project ideas: observe, build, share",
+   "visual": "4-H project ideas: connect animal observation to hands-on robotics. Use a non-identifying hands-and-robot crop of a supervised classroom activity; these are illustrative project ideas, not footage of a named 4-H club.",
+   "stock": "stem-robot-build-7868280-4k.mp4",
+   "stockOffset": 2,
+   "purpose": "4-H project ideas: connect animal observation to hands-on robotics. Use a non-identifying hands-and-robot crop of a supervised classroom activity; these are illustrative project ideas, not footage of a named 4-H club.",
+   "sourceCrop": [
+    1920,
+    1080,
+    0,
+    1080
+   ],
+   "contextLabel": "Hands-on STEM - illustrative footage",
+   "editorialTitle": "4-H project ideas: observe, build, share"
   },
   {
    "id": "S31",
@@ -745,7 +827,8 @@
    "route": "/projects",
    "action": "page",
    "onScreen": "Build it yourself",
-   "visual": "DIY projects."
+   "visual": "DIY projects.",
+   "purpose": "DIY projects."
   },
   {
    "id": "S32",
@@ -754,18 +837,25 @@
    "app": "web",
    "route": "/developers",
    "action": "page",
-   "onScreen": "Makers · farmers · engineers",
-   "visual": "Website developers page."
+   "onScreen": "",
+   "visual": "Return from project planning to harvesting: show the practical farm work that inspires the build.",
+   "stock": "harvest-lettuce-7456581.mp4",
+   "stockOffset": 5,
+   "purpose": "Return from project planning to harvesting: show the practical farm work that inspires the build."
   },
   {
    "id": "S33",
    "start": 121.15,
    "end": 125.4,
-   "app": "web",
-   "route": "/os",
+   "app": "os",
+   "route": "/projects",
    "action": "page",
-   "onScreen": "Tender Cells OS",
-   "visual": "Website OS page."
+   "onScreen": "From curiosity to a working circuit",
+   "visual": "Close circuit-board work completes the observe, plan, build sequence before the open-source resources.",
+   "purpose": "Close circuit-board work completes the observe, plan, build sequence before the open-source resources.",
+   "stock": "stem-circuit-5736195.mp4",
+   "stockOffset": 2,
+   "editorialTitle": "From curiosity to a working circuit"
   },
   {
    "id": "S34",
@@ -774,8 +864,10 @@
    "app": "web",
    "route": "/open-source",
    "action": "page",
-   "onScreen": "Open source",
-   "visual": "Open-source page."
+   "onScreen": "",
+   "visual": "Open-source resources show where makers can participate.",
+   "sourceShot": "S09",
+   "purpose": "Open-source resources show where makers can participate."
   },
   {
    "id": "S35",
@@ -784,8 +876,11 @@
    "app": "web",
    "route": "/os",
    "action": "page",
-   "onScreen": "Built by many hands",
-   "visual": "Website OS page, build section."
+   "onScreen": "",
+   "visual": "Human hands connect the open-source idea to practical work.",
+   "stock": "a-person-sowing-a-seed-2851.mp4",
+   "stockOffset": 18,
+   "purpose": "Human hands connect the open-source idea to practical work."
   },
   {
    "id": "S36",
@@ -795,7 +890,8 @@
    "route": "/library",
    "action": "page",
    "onScreen": "Animal & plant library",
-   "visual": "Library."
+   "visual": "Library.",
+   "purpose": "Library."
   },
   {
    "id": "S37",
@@ -805,7 +901,10 @@
    "route": "/demo",
    "action": "hero3d",
    "onScreen": "",
-   "visual": "Wide 3D farm."
+   "visual": "After the animal library, return to goats in pasture to reconnect learning with everyday care.",
+   "purpose": "After the animal library, return to goats in pasture to reconnect learning with everyday care.",
+   "stock": "goats-pasture-29711030.mp4",
+   "stockOffset": 4
   },
   {
    "id": "S38",
@@ -815,7 +914,8 @@
    "route": "/layout",
    "action": "viewer",
    "onScreen": "TENDER CELLS — LET'S GO!",
-   "visual": "Title slam over the Property Twin viewer."
+   "visual": "Title slam over the Property Twin viewer.",
+   "purpose": "Title slam over the Property Twin viewer."
   },
   {
    "id": "S39",
@@ -825,7 +925,8 @@
    "route": "/chicken-tender?section=eggs",
    "action": "page",
    "onScreen": "Chicken Tender™",
-   "visual": "Egg Map section."
+   "visual": "Egg Map section.",
+   "purpose": "Egg Map section."
   },
   {
    "id": "S40",
@@ -835,7 +936,8 @@
    "route": "/watershed",
    "action": "page",
    "onScreen": "Duck Dock™ · water",
-   "visual": "Watershed & drainage (water on the map)."
+   "visual": "Watershed & drainage (water on the map).",
+   "purpose": "Watershed & drainage (water on the map)."
   },
   {
    "id": "S41",
@@ -844,8 +946,12 @@
    "app": "os",
    "route": "/layout",
    "action": "viewer2d",
-   "onScreen": "Roaming Roost™",
-   "visual": "2D top view: roost loop inside the boundary."
+   "onScreen": "",
+   "visual": "A close outdoor mower pass across grass adds physical movement between the water map and farm machinery detail; label as stock robotics reference.",
+   "purpose": "A close outdoor mower pass across grass adds physical movement between the water map and farm machinery detail; label as stock robotics reference.",
+   "stock": "robot-mower-grass-42015-prepared.mp4",
+   "stockOffset": 29,
+   "contextLabel": "Outdoor robotics reference - stock"
   },
   {
    "id": "S42",
@@ -854,8 +960,11 @@
    "app": "os",
    "route": "/demo",
    "action": "hero3d",
-   "onScreen": "Future farming",
-   "visual": "Whole farm in 3D."
+   "onScreen": "",
+   "visual": "Farm machinery and tread texture bridge physical terrain into the simulated event-and-response workflow.",
+   "stock": "tractor-tire-7456455.mp4",
+   "stockOffset": 3,
+   "purpose": "Farm machinery and tread texture bridge physical terrain into the simulated event-and-response workflow."
   },
   {
    "id": "S43",
@@ -865,7 +974,8 @@
    "route": "/simulator",
    "action": "trigger",
    "onScreen": "Trigger an event",
-   "visual": "Event simulator: predator event runs its chain."
+   "visual": "Event simulator: predator event runs its chain.",
+   "purpose": "Event simulator: predator event runs its chain."
   },
   {
    "id": "S44",
@@ -874,8 +984,9 @@
    "app": "os",
    "route": "/mowers",
    "action": "page",
-   "onScreen": "Bring your own robot mower",
-   "visual": "Mowers page."
+   "onScreen": "Explore supported mower integrations",
+   "visual": "Mowers page.",
+   "purpose": "Mowers page."
   },
   {
    "id": "S45",
@@ -884,8 +995,19 @@
    "app": "web",
    "route": "/schools",
    "action": "page",
-   "onScreen": "Teaching kids and helping farms",
-   "visual": "Website schools page."
+   "onScreen": "Build. Test. Learn together.",
+   "visual": "Return to the student-built robot: inspecting wheels and sensors connects STEM projects to the application robotics pages.",
+   "stock": "stem-robot-build-7868280-4k.mp4",
+   "stockOffset": 10,
+   "purpose": "Return to the student-built robot: inspecting wheels and sensors connects STEM projects to the application robotics pages.",
+   "sourceCrop": [
+    1920,
+    1080,
+    0,
+    1080
+   ],
+   "contextLabel": "Hands-on STEM - illustrative footage",
+   "editorialTitle": "Build. Test. Learn together."
   },
   {
    "id": "S46",
@@ -895,7 +1017,8 @@
    "route": "/weed-patrol",
    "action": "page",
    "onScreen": "Weed patrol robots",
-   "visual": "Weed Patrol."
+   "visual": "Weed Patrol.",
+   "purpose": "Weed Patrol."
   },
   {
    "id": "S47",
@@ -905,7 +1028,11 @@
    "route": "/layout",
    "action": "viewer",
    "onScreen": "",
-   "visual": "Whoa 1."
+   "visual": "Outdoor rover movement continues the robotics story after Weed Patrol.",
+   "purpose": "Outdoor rover movement continues the robotics story after Weed Patrol.",
+   "stock": "rover-park-8566714.mp4",
+   "stockOffset": 6,
+   "contextLabel": "Outdoor robotics reference - stock"
   },
   {
    "id": "S48",
@@ -915,7 +1042,11 @@
    "route": "/demo",
    "action": "hero2d",
    "onScreen": "",
-   "visual": "Whoa 2."
+   "visual": "Cut down to the moving wheels before returning to the simulated arm and vision views.",
+   "purpose": "Cut down to the moving wheels before returning to the simulated arm and vision views.",
+   "stock": "rover-wheels-8566727.mp4",
+   "stockOffset": 5,
+   "contextLabel": "Outdoor robotics reference - stock"
   },
   {
    "id": "S49",
@@ -924,8 +1055,9 @@
    "app": "os",
    "route": "/chicken-tender?section=robot",
    "action": "page",
-   "onScreen": "Robot arm · simulated today",
-   "visual": "Robot Arm section."
+   "onScreen": "Robot arm workflow - simulated",
+   "visual": "Robot Arm section.",
+   "purpose": "Robot Arm section."
   },
   {
    "id": "S50",
@@ -934,8 +1066,9 @@
    "app": "os",
    "route": "/chicken-eye",
    "action": "page",
-   "onScreen": "Computer vision",
-   "visual": "ChickenEye."
+   "onScreen": "Vision dashboard - demo",
+   "visual": "ChickenEye.",
+   "purpose": "ChickenEye."
   },
   {
    "id": "S51",
@@ -944,8 +1077,9 @@
    "app": "os",
    "route": "/predator-monitor",
    "action": "page",
-   "onScreen": "Solar WatchTower + sensors",
-   "visual": "WatchTower."
+   "onScreen": "WatchTower and sensor workflow - demo",
+   "visual": "WatchTower.",
+   "purpose": "WatchTower."
   },
   {
    "id": "S52",
@@ -955,7 +1089,10 @@
    "route": "/weed-patrol",
    "action": "page",
    "onScreen": "",
-   "visual": "Weed Patrol."
+   "visual": "After sensors and vision, show a real harvest as the human purpose behind the engineering.",
+   "purpose": "After sensors and vision, show a real harvest as the human purpose behind the engineering.",
+   "stock": "harvest-lettuce-7456581.mp4",
+   "stockOffset": 1
   },
   {
    "id": "S53",
@@ -965,7 +1102,8 @@
    "route": "/layout",
    "action": "viewer2d",
    "onScreen": "Your property, your boundary",
-   "visual": "2D map with the property boundary. No map pins or claims about where users are."
+   "visual": "2D map with the property boundary. No map pins or claims about where users are.",
+   "purpose": "2D map with the property boundary. No map pins or claims about where users are."
   },
   {
    "id": "S54",
@@ -974,8 +1112,9 @@
    "app": "os",
    "route": "/mowers",
    "action": "page",
-   "onScreen": "Works with the gear you already have",
-   "visual": "Mowers page."
+   "onScreen": "Supported integrations; setup required",
+   "visual": "Mowers page.",
+   "purpose": "Mowers page."
   },
   {
    "id": "S55",
@@ -984,28 +1123,37 @@
    "app": "os",
    "route": "/projects",
    "action": "page",
-   "onScreen": "Big ideas, small beginnings",
-   "visual": "DIY projects."
+   "onScreen": "",
+   "visual": "Small beginnings: one seed and one practical task.",
+   "stock": "a-person-sowing-a-seed-2851.mp4",
+   "stockOffset": 20,
+   "purpose": "Small beginnings: one seed and one practical task."
   },
   {
    "id": "S56",
    "start": 191.31,
    "end": 194.4,
-   "app": "web",
-   "route": "/digital-twin",
-   "action": "page",
-   "onScreen": "Just beginning",
-   "visual": "Digital-twin page."
+   "app": "os",
+   "route": "/demo",
+   "action": "hero3d",
+   "onScreen": "",
+   "visual": "Return to the simulated twin: this is the application viewers can explore.",
+   "sourceShot": "S01",
+   "purpose": "Return to the simulated twin: this is the application viewers can explore."
   },
   {
    "id": "S57",
    "start": 194.4,
    "end": 198.4,
-   "app": "card",
-   "route": "",
-   "action": "",
-   "onScreen": "Chicken Tender · Duck Dock · Roaming Roost",
-   "visual": "Break: hold on black, three product names build in on the beats."
+   "app": "os",
+   "route": "/demo",
+   "action": "hero2d",
+   "onScreen": "",
+   "visual": "A moving mower crosses grass and paving at its dock, leading into the final montage.",
+   "purpose": "A moving mower crosses grass and paving at its dock, leading into the final montage.",
+   "stock": "robot-mower-grass-42015-prepared.mp4",
+   "stockOffset": 20,
+   "contextLabel": "Outdoor robotics reference - stock"
   },
   {
    "id": "S58",
@@ -1015,7 +1163,8 @@
    "route": "/chicken-tender?section=coop",
    "action": "page",
    "onScreen": "CHICKEN TENDER!",
-   "visual": ""
+   "visual": "",
+   "purpose": "Recognize the product in the final rhythmic montage."
   },
   {
    "id": "S59",
@@ -1024,8 +1173,11 @@
    "app": "os",
    "route": "/duck-dock",
    "action": "page",
-   "onScreen": "DUCK DOCK!",
-   "visual": ""
+   "onScreen": "",
+   "visual": "Brief duck cutaway on the Duck Dock callout.",
+   "purpose": "Brief duck cutaway on the Duck Dock callout.",
+   "stock": "ducks-gliding-on-blue-water-101500.mp4",
+   "stockOffset": 9
   },
   {
    "id": "S60",
@@ -1035,7 +1187,8 @@
    "route": "/roaming-roost",
    "action": "page",
    "onScreen": "ROAMING ROOST!",
-   "visual": ""
+   "visual": "",
+   "purpose": "Recognize the product in the final rhythmic montage."
   },
   {
    "id": "S61",
@@ -1044,8 +1197,12 @@
    "app": "os",
    "route": "/demo",
    "action": "hero3d",
-   "onScreen": "DON'T STOP!",
-   "visual": ""
+   "onScreen": "",
+   "visual": "A quick wheel-level outdoor motion accent.",
+   "purpose": "A quick wheel-level outdoor motion accent.",
+   "stock": "rover-wheels-8566727.mp4",
+   "stockOffset": 2,
+   "contextLabel": "Outdoor robotics reference - stock"
   },
   {
    "id": "S62",
@@ -1055,7 +1212,8 @@
    "route": "/chicken-tender?section=robot",
    "action": "page",
    "onScreen": "CHICKEN TENDER!",
-   "visual": ""
+   "visual": "",
+   "purpose": "Recognize the product in the final rhythmic montage."
   },
   {
    "id": "S63",
@@ -1064,8 +1222,11 @@
    "app": "os",
    "route": "/duck-dock",
    "action": "page",
-   "onScreen": "DUCK DOCK!",
-   "visual": ""
+   "onScreen": "",
+   "visual": "Return to real ducks on the repeated Duck Dock callout.",
+   "purpose": "Match the named animal on the repeated Duck Dock beat.",
+   "stock": "ducks-gliding-on-blue-water-101500.mp4",
+   "stockOffset": 12
   },
   {
    "id": "S64",
@@ -1075,7 +1236,8 @@
    "route": "/layout",
    "action": "viewer",
    "onScreen": "ROAMING ROOST!",
-   "visual": ""
+   "visual": "",
+   "purpose": "Recognize the product in the final rhythmic montage."
   },
   {
    "id": "S65",
@@ -1084,8 +1246,11 @@
    "app": "os",
    "route": "/demo",
    "action": "hero2d",
-   "onScreen": "DON'T STOP!",
-   "visual": ""
+   "onScreen": "",
+   "visual": "A quick pasture beat expands the final animal montage.",
+   "purpose": "A quick pasture beat expands the final animal montage.",
+   "stock": "goats-pasture-29711030.mp4",
+   "stockOffset": 2
   },
   {
    "id": "S66",
@@ -1094,8 +1259,9 @@
    "app": "os",
    "route": "/demo",
    "action": "hero3d",
-   "onScreen": "Building the future, one flock at a time",
-   "visual": "Whole farm in 3D."
+   "onScreen": "Explore your farm in 2D and 3D",
+   "visual": "Whole farm in 3D.",
+   "purpose": "Whole farm in 3D."
   },
   {
    "id": "S67",
@@ -1105,7 +1271,10 @@
    "route": "/layout",
    "action": "viewer",
    "onScreen": "",
-   "visual": ""
+   "visual": "Close with the harvest before returning to the flock and the final application invitation.",
+   "purpose": "Close with the harvest before returning to the flock and the final application invitation.",
+   "stock": "harvest-lettuce-7456581.mp4",
+   "stockOffset": 6
   },
   {
    "id": "S68",
@@ -1115,7 +1284,10 @@
    "route": "/demo",
    "action": "hero2d",
    "onScreen": "",
-   "visual": ""
+   "visual": "Return to the flock before the final invitation, completing the journey from animals to application and back.",
+   "stock": "chickens-roaming-34450566.mp4",
+   "stockOffset": 18,
+   "purpose": "End the story on the animals and land the product exists to support."
   },
   {
    "id": "S69",
@@ -1125,7 +1297,8 @@
    "route": "/demo",
    "action": "hero3d",
    "onScreen": "TENDER CELLS",
-   "visual": ""
+   "visual": "",
+   "purpose": "Recognize the product in the final rhythmic montage."
   },
   {
    "id": "S70",
@@ -1134,8 +1307,10 @@
    "app": "card",
    "route": "",
    "action": "",
-   "onScreen": "tendercells.com/demo\nOpen source on GitHub · WeCr8 Solutions",
-   "visual": "End card on black."
+   "onScreen": "Official Tender Cells logo / BUILDING THE FUTURE, ONE FLOCK AT A TIME / tendercells.com/app/demo / WeCr8 Solutions",
+   "visual": "Resolve on a clean official-logo end card with an inspiring line, application invitation, URL, and WeCr8 Solutions credit; fade to black on the final frames.",
+   "purpose": "Hold a readable invitation and application URL for the full ending; fade the picture to black on the final frames."
   }
- ]
+ ],
+ "story": "Care -> observe -> build -> apply -> return to the farm. Hens, ducks, goats and rabbits alternate with care and mapping views. Outdoor rovers, wheel details and a robotic mower on grass and paving make movement tangible. The 4-H project-ideas verse links animal observation, DIY planning, hands-on robotics and circuit work. Harvesting brings the story back to people and land before the application invitation. Stock illustrates these ideas; it is not Tender Cells hardware, customer footage, or an affiliated 4-H program."
 }

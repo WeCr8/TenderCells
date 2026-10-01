@@ -28,6 +28,7 @@ the mower at home:
 | **Wildlife quiet hours** | Between 20:00 and 07:00 by default. Night mowing kills hedgehogs, toads and other wildlife. You can change or turn this off per mower. |
 | **Flock out** | A guarded coop's door is not `closed`, or its door state is missing or older than 60 s |
 | **Animal seen** | A rover or camera reported an animal on the property in the last 15 minutes |
+| **Roost on the lawn** | A Roaming Roost (mobile animal housing) is parked in the mower's work area on the Property Twin: its animals may be on the lawn. The work area is 32 × 24 ft around the mower's dock. Today the OS checks this; the hub's rule accepts the same input (`occupiedBy`) once the OS reports positions to it. |
 
 **When the hub checks.** It checks the interlock every 5 s (locally, without waiting for a
 vendor poll) and before every start.

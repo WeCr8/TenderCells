@@ -11,7 +11,9 @@
 import { updateDemoEquipment, DEMO_DEVICES } from "../../services/demo/demoEnvironment";
 import { eggService } from "../../services/eggService";
 import { DEMO_PROPERTY_ID, deviceTwinId, type SourceType } from "../twin/twin";
-import { DEMO_MOWER_ID, simForceMowing, simMowers } from "../mower/mowerSim";
+import { DEMO_MOWER_ID, simCommand, simForceMowing, simMowers } from "../mower/mowerSim";
+import { mowerWorkArea } from "../mower/mower";
+import { loadPropertyLayout, savePropertyLayout, type PropertyItem } from "../../components/property/propertyLayoutStore";
 
 export type ChainKind = "device" | "signal" | "ai" | "rule" | "os" | "actuator" | "action" | "notify";
 
@@ -37,6 +39,10 @@ export interface Scenario {
   twin: string;
   apply?: () => Promise<void> | void;
 }
+
+/** "Why did this happen?" at three depths. The engineer depth is the full step chain. */
+export type WhyLevel = "kid" | "farmer" | "engineer";
+export interface WhyText { kid: string; farmer: string }
 
 /**
  * Where each step's data would come from on a live farm. In the demo every value is
@@ -277,7 +283,103 @@ export const SCENARIOS: Scenario[] = [
     learn: { label: "Connect a device", href: "/docs/connect-a-device" },
     build: { label: "Build a device for the OS", href: "/os#build" },
   },
+  {
+    id: "traffic-jam",
+    twin: deviceTwinId(DEMO_MOWER_ID),
+    title: "Robot traffic jam",
+    emoji: "🚦",
+    summary: "The mower's schedule says mow, but the Roaming Roost is parked on its lawn - mowing is held.",
+    steps: [
+      { kind: "device", actor: "Robot mower schedule", detail: "Mowing due on the mower's lawn" },
+      { kind: "os", actor: "Tender Cells OS", detail: "Checks the guarded property state before the mower may start" },
+      { kind: "signal", actor: "Property Twin", detail: "Roaming Roost parked in the mower's work area" },
+      { kind: "rule", actor: "Mower interlock", detail: "Mobile animal housing in the work area → animals may be on the lawn" },
+      { kind: "actuator", actor: "Robot mower (hub mower bridge)", detail: "Start refused - held at the dock" },
+      { kind: "notify", actor: "Owner alert", detail: "\"Mowing held - the Roaming Roost is on the lawn\"" },
+    ],
+    outcome: "Mowing held: the Roaming Roost is on the mower's lawn.",
+    concepts: ["interlocks", "shared context between systems", "animal safety", "digital twins"],
+    see: { label: "Robot mowers", path: "/mowers" },
+    learn: { label: "Bring your own robot mower", href: "/docs/robot-mowers" },
+    build: { label: "Link your mower", href: "/docs/robot-mowers#link-a-home-assistant-mower" },
+    apply: () => {
+      parkRoostOnMowerLawn();
+      try { simCommand(DEMO_MOWER_ID, "start", {}); } catch { /* refused by the interlock - that is the point */ }
+      simMowers(); // a mower that was already out is sent home
+    },
+  },
+  {
+    id: "roost-moves-on",
+    twin: deviceTwinId("rr_001"),
+    title: "Roaming Roost moves on",
+    emoji: "🐓",
+    summary: "The Roaming Roost drives to fresh pasture, off the mower's lawn - mowing may start again.",
+    steps: [
+      { kind: "device", actor: "Roaming Roost drive controller", detail: "Pasture rotation due - drives to fresh grass" },
+      { kind: "signal", actor: "Property Twin", detail: "Roost position updated - the mower's work area is clear" },
+      { kind: "rule", actor: "Mower interlock", detail: "Nothing in the work area and the coops are closed → the mower may start" },
+      { kind: "os", actor: "Tender Cells OS", detail: "Releases the mowing hold" },
+      { kind: "notify", actor: "Owner alert", detail: "\"Lawn clear - mowing can resume\"" },
+    ],
+    outcome: "Roaming Roost moved on; the lawn is clear for mowing.",
+    concepts: ["pasture rotation", "shared context between systems"],
+    see: { label: "Property Twin", path: "/layout" },
+    learn: { label: "Pasture rotation guide", href: "/guides/pasture-rotation" },
+    build: { label: "Door + Roaming Roost lesson", href: "/lessons/door-roaming-roost" },
+    apply: () => { returnRoostHome(); simMowers(); },
+  },
 ];
+
+/** Plain-language "why" for each event (the engineer depth is the step chain). */
+export const WHY: Record<string, WhyText> = {
+  predator: { kid: "A camera saw a fox near the coop, so the door closed to keep the chickens safe.", farmer: "Fox detected near the run (87% confidence) after dusk - door closed and you were alerted." },
+  sunset: { kid: "It got dark and every hen was home, so the coop door closed by itself.", farmer: "Dusk (under 40 lux for 5 minutes) with 7 of 7 hens counted in - door closed." },
+  "egg-laid": { kid: "A hen laid an egg! The camera spotted it and put it on the egg map.", farmer: "Nest camera found a new egg; it is on today's egg map for pickup." },
+  "water-low": { kid: "The water was almost gone, so a valve opened and filled it back up.", farmer: "Waterer at 12% - the refill valve opened until it reached 95%." },
+  "feed-low": { kid: "The food bin is getting low, so you got a reminder to fill it.", farmer: "Feed at 15% (under 20%) - a refill reminder was created, about 2 days left." },
+  heat: { kid: "The coop got too hot, so a fan turned on to cool the chickens down.", farmer: "Coop at 92°F (over 85°F) - fan on, cooling to 84°F; check water and shade." },
+  "missing-hen": { kid: "One hen wasn't home at bedtime, so the door stayed open for her.", farmer: "Dusk with a hen still out - door held open; her last sighting is on the map." },
+  leak: { kid: "A robot found a puddle by the water tap and marked it on the map.", farmer: "Standing water seen at the spigot - leak pinned on the property map." },
+  "mower-flock": { kid: "The chickens went outside, so the robot mower drove home so it wouldn't bump into them.", farmer: "Coop door opened while the mower ran - mower sent home and held until the door closes." },
+  offline: { kid: "The WatchTower stopped saying hello, so Tender Cells asked you to check it.", farmer: "WatchTower missed 3 check-ins - marked offline (code 10, Wi-Fi lost)." },
+  "traffic-jam": { kid: "The mower wanted to cut the grass, but the chickens' moving coop is parked on the lawn - so the mower waits.", farmer: "Mowing held: the Roaming Roost is in the mower's work area, so the lawn is not confirmed clear." },
+  "roost-moves-on": { kid: "The moving coop drove to fresh grass, so the lawn is clear for the mower again.", farmer: "Roaming Roost moved off the lawn - the mower's work area is clear; mowing may start." },
+};
+
+// ── Roaming Roost on the mower's lawn (traffic-jam / roost-moves-on) ─────────────
+const ROOST_HOME_KEY = "tendercells_demo_roost_home_v1";
+const overlaps = (a: { x: number; y: number; width: number; depth: number }, b: { x: number; y: number; width: number; depth: number }) =>
+  a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.depth && a.y + a.depth > b.y;
+
+/** Park the demo Roaming Roost on a clear spot of the mower's lawn (remembering where it was). */
+function parkRoostOnMowerLawn(): void {
+  const layout = loadPropertyLayout();
+  const roost = layout.items.find((i) => i.type === "roaming-roost");
+  const mower = layout.items.find((i) => i.type === "robot-mower" && i.deviceId === DEMO_MOWER_ID);
+  if (!roost || !mower) return;
+  const area = mowerWorkArea(layout, mower);
+  const others = layout.items.filter((i) => i.id !== roost.id);
+  let spot: { x: number; y: number } | null = null;
+  for (let y = area.y + 1; y + roost.depth <= area.y + area.depth - 1 && !spot; y += 1) {
+    for (let x = area.x + 1; x + roost.width <= area.x + area.width - 1; x += 1) {
+      const r = { x, y, width: roost.width, depth: roost.depth };
+      if (!others.some((o: PropertyItem) => overlaps(r, { x: o.x - 1, y: o.y - 1, width: o.width + 2, depth: o.depth + 2 }))) { spot = { x, y }; break; }
+    }
+  }
+  if (!spot) return;
+  try { if (!localStorage.getItem(ROOST_HOME_KEY)) localStorage.setItem(ROOST_HOME_KEY, JSON.stringify({ id: roost.id, x: roost.x, y: roost.y })); } catch { /* storage unavailable */ }
+  savePropertyLayout({ ...layout, items: layout.items.map((i) => (i.id === roost.id ? { ...i, ...spot } : i)) });
+}
+
+/** Drive the demo Roaming Roost back to where it was before the traffic jam. */
+function returnRoostHome(): void {
+  let home: { id: string; x: number; y: number } | null = null;
+  try { home = JSON.parse(localStorage.getItem(ROOST_HOME_KEY) || "null"); localStorage.removeItem(ROOST_HOME_KEY); } catch { /* storage unavailable */ }
+  if (!home) return;
+  const layout = loadPropertyLayout();
+  savePropertyLayout({ ...layout, items: layout.items.map((i) => (i.id === home!.id ? { ...i, x: home!.x, y: home!.y } : i)) });
+}
+
 
 export const scenarioById = (id: string): Scenario | undefined => SCENARIOS.find((s) => s.id === id);
 

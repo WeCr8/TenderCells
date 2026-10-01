@@ -40,6 +40,11 @@ test("a link must guard coops or confirm no animals", () => {
   assert.match(validateMowerLink({ ...base, noAnimalsConfirmed: true, quietHours: { start: 25, end: 7 } }) ?? "", /quietHours/);
 });
 
+test("a Roaming Roost parked in the mower's work area holds mowing", () => {
+  assert.match(mowingBlockedReason(link, ctx("closed", { occupiedBy: ["Roaming Roost"] })) ?? "", /Roaming Roost is in the mower's work area/);
+  assert.equal(mowingBlockedReason(link, ctx("closed", { occupiedBy: [] })), null);
+});
+
 test("Home Assistant states map to activities", () => {
   assert.equal(haToActivity("mowing"), "mowing");
   assert.equal(haToActivity("returning"), "returning");

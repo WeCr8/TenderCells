@@ -15,6 +15,7 @@ import { effectiveBoundary, insideBoundary } from '../yard/boundary';
 import { blockingZone, zonesFromLayout } from '../yard/exclusionZones';
 import { coverageRoute, headingTo } from '../yard/roverPlan';
 import { patternPaths } from '../mower/patterns';
+import { mowerWorkArea } from '../mower/mower';
 import { WEED_BED_TYPES } from '../yard/yardTypes';
 
 export interface Pt { x: number; y: number }
@@ -166,13 +167,7 @@ export function connectLoop(points: Pt[], blocked: Blocked, widthFt: number, dep
   return out;
 }
 
-const clampRect = (x: number, y: number, w: number, d: number, W: number, D: number) => {
-  const x0 = Math.max(0, x), y0 = Math.max(0, y);
-  return { x: x0, y: y0, width: Math.min(W, x + w) - x0, depth: Math.min(D, y + d) - y0 };
-};
-
 function driveRoute(item: PropertyItem, layout: PropertyLayoutState): Pt[] {
-  const { widthFt: W, depthFt: D } = layout.property;
   const cx = item.x + item.width / 2, cy = item.y + item.depth / 2;
   if (item.patrolPath && item.patrolPath.length > 1) return item.patrolPath;
   if (item.type === 'weed-rover') {
@@ -182,7 +177,7 @@ function driveRoute(item: PropertyItem, layout: PropertyLayoutState): Pt[] {
     return [{ x: cx, y: cy }, ...coverageRoute(area, [], 10, 4)];
   }
   if (item.type === 'robot-mower') {
-    const area = clampRect(cx - 16, cy - 12, 32, 24, W, D);
+    const area = mowerWorkArea(layout, item);
     return [{ x: cx, y: cy }, ...patternPaths(area, 'stripes', 0, 1, 3).flat()];
   }
   // Roaming Roost / custom robot: a slow octagon round where it is parked.

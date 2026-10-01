@@ -28,6 +28,8 @@ import { seedDemoEnvironment, type DemoReport } from "../services/demo/demoEnvir
 import { safeDemoNext } from "../lib/demo/demoNext";
 import { trackDemo } from "../lib/demo/track";
 import Viewport3D from "../components/viewport/Viewport3D";
+import WhyPanel from "../components/demo/WhyPanel";
+import { EVENT_LOG_EVENT, readEventLog, runScenario, scenarioById, type EventLogEntry } from "../lib/demo/eventSimulator";
 
 const C = {
   bg: "#0D2B1E",
@@ -69,32 +71,38 @@ const connections: { id: string; label: string; detail: string; path?: string; h
 // Guided entrances into the same simulation (not separate apps). OS pages use the router;
 // website pages (same origin) load normally.
 const personas: { id: string; emoji: string; title: string; who: string; detail: string; cta: string; path?: string; href?: string }[] = [
-  { id: "run-the-farm", emoji: "🚜", title: "Run the farm", who: "Farmers · backyard flocks · homesteaders", detail: "Alerts, animals, feed, water, doors, schedules, predators and system health in one view.", cta: "Open the dashboard", path: "/dashboard" },
-  { id: "mission", emoji: "🏁", title: "Take a mission", who: "Kids · families · first-time visitors", detail: "Protect the flock, close the coop before sunset, find today's eggs, fix a low-water alert.", cta: "Pick a mission", path: "/missions" },
+  { id: "run-the-farm", emoji: "🐔", title: "Run the farm", who: "Farmers · backyard flocks · homesteaders", detail: "Alerts, animals, feed, water, doors, schedules, predators and system health in one view.", cta: "Open the dashboard", path: "/dashboard" },
+  { id: "mission", emoji: "🎮", title: "Try a mission", who: "Kids · families · first-time visitors", detail: "Protect the flock, beat the heat, untangle a robot traffic jam, build a coop brain.", cta: "Pick a mission", path: "/missions" },
   { id: "4h-ffa", emoji: "🎓", title: "Build a 4-H / FFA project", who: "4-H · FFA · schools · homeschool", detail: "Project plans with a question, variables, data to collect and the lessons that build the device.", cta: "See project plans", href: "/science-fair" },
-  { id: "hardware", emoji: "🔧", title: "Explore the hardware", who: "Makers · engineers · parents · teachers", detail: "Boards, wiring, flashing, the MQTT contract and how a device shows up here - step by step.", cta: "Build a device", href: "/os#build" },
-  { id: "code", emoji: "💻", title: "Hack the code", who: "Developers · robotics students · contributors", detail: "Topics and payloads, the backend API, firmware, simulation and how to contribute.", cta: "Developer path", href: "/os#developers" },
-  { id: "platform", emoji: "🧭", title: "Explore Tender Cells OS", who: "Partners · investors · media", detail: "The platform, product families, the shared device and event layer, and the open-source approach.", cta: "About the OS", href: "/os" },
+  { id: "hardware", emoji: "🧑‍🔧", title: "Build hardware", who: "Makers · engineers · parents · teachers", detail: "Boards, wiring, flashing, the MQTT contract and how a device shows up here - step by step.", cta: "Build a device", href: "/os#build" },
+  { id: "code", emoji: "💻", title: "Explore the code", who: "Developers · robotics students · contributors", detail: "Topics and payloads, the backend API, firmware, simulation and how to contribute.", cta: "Developer path", href: "/os#developers" },
+  { id: "platform", emoji: "🏗", title: "Understand Tender Cells OS", who: "Partners · investors · media", detail: "The platform, product families, the shared device and event layer, and the open-source approach.", cta: "About the OS", href: "/os" },
 ];
 
 const countFrom = (detail: string) => Number(/(\d+)/.exec(detail)?.[1] ?? 0);
 
-/** Real-world state of the demo property, from the seed report. */
-function demoStats(report: DemoReport | null) {
+/** The demo property's state in owner terms (never internal verification labels). */
+function demoStats(report: DemoReport | null, activeEvents: number) {
   const devices = report?.devices ?? [];
+  const animals = devices.reduce((n, d) => n + countFrom(d.flock.detail), 0);
   return [
-    { label: "Systems online", value: devices.length },
-    { label: "Animals monitored", value: devices.reduce((n, d) => n + countFrom(d.flock.detail), 0) },
-    { label: "Nest boxes watched", value: devices.reduce((n, d) => n + (d.eggs.detail.includes("nest boxes") ? countFrom(d.eggs.detail) : 0), 0) },
-    { label: "Automations scheduled", value: devices.reduce((n, d) => n + countFrom(d.schedules.detail), 0) },
+    { id: "animals", text: `${animals} Animals` },
+    { id: "systems", text: `${devices.length} Systems` },
+    { id: "health", text: report?.ok ? "All systems online" : "Some systems need attention", warn: !report?.ok },
+    { id: "events", text: `${activeEvents} Active event${activeEvents === 1 ? "" : "s"}`, warn: activeEvents > 0 },
   ];
 }
+
+/** Events in the last half hour count as active. */
+const ACTIVE_MS = 30 * 60_000;
 
 export default function DemoLandingPage() {
   const navigate = useNavigate();
   const [phase, setPhase] = useState<Phase>("seeding");
   const [error, setError] = useState<string>("");
   const [report, setReport] = useState<DemoReport | null>(null);
+  const [latest, setLatest] = useState<EventLogEntry | null>(null);
+  const [activeEvents, setActiveEvents] = useState(0);
   const started = useRef(false);
 
   useEffect(() => {
@@ -112,6 +120,9 @@ export default function DemoLandingPage() {
         ]);
         setReport(seeded);
         track("demo_loaded", { ok: seeded.ok, devices: seeded.devices.length });
+        // Begin with an event: the first visit opens on the robot traffic jam (mower held
+        // because the Roaming Roost is on its lawn), so cause and effect show up at once.
+        if (!readEventLog().length) await runScenario("traffic-jam");
         setPhase("ready");
         // Deep link from the website: open the requested OS page with the demo data loaded.
         const next = safeDemoNext(new URLSearchParams(window.location.search).get("next"));
@@ -124,6 +135,18 @@ export default function DemoLandingPage() {
       }
     })();
   }, [navigate]);
+
+  useEffect(() => {
+    const refresh = () => {
+      const log = readEventLog();
+      const now = Date.now();
+      setLatest(log[0] && now - log[0].at < ACTIVE_MS ? log[0] : null);
+      setActiveEvents(log.filter((e) => now - e.at < ACTIVE_MS).length);
+    };
+    refresh();
+    window.addEventListener(EVENT_LOG_EVENT, refresh);
+    return () => window.removeEventListener(EVENT_LOG_EVENT, refresh);
+  }, []);
 
   return (
     <Box
@@ -157,25 +180,61 @@ export default function DemoLandingPage() {
           <Stack spacing={3} sx={{ width: "min(1080px, 92vw)" }}>
             {/* The first thing a visitor sees: the property itself, live, in 2D and 3D. */}
             <Box data-testid="demo-hero-twin" sx={{ textAlign: "left" }}>
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={1} alignItems={{ sm: "flex-end" }} justifyContent="space-between" sx={{ mb: 1 }}>
+              <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} alignItems={{ md: "flex-end" }} justifyContent="space-between" sx={{ mb: 1 }}>
                 <Box>
                   <Typography variant="h4" component="h1" sx={{ color: C.gold, fontWeight: 800, fontSize: { xs: 24, md: 32 } }}>
-                    Your whole property, live in 2D and 3D
+                    Welcome to the TenderCells Demo Farm
                   </Typography>
-                  <Typography sx={{ color: C.goldMuted, fontSize: 14, maxWidth: 720 }}>
-                    A 3D property operating system: robots mow, scan and patrol inside your boundary while coops, docks
-                    and cameras run on their own. Switch 2D / 3D, drag to rotate, scroll to zoom. Everything here is simulated.
+                  <Typography sx={{ color: C.white, fontWeight: 700, fontSize: 15, maxWidth: 760 }}>
+                    A simulated property where animals, habitats, sensors, cameras and robots share one digital twin.
                   </Typography>
+                  <Typography sx={{ color: C.goldMuted, fontSize: 13, maxWidth: 760 }}>
+                    Nothing here controls real hardware. Trigger events, inspect decisions, and see how a simulated system can
+                    become a connected physical build. Switch 2D / 3D, drag to rotate, scroll to zoom.
+                  </Typography>
+                  <Stack direction="row" spacing={0.75} useFlexGap flexWrap="wrap" sx={{ mt: 1 }} data-testid="demo-status">
+                    {demoStats(report, activeEvents).map((st) => (
+                      <Chip key={st.id} size="small" label={st.text}
+                        sx={{ bgcolor: st.warn ? C.warning + "26" : C.accent + "33", color: st.warn ? C.warning : C.gold, fontWeight: 700 }} />
+                    ))}
+                  </Stack>
                 </Box>
-                <Button variant="contained" onClick={() => { trackDemo("persona_selected", { persona: "property-twin" }); navigate("/layout"); }}
-                  sx={{ bgcolor: C.accent, color: C.white, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}>
-                  Open the Property Twin
-                </Button>
+                <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+                  <Button variant="contained" data-testid="enter-the-farm"
+                    onClick={() => { trackDemo("demo_started", { via: "enter-the-farm" }); trackDemo("property_viewed", { from: "demo" }); navigate("/layout"); }}
+                    sx={{ bgcolor: C.accent, color: C.white, fontWeight: 800, whiteSpace: "nowrap" }}>
+                    Enter the farm
+                  </Button>
+                  <Button variant="outlined" onClick={() => { trackDemo("persona_selected", { persona: "mission" }); navigate("/missions"); }}
+                    sx={{ borderColor: C.gold, color: C.gold, fontWeight: 700, whiteSpace: "nowrap" }}>
+                    Try a mission
+                  </Button>
+                </Stack>
               </Stack>
               <Box sx={{ borderRadius: 2, overflow: "hidden", border: `1px solid ${C.accent}` }}>
                 <Viewport3D initialWorkspaceMode="products" overview showAttentionPanel={false}
                   title="Demo farm" height={{ xs: "min(58dvh, 420px)", sm: "min(62dvh, 520px)", md: 560 }} />
               </Box>
+              {latest && (
+                <Paper elevation={0} data-testid="demo-happening-now"
+                  sx={{ mt: 1, p: 1.5, bgcolor: C.surface, border: `1px solid ${C.warning}66`, borderRadius: 2 }}>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1} alignItems={{ sm: "center" }} sx={{ mb: 1 }}>
+                    <Chip size="small" label="Happening now · simulated" sx={{ bgcolor: C.warning + "26", color: C.warning, fontWeight: 700, alignSelf: "flex-start" }} />
+                    <Typography sx={{ color: C.white, fontWeight: 800 }}>{latest.emoji} {latest.outcome}</Typography>
+                  </Stack>
+                  <Typography sx={{ color: C.gold, fontSize: 13, fontWeight: 700, mb: 0.5 }}>Why did this happen?</Typography>
+                  <WhyPanel scenarioId={latest.scenarioId} steps={latest.steps} twin={latest.twin} />
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ mt: 1.25 }}>
+                    <Button size="small" variant="contained" onClick={() => { trackDemo("event_opened", { event: latest.scenarioId }); navigate(scenarioById(latest.scenarioId)?.see.path ?? "/simulator"); }}
+                      sx={{ bgcolor: C.accent, color: C.white }}>See it: {scenarioById(latest.scenarioId)?.see.label ?? "Event simulator"}</Button>
+                    {latest.scenarioId === "traffic-jam" && (
+                      <Button size="small" variant="outlined" onClick={() => { trackDemo("simulation_action_requested", { action: "roost-moves-on" }); void runScenario("roost-moves-on").then(() => trackDemo("simulation_action_completed", { action: "roost-moves-on" })); }}
+                        sx={{ borderColor: C.gold, color: C.gold }} data-testid="resolve-traffic-jam">Move the Roaming Roost (simulated)</Button>
+                    )}
+                    <Button size="small" variant="outlined" onClick={() => navigate("/simulator")} sx={{ borderColor: C.accent, color: C.gold }}>Trigger another event</Button>
+                  </Stack>
+                </Paper>
+              )}
               <Grid container spacing={1} sx={{ mt: 0.5 }} data-testid="demo-connections">
                 {connections.map((c) => (
                   <Grid item xs={6} sm={4} md={2} key={c.id}>
@@ -208,8 +267,6 @@ export default function DemoLandingPage() {
                 entities can reflect what is physically happening.
               </Typography>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ pt: 0.5 }}>
-                <Button variant="contained" onClick={() => { trackDemo("demo_started", { via: "enter" }); navigate("/dashboard"); }}
-                  sx={{ bgcolor: C.accent, color: C.white, fontWeight: 700 }}>Enter demo</Button>
                 <Button variant="contained" onClick={() => navigate("/simulator")} sx={{ bgcolor: C.gold, color: C.bg, fontWeight: 700 }}>Trigger an event</Button>
                 <Button variant="outlined" href="/digital-twin" sx={{ borderColor: C.accent, color: C.gold }}>How digital twins work</Button>
                 <Button variant="outlined" href="/os#build" onClick={() => trackDemo("build_guide_opened", { from: "demo_hero" })}
@@ -218,18 +275,6 @@ export default function DemoLandingPage() {
                   onClick={() => trackDemo("github_clicked", { from: "demo_hero" })} sx={{ borderColor: C.accent, color: C.gold }}>View source</Button>
               </Stack>
             </Stack>
-
-            {/* Real-world state of the simulated property (not internal verification labels). */}
-            <Grid container spacing={1.5}>
-              {demoStats(report).map((item) => (
-                <Grid item xs={6} sm={3} key={item.label}>
-                  <Paper elevation={0} sx={{ bgcolor: C.surface, border: `1px solid ${C.accent}44`, borderRadius: 2, p: 1.5, textAlign: "center" }}>
-                    <Typography sx={{ color: C.gold, fontSize: 26, fontWeight: 800, lineHeight: 1 }}>{item.value}</Typography>
-                    <Typography sx={{ color: C.goldMuted, fontSize: 12 }}>{item.label}</Typography>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
 
             {!report?.ok && (
               <Alert severity="warning" sx={{ bgcolor: C.warning + "22", color: C.white }}>

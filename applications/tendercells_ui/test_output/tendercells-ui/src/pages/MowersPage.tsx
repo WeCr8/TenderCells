@@ -8,6 +8,7 @@
 // navigation and blade safety. Live: express-api /mowers (lib/mower/mowerApi.ts). Demo:
 // lib/mower/mowerSim.ts.
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { trackDemo } from "../lib/demo/track";
 import { useNavigate } from "react-router-dom";
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Checkbox, Chip, Dialog, DialogActions,
@@ -395,6 +396,7 @@ function MowerDialog({ open, editing, onClose, onSaved, vendors }: {
 export default function MowersPage() {
   const navigate = useNavigate();
   const { mowers, vendors, error, refresh } = useMowers();
+  useEffect(() => { trackDemo("mower_viewed"); }, []);
   const [dialog, setDialog] = useState<{ open: boolean; editing: MowerView | null }>({ open: false, editing: null });
 
   return (

@@ -71,6 +71,8 @@ import { useYardEvents } from '../hooks/useYardEvents';
 import FarmBotBridgePanel from '../components/garden/FarmBotBridgePanel';
 import RobotZonesDialog from '../components/property/RobotZonesDialog';
 import BoundaryPanel, { BoundarySvgLayer } from '../components/property/BoundaryPanel';
+import TwinInspector from '../components/property/TwinInspector';
+import { trackDemo } from '../lib/demo/track';
 import DetectionsSvgLayer, { type RoverMarker } from '../components/yard/DetectionsSvgLayer';
 import { getSimRover } from '../lib/yard/roverSim';
 import { WEED_ROVER_TYPES, YARD_LIVE } from '../lib/yard/yardTypes';
@@ -348,6 +350,8 @@ export default function PropertyLayoutBuilder() {
   useEffect(() => {
     savePropertyLayout({ property, items });
   }, [property, items]);
+
+  useEffect(() => { trackDemo('property_viewed', { from: 'layout' }); }, []);
 
   // FIX(2026-09-27): the 3D view's Terrain menu saves the layout too, but this editor
   // never listened, so its next save overwrote the choice. Adopt the base terrain from
@@ -1220,6 +1224,8 @@ export default function PropertyLayoutBuilder() {
             <TerrainEditorPanel property={property} onChange={(updates) => setProperty((p) => ({ ...p, ...updates }))} />
 
             <BoundaryPanel layout={{ property, items }} onChange={(next) => { setProperty(next.property); setItems(next.items); }} />
+
+            {selectedItem && <TwinInspector item={selectedItem} />}
 
             {/* Selected Item Panel */}
             {selectedItem && (

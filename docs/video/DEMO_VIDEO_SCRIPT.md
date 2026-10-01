@@ -4,7 +4,9 @@
 
 **Song:** [Tender Cells Anthem](tender-cells-anthem.mp3) by wecr8. Length 3:44.9, about **129.2 BPM**, so one bar is 1.86 s. The first beat is at 0.37 s.
 
-**Format:** 16:9, 1920×1080, 30 fps. The whole song is the video. There is no voice-over: the lyrics carry it, and the on-screen titles name what is shown.
+**Format:** 16:9, 1920×1080, 30 fps. The whole song is the video.
+
+**Audio: the song only.** No voice-over, narration or speech anywhere over the song, and no app sounds or sound effects. The lyrics tell the story, and the on-screen text names what is shown. Any spoken explanation belongs in a separate video, never in this one.
 
 **Rules for the edit:**
 - **Every screen is the real demo** (`/app/demo` in the OS, or the website). Keep the "Simulation" / "simulated" labels visible. Never show a simulated robot as real hardware.

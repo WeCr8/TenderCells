@@ -1,0 +1,19 @@
+{
+  "schema": "TenderCells.PartGlobalNeeds.v1",
+  "part_id": "TC-FDR-EL-HX711",
+  "part_name": "HX711 ADC",
+  "revision": "V9",
+  "status": "PURCHASED_BASELINE",
+  "requirements": {
+    "qty": 1
+  },
+  "coordinate_rule": "Orient and mate using interface-control file, not arbitrary vendor origin.",
+  "inspection": [
+    "verify identity",
+    "measure critical envelope",
+    "record supplier/lot",
+    "compare against CAD reference before final enclosure/mount release"
+  ],
+  "substitution_rule": "Equivalent only after dimensions/electrical characteristics are verified and deviation is recorded.",
+  "notes": "Preferred procurement identity Adafruit PID 5974; CAD envelope remains reference unless exact vendor model is substituted."
+}

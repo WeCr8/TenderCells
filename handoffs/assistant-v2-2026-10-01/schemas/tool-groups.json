@@ -1,0 +1,29 @@
+{
+  "customer_read": [
+    "farm",
+    "alerts",
+    "animals",
+    "habitats",
+    "property_twin",
+    "devices",
+    "builder",
+    "missions"
+  ],
+  "customer_local_control": [
+    "emergency_stop",
+    "request_action",
+    "confirm_action"
+  ],
+  "platform_admin": [
+    "customers",
+    "properties",
+    "devices",
+    "builder_content",
+    "missions",
+    "assets",
+    "integrations",
+    "simulation",
+    "connector_health",
+    "firmware"
+  ]
+}

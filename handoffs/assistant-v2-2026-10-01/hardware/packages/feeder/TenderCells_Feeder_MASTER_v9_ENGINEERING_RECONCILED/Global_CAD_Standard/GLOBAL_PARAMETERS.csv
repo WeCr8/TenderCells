@@ -1,0 +1,18 @@
+parameter,value,unit,description
+TC_UNITS,mm,millimeter,All mechanical CAD
+TC_AXIS_UP,Z,,Z is up in product/world assemblies
+TC_AXIS_FRONT,-Y,,Front/service side convention
+TC_AXIS_RIGHT,X,,Right-hand coordinate system
+TC_PRINT_CLEARANCE,0.3,mm,"per side, typical FDM sliding fit"
+TC_MOVING_CLEARANCE,0.6,mm,nominal moving/feed metering clearance
+TC_M3_CLEARANCE,3.4,mm,printed clearance hole target
+TC_M4_CLEARANCE,4.5,mm,printed clearance hole target
+TC_M5_CLEARANCE,5.5,mm,printed clearance hole target
+TC_INSERT_M3_OD,4.6,mm,heat-set pilot nominal; tune per insert vendor
+TC_WALL_GENERAL,2.4,mm,minimum general printed wall target
+TC_FLOOR_GENERAL,3.0,mm,minimum structural printed floor target
+TC_EDGE_FILLET,2.0,mm,default non-interface edge softening
+TC_GRID,25.0,mm,preferred modular mounting grid
+TC_SERVICE_CLEARANCE,20.0,mm,default around removable electronics modules
+TC_CABLE_BEND_MIN,25.0,mm,default low-voltage cable planning radius
+TC_MODEL_SCALE,1.0,,STEP/STL/GLB authored at 1 mm = 1 CAD mm

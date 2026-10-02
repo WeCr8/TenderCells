@@ -1,0 +1,48 @@
+{
+  "reviewed_at": "2026-10-01",
+  "repo": "WeCr8/TenderCells",
+  "branch_reviewed": "main",
+  "mcp": {
+    "version_constant_reviewed": "0.3.0",
+    "source": "applications/tendercells_ui/test_output/express-api/backend/src/mcp",
+    "test_files": [
+      "mcp.test.ts",
+      "hosted.test.ts"
+    ],
+    "view_dir": "applications/tendercells_ui/test_output/express-api/mcp-view",
+    "current_read_tools": [
+      "get_hub_status",
+      "get_device",
+      "get_alerts",
+      "get_yard_events",
+      "get_farm_snapshot",
+      "get_farm_overview"
+    ],
+    "local_tools": [
+      "emergency_stop",
+      "request_action",
+      "confirm_action"
+    ],
+    "customer_scope": "farm:read"
+  },
+  "builder": {
+    "source": "applications/tendercells_ui/test_output/tendercells-ui/src/features/builder",
+    "mission_files": [
+      "00-explore-the-farm.mission.json",
+      "01-protect-the-chickens.mission.json",
+      "02-beat-the-heat.mission.json",
+      "03-robot-traffic-jam.mission.json",
+      "04-build-a-coop-brain.mission.json",
+      "05-sensor-detective.mission.json"
+    ],
+    "project_files": [
+      "chicken-tender-door-book.project.json",
+      "electronics-blink-xiao.project.json",
+      "starter-node-first-coop-brain.project.json"
+    ],
+    "validation": "src/features/builder/lib/validate.ts",
+    "assets": "src/features/builder/lib/assets.ts"
+  },
+  "claude_plugin": "plugins/tendercells",
+  "connector_bundler": "functions/scripts/build-connector.mjs"
+}

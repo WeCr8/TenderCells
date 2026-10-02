@@ -1,0 +1,17 @@
+{
+  "revision": "V9",
+  "authority": "tessellated from V9 canonical STEP parts",
+  "nodes": [
+    "BasePlate",
+    "LoadCellPlatform",
+    "MeteringHousing",
+    "BearingSidePlate",
+    "DriveSidePlate",
+    "Rotor",
+    "HopperAdapter",
+    "HopperGasket",
+    "Hopper",
+    "HopperLid"
+  ],
+  "do_not_dimension_from_glb": true
+}

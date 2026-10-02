@@ -1,0 +1,6 @@
+load,design_allowance,notes
+XIAO ESP32C3,<0.5 A @ 5V allowance,conservative Wi-Fi peak allowance
+28BYJ-48 + ULN2003,~0.5 A allowance,verify purchased motor/driver
+HX711 + load cell,<0.05 A allowance,low-current sensing
+Hall + indicators,<0.05 A allowance,depends on LEDs
+prototype supply,5V >=2A,headroom for transients/accessories

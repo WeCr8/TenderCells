@@ -1,0 +1,15 @@
+{
+  "version": "v4-app-viewer",
+  "totalFiles": 107,
+  "interactiveGlbMB": 1.033,
+  "underTenderCells50MBLimit": true,
+  "features": [
+    "functional GLB digital twin",
+    "React/Vite Three.js drop-in",
+    "Firebase upload example",
+    "React Native WebView wrapper",
+    "telemetry schema",
+    "six-pocket rotor animation",
+    "feed/load/battery/jam visualization"
+  ]
+}

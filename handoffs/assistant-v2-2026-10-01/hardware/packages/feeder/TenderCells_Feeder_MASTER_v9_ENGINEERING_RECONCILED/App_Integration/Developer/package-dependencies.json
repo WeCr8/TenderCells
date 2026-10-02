@@ -1,0 +1,16 @@
+{
+  "web": [
+    "three",
+    "@types/three"
+  ],
+  "reactNative": [
+    "react-native-webview"
+  ],
+  "existingTenderCells": [
+    "React",
+    "Vite",
+    "MUI",
+    "Firebase Storage",
+    "Three.js GLTFLoader"
+  ]
+}

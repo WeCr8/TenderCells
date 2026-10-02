@@ -1,0 +1,27 @@
+{
+  "version": "2.3",
+  "current_phase": "public-assistant-readiness",
+  "critical_path": [
+    "B01 customer facade",
+    "store/reviewer blockers",
+    "signed MCPB",
+    "OpenAI submission",
+    "Claude submission"
+  ],
+  "next_after_public_release": [
+    "B02 MCP App cards",
+    "B03 Claude skills",
+    "B04 Property Twin reads",
+    "Builder reference-check",
+    "M8 sensor lesson",
+    "mobile/Safari QA"
+  ],
+  "future": [
+    "M9 Invent",
+    "printable export",
+    "teacher/classroom mode",
+    "admin MCP",
+    "robot/property orchestration",
+    "generator integration"
+  ]
+}

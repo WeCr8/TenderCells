@@ -1,0 +1,90 @@
+{
+  "source_repo": "WeCr8/TenderCells",
+  "source_dir": "applications/tendercells_ui/test_output/website/public/brand",
+  "reviewed": "2026-10-01",
+  "authoritative_vectors": [
+    "tendercells-icon.svg",
+    "tendercells-icon-square.svg"
+  ],
+  "colors": {
+    "green": "#147C38",
+    "cream": "#F7F4EE"
+  },
+  "assets": [
+    {
+      "path": "README.md",
+      "bytes": 1708,
+      "sha256": "3f617c533abd8e6f0273b71d61b8df2e7152c9790bc6a70fa6934aa379de89fc"
+    },
+    {
+      "path": "official/tendercells-icon-1024.png",
+      "bytes": 71646,
+      "sha256": "0064c691dafbff70cb00803f7bde4fdc03f008427e6983bf46a1998a4d7daf9c"
+    },
+    {
+      "path": "official/tendercells-icon-128.png",
+      "bytes": 7750,
+      "sha256": "973bf90cae2f693892e2a804ace7c41bece4152f6819f1a63c6162def3c7f29d"
+    },
+    {
+      "path": "official/tendercells-icon-256.png",
+      "bytes": 15857,
+      "sha256": "952899c0228660cc16f92587d628514e8ea11391fed0dfd348999702bbc006c1"
+    },
+    {
+      "path": "official/tendercells-icon-512.png",
+      "bytes": 33171,
+      "sha256": "f44ab697b4662d42d9c105f20f2004d1dd74f27733abdaf02ec8d34e6895390a"
+    },
+    {
+      "path": "official/tendercells-icon-64.png",
+      "bytes": 3879,
+      "sha256": "249d424c3583da0117a5ca1f48d3ef81feaa10a8f5f97bcc7f466535d26432a6"
+    },
+    {
+      "path": "official/tendercells-icon-square-1024.png",
+      "bytes": 53992,
+      "sha256": "71861464266a8429dce5f1a60731a6e3001ee0fe54b8ef1b107337e7de8d2395"
+    },
+    {
+      "path": "official/tendercells-icon-square-512.png",
+      "bytes": 25527,
+      "sha256": "81e07f7a52a6b30979becd4cc798ec2c14d841da9e292261fdba2e0687463bab"
+    },
+    {
+      "path": "official/tendercells-icon-square.svg",
+      "bytes": 1128,
+      "sha256": "71a716b49e9199dae9d78e37893573d30c38e575076fa5cbde9080ee2c0199b5"
+    },
+    {
+      "path": "official/tendercells-icon.svg",
+      "bytes": 1137,
+      "sha256": "b0d354f84e9bbb3931d54621c5f70f4ea59c13b8dd712e81c51bdb85cdcddfb3"
+    },
+    {
+      "path": "store-ready/claude-desktop-icon-512.png",
+      "bytes": 33171,
+      "sha256": "f44ab697b4662d42d9c105f20f2004d1dd74f27733abdaf02ec8d34e6895390a"
+    },
+    {
+      "path": "store-ready/claude-directory-icon-512.png",
+      "bytes": 33171,
+      "sha256": "f44ab697b4662d42d9c105f20f2004d1dd74f27733abdaf02ec8d34e6895390a"
+    },
+    {
+      "path": "store-ready/fullbleed-square-1024.png",
+      "bytes": 53992,
+      "sha256": "71861464266a8429dce5f1a60731a6e3001ee0fe54b8ef1b107337e7de8d2395"
+    },
+    {
+      "path": "store-ready/openai-store-icon-1024.png",
+      "bytes": 71646,
+      "sha256": "0064c691dafbff70cb00803f7bde4fdc03f008427e6983bf46a1998a4d7daf9c"
+    },
+    {
+      "path": "store-ready/openai-store-icon-512.png",
+      "bytes": 33171,
+      "sha256": "f44ab697b4662d42d9c105f20f2004d1dd74f27733abdaf02ec8d34e6895390a"
+    }
+  ]
+}

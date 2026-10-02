@@ -1,0 +1,65 @@
+import { test, expect } from '@playwright/test';
+
+test('simulated controls move, release, cancel, blur and latch stop', async ({ page }) => {
+  const motionRequests: string[] = [];
+  page.on('request', req => { if (/cmd\/drive|control\/ws/.test(req.url())) motionRequests.push(req.url()); });
+  await page.goto('/control-demo');
+  await expect(page.getByRole('heading', { name: 'Practice driving' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: /^Ready$/ })).toBeVisible();
+  const surface = page.getByTestId('freetouch-surface');
+  await surface.scrollIntoViewIfNeeded();
+  const rect = (await surface.boundingBox())!;
+  const x = rect.x + rect.width * .25, y = rect.y + rect.height * .65;
+  await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x, y - 65);
+  await expect(page.getByTestId('control-motion')).toHaveText('Moving (simulated)');
+  await expect(page.getByTestId('control-pose')).not.toContainText('X 0.00 m');
+  await page.mouse.up(); await expect(page.getByTestId('control-motion')).toHaveText('Stopped (simulated)');
+  await page.mouse.move(x,y); await page.mouse.down(); await page.mouse.move(x,y-65);
+  await expect(page.getByTestId('control-motion')).toHaveText('Moving (simulated)');
+  await surface.dispatchEvent('pointercancel', { pointerId: 1 });
+  await expect(page.getByTestId('control-motion')).toHaveText('Stopped (simulated)');
+  await page.mouse.up();
+  await page.getByLabel('Control input').selectOption('keyboard');
+  await page.getByRole('heading', { name: 'Practice driving' }).click();
+  await page.keyboard.down('Space'); await page.keyboard.down('ArrowUp');
+  await expect(page.getByTestId('control-motion')).toHaveText('Moving (simulated)');
+  await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+  await expect(page.getByTestId('control-motion')).toHaveText('Stopped (simulated)');
+  await page.keyboard.up('Space'); await page.keyboard.up('ArrowUp');
+  await page.keyboard.down('Space'); await page.keyboard.down('ArrowUp');
+  await expect(page.getByTestId('control-motion')).toHaveText('Moving (simulated)');
+  await page.getByRole('button', { name: 'E-STOP simulation' }).click();
+  await expect(page.getByText('Emergency stop latched')).toBeVisible();
+  await expect(page.getByTestId('control-motion')).toHaveText('Stopped (simulated)');
+  await page.keyboard.up('Space'); await page.keyboard.up('ArrowUp');
+  await page.getByRole('button', { name: 'Reset simulation stop' }).click();
+  await expect(page.getByRole('status').filter({ hasText: /^Ready$/ })).toBeVisible();
+  await expect(page.getByTestId('control-motion')).toHaveText('Stopped (simulated)');
+  expect(motionRequests).toEqual([]);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(overflow).toBe(false);
+});
+
+test('gamepad deadman and tab hiding stop simulated motion', async ({ page }) => {
+  await page.addInitScript(() => {
+    const state = { held: false };
+    Object.defineProperty(window, '__controlTestPad', { value: state });
+    Object.defineProperty(navigator, 'getGamepads', { value: () => [{ connected: true, axes: [0,-1], buttons: [false,false,false,false,state.held].map(pressed => ({ pressed })) }] });
+  });
+  await page.goto('/control-demo');
+  await page.getByLabel('Control input').selectOption('gamepad');
+  await expect(page.getByRole('status').filter({ hasText: /^Ready$/ })).toBeVisible();
+  await expect(page.getByTestId('control-motion')).toHaveText('Stopped (simulated)');
+  await page.evaluate(() => { (window as unknown as { __controlTestPad: { held: boolean } }).__controlTestPad.held = true; });
+  await expect(page.getByTestId('control-motion')).toHaveText('Moving (simulated)');
+  await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
+  await expect(page.getByTestId('control-motion')).toHaveText('Stopped (simulated)');
+  await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
+  await expect(page.getByTestId('control-motion')).toHaveText('Stopped (simulated)');
+  await page.evaluate(() => { (window as unknown as { __controlTestPad: { held: boolean } }).__controlTestPad.held = false; });
+  await page.waitForTimeout(100);
+  await page.evaluate(() => { (window as unknown as { __controlTestPad: { held: boolean } }).__controlTestPad.held = true; });
+  await expect(page.getByTestId('control-motion')).toHaveText('Moving (simulated)');
+  await page.evaluate(() => { (window as unknown as { __controlTestPad: { held: boolean } }).__controlTestPad.held = false; });
+  await expect(page.getByTestId('control-motion')).toHaveText('Stopped (simulated)');
+});

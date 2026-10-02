@@ -1,0 +1,15 @@
+{
+  "id": "class_tank_001",
+  "productType": "custom-rover",
+  "controlCapabilities": {
+    "motion": true,
+    "kinematics": "tank",
+    "camera": false,
+    "telemetry": true,
+    "estop": true,
+    "maxCommandHz": 15,
+    "allowedProfiles": [
+      "tank"
+    ]
+  }
+}

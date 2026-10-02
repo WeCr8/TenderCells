@@ -1,0 +1,14 @@
+{
+  "name": "TenderCells Control Deck Full Build",
+  "version": "0.2.0",
+  "repo": "WeCr8/TenderCells",
+  "baseline_sha": "53c934786be821084dec43fb5194f72ae2d7af73",
+  "baseline_date": "2026-10-01T14:42:25Z",
+  "status": "implementation-ready scaffold",
+  "safety": {
+    "continuous_motion_through_firebase": false,
+    "estop_separate_priority_path": true,
+    "hardware_watchdog_required_for_live_motion": true,
+    "lora_video_supported": false
+  }
+}

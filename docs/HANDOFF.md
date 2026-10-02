@@ -111,3 +111,7 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
      - a signed `.mcpb` on releases.
    - Never add arm / drive / laser / mower motion or E-STOP clear to the assistant tools.
 9. **Older open PRs not from today:** #106 (Copilot auth flow) and the Dependabot bumps #96–#103. Review or merge them separately.
+
+## Control Deck integration (2026-10-02)
+
+See `docs/CONTROL_DECK.md`: `/control-demo` is a simulated driving practice page, with touch, keyboard, and gamepad through the normalized engine. The backend gateway is attached but denies all connections by default; live hardware remains gated pending authentication/interlocks and firmware watchdog acceptance.

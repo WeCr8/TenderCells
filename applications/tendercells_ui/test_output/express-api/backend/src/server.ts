@@ -8,6 +8,8 @@ import './loadEnv.js';
 import './broker.js';
 
 import express from 'express';
+import { createServer } from 'node:http';
+import { attachControlGateway } from './control/controlGateway.js';
 import cors from 'cors';
 import os from 'node:os';
 import mqttRoutes from './routes/mqtt.routes.js';
@@ -122,7 +124,10 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-app.listen(PORT, HOST, () => {
+const server = createServer(app);
+// Simulation ships first. No analog publisher or live authorization is connected.
+attachControlGateway(server, { publish: () => false });
+server.listen(PORT, HOST, () => {
   const lan = HOST === '0.0.0.0' ? lanAddress() : null;
   const lanLine = lan
     ? `║  LAN:   http://${lan}:${PORT}  (open this on a phone / other laptop)`

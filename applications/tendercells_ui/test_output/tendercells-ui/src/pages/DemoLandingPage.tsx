@@ -267,6 +267,7 @@ export default function DemoLandingPage() {
                 entities can reflect what is physically happening.
               </Typography>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ pt: 0.5 }}>
+                <Button variant="outlined" onClick={() => navigate("/control-demo")} sx={{ borderColor: C.accent, color: C.gold }}>Practice driving</Button>
                 <Button variant="contained" onClick={() => navigate("/simulator")} sx={{ bgcolor: C.gold, color: C.bg, fontWeight: 700 }}>Trigger an event</Button>
                 <Button variant="outlined" href="/digital-twin" sx={{ borderColor: C.accent, color: C.gold }}>How digital twins work</Button>
                 <Button variant="outlined" href="/os#build" onClick={() => trackDemo("build_guide_opened", { from: "demo_hero" })}

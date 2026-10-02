@@ -1,0 +1,7 @@
+interface_id,description,x_mm,y_mm,z_mm,axis_x,axis_y,axis_z,scope,status
+IF_PRODUCT_DATUM_A,Primary base/mount plane,0,0,0,0,0,1,All products,FIXED
+IF_PRODUCT_DATUM_B,Longitudinal center plane,0,0,0,1,0,0,All products,FIXED
+IF_PRODUCT_DATUM_C,Transverse/service reference,0,0,0,0,1,0,All products,FIXED
+IF_FDR_ROTOR_AXIS,Feeder metering rotor axis,-50,0,116.7,0,1,0,Feeder mechanical core,MEASURED_FROM_LEGACY_ASSEMBLY
+IF_FDR_HOPPER_CENTER,Hopper center axis,-50,0,303.52,0,0,1,Feeder,MEASURED_FROM_STEP
+IF_FDR_LOADCELL_REGION,Load cell platform center,-49.4,0,40.83,0,0,1,Feeder,MEASURED_FROM_STEP

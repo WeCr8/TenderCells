@@ -1,0 +1,28 @@
+{
+  "version": "2.4",
+  "packages": [
+    {
+      "id": "smart-feeder-v9",
+      "source_archive": "TenderCells_Feeder_MASTER_v9_ENGINEERING_RECONCILED.zip",
+      "sha256": "cd11f10021d636d754b2185103726bcdd09ddb6023fe2df560b4159a74845d02",
+      "expanded_files": 290,
+      "status": "engineering-source-reconcile",
+      "priority": "P1",
+      "authority": {
+        "manufacturing": "STEP",
+        "printing": "STL",
+        "visualization": "GLB"
+      },
+      "next_batch": "B09-A"
+    },
+    {
+      "id": "doorcell-v1.4-solar-ready",
+      "source_archive": "TenderCells_DoorCell_V1_4_Solar_Ready_Assembly.zip",
+      "sha256": "12af9f8218278d4a06c56c2af08e9a571e5118c5be356a5bad48f8732d1265c9",
+      "expanded_files": 65,
+      "status": "prototype-reconcile-and-validate",
+      "priority": "P1",
+      "next_batch": "B09-A"
+    }
+  ]
+}

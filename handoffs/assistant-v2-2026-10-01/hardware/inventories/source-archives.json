@@ -1,0 +1,14 @@
+{
+  "feeder": {
+    "filename": "TenderCells_Feeder_MASTER_v9_ENGINEERING_RECONCILED.zip",
+    "bytes": 11943379,
+    "sha256": "cd11f10021d636d754b2185103726bcdd09ddb6023fe2df560b4159a74845d02",
+    "expanded_files": 290
+  },
+  "doorcell": {
+    "filename": "TenderCells_DoorCell_V1_4_Solar_Ready_Assembly.zip",
+    "bytes": 777640,
+    "sha256": "12af9f8218278d4a06c56c2af08e9a571e5118c5be356a5bad48f8732d1265c9",
+    "expanded_files": 65
+  }
+}

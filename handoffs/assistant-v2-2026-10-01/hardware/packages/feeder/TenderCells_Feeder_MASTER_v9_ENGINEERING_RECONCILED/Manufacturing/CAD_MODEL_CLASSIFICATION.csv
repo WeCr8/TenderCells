@@ -1,0 +1,10 @@
+cad_file,classification,component,production_note
+Seeed_XIAO_ESP32C3_REFERENCE.step,REFERENCE_ENVELOPE,Seeed XIAO ESP32C3,Use official vendor model for exact connector/component interference
+TAL220B_5kg_55mm_REFERENCE.step,DIMENSIONAL_REFERENCE,TAL220B-style 5 kg bar,Purchased drawing controls
+HX711_GENERIC_32x21_REFERENCE.step,REFERENCE_ENVELOPE,HX711 module,Generic clone PCBs vary
+ULN2003_DRIVER_REFERENCE.step,REFERENCE_ENVELOPE,ULN2003 driver board,Generic clone PCBs vary
+28BYJ48_5V_GEARED_STEPPER_REFERENCE.step,REFERENCE_ENVELOPE,28BYJ-48 5V stepper,Gearbox/connector variants exist
+A3144_HALL_SENSOR_REFERENCE.step,REFERENCE_ENVELOPE,A3144 Hall sensor,Board/package variants exist
+MG996R_TowerPro_REFERENCE.step,REFERENCE_ENVELOPE,MG996R-class servo,Alternate actuator only; clones vary
+696_Bearing_6x15x5_REFERENCE.step,NOMINAL_STANDARD,696 bearing,Verify purchased bearing
+6mm_D_Shaft_100mm_REFERENCE.step,NOMINAL_STANDARD,6 mm D-shaft,Purchased flat/length controls

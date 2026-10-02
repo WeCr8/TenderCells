@@ -1,0 +1,9 @@
+signal,xiao_pin,destination,notes
+HX711_DT,D1,HX711 DT,logic
+HX711_SCK,D2,HX711 SCK,logic
+HALL_HOME,D3,Hall output,pull-up as required
+STEP_IN1,D4,ULN2003 IN1,phase
+STEP_IN2,D5,ULN2003 IN2,phase
+STEP_IN3,D6,ULN2003 IN3,phase
+STEP_IN4,D7,ULN2003 IN4,phase
+GND,GND,all grounds,common reference

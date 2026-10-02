@@ -1,0 +1,16 @@
+interface_id,interface,part_a,part_b,controlled_math,status,requirement
+IF-FDR-001,Product base datum,Base,Assembly,Z=0,Fixed,All product-level components reference this datum.
+IF-FDR-010,Load-cell floating support,Base/Load cell,Floating platform,TAL220B 40 mm mounting pitch,Controlled,No wires/guards may bypass load path.
+IF-FDR-020,Housing support,Floating platform,Metering housing,Housing bottom at global Z=54.7 in reconciled assembly,Controlled,Entire feed system above platform is weighed unless intentionally isolated.
+IF-FDR-030,Rotor radial interface,Housing bore,Rotor OD,72.00 / 70.80 mm,PASS,0.60 mm radial clearance per side.
+IF-FDR-031,Rotor axial interface,Drive and bearing closure inner faces,Rotor,52.00 / 50.80 mm,PASS,0.60 mm axial clearance per side.
+IF-FDR-032,Rotor shaft,Rotor D-bore,D-shaft,6.00 nominal; 5.00 across flat,PASS-CAD,Physical shaft fit receiving inspection required.
+IF-FDR-033,Bearing shaft interface,696 bearing ID,D-shaft round journals,6.00 nominal,RECEIVING-GATE,Actual purchased tolerances determine slip/transition fit.
+IF-FDR-034,Bearing pocket,Closure plate,696 bearing OD,15.08 CAD / 15.00 nominal,PASS-PROTOTYPE,0.08 mm diametral CAD clearance; printer compensation test required.
+IF-FDR-040,Hopper adapter lower,Adapter,Meter housing,Centered on rotor/hopper x=-50,PASS-CAD,No internal ledge should project into gravity stream.
+IF-FDR-041,Hopper gasket,Adapter groove,TPU gasket,1.8 gasket / 1.6 groove depth,PASS-TARGET,~11.1% proud compression target.
+IF-FDR-042,Hopper reservoir,Hopper,Adapter,Centered x=-50,PASS-CAD,Bridge/flow test with pellets and crumbles required.
+IF-FDR-050,Drive axis,Stepper/coupler/shaft,Rotor,"Y-axis, x=-50, z=116.7",PASS-CAD-V9,V8 mixed axes; v9 corrected aligned reference module.
+IF-FDR-060,Home sensing,Magnet carrier,Hall bracket,One home event/rev,CALIBRATION-GATE,Set magnet/sensor gap to chosen sensor module spec and verify repeatability.
+IF-FDR-070,Trough removal,Trough,Rail,0.35 mm nominal slide clearance per side,PRINTER-GATE,Print fit test before production lot.
+IF-FDR-080,Electronics enclosure,XIAO/HX711/ULN2003,Enclosure,reference envelopes only for clone boards,RECEIVING-GATE,Exact SKU/board rev must be checked before hard tooling.

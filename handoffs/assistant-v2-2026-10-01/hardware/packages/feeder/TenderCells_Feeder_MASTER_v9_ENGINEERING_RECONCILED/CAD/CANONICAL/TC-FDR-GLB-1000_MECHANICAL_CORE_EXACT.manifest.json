@@ -1,0 +1,29 @@
+{
+  "file": "TC-FDR-GLB-1000_MECHANICAL_CORE_EXACT.glb",
+  "classification": "CAD_EXACT",
+  "source_step": "TC-FDR-ASM-1000_MECHANICAL_CORE.step",
+  "source_step_sha256": "4df4233d9ff0b7095715533e0b51bd4e8863f1259a93d9a99c47b1002f784d1b",
+  "units": "mm",
+  "axis": {
+    "+X": "right",
+    "+Z": "up",
+    "-Y": "front/service"
+  },
+  "extents_mm": [
+    248.0,
+    190.0,
+    402.7
+  ],
+  "nodes": [
+    "HopperLid",
+    "Hopper",
+    "HopperGasket",
+    "HopperAdapter",
+    "Bearing696",
+    "Rotor",
+    "BearingSidePlate",
+    "MeterHousing",
+    "LoadCellPlatform",
+    "BasePlate"
+  ]
+}

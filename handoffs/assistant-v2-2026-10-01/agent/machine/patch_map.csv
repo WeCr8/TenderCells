@@ -1,0 +1,11 @@
+batch,operation,repo_path,purpose
+B01,create,applications/tendercells_ui/test_output/express-api/backend/src/mcp/v2/registerV2.ts,register additive v2 reads
+B01,create,applications/tendercells_ui/test_output/express-api/backend/src/mcp/v2/customerTools.ts,farm home + list devices
+B01,create,applications/tendercells_ui/test_output/express-api/backend/src/mcp/v2/builderTools.ts,mission/project/step tools
+B01,create,applications/tendercells_ui/test_output/express-api/backend/src/mcp/v2/builderContent.ts,content lookups
+B01,generate,applications/tendercells_ui/test_output/express-api/backend/src/mcp/v2/generatedBuilderContent.ts,generated Builder data
+B01,create,applications/tendercells_ui/test_output/express-api/tools/generate-builder-mcp.mts,Builder data generator
+B01,modify,applications/tendercells_ui/test_output/express-api/backend/src/mcp/server.ts,call registerV2ReadTools
+B01,modify,applications/tendercells_ui/test_output/express-api/package.json,generator prebuild/pretest
+B01,create,applications/tendercells_ui/test_output/express-api/backend/src/mcp/v2/v2.test.ts,v2 tests
+B01,modify,applications/tendercells_ui/test_output/express-api/backend/src/mcp/mcp.test.ts,update additive tool assertion

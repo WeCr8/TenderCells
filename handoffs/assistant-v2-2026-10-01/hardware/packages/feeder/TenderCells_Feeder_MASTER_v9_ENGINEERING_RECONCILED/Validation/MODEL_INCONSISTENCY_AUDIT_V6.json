@@ -1,0 +1,26 @@
+[
+  {
+    "issue": "full_assembly_actuator_mismatch",
+    "v5": "00_FULL_ASSEMBLY_V3.step contains servo-era drive side geometry",
+    "v6": "legacy quarantined; neutral core + stepper module canonical",
+    "status": "RESOLVED"
+  },
+  {
+    "issue": "glb_envelope_mismatch",
+    "v5": "interactive GLB envelope differs from STEP and was not clearly classified",
+    "v6": "CAD-exact GLBs generated from canonical STEP; old GLB classified simplified",
+    "status": "RESOLVED"
+  },
+  {
+    "issue": "brand_icon_source",
+    "v5": "square icon family derived from full lockup",
+    "v6": "icon family derived from dedicated tc-mark.svg; lockup separate",
+    "status": "RESOLVED"
+  },
+  {
+    "issue": "revision_names",
+    "v5": "V3 STEP/V4 GLB/V5 package names mixed",
+    "v6": "canonical TC-FDR names decouple engineering identity from package version",
+    "status": "RESOLVED"
+  }
+]

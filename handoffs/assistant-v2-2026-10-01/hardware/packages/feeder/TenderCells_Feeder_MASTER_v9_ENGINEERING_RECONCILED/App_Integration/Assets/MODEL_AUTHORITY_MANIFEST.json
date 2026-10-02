@@ -1,0 +1,19 @@
+{
+  "product": "Tender Cells Classroom Smart Feeder",
+  "package_release": "v6-global",
+  "manufacturing_authority": "CAD/CANONICAL/TC-FDR-ASM-1000_MECHANICAL_CORE.step",
+  "default_drive_module": "CAD/CANONICAL/TC-FDR-SUB-1100_STEPPER_DRIVE_MODULE.step",
+  "runtime_models": [
+    {
+      "path": "CAD/CANONICAL/TC-FDR-GLB-1000_MECHANICAL_CORE_EXACT.glb",
+      "role": "dimensional_visualization",
+      "classification": "CAD_EXACT"
+    },
+    {
+      "path": "App_Integration/Assets/TenderCells_Smart_Feeder_Interactive_v4.glb",
+      "role": "legacy_behavior_demo",
+      "classification": "FUNCTIONAL_SIMPLIFIED_DO_NOT_DIMENSION"
+    }
+  ],
+  "global_standard": "Global_CAD_Standard/TENDERCELLS_GLOBAL_CAD_STANDARD.md"
+}

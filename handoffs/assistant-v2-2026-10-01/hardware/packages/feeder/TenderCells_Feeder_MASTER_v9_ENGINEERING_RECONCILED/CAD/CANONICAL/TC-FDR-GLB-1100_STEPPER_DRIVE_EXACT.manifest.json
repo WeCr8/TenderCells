@@ -1,0 +1,25 @@
+{
+  "file": "TC-FDR-GLB-1100_STEPPER_DRIVE_EXACT.glb",
+  "classification": "CAD_EXACT",
+  "source_step": "TC-FDR-SUB-1100_STEPPER_DRIVE_MODULE.step",
+  "source_step_sha256": "f6206a4e0f4c93faee2931c40c99ba6fc6243c178eef3a396a0a42fc24119059",
+  "units": "mm",
+  "axis": {
+    "+X": "right",
+    "+Z": "up",
+    "-Y": "front/service"
+  },
+  "extents_mm": [
+    136.212,
+    64.0,
+    134.8
+  ],
+  "nodes": [
+    "ShaftCoupler",
+    "Stepper28BYJ48",
+    "StepperMount",
+    "Bearing696",
+    "DriveShaft",
+    "Rotor"
+  ]
+}

@@ -10,6 +10,7 @@ import './broker.js';
 import express from 'express';
 import { createServer } from 'node:http';
 import { attachControlGateway } from './control/controlGateway.js';
+import { createMotionPublisher } from './control/controlAdapters.js';
 import cors from 'cors';
 import os from 'node:os';
 import mqttRoutes from './routes/mqtt.routes.js';
@@ -18,7 +19,7 @@ import { startScheduleRunner } from './schedule.runner.js';
 import { buildBackendXml, buildStateXml } from './describe.js';
 import { MQTTController } from './controllers/mqtt.controller.js';
 import { onEstop as mowerOnEstop, startMowerBridge } from './mowerBridge.js';
-import { ownedDeviceIds, requireAuth, type AuthedRequest } from './middleware/auth.js';
+import { AUTH_ENABLED, authorizeRoamingRoostControl, ownedDeviceIds, requireAuth, type AuthedRequest } from './middleware/auth.js';
 
 /**
  * First non-internal IPv4 address, so we can print a URL other devices on the
@@ -125,8 +126,11 @@ app.get('/api/status', (req, res) => {
 });
 
 const server = createServer(app);
-// Simulation ships first. No analog publisher or live authorization is connected.
-attachControlGateway(server, { publish: () => false });
+const controlHost = MQTTController.host();
+attachControlGateway(server, createMotionPublisher(controlHost.publish), {
+  authenticate: authorizeRoamingRoostControl,
+  canPublish: deviceId => process.env.TC_CONTROL_LIVE === '1' && AUTH_ENABLED && !controlHost.estopLatched(deviceId),
+});
 server.listen(PORT, HOST, () => {
   const lan = HOST === '0.0.0.0' ? lanAddress() : null;
   const lanLine = lan

@@ -25,6 +25,7 @@
 #ifndef DEVICE_ID
 #define DEVICE_ID "rr_001"
 #endif
+#define PRODUCT_TYPE "roaming-roost"
 
 // — Motor pins: L298N #1 (Front Left, Front Right) —
 #define FL_IN1  25
@@ -306,6 +307,7 @@ void publishSensors() {
   if (!mqttClient.connected()) return;
   JsonDocument doc;
   doc["deviceId"]  = DEVICE_ID;
+  doc["productType"] = PRODUCT_TYPE;
   doc["isDocked"]  = isDocked;
   doc["state"]     = currentState == SystemState::ESTOP ? "estop" :
                      currentState == SystemState::RUNNING ? "running" :
@@ -330,6 +332,7 @@ void publishState(const char* stateStr) {
   JsonDocument doc;
   doc["state"]    = stateStr;
   doc["deviceId"] = DEVICE_ID;
+  doc["productType"] = PRODUCT_TYPE;
   doc["isDocked"] = isDocked;
   doc["freeHeap"] = ESP.getFreeHeap();
   doc["uptime"]   = millis() / 1000;

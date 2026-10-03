@@ -22,9 +22,22 @@ available for a future camera-backed deck; this page supplies the simulator view
 
 ## Backend boundary
 
-The HTTP server now attaches `/api/control/ws`, which **rejects all connections by
-default (403)**. Production composition supplies neither an authorization callback
-nor a working motion publisher. There is no environment flag that enables this.
+The HTTP server attaches `/api/control/ws`. Live control is **disabled by default**:
+the owner-authenticated handshake requires `TC_CONTROL_LIVE=1`, Firebase auth
+(`TC_REQUIRE_AUTH=1` or Admin credentials), a claimed Firestore device whose
+`productType` is `roaming-roost`, and the `freetouch` profile. Browser clients send
+the Firebase ID token as the first WebSocket message, never in the URL. The browser
+requires WSS outside localhost; expose a LAN hub through a TLS-terminating reverse
+proxy before using this page across machines.
+
+`/control-live` is the opt-in browser surface. It requires sign-in, a claimed device
+ID, an explicit clear-area confirmation before connecting, and a reachable physical
+E-STOP. The hub maps normalized throttle/steering axes to the existing
+`tc/<deviceId>/cmd/drive` payload (`vx`, `vy`, `omega`, `speed`) at a conservative
+0.35 speed cap; deadman release, disconnect, stale input, and tab loss neutralize
+the command. Firmware advertises `productType: roaming-roost` and retains its local
+500 ms stale-drive stop. The dedicated E-STOP request uses the existing retained
+QoS 2 route. A successful hub response is not proof that the physical motors stopped.
 
 The gateway foundation is exercised with injected test authorization/publishers:
 frame validation, one lease per device (including competing connections that reuse
@@ -34,12 +47,12 @@ polling is 25 ms; the stale threshold is 500 ms, so actual detection can take up
 to one polling interval beyond the threshold plus event-loop delay. Firmware
 must enforce its own <=500 ms timeout; the server is not a real-time safety system.
 
-Before any live enablement: implement verified owner authentication, server-side
-capability and profile gating, explicit user confirmation and interlocks,
-retained E-STOP integration, the actual analog firmware consumer, firmware stale
-watchdog, and bench acceptance. Production live control is intentionally not
-claimed complete. Drone/MAVLink and other advanced profiles are library groundwork,
-not enabled by the practice page.
+Before setting the live-control flag or testing on a rover: flash the updated firmware,
+verify owner claim and the reported product type, and complete supervised bench
+acceptance with wheels raised, E-STOP, lost network, browser close, stale input, and
+obstacle-stop cases. The feature flag and auth checks must remain on. The hub is not
+a real-time safety system. Drone/MAVLink and other advanced profiles remain library
+groundwork, not enabled by the practice or live Roaming Roost pages.
 
 ## Package provenance
 

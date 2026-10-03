@@ -114,4 +114,8 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
 
 ## Control Deck integration (2026-10-02)
 
-See `docs/CONTROL_DECK.md`: `/control-demo` is a simulated driving practice page, with touch, keyboard, and gamepad through the normalized engine. The backend gateway is attached but denies all connections by default; live hardware remains gated pending authentication/interlocks and firmware watchdog acceptance.
+See `docs/CONTROL_DECK.md`: `/control-demo` is simulated driving practice; `/control-live` now has an owner-authenticated Roaming Roost path with touch, keyboard, and gamepad input. Live control remains disabled unless explicitly enabled on an auth-configured hub, and must not be used until the updated firmware is flashed and supervised bench acceptance passes.
+
+## Marketing-page content agent follow-up
+
+Build a separate agent workflow for SEO landing-page drafts covering mower connections (MQTT, Husqvarna, Home Assistant, and other verified integrations). Keep product claims grounded in current docs and require a human publication decision; the auto-publish policy is not yet specified.

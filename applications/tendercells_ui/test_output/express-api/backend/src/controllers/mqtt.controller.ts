@@ -148,7 +148,11 @@ export class MQTTController {
         void ref.collection("alerts").add({ ...payload, ts }).catch(() => {});
       } else {
         const field = kind === "sensors" ? "telemetry" : "state";
-        void ref.set({ [field]: payload, [`${field}At`]: ts }, { merge: true }).catch(() => {});
+        void ref.set({
+          [field]: payload,
+          [`${field}At`]: ts,
+          ...(payload.productType === "roaming-roost" ? { productType: "roaming-roost" } : {}),
+        }, { merge: true }).catch(() => {});
       }
     } catch {
       /* admin not initialized — skip silently */

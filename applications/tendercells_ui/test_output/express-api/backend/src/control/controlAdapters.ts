@@ -6,23 +6,28 @@ export interface MotionPublisher {
 
 export function neutralMotionPayload(reason: string): Record<string, unknown> {
   return {
-    mode: 'analog',
     deadman: false,
-    axes: {},
+    vx: 0,
+    vy: 0,
+    omega: 0,
+    speed: 0,
     reason,
     timestamp: Date.now(),
   };
 }
 
 export function frameToMqttPayload(frame: ControlFrame): Record<string, unknown> {
+  const axes = frame.deadman ? frame.axes : {};
+  const toDriveAxis = (value: number | undefined) => Math.round(Math.max(-1, Math.min(1, value ?? 0)) * 100);
   return {
-    mode: 'analog',
-    v: frame.v,
+    vx: toDriveAxis(axes.throttle ?? axes.y),
+    vy: toDriveAxis(axes.strafe),
+    omega: toDriveAxis(axes.steering ?? axes.yaw),
+    speed: frame.deadman ? 0.35 : 0,
     sessionId: frame.sessionId,
     profileId: frame.profileId,
     seq: frame.seq,
     deadman: frame.deadman,
-    axes: frame.deadman ? frame.axes : {},
     timestamp: Date.now(),
   };
 }
@@ -36,7 +41,7 @@ export function createMotionPublisher(
 ): MotionPublisher {
   return {
     publish(deviceId, payload) {
-      return mqttPublish(`tc/${deviceId}/cmd/drive/analog`, payload, false);
+      return mqttPublish(`tc/${deviceId}/cmd/drive`, payload, false);
     },
   };
 }

@@ -11,7 +11,7 @@ import Stack from "@mui/material/Stack";
 import ExploreIcon from "@mui/icons-material/Explore";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MapIcon from "@mui/icons-material/Map";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import ProductSectionPanel from "../components/navigation/ProductSectionPanel";
 import { ProductDetailsPanel, ProductHero } from "../components/products/ProductOverview";
 
@@ -36,6 +36,9 @@ export default function RoamingRoostDashboard() {
               Roaming Controls
             </Typography>
             <Stack spacing={2} sx={{ mt: 2 }}>
+              <Button variant="contained" component={Link} to="/control-live" fullWidth>
+                Live manual control
+              </Button>
               <Button variant="outlined" startIcon={<ExploreIcon />} fullWidth>
                 Track Location
               </Button>

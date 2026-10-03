@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "tendercells",
   "display_name": "Tender Cells",
-  "version": "0.3.0",
-  "description": "Ask Claude about your Tender Cells farm: coop readings, animal-health flags, alerts, yard events, a live farm card and E-STOP.",
-  "long_description": "Connects Claude Desktop to your Tender Cells hub on your own network. Read your coop's temperature, ammonia, feed, water and headcount; see predator alerts and yard flags; get a farm card with what needs attention. E-STOP is always available. Hardware actions (door, feed, relay) are off unless you turn them on, and each one needs your explicit yes with a single-use code. No hub yet? Turn on Demo farm to try it with a simulated farm.",
+  "version": "0.4.0",
+  "description": "Ask about your Tender Cells farm, explore missions and Builder projects, and get a read-only learning card.",
+  "long_description": "Connects Claude Desktop to your Tender Cells hub on your own network. Read coop conditions, animal-health flags, alerts and yard events; explore six learning missions and three Builder projects one step at a time with safety gates, checkpoints and source references. Concept books are clearly marked and never treated as verified wiring instructions. E-STOP remains available locally. Hardware actions (door, feed, relay) are off unless you turn them on, and each one needs your explicit yes with a single-use code. No hub yet? Turn on Demo farm to try it with simulated devices.",
   "author": {
     "name": "WeCr8 Solutions",
     "url": "https://tendercells.com"
@@ -43,6 +43,34 @@
     {
       "name": "get_farm_overview",
       "description": "Every device with readings, animal-health flags, yard flags and alerts; shows the farm card."
+    },
+    {
+      "name": "get_farm_home",
+      "description": "Concise farm status, devices and attention items."
+    },
+    {
+      "name": "list_devices",
+      "description": "List accessible devices with online, state and health status."
+    },
+    {
+      "name": "list_missions",
+      "description": "List the existing learning missions."
+    },
+    {
+      "name": "get_mission",
+      "description": "Read one mission step with learner depth and checkpoints."
+    },
+    {
+      "name": "list_builder_projects",
+      "description": "List existing Builder projects and concept books."
+    },
+    {
+      "name": "get_builder_project",
+      "description": "Read project metadata, parts, stages and source references."
+    },
+    {
+      "name": "get_builder_step",
+      "description": "Read one existing project step with safety gates and source references."
     },
     {
       "name": "get_hub_status",

@@ -8,18 +8,20 @@
   "scripts": {
     "dev": "tsx backend/src/server.ts",
     "demo": "node tools/demo.mjs",
-    "build": "tsc",
+    "build": "npm run mcp:content:check && tsc",
     "start": "node dist/server.js",
     "simulate": "node tools/simulate-device.mjs",
     "smoke": "node tools/smoke-test.mjs",
-    "test": "tsx --test backend/src/*.test.ts backend/src/mcp/*.test.ts",
+    "test": "npm run mcp:content:check && tsx --test backend/src/*.test.ts backend/src/mcp/*.test.ts backend/src/mcp/v2/*.test.ts",
     "tc": "node tools/tc.mjs",
     "describe:xml": "tsx tools/export-backend-xml.ts",
     "camera-bridge": "tsx tools/camera-bridge.mts",
     "mcp": "tsx backend/src/mcp/stdio.ts",
     "mcp:http": "tsx backend/src/mcp/http.ts",
     "mcp:demo": "tsx backend/src/mcp/stdio.ts --demo",
-    "mcp:pack": "tsx tools/build-mcpb.mts"
+    "mcp:pack": "tsx tools/build-mcpb.mts",
+    "mcp:content": "tsx tools/generate-builder-mcp.mts",
+    "mcp:content:check": "tsx tools/generate-builder-mcp.mts --check"
   },
   "dependencies": {
     "@modelcontextprotocol/ext-apps": "~1.7.5",

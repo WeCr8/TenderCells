@@ -1,6 +1,7 @@
 // mcp.test.ts - the Tender Cells MCP server against a fake hub: read tools, E-STOP, the
 // confirm-twice action flow (nothing moves on request; codes are single-use and expire;
 // E-STOP blocks and cancels), the allow-list, and the HTTP key / bind guards.
+import { V2_TOOLS } from "./v2/registerV2.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -45,7 +46,7 @@ test("read-only by default: no action tools, E-STOP always there", async () => {
   const { hub } = fakeHub();
   const client = await connect(hub, false);
   const names = (await client.listTools()).tools.map((t) => t.name).sort();
-  assert.deepEqual(names, ["emergency_stop", "get_alerts", "get_device", "get_farm_overview", "get_farm_snapshot", "get_hub_status", "get_yard_events"]);
+  assert.deepEqual(names, ["emergency_stop", "get_alerts", "get_device", "get_farm_overview", "get_farm_snapshot", "get_hub_status", "get_yard_events", ...V2_TOOLS].sort());
   const tools = (await client.listTools()).tools;
   for (const t of tools.filter((t) => t.name.startsWith("get_"))) assert.equal(t.annotations?.readOnlyHint, true, t.name);
 });

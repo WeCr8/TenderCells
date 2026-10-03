@@ -1,7 +1,7 @@
 {
   "name": "tendercells",
   "version": "0.4.0",
-  "description": "Ask Claude about your Tender Cells farm: sign in with your Tender Cells account and get readings, animal-health flags, alerts and a farm card (read-only, your farm only).",
+  "description": "Ask Claude about your Tender Cells farm, then explore existing learning missions and Builder projects one read-only step at a time, with safety gates, checkpoints and source references.",
   "author": {
     "name": "WeCr8 Solutions",
     "url": "https://tendercells.com"
@@ -12,6 +12,8 @@
   "keywords": [
     "farm",
     "chickens",
+    "missions",
+    "builder",
     "iot",
     "mqtt",
     "home-automation"

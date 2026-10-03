@@ -35,9 +35,9 @@ The MCP server advertises these icons in `serverInfo.icons`, so clients that sup
 ## Listing copy
 
 - **Name:** Tender Cells
-- **Tagline (≤ 80 chars):** Check on your backyard flock: coop readings, health flags and predator alerts.
+- **Tagline (≤ 80 chars):** Check your flock, explore missions and build projects safely.
 - **Short description:**
-  > Ask about your Tender Cells farm in plain words. See every coop's temperature, ammonia, feed, water and headcount, with animal-health problems flagged first, plus predator and fault alerts and an at-a-glance farm card. Read-only: it never moves hardware.
+  > Ask about your Tender Cells farm in plain words. See coop readings, animal-health flags, alerts and a farm card; explore six learning missions and three Builder projects one step at a time, with safety gates, checkpoints and source references. Read-only: it never moves hardware.
 - **Long description:**
   > Tender Cells is an automated animal-care platform for backyard farms: smart coops, sensors, predator-watch cameras and robots. Connect it to your assistant and ask "How are the chickens?", "Anything I should worry about tonight?" or "Is the coop door closed?".
   >
@@ -49,6 +49,8 @@ The MCP server advertises these icons in `serverInfo.icons`, so clients that sup
   > - a latched E-STOP.
   >
   > It also shows a live farm card inside the chat.
+  >
+  > Explore the existing Builder missions and projects one step at a time. The inline learning card preserves safety gates and checkpoints, cites its source documents and marks concept-only material clearly. Concept previews are not verified wiring instructions.
   >
   > It is read-only by design: the cloud connector cannot open doors, feed or move robots. Those stay in the Tender Cells app on your farm network, where every hardware action needs your confirmation.
   >
@@ -75,12 +77,24 @@ All tools on the hosted connectors are read-only.
 | `get_alerts` | Device alerts | `readOnlyHint: true` |
 | `get_yard_events` | Yard events | `readOnlyHint: true` |
 | `get_farm_snapshot` | Whole-farm snapshot | `readOnlyHint: true` |
+| `get_farm_home` | Farm home | `readOnlyHint: true` |
+| `list_devices` | Devices | `readOnlyHint: true` |
+| `list_missions` | Learning missions | `readOnlyHint: true` |
+| `get_mission` | Mission step (Builder card) | `readOnlyHint: true`, MCP Apps view `ui://tendercells/builder-card.html` |
+| `list_builder_projects` | Builder projects | `readOnlyHint: true` |
+| `get_builder_project` | Project details (Builder card) | `readOnlyHint: true`, MCP Apps view `ui://tendercells/builder-card.html` |
+| `get_builder_step` | Project step (Builder card) | `readOnlyHint: true`, MCP Apps view `ui://tendercells/builder-card.html` |
 
 **Prompts:** `farm_check` and `evening_lockup`.
 
 **Farm card (MCP Apps):**
 - It makes no network requests and loads no external resources (everything is inline). It needs no CSP domains.
 - Its only interaction is Refresh, which calls `get_farm_overview` again.
+
+**Builder card (MCP Apps):**
+- It displays one authored mission/project step, safety gates, checkpoint status, concept warnings and source references.
+- Previous/Next and learner-depth selection call only the read-only mission/project tools. No hardware actions or demo bindings are exposed.
+- The hosted connector and packaged Claude Desktop extension each ship a self-contained prebuilt card.
 
 ## Authentication (customer connector)
 
@@ -125,6 +139,7 @@ All tools on the hosted connectors are read-only.
 - [ ] **Firestore TTL policies** (console → Firestore → TTL): field `expireAt` on the `oauthRequests` and `oauthGrants` collections, so expired grants are cleaned up.
 - [ ] Reviewer account with devices; test credentials go in the submission form.
 - [ ] Screenshots from real Claude and ChatGPT chats.
+- [ ] Capture the Builder card on a checkpoint and the concept-only warning before claiming these views in store screenshots.
 - [ ] **Claude Desktop extension:** run `npm run mcp:pack` in the hub, attach `dist/tendercells.mcpb` to a GitHub release, and submit it to the extensions directory (it uses `icon.png` = the 512 px logo).
 - [ ] Submit:
   - the Claude connectors directory form;

@@ -2,7 +2,7 @@
 
 Ask an AI assistant about your farm in plain words: "How are the chickens doing?", "Any predator alerts tonight?", "Close the coop door." Tender Cells ships one **MCP server** (Model Context Protocol). Claude and ChatGPT both connect to it, so there is one tool set and one set of safety rules for both.
 
-> **Status: preview (v0.3).**
+> **Status: preview (v0.4).**
 > - **For customers:** add the hosted **Tender Cells** connector at `https://tendercells.com/mcp` in Claude or ChatGPT and sign in with your Tender Cells account. It's read-only. There's also a no-sign-in **demo farm** at `https://tendercells.com/mcp/demo`.
 > - **On the farm network:** the local plugin adds E-STOP, and hardware actions that are off unless you turn them on; each one needs your explicit "yes".
 > - Store listings are being prepared (`docs/CONNECTOR_LISTING.md`).
@@ -47,6 +47,11 @@ The public how-to page is https://tendercells.com/assistants.
 | `get_alerts` | Last 100 predator / fault / health alerts | always |
 | `get_yard_events` | Eggs ready, weeds found, roost headcount, animal or leak findings | always |
 | `get_farm_snapshot` | Every device at once | always |
+| `get_farm_home` | Concise farm status, device states and items needing attention | always |
+| `list_devices` | Accessible devices with online, state and health status | always |
+| `list_missions` / `get_mission` | List existing Builder missions and read one selected learner-depth step at a time | always |
+| `list_builder_projects` / `get_builder_project` | List existing hardware projects and concept books with source provenance | always |
+| `get_builder_step` | Read exactly one project step, including safety gates, checkpoint, parts and source references | always |
 | `emergency_stop` | Stops every actuator on a device. Never needs confirmation. | always |
 | `request_action` | Step 1 of 2: prepares an action **without touching hardware** and returns a summary, a "check first" list and a 6-digit code | only with `TC_MCP_ALLOW_ACTIONS=1` |
 | `confirm_action` | Step 2 of 2: runs it, only after you say yes | only with `TC_MCP_ALLOW_ACTIONS=1` |
@@ -65,6 +70,9 @@ The farm card is an [MCP Apps](https://github.com/modelcontextprotocol/ext-apps)
 - It shows each device's readings, what needs attention, yard flags and alerts, plus a Refresh button.
 - It has **no hardware buttons** on purpose: actions go through the chat and your confirmation.
 - In apps without MCP Apps support, the assistant gets the same data as text and structured output.
+
+Builder mission and project tools also return a read-only inline card. It shows one step at a time, preserves authored safety gates and checkpoints, cites Builder/source references, and clearly warns when content is concept-only. Its only controls navigate to the adjacent read-only step; it cannot actuate hardware or execute demo bindings.
+Choose young, beginner, advanced or teacher wording in the card; a requested depth uses an authored layer when available and otherwise keeps the source instruction unchanged.
 
 **Health flags** use the project thresholds:
 - **Warning:** temperature below 35°F or above 85°F, ammonia above 10 ppm, water below 15%, feed below 20%, or a device that's offline or in error.
@@ -87,6 +95,8 @@ It's the easy way to try the plugin, and to give app-directory reviewers somethi
 - mark a yard flag handled.
 
 **Never available to an assistant:** arm, gantry, Roaming Roost driving, routines, Hugging Face policies, laser weeding, mowers, exclusion zones, and clearing an E-STOP. Those stay in the Tender Cells OS, behind its own confirmations and the chicken-presence interlocks.
+
+Builder content is served from the existing mission and project JSON, not a second store. A project marked `concept` is not instruction-ready: its art and pages are not verified pinouts or wiring guidance. Follow the cited, verified source documentation and stop at every checkpoint.
 
 ## Safety model
 

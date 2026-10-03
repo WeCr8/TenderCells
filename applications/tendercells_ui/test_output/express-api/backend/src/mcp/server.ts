@@ -22,8 +22,10 @@ import { farmCardHtml } from "./farmCard.js";
 import { assessReading, type HealthFlag, type Reading } from "./health.js";
 import type { HubFetch, HubResponse } from "./hubClient.js";
 
+import { registerV2ReadTools } from "./v2/registerV2.js";
+
 export const MCP_NAME = "tendercells";
-export const MCP_VERSION = "0.3.0";
+export const MCP_VERSION = "0.4.0";
 export const SITE = "https://tendercells.com";
 /** Store / client icons (the Tender Cells mark), served by the website. */
 export const MCP_ICONS = [
@@ -185,6 +187,9 @@ const RULES_COMMON = [
   "- Animal safety first. If readings suggest a health risk (temperature below 35°F or above 85°F, ammonia above 10 ppm, water below 15%), say so before anything else.",
   "- Say \"simulated\" when a device id starts with sim_ or ends with _demo, or the data says it is simulated.",
   "- For \"how is the farm?\" questions, start with get_farm_overview: it flags animal-health issues and shows a farm card.",
+  "- For learning, list existing missions or Builder projects, then fetch one mission/project step at a time. Preserve its safety gates and checkpoint; cite its source references.",
+  "- Never execute a Builder demo binding or hardware action. A project marked concept is not verified for construction; never treat its art as an authoritative wiring or pinout source.",
+  "- Builder tools and their inline card are read-only and have no hardware controls.",
 ];
 const RULES_LOCAL = [
   "- If anything looks dangerous to an animal or a person, call emergency_stop. Stopping never needs confirmation.",
@@ -231,6 +236,7 @@ export function createTenderCellsMcp(opts: McpOptions): McpServer {
     { name: MCP_NAME, title: mode === "hosted-demo" ? "Tender Cells (demo farm)" : "Tender Cells", version: MCP_VERSION, websiteUrl: SITE, icons: MCP_ICONS },
     { instructions: instructionsFor(mode) },
   );
+  registerV2ReadTools(server, () => farmOverview(hub), hosted ? "cloud mirror" : "local hub");
   const deviceId = z.string().min(1).max(64).regex(/^[A-Za-z0-9_.-]+$/, "letters, digits, _ . - only").describe("Device id, e.g. ct_001 or sim_001");
   const READ = { readOnlyHint: true, openWorldHint: false } as const;
 

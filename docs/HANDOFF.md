@@ -1,6 +1,6 @@
 # Handoff: where things stand (2026-09-30)
 
-For the next agent (Codex, Claude Code or a person) picking up this repo. Everything below is merged to `main` and deployed to Firebase Hosting (`tendercells.com`, with the OS at `/app`).
+For the next agent (Codex, Claude Code or a person) picking up this repo. The v0.3 work below is merged to `main` and deployed to Firebase Hosting (`tendercells.com`, with the OS at `/app`); v0.4 is implemented on the current assistant-v2 branch and is pending review and deployment.
 
 ## Apps
 
@@ -105,6 +105,11 @@ For the next agent (Codex, Claude Code or a person) picking up this repo. Everyt
        - website how-to page `/assistants`;
        - OS page `/app/assistants` (Account → Claude & ChatGPT) to see and disconnect connected assistants (`/oauth/connections`);
        - the Claude Code plugin defaults to the hosted connector with sign-in.
+   - **Implemented (v0.4, assistant learning tools; pending merge/deployment):**
+     - seven read-only v2 tools for farm home/devices plus the six existing missions and three Builder projects;
+     - one-step mission/project navigation with source provenance, learner-depth selection, safety gates and checkpoint status;
+     - a self-contained inline Builder card with concept-only warnings and no hardware controls;
+     - the hosted connector and local Claude Desktop package build both prebuild the card.
    - **Next:**
      - the pre-submission checklist in `docs/CONNECTOR_LISTING.md` (TTL policies, reviewer account, real screenshots);
      - submit to the Claude and ChatGPT directories;

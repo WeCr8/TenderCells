@@ -1,0 +1,17 @@
+{
+  "id": "sitl_001",
+  "productType": "drone-sim",
+  "controlCapabilities": {
+    "motion": true,
+    "kinematics": "drone",
+    "camera": true,
+    "telemetry": true,
+    "estop": false,
+    "maxCommandHz": 25,
+    "allowedProfiles": [
+      "drone-mode-2"
+    ]
+  },
+  "adapter": "mavlink-sitl",
+  "physicalFlight": false
+}

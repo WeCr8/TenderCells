@@ -10,7 +10,7 @@
 //   docs.ts `doc`    that doc is published; siteDocs.json sources exist in the repo
 // Dynamic links (template strings) are skipped. Exit 1 lists every broken link.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const WEBSITE = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -123,7 +123,7 @@ for (const f of allSrc.filter((x) => /\.tsx?$/.test(x))) {
 // Links in the published lessons and docs (markdown): internal ones must resolve too.
 for (const dir of ["lessons", "docs"]) for (const f of walk(join(WEBSITE, "public", dir)).filter((x) => x.endsWith(".md"))) {
   const md = read(f).replace(/```[\s\S]*?```/g, "");
-  const slug = f.split("/").pop().replace(/\.md$/, "");
+  const slug = basename(f, ".md");
   for (const m of md.matchAll(/\]\(((?:\/|#)[^)\s]*)\)/g)) {
     const target = m[1].startsWith("#") ? `/${dir}/${slug}${m[1]}` : m[1];
     checkTarget(target, relative(WEBSITE, f));

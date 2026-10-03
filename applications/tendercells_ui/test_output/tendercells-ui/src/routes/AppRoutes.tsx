@@ -22,6 +22,8 @@ import {
   TenderCellsCloudDashboard,
   TurkeyTowerDashboard,
 } from "../pages";
+import ControlDemoPage from "../pages/ControlDemoPage";
+import RoamingRoostLiveControlPage from "../pages/RoamingRoostLiveControlPage";
 import DashboardPage from "../pages/DashboardPage";
 import DiagnosticsPage from "../pages/DiagnosticsPage";
 import AnalyticsPage from "../pages/AnalyticsPage";
@@ -64,6 +66,8 @@ export default function AppRoutes() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
       {/* Public, no-signup demo front door — auto-seeds then lands on dashboard */}
+      <Route path="/control-demo" element={<ControlDemoPage />} />
+      <Route path="/control-live" element={<RoamingRoostLiveControlPage />} />
       <Route path="/demo" element={<DemoLandingPage />} />
       <Route path="/try" element={<DemoLandingPage />} />
 

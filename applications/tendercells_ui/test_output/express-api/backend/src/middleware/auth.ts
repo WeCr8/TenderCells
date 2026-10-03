@@ -59,6 +59,20 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 }
 
+/** Live Control Deck is fail-closed: only an authenticated owner of a reported Roaming Roost may connect. */
+export async function authorizeRoamingRoostControl(token: string, deviceId: string, profileId: string): Promise<boolean> {
+  if (process.env.TC_CONTROL_LIVE !== "1" || !AUTH_ENABLED || profileId !== "freetouch") return false;
+  try {
+    ensureAdmin();
+    const decoded = await getAuthAdmin().verifyIdToken(token);
+    const snap = await getFirestoreAdmin().collection("devices").doc(deviceId).get();
+    const data = snap.data();
+    return snap.exists && data?.ownerId === decoded.uid && data?.productType === "roaming-roost";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Reject if the signed-in user does not own the target device. Run AFTER
  * requireAuth. Unclaimed devices are not actuatable once auth is on — claim first.

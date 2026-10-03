@@ -1,0 +1,68 @@
+import type { ControlProfile } from '../types.js';
+
+export const CONTROL_PROFILES: Record<string, ControlProfile> = {
+  freetouch: {
+    id: 'freetouch',
+    label: 'FreeTouch',
+    kinematics: 'differential',
+    inputAxes: ['throttle', 'steering'],
+    defaultRateHz: 20,
+    deadzone: 0.08,
+    expo: 0.20,
+    speedLimit: 0.65,
+  },
+  arcade: {
+    id: 'arcade',
+    label: 'Arcade Drive',
+    kinematics: 'differential',
+    inputAxes: ['throttle', 'steering'],
+    defaultRateHz: 20,
+    deadzone: 0.10,
+    expo: 0.15,
+    speedLimit: 0.75,
+  },
+  tank: {
+    id: 'tank',
+    label: 'Tank Drive',
+    kinematics: 'tank',
+    inputAxes: ['leftTrack', 'rightTrack'],
+    defaultRateHz: 20,
+    deadzone: 0.10,
+    expo: 0.10,
+    speedLimit: 0.70,
+  },
+  ackermann: {
+    id: 'ackermann',
+    label: 'RC Car',
+    kinematics: 'ackermann',
+    inputAxes: ['throttle', 'steering'],
+    defaultRateHz: 20,
+    deadzone: 0.08,
+    expo: 0.20,
+    speedLimit: 0.80,
+  },
+  mecanum: {
+    id: 'mecanum',
+    label: 'Mecanum',
+    kinematics: 'mecanum',
+    inputAxes: ['y', 'strafe', 'yaw'],
+    defaultRateHz: 20,
+    deadzone: 0.10,
+    expo: 0.15,
+    speedLimit: 0.65,
+  },
+  'drone-mode-2': {
+    id: 'drone-mode-2',
+    label: 'Drone Mode 2',
+    kinematics: 'drone',
+    inputAxes: ['throttle', 'yaw', 'pitch', 'roll'],
+    defaultRateHz: 25,
+    deadzone: 0.08,
+    expo: 0.25,
+    speedLimit: 1,
+  },
+};
+
+export function getControlProfile(id: string): ControlProfile | null {
+  return CONTROL_PROFILES[id] ?? null;
+}

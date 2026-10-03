@@ -1,0 +1,16 @@
+{
+  "id": "rr_sim_001",
+  "productType": "roaming-roost",
+  "controlCapabilities": {
+    "motion": true,
+    "kinematics": "differential",
+    "camera": true,
+    "telemetry": true,
+    "estop": true,
+    "maxCommandHz": 20,
+    "allowedProfiles": [
+      "freetouch",
+      "arcade"
+    ]
+  }
+}

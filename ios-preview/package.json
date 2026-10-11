@@ -1,0 +1,23 @@
+{
+  "name": "tendercells-ios-preview",
+  "version": "0.1.0",
+  "description": "TenderCells local iOS preview of the public demo",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "typecheck": "tsc --noEmit",
+    "doctor": "expo-doctor"
+  },
+  "dependencies": {
+    "expo": "~57.0.27",
+    "expo-build-properties": "~57.0.22",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-webview": "13.16.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.4",
+    "typescript": "~6.0.3"
+  },
+  "private": true
+}

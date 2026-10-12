@@ -10,6 +10,13 @@
       "bundleIdentifier": "com.wecr8.tendercells.preview",
       "supportsTablet": true
     },
+    "android": {
+      "package": "com.wecr8.tendercells.preview",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
     "plugins": [
       ["expo-build-properties", { "ios": { "enableSceneSupport": true } }]
     ]

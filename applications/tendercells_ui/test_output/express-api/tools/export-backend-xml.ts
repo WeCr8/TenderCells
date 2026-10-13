@@ -11,7 +11,8 @@ const out = resolve(dirname(fileURLToPath(import.meta.url)), "../../website/publ
 const xml = buildBackendXml();
 if (process.argv.includes("--check")) {
   let current = "";
-  try { current = readFileSync(out, "utf8"); } catch { /* missing */ }
+  // LF-normalised: a Windows checkout (git autocrlf) has CRLF and is otherwise identical.
+  try { current = readFileSync(out, "utf8").replace(/\r\n/g, "\n"); } catch { /* missing */ }
   if (current !== xml) {
     console.error(`${out} is out of date - run: npm run describe:xml`);
     process.exit(1);

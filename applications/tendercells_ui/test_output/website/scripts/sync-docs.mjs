@@ -115,12 +115,17 @@ function sitemapWith(xml) {
   return xml.replace("</urlset>", `${block}\n</urlset>`);
 }
 
+const lf = (text) => text.replace(/\r\n/g, "\n");
+
 function main() {
   const check = process.argv.includes("--check");
   const problems = [];
   const stale = [];
-  const write = (file, out) => {
-    const current = existsSync(file) ? readFileSync(file, "utf8") : null;
+  // FIX(2026-10-12): compare and write with LF line endings. On Windows (git autocrlf) every
+  // checked-out copy is CRLF, so --check reported all 51 pages stale and sync rewrote them.
+  const write = (file, rawOut) => {
+    const out = lf(rawOut);
+    const current = existsSync(file) ? lf(readFileSync(file, "utf8")) : null;
     if (current === out) return;
     if (check) stale.push(relative(WEBSITE, file));
     else writeFileSync(file, out);
@@ -130,10 +135,10 @@ function main() {
     ...SITE_DOCS.map((d) => ({ file: join(WEBSITE, "public/docs", `${d.slug}.md`), source: d.source })),
   ];
   for (const { file, source } of pages) {
-    write(file, HEADER(source) + convert(readFileSync(join(REPO, source), "utf8"), source, problems));
+    write(file, HEADER(source) + convert(lf(readFileSync(join(REPO, source), "utf8")), source, problems));
   }
   const sitemap = join(WEBSITE, "public/sitemap.xml");
-  write(sitemap, sitemapWith(readFileSync(sitemap, "utf8")));
+  write(sitemap, sitemapWith(lf(readFileSync(sitemap, "utf8"))));
 
   problems.forEach((p) => console.error(`broken link: ${p}`));
   if (stale.length) console.error(`stale copies (run npm run sync:docs): ${stale.join(", ")}`);

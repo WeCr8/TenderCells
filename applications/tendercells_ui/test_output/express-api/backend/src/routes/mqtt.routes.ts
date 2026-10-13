@@ -5,7 +5,9 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import { MQTTController } from "../controllers/mqtt.controller.js";
-import { AUTH_ENABLED, ownedDeviceIds, requireAuth, requireDeviceOwner, type AuthedRequest } from "../middleware/auth.js";
+import {
+  AUTH_ENABLED, ownedDeviceIds, requireAuth, requireDeviceOwner, requirePerson, requireScope, type AuthedRequest,
+} from "../middleware/auth.js";
 import { getFirestoreAdmin } from "../config/firebase-admin.js";
 import { mowerLinkConflict, ownerFields } from "../ownership.js";
 import { startOptions, validateCommand, validateMowerLink, validateSettings, type MowerAction } from "../mower.js";
@@ -19,28 +21,33 @@ const controller = new MQTTController();
 
 // Owner gate for any device-scoped route: must be signed in AND own the device
 // (no-op in demo/LAN mode). Keeps each user's actuation in their own instance.
-const owns = [requireAuth, requireDeviceOwner];
+// API keys (apiKeys.ts) pass only with the route's scope and, when bound, for their one device:
+//   reads   → device:telemetry      actuation (incl. E-STOP) → device:commands
+//   claim, E-STOP clear, mower linking/settings → a signed-in person only.
+const reads = [requireAuth, requireScope("device:telemetry"), requireDeviceOwner];
+const owns = [requireAuth, requireScope("device:commands"), requireDeviceOwner];
+const personOwns = [requireAuth, requirePerson, requireDeviceOwner];
 
 // Device telemetry (owner-gated for privacy when auth is on)
-router.get("/devices/:deviceId/telemetry", ...owns, (req: Request, res: Response) => {
+router.get("/devices/:deviceId/telemetry", ...reads, (req: Request, res: Response) => {
   controller.getTelemetry(req, res);
 });
 
-router.get("/devices/:deviceId/state", ...owns, (req: Request, res: Response) => {
+router.get("/devices/:deviceId/state", ...reads, (req: Request, res: Response) => {
   controller.getState(req, res);
 });
 
 // Live arm/gantry sub-state for the control UI (sliders, 3D viewport).
-router.get("/devices/:deviceId/state/:sub", ...owns, (req: Request, res: Response) => {
+router.get("/devices/:deviceId/state/:sub", ...reads, (req: Request, res: Response) => {
   controller.getSubState(req, res);
 });
 
-router.get("/devices/:deviceId/alerts", ...owns, (req: Request, res: Response) => {
+router.get("/devices/:deviceId/alerts", ...reads, (req: Request, res: Response) => {
   controller.getAlerts(req, res);
 });
 
 // Devices heard on the network with no owner yet — for the claim picker (auth only).
-router.get("/unclaimed", requireAuth, (req: Request, res: Response) => {
+router.get("/unclaimed", requireAuth, requirePerson, (req: Request, res: Response) => {
   controller.listUnclaimed(req, res);
 });
 
@@ -85,7 +92,7 @@ router.post("/devices/:deviceId/arm", ...owns, (req: Request, res: Response) => 
 router.post("/devices/:deviceId/estop", ...owns, (req: Request, res: Response) => {
   controller.sendEstop(req, res);
 });
-router.post("/devices/:deviceId/estop/clear", ...owns, (req: Request, res: Response) => {
+router.post("/devices/:deviceId/estop/clear", ...personOwns, (req: Request, res: Response) => {
   controller.clearEstop(req, res);
 });
 
@@ -94,13 +101,13 @@ router.post("/devices/:deviceId/routine", ...owns, (req: Request, res: Response)
 });
 
 // Station flags (eggs ready, pickup ready, weed detected, roost headcount) + presence.
-router.get("/devices/:deviceId/events", ...owns, (req: Request, res: Response) => {
+router.get("/devices/:deviceId/events", ...reads, (req: Request, res: Response) => {
   controller.getEvents(req, res);
 });
 router.post("/devices/:deviceId/events/:eventId/ack", ...owns, (req: Request, res: Response) => {
   void controller.ackEvent(req, res);
 });
-router.get("/devices/:deviceId/presence", ...owns, (req: Request, res: Response) => {
+router.get("/devices/:deviceId/presence", ...reads, (req: Request, res: Response) => {
   controller.getPresence(req, res);
 });
 
@@ -119,7 +126,7 @@ router.post("/devices/:deviceId/weeds/:eventId/reject", ...owns, (req: Request, 
 router.post("/devices/:deviceId/zones", ...owns, (req: Request, res: Response) => {
   void controller.sendZones(req, res);
 });
-router.get("/devices/:deviceId/zones", ...owns, (req: Request, res: Response) => {
+router.get("/devices/:deviceId/zones", ...reads, (req: Request, res: Response) => {
   controller.getZones(req, res);
 });
 
@@ -138,7 +145,7 @@ const fail = (res: Response, e: unknown) => {
 };
 
 // Linked mowers the caller owns, with state and the interlock reason.
-router.get("/mowers", requireAuth, async (req: Request, res: Response) => {
+router.get("/mowers", requireAuth, requirePerson, async (req: Request, res: Response) => {
   try {
     const only = await ownedDeviceIds((req as AuthedRequest).uid);
     res.json({ ...vendorStatus(), mowers: listLinks(only) });
@@ -146,12 +153,12 @@ router.get("/mowers", requireAuth, async (req: Request, res: Response) => {
 });
 
 // lawn_mower entities Home Assistant knows (for the link picker). Never returns the token.
-router.get("/mowers/home-assistant/entities", requireAuth, async (_req: Request, res: Response) => {
+router.get("/mowers/home-assistant/entities", requireAuth, requirePerson, async (_req: Request, res: Response) => {
   try { res.json({ entities: await listHaMowers() }); } catch (e) { fail(res, e); }
 });
 
 // Mowers on the owner's Husqvarna / GARDENA account or in Home Assistant (for the link picker).
-router.get("/mowers/vendors/:vendor/discover", requireAuth, async (req: Request, res: Response) => {
+router.get("/mowers/vendors/:vendor/discover", requireAuth, requirePerson, async (req: Request, res: Response) => {
   try { res.json({ vendor: req.params.vendor, mowers: await discover(req.params.vendor) }); } catch (e) { fail(res, e); }
 });
 
@@ -159,7 +166,7 @@ router.get("/mowers/vendors/:vendor/discover", requireAuth, async (req: Request,
 // FIX(2026-10-12): a caller-chosen deviceId used to be written with { ownerId: caller } and
 // merge, so linking a "mower" as ct_001 took over someone else's coop (door, drive, arm).
 // The id is now checked first, and the owner write is a transaction that refuses a conflict.
-router.post("/mowers", requireAuth, async (req: Request, res: Response) => {
+router.post("/mowers", requireAuth, requirePerson, async (req: Request, res: Response) => {
   const err = validateMowerLink(req.body);
   if (err) return res.status(400).json({ error: err });
   const uid = (req as AuthedRequest).uid;
@@ -189,13 +196,13 @@ router.post("/mowers", requireAuth, async (req: Request, res: Response) => {
   } catch (e) { fail(res, e); }
 });
 
-router.get("/devices/:deviceId/mower", ...owns, (req: Request, res: Response) => {
+router.get("/devices/:deviceId/mower", ...reads, (req: Request, res: Response) => {
   const v = mowerView(req.params.deviceId);
   if (!v) return res.status(404).json({ error: "This device is not a linked mower" });
   res.json(v);
 });
 
-router.put("/devices/:deviceId/mower", ...owns, (req: Request, res: Response) => {
+router.put("/devices/:deviceId/mower", ...personOwns, (req: Request, res: Response) => {
   const err = validateMowerLink(req.body, true);
   if (err) return res.status(400).json({ error: err });
   const current = getLink(req.params.deviceId);
@@ -208,7 +215,7 @@ router.put("/devices/:deviceId/mower", ...owns, (req: Request, res: Response) =>
   res.json({ success: true, link: updateLink(req.params.deviceId, req.body) });
 });
 
-router.delete("/devices/:deviceId/mower", ...owns, (req: Request, res: Response) => {
+router.delete("/devices/:deviceId/mower", ...personOwns, (req: Request, res: Response) => {
   if (!removeLink(req.params.deviceId)) return res.status(404).json({ error: "This device is not a linked mower" });
   res.json({ success: true });
 });
@@ -226,7 +233,7 @@ router.post("/devices/:deviceId/mower/command", ...owns, async (req: Request, re
 });
 
 // What the mower's own app would change: cutting height, headlight, schedule, stay-out zones, errors.
-router.post("/devices/:deviceId/mower/settings", ...owns, async (req: Request, res: Response) => {
+router.post("/devices/:deviceId/mower/settings", ...personOwns, async (req: Request, res: Response) => {
   if (!getLink(req.params.deviceId)) return res.status(404).json({ error: "This device is not a linked mower" });
   const err = validateSettings(req.body, capabilitiesOf(req.params.deviceId));
   if (err) return res.status(400).json({ error: err });

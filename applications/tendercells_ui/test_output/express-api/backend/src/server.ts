@@ -16,7 +16,7 @@ import { startScheduleRunner } from './schedule.runner.js';
 import { buildBackendXml, buildStateXml } from './describe.js';
 import { MQTTController } from './controllers/mqtt.controller.js';
 import { onEstop as mowerOnEstop, startMowerBridge } from './mowerBridge.js';
-import { ownedDeviceIds, requireAuth, type AuthedRequest } from './middleware/auth.js';
+import { ownedDeviceIds, requireAuth, requireScope, type AuthedRequest } from './middleware/auth.js';
 
 /**
  * First non-internal IPv4 address, so we can print a URL other devices on the
@@ -94,7 +94,7 @@ app.get('/api/describe.xml', (_req, res) => {
   res.type('application/xml').send(buildBackendXml({ routes: registeredRoutes() }));
 });
 
-app.get('/api/state.xml', requireAuth, async (req, res) => {
+app.get('/api/state.xml', requireAuth, requireScope('device:telemetry'), async (req, res) => {
   try {
     const only = await ownedDeviceIds((req as AuthedRequest).uid);
     res.type('application/xml').send(buildStateXml(MQTTController.devicesSnapshot(only)));

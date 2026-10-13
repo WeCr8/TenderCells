@@ -1,6 +1,6 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { AUTH_ENABLED, requireAuth, type AuthedRequest } from "../middleware/auth.js";
+import { AUTH_ENABLED, requireAuth, requirePerson, type AuthedRequest } from "../middleware/auth.js";
 
 type ProductType = "hardware_unit" | "automation_device" | "custom_product" | "software_only";
 type ProductStatus = "setup_required" | "connected" | "disconnected" | "maintenance" | "retired";
@@ -32,6 +32,8 @@ const router = Router();
 // code, edit, delete or re-link it. With accounts on it now needs a signed-in caller and
 // shows each person only their own products. LAN/demo mode is unchanged.
 router.use(requireAuth);
+// Activation codes and the product registry are for people, not machine API keys.
+router.use(requirePerson);
 
 /** May this caller see / change this product? Always true in LAN/demo mode. */
 export function canAccessProduct(product: { user_id: string }, uid: string | undefined, authEnabled = AUTH_ENABLED): boolean {

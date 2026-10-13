@@ -14,6 +14,7 @@ import RestaurantIcon from '@mui/icons-material/Restaurant';
 import ScienceIcon from '@mui/icons-material/Science';
 import { useProducts } from '../hooks/useProducts';
 import { useTelemetry } from '../hooks/useTelemetry';
+import firebaseApp, { FIREBASE_ENABLED, auth } from '../lib/firebase/firebaseApp';
 
 const C = {
   bg: '#0D2B1E', surface: '#1A3D2B', accent: '#4A7C59',
@@ -21,8 +22,16 @@ const C = {
   warning: '#E8A020', white: '#F0EDE4',
 };
 
-const FUNCTIONS_URL = import.meta.env.VITE_FUNCTIONS_URL as string | undefined
-  ?? 'http://127.0.0.1:5001/tender-cells/us-central1';
+// FIX(2026-10-12): aiChat is a Firebase *callable* (signed-in only). The page used a plain
+// fetch with no {data} envelope and no ID token (to 127.0.0.1:5001 unless VITE_FUNCTIONS_URL
+// was set), so every call failed and every answer was a canned local tip while the header
+// said "Powered by Claude". It now uses httpsCallable when signed in, and labels the tips.
+async function askTenderAI(payload: { system: string; messages: Array<{ role: string; content: string }> }) {
+  if (!FIREBASE_ENABLED || !firebaseApp || !auth.currentUser) throw new Error('signed-out');
+  const { getFunctions, httpsCallable } = await import('firebase/functions');
+  const result = await httpsCallable(getFunctions(firebaseApp), 'aiChat')(payload);
+  return result.data as { content?: Array<{ text: string }> };
+}
 
 interface Message {
   id: string;
@@ -91,6 +100,7 @@ export default function TenderAIPage() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [live, setLive] = useState<boolean | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -122,25 +132,22 @@ User question: ${userText}`;
     setLoading(true);
 
     try {
-      const res = await fetch(`${FUNCTIONS_URL}/aiChat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const data = await askTenderAI({
           system: `You are TenderAI, the intelligent assistant for Tender Cells automated animal care systems. Help diagnose issues, suggest schedule optimizations, interpret diagnostic codes, and explain what sensor readings mean for animal health. Always prioritize animal safety. If readings suggest immediate health risk, say so clearly first. Be concise and practical.`,
           messages: history.map(m => ({ role: m.role, content: m.id === userMsg.id ? buildContextMessage(m.content) : m.content })),
-        }),
       });
-
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      const data = await res.json() as { content?: Array<{ text: string }> };
+      setLive(true);
       const reply = data.content?.[0]?.text ?? 'Sorry, I could not generate a response.';
 
       setMessages(prev => [...prev, { id: `a${Date.now()}`, role: 'assistant', content: reply, ts: Date.now() }]);
-    } catch {
-      // Firebase Functions not deployed — use a helpful local fallback
+    } catch (err) {
+      // Signed out, no Firebase config, or the function failed: answer from built-in tips, and say so.
       const fallback = getFallbackResponse(content);
+      setLive(false);
       setMessages(prev => [...prev, { id: `a${Date.now()}`, role: 'assistant', content: fallback, ts: Date.now() }]);
-      setApiError('Using local responses — deploy Firebase Functions to enable live AI.');
+      setApiError((err as Error)?.message === 'signed-out'
+        ? 'Offline tips only (not AI). Sign in to ask Claude about your farm.'
+        : 'TenderAI is unavailable right now, so this answer is a built-in tip (not AI).');
     } finally {
       setLoading(false);
     }
@@ -156,7 +163,9 @@ User question: ${userText}`;
             <SmartToyIcon sx={{ color: C.accent, fontSize: 28 }} />
             <Box>
               <Typography variant="h5" sx={{ color: C.gold, fontWeight: 700 }}>TenderAI</Typography>
-              <Typography sx={{ color: C.goldMuted, fontSize: 12 }}>Powered by Claude claude-sonnet-4-6</Typography>
+              <Typography sx={{ color: C.goldMuted, fontSize: 12 }}>
+                {live === false ? 'Built-in tips (offline) · sign in for Claude' : 'Powered by Claude (signed-in accounts)'}
+              </Typography>
             </Box>
           </Stack>
           <Stack direction="row" spacing={1}>

@@ -16,10 +16,13 @@ import {
   assertFails,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { addDoc, collection, deleteDoc, doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 const PROJECT_ID = "tender-cells-rules-test";
+// `firebase emulators:exec` exports FIRESTORE_EMULATOR_HOST, so a run on another port
+// (when 8080 is taken) only needs a different emulators.firestore.port.
+const [EMULATOR_HOST, EMULATOR_PORT] = (process.env.FIRESTORE_EMULATOR_HOST ?? "127.0.0.1:8080").split(":");
 const ORG_A = "org-a";
 const ORG_B = "org-b";
 
@@ -30,8 +33,8 @@ beforeAll(async () => {
     projectId: PROJECT_ID,
     firestore: {
       rules: readFileSync("firestore.rules", "utf8"),
-      host: "127.0.0.1",
-      port: 8080,
+      host: EMULATOR_HOST,
+      port: Number(EMULATOR_PORT),
     },
   });
 });
@@ -68,6 +71,7 @@ describe("devices/{deviceId}", () => {
   beforeEach(async () => {
     await seed(async (db) => {
       await setDoc(doc(db, "devices/dev-1"), {
+        ownerId: "owner-uid",
         userId: "owner-uid",
         organizationId: ORG_A,
         classIds: ["class-1"],
@@ -79,13 +83,14 @@ describe("devices/{deviceId}", () => {
   it("lets the owner read and write their own device", async () => {
     const db = ownerCtx().firestore();
     await assertSucceeds(getDoc(doc(db, "devices/dev-1")));
-    await assertSucceeds(updateDoc(doc(db, "devices/dev-1"), { nickname: "Renamed" }));
+    await assertSucceeds(updateDoc(doc(db, "devices/dev-1"), { nickname: "Renamed", ownerId: "owner-uid", userId: "owner-uid" }));
   });
 
   it("denies a stranger with no relationship to the device", async () => {
     const db = strangerCtx().firestore();
     await assertFails(getDoc(doc(db, "devices/dev-1")));
     await assertFails(updateDoc(doc(db, "devices/dev-1"), { nickname: "Hijacked" }));
+    await assertFails(updateDoc(doc(db, "devices/dev-1"), { nickname: "Hijacked", ownerId: "stranger-uid", userId: "stranger-uid" }));
   });
 
   it("denies an unauthenticated caller", async () => {
@@ -142,6 +147,82 @@ describe("devices/{deviceId}", () => {
     const db = schoolAdminCtx(ORG_A).firestore();
     await assertFails(updateDoc(doc(db, "devices/dev-1"), { organizationId: ORG_B }));
     await assertFails(updateDoc(doc(db, "devices/dev-1"), { userId: "attacker-uid" }));
+  });
+});
+
+describe("devices - owner fields, simulation-only creates, claim fields (2026-10-12)", () => {
+  beforeEach(async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, "devices/claimed"), { ownerId: "owner-uid", userId: "owner-uid", claimedVia: "claim-code", simOnly: false, unclaimed: false });
+      await setDoc(doc(db, "devices/legacy"), { userId: "owner-uid", nickname: "Old app doc" });
+      await setDoc(doc(db, "devices/unclaimed"), { unclaimed: true, productType: "starter" });
+    });
+  });
+
+  it("an existing owner doc without ownerId must be written WITH ownerId", async () => {
+    const db = ownerCtx().firestore();
+    await assertFails(updateDoc(doc(db, "devices/legacy"), { nickname: "No ownerId" }));
+    await assertSucceeds(updateDoc(doc(db, "devices/legacy"), { nickname: "With ownerId", ownerId: "owner-uid" }));
+    await assertFails(setDoc(doc(db, "devices/legacy"), { nickname: "Someone else", ownerId: "stranger-uid", userId: "owner-uid" }, { merge: true }));
+  });
+
+  it("the app may create only simulation devices, as itself, without claim fields", async () => {
+    const db = ownerCtx().firestore();
+    await assertSucceeds(setDoc(doc(db, "devices/sim-1"), { ownerId: "owner-uid", userId: "owner-uid", simOnly: true, nickname: "Sim" }));
+    await assertFails(setDoc(doc(db, "devices/ct_001"), { ownerId: "owner-uid", userId: "owner-uid", simOnly: false, nickname: "Pre-claim a real id" }));
+    await assertFails(setDoc(doc(db, "devices/ct_002"), { ownerId: "owner-uid", userId: "owner-uid", nickname: "No simOnly" }));
+    await assertFails(setDoc(doc(db, "devices/ct_003"), { userId: "owner-uid", simOnly: true }));
+    await assertFails(setDoc(doc(db, "devices/ct_004"), { ownerId: "stranger-uid", userId: "owner-uid", simOnly: true }));
+    await assertFails(setDoc(doc(db, "devices/ct_005"), { ownerId: "owner-uid", userId: "owner-uid", simOnly: true, claimedVia: "claim-code" }));
+  });
+
+  it("nobody can claim an unclaimed board from the app (that needs the hub and a claim code)", async () => {
+    const db = ownerCtx().firestore();
+    await assertFails(setDoc(doc(db, "devices/unclaimed"), { ownerId: "owner-uid", userId: "owner-uid", unclaimed: false }, { merge: true }));
+  });
+
+  it("owners cannot change claim / simulation fields", async () => {
+    const db = ownerCtx().firestore();
+    const own = { ownerId: "owner-uid", userId: "owner-uid" };
+    await assertSucceeds(updateDoc(doc(db, "devices/claimed"), { nickname: "Renamed", ...own }));
+    await assertFails(updateDoc(doc(db, "devices/claimed"), { simOnly: true, ...own }));
+    await assertFails(updateDoc(doc(db, "devices/claimed"), { claimedVia: "pairing-token", ...own }));
+    await assertFails(updateDoc(doc(db, "devices/claimed"), { claimHash: "00".repeat(32), ...own }));
+    await assertSucceeds(updateDoc(doc(db, "devices/claimed"), { unclaimed: false, ...own })); // writing the same value is not a change
+  });
+
+  it("the owner's device list query (where ownerId == uid) is allowed", async () => {
+    const db = ownerCtx().firestore();
+    await assertSucceeds(getDocs(query(collection(db, "devices"), where("ownerId", "==", "owner-uid"))));
+    await assertFails(getDocs(query(collection(db, "devices"), where("ownerId", "==", "stranger-uid"))));
+  });
+});
+
+describe("users/{uid}/settings, apiKeys, deviceCommands (2026-10-12)", () => {
+  beforeEach(async () => {
+    await seed(async (db) => {
+      await setDoc(doc(db, "devices/dev-q"), { ownerId: "owner-uid", userId: "owner-uid" });
+      await setDoc(doc(db, "deviceCommands/dev-q/queue/sched_a_1"), { status: "delivered", command: "door" });
+      await setDoc(doc(db, "apiKeys/AAAAAAAAAAAA"), { ownerId: "owner-uid", hash: "00".repeat(32), scopes: ["device:telemetry"] });
+    });
+  });
+
+  it("lets a person save and read their own Settings (users/{uid}/settings/prefs), nobody else's", async () => {
+    await assertSucceeds(setDoc(doc(ownerCtx().firestore(), "users/owner-uid/settings/prefs"), { preferences: { timezone: "America/Los_Angeles" } }));
+    await assertSucceeds(getDoc(doc(ownerCtx().firestore(), "users/owner-uid/settings/prefs")));
+    await assertFails(getDoc(doc(strangerCtx().firestore(), "users/owner-uid/settings/prefs")));
+    await assertFails(setDoc(doc(strangerCtx().firestore(), "users/owner-uid/settings/prefs"), { preferences: {} }));
+  });
+
+  it("never exposes API key hashes to clients, even the key's owner", async () => {
+    await assertFails(getDoc(doc(ownerCtx().firestore(), "apiKeys/AAAAAAAAAAAA")));
+    await assertFails(setDoc(doc(ownerCtx().firestore(), "apiKeys/BBBBBBBBBBBB"), { ownerId: "owner-uid" }));
+  });
+
+  it("lets the device owner read queued commands; only the backend writes them", async () => {
+    await assertSucceeds(getDoc(doc(ownerCtx().firestore(), "deviceCommands/dev-q/queue/sched_a_1")));
+    await assertFails(getDoc(doc(strangerCtx().firestore(), "deviceCommands/dev-q/queue/sched_a_1")));
+    await assertFails(setDoc(doc(ownerCtx().firestore(), "deviceCommands/dev-q/queue/x"), { status: "pending", command: "door" }));
   });
 });
 

@@ -63,11 +63,31 @@ service cloud.firestore {
                request.auth.token.classIds.hasAny(data.classIds)));
     }
 
+    // The owner of a device document: ownerId, else userId (same rule as the hub's
+    // ownership.ts deviceOwner(), so the app, hub and Functions agree on who owns a device).
+    function deviceOwnerOf(data) {
+      return data.get('ownerId', data.get('userId', null));
+    }
+
     function ownsDevice(deviceId) {
       return isAuthenticated() &&
              exists(/databases/$(database)/documents/devices/$(deviceId)) &&
-             (deviceDoc(deviceId).data.userId == request.auth.uid ||
+             (deviceOwnerOf(deviceDoc(deviceId).data) == request.auth.uid ||
               schoolDeviceAccess(deviceDoc(deviceId).data));
+    }
+
+    // Client device writes must name the caller in BOTH owner fields (ownerId is canonical,
+    // userId is what older docs and queries use).
+    function writesSelfAsDeviceOwner() {
+      return isAuthenticated() &&
+             request.resource.data.ownerId == request.auth.uid &&
+             request.resource.data.userId == request.auth.uid;
+    }
+
+    // Written only by the hub / Cloud Functions when a device is claimed with proof of
+    // possession (claim code or hub pairing token). Clients can never set or change them.
+    function deviceServerFields() {
+      return ['simOnly', 'claimedAt', 'claimedVia', 'claimHash', 'unclaimed'];
     }
 
     function deviceItemCreateMatches(deviceId) {
@@ -140,6 +160,13 @@ service cloud.firestore {
       
       // Users can delete their own profile
       allow delete: if isOwner(userId);
+
+      // FIX(2026-10-12): Settings (settingsService.ts) saves users/{uid}/settings/prefs, which no
+      // rule matched, so every save was denied. The cloud schedule runner also reads the
+      // owner's timezone from it.
+      match /settings/{docId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // User settings collection
@@ -168,22 +195,45 @@ service cloud.firestore {
       allow delete: if isOwnedResource();
     }
 
-    // Devices collection (if stored in Firestore)
-    // Users can manage their own devices
+    // Devices collection
+    // FIX(2026-10-12): owners write with ownerId == userId == their uid; the app may only create
+    // simulation devices (simOnly: true). A real board is claimed on the hub with proof of
+    // possession, so nobody can pre-register someone else's hardware id (ct_001) from the app.
     match /devices/{deviceId} {
-      allow read: if isOwnedResource() || schoolDeviceAccess(resource.data);
-      
-      // Allow create if user sets their own userId
-      allow create: if isCreatingOwnData();
-      
-      // Allow update if user owns the device
-      allow update: if keepsOwner() ||
+      // ownerId == uid lets the app's `where('ownerId', '==', uid)` device list pass the rules.
+      allow read: if isAuthenticated() &&
+                     (resource.data.get('ownerId', null) == request.auth.uid ||
+                      resource.data.get('userId', null) == request.auth.uid) ||
+                     schoolDeviceAccess(resource.data);
+
+      allow create: if writesSelfAsDeviceOwner() &&
+                       request.resource.data.simOnly == true &&
+                       !request.resource.data.keys().hasAny(['claimedAt', 'claimedVia', 'claimHash']);
+
+      // Owner edits (name, placement, camera ...), never the claim / ownership fields.
+      allow update: if (deviceOwnerOf(resource.data) == request.auth.uid &&
+                        writesSelfAsDeviceOwner() &&
+                        !request.resource.data.diff(resource.data).affectedKeys().hasAny(deviceServerFields())) ||
                        (isSchoolAdmin(resource.data.organizationId) &&
                         request.resource.data.organizationId == resource.data.organizationId &&
-                        request.resource.data.userId == resource.data.userId);
-      
-      // Allow delete if user owns the device
-      allow delete: if isOwnedResource();
+                        request.resource.data.get('userId', null) == resource.data.get('userId', null) &&
+                        request.resource.data.get('ownerId', null) == resource.data.get('ownerId', null) &&
+                        !request.resource.data.diff(resource.data).affectedKeys().hasAny(deviceServerFields()));
+
+      allow delete: if isAuthenticated() && deviceOwnerOf(resource.data) == request.auth.uid;
+    }
+
+    // Queued device commands (Cloud Functions executeSchedules / the hub). Owners may watch
+    // what was delivered or held back (E-STOP); only the backend writes.
+    match /deviceCommands/{deviceId}/queue/{commandId} {
+      allow read: if ownsDevice(deviceId);
+      allow write: if false;
+    }
+
+    // Robot / hub API keys: hashes only, managed through the createApiKey / listApiKeys /
+    // revokeApiKey callables. No client access at all.
+    match /apiKeys/{keyId} {
+      allow read, write: if false;
     }
 
     // User preferences/notifications collection

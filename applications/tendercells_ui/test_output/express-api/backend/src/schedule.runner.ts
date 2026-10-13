@@ -1,7 +1,12 @@
 // schedule.runner.ts
 // Server-side scheduler: fires device commands at their cron time.
 //
-// The app only stored schedules (devices/{id}/schedules) — nothing executed them.
+// The app stores schedules at schedules/{deviceId}/items/{scheduleId} (schedulesService.ts,
+// firestore.rules). FIX(2026-10-12): this runner only queried collectionGroup("schedules"),
+// which never matches those item documents, so schedules made in the app never fired on
+// the hub. It now reads the app's path too (schedules.ts), plus the older
+// devices/{id}/schedules path. Cron is evaluated in the hub's local time zone; the app
+// builds it in the browser's, so hub and browser should share a time zone.
 // This runner, on the always-on API, scans enabled schedules every 30s, matches the
 // 5-field cron against now, and publishes the matching cmd/* over local MQTT (via
 // MQTTController). De-dupes within the same minute using lastRun. Requires Firebase
@@ -10,54 +15,7 @@
 import { AUTH_ENABLED } from "./middleware/auth.js";
 import { getFirestoreAdmin } from "./config/firebase-admin.js";
 import { MQTTController } from "./controllers/mqtt.controller.js";
-
-interface ScheduleDoc {
-  deviceId?: string;
-  action?: "feed" | "clean" | "door" | "water" | "weed_pass";
-  passes?: number;            // weed_pass: detection passes per run (1-10)
-  task?: "weed" | "plant_scan" | "patrol"; // weed_pass: what the pass looks for (default weed)
-  cronExpression?: string;
-  enabled?: boolean;
-  amount?: number;
-  state?: "open" | "close";   // door: which way (default open)
-  on?: boolean;               // water/relay: on or off (default on)
-  lastRun?: number | { toMillis?: () => number } | null;
-}
-
-// Match one cron field (supports *, n, a-b, */n, and comma lists) against a value.
-function matchField(field: string, val: number): boolean {
-  return field.split(",").some((part) => {
-    if (part === "*") return true;
-    if (part.startsWith("*/")) {
-      const n = Number(part.slice(2));
-      return n > 0 && val % n === 0;
-    }
-    if (part.includes("-")) {
-      const [a, b] = part.split("-").map(Number);
-      return val >= a && val <= b;
-    }
-    return Number(part) === val;
-  });
-}
-
-// 5-field cron: minute hour day-of-month month day-of-week.
-function cronMatch(expr: string, d: Date): boolean {
-  const f = expr.trim().split(/\s+/);
-  if (f.length !== 5) return false;
-  return (
-    matchField(f[0], d.getMinutes()) &&
-    matchField(f[1], d.getHours()) &&
-    matchField(f[2], d.getDate()) &&
-    matchField(f[3], d.getMonth() + 1) &&
-    matchField(f[4], d.getDay())
-  );
-}
-
-function toMs(v: ScheduleDoc["lastRun"]): number {
-  if (!v) return 0;
-  if (typeof v === "number") return v;
-  return v.toMillis?.() ?? 0;
-}
+import { collectEnabledSchedules, isDue, type ScheduleDb, type ScheduleDoc } from "./schedules.js";
 
 // Map a schedule action to a command publish.
 function fire(deviceId: string, s: ScheduleDoc): boolean {
@@ -85,17 +43,10 @@ function fire(deviceId: string, s: ScheduleDoc): boolean {
 
 async function tick() {
   try {
-    const db = getFirestoreAdmin();
+    const db = getFirestoreAdmin() as unknown as ScheduleDb;
     const now = new Date();
-    const snap = await db.collectionGroup("schedules").where("enabled", "==", true).get();
-    for (const doc of snap.docs) {
-      const s = doc.data() as ScheduleDoc;
-      if (!s.cronExpression || !cronMatch(s.cronExpression, now)) continue;
-      // De-dupe: skip if already fired this minute.
-      const last = toMs(s.lastRun);
-      if (last && Math.floor(last / 60000) === Math.floor(now.getTime() / 60000)) continue;
-      const deviceId = s.deviceId || doc.ref.parent.parent?.id;
-      if (!deviceId) continue;
+    for (const { deviceId, s, doc } of await collectEnabledSchedules(db)) {
+      if (!isDue(s, now)) continue;
       if (fire(deviceId, s)) {
         await doc.ref.set({ lastRun: Date.now() }, { merge: true }).catch(() => {});
         console.log(`[SCHED] fired ${s.action} on ${deviceId}`);

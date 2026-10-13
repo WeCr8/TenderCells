@@ -42,8 +42,7 @@ verification flow for a release check.
 This checkout resolves env files from the **repo root** (`vite.config.*` `envDir:
 '../../../..'`), and that root `.env` supplies `VITE_FIREBASE_PROJECT_ID`. Left alone,
 services would route to **live Firestore** during tests (flaky, network- and
-permission-dependent). The `test` block in **both** `vite.config.js` and
-`vite.config.ts` therefore sets:
+permission-dependent). The `test` block in `vite.config.ts` therefore sets:
 
 ```js
 test: {
@@ -52,8 +51,10 @@ test: {
 }
 ```
 
-> Edit **both** config files when changing this — the compiled `vite.config.js`
-> resolves before `vite.config.ts`, so a `.ts`-only change is dead.
+> `vite.config.ts` is the only config. `tsc -b` used to emit a `vite.config.js` next to it,
+> which Vite resolves first, so a `.ts`-only change was silently dead. The emit now goes to
+> `node_modules/.tmp/` and `vite.config.js` / `vite.config.d.ts` are untracked and
+> gitignored. Delete any stale local `vite.config.js` left from an older build.
 
 ### 2.3 Running
 
@@ -121,7 +122,7 @@ headless harness.
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| Tests hit Firestore / `PERMISSION_DENIED` | `test.env` override missing or only in `.ts` | Ensure `VITE_FIREBASE_PROJECT_ID: ''` is in **`vite.config.js`** too |
+| Tests hit Firestore / `PERMISSION_DENIED` | `test.env` override missing or only in `.ts` | Ensure `VITE_FIREBASE_PROJECT_ID: ''` is in `vite.config.ts`, and delete any stale local `vite.config.js` |
 | `Cannot find package 'jsdom'` | a test forced `@vitest-environment jsdom` | This file uses the node shim instead — drop the docblock |
 | A device row fails one layer | that service didn't persist for the device | Check the layer `detail` string in the report; confirm the family's `schedulesFor`/pack/grid entry exists |
 | Reset left some demo data | a record wasn't tagged | Verify new records set `metadata.source = DEMO_SOURCE` (products) or a known schedule label |

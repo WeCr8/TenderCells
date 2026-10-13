@@ -138,3 +138,10 @@ applications/tendercells_ui/test_output/express-api/.tendercells/
 # Claude Desktop extension build (npm run mcp:pack)
 dist-mcpb/
 *.mcpb
+
+# Build artifacts of `tsc -b` in the Vite apps: they changed on every build. The tsconfigs now
+# write them to node_modules/.tmp; these lines keep stale local copies out of commits.
+# (A stale vite.config.js also shadows vite.config.ts, because Vite resolves .js first.)
+*.tsbuildinfo
+applications/tendercells_ui/test_output/*/vite.config.js
+applications/tendercells_ui/test_output/*/vite.config.d.ts

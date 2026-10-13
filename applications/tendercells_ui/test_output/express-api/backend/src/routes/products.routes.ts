@@ -1,5 +1,6 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
+import { AUTH_ENABLED, requireAuth, type AuthedRequest } from "../middleware/auth.js";
 
 type ProductType = "hardware_unit" | "automation_device" | "custom_product" | "software_only";
 type ProductStatus = "setup_required" | "connected" | "disconnected" | "maintenance" | "retired";
@@ -25,6 +26,20 @@ interface Product {
 }
 
 const router = Router();
+
+// FIX(2026-10-12): this in-memory product registry (a dev/LAN mock - nothing persists) was
+// open even on a hub with accounts on: anyone could list every product with its activation
+// code, edit, delete or re-link it. With accounts on it now needs a signed-in caller and
+// shows each person only their own products. LAN/demo mode is unchanged.
+router.use(requireAuth);
+
+/** May this caller see / change this product? Always true in LAN/demo mode. */
+export function canAccessProduct(product: { user_id: string }, uid: string | undefined, authEnabled = AUTH_ENABLED): boolean {
+  return !authEnabled || (Boolean(uid) && product.user_id === uid);
+}
+const uidOf = (req: Request) => (req as AuthedRequest).uid;
+const mine = (req: Request) => products.filter((p) => canAccessProduct(p, uidOf(req)));
+const findMine = (req: Request) => mine(req).find((item) => item.id === req.params.id);
 
 const nowIso = () => new Date().toISOString();
 
@@ -57,25 +72,25 @@ const products: Product[] = [
   },
 ];
 
-function stats() {
+function stats(list: Product[]) {
   return {
-    totalProducts: products.length,
-    hardwareUnits: products.filter((product) => product.product_type === "hardware_unit").length,
-    automationDevices: products.filter((product) => product.product_type === "automation_device").length,
-    connectedProducts: products.filter((product) => product.status === "connected").length,
-    disconnectedProducts: products.filter((product) => product.status === "disconnected").length,
-    setupRequired: products.filter((product) => product.status === "setup_required").length,
-    onlineProducts: products.filter((product) => product.connection_status === "online").length,
-    offlineProducts: products.filter((product) => product.connection_status === "offline").length,
+    totalProducts: list.length,
+    hardwareUnits: list.filter((product) => product.product_type === "hardware_unit").length,
+    automationDevices: list.filter((product) => product.product_type === "automation_device").length,
+    connectedProducts: list.filter((product) => product.status === "connected").length,
+    disconnectedProducts: list.filter((product) => product.status === "disconnected").length,
+    setupRequired: list.filter((product) => product.status === "setup_required").length,
+    onlineProducts: list.filter((product) => product.connection_status === "online").length,
+    offlineProducts: list.filter((product) => product.connection_status === "offline").length,
   };
 }
 
-router.get("/", (_req: Request, res: Response) => {
-  res.json(products);
+router.get("/", (req: Request, res: Response) => {
+  res.json(mine(req));
 });
 
-router.get("/stats", (_req: Request, res: Response) => {
-  res.json(stats());
+router.get("/stats", (req: Request, res: Response) => {
+  res.json(stats(mine(req)));
 });
 
 router.post("/", (req: Request, res: Response) => {
@@ -84,7 +99,7 @@ router.post("/", (req: Request, res: Response) => {
   const serial = body.serial_number || `DEV-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
   const product: Product = {
     id: body.id || `api-dev-${Date.now()}`,
-    user_id: String(body.metadata?.owner_email || body.user_id || "local-dev"),
+    user_id: AUTH_ENABLED ? uidOf(req)! : String(body.metadata?.owner_email || body.user_id || "local-dev"),
     product_type: body.product_type || "custom_product",
     product_name: body.product_name || "Custom TenderCells Product",
     model: body.model || "Community Custom Build",
@@ -105,17 +120,19 @@ router.post("/", (req: Request, res: Response) => {
 });
 
 router.get("/:id", (req: Request, res: Response) => {
-  const product = products.find((item) => item.id === req.params.id);
+  const product = findMine(req);
   if (!product) return res.status(404).json({ error: "Product not found" });
   return res.json(product);
 });
 
 router.put("/:id", (req: Request, res: Response) => {
-  const index = products.findIndex((item) => item.id === req.params.id);
+  const current = findMine(req);
+  const index = current ? products.indexOf(current) : -1;
   if (index === -1) return res.status(404).json({ error: "Product not found" });
+  const { id: _id, user_id: _owner, created_at: _created, ...patch } = (req.body ?? {}) as Partial<Product>;
   products[index] = {
     ...products[index],
-    ...req.body,
+    ...patch,
     metadata: { ...products[index].metadata, ...req.body?.metadata },
     updated_at: nowIso(),
   };
@@ -123,14 +140,15 @@ router.put("/:id", (req: Request, res: Response) => {
 });
 
 router.delete("/:id", (req: Request, res: Response) => {
-  const index = products.findIndex((item) => item.id === req.params.id);
+  const current = findMine(req);
+  const index = current ? products.indexOf(current) : -1;
   if (index === -1) return res.status(404).json({ error: "Product not found" });
   products.splice(index, 1);
   return res.status(204).send();
 });
 
 router.post("/:id/connect", (req: Request, res: Response) => {
-  const product = products.find((item) => item.id === req.params.id);
+  const product = findMine(req);
   if (!product) return res.status(404).json({ error: "Product not found" });
   product.status = "connected";
   product.connection_status = "online";
@@ -140,7 +158,7 @@ router.post("/:id/connect", (req: Request, res: Response) => {
 });
 
 router.post("/:id/disconnect", (req: Request, res: Response) => {
-  const product = products.find((item) => item.id === req.params.id);
+  const product = findMine(req);
   if (!product) return res.status(404).json({ error: "Product not found" });
   product.status = "disconnected";
   product.connection_status = "offline";
@@ -150,9 +168,10 @@ router.post("/:id/disconnect", (req: Request, res: Response) => {
 });
 
 router.post("/:id/link-device", (req: Request, res: Response) => {
-  const product = products.find((item) => item.id === req.params.id);
+  const product = findMine(req);
   if (!product) return res.status(404).json({ error: "Product not found" });
-  product.device_id = req.body?.deviceId || product.device_id;
+  // Accept device_id too: every other field on this API is snake_case.
+  product.device_id = req.body?.deviceId || req.body?.device_id || product.device_id;
   product.updated_at = nowIso();
   return res.json(product);
 });
@@ -162,7 +181,9 @@ router.post("/validate", (req: Request, res: Response) => {
   const product = products.find((item) =>
     item.serial_number === code || item.activation_code === code || item.qr_code === code
   );
-  return res.json({ valid: Boolean(product), productInfo: product });
+  // Never hand another account's product (and its activation code) to the caller.
+  const visible = product && canAccessProduct(product, uidOf(req));
+  return res.json({ valid: Boolean(product), productInfo: visible ? product : undefined });
 });
 
 export default router;

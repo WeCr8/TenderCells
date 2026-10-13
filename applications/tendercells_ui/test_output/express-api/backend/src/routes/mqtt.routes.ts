@@ -7,6 +7,7 @@ import type { Request, Response } from "express";
 import { MQTTController } from "../controllers/mqtt.controller.js";
 import { AUTH_ENABLED, ownedDeviceIds, requireAuth, requireDeviceOwner, type AuthedRequest } from "../middleware/auth.js";
 import { getFirestoreAdmin } from "../config/firebase-admin.js";
+import { mowerLinkConflict, ownerFields } from "../ownership.js";
 import { startOptions, validateCommand, validateMowerLink, validateSettings, type MowerAction } from "../mower.js";
 import {
   capabilitiesOf, commandMower, createLink, discover, getLink, listHaMowers, listLinks, mowerView, removeLink, updateLink,
@@ -155,15 +156,34 @@ router.get("/mowers/vendors/:vendor/discover", requireAuth, async (req: Request,
 });
 
 // Link a mower. It is claimed for the caller so only they can command it.
+// FIX(2026-10-12): a caller-chosen deviceId used to be written with { ownerId: caller } and
+// merge, so linking a "mower" as ct_001 took over someone else's coop (door, drive, arm).
+// The id is now checked first, and the owner write is a transaction that refuses a conflict.
 router.post("/mowers", requireAuth, async (req: Request, res: Response) => {
   const err = validateMowerLink(req.body);
   if (err) return res.status(400).json({ error: err });
+  const uid = (req as AuthedRequest).uid;
   try {
+    if (AUTH_ENABLED && uid && typeof req.body.deviceId === "string") {
+      const snap = await getFirestoreAdmin().collection("devices").doc(req.body.deviceId).get();
+      const conflict = mowerLinkConflict(snap.exists ? snap.data() : undefined, uid);
+      if (conflict) return res.status(409).json({ error: conflict });
+    }
     const link = await createLink(req.body);
-    const uid = (req as AuthedRequest).uid;
     if (AUTH_ENABLED && uid) {
-      await getFirestoreAdmin().collection("devices").doc(link.deviceId)
-        .set({ ownerId: uid, claimedAt: Date.now(), unclaimed: false, productType: "robot-mower", nickname: link.name }, { merge: true });
+      const db = getFirestoreAdmin();
+      const docRef = db.collection("devices").doc(link.deviceId);
+      const conflict = await db.runTransaction(async (tx) => {
+        const snap = await tx.get(docRef);
+        const reason = mowerLinkConflict(snap.exists ? snap.data() : undefined, uid);
+        if (reason) return reason;
+        tx.set(docRef, { ...ownerFields(uid), claimedAt: Date.now(), unclaimed: false, productType: "robot-mower", nickname: link.name }, { merge: true });
+        return null;
+      });
+      if (conflict) {
+        removeLink(link.deviceId);
+        return res.status(409).json({ error: conflict });
+      }
     }
     res.status(201).json({ success: true, ...mowerView(link.deviceId) });
   } catch (e) { fail(res, e); }

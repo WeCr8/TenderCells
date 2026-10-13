@@ -10,6 +10,7 @@ import {
 } from "../yardEvents.js";
 import mqtt from "mqtt";
 import { AUTH_ENABLED, type AuthedRequest } from "../middleware/auth.js";
+import { deviceOwner, ownerFields } from "../ownership.js";
 import { getFirestoreAdmin } from "../config/firebase-admin.js";
 
 interface MQTTMessage {
@@ -181,7 +182,7 @@ export class MQTTController {
       const ref = db.collection("devices").doc(deviceId);
       void db.runTransaction(async (tx) => {
         const snap = await tx.get(ref);
-        if (snap.exists && snap.data()?.ownerId) return;  // already claimed — leave it
+        if (snap.exists && deviceOwner(snap.data())) return;  // already claimed — leave it
         tx.set(ref, {
           id: deviceId,
           mqttDeviceId: deviceId,
@@ -391,9 +392,11 @@ export class MQTTController {
       const ref = db.collection("devices").doc(deviceId);
       const result = await db.runTransaction(async (tx) => {
         const snap = await tx.get(ref);
-        const existing = snap.exists ? (snap.data()?.ownerId as string | undefined) : undefined;
+        const existing = snap.exists ? deviceOwner(snap.data()) : undefined;
         if (existing && existing !== uid) return { ok: false as const, ownerId: existing };
-        tx.set(ref, { ownerId: uid, claimedAt: Date.now(), unclaimed: false }, { merge: true });
+        // FIX(2026-10-12): write userId too. firestore.rules read devices/{id}.userId, so a
+        // device claimed here (ownerId only) was invisible to its owner in the app.
+        tx.set(ref, { ...ownerFields(uid), claimedAt: Date.now(), unclaimed: false }, { merge: true });
         return { ok: true as const, ownerId: uid };
       });
 

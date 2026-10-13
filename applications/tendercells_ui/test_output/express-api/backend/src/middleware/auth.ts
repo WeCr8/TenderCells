@@ -18,6 +18,7 @@ import {
   getFirestoreAdmin,
   initializeFirebaseAdmin,
 } from "../config/firebase-admin.js";
+import { deviceOwner } from "../ownership.js";
 
 const HAS_ADMIN = Boolean(
   process.env.FIREBASE_ADMIN_SDK_PATH || process.env.GOOGLE_APPLICATION_CREDENTIALS,
@@ -73,7 +74,8 @@ export async function requireDeviceOwner(req: Request, res: Response, next: Next
   try {
     ensureAdmin();
     const snap = await getFirestoreAdmin().collection("devices").doc(deviceId).get();
-    const ownerId = snap.exists ? (snap.data()?.ownerId as string | undefined) : undefined;
+    // ownerId, or userId for devices registered from the app (see ownership.ts).
+    const ownerId = snap.exists ? deviceOwner(snap.data()) : undefined;
 
     if (!ownerId) {
       return res
@@ -98,6 +100,14 @@ export async function ownedDeviceIds(uid: string | undefined): Promise<Set<strin
   if (!AUTH_ENABLED) return null;
   if (!uid) return new Set();
   ensureAdmin();
-  const snap = await getFirestoreAdmin().collection("devices").where("ownerId", "==", uid).get();
-  return new Set(snap.docs.map((d) => d.id));
+  const devices = getFirestoreAdmin().collection("devices");
+  // Both owner fields: app-registered devices carry userId, hub claims carry both.
+  const [byOwner, byUser] = await Promise.all([
+    devices.where("ownerId", "==", uid).get(),
+    devices.where("userId", "==", uid).get(),
+  ]);
+  const ids = new Set<string>();
+  for (const d of byOwner.docs) ids.add(d.id);
+  for (const d of byUser.docs) if (deviceOwner(d.data()) === uid) ids.add(d.id);
+  return ids;
 }

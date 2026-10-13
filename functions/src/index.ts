@@ -4,6 +4,9 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { sanitizeAiChat } from "./aiChatPolicy";
+import { runSchedules } from "./scheduleRunner";
+import { deviceApiStore, keyAdminStore, scheduleRunStore } from "./firestoreStores";
+import { createDeviceApi, issueKey, KeyAdminError, listKeys, revokeKey } from "./deviceApi";
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -36,14 +39,6 @@ interface AlertDoc {
   ts: number;
 }
 
-interface ScheduleDoc {
-  deviceId: string;
-  action: "feed" | "clean" | "door" | "water";
-  cronExpression: string;
-  enabled: boolean;
-  lastRun?: admin.firestore.Timestamp | null;
-}
-
 interface TelemetryReading {
   temperature: number;
   humidity: number;
@@ -60,40 +55,6 @@ interface AiChatRequest {
   system: string;
   messages: Array<{ role: "user" | "assistant"; content: string }>;
   max_tokens?: number;
-}
-
-// ============================================================================
-// CRON MATCHER (no external dep)
-// Supports: * / , - operators, standard 5-field cron (UTC)
-// ============================================================================
-
-function cronMatches(expression: string, now: Date): boolean {
-  const parts = expression.trim().split(/\s+/);
-  if (parts.length !== 5) return false;
-  const [minStr, hourStr, domStr, monthStr, dowStr] = parts;
-
-  const matchField = (field: string, value: number): boolean => {
-    if (field === "*") return true;
-    if (field.includes("/")) {
-      const [base, step] = field.split("/");
-      const start = base === "*" ? 0 : parseInt(base, 10);
-      return value >= start && (value - start) % parseInt(step, 10) === 0;
-    }
-    if (field.includes(",")) return field.split(",").some((v) => parseInt(v, 10) === value);
-    if (field.includes("-")) {
-      const [start, end] = field.split("-").map(Number);
-      return value >= start && value <= end;
-    }
-    return parseInt(field, 10) === value;
-  };
-
-  return (
-    matchField(minStr, now.getUTCMinutes()) &&
-    matchField(hourStr, now.getUTCHours()) &&
-    matchField(domStr, now.getUTCDate()) &&
-    matchField(monthStr, now.getUTCMonth() + 1) &&
-    matchField(dowStr, now.getUTCDay())
-  );
 }
 
 // ============================================================================
@@ -242,125 +203,26 @@ export const aggregateTelemetry = functions.pubsub
 // ============================================================================
 
 /**
- * Execute scheduled tasks (feed, water, clean, door) every 5 minutes.
- * Reads enabled schedules from /schedules/{deviceId}/items/{scheduleId}.
- * Writes pending commands to Realtime DB /pending-commands/{deviceId}/{pushId}.
- * MQTT bridge (express-api on Pi) listens to RTDB and publishes MQTT commands.
- *
- * NOTE: Motion commands (arm/gantry) are NEVER routed through Firebase.
- * Only scheduled maintenance tasks (door, feed, water, clean) use this path.
+ * Queue due schedules every 5 minutes (feed, water, door, clean, weed pass).
+ * Reads enabled schedules from /schedules/{deviceId}/items/{scheduleId}, matches each cron in the
+ * schedule's own time zone over the last 5 minutes, and queues the schedule's real command at
+ * /deviceCommands/{deviceId}/queue/{sched_<scheduleId>_<minute>} (scheduleExec.ts, scheduleRunner.ts).
+ * Delivered by: the farm hub's schedule runner (local MQTT, after its E-STOP / work-area checks),
+ * or the device itself via deviceApi GET /v1/devices/:id/commands with an API key.
+ * Skips devices in E-STOP or offline, and schedules with no known time zone.
+ * Never sends robot motion to a hubless device (deviceApi holds clean / weed passes).
  */
 export const executeSchedules = functions.pubsub
   .schedule("*/5 * * * *")
   .timeZone("UTC")
-  .onRun(async (_context) => {
-    const now = new Date();
-    console.log(`[executeSchedules] Checking at ${now.toISOString()}`);
-
-    const devicesSnap = await db.collection("devices").get();
-    let fired = 0;
-
-    for (const deviceDoc of devicesSnap.docs) {
-      const deviceId = deviceDoc.id;
-      const schedulesSnap = await db
-        .collection(`schedules/${deviceId}/items`)
-        .where("enabled", "==", true)
-        .get();
-
-      // ── Safety pre-checks ─────────────────────────────────────────────────
-      // 1. Device online check: lastSeen must be within 5 minutes
-      // 2. Device state check: skip if estop or error
-      // 3. Chicken presence check: skip clean commands if chickens detected
-
-      let deviceState: Record<string, unknown> = {};
-      try {
-        const stateSnap = await rtdb.ref(`device-states/${deviceId}`).once("value");
-        if (stateSnap.exists()) deviceState = stateSnap.val() as Record<string, unknown>;
-      } catch {
-        // RTDB unavailable — fall through to Firestore state doc
-      }
-
-      // Try Firestore device-states if RTDB returned nothing
-      if (!deviceState.systemState) {
-        try {
-          const fsState = await db.doc(`device-states/${deviceId}`).get();
-          if (fsState.exists) deviceState = fsState.data() as Record<string, unknown>;
-        } catch { /* ignore */ }
-      }
-
-      // Check device online (lastSeen within 5 min)
-      const lastSeen = deviceState.lastSeen as number | null | undefined;
-      if (!lastSeen || now.getTime() - lastSeen > 5 * 60_000) {
-        console.warn(`[executeSchedules] Device ${deviceId} offline (lastSeen ${lastSeen ?? "never"}) — skipping all schedules`);
-        continue;
-      }
-
-      // Check device not in estop or error
-      const sysState = String(deviceState.systemState ?? "idle");
-      if (sysState === "estop" || sysState === "error") {
-        console.warn(`[executeSchedules] Device ${deviceId} in ${sysState} — skipping all schedules`);
-        continue;
-      }
-
-      // Fetch latest telemetry once per device (used for chicken presence check)
-      let lastChickenCount = 0;
-      try {
-        const telSnap = await db
-          .collection(`telemetry/${deviceId}/readings`)
-          .orderBy("timestamp", "desc")
-          .limit(1)
-          .get();
-        if (!telSnap.empty) {
-          const reading = telSnap.docs[0].data() as TelemetryReading;
-          lastChickenCount = reading.chickenCount ?? 0;
-        }
-      } catch { /* if telemetry missing, assume 0 — conservative */ }
-
-      for (const schedDoc of schedulesSnap.docs) {
-        const schedule = schedDoc.data() as ScheduleDoc;
-
-        if (!schedule.cronExpression) continue;
-        if (!cronMatches(schedule.cronExpression, now)) continue;
-
-        // Skip if already ran within the last 4 minutes (prevent duplicate fire)
-        if (schedule.lastRun) {
-          const lastRunMs = schedule.lastRun.toMillis();
-          if (now.getTime() - lastRunMs < 4 * 60_000) continue;
-        }
-
-        // Chicken presence check: block clean commands if chickens are in the coop
-        if (schedule.action === "clean" && lastChickenCount > 0) {
-          console.warn(
-            `[executeSchedules] Skipping 'clean' for ${deviceId} — chickenCount=${lastChickenCount} (chickens present)`
-          );
-          continue;
-        }
-
-        // Build command payload
-        const command: Record<string, unknown> = {
-          action: schedule.action,
-          deviceId,
-          scheduleId: schedDoc.id,
-          source: "schedule",
-          ts: Date.now(),
-        };
-        if (schedule.action === "door") command.state = "open";
-        if (schedule.action === "feed") command.amount = 100; // grams
-        if (schedule.action === "water") command.amount = 500; // ml
-        if (schedule.action === "clean") command.mode = "sweep";
-
-        // Write to Realtime DB — express-api bridge picks this up and publishes MQTT
-        await rtdb.ref(`pending-commands/${deviceId}`).push(command);
-
-        // Mark schedule as run
-        await schedDoc.ref.update({ lastRun: admin.firestore.FieldValue.serverTimestamp() });
-
-        console.log(`[executeSchedules] Fired '${schedule.action}' for device ${deviceId}`);
-        fired++;
-      }
+  .onRun(async (context) => {
+    const toMs = Date.parse(context.timestamp) || Date.now();
+    const fromMs = toMs - 5 * 60_000;
+    const summary = await runSchedules(scheduleRunStore(db), fromMs, toMs);
+    for (const s of summary.skipped) {
+      if (s.reason !== "offline") console.log(`[executeSchedules] skipped ${s.deviceId}${s.scheduleId ? `/${s.scheduleId}` : ""}: ${s.reason}`);
     }
-
-    console.log(`[executeSchedules] ${fired} schedule(s) fired.`);
+    console.log(`[executeSchedules] ${summary.queued.length} command(s) queued for ${new Date(fromMs).toISOString()}..${new Date(toMs).toISOString()}`);
     return null;
   });
 
@@ -555,6 +417,43 @@ export const mcp = functions
     connector ??= require("./connector/index.js").createConnectorApp(admin) as ConnectorHandler;
     connector(req, res);
   });
+
+// ============================================================================
+// ROBOT / HUB API KEYS + DEVICE API
+// ============================================================================
+
+let deviceApp: ReturnType<typeof createDeviceApi> | undefined;
+
+/**
+ * Cloud API for robots, hubs and starter nodes (deviceApi.ts). Accepts a Tender Cells API key
+ * (Authorization: Bearer tck_… / X-TC-Api-Key) or a Firebase ID token.
+ */
+export const deviceApi = functions
+  .runWith({ memory: "256MB", timeoutSeconds: 30, maxInstances: 10 })
+  .https.onRequest((req, res) => {
+    deviceApp ??= createDeviceApi({ store: deviceApiStore(db), verifyIdToken: (t) => admin.auth().verifyIdToken(t, true) });
+    deviceApp(req, res);
+  });
+
+const keyCall = <T>(fn: (uid: string, data: Record<string, unknown>) => Promise<T>) =>
+  functions.https.onCall(async (data: Record<string, unknown>, context: functions.https.CallableContext) => {
+    // Firebase ID token only: an API key can never mint, list or revoke keys.
+    if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Sign in to manage API keys");
+    try {
+      return await fn(context.auth.uid, data ?? {});
+    } catch (err) {
+      if (err instanceof KeyAdminError) throw new functions.https.HttpsError(err.code, err.message);
+      console.error("[apiKeys] failed:", (err as Error)?.message ?? err);
+      throw new functions.https.HttpsError("unavailable", "Could not update API keys right now");
+    }
+  });
+
+/** Issue a robot/hub API key. The key is returned once; only its SHA-256 hash is stored. */
+export const createApiKey = keyCall((uid, data) => issueKey(keyAdminStore(db), uid, data));
+/** The signed-in person's API keys (never the keys themselves). */
+export const listApiKeys = keyCall((uid) => listKeys(keyAdminStore(db), uid));
+/** Revoke one of the signed-in person's API keys (hub caches keys for up to 30 s). */
+export const revokeApiKey = keyCall((uid, data) => revokeKey(keyAdminStore(db), uid, data.keyId));
 
 console.log("[TenderCells] Cloud Functions initialized");
 

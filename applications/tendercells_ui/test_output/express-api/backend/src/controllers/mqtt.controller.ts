@@ -11,6 +11,7 @@ import {
 import mqtt from "mqtt";
 import { AUTH_ENABLED, type AuthedRequest } from "../middleware/auth.js";
 import { deviceOwner, ownerFields } from "../ownership.js";
+import { brokerCredentials } from "../brokerAuth.js";
 import { getFirestoreAdmin } from "../config/firebase-admin.js";
 
 interface MQTTMessage {
@@ -103,6 +104,8 @@ export class MQTTController {
     try {
       MQTTController.client = mqtt.connect(brokerUrl, {
         clientId: `express-api-${Date.now()}`,
+        // Same pair the embedded broker enforces when TC_MQTT_USERNAME / TC_MQTT_PASSWORD are set.
+        ...(brokerCredentials() ?? {}),
         reconnectPeriod: 5000,
         keepalive: 60,
       });

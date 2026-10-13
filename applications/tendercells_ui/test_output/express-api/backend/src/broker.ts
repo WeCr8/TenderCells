@@ -13,6 +13,7 @@
 import Aedes from "aedes";
 import { createServer } from "net";
 import { Bonjour } from "bonjour-service";
+import { brokerCredentials, credentialsMatch } from "./brokerAuth.js";
 
 const EMBED = process.env.EMBED_BROKER !== "0";
 const MQTT_PORT = Number(process.env.MQTT_PORT || 1883);
@@ -35,7 +36,12 @@ function advertiseBroker() {
 }
 
 if (EMBED) {
-  const aedes = new Aedes();
+  // Optional device credentials (TC_MQTT_USERNAME / TC_MQTT_PASSWORD, see brokerAuth.ts).
+  const creds = brokerCredentials();
+  const aedes = new Aedes(creds ? {
+    authenticate: (_client, username, password, done) => done(null, credentialsMatch(creds, username, password)),
+  } : {});
+  if (creds) console.log("✓ MQTT broker requires TC_MQTT_USERNAME / TC_MQTT_PASSWORD");
   const server = createServer(aedes.handle);
 
   server.listen(MQTT_PORT, () => {

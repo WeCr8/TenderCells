@@ -197,3 +197,30 @@ test("Firestore source refuses writes", async () => {
   assert.equal(r.status, 405);
   assert.equal((await hub("/api/mqtt/devices/ct_100/presence")).body && ((await hub("/api/mqtt/devices/ct_100/presence")).body as { online: boolean }).online, true);
 });
+
+test("a Firestore failure answers 503 in the route's own shape instead of crashing the request", async () => {
+  const boom = async () => { throw new Error("7 PERMISSION_DENIED: Missing or insufficient permissions."); };
+  const store = new MemoryOAuthStore();
+  Object.assign(store, { getGrant: boom, takeGrant: boom, deleteGrant: boom, getRequest: boom, putClient: boom, listGrantsForUid: boom });
+  const app = createHostedApp({ store, issuer: "https://tendercells.example", now: () => NOW, verifyIdToken: async () => ({ uid: "alice" }), hubFor: () => async () => ({ ok: true, status: 200, body: {} }) });
+  const srv = app.listen(0);
+  const base = `http://127.0.0.1:${(srv.address() as AddressInfo).port}`;
+  const errors: string[] = [];
+  const orig = console.error;
+  console.error = (m: unknown) => { errors.push(String(m)); };
+  try {
+    const mcp = await rpc(base, "/mcp", "tools/list", "some-token");
+    assert.equal(mcp.status, 503);
+    assert.equal(((await mcp.json()) as { jsonrpc: string }).jsonrpc, "2.0");
+    const post = (path: string, body: unknown) => fetch(`${base}${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    for (const r of [await post("/oauth/token", { grant_type: "refresh_token", refresh_token: "x" }), await post("/oauth/revoke", { token: "x" }),
+      await post("/oauth/register", { redirect_uris: ["https://claude.ai/cb"] }), await fetch(`${base}/oauth/request/abc`)]) {
+      assert.equal(r.status, 503);
+      assert.equal(((await r.json()) as { error: string }).error, "temporarily_unavailable");
+    }
+    assert.ok(errors.some((e) => e.includes("[connector] /mcp failed: 7 PERMISSION_DENIED")), "the cause is logged");
+  } finally {
+    console.error = orig;
+    srv.close();
+  }
+});

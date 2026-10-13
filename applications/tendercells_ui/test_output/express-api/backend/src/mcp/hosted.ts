@@ -54,6 +54,26 @@ h2{font-size:18px;margin:24px 0 6px}ol{padding-left:22px}li{margin:4px 0}.note{c
 const rpcError = (res: Response, status: number, message: string) =>
   res.status(status).json({ jsonrpc: "2.0", error: { code: -32000, message }, id: null });
 
+type Handler = (req: Request, res: Response) => unknown;
+/**
+ * FIX(2026-10-12): every OAuth / MCP route awaits Firestore without a catch, so one failed
+ * Firestore call was an unhandled rejection (a crashed request; live tendercells.com/mcp,
+ * /oauth/token, /oauth/revoke and /oauth/request/:id all return a bare 500 today). Failures
+ * now answer 503 in the route's own error shape and log the cause for the function logs.
+ */
+function safe(route: string, fn: Handler): Handler {
+  return async (req, res) => {
+    try {
+      await fn(req, res);
+    } catch (err) {
+      console.error(`[connector] ${route} failed: ${(err as Error)?.message ?? String(err)}`);
+      if (res.headersSent) return;
+      if (route.startsWith("/mcp")) rpcError(res, 503, "Tender Cells is temporarily unavailable. Try again in a minute.");
+      else res.status(503).json({ error: "temporarily_unavailable", error_description: "Tender Cells is temporarily unavailable. Try again in a minute." });
+    }
+  };
+}
+
 /**
  * Build the hosted connector (OAuth + MCP) as an Express app.
  *
@@ -98,7 +118,7 @@ export function createHostedApp(opts: HostedOptions) {
   });
 
   // ── dynamic client registration (public clients) ─────────────────────────────
-  app.post("/oauth/register", async (req, res) => {
+  app.post("/oauth/register", safe("/oauth/register", async (req, res) => {
     const body = (req.body ?? {}) as { client_name?: unknown; redirect_uris?: unknown };
     const uris = Array.isArray(body.redirect_uris) ? body.redirect_uris.filter((u): u is string => typeof u === "string") : [];
     if (!uris.length || uris.length > 10 || !uris.every(allowedRedirect)) {
@@ -112,10 +132,10 @@ export function createHostedApp(opts: HostedOptions) {
       client_id: client.id, client_name: name, redirect_uris: uris, client_id_issued_at: Math.floor(client.createdAt / 1000),
       token_endpoint_auth_method: "none", grant_types: ["authorization_code", "refresh_token"], response_types: ["code"], scope: SCOPE,
     });
-  });
+  }));
 
   // ── authorize: validate, park the request, send the person to the consent page ─
-  app.get("/oauth/authorize", async (req, res) => {
+  app.get("/oauth/authorize", safe("/oauth/authorize", async (req, res) => {
     const q = req.query as Record<string, string | undefined>;
     const client = q.client_id ? await store.getClient(q.client_id) : null;
     // Never redirect to an unverified URI: show the error here instead.
@@ -138,18 +158,18 @@ export function createHostedApp(opts: HostedOptions) {
     const id = secret(18);
     await store.putRequest({ id, clientId: client.id, redirectUri: q.redirect_uri, state: q.state, codeChallenge: q.code_challenge, scope: SCOPE, resource, expiresAt: now() + REQUEST_TTL_MS });
     res.redirect(302, `${issuer}/connect?request=${encodeURIComponent(id)}`);
-  });
+  }));
 
   // What the consent page shows (no secrets).
-  app.get("/oauth/request/:id", async (req, res) => {
+  app.get("/oauth/request/:id", safe("/oauth/request/:id", async (req, res) => {
     const r = await store.getRequest(req.params.id);
     if (!r || r.expiresAt < now()) { res.status(404).json({ error: "This sign-in request expired. Start again from your assistant." }); return; }
     const client = await store.getClient(r.clientId);
     res.json({ clientName: client?.name ?? "AI assistant", redirectHost: new URL(r.redirectUri).host, scope: r.scope, expiresAt: r.expiresAt });
-  });
+  }));
 
   // The consent page posts the person's decision with a fresh Firebase ID token.
-  app.post("/oauth/approve", async (req, res) => {
+  app.post("/oauth/approve", safe("/oauth/approve", async (req, res) => {
     const { request: id, idToken, approve } = (req.body ?? {}) as { request?: string; idToken?: string; approve?: boolean };
     const r = id ? await store.getRequest(id) : null;
     if (!r || r.expiresAt < now()) { res.status(404).json({ error: "This sign-in request expired. Start again from your assistant." }); return; }
@@ -173,7 +193,7 @@ export function createHostedApp(opts: HostedOptions) {
     await store.putGrant(sha256(code), { kind: "code", uid, clientId: r.clientId, scope: r.scope, resource: r.resource, redirectUri: r.redirectUri, codeChallenge: r.codeChallenge, expiresAt: now() + CODE_TTL_MS, issuedAt: now() });
     u.searchParams.set("code", code);
     res.json({ redirect: u.toString() });
-  });
+  }));
 
   // ── token ─────────────────────────────────────────────────────────────────────
   const issueTokens = async (g: Pick<Grant, "uid" | "clientId" | "scope" | "resource" | "issuedAt">) => {
@@ -185,7 +205,7 @@ export function createHostedApp(opts: HostedOptions) {
     await store.putGrant(sha256(refresh), { ...base, kind: "refresh", expiresAt: now() + REFRESH_TTL_MS });
     return { access_token: access, token_type: "Bearer", expires_in: Math.floor(ACCESS_TTL_MS / 1000), refresh_token: refresh, scope: g.scope };
   };
-  app.post("/oauth/token", async (req, res) => {
+  app.post("/oauth/token", safe("/oauth/token", async (req, res) => {
     const b = (req.body ?? {}) as Record<string, string | undefined>;
     const bad = (error: string, description: string) => { res.status(400).json({ error, error_description: description }); };
     if (b.grant_type === "authorization_code") {
@@ -204,13 +224,13 @@ export function createHostedApp(opts: HostedOptions) {
       return;
     }
     bad("unsupported_grant_type", "Use authorization_code or refresh_token");
-  });
+  }));
 
-  app.post("/oauth/revoke", async (req, res) => {
+  app.post("/oauth/revoke", safe("/oauth/revoke", async (req, res) => {
     const token = (req.body as { token?: string } | undefined)?.token;
     if (token) await store.deleteGrant(sha256(token));
     res.status(200).end();
-  });
+  }));
 
   // ── connected assistants: the person manages their own connections ────────────
   // Authenticated with the person's own Firebase ID token (from the Tender Cells app),
@@ -226,7 +246,7 @@ export function createHostedApp(opts: HostedOptions) {
       return null;
     }
   };
-  app.get("/oauth/connections", async (req, res) => {
+  app.get("/oauth/connections", safe("/oauth/connections", async (req, res) => {
     const uid = await signedIn(req, res);
     if (!uid) return;
     const live = (await store.listGrantsForUid(uid)).filter(({ grant }) => grant.kind !== "code" && grant.expiresAt > now());
@@ -242,15 +262,15 @@ export function createHostedApp(opts: HostedOptions) {
       return { clientId, name: client?.name ?? "AI assistant", host, scope: SCOPE, connectedAt: v.connectedAt, until: v.until };
     }));
     res.json({ connections: connections.sort((a, b) => b.connectedAt - a.connectedAt) });
-  });
-  app.post("/oauth/connections/revoke", async (req, res) => {
+  }));
+  app.post("/oauth/connections/revoke", safe("/oauth/connections/revoke", async (req, res) => {
     const uid = await signedIn(req, res);
     if (!uid) return;
     const clientId = String((req.body as { clientId?: string } | undefined)?.clientId ?? "");
     const mine = (await store.listGrantsForUid(uid)).filter(({ grant }) => !clientId || grant.clientId === clientId);
     await Promise.all(mine.map(({ hash }) => store.deleteGrant(hash)));
     res.json({ revoked: mine.length });
-  });
+  }));
 
   // ── MCP ───────────────────────────────────────────────────────────────────────
   const serve = async (req: Request, res: Response, hub: HubFetch, mode: McpMode) => {
@@ -266,7 +286,7 @@ export function createHostedApp(opts: HostedOptions) {
   };
 
   app.post("/mcp/demo", (req, res) => { void serve(req, res, demoHub(now), "hosted-demo"); });
-  app.post("/mcp", async (req, res) => {
+  app.post("/mcp", safe("/mcp", async (req, res) => {
     const header = String(req.headers.authorization ?? "");
     const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
     const g = token ? await store.getGrant(sha256(token)) : null;
@@ -276,7 +296,7 @@ export function createHostedApp(opts: HostedOptions) {
       return;
     }
     await serve(req, res, opts.hubFor(g.uid), "hosted");
-  });
+  }));
   // A person who opens the URL in a browser gets a short "how to add this" page; MCP
   // clients (which never ask for text/html) keep getting the JSON-RPC 405.
   app.get(["/mcp", "/mcp/demo"], (req, res, next) => {

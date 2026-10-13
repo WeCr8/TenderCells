@@ -93,6 +93,11 @@ export class MQTTController {
     return null;
   }
 
+  /** Devices this hub has heard (telemetry or state) since it started. */
+  static knownDeviceIds(): string[] {
+    return [...new Set([...MQTTController.telemetry.keys(), ...MQTTController.states.keys()])].filter((id) => id !== "broadcast");
+  }
+
   /** E-STOP latched on the hub (sent from here) or reported by the device itself. */
   static estopLatched(deviceId: string): boolean {
     const state = MQTTController.states.get(deviceId);

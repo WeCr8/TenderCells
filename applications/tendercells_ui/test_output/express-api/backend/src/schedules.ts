@@ -12,6 +12,7 @@ export interface ScheduleDoc {
   amount?: number;
   state?: "open" | "close";   // door: which way (default open)
   on?: boolean;               // water/relay: on or off (default on)
+  timeZone?: string;          // IANA zone the cron was written in (the app stamps the browser's)
   lastRun?: number | { toMillis?: () => number } | null;
 }
 
@@ -31,17 +32,51 @@ function matchField(field: string, val: number): boolean {
   });
 }
 
-// 5-field cron: minute hour day-of-month month day-of-week.
-export function cronMatch(expr: string, d: Date): boolean {
+/** A usable IANA time zone name, or undefined. */
+export function validTimeZone(tz: unknown): string | undefined {
+  if (typeof tz !== "string" || !tz.trim()) return undefined;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: tz }).format(0);
+    return tz;
+  } catch {
+    return undefined;
+  }
+}
+
+const WEEKDAYS: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+function wallClock(d: Date, timeZone?: string) {
+  if (!timeZone) return { min: d.getMinutes(), hour: d.getHours(), day: d.getDate(), month: d.getMonth() + 1, dow: d.getDay() };
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone, hourCycle: "h23", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", weekday: "short",
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return { min: Number(get("minute")), hour: Number(get("hour")) % 24, day: Number(get("day")), month: Number(get("month")), dow: WEEKDAYS[get("weekday")] ?? 0 };
+}
+
+/**
+ * 5-field cron: minute hour day-of-month month day-of-week.
+ *
+ * @param timeZone - Match in this IANA zone (the schedule's own); omitted = the hub's local time
+ */
+export function cronMatch(expr: string, d: Date, timeZone?: string): boolean {
   const f = expr.trim().split(/\s+/);
   if (f.length !== 5) return false;
+  const w = wallClock(d, timeZone);
   return (
-    matchField(f[0], d.getMinutes()) &&
-    matchField(f[1], d.getHours()) &&
-    matchField(f[2], d.getDate()) &&
-    matchField(f[3], d.getMonth() + 1) &&
-    matchField(f[4], d.getDay())
+    matchField(f[0], w.min) &&
+    matchField(f[1], w.hour) &&
+    matchField(f[2], w.day) &&
+    matchField(f[3], w.month) &&
+    matchField(f[4], w.dow)
   );
+}
+
+/**
+ * The zone a schedule is matched in: its own timeZone (the app stamps the browser's), then
+ * TC_TIMEZONE on the hub, else undefined = the hub's local time (older schedules).
+ */
+export function scheduleTimeZone(s: ScheduleDoc, env: NodeJS.ProcessEnv = process.env): string | undefined {
+  return validTimeZone(s.timeZone) ?? validTimeZone(env.TC_TIMEZONE);
 }
 
 function toMs(v: ScheduleDoc["lastRun"]): number {
@@ -86,9 +121,103 @@ export async function collectEnabledSchedules(db: ScheduleDb): Promise<Array<{ d
   return out;
 }
 
-/** Due now and not already fired this minute? */
-export function isDue(s: ScheduleDoc, now: Date): boolean {
-  if (!s.cronExpression || !cronMatch(s.cronExpression, now)) return false;
+/** Due now (in the schedule's time zone) and not already fired this minute? */
+export function isDue(s: ScheduleDoc, now: Date, timeZone: string | undefined = scheduleTimeZone(s)): boolean {
+  if (!s.cronExpression || !cronMatch(s.cronExpression, now, timeZone)) return false;
   const last = toMs(s.lastRun);
   return !(last && Math.floor(last / 60000) === Math.floor(now.getTime() / 60000));
+}
+
+// ── commands and the shared queue (same contract as functions/src/scheduleExec.ts) ─────────
+
+export interface HubCommand {
+  suffix: "feed" | "clean" | "door" | "light" | "weed";
+  payload: Record<string, unknown>;
+  /** Robot motion inside the coop/yard: needs the work-area gate (E-STOP + headcount). */
+  motion: boolean;
+}
+
+const clampNum = (v: unknown, lo: number, hi: number, dflt: number) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.min(hi, Math.max(lo, Math.round(n))) : dflt;
+};
+
+/** The command a schedule sends. Mirrors commandFor() in functions/src/scheduleExec.ts. */
+export function commandFor(s: ScheduleDoc): HubCommand | null {
+  switch (s.action) {
+    case "feed": return { suffix: "feed", payload: { amount: clampNum(s.amount, 1, 1000, 50) }, motion: false };
+    case "door": return { suffix: "door", payload: { state: s.state === "close" ? "close" : "open" }, motion: false };
+    case "water": return { suffix: "light", payload: { on: s.on !== false }, motion: false };
+    case "clean": return { suffix: "clean", payload: { action: "start" }, motion: true };
+    case "weed_pass":
+      return {
+        suffix: "weed",
+        payload: { action: "pass", passes: clampNum(s.passes, 1, 10, 1), task: s.task === "plant_scan" || s.task === "patrol" ? s.task : "weed" },
+        motion: true,
+      };
+    default: return null;
+  }
+}
+
+/** Queue id shared with the cloud runner: one schedule at one minute is one command. */
+export const commandId = (scheduleId: string, minuteMs: number) => `sched_${scheduleId}_${Math.floor(minuteMs / 60_000)}`;
+
+/** How long a queued command stays deliverable (matches functions COMMAND_TTL_MS). */
+export const COMMAND_TTL_MS = 10 * 60_000;
+
+/** The slice of Firestore the queue code uses (deviceCommands/{deviceId}/queue/{id}). */
+export interface QueueDb {
+  /** Create the doc; false if it already exists. */
+  create(deviceId: string, cmdId: string, doc: Record<string, unknown>): Promise<boolean>;
+  update(deviceId: string, cmdId: string, patch: Record<string, unknown>): Promise<void>;
+  pending(deviceId: string): Promise<Array<Record<string, unknown> & { id: string }>>;
+  /** pending → delivering atomically; false when another hub/device took it. */
+  take(deviceId: string, cmdId: string): Promise<boolean>;
+}
+
+export interface Delivery {
+  /** E-STOP / work-area refusal for this device, or null to send. */
+  refusal(deviceId: string, cmd: HubCommand): string | null;
+  publish(deviceId: string, cmd: HubCommand): boolean;
+}
+
+/**
+ * Claim a due schedule before firing it, so the cloud runner (or another hub) does not also
+ * send it. Returns false when the command was already queued elsewhere; that copy is then
+ * delivered by deliverQueued() if it is still pending.
+ */
+export async function claimScheduled(q: QueueDb, deviceId: string, scheduleId: string, cmd: HubCommand, minuteMs: number, now: number): Promise<{ claimed: boolean; id: string }> {
+  const id = commandId(scheduleId, minuteMs);
+  const claimed = await q.create(deviceId, id, {
+    deviceId, command: cmd.suffix, payload: cmd.payload, motion: cmd.motion, source: "schedule", scheduleId,
+    dueAt: minuteMs, status: "delivering", createdBy: "hub", createdAt: now, expiresAt: minuteMs + COMMAND_TTL_MS,
+  });
+  return { claimed, id };
+}
+
+/**
+ * Deliver commands the cloud queued for devices on this hub, through the same gates as a
+ * button press. Commands held by E-STOP / the work-area gate are marked blocked, never retried
+ * later (a door must not swing open hours after its time).
+ */
+export async function deliverQueued(q: QueueDb, deviceIds: Iterable<string>, d: Delivery, now: number): Promise<Array<{ deviceId: string; id: string; status: string; reason?: string }>> {
+  const out: Array<{ deviceId: string; id: string; status: string; reason?: string }> = [];
+  for (const deviceId of deviceIds) {
+    for (const c of await q.pending(deviceId)) {
+      if (!(await q.take(deviceId, c.id))) continue;
+      const cmd: HubCommand = { suffix: c.command as HubCommand["suffix"], payload: (c.payload ?? {}) as Record<string, unknown>, motion: c.motion === true };
+      let status = "delivered";
+      let reason: string | undefined;
+      if (typeof c.expiresAt === "number" && c.expiresAt < now) { status = "expired"; reason = "expired"; } else if (!["feed", "clean", "door", "light", "weed"].includes(cmd.suffix)) {
+        status = "blocked"; reason = `unknown command ${String(c.command)}`;
+      } else {
+        reason = d.refusal(deviceId, cmd) ?? undefined;
+        if (reason) status = "blocked";
+        else if (!d.publish(deviceId, cmd)) { status = "pending"; reason = "broker not connected"; }
+      }
+      await q.update(deviceId, c.id, { status, ...(reason ? { reason } : {}), settledAt: now, deliveredBy: "hub" });
+      out.push({ deviceId, id: c.id, status, ...(reason ? { reason } : {}) });
+    }
+  }
+  return out;
 }

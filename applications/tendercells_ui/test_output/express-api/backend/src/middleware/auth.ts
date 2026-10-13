@@ -149,6 +149,11 @@ export async function requireDeviceOwner(req: Request, res: Response, next: Next
         .status(403)
         .json({ error: "Device not claimed. Claim it to your account first." });
     }
+    // A simulation document the app created can't drive hardware that happens to use its id;
+    // the real board is claimed with its claim code or a hub pairing token (claim.ts).
+    if (data?.simOnly === true) {
+      return res.status(403).json({ error: "This is a simulation-only device. Claim the real board with its claim code first." });
+    }
     if (ownerId !== uid) {
       return res.status(403).json({ error: "You do not own this device" });
     }

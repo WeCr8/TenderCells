@@ -51,9 +51,16 @@ router.get("/unclaimed", requireAuth, requirePerson, (req: Request, res: Respons
   controller.listUnclaimed(req, res);
 });
 
-// Claim a device to the signed-in account (auth only — device may be unclaimed).
-router.post("/devices/:deviceId/claim", requireAuth, (req: Request, res: Response) => {
+// Claim a device to the signed-in account with proof of possession: { claimCode } from the
+// board, or { pairingToken } from this hub (claim.ts). A person only, never an API key.
+router.post("/devices/:deviceId/claim", requireAuth, requirePerson, (req: Request, res: Response) => {
   controller.claimDevice(req, res);
+});
+
+// One-time pairing token for claiming a board without a claim code. Hub machine only
+// (or X-TC-Hub-Admin: $TC_HUB_ADMIN_KEY). CLI: tc pair <deviceId>
+router.post("/pairing-tokens", (req: Request, res: Response) => {
+  controller.issuePairingToken(req, res);
 });
 
 // Hardware control commands — all owner-gated.

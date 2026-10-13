@@ -186,6 +186,25 @@ async function run() {
       out(r, `⛔ ${id} EMERGENCY STOP sent`);
       break;
     }
+    case "pair": {
+      // One-time pairing token for claiming a board that has no claim code. Must run on the
+      // hub machine itself (or set TC_HUB_ADMIN_KEY to the hub's admin key).
+      const id = argv.shift();
+      let res;
+      try {
+        res = await fetch(`${MQTT}/pairing-tokens`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...(process.env.TC_HUB_ADMIN_KEY ? { "X-TC-Hub-Admin": process.env.TC_HUB_ADMIN_KEY } : {}) },
+          body: JSON.stringify(id ? { deviceId: id } : {}),
+        });
+      } catch (e) {
+        die(`API not reachable at ${API} — is 'npm run dev' running? (${e.message})`, 2);
+      }
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok) die(`pairing token refused: HTTP ${res.status}${r.error ? `: ${r.error}` : ""}`);
+      out(r, `pairing token${id ? ` for ${id}` : ""} (one use, expires ${new Date(r.expiresAt).toLocaleTimeString()}):\n  ${r.token}\nPaste it into Configure Device → Claim in the Tender Cells app.`);
+      break;
+    }
     case "help":
     case undefined:
     case "--help":
@@ -221,6 +240,9 @@ Control:
   tc arm <id> --joints a,b,c,d,e,f [--speed 0.3]
   tc routine <id> <name>            e.g. egg_collection_routine
   tc estop <id>                     emergency stop
+
+Accounts:
+  tc pair [id]                      one-time pairing token to claim a board (run on the hub)
 
 Global:
   --json                            machine-readable output + exit codes (for agents/scripts)

@@ -14,6 +14,9 @@ import { deviceOwner, ownerFields } from "../ownership.js";
 import { brokerCredentials } from "../brokerAuth.js";
 import { actuatorRefusal, type Actuator } from "../safety.js";
 import { getFirestoreAdmin } from "../config/firebase-admin.js";
+import {
+  checkClaimProof, claimConflict, ClaimLimiter, hubAdminOk, isClaimHash, isLocalRequest, PairingTokens,
+} from "../claim.js";
 
 interface MQTTMessage {
   [key: string]: unknown;
@@ -34,6 +37,11 @@ export class MQTTController {
   private static telemetryAt: Map<string, number> = new Map();
   // E-STOPs this hub latched (a bridged mower has no firmware to hold the retained stop).
   private static estops: Set<string> = new Set();
+  // Claim proof (claim.ts): the claimHash each board published, one-time pairing tokens, and a
+  // per-device limit on wrong codes.
+  private static claimHashes: Map<string, string> = new Map();
+  static pairing = new PairingTokens();
+  private static claimLimiter = new ClaimLimiter();
   /** Called after an E-STOP is published (the mower bridge sends a mower home). */
   static onEstopHooks: Array<(deviceId: string) => void | Promise<void>> = [];
 
@@ -234,6 +242,11 @@ export class MQTTController {
       }
       const payload = JSON.parse(raw) as MQTTMessage;
       const topicParts = topic.split("/");
+      // Boards with a claim code publish its hash (claim.ts). Keep it on the hub only.
+      if (topicParts[0] === "tc" && topicParts[1] && "claimHash" in payload) {
+        if (isClaimHash(payload.claimHash)) MQTTController.claimHashes.set(topicParts[1], payload.claimHash);
+        delete payload.claimHash;
+      }
       // Commands are published by us; everything else proves the device is alive.
       if (topicParts[0] === "tc" && topicParts[1] && topicParts[2] !== "cmd") touch(topicParts[1]);
 
@@ -330,8 +343,13 @@ export class MQTTController {
       return res.json({ devices: Array.from(MQTTController.telemetry.keys()).map((id) => ({ id })) });
     }
     try {
+      // Only boards this hub has heard (FIX 2026-10-12: listed every unclaimed device of every farm).
+      const heard = new Set(MQTTController.knownDeviceIds());
       const snap = await getFirestoreAdmin().collection("devices").where("unclaimed", "==", true).get();
-      const devices = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const devices = snap.docs.filter((d) => heard.has(d.id)).map((d) => {
+        const { claimHash: _h, ...rest } = d.data();
+        return { id: d.id, ...rest, hasClaimCode: MQTTController.claimHashes.has(d.id) };
+      });
       return res.json({ devices });
     } catch {
       return res.status(500).json({ error: "Could not list devices" });
@@ -398,8 +416,9 @@ export class MQTTController {
     });
   }
 
-  // Bind a device to the signed-in account (first-claim-wins). After this, only the
-  // owner can actuate it (see requireDeviceOwner). No-op in demo/LAN mode (no auth).
+  // Bind a device to the signed-in account, with proof of possession (claim.ts): the board's
+  // claim code or a one-time pairing token from this hub. FIX(2026-10-12): was first-come.
+  // After this, only the owner can actuate it (see requireDeviceOwner). No-op in demo/LAN mode.
   async claimDevice(req: Request, res: Response) {
     const { deviceId } = req.params;
     const uid = (req as AuthedRequest).uid;
@@ -412,27 +431,60 @@ export class MQTTController {
         note: "Demo/LAN mode — no account binding required",
       });
     }
+    if (MQTTController.claimLimiter.blocked(deviceId)) {
+      return res.status(429).json({ error: "Too many wrong claim attempts for this device. Wait 10 minutes." });
+    }
 
     try {
       const db = getFirestoreAdmin();
       const ref = db.collection("devices").doc(deviceId);
+      const before = await ref.get();
+      const existing = before.exists ? before.data() : undefined;
+      if (deviceOwner(existing) === uid && existing?.simOnly !== true) {
+        return res.json({ success: true, deviceId, claimed: true, ownerId: uid, note: "Already yours" });
+      }
+      const conflict = claimConflict(existing, uid);
+      if (conflict) return res.status(409).json({ error: conflict });
+
+      const expected = MQTTController.claimHashes.get(deviceId)
+        ?? (isClaimHash(existing?.claimHash) ? existing?.claimHash as string : undefined);
+      const proof = checkClaimProof(deviceId, req.body, expected, MQTTController.pairing);
+      if ("error" in proof) {
+        if (proof.status === 403) MQTTController.claimLimiter.fail(deviceId);
+        return res.status(proof.status).json({ error: proof.error });
+      }
+
       const result = await db.runTransaction(async (tx) => {
         const snap = await tx.get(ref);
-        const existing = snap.exists ? deviceOwner(snap.data()) : undefined;
-        if (existing && existing !== uid) return { ok: false as const, ownerId: existing };
+        const why = claimConflict(snap.exists ? snap.data() : undefined, uid);
+        if (why) return { ok: false as const, why };
         // FIX(2026-10-12): write userId too. firestore.rules read devices/{id}.userId, so a
         // device claimed here (ownerId only) was invisible to its owner in the app.
-        tx.set(ref, { ...ownerFields(uid), claimedAt: Date.now(), unclaimed: false }, { merge: true });
-        return { ok: true as const, ownerId: uid };
+        tx.set(ref, {
+          ...ownerFields(uid), claimedAt: Date.now(), claimedVia: proof.via, unclaimed: false, simOnly: false,
+          ...(expected ? { claimHash: expected } : {}),
+        }, { merge: true });
+        return { ok: true as const };
       });
 
-      if (!result.ok) {
-        return res.status(409).json({ error: "Device already claimed by another account" });
-      }
-      return res.json({ success: true, deviceId, claimed: true, ownerId: uid });
+      if (!result.ok) return res.status(409).json({ error: result.why });
+      return res.json({ success: true, deviceId, claimed: true, ownerId: uid, via: proof.via });
     } catch {
       return res.status(500).json({ error: "Claim failed" });
     }
+  }
+
+  /**
+   * Mint a one-time pairing token (claim.ts) for boards without a claim code. Only from the hub
+   * machine itself, or with X-TC-Hub-Admin matching TC_HUB_ADMIN_KEY.
+   */
+  issuePairingToken(req: Request, res: Response) {
+    const local = isLocalRequest(req.socket?.remoteAddress, req.headers as Record<string, unknown>);
+    if (!local && !hubAdminOk(req.headers["x-tc-hub-admin"], process.env.TC_HUB_ADMIN_KEY)) {
+      return res.status(403).json({ error: "Pairing tokens are made on the hub itself (tc pair), or with the hub admin key." });
+    }
+    const deviceId = typeof req.body?.deviceId === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(req.body.deviceId) ? req.body.deviceId : null;
+    return res.status(201).json(MQTTController.pairing.issue(deviceId));
   }
 
   sendLightCommand(req: Request, res: Response) {

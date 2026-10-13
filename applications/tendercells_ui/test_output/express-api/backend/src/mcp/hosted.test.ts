@@ -199,7 +199,7 @@ test("Firestore source refuses writes", async () => {
 });
 
 test("a Firestore failure answers 503 in the route's own shape instead of crashing the request", async () => {
-  const boom = async () => { throw new Error("7 PERMISSION_DENIED: Missing or insufficient permissions."); };
+  const boom = async () => { throw Object.assign(new Error("7 PERMISSION_DENIED: Missing or insufficient permissions."), { code: 7 }); };
   const store = new MemoryOAuthStore();
   Object.assign(store, { getGrant: boom, takeGrant: boom, deleteGrant: boom, getRequest: boom, putClient: boom, listGrantsForUid: boom });
   const app = createHostedApp({ store, issuer: "https://tendercells.example", now: () => NOW, verifyIdToken: async () => ({ uid: "alice" }), hubFor: () => async () => ({ ok: true, status: 200, body: {} }) });
@@ -218,9 +218,86 @@ test("a Firestore failure answers 503 in the route's own shape instead of crashi
       assert.equal(r.status, 503);
       assert.equal(((await r.json()) as { error: string }).error, "temporarily_unavailable");
     }
-    assert.ok(errors.some((e) => e.includes("[connector] /mcp failed: 7 PERMISSION_DENIED")), "the cause is logged");
+    assert.ok(errors.some((e) => e.includes("[connector] /mcp failed: PERMISSION_DENIED (7)")), "the cause is logged");
   } finally {
     console.error = orig;
     srv.close();
+  }
+});
+
+test("refresh needs client_id, and revoking a refresh token also kills its access token (whole family)", async () => {
+  const { srv, base } = await start();
+  try {
+    const redirect = "https://claude.ai/api/mcp/auth_callback";
+    const reg = await (await fetch(`${base}/oauth/register`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ client_name: "Claude", redirect_uris: [redirect] }) })).json() as { client_id: string };
+    const verifier = randomBytes(32).toString("base64url");
+    const challenge = createHash("sha256").update(verifier).digest("base64url");
+    // No `state`: this used to put state: undefined into Firestore (500 in production).
+    const q = new URLSearchParams({ response_type: "code", client_id: reg.client_id, redirect_uri: redirect, code_challenge: challenge, code_challenge_method: "S256" });
+    const auth = await fetch(`${base}/oauth/authorize?${q}`, { redirect: "manual" });
+    const requestId = String(new URL(String(auth.headers.get("location"))).searchParams.get("request"));
+    const ok = await (await fetch(`${base}/oauth/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ request: requestId, idToken: "good-id-token", approve: true }) })).json() as { redirect: string };
+    const code = String(new URL(ok.redirect).searchParams.get("code"));
+    const tokenReq = (body: Record<string, string>) => fetch(`${base}/oauth/token`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(body) });
+    const t = await (await tokenReq({ grant_type: "authorization_code", code, client_id: reg.client_id, redirect_uri: redirect, code_verifier: verifier })).json() as { access_token: string; refresh_token: string };
+
+    const noClient = await tokenReq({ grant_type: "refresh_token", refresh_token: t.refresh_token });
+    assert.equal(noClient.status, 400, "refresh without client_id is refused");
+    // ...and that attempt consumed nothing the real client needs? It did (rotation takes the token), so mint a fresh pair.
+    const auth2 = await fetch(`${base}/oauth/authorize?${q}`, { redirect: "manual" });
+    const req2 = String(new URL(String(auth2.headers.get("location"))).searchParams.get("request"));
+    const ok2 = await (await fetch(`${base}/oauth/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ request: req2, idToken: "good-id-token", approve: true }) })).json() as { redirect: string };
+    const t2 = await (await tokenReq({ grant_type: "authorization_code", code: String(new URL(ok2.redirect).searchParams.get("code")), client_id: reg.client_id, redirect_uri: redirect, code_verifier: verifier })).json() as { access_token: string; refresh_token: string };
+    const rotated = await (await tokenReq({ grant_type: "refresh_token", refresh_token: t2.refresh_token, client_id: reg.client_id })).json() as { access_token: string; refresh_token: string };
+    assert.equal((await rpc(base, "/mcp", "initialize", rotated.access_token, INIT)).status, 200);
+    assert.equal((await rpc(base, "/mcp", "initialize", t2.access_token, INIT)).status, 200, "the pre-refresh access token is still in its hour");
+
+    await fetch(`${base}/oauth/revoke`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ token: rotated.refresh_token }) });
+    assert.equal((await rpc(base, "/mcp", "initialize", rotated.access_token, INIT)).status, 401, "access token from the same approval is revoked");
+    assert.equal((await rpc(base, "/mcp", "initialize", t2.access_token, INIT)).status, 401, "older access token of the family too");
+    assert.equal((await tokenReq({ grant_type: "refresh_token", refresh_token: rotated.refresh_token, client_id: reg.client_id })).status, 400);
+  } finally {
+    srv.close();
+  }
+});
+
+test("the Firestore OAuth store never writes undefined fields (Firestore rejects them)", async () => {
+  const { firestoreOAuthStore } = await import("./oauth.js");
+  const writes: Record<string, unknown>[] = [];
+  const reject = (v: Record<string, unknown>) => {
+    for (const [k, x] of Object.entries(v)) if (x === undefined) throw new Error(`Cannot use "undefined" as a Firestore value (found in field "${k}")`);
+    writes.push(v);
+  };
+  const db = {
+    collection: () => ({
+      doc: () => ({ get: async () => ({ exists: false, data: () => undefined }), set: async (v: Record<string, unknown>) => reject(v), delete: async () => undefined }),
+      where: () => ({ get: async () => ({ docs: [] }) }),
+    }),
+    runTransaction: async () => null,
+  };
+  const store = firestoreOAuthStore(db as never);
+  await store.putRequest({ id: "r", clientId: "c", redirectUri: "https://x.example/cb", state: undefined, codeChallenge: "x", scope: "farm:read", resource: "https://x.example/mcp", expiresAt: NOW });
+  await store.putGrant("h", { kind: "code", uid: "u", clientId: "c", scope: "farm:read", resource: "r", expiresAt: NOW, redirectUri: undefined });
+  assert.equal(writes.length, 2);
+  assert.ok(!("state" in writes[0]));
+});
+
+test("GET /oauth/health names the Firestore failure (gRPC code) without exposing data", async () => {
+  const { errorCode } = await import("./hosted.js");
+  assert.equal(errorCode({ code: 7 }), "PERMISSION_DENIED (7)");
+  assert.equal(errorCode({ code: "auth/argument-error" }), "auth/argument-error");
+  for (const [probe, status, body] of [
+    [async () => [], 200, { firestore: "ok" }],
+    [async () => { throw Object.assign(new Error("Missing or insufficient permissions."), { code: 7 }); }, 503, { firestore: "error", code: "PERMISSION_DENIED (7)" }],
+  ] as const) {
+    const app = createHostedApp({ store: new MemoryOAuthStore(), verifyIdToken: async () => ({ uid: "x" }), hubFor: () => async () => ({ ok: true, status: 200, body: {} }), probe });
+    const srv = app.listen(0);
+    try {
+      const r = await fetch(`http://127.0.0.1:${(srv.address() as AddressInfo).port}/oauth/health`);
+      assert.equal(r.status, status);
+      assert.deepEqual(await r.json(), body);
+    } finally {
+      srv.close();
+    }
   }
 });

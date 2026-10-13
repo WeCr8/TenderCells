@@ -25,6 +25,7 @@ export function createConnectorApp(admin: AdminLike, issuer = process.env.TC_CON
     store: firestoreOAuthStore(db as FirestoreDocs),
     verifyIdToken: (t) => admin.auth().verifyIdToken(t, true),
     hubFor: (uid) => firestoreHub(db as FirestoreLike, uid),
+    probe: () => (db as { collection(p: string): { limit(n: number): { get(): Promise<unknown> } } }).collection("oauthClients").limit(1).get(),
   });
 }
 

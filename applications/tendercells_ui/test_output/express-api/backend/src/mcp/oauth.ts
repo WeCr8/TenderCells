@@ -16,7 +16,12 @@ export const REQUEST_TTL_MS = 10 * 60_000;
 
 export interface OAuthClient { id: string; name: string; redirectUris: string[]; createdAt: number }
 export interface AuthRequest { id: string; clientId: string; redirectUri: string; state?: string; codeChallenge: string; scope: string; resource: string; expiresAt: number }
-export interface Grant { kind: "code" | "access" | "refresh"; uid: string; clientId: string; scope: string; resource: string; expiresAt: number; redirectUri?: string; codeChallenge?: string; issuedAt?: number }
+export interface Grant {
+  kind: "code" | "access" | "refresh"; uid: string; clientId: string; scope: string; resource: string; expiresAt: number;
+  redirectUri?: string; codeChallenge?: string; issuedAt?: number;
+  /** Shared by every access/refresh token descended from one approval (kept across refreshes). */
+  familyId?: string;
+}
 
 /** Persistence for clients, pending requests and grants (Firestore in production). */
 export interface OAuthStore {
@@ -91,18 +96,22 @@ export interface FirestoreDocs {
  */
 export function firestoreOAuthStore(db: FirestoreDocs): OAuthStore {
   const col = (name: string) => db.collection(name);
+  // FIX(2026-10-12): Firestore refuses `undefined` field values ("Cannot use undefined as a
+  // Firestore value"), and an authorize request without `state` carries state: undefined.
+  // That request failed with a 500 before the consent page ever loaded. Drop undefined fields.
+  const defined = (v: Record<string, unknown>) => Object.fromEntries(Object.entries(v).filter(([, x]) => x !== undefined));
   const read = async <T>(name: string, id: string) => {
     const s = await col(name).doc(id).get();
     return s.exists ? (s.data() as T) : null;
   };
   return {
-    putClient: async (c) => { await col("oauthClients").doc(c.id).set({ ...c }); },
+    putClient: async (c) => { await col("oauthClients").doc(c.id).set(defined({ ...c })); },
     getClient: (id) => read<OAuthClient>("oauthClients", id),
     // expireAt (a timestamp) lets a Firestore TTL policy delete stale documents.
-    putRequest: async (r) => { await col("oauthRequests").doc(r.id).set({ ...r, expireAt: new Date(r.expiresAt) }); },
+    putRequest: async (r) => { await col("oauthRequests").doc(r.id).set(defined({ ...r, expireAt: new Date(r.expiresAt) })); },
     getRequest: (id) => read<AuthRequest>("oauthRequests", id),
     deleteRequest: async (id) => { await col("oauthRequests").doc(id).delete(); },
-    putGrant: async (h, g) => { await col("oauthGrants").doc(h).set({ ...g, expireAt: new Date(g.expiresAt) }); },
+    putGrant: async (h, g) => { await col("oauthGrants").doc(h).set(defined({ ...g, expireAt: new Date(g.expiresAt) })); },
     takeGrant: (h) => db.runTransaction(async (tx) => {
       const ref = col("oauthGrants").doc(h);
       const s = await tx.get(ref);

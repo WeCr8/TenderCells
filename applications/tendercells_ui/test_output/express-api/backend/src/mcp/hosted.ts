@@ -27,6 +27,8 @@ export interface HostedOptions {
   hubFor: (uid: string) => HubFetch;
   /** Public origin, e.g. https://tendercells.com */
   issuer?: string;
+  /** One cheap Firestore read for GET /oauth/health (throws when Firestore is unreachable). */
+  probe?: () => Promise<unknown>;
   now?: () => number;
 }
 
@@ -55,6 +57,18 @@ const rpcError = (res: Response, status: number, message: string) =>
   res.status(status).json({ jsonrpc: "2.0", error: { code: -32000, message }, id: null });
 
 type Handler = (req: Request, res: Response) => unknown;
+
+// gRPC status codes the Firestore Admin SDK reports, so a log line names the cause.
+const GRPC: Record<number, string> = {
+  1: "CANCELLED", 2: "UNKNOWN", 3: "INVALID_ARGUMENT", 4: "DEADLINE_EXCEEDED", 5: "NOT_FOUND", 6: "ALREADY_EXISTS",
+  7: "PERMISSION_DENIED", 8: "RESOURCE_EXHAUSTED", 9: "FAILED_PRECONDITION", 10: "ABORTED", 13: "INTERNAL", 14: "UNAVAILABLE", 16: "UNAUTHENTICATED",
+};
+/** "PERMISSION_DENIED (7)" for a Firestore error, the error's own code otherwise. */
+export function errorCode(err: unknown): string {
+  const c = (err as { code?: unknown })?.code;
+  if (typeof c === "number") return `${GRPC[c] ?? "code"} (${c})`;
+  return typeof c === "string" ? c : "no-code";
+}
 /**
  * FIX(2026-10-12): every OAuth / MCP route awaits Firestore without a catch, so one failed
  * Firestore call was an unhandled rejection (a crashed request; live tendercells.com/mcp,
@@ -66,7 +80,7 @@ function safe(route: string, fn: Handler): Handler {
     try {
       await fn(req, res);
     } catch (err) {
-      console.error(`[connector] ${route} failed: ${(err as Error)?.message ?? String(err)}`);
+      console.error(`[connector] ${route} failed: ${errorCode(err)} ${(err as Error)?.message ?? String(err)}`);
       if (res.headersSent) return;
       if (route.startsWith("/mcp")) rpcError(res, 503, "Tender Cells is temporarily unavailable. Try again in a minute.");
       else res.status(503).json({ error: "temporarily_unavailable", error_description: "Tender Cells is temporarily unavailable. Try again in a minute." });
@@ -115,6 +129,19 @@ export function createHostedApp(opts: HostedOptions) {
       scopes_supported: [SCOPE],
       service_documentation: `${issuer}/docs/ai-assistant-plugin`,
     });
+  });
+
+  // Is the connector's storage reachable? One read, no data returned. After a deploy:
+  // curl https://tendercells.com/oauth/health → {"firestore":"ok"} or the gRPC code that failed.
+  app.get("/oauth/health", async (_req, res) => {
+    if (!opts.probe) { res.json({ firestore: "not-configured" }); return; }
+    try {
+      await opts.probe();
+      res.json({ firestore: "ok" });
+    } catch (err) {
+      console.error(`[connector] /oauth/health failed: ${errorCode(err)} ${(err as Error)?.message ?? String(err)}`);
+      res.status(503).json({ firestore: "error", code: errorCode(err) });
+    }
   });
 
   // ── dynamic client registration (public clients) ─────────────────────────────
@@ -196,11 +223,12 @@ export function createHostedApp(opts: HostedOptions) {
   }));
 
   // ── token ─────────────────────────────────────────────────────────────────────
-  const issueTokens = async (g: Pick<Grant, "uid" | "clientId" | "scope" | "resource" | "issuedAt">) => {
+  const issueTokens = async (g: Pick<Grant, "uid" | "clientId" | "scope" | "resource" | "issuedAt" | "familyId">) => {
     const access = secret();
     const refresh = secret();
     // issuedAt = when the person first approved this assistant (kept across refreshes).
-    const base = { uid: g.uid, clientId: g.clientId, scope: g.scope, resource: g.resource, issuedAt: g.issuedAt ?? now() };
+    // familyId ties every token from one approval together, so revoking one revokes the rest.
+    const base = { uid: g.uid, clientId: g.clientId, scope: g.scope, resource: g.resource, issuedAt: g.issuedAt ?? now(), familyId: g.familyId ?? secret(12) };
     await store.putGrant(sha256(access), { ...base, kind: "access", expiresAt: now() + ACCESS_TTL_MS });
     await store.putGrant(sha256(refresh), { ...base, kind: "refresh", expiresAt: now() + REFRESH_TTL_MS });
     return { access_token: access, token_type: "Bearer", expires_in: Math.floor(ACCESS_TTL_MS / 1000), refresh_token: refresh, scope: g.scope };
@@ -219,16 +247,30 @@ export function createHostedApp(opts: HostedOptions) {
     if (b.grant_type === "refresh_token") {
       const g = b.refresh_token ? await store.takeGrant(sha256(b.refresh_token)) : null; // rotation: old token is gone
       if (!g || g.kind !== "refresh" || g.expiresAt < now()) return bad("invalid_grant", "Refresh token is invalid or expired");
-      if (b.client_id && g.clientId !== b.client_id) return bad("invalid_grant", "Client does not match");
+      // FIX(2026-10-12): client_id was optional here. Public clients must send it (RFC 6749 §6),
+      // so a leaked refresh token can't be redeemed without knowing whose it is.
+      if (!b.client_id || g.clientId !== b.client_id) return bad("invalid_grant", "client_id is required and must match the token's client");
       res.json(await issueTokens(g));
       return;
     }
     bad("unsupported_grant_type", "Use authorization_code or refresh_token");
   }));
 
+  // FIX(2026-10-12): revoking a refresh token left its access token working for up to an hour.
+  // Revoking any token now revokes its whole family (RFC 7009 §2.1): every access and refresh
+  // token from the same approval. Older tokens without a familyId revoke that assistant's grants.
   app.post("/oauth/revoke", safe("/oauth/revoke", async (req, res) => {
     const token = (req.body as { token?: string } | undefined)?.token;
-    if (token) await store.deleteGrant(sha256(token));
+    if (token) {
+      const hash = sha256(token);
+      const g = await store.getGrant(hash);
+      await store.deleteGrant(hash);
+      if (g && g.kind !== "code") {
+        const family = (await store.listGrantsForUid(g.uid)).filter(({ grant }) =>
+          grant.clientId === g.clientId && grant.kind !== "code" && (g.familyId ? grant.familyId === g.familyId : true));
+        await Promise.all(family.map(({ hash: h }) => store.deleteGrant(h)));
+      }
+    }
     res.status(200).end();
   }));
 

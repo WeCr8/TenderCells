@@ -12,6 +12,7 @@ import mqtt from "mqtt";
 import { AUTH_ENABLED, type AuthedRequest } from "../middleware/auth.js";
 import { deviceOwner, ownerFields } from "../ownership.js";
 import { brokerCredentials } from "../brokerAuth.js";
+import { actuatorRefusal, type Actuator } from "../safety.js";
 import { getFirestoreAdmin } from "../config/firebase-admin.js";
 
 interface MQTTMessage {
@@ -68,7 +69,7 @@ export class MQTTController {
    * @param deviceId - Target device
    * @returns A user-facing reason to refuse, or null when motion is allowed
    */
-  static motionBlockedReason(deviceId: string, service: "arm" | "weed" = "arm"): string | null {
+  static motionBlockedReason(deviceId: string, service: "arm" | "weed" | "gantry" = "arm"): string | null {
     const state = MQTTController.states.get(deviceId);
     const arm = MQTTController.subStates.get(`${deviceId}:${service}`);
     if (state?.state === "estop" || state?.systemState === "estop" || arm?.estop === true) {
@@ -90,6 +91,21 @@ export class MQTTController {
       return `${n} chicken${n === 1 ? "" : "s"} detected in the coop. Let them out (open the door) and wait for the work area to clear before running robot motion.`;
     }
     return null;
+  }
+
+  /** E-STOP latched on the hub (sent from here) or reported by the device itself. */
+  static estopLatched(deviceId: string): boolean {
+    const state = MQTTController.states.get(deviceId);
+    return MQTTController.estops.has(deviceId) || state?.state === "estop" || state?.systemState === "estop";
+  }
+
+  /** 409 with the reason when the E-STOP latch / work-area gate refuses this command (safety.ts). */
+  private static refuse(res: Response, deviceId: string, command: Actuator, payload: Record<string, unknown>): boolean {
+    const reason = actuatorRefusal(command, payload, MQTTController.estopLatched(deviceId),
+      () => MQTTController.motionBlockedReason(deviceId, "gantry"));
+    if (!reason) return false;
+    res.status(409).json({ error: reason, deviceId, command });
+    return true;
   }
 
   private static initializeClient() {
@@ -334,6 +350,7 @@ export class MQTTController {
 
     const err = validatePayload(req.body, SCHEMAS.door);
     if (err) return res.status(400).json({ error: err });
+    if (MQTTController.refuse(res, deviceId, "door", req.body)) return;
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }
@@ -357,6 +374,7 @@ export class MQTTController {
 
     const err = validatePayload(req.body, SCHEMAS.drive);
     if (err) return res.status(400).json({ error: err });
+    if (MQTTController.refuse(res, deviceId, "drive", req.body)) return;
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }
@@ -418,6 +436,7 @@ export class MQTTController {
 
     const err = validatePayload(req.body, SCHEMAS.light);
     if (err) return res.status(400).json({ error: err });
+    if (MQTTController.refuse(res, deviceId, "light", req.body)) return;
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }
@@ -452,6 +471,7 @@ export class MQTTController {
 
     const err = validatePayload(req.body, SCHEMAS.gantry);
     if (err) return res.status(400).json({ error: err });
+    if (MQTTController.refuse(res, deviceId, "gantry", req.body)) return;
     if (cmd === undefined && x === undefined && y === undefined)
       return res.status(400).json({ error: "Provide cmd, or x/y coordinates" });
     if (!MQTTController.client?.connected) {
@@ -475,6 +495,7 @@ export class MQTTController {
 
     const err = validatePayload(req.body, SCHEMAS.feed);
     if (err) return res.status(400).json({ error: err });
+    if (MQTTController.refuse(res, deviceId, "feed", req.body)) return;
     if (!MQTTController.client?.connected) {
       return res.status(503).json({ error: "MQTT not connected" });
     }

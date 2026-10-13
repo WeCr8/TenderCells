@@ -21,6 +21,8 @@ import ScienceIcon from "@mui/icons-material/Science";
 import MemoryIcon from "@mui/icons-material/Memory";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import ApiKeysSection from "../components/settings/ApiKeysSection";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 import { settingsService, DEFAULT_SETTINGS, type UserSettings } from "../services/settingsService";
@@ -435,6 +437,16 @@ export default function SettingsPage() {
                 />
               </Stack>
             </Stack>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Robot & hub API keys */}
+        <Accordion sx={accordSx}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: C.goldMuted }} />}>
+            <SectionHeader icon={<VpnKeyIcon />} label="Robot & hub API keys" />
+          </AccordionSummary>
+          <AccordionDetails>
+            <ApiKeysSection signedIn={Boolean(user)} />
           </AccordionDetails>
         </Accordion>
 

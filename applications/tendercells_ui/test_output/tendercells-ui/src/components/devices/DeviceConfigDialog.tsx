@@ -23,6 +23,8 @@ export default function DeviceConfigDialog({
 }: { open: boolean; onClose: () => void; onSaved?: () => void }) {
   const [unclaimed, setUnclaimed] = useState<Array<{ id: string }>>([]);
   const [deviceId, setDeviceId] = useState('');
+  // Proof of possession for the claim: the board's claim code, or a hub pairing token (tc pair).
+  const [proof, setProof] = useState('');
   const [nickname, setNickname] = useState('');
   const [productType, setProductType] = useState('chicken-tender');
   const [peripheral, setPeripheral] = useState('none');
@@ -43,14 +45,16 @@ export default function DeviceConfigDialog({
 
   const claim = useCallback(async () => {
     if (!deviceId) { setMsg({ type: 'error', text: 'Enter or pick a device id first' }); return; }
+    const p = proof.trim();
+    if (!p) { setMsg({ type: 'error', text: 'Enter the claim code from the board, or a pairing token from the hub (tc pair)' }); return; }
     setBusy(true); setMsg(null);
     try {
-      await hw.claim();
+      await hw.claim(p.startsWith('tcp_') ? { pairingToken: p } : { claimCode: p });
       setMsg({ type: 'success', text: `Claimed ${deviceId} to your account` });
     } catch (e) {
       setMsg({ type: 'error', text: e instanceof Error ? e.message : 'Claim failed' });
     } finally { setBusy(false); }
-  }, [deviceId, hw]);
+  }, [deviceId, hw, proof]);
 
   const save = useCallback(async () => {
     if (!deviceId) { setMsg({ type: 'error', text: 'Device id required' }); return; }
@@ -90,7 +94,10 @@ export default function DeviceConfigDialog({
 
           <TextField label="Device ID" value={deviceId} onChange={(e) => setDeviceId(e.target.value)}
             size="small" fullWidth helperText="From the board's serial banner or tc status" />
-          <Button onClick={claim} disabled={busy || !deviceId} variant="outlined">Claim to my account</Button>
+          <TextField label="Claim code or pairing token" value={proof} onChange={(e) => setProof(e.target.value)}
+            size="small" fullWidth placeholder="ABCD-EFGH-JKMN"
+            helperText="Printed on the board's serial banner and setup page. Older boards: run `tc pair <id>` on the hub and paste the token." />
+          <Button onClick={claim} disabled={busy || !deviceId || !proof.trim()} variant="outlined">Claim to my account</Button>
 
           <TextField label="Nickname" value={nickname} onChange={(e) => setNickname(e.target.value)} size="small" fullWidth />
           <TextField select label="Product type" value={productType} onChange={(e) => setProductType(e.target.value)} size="small" fullWidth>

@@ -123,8 +123,9 @@ export const useHardwareControl = (deviceId: string) => {
     getArmState: () => getSubState('arm'),
     getGantryState: () => getSubState('gantry'),
 
-    // Register this device to the signed-in account (first-claim-wins).
-    claim: () => sendCommand('claim'),
+    // Register this device to the signed-in account. Needs proof of possession: the claim code
+    // printed by the board (serial banner / setup page) or a pairing token from the hub (tc pair).
+    claim: (proof: { claimCode?: string; pairingToken?: string } = {}) => sendCommand('claim', proof),
   };
 };
 

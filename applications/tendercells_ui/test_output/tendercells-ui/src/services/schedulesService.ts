@@ -25,11 +25,33 @@ export interface Schedule {
   amount?: number; // grams (feed) or ml (water)
   passes?: number; // weed_pass: detection passes per run (1-10)
   task?: 'weed' | 'plant_scan' | 'patrol'; // weed_pass: what the pass looks for
-  lastRun?: Timestampish | null;
+  state?: 'open' | 'close'; // door: which way (default open)
+  on?: boolean; // water/relay: on or off (default on)
+  // IANA zone the cron was written in (the browser's, stamped on save). The hub and the cloud
+  // runner match the cron in this zone, so 6:00 means 6:00 at the coop, not 6:00 UTC.
+  timeZone?: string;
+  // The app writes a Timestamp; the hub's runner writes epoch ms. Read it with lastRunMillis().
+  lastRun?: Timestampish | number | null;
   createdAt?: Timestampish;
 }
 
 export type CreateScheduleData = Omit<Schedule, 'id' | 'lastRun' | 'createdAt'>;
+
+/** The browser's IANA time zone (what the schedule's cron hour means). */
+export function browserTimeZone(): string | undefined {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** lastRun as epoch ms, whichever writer stored it (Timestamp from the app/cloud, number from the hub). */
+export function lastRunMillis(v: Schedule['lastRun']): number | null {
+  if (v == null) return null;
+  if (typeof v === 'number') return v;
+  return typeof v.toMillis === 'function' ? v.toMillis() : null;
+}
 export type UpdateScheduleData = Partial<Omit<Schedule, 'id' | 'deviceId' | 'createdAt'>>;
 
 const FIREBASE_ENABLED = FIRESTORE_DATA_ENABLED;
@@ -74,6 +96,7 @@ const localBackend = {
     const rows = readAll();
     const row: StoredSchedule = {
       ...data,
+      timeZone: data.timeZone ?? browserTimeZone(),
       deviceId,
       id: `sch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       lastRunMs: null,
@@ -122,13 +145,16 @@ async function firestoreBackend() {
       }
     },
     async createSchedule(deviceId: string, data: CreateScheduleData): Promise<Schedule> {
-      const payload = { ...data, deviceId, lastRun: null, createdAt: Timestamp.now() };
+      const tz = data.timeZone ?? browserTimeZone();
+      const payload = { ...data, ...(tz ? { timeZone: tz } : {}), deviceId, lastRun: null, createdAt: Timestamp.now() };
       const ref = await addDoc(itemsRef(deviceId), payload);
       return { id: ref.id, ...payload };
     },
     async updateSchedule(deviceId: string, scheduleId: string, updates: UpdateScheduleData): Promise<void> {
+      // A changed time is re-stamped with the zone it was entered in.
+      const tz = updates.cronExpression && !updates.timeZone ? browserTimeZone() : undefined;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await updateDoc(itemRef(deviceId, scheduleId), updates as any);
+      await updateDoc(itemRef(deviceId, scheduleId), (tz ? { ...updates, timeZone: tz } : updates) as any);
     },
     async deleteSchedule(deviceId: string, scheduleId: string): Promise<void> {
       await deleteDoc(itemRef(deviceId, scheduleId));

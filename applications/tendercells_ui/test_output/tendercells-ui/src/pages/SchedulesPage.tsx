@@ -23,6 +23,7 @@ import {
   buildCron,
   parseCron,
   cronToLabel,
+  lastRunMillis,
   ACTION_LABELS,
   ACTION_COLORS,
   type Schedule,
@@ -378,7 +379,7 @@ function ScheduleRow({ schedule, onToggle, onEdit, onDelete, onRunNow }: Schedul
 
       {schedule.lastRun && (
         <Typography variant="caption" sx={{ color: colors.goldMuted, whiteSpace: 'nowrap' }}>
-          Last: {new Date(schedule.lastRun.toMillis()).toLocaleDateString()}
+          Last: {new Date(lastRunMillis(schedule.lastRun) ?? 0).toLocaleDateString()}
         </Typography>
       )}
 

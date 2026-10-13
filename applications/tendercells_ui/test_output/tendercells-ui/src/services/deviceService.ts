@@ -1,5 +1,5 @@
 // deviceService.ts - Device registration and management
-import { db } from '../lib/firebase/firebaseApp';
+import { auth, db } from '../lib/firebase/firebaseApp';
 import { collection, doc, setDoc, getDoc, query, where, getDocs, Timestamp } from 'firebase/firestore';
 
 export interface Device {
@@ -30,7 +30,9 @@ export interface Device {
   unclaimed?: boolean;        // true until claimed to an account
 }
 
-// Register new device for user
+// Register a SIMULATION device for the user. Real boards are claimed on the hub with their claim
+// code or a pairing token (proof of possession); firestore.rules only let the app create
+// devices with simOnly: true.
 export async function registerDevice(
   userId: string,
   deviceData: Omit<Device, 'id' | 'createdAt' | 'updatedAt' | 'ownerId'> & { ownerId?: string }
@@ -45,6 +47,7 @@ export async function registerDevice(
 
     const newDevice: Device = {
       ...deviceData,
+      simOnly: true,
       id: deviceId,
       ownerId: deviceData.ownerId || userId,  // canonical owner field
       userId,                                  // back-compat
@@ -77,11 +80,21 @@ export async function getUserDevices(userId: string): Promise<Device[]> {
   }
 }
 
-// Merge config changes onto a device doc (name, peripheral, placement, camera, etc.)
+// Fields only the hub / Cloud Functions write (claim proof, ownership, simulation flag).
+// firestore.rules refuse client writes that change them.
+const SERVER_FIELDS = ['ownerId', 'userId', 'simOnly', 'claimedAt', 'claimedVia', 'claimHash', 'unclaimed'] as const;
+
+// Merge config changes onto a device doc (name, peripheral, placement, camera, etc.). The device
+// must already be yours (claimed with proof on the hub); both owner fields are sent because
+// firestore.rules require ownerId == userId == your uid on every client write.
 export async function updateDevice(deviceId: string, updates: Partial<Device>): Promise<void> {
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error('Sign in to change device settings');
+  const clean: Record<string, unknown> = { ...updates };
+  for (const f of SERVER_FIELDS) delete clean[f];
   await setDoc(
     doc(db, 'devices', deviceId),
-    { ...updates, updatedAt: Timestamp.now() },
+    { ...clean, ownerId: uid, userId: uid, updatedAt: Timestamp.now() },
     { merge: true },
   );
 }

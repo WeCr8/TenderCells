@@ -26,6 +26,7 @@ import { ProductDetailsPanel, ProductHero } from "../components/products/Product
 import type { CameraFeed } from "../types/camera";
 import { useProducts } from "../hooks/useProducts";
 import { FIRESTORE_DATA_ENABLED } from "../lib/firebase/firebaseApp";
+import { HARDWARE_API_CONFIGURED, HARDWARE_API_ORIGIN } from '../lib/api/hardwareApi';
 
 // Demo/sim-only seed (VITE_SIM_DATA_ONLY / no Firebase config) - three
 // plausible cameras with a non-functional "placeholder://" stream so the
@@ -112,17 +113,21 @@ export default function ChickenTenderDashboard() {
   }, [chickenTender, attachedCamera, realStreamUrl]);
 
   useEffect(() => {
-    const shouldProbeLocalApi =
+    // FIX(2026-10-12): probe the hub the app is actually configured for (VITE_MQTT_API_BASE_URL,
+    // e.g. a LAN hub at 192.168.1.50:4000), not always localhost:4000, so a down LAN hub shows
+    // the warning instead of a silent green. The hosted demo (no hub configured) still skips it.
+    const shouldProbeHub =
+      HARDWARE_API_CONFIGURED ||
       import.meta.env.DEV ||
       ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
-    if (!shouldProbeLocalApi) {
+    if (!shouldProbeHub) {
       setApiStatus("ok");
       return;
     }
 
     // Check API health on mount
-    fetch("http://localhost:4000/health")
+    fetch(`${HARDWARE_API_ORIGIN}/health`)
       .then((res) => setApiStatus(res.ok ? "ok" : "error"))
       .catch(() => setApiStatus("error"));
   }, []);

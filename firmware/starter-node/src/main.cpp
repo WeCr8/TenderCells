@@ -29,6 +29,7 @@
 #include <DHT.h>          // DHT22 temp/humidity (peripheral=temp-humidity)
 #include <LoRa.h>         // optional mesh radio (meshOnly, or as a WiFi<->mesh bridge)
 #include "tc_mesh.h"      // shared Tender Cells LoRa mesh (firmware/shared/tc_mesh)
+#include <mbedtls/md.h>   // SHA-256 for the claim hash (same API on mbedtls 2.x and 3.x)
 
 // ── Board ──────────────────────────────────────────────────────────────────
 // XIAO ESP32-S3 user LED is on GPIO21 and is active-LOW.
@@ -112,6 +113,19 @@ String peripheral;
 // bridge (any board with a radio attached does this automatically - see
 // meshAttached below - no separate "bridge firmware" exists).
 String meshOnlyPref;
+// Broker credentials (optional). Leave both blank on an open classroom broker. With
+// TC_MQTT_USERNAME/TC_MQTT_PASSWORD set on the hub, type that pair. With accounts on, paste a
+// Tender Cells API key (tck_..., Settings -> Robot & hub API keys) as the password and leave
+// the username blank: the board then connects as its own device id, which is what the hub's
+// key-authenticated broker expects (brokerAuth.ts). Stored in NVS only, never printed.
+String mqttUser;
+String mqttPass;
+// Claim code: proof of possession for "Claim to my account" (express-api claim.ts). Generated
+// once on first boot from the hardware RNG, kept in NVS, printed on the serial banner and the
+// setup page, and never sent over the network. The board only publishes
+// claimHash = sha256("tc-claim:v1:<deviceId>:<CODE>") (lower-case hex) in its state message.
+String claimCode;          // XXXX-XXXX-XXXX (display form)
+char claimHashHex[65] = {0};
 
 // ── Runtime ──────────────────────────────────────────────────────────────────
 WiFiClient net;
@@ -194,6 +208,58 @@ static const unsigned long BTN_DEBOUNCE_MS = 50;
 void setLed(bool on) {
   ledOn = on;
   digitalWrite(LED_PIN, (LED_ACTIVE_LOW ? !on : on));
+}
+
+// ── Claim code ───────────────────────────────────────────────────────────────
+// Crockford base32 (no I, L, O, U), so a code read aloud or typed with look-alikes still
+// matches: the hub upper-cases, drops spaces/dashes and maps O->0, I/L->1 (normalizeClaimCode).
+static const char CLAIM_ALPHABET[] = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+
+String newClaimCode() {
+  char out[15];
+  int j = 0;
+  for (int i = 0; i < 12; i++) {
+    if (i == 4 || i == 8) out[j++] = '-';
+    out[j++] = CLAIM_ALPHABET[esp_random() & 31];  // 32 symbols: no modulo bias
+  }
+  out[j] = 0;
+  return String(out);
+}
+
+// Canonical form the hash is taken over: upper-case, no dashes/spaces, O->0, I/L->1.
+String normalizedClaimCode(const String& code) {
+  String n;
+  for (size_t i = 0; i < code.length(); i++) {
+    char c = toupper((unsigned char)code[i]);
+    if (c == '-' || c == ' ') continue;
+    if (c == 'O') c = '0';
+    if (c == 'I' || c == 'L') c = '1';
+    n += c;
+  }
+  return n;
+}
+
+// sha256("tc-claim:v1:<deviceId>:<CODE>") as lower-case hex. Test vector (pinned in
+// express-api claim.test.ts): node_1A2B + 7K3M-9QX2-RTHP ->
+// ead7de4687e2840d837d5fcc5644e2c4b1e9ffd2eaa30cdb67fd70c7d54646d4
+void computeClaimHash() {
+  String msg = "tc-claim:v1:" + deviceId + ":" + normalizedClaimCode(claimCode);
+  uint8_t digest[32];
+  const mbedtls_md_info_t* info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+  if (!info || mbedtls_md(info, (const unsigned char*)msg.c_str(), msg.length(), digest) != 0) {
+    claimHashHex[0] = 0;
+    return;
+  }
+  for (int i = 0; i < 32; i++) snprintf(claimHashHex + i * 2, 3, "%02x", digest[i]);
+}
+
+void printClaimBanner() {
+  Serial.println("------------------------------------------------");
+  Serial.printf(" Device ID : %s\n", deviceId.c_str());
+  Serial.printf(" Claim code: %s\n", claimCode.c_str());
+  Serial.println(" Enter both in the app: Devices -> Configure -> Claim.");
+  Serial.println(" Keep the claim code private - it proves this board is yours.");
+  Serial.println("------------------------------------------------");
 }
 
 // Topic helpers
@@ -295,7 +361,7 @@ void sendOut(const char* mqttTopic, JsonDocument& doc, bool retain) {
     size_t n = serializeJson(doc, (char*)buf, sizeof(buf));
     mesh.sendBroadcast(TC_MSG_HEARTBEAT, buf, (uint8_t)n);
   } else {
-    char buf[256];
+    char buf[384];  // room for the 64-char claimHash in state messages
     size_t n = serializeJson(doc, buf, sizeof(buf));
     mqtt.publish(mqttTopic, (const uint8_t*)buf, n, retain);
   }
@@ -303,12 +369,16 @@ void sendOut(const char* mqttTopic, JsonDocument& doc, bool retain) {
 
 // ── Publish current state (retained when E-STOP, like the coop controller) ───
 void publishState(const char* state) {
-  StaticJsonDocument<192> doc;
+  StaticJsonDocument<256> doc;
   doc["state"]    = state;
   doc["uptime"]   = millis() / 1000;
   doc["freeHeap"] = ESP.getFreeHeap();
   doc["rssi"]     = WiFi.RSSI();
   doc["ts"]       = millis();
+  // The hub keeps this to check a claim code (claim.ts); it strips it before storing state.
+  // Over MQTT only: a mesh frame is capped at TC_MESH_MAX_PAYLOAD, so mesh-only boards are
+  // claimed with a hub pairing token (tc pair <id>) instead.
+  if (!meshOnly && claimHashHex[0]) doc["claimHash"] = (const char*)claimHashHex;
   sendOut(topicState().c_str(), doc, strcmp(state, "estop") == 0);
 }
 
@@ -516,13 +586,21 @@ void subscribeCommands() {
 
 bool reconnectMqtt() {
   String clientId = "tc-starter-" + deviceId + "-" + String((uint32_t)esp_random(), HEX);
-  if (mqtt.connect(clientId.c_str())) {
+  // An API key (tck_...) with a blank username connects as this device's id.
+  String user = mqttUser;
+  if (user.isEmpty() && mqttPass.startsWith("tck_")) user = deviceId;
+  bool ok = mqttPass.length()
+    ? mqtt.connect(clientId.c_str(), user.c_str(), mqttPass.c_str())
+    : mqtt.connect(clientId.c_str());
+  if (ok) {
     Serial.println("[MQTT] connected");
     subscribeCommands();
     publishState(eStopActive ? "estop" : "idle");
     return true;
   }
-  Serial.printf("[MQTT] connect failed rc=%d\n", mqtt.state());
+  // rc=4 bad credentials, rc=5 not authorised (wrong key, revoked key, or wrong device id).
+  Serial.printf("[MQTT] connect failed rc=%d%s\n", mqtt.state(),
+                (mqtt.state() == 4 || mqtt.state() == 5) ? " (check MQTT username / password or API key)" : "");
   return false;
 }
 
@@ -537,6 +615,13 @@ void provisionConfig() {
   threatLabel  = prefs.getString("threat", "predator");
   peripheral   = prefs.getString("peripheral", "none");
   meshOnlyPref = prefs.getString("meshOnly", "no");
+  mqttUser     = prefs.getString("mqttUser", "");
+  mqttPass     = prefs.getString("mqttPass", "");
+  claimCode    = prefs.getString("claimCode", "");
+  if (claimCode.isEmpty()) {
+    claimCode = newClaimCode();
+    prefs.putString("claimCode", claimCode);
+  }
   bool alreadyConfigured = prefs.getString("configured", "") == "yes";
 
   // Default device id from chip MAC if unset.
@@ -546,6 +631,8 @@ void provisionConfig() {
     snprintf(id, sizeof(id), "node_%04X", (uint16_t)(mac & 0xFFFF));
     deviceId = id;
   }
+  computeClaimHash();
+  printClaimBanner();
 
   // A meshOnly board that has already been through the one-time setup form
   // never opens the "TenderNode-Setup" AP again - it goes straight to mesh
@@ -587,7 +674,17 @@ void provisionConfig() {
   wm.addParameter(&pSpecies);
   wm.addParameter(&pThreat);
   wm.addParameter(&pPeripheral);
+  WiFiManagerParameter pMqttUser("mqttuser", "MQTT username (blank if open, or if you paste an API key below)", mqttUser.c_str(), 40);
+  // Not pre-filled, so the stored secret is never served back on the setup page. Blank keeps it.
+  WiFiManagerParameter pMqttPass("mqttpass", "MQTT password or API key (tck_...) - blank keeps the saved one", "", 120, "type='password'");
+  // Shown, not edited: the claim code the owner types into the app.
+  String claimHtml = "<p><b>Claim code:</b> <code>" + claimCode + "</code> (device " + deviceId +
+                     ")<br>Enter it in the app under Devices &rarr; Configure &rarr; Claim.</p>";
+  WiFiManagerParameter pClaim(claimHtml.c_str());
   wm.addParameter(&pMeshOnly);
+  wm.addParameter(&pMqttUser);
+  wm.addParameter(&pMqttPass);
+  wm.addParameter(&pClaim);
 
   // Blink while waiting for setup so the user knows it's in portal mode.
   wm.setConfigPortalTimeout(0);  // stay until configured
@@ -602,6 +699,11 @@ void provisionConfig() {
   threatLabel  = pThreat.getValue();
   peripheral   = pPeripheral.getValue();
   meshOnlyPref = pMeshOnly.getValue();
+  mqttUser     = pMqttUser.getValue();
+  mqttUser.trim();
+  String newPass = pMqttPass.getValue();
+  newPass.trim();
+  if (newPass.length()) mqttPass = newPass;
   if (productType.isEmpty()) productType = "starter";
   if (threatLabel.isEmpty()) threatLabel = "predator";
   if (peripheral.isEmpty())  peripheral = "none";
@@ -615,13 +717,19 @@ void provisionConfig() {
   prefs.putString("threat", threatLabel);
   prefs.putString("peripheral", peripheral);
   prefs.putString("meshOnly", meshOnly ? "yes" : "no");
+  prefs.putString("mqttUser", mqttUser);
+  prefs.putString("mqttPass", mqttPass);
   prefs.putString("configured", "yes");
   prefs.end();
+  computeClaimHash();  // the device id may have been changed on the setup page
 
-  Serial.printf("[WIFI] %s | broker=%s:%s | id=%s | product=%s | species=%s | threat=%s | meshOnly=%s\n",
+  // Never print the password or key itself.
+  const char* auth = mqttPass.isEmpty() ? "none" : (mqttPass.startsWith("tck_") ? "api-key" : "user/password");
+  Serial.printf("[WIFI] %s | broker=%s:%s | id=%s | product=%s | species=%s | threat=%s | meshOnly=%s | mqttAuth=%s\n",
                 ok ? "connected" : "NOT connected", brokerIp.c_str(),
                 brokerPort.c_str(), deviceId.c_str(), productType.c_str(),
-                species.c_str(), threatLabel.c_str(), meshOnly ? "yes" : "no");
+                species.c_str(), threatLabel.c_str(), meshOnly ? "yes" : "no", auth);
+  printClaimBanner();
 }
 
 // ── mDNS broker discovery ─────────────────────────────────────────────────────

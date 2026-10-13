@@ -157,6 +157,24 @@ read the code.
 
 ---
 
+## 5c. Claim the board to your account, and broker sign-in
+
+**Claim code.** On first boot the board makes a claim code such as `7K3M-9QX2-RTHP`, saves it,
+and prints it on the Serial banner next to its device id. The setup page shows it too. In the
+app, open **Devices → Configure**, enter the device id and the claim code, and press **Claim to
+my account**. The code never leaves the board: it only publishes
+`claimHash = sha256("tc-claim:v1:<deviceId>:<CODE>")` in its state message, and the hub checks the
+code you type against it. Keep the code private. Re-flashing with a full erase makes a new one.
+Mesh-only boards don't send the hash; claim them with a pairing token from the hub
+(`tc pair <deviceId>`).
+
+**Broker sign-in (optional).** Leave both fields blank on an open classroom broker.
+- Hub started with `TC_MQTT_USERNAME` / `TC_MQTT_PASSWORD`: type that pair.
+- Accounts on: create a key under **Settings → Robot & hub API keys** (scopes *telemetry* and
+  *commands*, bound to this device), paste it (`tck_…`) as the password and leave the username
+  blank. The board connects as its own device id. The password field is never shown back;
+  leave it blank to keep the saved one.
+
 ## 6. Read what the board is doing (Serial)
 
 - Arduino IDE → Tools → **Serial Monitor**, baud **115200**.

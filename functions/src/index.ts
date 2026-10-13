@@ -3,6 +3,7 @@
 
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { sanitizeAiChat } from "./aiChatPolicy";
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -467,7 +468,8 @@ export const onDeviceCreated = functions.firestore
 /**
  * Proxy authenticated Claude API calls — keeps API key server-side.
  * Called from app/services/aiAgent.ts via Firebase Functions SDK.
- * Requires Firebase Auth. Rate limited to 1000 tokens max per request.
+ * Requires Firebase Auth. Input is validated and capped by sanitizeAiChat (aiChatPolicy.ts):
+ * at most 20 turns of 4000 characters and 1000 output tokens per request.
  */
 export const aiChat = functions.https.onCall(
   async (data: AiChatRequest, context: functions.https.CallableContext) => {
@@ -477,11 +479,10 @@ export const aiChat = functions.https.onCall(
     if (!ANTHROPIC_API_KEY) {
       throw new functions.https.HttpsError("internal", "ANTHROPIC_API_KEY not configured in Cloud Functions environment");
     }
-    if (!Array.isArray(data.messages) || data.messages.length === 0) {
-      throw new functions.https.HttpsError("invalid-argument", "messages array is required");
+    const payload = sanitizeAiChat(data);
+    if ("error" in payload) {
+      throw new functions.https.HttpsError("invalid-argument", payload.error);
     }
-
-    const maxTokens = Math.min(data.max_tokens ?? 500, 1000);
 
     let response: Response;
     try {
@@ -494,9 +495,9 @@ export const aiChat = functions.https.onCall(
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
-          max_tokens: maxTokens,
-          system: data.system || "",
-          messages: data.messages,
+          max_tokens: payload.max_tokens,
+          system: payload.system,
+          messages: payload.messages,
         }),
       });
     } catch (err) {

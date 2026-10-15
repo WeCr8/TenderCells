@@ -7,6 +7,7 @@ import { sanitizeAiChat } from "./aiChatPolicy";
 import { runSchedules } from "./scheduleRunner";
 import { deviceApiStore, keyAdminStore, scheduleRunStore } from "./firestoreStores";
 import { createDeviceApi, issueKey, KeyAdminError, listKeys, revokeKey } from "./deviceApi";
+import { probeFirestore } from "./healthProbe";
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -386,14 +387,26 @@ export const aiChat = functions.https.onCall(
  * Health check endpoint for monitoring and uptime checks.
  * GET /health — returns 200 with service status.
  */
-export const health = functions.https.onRequest((_req, res) => {
-  res.json({
+export const health = functions.https.onRequest(async (req, res) => {
+  const body: Record<string, unknown> = {
     status: "ok",
     service: "tender-cells-functions",
     version: "0.1.0",
     timestamp: new Date().toISOString(),
     environment: process.env.FUNCTIONS_EMULATOR ? "emulator" : "production",
-  });
+  };
+  // FIX(2026-10-15): `?deep=1` checks the runtime service account's Firestore access (IAM).
+  if (req.query?.deep === "1") {
+    const probe = await probeFirestore(db);
+    Object.assign(body, probe);
+    if (probe.firestore !== "ok") {
+      functions.logger.error(`[health] Firestore probe failed: ${probe.code}`);
+      body.status = "degraded";
+      res.status(503).json(body);
+      return;
+    }
+  }
+  res.json(body);
 });
 
 // ============================================================================

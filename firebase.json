@@ -180,6 +180,13 @@
         "**/.*",
         "**/node_modules/**"
       ],
+      "redirects": [
+        {
+          "source": "/:path*",
+          "destination": "https://tendercells.com/app/:path",
+          "type": 301
+        }
+      ],
       "rewrites": [
         {
           "source": "**",

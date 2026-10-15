@@ -16,7 +16,13 @@ import {
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { FIREBASE_ENABLED, auth } from '../lib/firebase/firebaseApp';
+import { FIREBASE_ENABLED, SAME_ORIGIN_AUTH, auth } from '../lib/firebase/firebaseApp';
+import {
+  chooseSignInFlow,
+  describeFederatedSignInError,
+  readDeviceSignals,
+  shouldFallBackToRedirect,
+} from '../../../shared/auth/signInPlan';
 import { setAnalyticsUser } from '../analytics';
 import { AuthContext, type AuthContextType } from './authContextStore';
 import { applyPendingWorkspaceReset } from '../services/workspaceReset';
@@ -92,9 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (code === 'auth/network-request-failed' || code === 'auth/internal-error') {
       return 'Could not reach Tender Cells sign-in. Check your connection and try again.';
     }
-    if (code === 'auth/popup-closed-by-user') {
-      return 'Google sign-in was closed before it completed.';
-    }
+    const federated = describeFederatedSignInError(code, readDeviceSignals());
+    if (federated) return federated;
     return err instanceof Error ? err.message : fallback;
   };
 
@@ -121,13 +126,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       auth.tenantId = null;
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
+      // FIX(2026-10-15): redirect only when it can finish (same-origin auth helper). The old
+      // unconditional popup-blocked -> redirect fallback silently failed on iPad Safari.
+      if (chooseSignInFlow(SAME_ORIGIN_AUTH, readDeviceSignals()) === 'redirect') {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
       try {
         await signInWithPopup(auth, provider);
       } catch (err) {
         const code = typeof err === 'object' && err && 'code' in err
           ? String((err as { code?: unknown }).code)
           : '';
-        if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request' || code === 'auth/operation-not-supported-in-this-environment') {
+        if (shouldFallBackToRedirect(code, SAME_ORIGIN_AUTH)) {
           await signInWithRedirect(auth, provider);
           return;
         }

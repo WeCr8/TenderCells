@@ -131,6 +131,12 @@ jobs:
           # (public identifiers, not secrets) - see docs/SCHOOL_SSO_PLAN.md.
           VITE_GOOGLE_OAUTH_CLIENT_ID: ${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
           VITE_MICROSOFT_CLIENT_ID: ${{ vars.MICROSOFT_CLIENT_ID }}
+          # Hosts that serve the Firebase auth helper same-origin (e.g. "tendercells.com").
+          # Set this repo variable ONLY after https://<host>/__/auth/handler is an authorized
+          # redirect URI on the Google OAuth web client; until then leave it empty. The bundle
+          # keeps tender-cells.firebaseapp.com as the fallback for every other host.
+          # See shared/auth/signInPlan.ts (iPad Safari sign-in fix, 2026-10-15).
+          VITE_FIREBASE_SAME_ORIGIN_AUTH_HOSTS: ${{ vars.FIREBASE_SAME_ORIGIN_AUTH_HOSTS }}
         run: npm --prefix website run build:with-app
 
       # Refuse to publish an app whose sign-in cannot work: the built /app bundle

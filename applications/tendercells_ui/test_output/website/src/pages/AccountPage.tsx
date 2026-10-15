@@ -25,7 +25,14 @@ import { Link } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import { TENDERCELLS_OS_URL } from "../config/appLinks";
 import { useAuthUser } from "../hooks/useAuthUser";
-import { ACTION_CODE_SETTINGS, AUTH_CONFIGURED, app, auth } from "../lib/firebase";
+import { ACTION_CODE_SETTINGS, AUTH_CONFIGURED, SAME_ORIGIN_AUTH, app, auth } from "../lib/firebase";
+import {
+  chooseSignInFlow,
+  describeFederatedSignInError,
+  describeFunctionsError,
+  readDeviceSignals,
+  shouldFallBackToRedirect,
+} from "../../../shared/auth/signInPlan";
 import EmailPreferences from "./AccountSettings";
 import "./AccountPage.css";
 
@@ -79,7 +86,8 @@ function SchoolSignIn() {
       if (!result.data.providers.length) setError("This school has no active sign-in provider yet. Ask the district administrator.");
     } catch (reason) {
       setOptions(null);
-      setError(reason instanceof Error ? reason.message : "School sign-in could not be loaded.");
+      // FIX(2026-10-15): a backend outage used to surface as the bare word "INTERNAL".
+      setError(describeFunctionsError(reason, "School sign-in could not be loaded."));
     } finally {
       setBusy(false);
     }
@@ -95,18 +103,28 @@ function SchoolSignIn() {
       : provider.providerId.startsWith("saml.")
         ? new SAMLAuthProvider(provider.providerId)
         : new OAuthProvider(provider.providerId);
+    const device = readDeviceSignals();
+    // Narrowed copies: TS doesn't carry the guard above into the closure below.
+    const firebaseAuth = auth;
+    const school = options;
+    const startRedirect = async () => {
+      sessionStorage.setItem(SCHOOL_REDIRECT_KEY, JSON.stringify({
+        organizationId: school.organizationId,
+        tenantId: provider.tenantId,
+        providerId: provider.providerId,
+      } satisfies SchoolRedirectState));
+      await signInWithRedirect(firebaseAuth, authProvider);
+    };
     try {
+      if (chooseSignInFlow(SAME_ORIGIN_AUTH, device) === "redirect") {
+        await startRedirect();
+        return;
+      }
       try {
         await signInWithPopup(auth, authProvider);
       } catch (reason) {
-        const code = errorCode(reason);
-        if (["auth/popup-blocked", "auth/cancelled-popup-request", "auth/operation-not-supported-in-this-environment"].includes(code)) {
-          sessionStorage.setItem(SCHOOL_REDIRECT_KEY, JSON.stringify({
-            organizationId: options.organizationId,
-            tenantId: provider.tenantId,
-            providerId: provider.providerId,
-          } satisfies SchoolRedirectState));
-          await signInWithRedirect(auth, authProvider);
+        if (shouldFallBackToRedirect(errorCode(reason), SAME_ORIGIN_AUTH)) {
+          await startRedirect();
           return;
         }
         throw reason;
@@ -116,7 +134,12 @@ function SchoolSignIn() {
       window.location.assign("/app/dashboard");
     } catch (reason) {
       auth.tenantId = null;
-      setError(reason instanceof Error ? reason.message : "School sign-in failed.");
+      const code = errorCode(reason);
+      setError(
+        code.startsWith("functions/")
+          ? describeFunctionsError(reason, "School sign-in failed.")
+          : describeFederatedSignInError(code, device) ?? (reason instanceof Error ? reason.message : "School sign-in failed."),
+      );
     } finally {
       setBusy(false);
     }
@@ -366,15 +389,28 @@ function SignInForm() {
     auth.tenantId = null;
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
+    // FIX(2026-10-15): the old code fell back to signInWithRedirect whenever a popup was
+    // blocked. Safari blocks popups and partitions storage, so that redirect could never finish
+    // while the auth helper lived on firebaseapp.com. Redirect is used only when it can complete.
+    const device = readDeviceSignals();
     try {
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      const code = errorCode(err);
-      if (code === "auth/popup-blocked" || code === "auth/cancelled-popup-request" || code === "auth/operation-not-supported-in-this-environment") {
+      if (chooseSignInFlow(SAME_ORIGIN_AUTH, device) === "redirect") {
         await signInWithRedirect(auth, provider);
         return;
       }
-      setError(describeAuthError(err));
+      await signInWithPopup(auth, provider);
+    } catch (err) {
+      const code = errorCode(err);
+      if (shouldFallBackToRedirect(code, SAME_ORIGIN_AUTH)) {
+        try {
+          await signInWithRedirect(auth, provider);
+          return;
+        } catch (redirectErr) {
+          setError(describeAuthError(redirectErr));
+          return;
+        }
+      }
+      setError(describeFederatedSignInError(code, device) ?? describeAuthError(err));
     } finally {
       setBusy(false);
     }
@@ -492,7 +528,15 @@ export default function AccountPage() {
     }).catch((reason) => {
       sessionStorage.removeItem(SCHOOL_REDIRECT_KEY);
       firebaseAuth.tenantId = null;
-      setRedirectError(reason instanceof Error ? reason.message : "School sign-in could not be completed. Please try again.");
+      const code = errorCode(reason);
+      if (code.startsWith("functions/")) {
+        setRedirectError(describeFunctionsError(reason, "School sign-in could not be completed. Please try again."));
+      } else if (schoolRedirect) {
+        setRedirectError(reason instanceof Error ? reason.message : "School sign-in could not be completed. Please try again.");
+      } else {
+        // A Google redirect that came back with an error (it used to be reported as a school error).
+        setRedirectError(describeFederatedSignInError(code, readDeviceSignals()) ?? describeAuthError(reason));
+      }
     });
   }, []);
 

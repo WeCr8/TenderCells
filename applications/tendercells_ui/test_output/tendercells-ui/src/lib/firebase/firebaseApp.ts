@@ -9,9 +9,23 @@ import type { Firestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import type { FirebaseStorage } from 'firebase/storage';
 
+import { currentLocation, isSameOriginAuth, parseHostList, resolveAuthDomain } from '../../../../shared/auth/signInPlan';
+
+// FIX(2026-10-15): on hosts listed in VITE_FIREBASE_SAME_ORIGIN_AUTH_HOSTS (e.g. tendercells.com)
+// the auth helper is served from the page's own origin, so Google sign-in survives Safari/Chrome
+// storage partitioning (iPad). See shared/auth/signInPlan.ts for why, and the console step it needs.
+const AUTH_DOMAIN = resolveAuthDomain(
+  import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  currentLocation(),
+  parseHostList(import.meta.env.VITE_FIREBASE_SAME_ORIGIN_AUTH_HOSTS),
+);
+
+/** True when /__/auth/* runs on this page's origin, so signInWithRedirect can complete. */
+export const SAME_ORIGIN_AUTH = isSameOriginAuth(AUTH_DOMAIN, currentLocation());
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  authDomain: AUTH_DOMAIN,
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,

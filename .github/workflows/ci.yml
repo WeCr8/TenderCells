@@ -29,6 +29,7 @@ jobs:
       python: ${{ steps.f.outputs.python }}
       rules: ${{ steps.f.outputs.rules }}
       website: ${{ steps.f.outputs.website }}
+      starter: ${{ steps.f.outputs.starter }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,7 +45,7 @@ jobs:
           if [ "$EVENT" = "pull_request" ]; then BASE="$PR_BASE"; HEAD="$PR_HEAD"; else BASE="$PUSH_BEFORE"; HEAD="$GITHUB_SHA"; fi
           if [ -z "$BASE" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
             echo "No usable base ($BASE) - running everything"
-            for k in ui api functions firmware python rules website; do echo "$k=true" >> "$GITHUB_OUTPUT"; done
+            for k in ui api functions firmware python rules website starter; do echo "$k=true" >> "$GITHUB_OUTPUT"; done
             exit 0
           fi
           FILES=$(git diff --name-only "$BASE" "$HEAD")
@@ -55,7 +56,9 @@ jobs:
           echo "api=$(has "$APPS/express-api/|$APPS/website/public/api/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
           # The hosted AI-assistant connector is bundled into functions from the hub's mcp/ sources.
           echo "functions=$(has "^functions/|$APPS/express-api/backend/src/mcp/|$APPS/express-api/mcp-view/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
-          echo "firmware=$(has '^firmware/(chicken-tender|watchtower|camera-node|shared|roaming-roost|starter-node)/|^\.github/workflows/ci\.yml')" >> "$GITHUB_OUTPUT"
+          echo "firmware=$(has '^firmware/(chicken-tender|chicken-tender-starter|watchtower|camera-node|shared|roaming-roost|starter-node)/|^\.github/workflows/ci\.yml')" >> "$GITHUB_OUTPUT"
+          # Chicken Tender starter: door-logic host tests + electrical checks / BOM generator.
+          echo "starter=$(has "^firmware/chicken-tender-starter/|^hardware/chicken-tender-starter/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
           echo "python=$(has '^firmware/jetson-nano/|^\.github/workflows/ci\.yml')" >> "$GITHUB_OUTPUT"
           # Website: its own code, the OS routes it links into, and the docs its lessons / doc list come from.
           echo "website=$(has "$APPS/(website|shared)/|$APPS/tendercells-ui/src/routes/|^docs/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
@@ -188,6 +191,9 @@ jobs:
       - name: Build Chicken Tender firmware
         run: cd firmware/chicken-tender && pio run
 
+      - name: Build Chicken Tender Starter firmware (XIAO ESP32-S3, both actuator tiers)
+        run: cd firmware/chicken-tender-starter && pio run
+
       - name: Build WatchTower firmware
         run: cd firmware/watchtower && pio run
         continue-on-error: true
@@ -199,6 +205,24 @@ jobs:
           if [ "$SIZE" -gt 3932160 ]; then
             echo "Warning: Firmware exceeds 3.75MB flash limit"
           fi
+
+  chicken-tender-starter:
+    name: "Chicken Tender starter — door-logic host tests, electrical checks"
+    needs: changes
+    if: needs.changes.outputs.starter == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Door-logic host tests (g++, -Werror)
+        run: make -C firmware/chicken-tender-starter/test/host
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Electrical checks + BOM (tc-hw/1; fails on any FAIL or on stale generated files)
+        run: |
+          pip install pyyaml
+          python hardware/chicken-tender-starter/gen/build_electronics.py --check
+          git diff --exit-code -- hardware/chicken-tender-starter/out
 
   arm-service:
     name: "Arm service — pytest (sim, UR, LeRobot, Hugging Face policies)"

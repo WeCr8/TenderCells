@@ -1,0 +1,310 @@
+[
+ {
+  "tier": "starter",
+  "check": "pin map matches the spec (D0 PWM, D1 dir, D2 fault, D3 CS, D4/D5 I2C, D6 spare, D7 enable via E-STOP, D8/D9 reeds, D10 E-STOP sense)",
+  "result": "PASS",
+  "detail": "11/11 header pins as specified",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "pin constraints (strap pin input-only, boot-log pin unused, ADC on ADC1)",
+  "result": "PASS",
+  "detail": "D2 (GPIO3 strap) is a pulled-up input; D6 (U0TXD) spare; D3 = ADC1_CH3 works with Wi-Fi; D7 (U0RXD) is Hi-Z during boot and the carrier pulls SLEEP low, so the driver stays asleep through reset",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "netlist integrity (no node in two nets, every pin net present)",
+  "result": "PASS",
+  "detail": "19 nets, 55 nodes",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "E-STOP is hardware: NC contact in series D7 -> SW1 -> DRV8874 SLEEP, D10 senses SLEEP",
+  "result": "PASS",
+  "detail": "Pressing the button or cutting either wire lets the carrier pull SLEEP low -> outputs Hi-Z (coast); the worm drive holds the door. Not a certified safety function (no redundancy/monitoring category) - it is a kid-friendly hard stop.",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "DRV8874 PMODE tied to GND (PH/EN latched on wake)",
+  "result": "PASS",
+  "detail": "Carrier leaves PMODE floating (= independent half-bridge); the plate ties it to GND",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "driver current limit ~2.0 A (R1 20 k VREF->GND with carrier 10 k pull-up to SLEEP = 3.3 V)",
+  "result": "PASS",
+  "detail": "VREF = 3.3 x 20k/(10k+20k) = 2.20 V; I_lim = VREF / (450 uA/A x 2.49 k = 1.121 V/A) = 1.96 A (<= 2.1 A carrier continuous)",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "current-sense voltage inside the ADC span at the limit",
+  "result": "PASS",
+  "detail": "CS at 1.96 A = 2200 mV < 3100 mV",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "firmware jam threshold below the hardware limit",
+  "result": "PASS",
+  "detail": "1.80 A < 1.96 A (nFAULT also asserts while chopping; firmware holds 600 ms before faulting)",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "actuator running current at the door load < 2 A and < the driver limit (act-generic-12v-300mm)",
+  "result": "PASS",
+  "detail": "no-load 0.8 A, max-load 3.0 A at 150 N; door ~15 N -> ~1.02 A (linear interpolation, assumed - verify listing/force data)",
+  "data": "estimate"
+ },
+ {
+  "tier": "starter",
+  "check": "actuator meets the spec (12 V, built-in end-of-stroke limits, sealed, stroke >= door travel)",
+  "result": "PASS",
+  "detail": "IP54, 300 mm stroke vs 280 mm door travel, limits built in",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "firmware travel timeout covers the slowest full travel",
+  "result": "PASS",
+  "detail": "280 mm at 8.0 mm/s = 35.0 s; timeout 55 s",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "actuator duty cycle",
+  "result": "PASS",
+  "detail": "2 moves/day of 35 s; even 2 moves in 10 min = 12 % < 20 % rated",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "5 V regulator: 12 V in window, load < 600 mA",
+  "result": "PASS",
+  "detail": "12 V in 5.2-50 V; XIAO Wi-Fi peak + DHT20 ~0.36 A < 0.6 A",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "XIAO 5V pin after the back-feed Schottky",
+  "result": "PASS",
+  "detail": "5.0 - 0.32 = 4.68 V (window 4.5-5.5 V); USB and the regulator never back-feed",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "12 V adapter budget (worst case: driver at its limit + logic)",
+  "result": "PASS",
+  "detail": "1.96 A + 0.18 A = 2.14 A <= 80 % of 3.0 A",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "3 A fuse above the load and below the power-wire ampacity",
+  "result": "PASS",
+  "detail": "load 2.14 A < fuse 3.0 A <= 20 AWG 5.0 A",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "no Dupont on a 12 V / motor wire",
+  "result": "PASS",
+  "detail": "12 V and motor wires use 5.08 mm screw terminals, the barrel jack and solder joints",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "logic levels (3.3 V XIAO -> DRV8874 1.8-5.5 V; DHT20 on 3V3 with 4.7 k pull-ups)",
+  "result": "PASS",
+  "detail": "all 3.3 V; nothing on the XIAO sees 5 V or 12 V",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "12 V / motor nets never touch the XIAO (the book's old error)",
+  "result": "PASS",
+  "detail": "XIAO is powered only from the 5 V regulator via D1",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "D7 drives SLEEP + VREF divider within GPIO limits",
+  "result": "PASS",
+  "detail": "~0.21 mA << 40 mA",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "power: 12 V Class 2 adapter, no battery",
+  "result": "PASS",
+  "detail": "Class 2 limits energy at the source; adapter stays at a covered/indoor outlet, only 12 V goes outside",
+  "data": "checked"
+ },
+ {
+  "tier": "starter",
+  "check": "cord-lift door: actuator only lifts; closing is gravity",
+  "result": "PASS",
+  "detail": "door <= 1.0 kg (~10 N) rests on a hen at most; actuator force (150 N) can never push it down",
+  "data": "design rule"
+ },
+ {
+  "tier": "pro",
+  "check": "pin map matches the spec (D0 PWM, D1 dir, D2 fault, D3 CS, D4/D5 I2C, D6 spare, D7 enable via E-STOP, D8/D9 reeds, D10 E-STOP sense)",
+  "result": "PASS",
+  "detail": "11/11 header pins as specified",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "pin constraints (strap pin input-only, boot-log pin unused, ADC on ADC1)",
+  "result": "PASS",
+  "detail": "D2 (GPIO3 strap) is a pulled-up input; D6 (U0TXD) spare; D3 = ADC1_CH3 works with Wi-Fi; D7 (U0RXD) is Hi-Z during boot and the carrier pulls SLEEP low, so the driver stays asleep through reset",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "netlist integrity (no node in two nets, every pin net present)",
+  "result": "PASS",
+  "detail": "19 nets, 55 nodes",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "E-STOP is hardware: NC contact in series D7 -> SW1 -> DRV8874 SLEEP, D10 senses SLEEP",
+  "result": "PASS",
+  "detail": "Pressing the button or cutting either wire lets the carrier pull SLEEP low -> outputs Hi-Z (coast); the worm drive holds the door. Not a certified safety function (no redundancy/monitoring category) - it is a kid-friendly hard stop.",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "DRV8874 PMODE tied to GND (PH/EN latched on wake)",
+  "result": "PASS",
+  "detail": "Carrier leaves PMODE floating (= independent half-bridge); the plate ties it to GND",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "driver current limit ~2.0 A (R1 20 k VREF->GND with carrier 10 k pull-up to SLEEP = 3.3 V)",
+  "result": "PASS",
+  "detail": "VREF = 3.3 x 20k/(10k+20k) = 2.20 V; I_lim = VREF / (450 uA/A x 2.49 k = 1.121 V/A) = 1.96 A (<= 2.1 A carrier continuous)",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "current-sense voltage inside the ADC span at the limit",
+  "result": "PASS",
+  "detail": "CS at 1.96 A = 2200 mV < 3100 mV",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "firmware jam threshold below the hardware limit",
+  "result": "PASS",
+  "detail": "1.80 A < 1.96 A (nFAULT also asserts while chopping; firmware holds 600 ms before faulting)",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "actuator running current at the door load < 2 A and < the driver limit (act-glideforce-lact12-12v-05)",
+  "result": "PASS",
+  "detail": "no-load 1.2 A, max-load 3.2 A at 150 N; door ~15 N -> ~1.40 A (linear interpolation, checked data)",
+  "data": "checked (vendor current) / estimate (load interpolation)"
+ },
+ {
+  "tier": "pro",
+  "check": "actuator meets the spec (12 V, built-in end-of-stroke limits, sealed, stroke >= door travel)",
+  "result": "PASS",
+  "detail": "IP65, 300 mm stroke vs 280 mm door travel, limits built in",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "firmware travel timeout covers the slowest full travel",
+  "result": "PASS",
+  "detail": "280 mm at 36.5 mm/s = 7.7 s; timeout 14 s",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "actuator duty cycle",
+  "result": "PASS",
+  "detail": "2 moves/day of 8 s; even 2 moves in 10 min = 3 % < 25 % rated",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "5 V regulator: 12 V in window, load < 600 mA",
+  "result": "PASS",
+  "detail": "12 V in 5.2-50 V; XIAO Wi-Fi peak + DHT20 ~0.36 A < 0.6 A",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "XIAO 5V pin after the back-feed Schottky",
+  "result": "PASS",
+  "detail": "5.0 - 0.32 = 4.68 V (window 4.5-5.5 V); USB and the regulator never back-feed",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "12 V adapter budget (worst case: driver at its limit + logic)",
+  "result": "PASS",
+  "detail": "1.96 A + 0.18 A = 2.14 A <= 80 % of 3.0 A",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "3 A fuse above the load and below the power-wire ampacity",
+  "result": "PASS",
+  "detail": "load 2.14 A < fuse 3.0 A <= 20 AWG 5.0 A",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "no Dupont on a 12 V / motor wire",
+  "result": "PASS",
+  "detail": "12 V and motor wires use 5.08 mm screw terminals, the barrel jack and solder joints",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "logic levels (3.3 V XIAO -> DRV8874 1.8-5.5 V; DHT20 on 3V3 with 4.7 k pull-ups)",
+  "result": "PASS",
+  "detail": "all 3.3 V; nothing on the XIAO sees 5 V or 12 V",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "12 V / motor nets never touch the XIAO (the book's old error)",
+  "result": "PASS",
+  "detail": "XIAO is powered only from the 5 V regulator via D1",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "D7 drives SLEEP + VREF divider within GPIO limits",
+  "result": "PASS",
+  "detail": "~0.21 mA << 40 mA",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "power: 12 V Class 2 adapter, no battery",
+  "result": "PASS",
+  "detail": "Class 2 limits energy at the source; adapter stays at a covered/indoor outlet, only 12 V goes outside",
+  "data": "checked"
+ },
+ {
+  "tier": "pro",
+  "check": "cord-lift door: actuator only lifts; closing is gravity",
+  "result": "PASS",
+  "detail": "door <= 1.0 kg (~10 N) rests on a hen at most; actuator force (150 N) can never push it down",
+  "data": "design rule"
+ }
+]

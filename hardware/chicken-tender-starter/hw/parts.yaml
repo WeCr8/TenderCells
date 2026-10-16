@@ -1,0 +1,173 @@
+# Chicken Tender Starter part catalog (schema tc-hw/1). Electrical + purchasing facts, each with its source.
+# conf: HIGH = vendor page/datasheet opened 2026-10-16; MEDIUM = vendor listing text; LOW / estimate = not verified, measure.
+# price_status: checked = price read on the vendor page 2026-10-16; estimate = typical street price, not checked.
+
+xiao-esp32s3:
+  kind: mcu
+  src: "https://www.seeedstudio.com/XIAO-ESP32S3-p-5627.html"
+  conf: MEDIUM
+  price_usd: 7.49
+  price_status: checked
+  logic_v: 3.3
+  vin_5v_pin: {min: 4.5, max: 5.5, note: "5V pin is the USB VBUS net: feed it through a Schottky so USB and the regulator never back-feed"}
+  i_typ_A: {idle_wifi: 0.10, wifi_tx_peak: 0.35}       # LOW: ESP32-S3 typical figures, measure with a USB meter
+  gpio_source_mA_max: 40
+  adc_full_scale_mV: 3100                              # 11/12 dB attenuation, usable span (ESP-IDF docs)
+  pins:
+    D0:  {gpio: 1,  adc: ADC1_CH0}
+    D1:  {gpio: 2,  adc: ADC1_CH1}
+    D2:  {gpio: 3,  adc: ADC1_CH2, strapping: "GPIO3 JTAG-source strap: input only"}
+    D3:  {gpio: 4,  adc: ADC1_CH3}
+    D4:  {gpio: 5,  adc: ADC1_CH4, default: I2C_SDA}
+    D5:  {gpio: 6,  adc: ADC1_CH5, default: I2C_SCL}
+    D6:  {gpio: 43, boot_activity: "U0TXD - toggles with the ROM boot log"}
+    D7:  {gpio: 44, boot_activity: "U0RXD - high-Z input during boot, output after setup()"}
+    D8:  {gpio: 7,  adc: ADC1_CH6}
+    D9:  {gpio: 8,  adc: ADC1_CH7}
+    D10: {gpio: 9,  adc: ADC1_CH8}
+
+drv8874-pololu-4035:
+  kind: motor_driver
+  src: "https://www.pololu.com/product/4035 ; TI DRV8874 datasheet (A_IPROPI 450 uA/A)"
+  conf: HIGH
+  price_usd: 11.94
+  price_status: checked
+  vm: {min: 4.5, max: 37}
+  cont_A: 2.1                     # Pololu: sustainable for many minutes, room temp, no heatsink
+  logic_v: {min: 1.8, max: 5.5}
+  r_cs_ohm: 2490                  # CS (IPROPI) to GND on the carrier -> ~1.1 V/A
+  a_ipropi_uA_per_A: 450
+  r_vref_pullup_ohm: 10000        # VREF pulled up to SLEEP through 10 k on the carrier
+  sleep_default: low              # carrier pulls SLEEP low: driver asleep (outputs Hi-Z) unless driven high
+  pmode_default: floating         # floating = independent half-bridge: MUST be tied low for PH/EN
+  nfault: "open drain, external pull-up required; with IMODE pulled low it also asserts during current chopping"
+  reverse_protected: true
+
+d36v6f5-pololu-3792:
+  kind: regulator
+  src: "https://www.pololu.com/product/3792"
+  conf: HIGH
+  price_usd: 5.95
+  price_status: checked
+  vin: {min: 5.2, max: 50}
+  vout: 5.0
+  iout_max_A: 0.6
+  eff_est: 0.85                   # LOW: typical at 12 V in / 0.3 A out (vendor efficiency graph, read approximately)
+  size_mm: [13, 10, 3]
+
+dht20-adafruit-5183:
+  kind: sensor
+  src: "https://www.adafruit.com/product/5183"
+  conf: MEDIUM
+  price_usd: 4.50
+  price_status: checked
+  vdd: {min: 2.2, max: 5.5}
+  i2c_addr: "0x38"
+  i_A: 0.001
+  note: "Bare 4-pin module: no I2C pull-ups on board -> R2/R3 4.7 k to 3V3 on the electronics plate"
+
+act-glideforce-lact12-12v-05:
+  kind: actuator
+  tier: pro
+  src: "https://www.pololu.com/product/2326 (Glideforce LACT12-12V-05, Pololu 2326)"
+  conf: HIGH
+  price_usd: 167.91               # Pololu 2326 page, qty 1, read 2026-10-16
+  price_status: checked
+  v: 12
+  stroke_mm: 300                  # 11.81 in actual
+  retracted_mm: 413               # hole to hole
+  extended_mm: 713
+  hole_d_mm: 6.4                  # 1/4 in mounting holes
+  force_N: 150                    # 15 kgf rated dynamic
+  i_noload_A: 1.2
+  i_maxload_A: 3.2
+  i_stall_A: 7.0
+  speed_noload_mm_s: 43.9
+  speed_maxload_mm_s: 36.5
+  duty_max: 0.25                  # estimate (LD datasheet duty not re-read)
+  ip: IP65
+  limit_switches: true
+  current_status: checked
+
+# Starter tier actuator: deliberately GENERIC. No listing is picked here: choose any 12 V
+# linear actuator that meets the minimums below and VERIFY LISTING/FORCE before buying
+# (stroke >= 290 mm, built-in end-of-stroke limit switches, IP54 or better, rated force >= 150 N,
+# mounting holes that take an M6 pin). No ASIN and no price on purpose.
+act-generic-12v-300mm:
+  kind: actuator
+  tier: starter
+  src: "Generic 12 V linear actuator, 12 in / 300 mm stroke, built-in limit switches, IP54+ (verify listing/force)"
+  conf: LOW
+  price_usd: null                 # no price: depends on the listing you pick
+  price_status: verify listing
+  verify: "verify listing/force: stroke, force, speed, current, IP rating and hole size are design minimums, not a listing's numbers"
+  v: 12
+  stroke_mm: 300                  # minimum to buy (door travel 280 mm + 10 mm margin -> >= 290)
+  retracted_mm: 420               # assumed for the bracket layout; measure yours
+  extended_mm: 720
+  hole_d_mm: 6.0                  # assumed: the clevis uses an M6 pin (fits 6.0-6.4 mm holes); measure yours
+  force_N: 150                    # minimum to buy; most generic 12 in actuators list far more
+  i_noload_A: 0.8                 # assumed for the check; verify on the listing
+  i_maxload_A: 3.0                # assumed for the check; verify on the listing
+  speed_noload_mm_s: 10           # slowest assumed; the 55 s firmware timeout is sized from this
+  duty_max: 0.20                  # assumed
+  ip: IP54                        # minimum to buy
+  limit_switches: true            # required
+  current_status: assumed - verify listing/force
+
+adapter-12v-3a-class2:
+  kind: supply
+  src: "generic UL-listed 12 V 3 A Class 2 wall adapter, 5.5 x 2.1 mm barrel (choose one marked 'Class 2')"
+  conf: LOW
+  price_usd: 12.00
+  price_status: estimate
+  v: 12
+  i_max_A: 3.0
+  class2: true
+
+fuse-3a-inline:
+  kind: fuse
+  src: "inline ATO/ATC blade fuse holder (20 AWG leads) + 3 A blade fuse"
+  conf: LOW
+  price_usd: 3.00
+  price_status: estimate
+  rating_A: 3.0
+
+d-1n5817:
+  kind: diode
+  src: "1N5817 Schottky 1 A 20 V (onsemi datasheet: Vf ~0.45 V at 1 A, ~0.32 V at 0.3 A)"
+  conf: MEDIUM
+  price_usd: 0.20
+  price_status: estimate
+  if_max_A: 1.0
+  vf_V: 0.32
+
+estop-22mm-nc:
+  kind: switch
+  src: "22 mm mushroom E-STOP, twist-release, 1 NC contact (IP65 front)"
+  conf: LOW
+  price_usd: 8.00
+  price_status: estimate
+  contacts: NC
+
+reed-door-wired-no:
+  kind: switch
+  src: "wired magnetic door/window reed sensor, normally open (closes with magnet present), with magnet"
+  conf: LOW
+  price_usd: 4.00
+  price_status: estimate
+  contacts: NO
+
+res-20k-1pct:   {kind: resistor, src: "20 kOhm 1 % 1/4 W", conf: HIGH, price_usd: 0.10, price_status: estimate, ohm: 20000}
+res-4k7-1pct:   {kind: resistor, src: "4.7 kOhm 1 % 1/4 W", conf: HIGH, price_usd: 0.10, price_status: estimate, ohm: 4700}
+jack-dc-5521-panel: {kind: connector, src: "5.5 x 2.1 mm panel-mount DC jack, 5 A", conf: LOW, price_usd: 1.50, price_status: estimate, rating_A: 5}
+term-5p08-2p:   {kind: connector, src: "2-pos 5.08 mm pluggable screw terminal (12 V in, motor out)", conf: LOW, price_usd: 0.60, price_status: estimate, rating_A: 8}
+
+connectors:
+  dupont-2.54: {rating_A: 1.0}
+  term-5.08: {rating_A: 8.0}
+  barrel-5521: {rating_A: 5.0}
+  solder: {rating_A: 10.0}
+
+# Conservative chassis-wiring ampacity used for the checks (bundled, inside an enclosure).
+wire_ampacity_A: {18: 7.0, 20: 5.0, 22: 3.0, 24: 2.0, 26: 1.0, 28: 0.5}

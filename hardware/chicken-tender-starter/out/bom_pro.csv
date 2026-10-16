@@ -1,0 +1,24 @@
+refs,part,desc,qty,unit,ext,status,source
+U1,xiao-esp32s3,https://www.seeedstudio.com/XIAO-ESP32S3-p-5627.html,1,7.49,7.49,checked,https://www.seeedstudio.com/XIAO-ESP32S3-p-5627.html
+U2,d36v6f5-pololu-3792,https://www.pololu.com/product/3792,1,5.95,5.95,checked,https://www.pololu.com/product/3792
+U3,drv8874-pololu-4035,https://www.pololu.com/product/4035 ; TI DRV8874 datasheet,1,11.94,11.94,checked,https://www.pololu.com/product/4035
+D1,d-1n5817,1N5817 Schottky 1 A 20 V,1,0.2,0.2,estimate,"1N5817 Schottky 1 A 20 V (onsemi datasheet: Vf ~0.45 V at 1 A, ~0.32 V at 0.3 A)"
+R1,res-20k-1pct,20 kOhm 1 % 1/4 W,1,0.1,0.1,estimate,20 kOhm 1 % 1/4 W
+R2 R3,res-4k7-1pct,4.7 kOhm 1 % 1/4 W,2,0.1,0.2,estimate,4.7 kOhm 1 % 1/4 W
+M1,act-glideforce-lact12-12v-05,"https://www.pololu.com/product/2326 (Glideforce LACT12-12V-05, Pololu 2326)",1,167.91,167.91,checked,https://www.pololu.com/product/2326
+S1,dht20-adafruit-5183,https://www.adafruit.com/product/5183,1,4.5,4.5,checked,https://www.adafruit.com/product/5183
+SW1,estop-22mm-nc,"22 mm mushroom E-STOP, twist-release, 1 NC contact",1,8.0,8.0,estimate,"22 mm mushroom E-STOP, twist-release, 1 NC contact (IP65 front)"
+RS1 RS2,reed-door-wired-no,"wired magnetic door/window reed sensor, normally open",2,4.0,8.0,estimate,"wired magnetic door/window reed sensor, normally open (closes with magnet present), with magnet"
+J1,jack-dc-5521-panel,"5.5 x 2.1 mm panel-mount DC jack, 5 A",1,1.5,1.5,estimate,"5.5 x 2.1 mm panel-mount DC jack, 5 A"
+F1,fuse-3a-inline,inline ATO/ATC blade fuse holder,1,3.0,3.0,estimate,inline ATO/ATC blade fuse holder (20 AWG leads) + 3 A blade fuse
+PS1,adapter-12v-3a-class2,"generic UL-listed 12 V 3 A Class 2 wall adapter, 5.5 x 2.1 mm barrel",1,12.0,12.0,estimate,"generic UL-listed 12 V 3 A Class 2 wall adapter, 5.5 x 2.1 mm barrel (choose one marked 'Class 2')"
+TB1 TB2,term-5p08-2p,2-pos 5.08 mm pluggable screw terminal,2,0.6,1.2,estimate,"2-pos 5.08 mm pluggable screw terminal (12 V in, motor out)"
+PLA/PETG,PLA/PETG,"Printed parts (control box, lid, plate, clevis bracket, cord eye, door anchor, reed mount, 2 guide segments) ~260 g PETG",1,5.2,5.2,estimate,https://www.prusa3d.com/category/prusament-petg/ (~$20/kg)
+INS-M3,INS-M3,"M3 heat-set inserts, CNC Kitchen / Ruthex M3 standard (L 5.7, OD 4.6) - heatset mode only",20,0.12,2.4,estimate,https://www.cnckitchen.store/ (100-pack ~$12)
+SCR-M3x8,SCR-M3x8,"M3 x 8 button-head screws (box, plate, brackets)",20,0.08,1.6,estimate,generic
+SCR-M3x6,SCR-M3x6,"M3 x 6 screws (XIAO/DRV8874/regulator carriers to the plate, via standoffs)",8,0.08,0.64,estimate,generic
+SCR-WOOD,SCR-WOOD,"#8 x 3/4 in exterior wood screws (brackets, guides, reed mount to the coop)",16,0.1,1.6,estimate,generic
+PIN-M6,PIN-M6,"M6 x 30 shoulder/clevis bolt + nyloc (actuator pivot pins, both ends)",2,1.2,2.4,estimate,generic
+CORD,CORD,"1.8 mm braided Dyneema/UHMWPE cord, 1 m (door lift)",1,3.0,3.0,estimate,generic
+GLAND,GLAND,"PG7 cable glands (actuator lead, reed leads)",3,0.5,1.5,estimate,generic
+WIRE,WIRE,"Hook-up wire 20 AWG red/black 2 m, 26 AWG multicolor, Dupont jumpers, heat-shrink",1,6.0,6.0,estimate,generic

@@ -1,7 +1,7 @@
 {
  "id": "chicken-tender-door-book",
  "title": "Chicken Tender Door Controller",
- "version": "0.1.0",
+ "version": "0.2.0",
  "milestone": "Door Builder",
  "phase": "BUILD",
  "concept": true,
@@ -15,9 +15,10 @@
  "estimated_minutes": 120,
  "source_docs": [
   "docs/builder/README.md",
-  "firmware/starter-node/README.md"
+  "firmware/chicken-tender-starter/README.md",
+  "hardware/chicken-tender-starter/README.md"
  ],
- "concept_note": "Concept preview: these pages show how the build manual will look. Pin labels, voltages, connector polarity and dimensions are not verified yet - do not wire from them. The pictured XIAO ESP32-S3 controller runs the Starter Node firmware (choose product type chicken-tender) today; the dedicated Chicken Tender firmware targets an ESP32-WROOM-32.",
+ "concept_note": "Concept preview: these pages show how the build manual will look; the pictures still show the old layout. The wiring text is corrected to the starter electronics in hardware/chicken-tender-starter (tc-hw/1): 12 V goes ONLY to the DRV8874 motor driver and the 5 V regulator, never to the XIAO ESP32-S3 or its expansion board. Dimensions are not verified yet - wire from the hardware wiring diagram, not from these pictures.",
  "stages": [
   {
    "id": "meet",
@@ -40,7 +41,7 @@
      "id": "d02",
      "type": "concept",
      "action": "Check the box",
-     "instruction": "Check you have every part: controller and expansion board, 12 V linear actuator, limit switch, weatherproof enclosure, 12 V power supply, door brackets A and B, wires, screws and zip ties. The camera and DHT22 sensor are optional.",
+     "instruction": "Check you have every part: XIAO ESP32-S3, electronics plate with DRV8874 motor driver and 5 V regulator, 12 V linear actuator (with built-in end-of-stroke limit switches), 2 reed switches and a magnet, red E-STOP button, DHT20 temperature sensor, 12 V Class 2 power adapter, printed control box and brackets, door cord, wires, screws and zip ties. The camera is optional.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_04.webp",
       "view": "page"
@@ -72,7 +73,7 @@
      "id": "d04",
      "type": "assembly",
      "action": "Place the board",
-     "instruction": "Place the XIAO ESP32-S3 on the expansion board with the USB-C connector facing the top.",
+     "instruction": "Push the XIAO ESP32-S3 onto its header on the electronics plate with the USB-C connector facing the top. Leave every pin row reachable.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_06.webp",
       "view": "page"
@@ -167,8 +168,8 @@
     {
      "id": "d10",
      "type": "assembly",
-     "action": "Bracket B",
-     "instruction": "Attach bracket B to the moving door.",
+     "action": "Door anchor",
+     "instruction": "Screw the door anchor bracket to the top edge of the sliding door.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_12.webp",
       "view": "page"
@@ -181,7 +182,7 @@
      "id": "d11",
      "type": "assembly",
      "action": "Mount the actuator",
-     "instruction": "Connect the linear actuator between the two brackets.",
+     "instruction": "Mount the actuator above the door with the clevis bracket, then tie the door cord from the rod cord eye to the door anchor. The door closes under its own weight - the actuator only lifts it and never pushes it down.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_13.webp",
       "view": "page"
@@ -200,7 +201,7 @@
      "id": "d12",
      "type": "electronics",
      "action": "Motor wires",
-     "instruction": "Connect the linear actuator wires to the expansion board's MOTOR terminals.",
+     "instruction": "Connect the two actuator wires to the DRV8874 driver's OUT1 and OUT2 terminals on the electronics plate. Never connect the actuator to the XIAO or its expansion board.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_14.webp",
       "view": "page"
@@ -213,8 +214,8 @@
     {
      "id": "d13",
      "type": "electronics",
-     "action": "Limit switch",
-     "instruction": "Connect the limit switch wires.",
+     "action": "Door switches",
+     "instruction": "Connect the door-closed reed switch to D8 and the door-open reed switch to D9; the other wire of each goes to GND. The actuator's own end-of-stroke limit switches are built in and need no wires.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_15.webp",
       "view": "page"
@@ -227,8 +228,8 @@
     {
      "id": "d14",
      "type": "electronics",
-     "action": "DHT22 (optional)",
-     "instruction": "Connect the DHT22 temperature / humidity sensor (optional).",
+     "action": "DHT20 sensor",
+     "instruction": "Connect the DHT20 sensor: VCC to 3V3 (not 5 V), GND to GND, SDA to D4 and SCL to D5.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_16.webp",
       "view": "page"
@@ -242,7 +243,7 @@
      "id": "d15",
      "type": "electronics",
      "action": "12 V in",
-     "instruction": "Connect the 12 V power supply lead to the 12V IN terminal - with the supply unplugged from the wall.",
+     "instruction": "Connect the 12 V adapter lead to the 12 V terminal on the electronics plate - with the adapter unplugged from the wall. 12 V feeds only the DRV8874 driver and the 5 V regulator; the XIAO is powered from the regulator's 5 V. Never wire 12 V to the XIAO or its expansion board.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_17.webp",
       "view": "page"
@@ -256,7 +257,7 @@
      "id": "d16",
      "type": "assembly",
      "action": "Close the enclosure",
-     "instruction": "Route the wires neatly and close the lid.",
+     "instruction": "Fit the red E-STOP button in the lid, plug in its lead, route the wires neatly and close the lid.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_18.webp",
       "view": "page"
@@ -276,7 +277,7 @@
      "id": "d17",
      "type": "test",
      "action": "Power on",
-     "instruction": "Plug in the 12 V supply. The board should power on (its LED lights).",
+     "instruction": "Keep fingers and chickens clear of the door, then plug in the 12 V adapter. On the very first power-up the door closes (it runs down to the closed reed); after that it returns to the last position you commanded. If the E-STOP was pressed or set from the app, the door stays still until you reset the E-STOP from the app.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_19.webp",
       "view": "page"
@@ -289,7 +290,7 @@
      "id": "d18",
      "type": "test",
      "action": "Move the door",
-     "instruction": "Extend and retract the actuator by hand to check the door moves smoothly. Keep fingers and chickens clear of the door.",
+     "instruction": "From the app, open the door, then close it, and check it stops at each reed switch. Press the E-STOP while it moves: the door must stop at once and stay stopped even after you release the button, until you reset the E-STOP from the app. Keep fingers and chickens clear of the door.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_20.webp",
       "view": "page"
@@ -308,7 +309,7 @@
      "id": "d19",
      "type": "flash",
      "action": "Flash the firmware",
-     "instruction": "Open the Tender Cells browser flasher and flash Starter Node; in its setup page pick product type chicken-tender.",
+     "instruction": "Flash the Chicken Tender Starter firmware (firmware/chicken-tender-starter) with PlatformIO. Its browser-flasher target is not published yet.",
      "image": {
       "step_asset": "books/chicken-tender-door/page_21.webp",
       "view": "page"
@@ -317,8 +318,7 @@
       "SUPERVISION_RECOMMENDED"
      ],
      "source_refs": [
-      "/flash?target=starter-node",
-      "firmware/starter-node/README.md"
+      "firmware/chicken-tender-starter/README.md"
      ]
     },
     {

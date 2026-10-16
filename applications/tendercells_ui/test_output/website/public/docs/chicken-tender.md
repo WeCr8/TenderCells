@@ -18,6 +18,17 @@ Public framing: buy a TenderCells kit/product from us when official hardware bec
 - Pinout revision: pending
 - CAD revision: placeholder coop presets until full assembly is finalized
 
+## Product Tiers
+
+Cheap up to pro versions with different levels of electronics, sensors, robots and cameras.
+Full table: [hardware/chicken-tender-starter/TIERS.md](https://github.com/WeCr8/TenderCells/blob/main/hardware/chicken-tender-starter/TIERS.md).
+
+| Tier | Electronics | Door actuator | Sensors | Robots | Cameras | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| Starter | XIAO ESP32-S3 + DRV8874 door controller, NC E-STOP, 12 V Class 2 adapter | generic 12 V linear actuator (verify listing/force) | door reeds, DHT20, motor current | none | none | rev A1 ([hardware](https://github.com/WeCr8/TenderCells/blob/main/hardware/chicken-tender-starter/README.md), [firmware](https://github.com/WeCr8/TenderCells/blob/main/firmware/chicken-tender-starter/README.md)) |
+| Plus | Starter + XIAO ESP32-S3 Sense camera node | generic or Glideforce | Starter + light level | optional classroom Roaming Roost | 1 door/run camera | planned |
+| Pro | Starter door controller + Chicken Tender WROOM coop controller + Jetson-class edge AI | Glideforce LACT12-12V-05 | + ammonia (MQ-137), feed weight, headcount | Roaming Roost, TenderCell gantry/arm | camera nodes + ChickenEye | door rev A1; rest planned |
+
 ## Current MVP
 
 - Firebase-authenticated dashboard.
@@ -52,8 +63,8 @@ Chicken TenderCell should support community hardware as long as it preserves saf
 
 ## Required Docs
 
-- [ ] BOM
-- [ ] Wiring diagram or pinout
+- [x] BOM (Starter door controller: `hardware/chicken-tender-starter/out/BOM.md`)
+- [x] Wiring diagram or pinout (Starter door controller: `hardware/chicken-tender-starter/out/wiring.svg`)
 - [ ] CAD/STL/source model files
 - [ ] Firmware setup
 - [ ] Assembly instructions

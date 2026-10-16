@@ -108,6 +108,16 @@ For a 3.3 V PIR, reed switch, float switch, or similar digital module, use
 `D1 / GPIO2` for signal and share `GND`. A dry switch normally needs a pull-up or
 pull-down configured in firmware. Never feed 5 V into a GPIO.
 
+### Sync / trigger input (optional, for data collection)
+
+`D3 / GPIO4` is reserved as an optional 3.3 V **sync input** (rising edge,
+internal pull-down, off by default). Share `GND` with the trigger source and
+never feed it 5 V. Turn it on with `{"syncInput": true}` on
+`tc/{id}/cmd/camera/config`. The node timestamps each edge so recordings can be
+aligned with other sensors on the same wire. The camera sensor still
+free-runs, so this is not an exposure trigger. See
+[Camera Timing](CAMERA_TIMING.md).
+
 ### Relay, lamp, fan, or pump
 
 Use `D0 / GPIO1` only as a logic signal into a 3.3 V-compatible opto-isolated relay
@@ -127,6 +137,7 @@ requires it. Do not route load current through a XIAO ground pin or PCB trace.
 | Camera | GPIO10-18, GPIO38-40, GPIO47, and GPIO48 |
 | Digital microphone | GPIO41-42 |
 | microSD | GPIO3 and GPIO7-9 |
+| Sync input (when enabled) | GPIO4 (`D3`) |
 
 ## Flash and register in the UI
 
@@ -135,7 +146,8 @@ requires it. Do not route load current through a XIAO ground pin or PCB trace.
 3. Select **Seeed XIAO ESP32-S3 Sense** and the **Camera only** starter setup.
 4. Choose **1. Flash Camera**. In Chrome or Edge, connect the XIAO serial port and
    install the `camera-node` image.
-5. Join the temporary `TenderCam-Setup` Wi-Fi network.
+5. Join the temporary `TenderCam-Setup` Wi-Fi network with this camera's own
+   setup password (see [Setup Wi-Fi password and label](#setup-wi-fi-password-and-label)).
 6. Enter 2.4 GHz Wi-Fi, broker address when auto-discovery is unavailable, a unique
    device ID, and product type `camera-kit`.
 7. Return to TenderCells and choose **2. Register Camera**. Give it a human name and
@@ -146,6 +158,52 @@ requires it. Do not route load current through a XIAO ground pin or PCB trace.
    it was not discovered automatically.
 10. Confirm live video, online state, and heartbeat before enabling another board
     capability.
+
+### Setup Wi-Fi password and label
+
+`TenderCam-Setup` is WPA2-protected with a password unique to each camera. On its
+first boot the camera generates a random secret, stores it in flash (NVS) and
+derives a 12-character password from it in groups of four, for example
+`7k2m-x9qa-4dfr` (digits and lowercase letters, never `i`, `l`, `o` or `u`). Type
+it exactly, hyphens included.
+
+The camera prints it on the USB serial console (115200 baud) on every boot:
+
+```text
+[NET] setup Wi-Fi: TenderCam-Setup  password: 7k2m-x9qa-4dfr
+```
+
+Copy it onto a label on the enclosure the first time you flash the board:
+
+```text
+TenderCells camera  ID: cam_XXXX  |  Setup Wi-Fi: TenderCam-Setup  |  Password: ____-____-____
+```
+
+The password survives re-flashing. Only a full flash erase creates a new one, so
+re-read the serial console and update the label after an erase. The setup network
+only appears while the camera is not connected to your Wi-Fi, and on an already
+set-up camera it closes after 300 s and the camera reboots to retry.
+
+### One stream client: view through the relay
+
+The XIAO serves **one** `/stream` client at a time (its web server handles one
+long-running request per port). During a recording session that client is the
+recorder; otherwise it is the relay that the TenderCells UI watches. Everyone
+watches through the relay, never the camera directly; a second direct viewer
+stalls or blocks the first. Stop the relay's pull while you record.
+`http://<device-ip>:81/status` and `/time` are on a separate port and stay
+available while streaming. Details: [Camera Timing](CAMERA_TIMING.md).
+
+### Local network access
+
+The camera endpoints have no password or token: keep the camera on a private LAN
+(a token is a planned follow-up). Browser pages can only read `/stream` and
+`:81/status` if their origin matches the camera's **UI/relay origin** setting
+(in the setup portal, or `{"corsOrigin":"https://your-relay:8443"}` in
+`tc/{id}/cmd/camera/config`). Blank, the default, means no web page can read them
+with JavaScript; showing the stream in an `<img>` tag and non-browser tools such
+as the recorder, FFmpeg and `timestamp_audit.py` still work. `:81/time` stays
+readable from any origin.
 
 ## Device registry record
 
@@ -206,7 +264,8 @@ For the complete topic and API contract, continue to [Connect a Device](CONNECT_
 ## Verification checklist
 
 - [ ] USB data connection flashes successfully.
-- [ ] `TenderCam-Setup` provisions 2.4 GHz Wi-Fi.
+- [ ] Serial console shows `setup Wi-Fi: TenderCam-Setup  password: ...` and the label matches it.
+- [ ] `TenderCam-Setup` asks for that password (WPA2) and provisions 2.4 GHz Wi-Fi.
 - [ ] Device publishes a heartbeat every 10 seconds.
 - [ ] Device appears unclaimed, then binds to the signed-in owner.
 - [ ] Registry capabilities match installed hardware.
@@ -214,6 +273,10 @@ For the complete topic and API contract, continue to [Connect a Device](CONNECT_
 - [ ] UI feature switch produces `tc/{id}/cmd/camera/config`.
 - [ ] Reboot preserves the selected configuration.
 - [ ] Removing a physical module also removes its registry capability.
+- [ ] `http://<device-ip>:81/status` shows `clock.synced: true` and the expected `targetFps` (10 by default).
+- [ ] With no viewer, `/status` → `network.wifiPowerSaveActive: true`; while the recorder streams it is `false` (reason `stream`).
+- [ ] Only the recorder or the relay connects to `/stream`; viewers use the relay.
+- [ ] Before recording data, `timestamp_audit.py` passes (see [Camera Timing](CAMERA_TIMING.md)).
 
 ### Electrical acceptance checks
 

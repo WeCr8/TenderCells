@@ -2,19 +2,29 @@
 # Install:
 #   sudo cp tc-camera-node.service /etc/systemd/system/
 #   sudo systemctl daemon-reload && sudo systemctl enable --now tc-camera-node
-# Edit the broker IP + device id below first (or set them in /etc/default/tc-camera-node).
+# Edit the broker IP + device id below first (or set them in /etc/default/tc-camera-node):
+#   TC_BROKER=192.168.1.50
+#   TC_DEVICE_ID=pi_cam_01
+#   TC_FPS=30                          # keep in step with the control/recording loop
+#   TC_FRAME_LOG=/home/pi/tendercells/frames.jsonl   # optional per-frame sidecar
+# For dataset collection also enable time sync before the node starts:
+#   sudo apt install -y chrony && sudo systemctl enable --now chrony
 [Unit]
 Description=Tender Cells Pi Camera Node
-After=network-online.target
-Wants=network-online.target
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
 
 [Service]
 Type=simple
 User=pi
+SupplementaryGroups=video
 EnvironmentFile=-/etc/default/tc-camera-node
 ExecStart=/usr/bin/python3 /home/pi/tendercells/camera_node.py
-Restart=on-failure
+# The node exits non-zero when the camera stalls; always restart it.
+Restart=always
 RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target

@@ -22,3 +22,17 @@ This Apache-2.0 deployment keeps camera media, TURN credentials, and infrastruct
 Docker Desktop users must enable host networking in Settings > Resources > Network. Linux supports host networking directly. A later production profile may replace host networking with an explicitly published, administrator-selected UDP relay range.
 
 This bundle intentionally contains no TenderCells production keys, Firebase service account, Stripe credential, customer data, proprietary model, or managed-cloud configuration.
+
+## Timing note (datasets)
+
+MJPEG over HTTP has no presentation timestamps, so FFmpeg is told to use arrival
+(wall-clock) time instead of assuming 25 fps; this keeps the relayed video from
+drifting when the camera runs at 15 or 30 fps. Arrival time is **receive** time,
+not capture time, and the relay re-encodes to H.264 and drops the per-frame
+`X-Capture-*` headers. Record training data straight from the camera's
+`/stream` (or the node's `--frame-log` sidecar), never from this relay. See
+`docs/CAMERA_TIMING.md`.
+
+MediaMTX here has no read/publish credentials of its own (its default allows any
+user). It is bound to `127.0.0.1` on purpose; keep it that way and put access
+control in the HTTPS proxy or VPN in front of it.

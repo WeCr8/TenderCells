@@ -60,15 +60,22 @@ const int           SENSOR_FAULT_ALERT_AFTER   = 5;       // consecutive failed 
 #define PIN_STEPPER_DIR     27
 #define PIN_FEED_MOTOR_PWM  26
 #define PIN_FEED_MOTOR_DIR  25
-// Optional normally-closed E-STOP button: GPIO32 -> NC contact -> GND, internal pull-up.
-// Closed (LOW) = run; open or a cut wire (HIGH) = stop. Build with -DCT_ESTOP_INPUT=1 to use it.
+// Normally-closed E-STOP button: GPIO32 -> NC contact -> GND, internal pull-up.
+// Closed (LOW) = run; open or a cut wire (HIGH) = stop. ON by default: a board with no button
+// wired latches E-STOP until GPIO32 is tied to GND through the NC contact (bench only: build
+// with -DCT_ESTOP_INPUT=0). Watched by a RISING-edge interrupt AND read every loop pass.
 #define PIN_ESTOP_IN        32
 #ifndef CT_ESTOP_INPUT
-#define CT_ESTOP_INPUT      0
+#define CT_ESTOP_INPUT      1
 #endif
-// MQ-137 module AOUT is 0-5 V. It MUST go through a 10k (top) / 20k (bottom) divider before
-// GPIO35: Vadc = Vsensor * 20/(10+20) = 0.667 x, so 5.0 V -> 3.33 V. Firmware scales it back.
-#define AMMONIA_DIVIDER_GAIN 1.5f  // (10k + 20k) / 20k
+// MQ-137 module AOUT is 0-5 V. It MUST go through a 12k (top) / 15k (bottom) divider before
+// GPIO35: Vadc = Vsensor * 15/(12+15) = 0.556 x, so 5.0 V -> 2.78 V and even a 5.25 V module
+// rail -> 2.92 V, inside the ESP32 ADC's ~3.1 V usable span at 11 dB. Firmware scales it back.
+#define AMMONIA_R_TOP_KOHM    12.0f
+#define AMMONIA_R_BOTTOM_KOHM 15.0f
+#define AMMONIA_DIVIDER_GAIN ((AMMONIA_R_TOP_KOHM + AMMONIA_R_BOTTOM_KOHM) / AMMONIA_R_BOTTOM_KOHM)  // 1.8
+static_assert(5.25f * AMMONIA_R_BOTTOM_KOHM / (AMMONIA_R_TOP_KOHM + AMMONIA_R_BOTTOM_KOHM) <= 3.1f,
+              "MQ-137 divider must keep the ADC pin <= 3.1 V at a 5.25 V module rail");
 
 #define DOOR_OPEN_DEG   90
 #define DOOR_CLOSE_DEG  0
@@ -85,6 +92,16 @@ unsigned long lastStateChangeMs = 0;
 
 // E-STOP is authoritative: when set, no actuator may move until cleared by the app.
 volatile bool eStopActive = false;
+volatile bool hwEStopEdge = false;   // set by the GPIO32 ISR; pollEStopInput() finishes the stop
+
+#if CT_ESTOP_INPUT
+// A press that is over before loop() comes back (e.g. during a DHT read or an MQTT connect)
+// is still latched: every actuator call site checks eStopActive first.
+void IRAM_ATTR onHwEStop() {
+  eStopActive = true;
+  hwEStopEdge = true;
+}
+#endif
 
 // Non-blocking action timers (loop never blocks > a few ms)
 // Timers store a start time + duration and compare with (now - start) >= duration, which
@@ -176,6 +193,7 @@ void setup() {
   disableAllMotors();
 #if CT_ESTOP_INPUT
   pinMode(PIN_ESTOP_IN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(PIN_ESTOP_IN), onHwEStop, RISING);
 #endif
   analogSetPinAttenuation(PIN_AMMONIA_SENSOR, ADC_11db);  // full 0-3.3 V range
 
@@ -450,9 +468,10 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
 
   // --- E-STOP first, always (safety authority) ---
   if (strcmp(action, "estop") == 0) {
-    bool active = doc["active"] | false;
-    if (active) enterEStop();
-    else        clearEStop();
+    // Only an explicit {"active":false} clears; any other payload (missing, non-bool) stops.
+    const bool explicitClear = doc["active"].is<bool>() && !doc["active"].as<bool>();
+    if (explicitClear) clearEStop();
+    else               enterEStop();
     return;
   }
 
@@ -515,16 +534,16 @@ void restoreDoor() {
 
 void pollEStopInput() {
 #if CT_ESTOP_INPUT
-  // NC contact: HIGH means the button is pressed OR the loop is broken -> stop.
-  static uint8_t highCount = 0;
-  if (digitalRead(PIN_ESTOP_IN) == HIGH) {
-    if (highCount < 3) highCount++;
-    if (highCount == 3 && !eStopActive) {   // ~3 loop passes of debounce
+  // No debounce on the stop direction: an NC loop that reads open even once is a stop
+  // (fail-safe). Clearing still needs the app's explicit estop {active:false}.
+  const bool open = digitalRead(PIN_ESTOP_IN) == HIGH;
+  if (hwEStopEdge || open) {
+    const bool wasEdge = hwEStopEdge;
+    hwEStopEdge = false;
+    if (currentState != SystemState::ESTOP) {
       enterEStop();
-      publishAlert("safety", "hardware E-STOP opened");
+      publishAlert("safety", wasEdge && !open ? "hardware E-STOP pressed (momentary)" : "hardware E-STOP opened");
     }
-  } else {
-    highCount = 0;
   }
 #endif
 }
@@ -621,6 +640,7 @@ void readSensors() {
     // Sensor volts = ADC volts x divider gain; report as % of the module's 0-5 V span.
     const float vSensor = (analogReadMilliVolts(PIN_AMMONIA_SENSOR) / 1000.0f) * AMMONIA_DIVIDER_GAIN;
     aSum += (vSensor / 5.0f) * 100.0f;
+    pollEStopInput();   // never let sensor reads delay a stop
     delay(20);  // < 50ms, watchdog-safe
   }
   currentReading.ammonia = aSum / 3.0f;

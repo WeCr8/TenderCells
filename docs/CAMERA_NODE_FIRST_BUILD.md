@@ -108,6 +108,16 @@ For a 3.3 V PIR, reed switch, float switch, or similar digital module, use
 `D1 / GPIO2` for signal and share `GND`. A dry switch normally needs a pull-up or
 pull-down configured in firmware. Never feed 5 V into a GPIO.
 
+### Sync / trigger input (optional, for data collection)
+
+`D3 / GPIO4` is reserved as an optional 3.3 V **sync input** (rising edge,
+internal pull-down, off by default). Share `GND` with the trigger source and
+never feed it 5 V. Turn it on with `{"syncInput": true}` on
+`tc/{id}/cmd/camera/config`. The node timestamps each edge so recordings can be
+aligned with other sensors on the same wire. The camera sensor still
+free-runs, so this is not an exposure trigger. See
+[Camera Timing](CAMERA_TIMING.md).
+
 ### Relay, lamp, fan, or pump
 
 Use `D0 / GPIO1` only as a logic signal into a 3.3 V-compatible opto-isolated relay
@@ -127,6 +137,7 @@ requires it. Do not route load current through a XIAO ground pin or PCB trace.
 | Camera | GPIO10-18, GPIO38-40, GPIO47, and GPIO48 |
 | Digital microphone | GPIO41-42 |
 | microSD | GPIO3 and GPIO7-9 |
+| Sync input (when enabled) | GPIO4 (`D3`) |
 
 ## Flash and register in the UI
 
@@ -214,6 +225,8 @@ For the complete topic and API contract, continue to [Connect a Device](CONNECT_
 - [ ] UI feature switch produces `tc/{id}/cmd/camera/config`.
 - [ ] Reboot preserves the selected configuration.
 - [ ] Removing a physical module also removes its registry capability.
+- [ ] `http://<device-ip>:81/status` shows `clock.synced: true` and the expected `targetFps`.
+- [ ] Before recording data, `timestamp_audit.py` passes (see [Camera Timing](CAMERA_TIMING.md)).
 
 ### Electrical acceptance checks
 

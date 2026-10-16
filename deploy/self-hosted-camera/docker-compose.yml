@@ -32,6 +32,7 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command: >-
       exec ffmpeg -hide_banner -loglevel warning -reconnect 1 -reconnect_streamed 1
-      -reconnect_delay_max 5 -i $${TC_CAMERA_URL}
+      -reconnect_delay_max 5 -use_wallclock_as_timestamps 1 -fflags +genpts
+      -i $${TC_CAMERA_URL}
       -an -c:v libx264 -preset veryfast -tune zerolatency
       -f rtsp rtsp://media:8554/camera

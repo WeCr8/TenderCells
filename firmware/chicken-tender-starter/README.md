@@ -2,7 +2,7 @@
 
 Door controller for the **Chicken Tender Door Controller** build book: a Seeed XIAO ESP32-S3
 drives a 12 V linear actuator through a Pololu DRV8874 carrier to lift a cord-hung coop door.
-The door closes under its own weight. Hardware, wiring and BOM: `hardware/chicken-tender-starter/`.
+The door closes under its own weight. Hardware, wiring, BOM and the Starter / Plus / Pro tiers: `hardware/chicken-tender-starter/`.
 
 | Pin | Net | Use |
 |-----|-----|-----|

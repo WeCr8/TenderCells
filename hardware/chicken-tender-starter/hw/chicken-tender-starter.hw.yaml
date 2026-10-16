@@ -1,0 +1,98 @@
+# Chicken Tender Starter - hardware description (schema tc-hw/1, same format as Rover v1).
+# Single source for firmware/chicken-tender-starter/include/pins.h, the netlist, the wiring SVG,
+# the BOM tiers and the electrical checks (gen/build_electronics.py). Edit here, regenerate.
+# Base = "starter" tier (generic 12 V actuator, verify listing/force). variants/pro.overlay.yaml swaps in the Glideforce.
+schema: tc-hw/1
+id: chicken-tender-starter
+rev: A1
+title: "Chicken Tender Starter - XIAO ESP32-S3, DRV8874, 12 V cord-lift door actuator, 12 V Class 2 adapter"
+tier: starter
+board: {ref: U1, part: xiao-esp32s3}
+features: {camera: false, wifi: true, battery: false}
+battery: {ref: none, part: null, switch: "none - 12 V Class 2 wall adapter only (no battery in the kit)"}
+supply: {ref: PS1, part: adapter-12v-3a-class2, jack: J1, fuse: {ref: F1, part: fuse-3a-inline}}
+rails:
+  V12:  {from: PS1, via: [J1, F1], note: "Class 2 adapter -> panel jack -> 3 A inline fuse -> 12 V terminal"}
+  VM:   {from: V12, note: "DRV8874 VIN (reverse-protected on the carrier)"}
+  V5:   {from: V12, via: [U2], note: "D36V6F5 5 V / 600 mA buck"}
+  V5_XIAO: {from: V5, via: [D1], note: "1N5817 into the XIAO 5V pin: blocks USB <-> regulator back-feed"}
+  V3V3: {from: U1, note: "XIAO on-board 3.3 V LDO"}
+parts:
+  U1:  {part: xiao-esp32s3, rail: V5_XIAO, load: wifi_tx_peak}
+  U2:  {part: d36v6f5-pololu-3792, rail: V12}
+  U3:  {part: drv8874-pololu-4035, rail: VM, logic_rail: V3V3, mode: PH_EN, pmode: GND}
+  D1:  {part: d-1n5817}
+  R1:  {part: res-20k-1pct, net: [DRV_VREF, GND], note: "VREF to GND with the carrier's 10 k pull-up to SLEEP -> ~2.0 A limit"}
+  R2:  {part: res-4k7-1pct, net: [I2C_SDA, V3V3]}
+  R3:  {part: res-4k7-1pct, net: [I2C_SCL, V3V3]}
+  M1:  {part: act-generic-12v-300mm, driver: U3, wiring: single, note: "Starter tier: generic 12 V actuator - verify listing/force"}
+  S1:  {part: dht20-adafruit-5183, rail: V3V3}
+  SW1: {part: estop-22mm-nc, note: "NC contact in series with the driver SLEEP line"}
+  RS1: {part: reed-door-wired-no, role: door_closed}
+  RS2: {part: reed-door-wired-no, role: door_open}
+  J1:  {part: jack-dc-5521-panel}
+  F1:  {part: fuse-3a-inline}
+  PS1: {part: adapter-12v-3a-class2}
+  TB1: {part: term-5p08-2p, role: "12 V in"}
+  TB2: {part: term-5p08-2p, role: "motor out"}
+pins:     # XIAO header pin -> net (the user-specified map)
+  D0:  {net: MOT_EN, to: U3.EN, dir: out, func: pwm}
+  D1:  {net: MOT_PH, to: U3.PH, dir: out, func: gpio}
+  D2:  {net: DRV_nFAULT, to: U3.nFAULT, dir: in, pull: up, func: gpio, boot: "strap pin used only as a pulled-up input"}
+  D3:  {net: DRV_CS, to: U3.CS, dir: in, func: adc}
+  D4:  {net: I2C_SDA, to: S1.SDA, dir: io, func: i2c_sda, pull: "R2 4.7 k"}
+  D5:  {net: I2C_SCL, to: S1.SCL, dir: out, func: i2c_scl, pull: "R3 4.7 k"}
+  D6:  {net: SPARE_D6, dir: in, func: gpio, note: "spare (U0TXD toggles at boot - never a motor input)"}
+  D7:  {net: DRV_EN_RAW, to: SW1.1, dir: out, func: gpio, note: "driver enable, through the NC E-STOP to SLEEP"}
+  D8:  {net: REED_CLOSED, to: RS1.1, dir: in, pull: up, func: gpio}
+  D9:  {net: REED_OPEN, to: RS2.1, dir: in, pull: up, func: gpio}
+  D10: {net: ESTOP_SENSE, to: U3.SLEEP, dir: in, func: gpio, note: "reads the SLEEP node after the E-STOP"}
+nets:     # every net with its nodes (the netlist is generated from this)
+  V12_RAW:     [J1.TIP, F1.1]
+  V12:         [F1.2, TB1.1, U3.VIN, U2.VIN]
+  GND:         [J1.SLEEVE, TB1.2, U3.GND, U2.GND, U1.GND, S1.GND, RS1.2, RS2.2, R1.2, U3.PMODE]
+  V5:          [U2.VOUT, D1.A]
+  V5_XIAO:     [D1.K, U1.5V]
+  V3V3:        [U1.3V3, S1.VIN, R2.2, R3.2]
+  MOT_EN:      [U1.D0, U3.EN]
+  MOT_PH:      [U1.D1, U3.PH]
+  DRV_nFAULT:  [U1.D2, U3.nFAULT]
+  DRV_CS:      [U1.D3, U3.CS]
+  I2C_SDA:     [U1.D4, S1.SDA, R2.1]
+  I2C_SCL:     [U1.D5, S1.SCL, R3.1]
+  DRV_EN_RAW:  [U1.D7, SW1.1]
+  DRV_SLEEP:   [SW1.2, U3.SLEEP, U1.D10]
+  DRV_VREF:    [U3.VREF, R1.1]
+  REED_CLOSED: [U1.D8, RS1.1]
+  REED_OPEN:   [U1.D9, RS2.1]
+  MOT_A:       [U3.OUT1, TB2.1, M1.+]
+  MOT_B:       [U3.OUT2, TB2.2, M1.-]
+current_limit: {target_A: 2.0, tolerance_A: 0.2, r_vref_gnd: R1, sleep_v: 3.3}
+pwm: {freq_hz: 20000, bits: 10, note: "20 kHz: above hearing; DRV8874 PWM up to 100 kHz"}
+door:
+  travel_mm: 280            # cord-lift: door rises 280 mm (opening height); actuator stroke 300 mm
+  mass_kg: 1.0              # max door mass: light enough to rest on a hen without harm, heavy enough to fall
+  load_N_est: 15            # door weight + guide friction, estimate
+firmware:
+  flags: {CT_TIER_NAME: starter, CT_TRAVEL_TIMEOUT_MS: 55000, OVERCURRENT_MA: 1800}
+harness:
+  - {id: W1,  from: J1.TIP,   to: F1.1,    awg: 20, conn: [solder, inline],   len_mm: 60,  current: V12}
+  - {id: W2,  from: F1.2,     to: TB1.1,   awg: 20, conn: [inline, term-5.08], len_mm: 80, current: V12}
+  - {id: W3,  from: J1.SLEEVE, to: TB1.2,  awg: 20, conn: [solder, term-5.08], len_mm: 80, current: V12}
+  - {id: W4,  from: TB1.1,    to: U3.VIN,  awg: 20, conn: [term-5.08, solder], len_mm: 60, current: V12}
+  - {id: W5,  from: TB1.2,    to: U3.GND,  awg: 20, conn: [term-5.08, solder], len_mm: 60, current: V12}
+  - {id: W6,  from: TB1.1,    to: U2.VIN,  awg: 24, conn: [term-5.08, solder], len_mm: 60, current: V5_IN}
+  - {id: W7,  from: TB1.2,    to: U2.GND,  awg: 24, conn: [term-5.08, solder], len_mm: 60, current: V5_IN}
+  - {id: W8,  from: U2.VOUT,  to: D1.A,    awg: 24, conn: [solder, solder],   len_mm: 20,  current: V5}
+  - {id: W9,  from: D1.K,     to: U1.5V,   awg: 24, conn: [solder, dupont-2.54], len_mm: 60, current: V5}
+  - {id: W10, from: U2.GND,   to: U1.GND,  awg: 24, conn: [solder, dupont-2.54], len_mm: 60, current: V5}
+  - {id: W11, from: U3.OUT1,  to: TB2.1,   awg: 20, conn: [solder, term-5.08], len_mm: 40, current: MOT}
+  - {id: W12, from: U3.OUT2,  to: TB2.2,   awg: 20, conn: [solder, term-5.08], len_mm: 40, current: MOT}
+  - {id: W13, from: TB2.1,    to: M1.+,    awg: 20, conn: [term-5.08, actuator-lead], len_mm: 1500, current: MOT, note: "outdoor cable to the actuator, drip loop at the gland"}
+  - {id: W14, from: TB2.2,    to: M1.-,    awg: 20, conn: [term-5.08, actuator-lead], len_mm: 1500, current: MOT}
+  - {id: W15, from: U1.D0..D3, to: U3.EN/PH/nFAULT/CS, awg: 26, conn: [dupont-2.54, dupont-2.54], len_mm: 60, current: signal}
+  - {id: W16, from: U1.D7,    to: SW1.1,   awg: 26, conn: [dupont-2.54, spade-2.8], len_mm: 120, current: signal}
+  - {id: W17, from: SW1.2,    to: U3.SLEEP, awg: 26, conn: [spade-2.8, dupont-2.54], len_mm: 120, current: signal, note: "Y-splice to U1.D10"}
+  - {id: W18, from: U1.D8,    to: RS1.1,   awg: 26, conn: [dupont-2.54, reed-lead], len_mm: 1200, current: signal}
+  - {id: W19, from: U1.D9,    to: RS2.1,   awg: 26, conn: [dupont-2.54, reed-lead], len_mm: 1200, current: signal}
+  - {id: W20, from: U1.3V3/GND/D4/D5, to: S1, awg: 26, conn: [dupont-2.54, dupont-2.54], len_mm: 100, current: signal}

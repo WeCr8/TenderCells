@@ -57,8 +57,8 @@ jobs:
           # The hosted AI-assistant connector is bundled into functions from the hub's mcp/ sources.
           echo "functions=$(has "^functions/|$APPS/express-api/backend/src/mcp/|$APPS/express-api/mcp-view/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
           echo "firmware=$(has '^firmware/(chicken-tender|chicken-tender-starter|watchtower|camera-node|shared|roaming-roost|starter-node)/|^\.github/workflows/ci\.yml')" >> "$GITHUB_OUTPUT"
-          # Chicken Tender starter: door-logic host tests.
-          echo "starter=$(has "^firmware/chicken-tender-starter/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
+          # Chicken Tender starter: door-logic host tests + electrical checks / BOM generator.
+          echo "starter=$(has "^firmware/chicken-tender-starter/|^hardware/chicken-tender-starter/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
           echo "python=$(has '^firmware/jetson-nano/|^\.github/workflows/ci\.yml')" >> "$GITHUB_OUTPUT"
           # Website: its own code, the OS routes it links into, and the docs its lessons / doc list come from.
           echo "website=$(has "$APPS/(website|shared)/|$APPS/tendercells-ui/src/routes/|^docs/|^\.github/workflows/ci\.yml")" >> "$GITHUB_OUTPUT"
@@ -207,7 +207,7 @@ jobs:
           fi
 
   chicken-tender-starter:
-    name: "Chicken Tender starter — door-logic host tests"
+    name: "Chicken Tender starter — door-logic host tests, electrical checks"
     needs: changes
     if: needs.changes.outputs.starter == 'true'
     runs-on: ubuntu-latest
@@ -215,6 +215,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Door-logic host tests (g++, -Werror)
         run: make -C firmware/chicken-tender-starter/test/host
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Electrical checks + BOM (tc-hw/1; fails on any FAIL or on stale generated files)
+        run: |
+          pip install pyyaml
+          python hardware/chicken-tender-starter/gen/build_electronics.py --check
+          git diff --exit-code -- hardware/chicken-tender-starter/out
 
   arm-service:
     name: "Arm service — pytest (sim, UR, LeRobot, Hugging Face policies)"

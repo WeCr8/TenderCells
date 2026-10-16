@@ -12,6 +12,17 @@
  *   4) Report clock offset / sync quality at http://<lan-ip>:81/status and offer a
  *      cheap http://<lan-ip>:81/time probe for host-side offset estimation.
  *
+ * Operating model (docs/CAMERA_TIMING.md):
+ *   - ONE stream client: the recorder during a session, otherwise the relay that
+ *     viewers watch. Nobody opens /stream directly.
+ *   - Wi-Fi power-save is ON when idle (battery). It is switched OFF automatically
+ *     while a /stream client is connected or a /time probe (timing audit / recorder
+ *     offset estimation) ran recently, then restored. {"wifiSleep":false} = always off.
+ *   - LAN-only, no token (yet). CORS: /stream and /status are readable from the one
+ *     configured browser origin (corsOrigin) only; /time stays readable from anywhere.
+ *   - Setup AP TenderCam-Setup is WPA2 with a per-device password derived from a
+ *     random secret generated on first boot (NVS), printed on serial every boot.
+ *
  * Timing contract (also in docs/CAMERA_TIMING.md), per multipart part:
  *   X-Frame-Seq          global frame counter (unique across clients)
  *   X-Stream-Seq         per-connection counter (gaps = frames this client missed)
@@ -44,6 +55,7 @@
 #include <esp_task_wdt.h>
 #include <esp_timer.h>
 #include <esp_sntp.h>
+#include <esp_random.h>
 #include <sys/time.h>
 #include <atomic>
 #include "esp_camera.h"
@@ -78,12 +90,15 @@ static const unsigned long BROKER_DISCOVERY_MS    = 30000;
 static const unsigned long WATCHDOG_TIMEOUT_S     = 8;
 static const uint32_t      PORTAL_TIMEOUT_SAVED_S = 300;    // reboot + retry saved Wi-Fi
 static const uint32_t      SNTP_INTERVAL_MS       = 5UL * 60UL * 1000UL;
-static const uint8_t       DEFAULT_FPS            = 15;     // modest; divides a 30 Hz control loop
+static const uint8_t       DEFAULT_FPS            = 10;     // battery + airtime; divides a 30 Hz control loop
 static const uint8_t       MAX_FPS                = 30;
+static const int64_t       STREAM_GRACE_US        = 10LL * 1000000LL;  // keep low-latency after a stream ends
+static const int64_t       TIME_PROBE_HOLD_US     = 30LL * 1000000LL;  // /time probe => audit/recorder starting
+static const char*         SETUP_AP_SSID          = "TenderCam-Setup";
 static const int64_t       MIN_VALID_EPOCH_US     = 1704067200LL * 1000000LL; // 2024-01-01
 
 Preferences prefs;
-String brokerIp, brokerPort, deviceId, productType, ntpServer;
+String brokerIp, brokerPort, deviceId, productType, ntpServer, corsOrigin;
 
 WiFiClient net;
 PubSubClient mqtt(net);
@@ -107,7 +122,7 @@ bool gpioEnabled = false;
 bool cameraReady = false;
 volatile uint8_t targetFps = DEFAULT_FPS;
 bool syncInputEnabled = false;
-bool wifiSleepEnabled = false;
+bool wifiSleepEnabled = true;     // power-save allowed when no session is active
 const char* frameSizeName = "VGA";
 
 // ── Clock: esp_timer (monotonic) + SNTP-disciplined epoch mapping ────────────
@@ -195,6 +210,78 @@ void applySyncInput() {
 // ── Frame statistics (device-side) ───────────────────────────────────────────
 static std::atomic<uint32_t> frameSeq{0};
 static std::atomic<uint32_t> activeStreams{0};
+
+// ── Wi-Fi power-save: on when idle, off while a session/audit is active ─────
+// Modem sleep saves battery but adds 10-100+ ms latency jitter, so it is lifted
+// only while timing matters: a /stream client is connected (the recorder is the
+// only client) or a /time probe ran recently (pre-session audit, recorder offset
+// estimation). Restored automatically once both have lapsed.
+static std::atomic<int64_t> lowLatencyHoldUntilUs{0};
+static SemaphoreHandle_t psMutex = NULL;
+static bool psActive = true;               // power-save currently applied to the radio
+static const char* psReason = "idle";
+
+static void holdLowLatency(int64_t forUs) {
+  const int64_t until = esp_timer_get_time() + forUs;
+  int64_t cur = lowLatencyHoldUntilUs.load();
+  while (until > cur && !lowLatencyHoldUntilUs.compare_exchange_weak(cur, until)) {}
+}
+
+// Safe from any task (loop, httpd handlers). Only touches the radio on a change.
+void applyWifiPowerSave() {
+  if (!psMutex) return;
+  const char* reason = "idle";
+  if (!wifiSleepEnabled) reason = "disabled";
+  else if (activeStreams.load() > 0) reason = "stream";
+  else if (esp_timer_get_time() < lowLatencyHoldUntilUs.load()) reason = "session_hold";
+  const bool wantPs = strcmp(reason, "idle") == 0;
+  xSemaphoreTake(psMutex, portMAX_DELAY);
+  psReason = reason;
+  if (wantPs != psActive) {
+    WiFi.setSleep(wantPs);
+    psActive = wantPs;
+    Serial.printf("[NET] Wi-Fi power-save %s (%s)\n", wantPs ? "ON" : "OFF", reason);
+  }
+  xSemaphoreGive(psMutex);
+}
+
+// ── CORS: one configured browser origin for /stream and /status ──────────────
+// Non-browser clients (recorder, relay/ffmpeg, timestamp_audit.py) ignore CORS.
+// Blank corsOrigin = no Access-Control-Allow-Origin, so arbitrary web pages cannot
+// read frames, headers or status. <img> display still works without CORS.
+// corsOrigin (String) is written from the MQTT task; handlers read this copy under a
+// lock into a caller-owned buffer (httpd keeps header pointers until they are sent).
+static char corsOriginBuf[100] = {0};
+static portMUX_TYPE corsMux = portMUX_INITIALIZER_UNLOCKED;
+
+static void setCorsOrigin(const String& o) {
+  corsOrigin = o;
+  portENTER_CRITICAL(&corsMux);
+  strlcpy(corsOriginBuf, o.c_str(), sizeof(corsOriginBuf));
+  portEXIT_CRITICAL(&corsMux);
+}
+
+static void setRestrictedCors(httpd_req_t* req, char (&buf)[100], const char* exposeHeaders) {
+  portENTER_CRITICAL(&corsMux);
+  memcpy(buf, corsOriginBuf, sizeof(buf));
+  portEXIT_CRITICAL(&corsMux);
+  if (!buf[0]) return;
+  httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", buf);
+  httpd_resp_set_hdr(req, "Vary", "Origin");
+  if (exposeHeaders) httpd_resp_set_hdr(req, "Access-Control-Expose-Headers", exposeHeaders);
+}
+
+static bool validCorsOrigin(const String& o) {
+  if (!o.length()) return true;    // blank clears it
+  if (o.length() > 96) return false;
+  if (!o.startsWith("http://") && !o.startsWith("https://")) return false;
+  if (o.endsWith("/")) return false;
+  for (size_t i = 0; i < o.length(); i++) {
+    const char ch = o[i];
+    if (ch <= ' ' || ch == '"' || ch == ',' || ch == '*' || ch >= 0x7f) return false;
+  }
+  return o.indexOf('/', 8) < 0;    // scheme://host[:port] only, no path
+}
 static portMUX_TYPE statsMux = portMUX_INITIALIZER_UNLOCKED;
 static int64_t lastCaptureMonoUs = 0;
 static float   intervalEwmaUs = 0;
@@ -228,10 +315,11 @@ static esp_err_t streamHandler(httpd_req_t* req) {
   }
   esp_err_t res = httpd_resp_set_type(req, STREAM_CONTENT_TYPE);
   if (res != ESP_OK) return res;
-  httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-  httpd_resp_set_hdr(req, "Access-Control-Expose-Headers", "X-Frame-Seq, X-Capture-Epoch-Us");
+  char cors[100];   // lives for the whole response
+  setRestrictedCors(req, cors, "X-Frame-Seq, X-Capture-Epoch-Us");
   httpd_resp_set_hdr(req, "Cache-Control", "no-store, no-cache, must-revalidate");
   activeStreams.fetch_add(1);
+  applyWifiPowerSave();   // session started: radio to low-latency now, not on the next loop()
   char part[384];
   uint32_t streamSeq = 0;
   int64_t nextDueUs = esp_timer_get_time();
@@ -282,6 +370,7 @@ static esp_err_t streamHandler(httpd_req_t* req) {
     esp_camera_fb_return(fb);
     if (res != ESP_OK) break;  // client disconnected
   }
+  holdLowLatency(STREAM_GRACE_US);   // reconnects / audit end-probes stay low-latency
   activeStreams.fetch_sub(1);
   return res;
 }
@@ -320,6 +409,8 @@ void fillClockJson(JsonObject o, const ClockState& c, int64_t mono) {
 
 // Cheap probe for host-side NTP-style offset estimation (min-RTT filter).
 static esp_err_t timeHandler(httpd_req_t* req) {
+  holdLowLatency(TIME_PROBE_HOLD_US);   // an audit/recorder is starting: lift power-save
+  applyWifiPowerSave();
   const int64_t mono = esp_timer_get_time();
   const ClockState c = clockSnapshot();
   char buf[160];
@@ -332,6 +423,8 @@ static esp_err_t timeHandler(httpd_req_t* req) {
 }
 
 static esp_err_t statusHandler(httpd_req_t* req) {
+  char cors[100];   // snapshot used for both the header and the JSON field
+  setRestrictedCors(req, cors, NULL);
   const int64_t mono = esp_timer_get_time();
   const ClockState c = clockSnapshot();
   JsonDocument doc;
@@ -370,7 +463,10 @@ static esp_err_t statusHandler(httpd_req_t* req) {
   sync["exposureTrigger"] = false;   // sensor free-runs; edges are timestamped only
   JsonObject net_ = doc["network"].to<JsonObject>();
   net_["rssi"] = WiFi.RSSI();
-  net_["wifiSleep"] = wifiSleepEnabled;
+  net_["wifiSleep"] = wifiSleepEnabled;          // setting: power-save allowed when idle
+  net_["wifiPowerSaveActive"] = psActive;        // what the radio is doing now
+  net_["wifiPowerSaveReason"] = psReason;        // idle | stream | session_hold | disabled
+  net_["corsOrigin"] = (const char*)cors;
   net_["mqttConnected"] = mqtt.connected();
   JsonObject mem = doc["memory"].to<JsonObject>();
   mem["freeHeap"] = ESP.getFreeHeap();
@@ -379,7 +475,6 @@ static esp_err_t statusHandler(httpd_req_t* req) {
   String out;
   serializeJson(doc, out);
   httpd_resp_set_type(req, "application/json");
-  httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
   httpd_resp_set_hdr(req, "Cache-Control", "no-store");
   return httpd_resp_send(req, out.c_str(), out.length());
 }
@@ -514,10 +609,16 @@ void onMqtt(char* topic, byte* payload, unsigned int len) {
       prefs.putBool("syncIn", syncInputEnabled);
       applySyncInput();
     }
-    if (doc["wifiSleep"].is<bool>()) {
+    if (doc["wifiSleep"].is<bool>()) {   // true (default) = power-save when idle; false = always off
       wifiSleepEnabled = doc["wifiSleep"].as<bool>();
       prefs.putBool("wifiSleep", wifiSleepEnabled);
-      WiFi.setSleep(wifiSleepEnabled);
+      applyWifiPowerSave();
+    }
+    if (doc["corsOrigin"].is<const char*>()) {
+      String o = doc["corsOrigin"].as<const char*>();
+      o.trim();
+      if (validCorsOrigin(o)) { setCorsOrigin(o); prefs.putString("cors", corsOrigin); }
+      else Serial.println("[NET] corsOrigin rejected (use scheme://host[:port], no path)");
     }
     prefs.end();
     publishHeartbeat();
@@ -538,7 +639,7 @@ bool reconnect() {
 }
 
 bool tryUsbProvision() {
-  Serial.println("[USB] Send TC_SCAN or TC_PROVISION JSON within 10 seconds, or use TenderCam-Setup");
+  Serial.println("[USB] Send TC_SCAN or TC_PROVISION JSON within 10 seconds, or use the TenderCam-Setup Wi-Fi");
   unsigned long deadline = millis() + 10000;
   while (millis() < deadline) {
     if (!Serial.available()) { delay(25); continue; }
@@ -601,6 +702,35 @@ bool tryUsbProvision() {
   return false;
 }
 
+// Setup AP password: WPA2, per device. A 64-bit random secret is generated once
+// (first boot) and kept in NVS; the password is derived from it as 12 Crockford
+// base32 characters in groups of four (60 bits), e.g. "7k2m-x9qa-4dfr". It survives
+// re-flashing; only an NVS/flash erase makes a new one (re-print the label).
+String setupApPassword() {
+  static const char* ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz";  // no i l o u
+  uint8_t secret[8] = {0};
+  bool have = prefs.isKey("apSecret") && prefs.getBytes("apSecret", secret, sizeof(secret)) == sizeof(secret);
+  if (!have) {
+    // esp_random() is a true RNG only while the RF subsystem runs: start STA first.
+    WiFi.mode(WIFI_STA);
+    delay(10);
+    esp_fill_random(secret, sizeof(secret));
+    prefs.putBytes("apSecret", secret, sizeof(secret));
+    Serial.println("[NET] generated new setup Wi-Fi secret (first boot)");
+  }
+  uint64_t v = 0;
+  memcpy(&v, secret, sizeof(v));
+  char out[16];
+  int j = 0;
+  for (int i = 0; i < 12; i++) {
+    if (i && i % 4 == 0) out[j++] = '-';
+    out[j++] = ALPHABET[v & 31];
+    v >>= 5;
+  }
+  out[j] = 0;
+  return String(out);
+}
+
 void provision() {
   prefs.begin("tccam", false);
   brokerIp    = prefs.getString("brokerIp", "");
@@ -608,6 +738,10 @@ void provision() {
   deviceId    = prefs.getString("deviceId", "");
   productType = prefs.getString("product", "camera-kit");
   ntpServer   = prefs.getString("ntp", "");
+  {
+    String o = prefs.getString("cors", "");
+    setCorsOrigin(validCorsOrigin(o) ? o : String());
+  }
   cameraEnabled = prefs.getBool("camera", true);
   microphoneEnabled = prefs.getBool("microphone", false);
   microSdEnabled = prefs.getBool("microsd", false);
@@ -615,12 +749,15 @@ void provision() {
   targetFps = prefs.getUChar("fps", DEFAULT_FPS);
   if (targetFps < 1 || targetFps > MAX_FPS) targetFps = DEFAULT_FPS;
   syncInputEnabled = prefs.getBool("syncIn", false);
-  wifiSleepEnabled = prefs.getBool("wifiSleep", false);
+  wifiSleepEnabled = prefs.getBool("wifiSleep", true);
   if (deviceId.isEmpty()) {
     uint64_t mac = ESP.getEfuseMac();
     char b[24]; snprintf(b, sizeof(b), "cam_%04X", (uint16_t)(mac & 0xFFFF));
     deviceId = b;
   }
+  const String apPassword = setupApPassword();
+  // Printed every boot so it can be read back over USB serial and copied to the label.
+  Serial.printf("[NET] setup Wi-Fi: %s  password: %s\n", SETUP_AP_SSID, apPassword.c_str());
   bool usbConnected = tryUsbProvision();
   WiFiManager wm;
   WiFiManagerParameter pB("broker", "Broker IP (blank = auto)", brokerIp.c_str(), 40);
@@ -628,14 +765,15 @@ void provision() {
   WiFiManagerParameter pI("devid", "Device ID", deviceId.c_str(), 22);
   WiFiManagerParameter pT("product", "Product type", productType.c_str(), 20);
   WiFiManagerParameter pN("ntp", "NTP server (blank = broker, then pool)", ntpServer.c_str(), 40);
+  WiFiManagerParameter pC("cors", "UI/relay origin for browser reads (blank = none)", corsOrigin.c_str(), 96);
   wm.addParameter(&pB); wm.addParameter(&pP); wm.addParameter(&pI); wm.addParameter(&pT);
-  wm.addParameter(&pN);
+  wm.addParameter(&pN); wm.addParameter(&pC);
   if (!usbConnected) {
     // Already-provisioned nodes must not sit in an open setup AP forever when the
     // router is merely slow to come back after a power cut: time out and reboot.
     const bool saved = wm.getWiFiIsSaved();
     wm.setConfigPortalTimeout(saved ? PORTAL_TIMEOUT_SAVED_S : 0);
-    if (!wm.autoConnect("TenderCam-Setup")) {
+    if (!wm.autoConnect(SETUP_AP_SSID, apPassword.c_str())) {   // WPA2, per-device password
       Serial.println("[NET] Wi-Fi unavailable and portal timed out — rebooting to retry");
       prefs.end();
       delay(500);
@@ -646,11 +784,14 @@ void provision() {
     brokerIp = pB.getValue(); brokerPort = pP.getValue();
     deviceId = pI.getValue(); productType = pT.getValue();
     ntpServer = pN.getValue();
+    String o = pC.getValue(); o.trim();
+    if (validCorsOrigin(o)) setCorsOrigin(o);
   }
   if (productType.isEmpty()) productType = "camera-kit";
   prefs.putString("brokerIp", brokerIp); prefs.putString("brokerPort", brokerPort);
   prefs.putString("deviceId", deviceId); prefs.putString("product", productType);
   prefs.putString("ntp", ntpServer);
+  prefs.putString("cors", corsOrigin);
   prefs.end();
 }
 
@@ -685,7 +826,10 @@ void setup() {
   provision();
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
-  WiFi.setSleep(wifiSleepEnabled);  // modem sleep adds 10-100+ ms latency jitter
+  psMutex = xSemaphoreCreateMutex();
+  psActive = true;
+  WiFi.setSleep(true);   // battery default; lifted automatically during sessions/audits
+  applyWifiPowerSave();  // honours {"wifiSleep":false} (always low-latency)
   applySyncInput();
   startMdns();
 
@@ -702,12 +846,14 @@ void setup() {
   esp_task_wdt_init(WATCHDOG_TIMEOUT_S, true);
   esp_task_wdt_add(NULL);
 
-  Serial.printf("[NET] stream: http://%s/stream  status: http://%s:81/status  fps=%u\n",
-                WiFi.localIP().toString().c_str(), WiFi.localIP().toString().c_str(), targetFps);
+  Serial.printf("[NET] stream: http://%s/stream  status: http://%s:81/status  fps=%u  cors=%s\n",
+                WiFi.localIP().toString().c_str(), WiFi.localIP().toString().c_str(), targetFps,
+                corsOrigin.length() ? corsOrigin.c_str() : "(none)");
 }
 
 void loop() {
   esp_task_wdt_reset();
+  applyWifiPowerSave();   // restores power-save once the session/audit hold lapses
   if (WiFi.status() != WL_CONNECTED && millis() - lastWifiReconnect > WIFI_RECONNECT_MS) {
     lastWifiReconnect = millis();
     WiFi.reconnect();

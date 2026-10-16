@@ -22,7 +22,12 @@ Run:
   python3 camera_node.py --broker 192.168.1.50 --id pi_cam_01
 
 Config via flags or env: TC_BROKER, TC_BROKER_PORT, TC_DEVICE_ID, TC_HTTP_PORT,
-TC_PRODUCT, TC_FPS, TC_WIDTH, TC_HEIGHT, TC_FRAME_LOG.
+TC_PRODUCT, TC_FPS, TC_WIDTH, TC_HEIGHT, TC_FRAME_LOG, TC_CORS_ORIGIN.
+
+LAN-only, no token (yet). CORS: /stream, /status and /healthz are readable only
+from the one configured browser origin (--cors-origin, e.g. the relay/UI origin);
+blank = no Access-Control-Allow-Origin. /time stays readable from any origin.
+Non-browser clients (recorder, relay/ffmpeg, timestamp_audit.py) ignore CORS.
 """
 
 from __future__ import annotations
@@ -56,6 +61,17 @@ HEARTBEAT_S = 10
 DEFAULT_FPS = 30          # matches a 30 Hz control/recording loop (e.g. SO-101 LeRobot)
 STALL_TIMEOUT_S = 10.0
 IMX296_TRIGGER = "/sys/module/imx296/parameters/trigger_mode"
+_ORIGIN_RE = re.compile(r"^https?://[^\s/\"',*]+$")
+
+
+def normalize_cors_origin(value: Optional[str]) -> str:
+    """Return a single scheme://host[:port] origin, or "" (no CORS) if blank."""
+    value = (value or "").strip()
+    if not value:
+        return ""
+    if len(value) > 96 or not _ORIGIN_RE.match(value):
+        raise ValueError(f"invalid CORS origin {value!r}: use scheme://host[:port], no path, no '*'")
+    return value
 
 
 def lan_ip() -> str:
@@ -237,15 +253,27 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
     output: FrameBuffer = None            # set by make_server
     status_fn: Callable[[], dict] = None
     frame_timeout_s: float = 5.0
+    cors_origin: str = ""                 # "" = no CORS header (same-origin/non-browser only)
     protocol_version = "HTTP/1.0"
 
-    def _json(self, obj: dict, code: int = 200):
+    def _cors(self, public: bool = False, expose: Optional[str] = None):
+        if public:
+            self.send_header("Access-Control-Allow-Origin", "*")
+            return
+        if not self.cors_origin:
+            return
+        self.send_header("Access-Control-Allow-Origin", self.cors_origin)
+        self.send_header("Vary", "Origin")
+        if expose:
+            self.send_header("Access-Control-Expose-Headers", expose)
+
+    def _json(self, obj: dict, code: int = 200, public: bool = False):
         body = json.dumps(obj, separators=(",", ":")).encode()
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self._cors(public)
         self.end_headers()
         self.wfile.write(body)
 
@@ -255,7 +283,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             mono = time.monotonic_ns() // 1000
             epoch = time.time_ns() // 1000
             st = self.output.clock.status()[0] if self.output.clock else None
-            self._json({"monoUs": mono, "epochUs": epoch, "synced": bool(st and st.synced)})
+            self._json({"monoUs": mono, "epochUs": epoch, "synced": bool(st and st.synced)}, public=True)
             return
         if path in ("/status", "/healthz"):
             st = self.status_fn() if self.status_fn else {}
@@ -268,7 +296,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Age", "0")
         self.send_header("Cache-Control", "no-cache, private")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self._cors(expose="X-Frame-Seq, X-Capture-Epoch-Us")
         self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=FRAME")
         self.end_headers()
         last = self.output.seq
@@ -303,9 +331,10 @@ class ThreadingHTTPServer(ThreadingMixIn, server.HTTPServer):
 
 
 def make_server(http_port: int, output: FrameBuffer, status_fn: Callable[[], dict],
-                frame_timeout_s: float = 5.0) -> ThreadingHTTPServer:
+                frame_timeout_s: float = 5.0, cors_origin: str = "") -> ThreadingHTTPServer:
     handler = type("TCStreamingHandler", (StreamingHandler,), {
-        "output": output, "status_fn": staticmethod(status_fn), "frame_timeout_s": frame_timeout_s})
+        "output": output, "status_fn": staticmethod(status_fn), "frame_timeout_s": frame_timeout_s,
+        "cors_origin": normalize_cors_origin(cors_origin)})
     return ThreadingHTTPServer(("", http_port), handler)
 
 
@@ -352,6 +381,7 @@ def build_status(device_id: str, output: FrameBuffer, args, started_mono: float,
             "exposureTrigger": trig == 1,
         },
         "frameLog": args.frame_log or None,
+        "corsOrigin": getattr(args, "cors_origin", "") or None,
     }
 
 
@@ -392,7 +422,14 @@ def main():
     p.add_argument("--height", type=int, default=int(os.getenv("TC_HEIGHT", "720")))
     p.add_argument("--frame-log", default=os.getenv("TC_FRAME_LOG", ""),
                    help="append one JSON line per captured frame (seq + capture stamps)")
+    p.add_argument("--cors-origin", default=os.getenv("TC_CORS_ORIGIN", ""),
+                   help="relay/UI browser origin allowed to read /stream and /status "
+                        "(scheme://host[:port]); blank = none. /time is always public")
     args = p.parse_args()
+    try:
+        args.cors_origin = normalize_cors_origin(args.cors_origin)
+    except ValueError as exc:
+        p.error(str(exc))
     args.fps = max(1, min(args.fps, 120))
 
     started = time.monotonic()
@@ -403,7 +440,7 @@ def main():
     def status_fn():
         return build_status(args.id, output, args, started, camera_ok)
 
-    srv = make_server(args.http_port, output, status_fn)
+    srv = make_server(args.http_port, output, status_fn, cors_origin=args.cors_origin)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     host = stream_host()
     stream_url = f"http://{host}:{args.http_port}/stream"

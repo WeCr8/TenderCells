@@ -182,3 +182,51 @@ def test_audit_fails_on_tight_budget(fake_camera, tmp_path):
 
 def test_audit_reports_no_frames_as_error():
     assert ta.main(["http://127.0.0.1:9/stream", "--duration", "1", "--probes", "1"]) == 2
+
+
+def _serve(cors_origin=""):
+    fb = cn.FrameBuffer(FakeClock(synced=True))
+    args = types.SimpleNamespace(width=640, height=480, fps=30, frame_log="", cors_origin=cors_origin)
+    started = time.monotonic()
+    srv = cn.make_server(0, fb, lambda: cn.build_status("pi_cam_cors", fb, args, started, True),
+                         frame_timeout_s=0.3, cors_origin=cors_origin)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv, fb, f"http://127.0.0.1:{srv.server_address[1]}"
+
+
+def test_cors_default_blocks_stream_and_status_but_time_is_public():
+    srv, fb, base = _serve("")
+    try:
+        assert ta.OPENER.open(base + "/time", timeout=2).headers["Access-Control-Allow-Origin"] == "*"
+        assert ta.OPENER.open(base + "/status", timeout=2).headers.get("Access-Control-Allow-Origin") is None
+        fb.push(b"\xff\xd8x\xff\xd9", time.monotonic_ns())
+        with ta.OPENER.open(base + "/stream", timeout=2) as r:
+            assert r.headers.get("Access-Control-Allow-Origin") is None
+    finally:
+        srv.shutdown()
+        fb.close()
+
+
+def test_cors_configured_origin_only():
+    srv, fb, base = _serve("https://relay.example.org:8443")
+    try:
+        st = ta.OPENER.open(base + "/status", timeout=2)
+        assert st.headers["Access-Control-Allow-Origin"] == "https://relay.example.org:8443"
+        assert st.headers["Vary"] == "Origin"
+        assert json.loads(st.read())["corsOrigin"] == "https://relay.example.org:8443"
+        assert ta.OPENER.open(base + "/time", timeout=2).headers["Access-Control-Allow-Origin"] == "*"
+        with ta.OPENER.open(base + "/stream", timeout=2) as r:
+            assert r.headers["Access-Control-Allow-Origin"] == "https://relay.example.org:8443"
+            assert "X-Frame-Seq" in r.headers["Access-Control-Expose-Headers"]
+    finally:
+        srv.shutdown()
+        fb.close()
+
+
+@pytest.mark.parametrize("bad", ["*", "https://a.example/path", "relay.example", "https://a.example, https://b",
+                                 "javascript:alert(1)", "https://a.example/"])
+def test_cors_origin_validation(bad):
+    with pytest.raises(ValueError):
+        cn.normalize_cors_origin(bad)
+    assert cn.normalize_cors_origin("  ") == ""
+    assert cn.normalize_cors_origin("http://192.168.1.20:5173") == "http://192.168.1.20:5173"

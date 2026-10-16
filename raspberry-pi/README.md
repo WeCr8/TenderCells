@@ -46,7 +46,9 @@ Run it on boot:
 ```bash
 sudo mkdir -p /home/pi/tendercells && sudo cp camera-node/camera_node.py camera-node/camera_timing.py /home/pi/tendercells/
 echo 'TC_BROKER=192.168.1.50
-TC_DEVICE_ID=pi_cam_01' | sudo tee /etc/default/tc-camera-node
+TC_DEVICE_ID=pi_cam_01
+# optional: the one browser origin (relay/UI) allowed to read /stream and /status
+# TC_CORS_ORIGIN=https://relay.example:8443' | sudo tee /etc/default/tc-camera-node
 sudo cp camera-node/tc-camera-node.service /etc/systemd/system/
 sudo systemctl daemon-reload && sudo systemctl enable --now tc-camera-node
 ```
@@ -57,6 +59,8 @@ camera node. Works in demo (LAN) and for logged-in accounts.
 ## Contracts (shared with ESP32 firmware)
 - Heartbeat: `tc/{id}/sensors` `{ "peripheral":"camera", "streamUrl":"http://<ip>:8000/stream", "statusUrl":..., "fps":30, "clockSynced":true, ... }`
 - Frame timing headers + `/status` + `/time`: [docs/CAMERA_TIMING.md](../docs/CAMERA_TIMING.md)
+- LAN-only, no token yet. CORS: `/stream`, `/status`, `/healthz` only for `--cors-origin`
+  (blank = none); `/time` is readable from any origin.
 
 Tests (no Pi needed): `cd camera-node && python3 -m pytest -q tests && ruff check --config ruff.toml .`
 - State: `tc/{id}/state` `{ "state":"idle|estop" }`

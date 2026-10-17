@@ -3879,10 +3879,14 @@ button, .btn, a[role="button"] {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
+  /* The earlier .auth-modal-overlay rule sets z-index: 1000000, which painted the
+     overlay above the form: every tap on an input hit the overlay and closed the modal. */
+  z-index: 0;
 }
 
 .auth-modal-content {
   position: relative;
+  z-index: 1;
   background: var(--white);
   border-radius: 12px;
   width: 90%;

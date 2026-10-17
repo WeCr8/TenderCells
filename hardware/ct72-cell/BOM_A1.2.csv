@@ -1,0 +1,98 @@
+item,category,description,unit,qty_starter,qty_plus,qty_pro,qty_pro_heavy_option,unit_usd_est,ext_starter_usd,ext_plus_usd,ext_pro_usd,ext_pro_heavy_option_usd,vendor_pn,vendor_url,price_basis
+ADAPTER_PLUS,Arm,"SO-101 adapter ring (printed PETG/ASA, M6 to the grid)",ea,0,1,0,0,8.0,0.0,8.0,0.0,0.0,,,est
+ADAPTER_PRO,Arm,"SO-101 adapter ring (printed PETG/ASA, M6 to the grid)",ea,0,0,1,0,8.0,0.0,0.0,8.0,0.0,,,est
+ADAPTER_PRO_HEAVY,Arm,UR3e adapter ring 6061 160x12 mm,ea,0,0,0,1,80.0,0.0,0.0,0.0,80.0,,,A1 est
+ADAPTER_STARTER,Arm,Vacuum-tool outrigger + plunger block (6 mm Al / printed),ea,1,0,0,0,15.0,15.0,0.0,0.0,0.0,,,est
+ARM_PRO_CB,Arm,UR control box floor stand / bracket,ea,0,0,0,1,60.0,0.0,0.0,0.0,60.0,generic,,control box itself in ARM_PRO
+ARM_PRO_HEAVY,Arm,Universal Robots UR3e (arm + control box + teach pendant),ea,0,0,0,1,33000.0,0.0,0.0,0.0,33000.0,UR3e,https://vention.com/parts/universal-robots-ur3e-collaborative-robot-arm-2446,A1.1 check: $29.7k-$39.5k
+ARM_SO101_FOLLOWER,Arm,"SO-101 follower kit, 6x Feetech STS3215-C047 12 V + bus board + printed parts",ea,0,1,1,0,230.0,0.0,230.0,230.0,0.0,SO-ARM101 follower (12 V),https://github.com/TheRobotStudio/SO-ARM100,A1.1 check: $150-299
+ARM_SO101_LEADER,Arm,SO-101 leader kit (7.4 V STS3215 C001/C044/C046 mix) for teleop,ea,0,1,1,0,150.0,0.0,150.0,150.0,0.0,SO-ARM101 leader,https://github.com/TheRobotStudio/SO-ARM100,est (kits sold with follower)
+EGG_TOOL_VAC,Arm,"Starter egg tool: 12 V mini diaphragm pump, 12 V NC valve, XGZP6847A vacuum sensor, 25 mm silicone bellows cup, spring plunger + contact switch",lot,1,0,0,0,45.0,45.0,0.0,0.0,0.0,generic,https://www.amazon.com/s?k=12V+mini+vacuum+pump+bellows+suction+cup,est
+GRIPPER_SOFT,Arm,Soft egg gripper: printed TPU 95A Fin Ray fingers + 3 mm EVA foam pads (replaces SO-101 jaws),lot,0,1,1,0,10.0,0.0,10.0,10.0,0.0,printed,,est
+SERVO_BUS_FUSE,Arm,Inline blade fuse holders + 3 A fuses x6 + 18 AWG star power harness (bypasses daisy-chain jumpers),lot,0,1,1,0,12.0,0.0,12.0,12.0,0.0,generic,,est
+SERVO_PSU_12V,Arm,"12 V 12.5 A PSU for the follower servo bus (6x 2.7 A stall), fused star feed",ea,0,1,1,0,25.0,0.0,25.0,25.0,0.0,Mean Well LRS-150-12,https://www.meanwell.com/webapp/product/search.aspx?prod=LRS-150,est; replaces the kit's 12 V 5 A brick
+TELEOP_TABLE,Arm,Teleop station: small table + USB gamepad (gantry jog),lot,0,1,1,0,45.0,0.0,45.0,45.0,0.0,generic,,est
+CAM_CORNER_XIAO,Cameras,"XIAO ESP32-S3 Sense monitor cam (Wi-Fi, not in the dataset)",ea,1,1,1,1,14.0,14.0,14.0,14.0,14.0,Seeed 113991115,https://www.seeedstudio.com/XIAO-ESP32S3-Sense-p-5639.html,vendor $13.99
+CAM_CSI_EXT,Cameras,"CSI-to-HDMI extension kit (gantry cam through the cable chain, ~3 m)",ea,0,1,1,0,18.0,0.0,18.0,18.0,0.0,Arducam CSI-HDMI extension,https://www.amazon.com/s?k=arducam+csi+hdmi+extension,est
+CAM_GS,Cameras,Global-shutter cam with external trigger: Plus = Raspberry Pi Global Shutter Camera (IMX296) + lens; Pro = Arducam OV9281 (Jetson),ea,0,2,2,1,65.0,0.0,130.0,130.0,65.0,RPi GS Camera / Arducam OV9281 B0162,https://www.raspberrypi.com/products/raspberry-pi-global-shutter-camera/,RPi GS $50 + 6 mm lens; Arducam $52 (A1.1)
+CAM_TOOL,Cameras,Starter gantry cam: XIAO ESP32-S3 Sense on the Z plate (scripted pick),ea,1,0,0,0,14.0,14.0,0.0,0.0,0.0,Seeed 113991115,https://www.seeedstudio.com/XIAO-ESP32S3-Sense-p-5639.html,vendor
+CAM_TOOL_UVC,Cameras,pro_heavy gantry cam: USB UVC (UR3e has its own controller),ea,0,0,0,1,40.0,0.0,0.0,0.0,40.0,generic,,A1
+COMPUTE_JETSON,Compute,Jetson Orin Nano Super dev kit 8 GB + 256 GB NVMe (Zach already owns one),ea,0,0,1,1,290.0,0.0,0.0,290.0,290.0,NVIDIA 945-13766-0000-000,https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/nano-super-developer-kit/,A1.1 check $249 + NVMe
+COMPUTE_PI5,Compute,Raspberry Pi 5 8 GB + active cooler + 64 GB A2 card + 27 W PSU,ea,0,1,0,0,190.0,0.0,190.0,0.0,0.0,Raspberry Pi 5 8GB,https://www.raspberrypi.com/products/raspberry-pi-5/,A1.1 check: board $130-175 after 2026 hikes
+ACT_DRIVER,Controls,"Pololu DRV8874 single brushed DC driver carrier (roost A, roost B, lid) - current sense for pinch/stall",ea,3,3,3,3,13.0,39.0,39.0,39.0,39.0,Pololu #4035,https://www.pololu.com/product/4035,vendor ~$13
+CELL_IO_NODE,Controls,"Cell-IO node: XIAO ESP32-S3, MCP23017 IO expander, ADS1115 ADC, 2x HX711, 3.3 V/5 V buck, terminal PCB",lot,1,1,1,1,35.0,35.0,35.0,35.0,35.0,Seeed 113991114 + Adafruit 5346 + Adafruit 1085,https://www.seeedstudio.com/XIAO-ESP32S3-p-5627.html,est
+DRV_EXT_STEP,Controls,BTT Octopus (step/dir to the pro_heavy CL57T drivers + extra IO),ea,0,0,0,1,65.0,0.0,0.0,0.0,65.0,BIGTREETECH Octopus V1.1,https://github.com/bigtreetech/BIGTREETECH-OCTOPUS-V1.0,est
+KLIPPER_HOST_ZERO,Controls,"Raspberry Pi Zero 2 W + 32 GB card (Klipper/Moonraker host, Starter)",ea,1,0,0,0,25.0,25.0,0.0,0.0,0.0,Raspberry Pi Zero 2 W,https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/,MSRP $15 + card
+KLIPPER_MCU,Controls,"BTT SKR Mini E3 V3 (4x TMC2209 UART) - X, X1, Y, Z",ea,1,1,1,0,40.0,40.0,40.0,40.0,0.0,BIGTREETECH SKR Mini E3 V3.0,https://github.com/bigtreetech/BIGTREETECH-SKR-mini-E3,est
+APRILTAG,Coop,"AprilTag tag36h11 id 0, 60 mm, laminated on a printed tab",ea,1,1,1,1,1.0,1.0,1.0,1.0,1.0,printed,https://github.com/AprilRobotics/apriltag-imgs,est
+BASKET_POCKET,Coop,Basket pocket (ply) + printed corner locators + exterior hatch hinge/latch,ea,1,1,1,1,25.0,25.0,25.0,25.0,25.0,materials,,est
+EGG_BASKET,Coop,Egg basket ~250x200x120 mm (wire or plastic) + foam liner,ea,1,1,1,1,15.0,15.0,15.0,15.0,15.0,generic,,est
+LID_ACT,Coop,12 V linear actuator 2 in stroke for the nest lids + lid-open reed switch,ea,1,1,1,1,28.0,28.0,28.0,28.0,28.0,generic,https://www.amazon.com/s?k=12V+linear+actuator+2+inch+stroke,est
+NEST_BOX,Coop,"Nest box 12x12x12 in, 1/2 in ply/HDPE: flat floor, back, dividers, aisle lip + top rail",ea,2,2,2,2,35.0,70.0,70.0,70.0,70.0,materials,,est
+NEST_LID,Coop,Hinged nest lid 1/2 in ply + piano hinge (common hinge rod),ea,2,2,2,2,10.0,20.0,20.0,20.0,20.0,materials,,est
+NEST_LINER,Coop,Removable washable nest pad liner 12x12 in (rubber/PP),ea,2,2,2,2,8.0,16.0,16.0,16.0,16.0,generic,https://www.amazon.com/s?k=nesting+box+pads,est
+NEST_SHELF,Coop,18 mm ply shelf + 2 steel L-brackets (bank + basket),ea,1,1,1,1,25.0,25.0,25.0,25.0,25.0,materials,,est
+ROOST_ACT,Coop,"12 V linear actuator 4 in stroke, ~200 N, built-in limit switches (generic; Glideforce/Progressive premium)",ea,2,2,2,2,32.0,64.0,64.0,64.0,64.0,generic,https://www.amazon.com/s?k=12V+linear+actuator+4+inch+stroke,est; generic OK per Zach (Oct 16)
+ROOST_ARM,Coop,Swing arm: 30x6 mm steel flat bar + bar bracket,ea,4,4,4,4,6.0,24.0,24.0,24.0,24.0,generic,,est
+ROOST_BAR,Coop,"Roost bar 2x1.5 in hardwood, 42 in, edges rounded",ea,2,2,2,2,12.0,24.0,24.0,24.0,24.0,lumber,,est
+ROOST_TUBE,Coop,1 in steel tube torque shaft + 2 pillow blocks + lever + quick-release clevis pin,ea,2,2,2,2,30.0,60.0,60.0,60.0,60.0,generic,,est
+BED_TRAY,Coop module,"Deep-bed tray, marine ply + washable liner, ledgers",ea,1,1,1,1,120.0,120.0,120.0,120.0,120.0,generic,,
+POOP_BIN,Coop module,"Poop-bin cassette, HDPE/ply tray 60x18x8 in + drawer slides 24 in",ea,1,1,1,1,85.0,85.0,85.0,85.0,85.0,generic,,
+BUCK,Electronics,24->12 V and 24->5 V buck converters,lot,1,1,1,1,20.0,20.0,20.0,20.0,20.0,generic,,
+CAM_BRACKET,Electronics,1/4-20 camera bracket on post corner,ea,4,4,4,4,6.0,24.0,24.0,24.0,24.0,generic,,
+COMPUTE_BOX,Electronics,Second enclosure 10x8x6 in for SBC + fan/filter,ea,0,1,1,1,45.0,0.0,45.0,45.0,45.0,generic,,
+CONTROL_BOX,Electronics,"NEMA 4X enclosure 12x16x6 in + DIN rail, terminals, fuses, glands",ea,1,1,1,1,110.0,110.0,110.0,110.0,110.0,generic,,brief 15.1
+DOOR_CTRL,Electronics,Chicken Tender Starter door controller (XIAO ESP32-S3 + DRV8874 + reeds),ea,1,1,1,1,45.0,45.0,45.0,45.0,45.0,generic,,per ct-starter repo
+PSU_24V,Electronics,24 V 350 W DIN PSU (Starter/Plus) / 600 W (Pro),ea,0,0,0,1,45.0,0.0,0.0,0.0,45.0,generic,,Pro uses 2
+PSU_24V_MOTION,Electronics,24 V 150 W DIN PSU (steppers),ea,1,1,1,1,30.0,30.0,30.0,30.0,30.0,Mean Well HDR-150-24,https://www.meanwell.com/webapp/product/search.aspx?prod=HDR-150,est
+WATCH_PAD,Electronics,WatchTower AI mount pad,ea,1,1,1,1,15.0,15.0,15.0,15.0,15.0,generic,,
+WATCH_POLE,Electronics,WatchTower 1.5 in mount pole 24 in,ea,1,1,1,1,15.0,15.0,15.0,15.0,15.0,generic,,
+WIRING,Electronics,"Wire, ferrules, connectors, shielded motor cable (lot)",lot,1,1,1,1,90.0,90.0,90.0,90.0,90.0,generic,,
+CORNER_HW,Frame,3-way corner cubes / L-brackets + M5 T-nuts & screws (lot per cell),lot,1,1,1,1,120.0,120.0,120.0,120.0,120.0,generic,,~40 joints
+EXT_2040,Frame,"2040 aluminium extrusion, 20-series, cut to length",m,36.725,36.725,36.725,36.725,16.0,587.6,587.6,587.6,587.6,generic,,~$16/m generic 2040
+EXT_4040,Frame,"4040 aluminium extrusion, 20-series V-slot/T-slot, cut to length",m,11.261,11.261,11.261,11.261,30.0,337.83,337.83,337.83,337.83,generic,,~$30/m generic 4040
+LEVEL_FOOT,Frame,M8 levelling foot 60 mm,ea,4,4,4,4,4.0,16.0,16.0,16.0,16.0,generic,,
+DOOR_EGG_HATCH,Guarding,"Exterior egg-collection hatch: frame, hinge, latch",ea,1,1,1,1,20.0,20.0,20.0,20.0,20.0,materials,,est
+DOOR_SERVICE,Guarding,"24x48 in service door: frame, hinges, latch",ea,1,1,1,1,60.0,60.0,60.0,60.0,60.0,generic,,
+GUARD_MESH,Guarding,"Welded-wire mesh 1/2 in 19 ga (hardware cloth) on frame, per side panel",ea,3,3,0,0,90.0,270.0,270.0,0.0,0.0,generic,,~2 rolls/side
+GUARD_MESH_PRO,Guarding,"Machine-guard welded mesh panels (ISO 13857 distances) per side, upgrade",ea,0,0,3,3,650.0,0.0,0.0,1950.0,1950.0,generic,,Pro replaces hardware cloth
+GUARD_SHEAR,Guarding,"3 mm ACM shear panel (back wall bracing), 2 sheets 4x8",ea,1,1,1,1,120.0,120.0,120.0,120.0,120.0,generic,,
+GUARD_TOP,Guarding,Top panel: mesh or twin-wall polycarbonate,ea,1,1,1,1,90.0,90.0,90.0,90.0,90.0,generic,,
+BELT_GT2_10,Motion,"GT2 10 mm fiberglass belt (X 2 loops + Y loop, ~11 m)",m,11.5,11.5,11.5,0,2.0,23.0,23.0,23.0,0.0,Gates 2MGT-10 or equivalent,https://www.amazon.com/s?k=GT2+10mm+belt+10m,est
+BELT_HTD5M_15,Motion,"HTD-5M 15 mm open belt (pro_heavy, ~11 m)",m,0,0,0,11.5,9.0,0.0,0.0,0.0,103.5,generic HTD5M-15,https://www.amazon.com/s?k=HTD+5M+15mm+open+belt,est
+CABLE_CHAIN,Motion,"Cable chain 15x30 mm, ~4 m total + brackets",lot,1,1,1,1,35.0,35.0,35.0,35.0,35.0,generic,,
+EXT_2080,Motion,"2080 aluminium extrusion (Y bridge), cut to length",m,1.769,1.769,1.769,1.769,30.0,53.07,53.07,53.07,53.07,generic,,~$30/m generic 2080
+IDLER_TENSIONER,Motion,X-end idler + screw tensioner block (in PULLEY_IDLER_KIT),ea,2,2,2,2,0.0,0.0,0.0,0.0,0.0,,,counted in kit
+MGN12H_BLOCK,Motion,MGN12H carriage block,ea,0,3,3,0,8.0,0.0,24.0,24.0,0.0,generic,,
+MGN12_RAIL,Motion,"MGN12 linear rail, cut to length",m,0,5.126,5.126,0,25.0,0.0,128.15,128.15,0.0,generic,,~$25/m generic
+MGN15H_BLOCK,Motion,MGN15H carriage block,ea,1,1,1,4,12.0,12.0,12.0,12.0,48.0,generic,,
+MGN15_RAIL,Motion,"MGN15 rail (Z mast; pro_heavy also X/Y), cut to length",m,1.47,1.47,1.47,6.597,35.0,51.45,51.45,51.45,230.9,generic MGN15,https://www.amazon.com/s?k=MGN15+linear+rail,A1 est
+MOTOR_Z_N23B,Motion,NEMA23 2.0 Nm with 24 V brake (pro_heavy Z),ea,0,0,0,1,68.0,0.0,0.0,0.0,68.0,StepperOnline 23HS30-5004D-E1000-B280,https://www.omc-stepperonline.com/nema-23-stepper-motor-2-0nm-283-22oz-in-with-24v-4-5w-electromagnetic-brake-23hs30-5004d-b280,A1.1 check: $41-68
+NEMA17_XY,Motion,"NEMA17 stepper 0.59 Nm 2 A, 48 mm (X1, X2, Y)",ea,3,3,3,0,14.0,42.0,42.0,42.0,0.0,StepperOnline 17HS19-2004S1,https://www.omc-stepperonline.com/nema-17-bipolar-59ncm-84oz-in-2a-42x48mm-4-wires-w-1m-cable-connector-17hs19-2004s1,vendor list ~$14 (est)
+NEMA17_Z,Motion,"NEMA17 stepper 0.59 Nm (Z, drives Tr8x2 screw via coupler)",ea,1,1,1,0,14.0,14.0,14.0,14.0,0.0,StepperOnline 17HS19-2004S1,https://www.omc-stepperonline.com/nema-17-bipolar-59ncm-84oz-in-2a-42x48mm-4-wires-w-1m-cable-connector-17hs19-2004s1,est
+NEMA23_XY,Motion,NEMA23 3.0 Nm closed-loop stepper + CL57T driver (pro_heavy X1/X2/Y),ea,0,0,0,3,110.0,0.0,0.0,0.0,330.0,StepperOnline 23HS45-4204D-E1000 + CL57T,https://www.omc-stepperonline.com/closed-loop-stepper-driver-0-8-0a-24-48vdc-for-nema-17-23-24-stepper-motor-cl57t,CL57T $34-37 checked in A1.1; motor est
+PLATE_ARM,Motion,"Arm/tool mount plate 250x250x12.7 mm Al, 5x5 M6 grid (shared)",ea,1,1,1,1,45.0,45.0,45.0,45.0,45.0,generic,,
+PLATE_GUSSET,Motion,Mount-plate gusset 10 mm Al,ea,1,1,1,1,10.0,10.0,10.0,10.0,10.0,generic,,
+PLATE_X,Motion,X carriage plate 6 mm Al (cut/drilled),ea,2,2,2,2,18.0,36.0,36.0,36.0,36.0,generic,,
+PLATE_Y,Motion,Y carriage plate 10 mm Al,ea,1,1,1,1,20.0,20.0,20.0,20.0,20.0,generic,,
+PLATE_Z,Motion,Z carriage plate 10 mm Al,ea,1,1,1,1,20.0,20.0,20.0,20.0,20.0,generic,,
+PULLEY_IDLER_KIT,Motion,20T pulleys (3) + toothed/smooth idlers (6) + belt tensioners (3) for the belt width,lot,1,1,1,3,35.0,35.0,35.0,35.0,105.0,generic,https://www.amazon.com/s?k=GT2+20T+pulley+10mm+idler+tensioner,est (pro_heavy HTD: x3 cost)
+VWHEEL_CARRIAGE,Motion,"V-wheel carriage: 4x Delrin Solid V wheels, eccentric spacers, M5 hardware, plate",ea,3,0,0,0,22.0,66.0,0.0,0.0,0.0,OpenBuilds Solid V Wheel kit x4,https://openbuildspartstore.com/solid-v-wheel-kit/,est
+Z_SFU1605_KIT,Motion,SFU1605 ball screw (cut) + BK12/BF12 + nut housing + coupler,m,0,0,0,1.482,110.0,0.0,0.0,0.0,163.02,generic SFU1605,https://www.amazon.com/s?k=SFU1605+ballscrew+1500mm+BK12+BF12,A1.1: ~$100-200 per 1.7 m
+Z_TR8_KIT,Motion,Tr8x2 lead screw (cut to length) + POM anti-backlash nut + KFL08 + KP08 + 5x8 coupler,m,1.482,1.482,1.482,0,30.0,44.46,44.46,44.46,0.0,generic,https://www.amazon.com/s?k=T8+lead+screw+1500mm+lead+2mm,est ~$40 per 1.5 m kit; 1.5 m stock exists
+ESTOP,Safety,"E-stop mushroom, twist release, NC (Pro: 2NC safety-rated)",ea,1,1,2,2,25.0,25.0,25.0,50.0,50.0,generic,,
+ESTOP_RELAY,Safety,"E-stop power relay (DIN, 24 V coil, 3NO): cuts stepper 24 V, servo 12 V and actuator 12 V",ea,1,1,1,1,18.0,18.0,18.0,18.0,18.0,generic,,est
+PINCH_GUARD,Safety,Printed pinch guard over lever/clevis/hinge (finger-safe),ea,2,2,2,2,4.0,8.0,8.0,8.0,8.0,printed,,est
+SAFETY_INTERLOCK,Safety,"Coded safety interlock switch (service door), PLd-capable",ea,0,0,1,1,90.0,0.0,0.0,90.0,90.0,generic,,Pro
+SAFETY_RELAY,Safety,Dual-channel safety relay (E-stop + door) Cat 3/PLd,ea,0,0,1,1,310.0,0.0,0.0,310.0,310.0,Pilz PNOZ s4 750104,https://shop.appliedindustrialautomation.com/products/PILZ-750104,A1.1 check $309-540
+ENDSTOP_MAX,Sensors,Mechanical max-travel limit switch,ea,0,3,3,3,2.0,0.0,6.0,6.0,6.0,generic,,
+ENDSTOP_MECH,Sensors,"Mechanical endstop (X min front+back, Y min, Z max)",ea,4,4,4,4,2.0,8.0,8.0,8.0,8.0,generic,,est
+ENV_SENS,Sensors,DHT20/SHT4x temp-humidity + ammonia sensor (coop air),lot,1,1,1,1,25.0,25.0,25.0,25.0,25.0,generic,,
+LOAD_CELL,Sensors,5 kg bar load cell (2 per roost bar) for bird occupancy,ea,4,4,4,4,4.0,16.0,16.0,16.0,16.0,TAL220B 5 kg class,https://www.sparkfun.com/search/results?term=load+cell+5kg,est
+SW_BIN,Sensors,Bin-seated micro switch (brief 10.6),ea,1,1,1,1,3.0,3.0,3.0,3.0,3.0,generic,,
+SW_LIMIT_ROOST,Sensors,Roller limit switch: roost deployed/stowed (2 per bar),ea,4,4,4,4,2.0,8.0,8.0,8.0,8.0,generic,,est
+TOF,Sensors,VL53L1X ToF sensor on tool plate (bed height),ea,0,1,1,1,12.0,0.0,12.0,12.0,12.0,generic,,
+NET_PTP,Timing,"5-port gigabit switch + Cat6 patch cables (wired PTP/chrony LAN: Pi/Jetson, training PC)",lot,0,1,1,1,30.0,0.0,30.0,30.0,30.0,generic,,est
+TRIGGER_KIT,Timing,"Camera trigger harness: shielded twisted pair, 74LVC1T45 level shifter (3.3 V -> 1.8 V XTR), series R, JST-SH",lot,0,1,1,0,15.0,0.0,15.0,15.0,0.0,generic,https://www.raspberrypi.com/documentation/accessories/camera.html,est
+
+TOTAL_EST,,"Estimated parts cost (USD, excl. tax/shipping/labour, +/-30% draft)",,,,,,,3392,4306,6511,39857,,,"pro_heavy column = full UR3e variant, not a tier"

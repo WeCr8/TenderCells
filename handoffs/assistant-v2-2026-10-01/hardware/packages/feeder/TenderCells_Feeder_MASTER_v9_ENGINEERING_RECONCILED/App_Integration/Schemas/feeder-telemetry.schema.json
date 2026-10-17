@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TenderCells Feeder Telemetry",
+  "type": "object",
+  "properties": {
+    "feedPercent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "feedWeightGrams": {
+      "type": "number",
+      "minimum": 0
+    },
+    "batteryPercent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "rotorPocket": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "dispenseCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "connected": {
+      "type": "boolean"
+    },
+    "jammed": {
+      "type": "boolean"
+    },
+    "homed": {
+      "type": "boolean"
+    },
+    "lastDispenseAt": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "feedPercent",
+    "batteryPercent",
+    "rotorPocket",
+    "connected",
+    "jammed"
+  ]
+}

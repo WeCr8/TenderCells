@@ -1,0 +1,252 @@
+[
+  {
+    "file": "01_Base_Plate_HeatSet.stl",
+    "watertight": true,
+    "extents_mm": [
+      230.0,
+      190.0,
+      20.0
+    ],
+    "faces": 2060
+  },
+  {
+    "file": "02_LoadCell_Floating_Platform.stl",
+    "watertight": true,
+    "extents_mm": [
+      126.0,
+      82.0,
+      30.0
+    ],
+    "faces": 5048
+  },
+  {
+    "file": "03_Metering_Center_Housing.stl",
+    "watertight": true,
+    "extents_mm": [
+      112.0,
+      66.0,
+      118.0
+    ],
+    "faces": 9978
+  },
+  {
+    "file": "04_Six_Pocket_Rotor_D_Bore.stl",
+    "watertight": true,
+    "extents_mm": [
+      68.424,
+      40.0,
+      69.6
+    ],
+    "faces": 2780
+  },
+  {
+    "file": "05_Servo_Side_Plate.stl",
+    "watertight": true,
+    "extents_mm": [
+      104.0,
+      7.0,
+      106.0
+    ],
+    "faces": 4568
+  },
+  {
+    "file": "06_Bearing_Side_Plate_696.stl",
+    "watertight": true,
+    "extents_mm": [
+      104.0,
+      7.0,
+      106.0
+    ],
+    "faces": 4568
+  },
+  {
+    "file": "07_Bearing_Retainer_Cap.stl",
+    "watertight": true,
+    "extents_mm": [
+      32.0,
+      31.9901,
+      3.0
+    ],
+    "faces": 2532
+  },
+  {
+    "file": "08_25T_Hub_to_6mm_D_Shaft_Adapter.stl",
+    "watertight": true,
+    "extents_mm": [
+      34.0,
+      33.9894,
+      10.0
+    ],
+    "faces": 3536
+  },
+  {
+    "file": "09_MG996R_Servo_Cradle.stl",
+    "watertight": true,
+    "extents_mm": [
+      68.0,
+      38.0,
+      54.0
+    ],
+    "faces": 2076
+  },
+  {
+    "file": "10_Hopper_Adapter_Gasketed.stl",
+    "watertight": true,
+    "extents_mm": [
+      108.0,
+      88.0,
+      32.0
+    ],
+    "faces": 1920
+  },
+  {
+    "file": "11_Hopper_Removable.stl",
+    "watertight": true,
+    "extents_mm": [
+      160.0,
+      160.0,
+      190.0
+    ],
+    "faces": 1490
+  },
+  {
+    "file": "12_Hopper_Lid.stl",
+    "watertight": true,
+    "extents_mm": [
+      166.0,
+      166.0,
+      12.0
+    ],
+    "faces": 44
+  },
+  {
+    "file": "13_Washable_Feed_Trough_Slide.stl",
+    "watertight": true,
+    "extents_mm": [
+      138.0,
+      80.0,
+      45.0
+    ],
+    "faces": 68
+  },
+  {
+    "file": "14_Trough_Slide_Rail.stl",
+    "watertight": true,
+    "extents_mm": [
+      84.0,
+      38.0,
+      10.0
+    ],
+    "faces": 840
+  },
+  {
+    "file": "15_Electronics_Enclosure_M3.stl",
+    "watertight": true,
+    "extents_mm": [
+      104.0,
+      117.0,
+      44.0
+    ],
+    "faces": 3832
+  },
+  {
+    "file": "16_Electronics_Lid.stl",
+    "watertight": true,
+    "extents_mm": [
+      104.0,
+      80.0,
+      4.0
+    ],
+    "faces": 2044
+  },
+  {
+    "file": "17_Wire_Strain_Relief_Clamp.stl",
+    "watertight": true,
+    "extents_mm": [
+      32.0,
+      18.0,
+      8.0
+    ],
+    "faces": 1788
+  },
+  {
+    "file": "18_HeatSet_Insert_Test_Coupon.stl",
+    "watertight": true,
+    "extents_mm": [
+      95.0,
+      34.0,
+      8.0
+    ],
+    "faces": 9156
+  },
+  {
+    "file": "19_Hopper_Gasket_TPU.stl",
+    "watertight": true,
+    "extents_mm": [
+      96.0,
+      86.0,
+      1.8
+    ],
+    "faces": 32
+  },
+  {
+    "file": "20_LoadCell_Guard.stl",
+    "watertight": true,
+    "extents_mm": [
+      82.0,
+      38.0,
+      34.0
+    ],
+    "faces": 1044
+  },
+  {
+    "file": "21_28BYJ48_Stepper_Mount.stl",
+    "watertight": true,
+    "extents_mm": [
+      64.0,
+      64.0,
+      7.0
+    ],
+    "faces": 1536
+  },
+  {
+    "file": "22_5mm_to_6mm_Shaft_Clamp_Coupler.stl",
+    "watertight": true,
+    "extents_mm": [
+      18.0,
+      17.9944,
+      32.0
+    ],
+    "faces": 4252
+  },
+  {
+    "file": "23_ULN2003_Driver_Carrier.stl",
+    "watertight": true,
+    "extents_mm": [
+      44.0,
+      41.0,
+      9.5
+    ],
+    "faces": 4076
+  },
+  {
+    "file": "24_Hall_Sensor_Homing_Bracket.stl",
+    "watertight": true,
+    "extents_mm": [
+      28.0,
+      14.0,
+      22.0
+    ],
+    "faces": 1314
+  },
+  {
+    "file": "25_Rotor_Homing_Magnet_Carrier.stl",
+    "watertight": true,
+    "extents_mm": [
+      14.0,
+      10.0,
+      4.0
+    ],
+    "faces": 1024
+  }
+]

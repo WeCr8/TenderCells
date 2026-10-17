@@ -1,0 +1,47 @@
+[
+  {
+    "file": "Marketing/Real_Asset_Renders/01_REAL_CORE_ISOMETRIC.png",
+    "sha256": "002e5346b9d2675120e3f4cd90d593c2cdc7b138e31bde7e2c6aa01b6856f0da",
+    "bytes": 110258
+  },
+  {
+    "file": "Marketing/Real_Asset_Renders/02_REAL_CORE_FRONT.png",
+    "sha256": "773e3bf460594476965cf182e12963fcb2b14325f184961552f2ca1576cc32c4",
+    "bytes": 60213
+  },
+  {
+    "file": "Marketing/Real_Asset_Renders/03_REAL_CORE_SIDE.png",
+    "sha256": "398fe3a84c39f918c7f74aed286820154a9217e94acfc9677e0f0a7dac4a801d",
+    "bytes": 55407
+  },
+  {
+    "file": "Marketing/Real_Asset_Renders/04_REAL_STEPPER_DRIVE.png",
+    "sha256": "188ebd5819b211b46b0f3c1ec36683f51997e6309993cddaf83f3232eec27437",
+    "bytes": 246535
+  },
+  {
+    "file": "Marketing/Real_Asset_Renders/05_REAL_ASSET_COMBINED.png",
+    "sha256": "f48f5d3b5bec632d828814a8a8e85b665e4d9112e47738d334a556275a070bbe",
+    "bytes": 98457
+  },
+  {
+    "file": "Marketing/Real_Asset_Renders/06_REAL_CORE_TRANSPARENT.png",
+    "sha256": "82309955c8869fd3da3b24f2bdfa49cfd89efd0ce5103eab55a5c734fcedb4aa",
+    "bytes": 125920
+  },
+  {
+    "file": "Marketing/Real_Asset_Renders/07_REAL_CAD_FARM_MARKETING_COMPOSITE.png",
+    "sha256": "3bddb4edbb92309b69e830ac9c7682da0d4b040601097f39f6bdbb275bcfafa7",
+    "bytes": 1103193
+  },
+  {
+    "file": "Marketing/Real_Asset_Renders/08_REAL_CAD_STUDIO_MARKETING.png",
+    "sha256": "003ae3087922815191817349db86eaaa8f59fae17aed2c052cb95a4b4848f10b",
+    "bytes": 138418
+  },
+  {
+    "file": "Marketing/Real_Asset_Renders/TC-FDR-MKT-1000_REAL_CAD_COMBINED.glb",
+    "sha256": "e1de40a4e07fdd148658b01495a585bb1191124b0a2c1f7d8b214533dd17c001",
+    "bytes": 952464
+  }
+]

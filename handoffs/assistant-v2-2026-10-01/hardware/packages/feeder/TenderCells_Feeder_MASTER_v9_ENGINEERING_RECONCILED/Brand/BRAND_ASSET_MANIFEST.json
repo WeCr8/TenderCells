@@ -1,0 +1,11 @@
+{
+  "source_of_truth": "Brand/Original/tender-cells-logo.svg",
+  "source_repository_path": "applications/tendercells_ui/test_output/website/public/assets/images/tender-cells-logo.svg",
+  "source_dimensions": "1024x1024",
+  "official_colors": {
+    "green": "#147C38",
+    "navy": "#061D2E",
+    "cream": "#F7F4EE"
+  },
+  "note": "PNG and ICO files in this package are deterministic raster/icon derivatives of the official repository SVG source. The repository references a PNG fallback, but binary retrieval was not available through the text-only connector during package build."
+}

@@ -1,0 +1,22 @@
+name,value,unit,description
+TC_FDR_BORE_D,72.0,mm,Metering housing bore
+TC_FDR_ROTOR_OD,70.8,mm,Corrected rotor OD
+TC_FDR_ROTOR_W,50.8,mm,Corrected rotor axial width
+TC_FDR_ROTOR_RADIAL_CLR,0.6,mm,Per-side radial clearance
+TC_FDR_ROTOR_AXIAL_CLR,0.6,mm,Per-side axial clearance
+TC_FDR_ROTOR_POCKETS,6,,Pocket count
+TC_FDR_INDEX_ANGLE,60,deg,360 / pocket count
+TC_FDR_SIDE_INNER_SPACING,52.0,mm,Closure plate inner-face spacing
+TC_FDR_SHAFT_D,6.0,mm,Rotor shaft nominal
+TC_FDR_SHAFT_D_FLAT,5.0,mm,D-shaft across-flat
+TC_FDR_BEARING_ID,6.0,mm,696 bearing
+TC_FDR_BEARING_OD,15.0,mm,696 bearing
+TC_FDR_BEARING_W,5.0,mm,696 bearing
+TC_FDR_BEARING_POCKET,15.08,mm,Printed pocket candidate
+TC_FDR_GASKET_T,1.8,mm,Actual gasket STEP thickness
+TC_FDR_GASKET_GROOVE_D,1.6,mm,Nominal groove depth
+TC_FDR_HOPPER_TOP,160,mm,Outer top size
+TC_FDR_HOPPER_BOTTOM,82,mm,Outer lower size
+TC_FDR_HOPPER_H,190,mm,Outer height
+TC_FDR_HOPPER_WALL,2.6,mm,Nominal wall
+TC_FDR_LOADCELL_CAP,5000,g,TAL220B baseline

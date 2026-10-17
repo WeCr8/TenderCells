@@ -1,0 +1,377 @@
+[
+  {
+    "file": "01_Base_Plate_HeatSet.stl",
+    "step_source": "01_Base_Plate_HeatSet.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 2060,
+    "extents_mm": [
+      230.0,
+      190.0,
+      20.0
+    ],
+    "volume_mm3": 364643.273
+  },
+  {
+    "file": "02_LoadCell_Floating_Platform.stl",
+    "step_source": "02_LoadCell_Floating_Platform.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 2,
+    "faces": 5048,
+    "extents_mm": [
+      126.0,
+      82.0,
+      30.0
+    ],
+    "volume_mm3": 89760.214
+  },
+  {
+    "file": "03_Metering_Center_Housing.stl",
+    "step_source": "03_Metering_Center_Housing.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 9978,
+    "extents_mm": [
+      112.0,
+      66.0,
+      118.0
+    ],
+    "volume_mm3": 434063.813
+  },
+  {
+    "file": "04_Six_Pocket_Rotor_D_Bore.stl",
+    "step_source": "04_Six_Pocket_Rotor_D_Bore.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 2780,
+    "extents_mm": [
+      68.424,
+      40.0,
+      69.6
+    ],
+    "volume_mm3": 60526.708
+  },
+  {
+    "file": "05_Servo_Side_Plate.stl",
+    "step_source": "05_Servo_Side_Plate.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 4568,
+    "extents_mm": [
+      104.0,
+      7.0,
+      106.0
+    ],
+    "volume_mm3": 70037.687
+  },
+  {
+    "file": "06_Bearing_Side_Plate_696.stl",
+    "step_source": "06_Bearing_Side_Plate_696.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 4568,
+    "extents_mm": [
+      104.0,
+      7.0,
+      106.0
+    ],
+    "volume_mm3": 75482.988
+  },
+  {
+    "file": "07_Bearing_Retainer_Cap.stl",
+    "step_source": "07_Bearing_Retainer_Cap.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 2532,
+    "extents_mm": [
+      32.0,
+      31.99,
+      3.0
+    ],
+    "volume_mm3": 2179.33
+  },
+  {
+    "file": "08_25T_Hub_to_6mm_D_Shaft_Adapter.stl",
+    "step_source": "08_25T_Hub_to_6mm_D_Shaft_Adapter.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 3536,
+    "extents_mm": [
+      34.0,
+      33.989,
+      10.0
+    ],
+    "volume_mm3": 8376.414
+  },
+  {
+    "file": "09_MG996R_Servo_Cradle.stl",
+    "step_source": "09_MG996R_Servo_Cradle.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 2076,
+    "extents_mm": [
+      68.0,
+      38.0,
+      54.0
+    ],
+    "volume_mm3": 35878.189
+  },
+  {
+    "file": "10_Hopper_Adapter_Gasketed.stl",
+    "step_source": "10_Hopper_Adapter_Gasketed.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 1920,
+    "extents_mm": [
+      108.0,
+      88.0,
+      32.0
+    ],
+    "volume_mm3": 93881.644
+  },
+  {
+    "file": "11_Hopper_Removable.stl",
+    "step_source": "11_Hopper_Removable.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 1490,
+    "extents_mm": [
+      160.0,
+      160.0,
+      190.0
+    ],
+    "volume_mm3": 314336.8
+  },
+  {
+    "file": "12_Hopper_Lid.stl",
+    "step_source": "12_Hopper_Lid.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 44,
+    "extents_mm": [
+      166.0,
+      166.0,
+      12.0
+    ],
+    "volume_mm3": 150548.0
+  },
+  {
+    "file": "13_Washable_Feed_Trough_Slide.stl",
+    "step_source": "13_Washable_Feed_Trough_Slide.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 68,
+    "extents_mm": [
+      138.0,
+      80.0,
+      45.0
+    ],
+    "volume_mm3": 89256.0
+  },
+  {
+    "file": "14_Trough_Slide_Rail.stl",
+    "step_source": "14_Trough_Slide_Rail.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 840,
+    "extents_mm": [
+      84.0,
+      38.0,
+      10.0
+    ],
+    "volume_mm3": 13082.191
+  },
+  {
+    "file": "15_Electronics_Enclosure_M3.stl",
+    "step_source": "15_Electronics_Enclosure_M3.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 3832,
+    "extents_mm": [
+      104.0,
+      117.0,
+      44.0
+    ],
+    "volume_mm3": 92900.274
+  },
+  {
+    "file": "16_Electronics_Lid.stl",
+    "step_source": "16_Electronics_Lid.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 2044,
+    "extents_mm": [
+      104.0,
+      80.0,
+      4.0
+    ],
+    "volume_mm3": 33134.793
+  },
+  {
+    "file": "17_Wire_Strain_Relief_Clamp.stl",
+    "step_source": "17_Wire_Strain_Relief_Clamp.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 1788,
+    "extents_mm": [
+      32.0,
+      18.0,
+      8.0
+    ],
+    "volume_mm3": 3954.066
+  },
+  {
+    "file": "18_HeatSet_Insert_Test_Coupon.stl",
+    "step_source": "18_HeatSet_Insert_Test_Coupon.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 9156,
+    "extents_mm": [
+      95.0,
+      34.0,
+      8.0
+    ],
+    "volume_mm3": 22430.728
+  },
+  {
+    "file": "19_Hopper_Gasket_TPU.stl",
+    "step_source": "19_Hopper_Gasket_TPU.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 32,
+    "extents_mm": [
+      96.0,
+      86.0,
+      1.8
+    ],
+    "volume_mm3": 2505.6
+  },
+  {
+    "file": "20_LoadCell_Guard.stl",
+    "step_source": "20_LoadCell_Guard.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 1044,
+    "extents_mm": [
+      82.0,
+      38.0,
+      34.0
+    ],
+    "volume_mm3": 22782.955
+  },
+  {
+    "file": "21_28BYJ48_Stepper_Mount.stl",
+    "step_source": "21_28BYJ48_Stepper_Mount.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 1536,
+    "extents_mm": [
+      64.0,
+      64.0,
+      7.0
+    ],
+    "volume_mm3": 26683.23
+  },
+  {
+    "file": "22_5mm_to_6mm_Shaft_Clamp_Coupler.stl",
+    "step_source": "22_5mm_to_6mm_Shaft_Clamp_Coupler.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 4252,
+    "extents_mm": [
+      18.0,
+      17.994,
+      32.0
+    ],
+    "volume_mm3": 6797.762
+  },
+  {
+    "file": "23_ULN2003_Driver_Carrier.stl",
+    "step_source": "23_ULN2003_Driver_Carrier.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 4076,
+    "extents_mm": [
+      44.0,
+      41.0,
+      9.5
+    ],
+    "volume_mm3": 5673.575
+  },
+  {
+    "file": "24_Hall_Sensor_Homing_Bracket.stl",
+    "step_source": "24_Hall_Sensor_Homing_Bracket.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 1314,
+    "extents_mm": [
+      28.0,
+      14.0,
+      22.0
+    ],
+    "volume_mm3": 2898.939
+  },
+  {
+    "file": "25_Rotor_Homing_Magnet_Carrier.stl",
+    "step_source": "25_Rotor_Homing_Magnet_Carrier.step",
+    "step_valid": true,
+    "solid_count": 1,
+    "watertight": true,
+    "body_count": 1,
+    "faces": 1024,
+    "extents_mm": [
+      14.0,
+      10.0,
+      4.0
+    ],
+    "volume_mm3": 504.404
+  }
+]

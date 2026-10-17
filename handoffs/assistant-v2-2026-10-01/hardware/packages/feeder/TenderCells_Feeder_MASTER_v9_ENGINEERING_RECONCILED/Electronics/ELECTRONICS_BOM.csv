@@ -1,0 +1,11 @@
+qty,item,preferred_spec,function,cad_status
+1,Seeed Studio XIAO ESP32C3,"Wi-Fi/BLE, 3.3V logic",controller,reference envelope
+1,28BYJ-48 geared stepper,5V,six-pocket rotor indexing,reference envelope
+1,ULN2003 stepper driver,28BYJ-compatible,motor driver,reference envelope
+1,5 kg straight-bar load cell,"TAL220B-style, 55mm",feed weight,dimensional reference
+1,HX711 amplifier,3.3/5V compatible,load-cell ADC,reference envelope
+1,A3144-compatible Hall sensor,digital Hall switch,rotor homing,reference envelope
+1,small magnet,fit printed carrier,home target,measure selected magnet
+1,5V regulated supply/power bank,>=2A prototype recommendation,power,selected product controls
+1,470-1000uF electrolytic,>=10V,motor transient support,electrical only
+1,switch + fuse/PTC,sized to selected supply,local isolation/protection,selected product controls

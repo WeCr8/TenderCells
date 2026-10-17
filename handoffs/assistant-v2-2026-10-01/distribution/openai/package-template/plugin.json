@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "tendercells",
+  "version": "0.5.0",
+  "description": "Check your TenderCells farm, review alerts, and use Builder missions and projects.",
+  "author": {
+    "name": "WeCr8 Solutions",
+    "url": "https://tendercells.com"
+  },
+  "homepage": "https://tendercells.com/assistants",
+  "repository": "https://github.com/WeCr8/TenderCells",
+  "license": "Apache-2.0",
+  "keywords": [
+    "farm",
+    "animal-care",
+    "iot",
+    "education",
+    "builder"
+  ]
+}

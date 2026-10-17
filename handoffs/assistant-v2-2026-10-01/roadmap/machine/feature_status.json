@@ -1,0 +1,198 @@
+[
+  {
+    "feature": "MCP shared core",
+    "status": "Complete",
+    "priority": "P0",
+    "current": "Existing shared MCP server for Claude/ChatGPT",
+    "next": "Keep compatibility"
+  },
+  {
+    "feature": "Hosted customer connector",
+    "status": "Complete",
+    "priority": "P0",
+    "current": "OAuth 2.1, farm:read, read-only Firestore mirror",
+    "next": "Preserve safety boundary"
+  },
+  {
+    "feature": "Hosted demo connector",
+    "status": "Complete",
+    "priority": "P0",
+    "current": "/mcp/demo simulated farm",
+    "next": "Use for reviewers"
+  },
+  {
+    "feature": "Farm Card MCP App",
+    "status": "Complete",
+    "priority": "P0",
+    "current": "Inline farm overview",
+    "next": "Retain"
+  },
+  {
+    "feature": "Local confirm-twice actions",
+    "status": "Complete",
+    "priority": "P0",
+    "current": "request_action -> human yes -> confirm_action",
+    "next": "Do not weaken"
+  },
+  {
+    "feature": "Customer self-service connections",
+    "status": "Complete",
+    "priority": "P0",
+    "current": "/app/assistants + revoke",
+    "next": "Keep"
+  },
+  {
+    "feature": "Claude plugin + farm-check",
+    "status": "Complete",
+    "priority": "P0",
+    "current": "Plugin marketplace structure exists",
+    "next": "Add v2 skills"
+  },
+  {
+    "feature": "Builder M0-M7",
+    "status": "Complete",
+    "priority": "P1",
+    "current": "59 LEGO-style steps, missions + Blink + Starter Node",
+    "next": "Expose via MCP"
+  },
+  {
+    "feature": "Chicken Tender Door book",
+    "status": "Concept",
+    "priority": "P1",
+    "current": "21 illustrated pages, explicitly concept",
+    "next": "Verify real BOM/wiring before instruction-ready"
+  },
+  {
+    "feature": "Builder parts catalog",
+    "status": "Draft",
+    "priority": "P1",
+    "current": "67 IDs",
+    "next": "Reference-check art and technical metadata"
+  },
+  {
+    "feature": "Assistant v2 customer facade",
+    "status": "Planned",
+    "priority": "P0",
+    "current": "get_farm_home, list_devices, Builder/Mission reads",
+    "next": "Implement B01"
+  },
+  {
+    "feature": "Builder/Mission assistant cards",
+    "status": "Planned",
+    "priority": "P1",
+    "current": "MCP App cards",
+    "next": "Implement B02"
+  },
+  {
+    "feature": "Claude Builder/Mission skills",
+    "status": "Planned",
+    "priority": "P1",
+    "current": "builder-guide, mission-guide, device-connect",
+    "next": "Implement B03"
+  },
+  {
+    "feature": "Property Twin assistant adapters",
+    "status": "Planned",
+    "priority": "P1",
+    "current": "animals, habitats, property twin",
+    "next": "Implement B04 from real services"
+  },
+  {
+    "feature": "Platform admin assistant",
+    "status": "Future",
+    "priority": "P2",
+    "current": "Separate authorization boundary",
+    "next": "B05 read-only, B06 writes"
+  },
+  {
+    "feature": "Store submissions",
+    "status": "Pending",
+    "priority": "P0",
+    "current": "OpenAI + Claude public directories",
+    "next": "Complete B07 release gate"
+  },
+  {
+    "feature": "Signed Claude Desktop MCPB release",
+    "status": "Pending",
+    "priority": "P0",
+    "current": "Package already buildable",
+    "next": "Sign/attach release"
+  },
+  {
+    "feature": "Reviewer account/screenshots",
+    "status": "Pending",
+    "priority": "P0",
+    "current": "Required for store review",
+    "next": "Create seeded account + capture real chats"
+  },
+  {
+    "feature": "Firestore TTL policies",
+    "status": "Pending",
+    "priority": "P0",
+    "current": "oauthRequests/oauthGrants expireAt",
+    "next": "Verify in console"
+  },
+  {
+    "feature": "Builder M8 Sensor",
+    "status": "Pending",
+    "priority": "P1",
+    "current": "replace button with sensor",
+    "next": "Implement after B01/store-critical path"
+  },
+  {
+    "feature": "Builder M9 Invent",
+    "status": "Pending",
+    "priority": "P2",
+    "current": "design a TenderCell",
+    "next": "Implement after M8"
+  },
+  {
+    "feature": "Printable Builder export",
+    "status": "Pending",
+    "priority": "P2",
+    "current": "same step data -> print manual",
+    "next": "No separate content authoring"
+  },
+  {
+    "feature": "Teacher/classroom mode",
+    "status": "Pending",
+    "priority": "P2",
+    "current": "team/classroom UX",
+    "next": "Use existing learner depths/safety"
+  },
+  {
+    "feature": "Builder generator integration",
+    "status": "Pending",
+    "priority": "P3",
+    "current": "mirror stable Builder into Python generator",
+    "next": "Do after content stabilizes"
+  },
+  {
+    "feature": "Reference-checked part art",
+    "status": "Pending",
+    "priority": "P1",
+    "current": "boards/cables/sensors/etc.",
+    "next": "Needed for authoritative hardware lessons"
+  },
+  {
+    "feature": "Demo event twin highlighting",
+    "status": "Pending",
+    "priority": "P2",
+    "current": "highlight affected twin in 3D",
+    "next": "Repo handoff next step"
+  },
+  {
+    "feature": "Command requested/ack/confirmed UI",
+    "status": "Pending",
+    "priority": "P2",
+    "current": "visual command-state lifecycle",
+    "next": "Preserve provenance"
+  },
+  {
+    "feature": "Mobile/Safari QA",
+    "status": "Pending",
+    "priority": "P1",
+    "current": "demo + Builder + assistant pages",
+    "next": "Release quality"
+  }
+]

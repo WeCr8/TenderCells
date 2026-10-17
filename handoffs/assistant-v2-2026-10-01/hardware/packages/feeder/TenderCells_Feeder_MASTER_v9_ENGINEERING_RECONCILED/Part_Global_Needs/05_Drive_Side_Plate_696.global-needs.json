@@ -1,0 +1,106 @@
+{
+  "schema": "TenderCells.PartGlobalNeeds.v1",
+  "part_id": "TC-FDR-05",
+  "part_name": "05_Drive_Side_Plate_696",
+  "revision": "V9",
+  "status": "CANONICAL_DEFAULT",
+  "role": "Default drive-side sealed bearing closure",
+  "source_of_truth": {
+    "STEP": "CAD/STEP/05_Drive_Side_Plate_696.step",
+    "STL": "CAD/STL/05_Drive_Side_Plate_696.stl",
+    "authority": "STEP geometry + this needs file; STL is a manufacturing derivative"
+  },
+  "measured_envelope_mm": {
+    "x": 104.0,
+    "y": 7.0,
+    "z": 106.0
+  },
+  "measured_volume_mm3": 75482.29,
+  "solid_count": 1,
+  "global_coordinate_system": {
+    "+X": "right",
+    "+Z": "up",
+    "-Y": "front/service"
+  },
+  "interfaces": [
+    {
+      "id": "DATUM-A",
+      "definition": "Product mounting/base plane",
+      "rule": "Z=0 at product level unless explicitly transformed in assembly"
+    },
+    {
+      "id": "COORD",
+      "definition": "Global coordinate convention",
+      "rule": "+X right, +Z up, -Y service/front"
+    },
+    {
+      "id": "BEARING",
+      "mates_with": "696 bearing",
+      "target": "15.08 mm printed pocket for 15.00 mm OD bearing",
+      "validation": "printer-specific fit check"
+    },
+    {
+      "id": "HOUSING",
+      "mates_with": "03 housing",
+      "target": "104 x 106 plate envelope; four-corner fastener pattern inherited from CAD",
+      "validation": "no feed-access gap to rotor chamber"
+    }
+  ],
+  "manufacturing": {
+    "default_process": "FDM additive manufacturing",
+    "default_material": "PETG for indoor/prototype; ASA or validated outdoor polymer for UV/weather exposure",
+    "units": "mm",
+    "scale": "1:1",
+    "dimensional_rule": "interface dimensions override cosmetic dimensions; verify printer compensation with coupons"
+  },
+  "tolerance_policy": {
+    "general_printed_noncritical_mm": "\u00b10.30 typical starting allowance, printer-dependent",
+    "moving_clearance_per_side_mm": 0.6,
+    "slide_clearance_per_side_mm": 0.35,
+    "bearing_pocket_rule": "15.08 CAD for 15.00 OD prototype fit; validate actual printer",
+    "heat_set_rule": "use insert coupon before production parts"
+  },
+  "inspection": {
+    "incoming_or_print": [
+      "confirm filename/revision",
+      "confirm 1:1 units",
+      "inspect for warp/split layers",
+      "measure all listed critical interfaces",
+      "dry-fit before heat-setting inserts"
+    ],
+    "release_criteria": "No forced assembly, no unintended load-cell bypass, no feed-path step/gap outside specified clearances, no interference throughout intended motion."
+  },
+  "failure_modes": [
+    "incorrect scale or coordinate import",
+    "printer shrink/warp at mating features",
+    "uncontrolled substitution of hardware",
+    "feed fines entering excess clearance",
+    "fastener over-torque cracking printed bosses"
+  ],
+  "digital_twin": {
+    "node_name_recommendation": "05_Drive_Side_Plate_696",
+    "telemetry_binding": "static geometry",
+    "do_not_dimension_from_GLB": true
+  },
+  "solidworks_fusion": {
+    "import_units": "mm",
+    "preserve_origin": true,
+    "create_component_from_body": true,
+    "mate_to_interface_ids": [
+      "DATUM-A",
+      "COORD",
+      "BEARING",
+      "HOUSING"
+    ],
+    "recommended_custom_properties": [
+      "TC_Part_ID",
+      "TC_Revision",
+      "TC_Status",
+      "Material",
+      "BOM_Qty",
+      "Interface_IDs"
+    ]
+  },
+  "physical_validation_required": false,
+  "notes": "See Final_Engineering_Audit/PART_TO_PART_MATH_VERIFICATION.csv and MASTER_PARAMETERS_RECONCILED_V9.json."
+}

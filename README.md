@@ -27,6 +27,10 @@ make on top of it. See [CONTRIBUTING](CONTRIBUTING.md),
 
 ---
 
+## Implementation handoffs
+
+[AI Assistant v2, Smart Feeder and DoorCell complete handoff](handoffs/README.md) contains the versioned implementation plan, starter scaffolds, and engineering sources.
+
 ## Open Source Launch
 
 TenderCells is being built as an open-source operating system for home farming automation and animal care. Builders should be able to self-host the software, inspect the firmware direction, document their own hardware, simulate property layouts, and register custom products without being locked into black-box devices.

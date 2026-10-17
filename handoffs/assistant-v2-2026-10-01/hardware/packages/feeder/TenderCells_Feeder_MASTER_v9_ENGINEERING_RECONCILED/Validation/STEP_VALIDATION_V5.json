@@ -1,0 +1,147 @@
+[
+  {
+    "file": "00A_ROTOR_DRIVE_SUBASSEMBLY.step",
+    "solid_count": 4,
+    "all_solids_valid": true
+  },
+  {
+    "file": "00B_LOAD_CELL_SUBASSEMBLY.step",
+    "solid_count": 3,
+    "all_solids_valid": true
+  },
+  {
+    "file": "00C_DEFAULT_STEPPER_DRIVE_SUBASSEMBLY.step",
+    "solid_count": 6,
+    "all_solids_valid": true
+  },
+  {
+    "file": "00_FULL_ASSEMBLY_V3.step",
+    "solid_count": 13,
+    "all_solids_valid": true
+  },
+  {
+    "file": "01_Base_Plate_HeatSet.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "02_LoadCell_Floating_Platform.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "03_Metering_Center_Housing.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "04_Six_Pocket_Rotor_D_Bore.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "05_Servo_Side_Plate.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "06_Bearing_Side_Plate_696.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "07_Bearing_Retainer_Cap.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "08_25T_Hub_to_6mm_D_Shaft_Adapter.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "09_MG996R_Servo_Cradle.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "10_Hopper_Adapter_Gasketed.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "11_Hopper_Removable.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "12_Hopper_Lid.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "13_Washable_Feed_Trough_Slide.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "14_Trough_Slide_Rail.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "15_Electronics_Enclosure_M3.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "16_Electronics_Lid.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "17_Wire_Strain_Relief_Clamp.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "18_HeatSet_Insert_Test_Coupon.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "19_Hopper_Gasket_TPU.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "20_LoadCell_Guard.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "21_28BYJ48_Stepper_Mount.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "22_5mm_to_6mm_Shaft_Clamp_Coupler.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "23_ULN2003_Driver_Carrier.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "24_Hall_Sensor_Homing_Bracket.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  },
+  {
+    "file": "25_Rotor_Homing_Magnet_Carrier.step",
+    "solid_count": 1,
+    "all_solids_valid": true
+  }
+]

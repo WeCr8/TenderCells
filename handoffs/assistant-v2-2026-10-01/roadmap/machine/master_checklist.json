@@ -1,0 +1,757 @@
+[
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "B01 customer facade implemented"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "`get_farm_home`"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "`list_devices`"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "`list_missions`"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "`get_mission`"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "`list_builder_projects`"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "`get_builder_project`"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "`get_builder_step`"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "Existing v0.3 tools preserved"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "Hosted connector remains read-only"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "Local confirm-twice unchanged"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "Existing MCP tests green"
+  },
+  {
+    "section": "A. Core assistant",
+    "done": false,
+    "item": "New v2 tests green"
+  },
+  {
+    "section": "B. Customer UX",
+    "done": false,
+    "item": "Farm Home feels customer-facing"
+  },
+  {
+    "section": "B. Customer UX",
+    "done": false,
+    "item": "Animals naming used in public UI instead of Pets"
+  },
+  {
+    "section": "B. Customer UX",
+    "done": false,
+    "item": "Mission card"
+  },
+  {
+    "section": "B. Customer UX",
+    "done": false,
+    "item": "Builder project card"
+  },
+  {
+    "section": "B. Customer UX",
+    "done": false,
+    "item": "Device card"
+  },
+  {
+    "section": "B. Customer UX",
+    "done": false,
+    "item": "Alert detail card"
+  },
+  {
+    "section": "B. Customer UX",
+    "done": false,
+    "item": "Property Twin assistant read path"
+  },
+  {
+    "section": "B. Customer UX",
+    "done": false,
+    "item": "Simulation clearly labelled"
+  },
+  {
+    "section": "B. Customer UX",
+    "done": false,
+    "item": "Accessibility tested"
+  },
+  {
+    "section": "C. Claude",
+    "done": false,
+    "item": "farm-check remains valid"
+  },
+  {
+    "section": "C. Claude",
+    "done": false,
+    "item": "builder-guide added"
+  },
+  {
+    "section": "C. Claude",
+    "done": false,
+    "item": "mission-guide added"
+  },
+  {
+    "section": "C. Claude",
+    "done": false,
+    "item": "device-connect added"
+  },
+  {
+    "section": "C. Claude",
+    "done": false,
+    "item": "plugin version updated"
+  },
+  {
+    "section": "C. Claude",
+    "done": false,
+    "item": "`.mcp.json` points to production"
+  },
+  {
+    "section": "C. Claude",
+    "done": false,
+    "item": "Claude custom connector tested"
+  },
+  {
+    "section": "C. Claude",
+    "done": false,
+    "item": "Claude Code marketplace install tested"
+  },
+  {
+    "section": "C. Claude",
+    "done": false,
+    "item": "`.mcpb` built"
+  },
+  {
+    "section": "C. Claude",
+    "done": false,
+    "item": "`.mcpb` signed/released"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "portable plugin ZIP built"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "official TenderCells logo included"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "production MCP configured"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "publisher identity verified"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "domain verification completed"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "tool scan reviewed"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "5 positive cases ready"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "3 negative cases ready"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "demo recording ready"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "reviewer credentials entered securely"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "submission sent"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "review findings resolved"
+  },
+  {
+    "section": "D. OpenAI",
+    "done": false,
+    "item": "published"
+  },
+  {
+    "section": "E. Claude directory",
+    "done": false,
+    "item": "plugin bundle validated"
+  },
+  {
+    "section": "E. Claude directory",
+    "done": false,
+    "item": "official logo/listing assets ready"
+  },
+  {
+    "section": "E. Claude directory",
+    "done": false,
+    "item": "reviewer account works"
+  },
+  {
+    "section": "E. Claude directory",
+    "done": false,
+    "item": "Claude scenarios pass"
+  },
+  {
+    "section": "E. Claude directory",
+    "done": false,
+    "item": "submission sent"
+  },
+  {
+    "section": "E. Claude directory",
+    "done": false,
+    "item": "findings resolved"
+  },
+  {
+    "section": "E. Claude directory",
+    "done": false,
+    "item": "published"
+  },
+  {
+    "section": "F. OAuth / privacy / operations",
+    "done": false,
+    "item": "`farm:read` remains customer scope"
+  },
+  {
+    "section": "F. OAuth / privacy / operations",
+    "done": false,
+    "item": "cross-user isolation test passes"
+  },
+  {
+    "section": "F. OAuth / privacy / operations",
+    "done": false,
+    "item": "TTL on `oauthRequests.expireAt`"
+  },
+  {
+    "section": "F. OAuth / privacy / operations",
+    "done": false,
+    "item": "TTL on `oauthGrants.expireAt`"
+  },
+  {
+    "section": "F. OAuth / privacy / operations",
+    "done": false,
+    "item": "privacy policy current"
+  },
+  {
+    "section": "F. OAuth / privacy / operations",
+    "done": false,
+    "item": "terms current"
+  },
+  {
+    "section": "F. OAuth / privacy / operations",
+    "done": false,
+    "item": "assistant help page current"
+  },
+  {
+    "section": "F. OAuth / privacy / operations",
+    "done": false,
+    "item": "self-service revoke works"
+  },
+  {
+    "section": "F. OAuth / privacy / operations",
+    "done": false,
+    "item": "support inbox monitored"
+  },
+  {
+    "section": "F. OAuth / privacy / operations",
+    "done": false,
+    "item": "no secrets in repository/package"
+  },
+  {
+    "section": "G. Builder content",
+    "done": true,
+    "item": "M0 Explore the Farm"
+  },
+  {
+    "section": "G. Builder content",
+    "done": true,
+    "item": "M1 Protect the Chickens"
+  },
+  {
+    "section": "G. Builder content",
+    "done": true,
+    "item": "M2 Beat the Heat"
+  },
+  {
+    "section": "G. Builder content",
+    "done": true,
+    "item": "M3 Robot Traffic Jam"
+  },
+  {
+    "section": "G. Builder content",
+    "done": true,
+    "item": "M4 Build a Coop Brain"
+  },
+  {
+    "section": "G. Builder content",
+    "done": true,
+    "item": "M5 Sensor Detective"
+  },
+  {
+    "section": "G. Builder content",
+    "done": true,
+    "item": "M6 Make a Light Blink"
+  },
+  {
+    "section": "G. Builder content",
+    "done": true,
+    "item": "M7 Starter Node / First Coop Brain"
+  },
+  {
+    "section": "G. Builder content",
+    "done": false,
+    "item": "M8 Replace Button with Sensor"
+  },
+  {
+    "section": "G. Builder content",
+    "done": false,
+    "item": "M9 Invent a TenderCell"
+  },
+  {
+    "section": "G. Builder content",
+    "done": false,
+    "item": "printable export"
+  },
+  {
+    "section": "G. Builder content",
+    "done": false,
+    "item": "teacher/classroom mode"
+  },
+  {
+    "section": "G. Builder content",
+    "done": false,
+    "item": "Python generator mirror"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "XIAO asset reference-checked"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "USB-C assets reference-checked"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "jumper wire family reference-checked"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "JST assets reference-checked"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "Dupont assets reference-checked"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "WAGO/terminal assets reference-checked"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "breadboard topology verified"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "sensor assets verified"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "power assets verified"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "Chicken Tender Door BOM verified"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "Chicken Tender Door wiring verified"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "Chicken Tender Door mechanics verified"
+  },
+  {
+    "section": "H. Builder visual authority",
+    "done": false,
+    "item": "concept flag removed only after all three pass"
+  },
+  {
+    "section": "I. Brand",
+    "done": true,
+    "item": "authoritative TenderCells SVG included"
+  },
+  {
+    "section": "I. Brand",
+    "done": true,
+    "item": "square authoritative SVG included"
+  },
+  {
+    "section": "I. Brand",
+    "done": true,
+    "item": "64/128/256/512/1024 raster sizes included"
+  },
+  {
+    "section": "I. Brand",
+    "done": true,
+    "item": "store-ready 512/1024 assets included"
+  },
+  {
+    "section": "I. Brand",
+    "done": false,
+    "item": "real ChatGPT screenshot uses correct logo"
+  },
+  {
+    "section": "I. Brand",
+    "done": false,
+    "item": "real Claude screenshot uses correct logo"
+  },
+  {
+    "section": "I. Brand",
+    "done": false,
+    "item": "MCP serverInfo icon tested in both clients"
+  },
+  {
+    "section": "I. Brand",
+    "done": false,
+    "item": "listing icon visually checked after platform masking"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "`scripts/agent-preflight.sh`"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "`scripts/verify-b01.sh`"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "`scripts/store-preflight.sh`"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "OS typecheck"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "OS lint"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "OS vitest"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "OS build"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "website typecheck/lint/docs/links/build"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "hub typecheck/tests/describe check"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "mobile Chrome QA"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "mobile Safari QA"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "desktop Chrome QA"
+  },
+  {
+    "section": "J. Release QA",
+    "done": false,
+    "item": "real OAuth connect/revoke test"
+  },
+  {
+    "section": "K. Future admin",
+    "done": false,
+    "item": "separate admin auth/resource"
+  },
+  {
+    "section": "K. Future admin",
+    "done": false,
+    "item": "admin read-only status"
+  },
+  {
+    "section": "K. Future admin",
+    "done": false,
+    "item": "content validation queue"
+  },
+  {
+    "section": "K. Future admin",
+    "done": false,
+    "item": "asset review queue"
+  },
+  {
+    "section": "K. Future admin",
+    "done": false,
+    "item": "device diagnostics"
+  },
+  {
+    "section": "K. Future admin",
+    "done": false,
+    "item": "content draft/update/publish"
+  },
+  {
+    "section": "K. Future admin",
+    "done": false,
+    "item": "audit records"
+  },
+  {
+    "section": "K. Future admin",
+    "done": false,
+    "item": "customer connector proves admin tools absent"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": true,
+    "item": "source archive included intact"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": true,
+    "item": "expanded engineering package included"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": true,
+    "item": "file inventory/checksums generated"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "current repo MQTT contract reconciliation"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "MCU/pinout reconciliation"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "procurement BOM \u2192 stable Builder part IDs"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "canonical STEP authority mapped"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "GLB reused through existing model-upload/Three.js path"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "feeder digital twin integrated"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "firmware safety review"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "Builder Smart Feeder project authored"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "calibration/test checkpoints authored"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "applicable package validation results reviewed"
+  },
+  {
+    "section": "L. Smart Feeder engineering integration",
+    "done": false,
+    "item": "live hardware validation recorded"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": true,
+    "item": "source archive included intact"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": true,
+    "item": "expanded engineering package included"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": true,
+    "item": "file inventory/checksums generated"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "current Chicken Tender Door book audited page-by-page"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "DoorCell BOM mapped to stable Builder asset IDs"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "controller/MCU/pinout reconciled"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "MQTT contract reconciled"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "rack/pinion/mechanical geometry review"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "solar branch clearly optional"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "open/closed limit tests passed"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "timeout test passed"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "overcurrent obstruction test passed"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "close-obstruction safe response passed"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "E-STOP test passed"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "manual release test passed"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "power-loss regression tests passed"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "supervised bench cycles completed"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "supervised mounted cycles completed"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "animal-safe clearance inspection completed"
+  },
+  {
+    "section": "M. DoorCell V1.4 engineering integration",
+    "done": false,
+    "item": "concept flag removed only after validation"
+  }
+]

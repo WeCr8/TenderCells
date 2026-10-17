@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tender Cells Hardware Product Metadata",
+  "type": "object",
+  "required": [
+    "family_code",
+    "product_id",
+    "revision",
+    "units",
+    "datum_scheme",
+    "cad_authority"
+  ],
+  "properties": {
+    "family_code": {
+      "type": "string"
+    },
+    "product_id": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "string"
+    },
+    "units": {
+      "const": "mm"
+    },
+    "datum_scheme": {
+      "type": "string",
+      "const": "TC_ABC_RIGHT_HANDED"
+    },
+    "cad_authority": {
+      "type": "string"
+    },
+    "electronics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "mpn": {
+            "type": "string"
+          },
+          "classification": {
+            "enum": [
+              "EXACT_VENDOR",
+              "RECEIVING_VERIFIED",
+              "REFERENCE_ENVELOPE"
+            ]
+          }
+        }
+      }
+    },
+    "glb": {
+      "type": "object",
+      "properties": {
+        "classification": {
+          "enum": [
+            "CAD_EXACT",
+            "FUNCTIONAL_SIMPLIFIED"
+          ]
+        },
+        "source_sha256": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

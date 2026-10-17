@@ -1,0 +1,27 @@
+{
+  "B01": {
+    "must_pass": [
+      "express-api npm test",
+      "express-api npm run build",
+      "tendercells-ui npx vitest run src/__tests__/builder",
+      "tendercells-ui npm run build"
+    ],
+    "must_remain_true": [
+      "hosted connector read-only",
+      "customer OAuth scope farm:read",
+      "existing tool names available",
+      "local confirm-twice hardware flow unchanged",
+      "no admin tools on customer connector",
+      "Builder data derived from existing Builder JSON"
+    ],
+    "new_tools": [
+      "get_farm_home",
+      "list_devices",
+      "list_missions",
+      "get_mission",
+      "list_builder_projects",
+      "get_builder_project",
+      "get_builder_step"
+    ]
+  }
+}

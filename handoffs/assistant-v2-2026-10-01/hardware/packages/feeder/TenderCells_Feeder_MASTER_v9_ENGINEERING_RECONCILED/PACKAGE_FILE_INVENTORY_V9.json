@@ -1,0 +1,1452 @@
+[
+  {
+    "path": "00_DROP_IN_START_HERE.md",
+    "bytes": 721,
+    "sha256": "57df1bb2cbd6f6a158fedba3f1f5b2bd8bf2fea65eaaa7ae502706ddadc480c3"
+  },
+  {
+    "path": "PACKAGE_FILE_INVENTORY_V6.json",
+    "bytes": 33910,
+    "sha256": "984f1f970c5448b2da4b84445abc8a42e1ef78013bfb0d8a8c49c5981199353a"
+  },
+  {
+    "path": "PACKAGE_SUMMARY_V4.json",
+    "bytes": 377,
+    "sha256": "4d828c3fc4a253afc900b8da5f49cef18ace78a767171a902d9eca6c553e27cb"
+  },
+  {
+    "path": "PACKAGE_FILE_INVENTORY.json",
+    "bytes": 27384,
+    "sha256": "98846154bceaf7dcb062350f486c1d31c256511e5f9979c5881a6534fdf3e5af"
+  },
+  {
+    "path": "00_PRODUCTION_READINESS.md",
+    "bytes": 916,
+    "sha256": "8641eb683e5ea4cd2871e8180cbe020a7cc6324c04e7a6586b36cbe525a59114"
+  },
+  {
+    "path": "PACKAGE_AUDIT_SUMMARY.json",
+    "bytes": 658,
+    "sha256": "7f9602e443ccebf03784a571955add8413a03dd7d69ca66337be1d4b077a93f4"
+  },
+  {
+    "path": "00_V8_REAL_ASSET_MARKETING.md",
+    "bytes": 494,
+    "sha256": "b2498c049983120aeac8d49e8befd9bcbd51d945b666e37730cf9583ba55d4ad"
+  },
+  {
+    "path": "00_V9_FINAL_ENGINEERING_RECONCILIATION.md",
+    "bytes": 481,
+    "sha256": "677975af58e612fe0e581cf76c4bd7d7a2a632f5f68dc66833c670da269e1afb"
+  },
+  {
+    "path": "PACKAGE_SUMMARY.json",
+    "bytes": 191,
+    "sha256": "d9e4b68d07d5e779d82b526b0e004b3198010455ba7242df4fb9314b1bc32515"
+  },
+  {
+    "path": "PACKAGE_MANIFEST_V4.txt",
+    "bytes": 4307,
+    "sha256": "190eb3e861d5a6b43cb11052c4105e8e4285085813b93ca9b7486b6980d16c1f"
+  },
+  {
+    "path": "PACKAGE_FILE_INVENTORY_V9.json",
+    "bytes": 47138,
+    "sha256": "d6d9f24e84469032b1d6a6c56ff369bfc9f11869844574fc6e2066a8e4faf098"
+  },
+  {
+    "path": "00_BOM_LOCKED_V7.md",
+    "bytes": 120,
+    "sha256": "8ea2534daad8a41d0bff0303f47db968e1fab92c53b0edae7bf7cd89a18d3dcc"
+  },
+  {
+    "path": "README.md",
+    "bytes": 544,
+    "sha256": "49033cd906f2fdbe4ce21a58e6399ca43fcf1afa4dee164d889b629da61a0bee"
+  },
+  {
+    "path": "PACKAGE_MANIFEST.txt",
+    "bytes": 3502,
+    "sha256": "00feb1947dccaf5b4a3687a9e147bc7f830d6ac212c95e50fdd41a31db756b90"
+  },
+  {
+    "path": "00_MODEL_AND_BRAND_CORRECTIONS.md",
+    "bytes": 985,
+    "sha256": "2235702f9a1a58e593ecad42bb1905953d5204cfbc59b41ed672ce1f9366fbc4"
+  },
+  {
+    "path": "Validation/STL_VALIDATION_V6.json",
+    "bytes": 3950,
+    "sha256": "bac12a57dee67860e9be740018b4e910e9069754d2ee3ad7cf5b101a501ffde4"
+  },
+  {
+    "path": "Validation/GLB_STEP_CONSISTENCY_V9.json",
+    "bytes": 236,
+    "sha256": "6cac41be263d1437e9f0d85856b2508921a3fa303e30030b6241b7aa1a152dd3"
+  },
+  {
+    "path": "Validation/STEP_VALIDATION_V5.json",
+    "bytes": 3070,
+    "sha256": "9369b0e8322543ed7109690c27ae47db5ddf4f168f6c99f81fcb808dae6f3f1c"
+  },
+  {
+    "path": "Validation/STL_VALIDATION_V5.json",
+    "bytes": 7641,
+    "sha256": "b2f2ff099e104275a713036f542793e14172883fa10937f3ed7c7ac120a4b0b5"
+  },
+  {
+    "path": "Validation/ACTUATOR_FUNCTION_CHECK.md",
+    "bytes": 351,
+    "sha256": "ab69c5727216038b2dde9a10020914458b9c16ba9341d590fb4a498f75f8f5c3"
+  },
+  {
+    "path": "Validation/STL_VALIDATION.json",
+    "bytes": 6682,
+    "sha256": "0d3f49e26e31461ca7e20ba528c0c668eb82b30757a32a47a891121a11696398"
+  },
+  {
+    "path": "Validation/STL_VALIDATION_V9.json",
+    "bytes": 4164,
+    "sha256": "71307e43f8f83fa8db0a4547cdb8a31cd3bf48900ece4b328b06da520e97f3df"
+  },
+  {
+    "path": "Validation/MODEL_INCONSISTENCY_AUDIT_V6.json",
+    "bytes": 887,
+    "sha256": "5947f0d5433d7402ddb305dabf7cc7b17415e67452edd35061790989264ba023"
+  },
+  {
+    "path": "CAD/MASTER_PARAMETERS.json",
+    "bytes": 1699,
+    "sha256": "c870f1bb02b64a113c8bbe7fc9d035bd7c24fd512db75e832b7af5a0936bd602"
+  },
+  {
+    "path": "CAD/STEP/13_Washable_Feed_Trough_Slide.step",
+    "bytes": 67116,
+    "sha256": "3b7eba749489b3c043b303facf2daa0b700099f151ccf7a27e953f4f0bc09132"
+  },
+  {
+    "path": "CAD/STEP/06_Bearing_Side_Plate_696.step",
+    "bytes": 49624,
+    "sha256": "3e5efe971eb012582c9d9b32e830e9cf5a4446229fda069843b2eb4fceddf4d4"
+  },
+  {
+    "path": "CAD/STEP/09_MG996R_Servo_Cradle.step",
+    "bytes": 57973,
+    "sha256": "9a5e95e1fd2a03ec01db5d1252546b7ae64c9ccee89748f9810c63aec32e27eb"
+  },
+  {
+    "path": "CAD/STEP/24_Hall_Sensor_Homing_Bracket.step",
+    "bytes": 62670,
+    "sha256": "418d40a3abef65b475c97afeb55449c68ed72fbc550c8e77c62fd35be9cf08df"
+  },
+  {
+    "path": "CAD/STEP/05_Servo_Side_Plate.step",
+    "bytes": 52198,
+    "sha256": "756ea99a7d0af1c360693993d2da042faaa0563c779e222fc5ea2448c39cfca3"
+  },
+  {
+    "path": "CAD/STEP/10_Hopper_Adapter_Gasketed.step",
+    "bytes": 211526,
+    "sha256": "02db55883c90b6971d137237af06335d9487a02a171918eba31c41aa96a0a342"
+  },
+  {
+    "path": "CAD/STEP/07_Bearing_Retainer_Cap.step",
+    "bytes": 24571,
+    "sha256": "6be08782f30fd22e3220f87b33c5bf58e4607f4cbe397530955a99cc2966889b"
+  },
+  {
+    "path": "CAD/STEP/15_Electronics_Enclosure_M3.step",
+    "bytes": 149887,
+    "sha256": "2b70378cfb0e1865f11f1b81fc366b405dd6f956d41196e2ed79c9d9bdd2d08a"
+  },
+  {
+    "path": "CAD/STEP/00B_LOAD_CELL_SUBASSEMBLY.step",
+    "bytes": 58385,
+    "sha256": "604da86465f4ae859e4ef86b2bc54afe2b8c0d7dbdd7a4641fbab3d292799b3a"
+  },
+  {
+    "path": "CAD/STEP/18_HeatSet_Insert_Test_Coupon.step",
+    "bytes": 102947,
+    "sha256": "31f5b7ed0f31464d58a25d67037e43e1e178d906e5a3bf7b9ee6c093f7cf82e0"
+  },
+  {
+    "path": "CAD/STEP/02_LoadCell_Floating_Platform.step",
+    "bytes": 55068,
+    "sha256": "533b20c1393042d55eba5159c0fb5210f2834483d7d457dc48a502cf5d554345"
+  },
+  {
+    "path": "CAD/STEP/17_Wire_Strain_Relief_Clamp.step",
+    "bytes": 31555,
+    "sha256": "2174b1e524e93491ec7b0b8ba6e5fa51ac5bceee58647481269b708ad73bebd2"
+  },
+  {
+    "path": "CAD/STEP/00C_DEFAULT_STEPPER_DRIVE_SUBASSEMBLY.step",
+    "bytes": 381802,
+    "sha256": "f6206a4e0f4c93faee2931c40c99ba6fc6243c178eef3a396a0a42fc24119059"
+  },
+  {
+    "path": "CAD/STEP/08_25T_Hub_to_6mm_D_Shaft_Adapter.step",
+    "bytes": 54526,
+    "sha256": "73d5f5df563e8be3946131efadbf8c7d38fe20fb90139fad0d3cd6f4dc7b3a13"
+  },
+  {
+    "path": "CAD/STEP/20_LoadCell_Guard.step",
+    "bytes": 36497,
+    "sha256": "cd330542e755e3e9216d66cbad1603633a656ce5adb3b56a37c9deb3078ace3d"
+  },
+  {
+    "path": "CAD/STEP/14_Trough_Slide_Rail.step",
+    "bytes": 74490,
+    "sha256": "3a1918d5f15340562e0058508b8fb95a4748ec7da5f596bfd1ed6b10617105b1"
+  },
+  {
+    "path": "CAD/STEP/23_ULN2003_Driver_Carrier.step",
+    "bytes": 81115,
+    "sha256": "aa7c2352db52f9afd826efedee29c980705c387c710081695cea370175169c0c"
+  },
+  {
+    "path": "CAD/STEP/22_5mm_to_6mm_Shaft_Clamp_Coupler.step",
+    "bytes": 231227,
+    "sha256": "36caddacd76865b34ed4c2af23ae6e2a719617a26e2dc0a49098a6aee7ab20bc"
+  },
+  {
+    "path": "CAD/STEP/16_Electronics_Lid.step",
+    "bytes": 34342,
+    "sha256": "3af78d720b2eb8c427920f8d1f122e39aa6ae3480e0951099b12a21d32072027"
+  },
+  {
+    "path": "CAD/STEP/04_Six_Pocket_Rotor_D_Bore.step",
+    "bytes": 127697,
+    "sha256": "c79942686a29e1e41a54cd9b4410796509510506470d5d3d18c8ccf83fdf061d"
+  },
+  {
+    "path": "CAD/STEP/03_Metering_Center_Housing.step",
+    "bytes": 443529,
+    "sha256": "7e6f59160391394eb011ad52579a0c9eaa12678e81e20ca062b3b980d80dd04f"
+  },
+  {
+    "path": "CAD/STEP/12_Hopper_Lid.step",
+    "bytes": 43275,
+    "sha256": "fccd583fe139f7dfdf0137a04aef89609cd8725889e455e2ebc9db43fdb5856b"
+  },
+  {
+    "path": "CAD/STEP/21_28BYJ48_Stepper_Mount.step",
+    "bytes": 29769,
+    "sha256": "6ce2ed5f915fb1ba4106ff513d6a5819e0afe78cdf082d716edd656d5afb7c31"
+  },
+  {
+    "path": "CAD/STEP/00_FULL_ASSEMBLY_V3.step",
+    "bytes": 1269049,
+    "sha256": "913df5529b5468d4ac74407a2daa59a532a3960c5dbbf51cc539fddb66c35dac"
+  },
+  {
+    "path": "CAD/STEP/25_Rotor_Homing_Magnet_Carrier.step",
+    "bytes": 24588,
+    "sha256": "97c611a410a6321928360226f62605b20114c3be750471d2dd242cd927d57b4a"
+  },
+  {
+    "path": "CAD/STEP/19_Hopper_Gasket_TPU.step",
+    "bytes": 29513,
+    "sha256": "5e63828fe8b4f71933c1371228fd0237b5d67da727f866f4308f7c6fead8f612"
+  },
+  {
+    "path": "CAD/STEP/01_Base_Plate_HeatSet.step",
+    "bytes": 48312,
+    "sha256": "c35ab3bd979780504d137672786179838a403939e0f86e5a3d63bfe6312f0c55"
+  },
+  {
+    "path": "CAD/STEP/11_Hopper_Removable.step",
+    "bytes": 200004,
+    "sha256": "2e97234975bb527424223d0777583e812d842fe0bb78fa8ae04d196903de3f73"
+  },
+  {
+    "path": "CAD/STEP/00A_ROTOR_DRIVE_SUBASSEMBLY.step",
+    "bytes": 146878,
+    "sha256": "d65674363ecc64eef396c7fbaadb7bc6cc991e6f873829bbb0f85926bc676b36"
+  },
+  {
+    "path": "CAD/STEP/05_Drive_Side_Plate_696.step",
+    "bytes": 49624,
+    "sha256": "3e5efe971eb012582c9d9b32e830e9cf5a4446229fda069843b2eb4fceddf4d4"
+  },
+  {
+    "path": "CAD/STL/02_LoadCell_Floating_Platform.stl",
+    "bytes": 252484,
+    "sha256": "31fb88c3dd981cbbe949c25bb6379e97f3bb64843be2f80d014335a9b1decd24"
+  },
+  {
+    "path": "CAD/STL/18_HeatSet_Insert_Test_Coupon.stl",
+    "bytes": 457884,
+    "sha256": "7c9b9b9bedf414792ee76c092911681b1d83b51e768f48cf08a1f3af767041a0"
+  },
+  {
+    "path": "CAD/STL/05_Servo_Side_Plate.stl",
+    "bytes": 228484,
+    "sha256": "965635c01ea9f895cfc18a38fec8a0c6ca0555006c9819ca270086448c946608"
+  },
+  {
+    "path": "CAD/STL/14_Trough_Slide_Rail.stl",
+    "bytes": 42084,
+    "sha256": "61ea6004712370730837b4b33bd3aa677bf09fa0c3a150b7e6d18d3565a55d9c"
+  },
+  {
+    "path": "CAD/STL/20_LoadCell_Guard.stl",
+    "bytes": 52284,
+    "sha256": "395f92fb59c70641f784899fd129e7f3171c457fa66ab00221a9b4201fd26347"
+  },
+  {
+    "path": "CAD/STL/03_Metering_Center_Housing.stl",
+    "bytes": 498984,
+    "sha256": "5c1b37e346fd960144144ddee3183d8a9088fcf7849f2b896fd6e355de8d4a79"
+  },
+  {
+    "path": "CAD/STL/25_Rotor_Homing_Magnet_Carrier.stl",
+    "bytes": 51284,
+    "sha256": "bfa5fce4b78d12303eb1fa3134cb72df876c938f4ed8bf4771f229857741ffd3"
+  },
+  {
+    "path": "CAD/STL/17_Wire_Strain_Relief_Clamp.stl",
+    "bytes": 89484,
+    "sha256": "09860878b5d9ade98650273d9d1eb3c9369cbb12ac3a151e90b1455bef0a0979"
+  },
+  {
+    "path": "CAD/STL/23_ULN2003_Driver_Carrier.stl",
+    "bytes": 203884,
+    "sha256": "1b7e15c1ab034f738c5bfe8a4d1d4648ba8c83a9433bb3a5788801524dfcf63e"
+  },
+  {
+    "path": "CAD/STL/04_Six_Pocket_Rotor_D_Bore.stl",
+    "bytes": 272584,
+    "sha256": "fc59bf4fae0c52aab7e2bef49c30874c346fdd06e88bc0d9a64b04b577bfa8d7"
+  },
+  {
+    "path": "CAD/STL/10_Hopper_Adapter_Gasketed.stl",
+    "bytes": 96084,
+    "sha256": "afb44af7b7c8bbaf834819e460019c329cff3e919b05bda449bbba19da14331d"
+  },
+  {
+    "path": "CAD/STL/19_Hopper_Gasket_TPU.stl",
+    "bytes": 1684,
+    "sha256": "89d4b3e2a0d3f35fd2615c7e04d42a445fe7fa4c1abef6f18f59b8abde7b38f4"
+  },
+  {
+    "path": "CAD/STL/13_Washable_Feed_Trough_Slide.stl",
+    "bytes": 3484,
+    "sha256": "1495245991ad4be939bd10ae6b62e2c577c3c3c236e1f43721b8052edd40c650"
+  },
+  {
+    "path": "CAD/STL/08_25T_Hub_to_6mm_D_Shaft_Adapter.stl",
+    "bytes": 176884,
+    "sha256": "a05bcacbfc7ae3ebeb6fa092b4d1e219259f5d3e4ad44e821feb6845c1fb68d7"
+  },
+  {
+    "path": "CAD/STL/01_Base_Plate_HeatSet.stl",
+    "bytes": 103084,
+    "sha256": "d9480ac0576d5ad63237a586166f84b9520a634fa42b958e82b68f5bdacf3c11"
+  },
+  {
+    "path": "CAD/STL/22_5mm_to_6mm_Shaft_Clamp_Coupler.stl",
+    "bytes": 212684,
+    "sha256": "a767d4a284f9c6e3f026adc1e378dc24d95cf91c9e2ee3c127579f4f1082e8a2"
+  },
+  {
+    "path": "CAD/STL/21_28BYJ48_Stepper_Mount.stl",
+    "bytes": 76884,
+    "sha256": "d0b74a1e3b85d6d9f3ca61956eb013a4e2239ab96223c8c138423012f0e42257"
+  },
+  {
+    "path": "CAD/STL/15_Electronics_Enclosure_M3.stl",
+    "bytes": 191684,
+    "sha256": "d07985c48984f775b4edb5404bf2de043f240e4fc550339645210f9d9ac24c4b"
+  },
+  {
+    "path": "CAD/STL/16_Electronics_Lid.stl",
+    "bytes": 102284,
+    "sha256": "0ae2a23ab43b2dd885740557679334ab28438f2ae8d283eb84dec8bb5c647bf8"
+  },
+  {
+    "path": "CAD/STL/09_MG996R_Servo_Cradle.stl",
+    "bytes": 103884,
+    "sha256": "696ea1beefa53e0fa1711c4077ff290b281bb0d07513555e92893d4e932587b9"
+  },
+  {
+    "path": "CAD/STL/06_Bearing_Side_Plate_696.stl",
+    "bytes": 228484,
+    "sha256": "979024475685cbf101a1d45e82d523f9e23963612e5c082d88fb76ff1980365f"
+  },
+  {
+    "path": "CAD/STL/07_Bearing_Retainer_Cap.stl",
+    "bytes": 126684,
+    "sha256": "972f3df0f1b02979ef9802ec53b1583e070b4b4fa7b797d546e20943114c69d9"
+  },
+  {
+    "path": "CAD/STL/11_Hopper_Removable.stl",
+    "bytes": 74584,
+    "sha256": "9087e1a473e1c74cc9fb548170a011165f74e6f1745b5dafc00950193702a5f7"
+  },
+  {
+    "path": "CAD/STL/24_Hall_Sensor_Homing_Bracket.stl",
+    "bytes": 65784,
+    "sha256": "ab137e659a856768def3e9b23623916d1d28a43ad8bfa10eae620278e4da053b"
+  },
+  {
+    "path": "CAD/STL/12_Hopper_Lid.stl",
+    "bytes": 2284,
+    "sha256": "0eff9dc9798ca47cc39053dfeabc25c2c68f8b77f0fdb9e51d9ae19afcfd2cc3"
+  },
+  {
+    "path": "CAD/STL/05_Drive_Side_Plate_696.stl",
+    "bytes": 228484,
+    "sha256": "979024475685cbf101a1d45e82d523f9e23963612e5c082d88fb76ff1980365f"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-GLB-2100_STEPPER_DRIVE_ALIGNED_V9.glb",
+    "bytes": 418988,
+    "sha256": "4c39b5d5f4918755f7f256f02afe94e92d6538e13dec1cadd8f621e567272e17"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-GLB-1100_STEPPER_DRIVE_EXACT.glb",
+    "bytes": 262736,
+    "sha256": "b58bd716e2cbd5dc3edfe2d6fec2176bc0587439abcfb1a33bd2d286af0d1258"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-GLB-2000_FEED_PATH_CORE_V9.glb.manifest.json",
+    "bytes": 330,
+    "sha256": "b2b2f036132d1a008c06f2d2cf385442b95ea4594dd062584150cb6958bef26a"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-GLB-2000_FEED_PATH_CORE_V9.glb",
+    "bytes": 765396,
+    "sha256": "de3027f56bffe6ec29d556ce4431b69838082aff5e9b9f744c592851ec99283c"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-SUB-1200_LOAD_CELL_MODULE.step",
+    "bytes": 58385,
+    "sha256": "604da86465f4ae859e4ef86b2bc54afe2b8c0d7dbdd7a4641fbab3d292799b3a"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-SUB-2100_STEPPER_DRIVE_ALIGNED_V9.step",
+    "bytes": 509816,
+    "sha256": "318e0f8195ce25668d84504bcab1a2faf1c63240ca8c4a007b68bbc937902780"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-ASM-2000_FEED_PATH_CORE_V9.step",
+    "bytes": 1308418,
+    "sha256": "4c3eb09bbd1a0fc54390f15d6514a874ce30524bb7f80eba0be75ea90e345b90"
+  },
+  {
+    "path": "CAD/CANONICAL/GLB_AUTHORITY_V9.md",
+    "bytes": 279,
+    "sha256": "38f1e7ee3b10cd809d4afe4d2d78a39ca858c226f776e1f88eb44e6f3c445d0b"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-GLB-1100_STEPPER_DRIVE_EXACT.manifest.json",
+    "bytes": 521,
+    "sha256": "f82e26a3daaaf171f32f7bfbddb2acc15b269fe82324d3c6f7d9c777c8e3f6f6"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-GLB-1000_MECHANICAL_CORE_EXACT.glb",
+    "bytes": 689068,
+    "sha256": "10648a3e37c73e261656dff35fea7f4cd83925800b5a63222c0eb3f11aad9aab"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-GLOBAL-REF-0001_COORDINATE_FRAME_100MM.step",
+    "bytes": 64594,
+    "sha256": "01344edab8b99abc002b3da0308636cb2928effd2c994fc8652ba0b77cf87cd1"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-SUB-1100_STEPPER_DRIVE_MODULE.step",
+    "bytes": 381802,
+    "sha256": "f6206a4e0f4c93faee2931c40c99ba6fc6243c178eef3a396a0a42fc24119059"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-GLB-1000_MECHANICAL_CORE_EXACT.manifest.json",
+    "bytes": 594,
+    "sha256": "9b80cbca57e421ee32e2bdbb7dec1f758213598d46b280b226071ad12fa53dff"
+  },
+  {
+    "path": "CAD/CANONICAL/TC-FDR-ASM-1000_MECHANICAL_CORE.step",
+    "bytes": 1180595,
+    "sha256": "4df4233d9ff0b7095715533e0b51bd4e8863f1259a93d9a99c47b1002f784d1b"
+  },
+  {
+    "path": "CAD/HARDWARE_STEP/M3x16_SHCS_REFERENCE.step",
+    "bytes": 9696,
+    "sha256": "381fcd5ca6efe27c5e5ff2fc0d00ffeb24a2642b8e20c03a4f48db4485c8bc14"
+  },
+  {
+    "path": "CAD/HARDWARE_STEP/696_Bearing_6x15x5_REFERENCE.step",
+    "bytes": 9988,
+    "sha256": "f64f5e7bf52d995b4c1f96ba894a333abaf45a0a9e29f95406e547b85de73f90"
+  },
+  {
+    "path": "CAD/HARDWARE_STEP/M5x20_SHCS_REFERENCE.step",
+    "bytes": 9692,
+    "sha256": "f5c264b0aa3912c7e186ae8e9d242e2874bc639ff4db08409aae8abd22516636"
+  },
+  {
+    "path": "CAD/HARDWARE_STEP/6mm_D_Shaft_100mm_REFERENCE.step",
+    "bytes": 9923,
+    "sha256": "82936316f7a79be44bff0ebf822c6c5c4a98aa0bd92a71e6d722662b2084e450"
+  },
+  {
+    "path": "CAD/HARDWARE_STEP/M4x16_SHCS_REFERENCE.step",
+    "bytes": 9674,
+    "sha256": "546b46537de610f3a327f49b596353265a60f50e1a9b543f865ae745f8ee8343"
+  },
+  {
+    "path": "CAD/HARDWARE_STEP/25T_Aluminum_Servo_Hub_20mm_14PCD_REFERENCE.step",
+    "bytes": 30887,
+    "sha256": "f12359991ce38dd5ea43afe02bedd2b90d2224c4562d6ac8134879ad6d0c947c"
+  },
+  {
+    "path": "CAD/HARDWARE_STEP/M3x10_SHCS_REFERENCE.step",
+    "bytes": 9696,
+    "sha256": "82b99ecb61b05ec906c3d9e3fd41e064466b7a48dd772ed631511aca8580c304"
+  },
+  {
+    "path": "CAD/LEGACY_REFERENCE/TC-FDR-ASM-0900_LEGACY_SERVO_ERA_FULL_ASSEMBLY.step",
+    "bytes": 1269049,
+    "sha256": "913df5529b5468d4ac74407a2daa59a532a3960c5dbbf51cc539fddb66c35dac"
+  },
+  {
+    "path": "CAD/LEGACY_REFERENCE/V8_METERING/05_Servo_Side_Plate_V8.stl",
+    "bytes": 228484,
+    "sha256": "965635c01ea9f895cfc18a38fec8a0c6ca0555006c9819ca270086448c946608"
+  },
+  {
+    "path": "CAD/LEGACY_REFERENCE/V8_METERING/04_Six_Pocket_Rotor_D_Bore_V8.step",
+    "bytes": 53379,
+    "sha256": "b98e3bf95ea4516fba25bab2f0e2dcc3af8aaefc2ebe5b1a74f514006c152c00"
+  },
+  {
+    "path": "CAD/LEGACY_REFERENCE/V8_METERING/05_Servo_Side_Plate_V8.step",
+    "bytes": 52198,
+    "sha256": "756ea99a7d0af1c360693993d2da042faaa0563c779e222fc5ea2448c39cfca3"
+  },
+  {
+    "path": "CAD/LEGACY_REFERENCE/V8_METERING/04_Six_Pocket_Rotor_D_Bore_V8.stl",
+    "bytes": 139084,
+    "sha256": "cfacd6cb4cd4e6ea85a9b4bc57f68b7c9d610111073553042e91ee532fb28ac3"
+  },
+  {
+    "path": "CAD/ALTERNATES/MG996R_SERVO/09_MG996R_Servo_Cradle.step",
+    "bytes": 57973,
+    "sha256": "9a5e95e1fd2a03ec01db5d1252546b7ae64c9ccee89748f9810c63aec32e27eb"
+  },
+  {
+    "path": "CAD/ALTERNATES/MG996R_SERVO/05_Servo_Side_Plate.step",
+    "bytes": 52198,
+    "sha256": "756ea99a7d0af1c360693993d2da042faaa0563c779e222fc5ea2448c39cfca3"
+  },
+  {
+    "path": "CAD/ALTERNATES/MG996R_SERVO/08_25T_Hub_to_6mm_D_Shaft_Adapter.step",
+    "bytes": 54526,
+    "sha256": "73d5f5df563e8be3946131efadbf8c7d38fe20fb90139fad0d3cd6f4dc7b3a13"
+  },
+  {
+    "path": "Manufacturing/TOLERANCES_AND_FITS.md",
+    "bytes": 1266,
+    "sha256": "ca7d1a4612d56283329f22ce0bd6d44a2a8817c60a2948b0103979ea5cc898cb"
+  },
+  {
+    "path": "Manufacturing/CAD_MODEL_CLASSIFICATION.csv",
+    "bytes": 990,
+    "sha256": "b3bb4febea9b58b4d071c7eb7994971e5c8eb547efa9ba87751750df57e4f459"
+  },
+  {
+    "path": "Manufacturing/RECEIVING_INSPECTION.md",
+    "bytes": 672,
+    "sha256": "a22a845afc21fe2aa1d87d944e57564d56de87b3fc0da20ed341b8a064ddd7b9"
+  },
+  {
+    "path": "Manufacturing/EXACT_VS_REFERENCE_MODELS.md",
+    "bytes": 492,
+    "sha256": "80698c1f79d005a6e124f8832f695cef09c6f7694eab8f2fda18ae61dd0e885e"
+  },
+  {
+    "path": "Manufacturing/PRINT_SETTINGS.md",
+    "bytes": 676,
+    "sha256": "bfac7558b0d95c3e9afb5c5806071fef5ecb24f2dadd6abcd2f0d632cacee143"
+  },
+  {
+    "path": "Manufacturing/PART_DIMENSIONS.csv",
+    "bytes": 1860,
+    "sha256": "c575c06c190f14cac17753e59d738d75b17e53467aaecb3632ef4437a6d02320"
+  },
+  {
+    "path": "Part_Global_Needs/06_Bearing_Side_Plate_696.global-needs.json",
+    "bytes": 3507,
+    "sha256": "720bf62f082ce5d5700601c1d50ffab1766cac234cc8d42a596529da77b4cc29"
+  },
+  {
+    "path": "Part_Global_Needs/TC-FDR-ACT-28BYJ.global-needs.json",
+    "bytes": 754,
+    "sha256": "931b8dc6aef76ea0e2c10d597e54d761f66d6820890677974fc9b6185d266b64"
+  },
+  {
+    "path": "Part_Global_Needs/TC-FDR-HW-MAG.global-needs.json",
+    "bytes": 714,
+    "sha256": "e16ca542ca09f4284d692d63705579df6501624ec9e069e3497cfa50ac2b98ad"
+  },
+  {
+    "path": "Part_Global_Needs/15_Electronics_Enclosure_M3.global-needs.json",
+    "bytes": 3068,
+    "sha256": "ddc9f89dbca9c36ffec7f3c580cae3378030af6ca7bba071193f5ab0fd0ea6b7"
+  },
+  {
+    "path": "Part_Global_Needs/22_5mm_to_6mm_Shaft_Clamp_Coupler.global-needs.json",
+    "bytes": 3335,
+    "sha256": "a9c9f021a5d286cffeae46efb5b44b32c9731ca12fbeea0ab9f8baae61277b65"
+  },
+  {
+    "path": "Part_Global_Needs/TC-FDR-DRV-ULN2003.global-needs.json",
+    "bytes": 717,
+    "sha256": "69d8ae1134457680ae881a3d23dded021730e804c408efce60e9881349b6a31b"
+  },
+  {
+    "path": "Part_Global_Needs/TC-FDR-SN-HALL.global-needs.json",
+    "bytes": 704,
+    "sha256": "d858ec37fc20f9d67a420207d054e4d58abc4a95764fa4df9611b9bd6c0f3d38"
+  },
+  {
+    "path": "Part_Global_Needs/14_Trough_Slide_Rail.global-needs.json",
+    "bytes": 3044,
+    "sha256": "0eb404bdd06c883c70c54b1ab60de86b4f7be2592e6ddba3811bb7aac0d87f42"
+  },
+  {
+    "path": "Part_Global_Needs/PART_GLOBAL_NEEDS_INDEX.csv",
+    "bytes": 3546,
+    "sha256": "5a69668343c39d01a521c44e070cf58370b41537173cddc0c5a97a53c322c3eb"
+  },
+  {
+    "path": "Part_Global_Needs/TC-FDR-EL-HX711.global-needs.json",
+    "bytes": 741,
+    "sha256": "e63dfd7cc858efebb94b592bc0508abef7220979ac433aff127002b29e8e181e"
+  },
+  {
+    "path": "Part_Global_Needs/05_Servo_Side_Plate.global-needs.json",
+    "bytes": 3042,
+    "sha256": "193470038b2c52bb27266d8f6d53a6c819ec5d3ba4d253335030e405db94f234"
+  },
+  {
+    "path": "Part_Global_Needs/05_Drive_Side_Plate_696.global-needs.json",
+    "bytes": 3513,
+    "sha256": "57967142ba8348bb8bdba21f256d4576cd444ff26c87452d5943cf4b6c073101"
+  },
+  {
+    "path": "Part_Global_Needs/21_28BYJ48_Stepper_Mount.global-needs.json",
+    "bytes": 3297,
+    "sha256": "f20f1b0b79274355ce9bfd519b69a7139241d6f5c9fcdbc5531c049a35a134c0"
+  },
+  {
+    "path": "Part_Global_Needs/18_HeatSet_Insert_Test_Coupon.global-needs.json",
+    "bytes": 3072,
+    "sha256": "fb4098c5cd02b9c67d130ae857b3774581a8c726886a257f6042d3df9810c8a6"
+  },
+  {
+    "path": "Part_Global_Needs/10_Hopper_Adapter_Gasketed.global-needs.json",
+    "bytes": 3462,
+    "sha256": "75934a38134d71e6cd93194312dbae3d16bc043beed9a6500afe68ed4fad4a03"
+  },
+  {
+    "path": "Part_Global_Needs/TC-FDR-EL-XIAO.global-needs.json",
+    "bytes": 763,
+    "sha256": "10004c1d7cde6b78ef7707d61fe29d7a2a5765ac5a8cfa3ef18a8ad5642d9767"
+  },
+  {
+    "path": "Part_Global_Needs/24_Hall_Sensor_Homing_Bracket.global-needs.json",
+    "bytes": 3076,
+    "sha256": "c57a25702c57af97a26903fb681f16a0e48ac13c8a85a096f252aa4f4ae288fa"
+  },
+  {
+    "path": "Part_Global_Needs/25_Rotor_Homing_Magnet_Carrier.global-needs.json",
+    "bytes": 3074,
+    "sha256": "640948b775d816043378200c4db392f9cc3b6b46b7ae6107de599d0beafd8db6"
+  },
+  {
+    "path": "Part_Global_Needs/02_LoadCell_Floating_Platform.global-needs.json",
+    "bytes": 3302,
+    "sha256": "bb418fc6314b6e7fff9268e12e5567dd7fc7a43dae53cc55034df6655569d7d6"
+  },
+  {
+    "path": "Part_Global_Needs/03_Metering_Center_Housing.global-needs.json",
+    "bytes": 3479,
+    "sha256": "45b216f1fba0ed3d7cc9a12402d18e1bbc875427a41c6ecb66c89c388c9516f1"
+  },
+  {
+    "path": "Part_Global_Needs/TC-FDR-HW-SHAFT.global-needs.json",
+    "bytes": 745,
+    "sha256": "76d84efccd302f5820174680b2abaf574dd880972409bb4de627535929625f05"
+  },
+  {
+    "path": "Part_Global_Needs/08_25T_Hub_to_6mm_D_Shaft_Adapter.global-needs.json",
+    "bytes": 3095,
+    "sha256": "352b276071bf42371edce77771622db4b80c1bde05b7ba5faa98eff7843bde7f"
+  },
+  {
+    "path": "Part_Global_Needs/01_Base_Plate_HeatSet.global-needs.json",
+    "bytes": 3053,
+    "sha256": "5d9159bc46644cefd2f1e1ce951859cce5a74bbb704e68ed9082f5dd32371a03"
+  },
+  {
+    "path": "Part_Global_Needs/23_ULN2003_Driver_Carrier.global-needs.json",
+    "bytes": 3050,
+    "sha256": "e9bc232b57139dd7a807085bb40fe0757bfe4b6e07c58f85a7cfd4fbddd1f7af"
+  },
+  {
+    "path": "Part_Global_Needs/04_Six_Pocket_Rotor_D_Bore.global-needs.json",
+    "bytes": 3664,
+    "sha256": "24d395a1af9a28d4b73a476a9f134db0590172d23ab8524e6c66414bd9496af0"
+  },
+  {
+    "path": "Part_Global_Needs/16_Electronics_Lid.global-needs.json",
+    "bytes": 3034,
+    "sha256": "2d9440f4a29602ab68d4cb3511c5d02f8a2248cef2dcba1dd96b223d6188c942"
+  },
+  {
+    "path": "Part_Global_Needs/07_Bearing_Retainer_Cap.global-needs.json",
+    "bytes": 3049,
+    "sha256": "747a9ac387f0d00078a2e8249e2cf31a4c2abdb72f928a28365414539a0bfe36"
+  },
+  {
+    "path": "Part_Global_Needs/12_Hopper_Lid.global-needs.json",
+    "bytes": 3009,
+    "sha256": "6e3229ba960bcbe26d6c421fa33c57decd710f368af4cda6f3fbef0c89ba940c"
+  },
+  {
+    "path": "Part_Global_Needs/TC-FDR-SN-TAL220B.global-needs.json",
+    "bytes": 789,
+    "sha256": "953bea0ac7744604eadef805252e17baf6978e5cfddf3a4015dc820be609f7f3"
+  },
+  {
+    "path": "Part_Global_Needs/17_Wire_Strain_Relief_Clamp.global-needs.json",
+    "bytes": 3061,
+    "sha256": "ca6423992bff20d7f86523f65f902f43d8e10292f631c367fe31095b93ff9cbd"
+  },
+  {
+    "path": "Part_Global_Needs/TC-FDR-HW-696.global-needs.json",
+    "bytes": 751,
+    "sha256": "b86cdc174cb11fed00b373130e575b112c7aacbdd00090012cbcdceaffe7c7b1"
+  },
+  {
+    "path": "Part_Global_Needs/09_MG996R_Servo_Cradle.global-needs.json",
+    "bytes": 3050,
+    "sha256": "9dae715030e8179bd787b991ad8e198040a8e65605397ef5824c8d3d5891d5a4"
+  },
+  {
+    "path": "Part_Global_Needs/11_Hopper_Removable.global-needs.json",
+    "bytes": 3382,
+    "sha256": "f6d0e1e653237a6b4c42048bb43a6503bb2ceff5225d55f7ecaaeac8fad6f7a0"
+  },
+  {
+    "path": "Part_Global_Needs/20_LoadCell_Guard.global-needs.json",
+    "bytes": 3258,
+    "sha256": "62ac8399bfad3f7ff7fe2d8ef54bc873dd66b94454aabf865b5e5f7d40b2e383"
+  },
+  {
+    "path": "Part_Global_Needs/19_Hopper_Gasket_TPU.global-needs.json",
+    "bytes": 2951,
+    "sha256": "58655b1296746aeea63fc87e9e297aa8d65d9e4db3e13954bfd5f3e6e1710fa6"
+  },
+  {
+    "path": "Part_Global_Needs/13_Washable_Feed_Trough_Slide.global-needs.json",
+    "bytes": 3074,
+    "sha256": "a4ec2b22de099b4c54ec65c3a3cba54a181b3041cc35f7bf5f2c35d97f10b522"
+  },
+  {
+    "path": "Marketing/README_REAL_ASSET_MARKETING.md",
+    "bytes": 1598,
+    "sha256": "279adb19b895a17c1fbf0e28a39c27907a68888a71173efd3bbdeb28295ba00f"
+  },
+  {
+    "path": "Marketing/REAL_ASSET_MANIFEST.json",
+    "bytes": 1661,
+    "sha256": "cb978f438b5ed1eb99bfe16d65371f11d68f6d5b55198827369558e061a21500"
+  },
+  {
+    "path": "Marketing/Real_Asset_Renders/TC-FDR-MKT-1000_REAL_CAD_COMBINED.glb",
+    "bytes": 952464,
+    "sha256": "e1de40a4e07fdd148658b01495a585bb1191124b0a2c1f7d8b214533dd17c001"
+  },
+  {
+    "path": "Marketing/Real_Asset_Renders/02_REAL_CORE_FRONT.png",
+    "bytes": 60213,
+    "sha256": "773e3bf460594476965cf182e12963fcb2b14325f184961552f2ca1576cc32c4"
+  },
+  {
+    "path": "Marketing/Real_Asset_Renders/01_REAL_CORE_ISOMETRIC.png",
+    "bytes": 110258,
+    "sha256": "002e5346b9d2675120e3f4cd90d593c2cdc7b138e31bde7e2c6aa01b6856f0da"
+  },
+  {
+    "path": "Marketing/Real_Asset_Renders/03_REAL_CORE_SIDE.png",
+    "bytes": 55407,
+    "sha256": "398fe3a84c39f918c7f74aed286820154a9217e94acfc9677e0f0a7dac4a801d"
+  },
+  {
+    "path": "Marketing/Real_Asset_Renders/06_REAL_CORE_TRANSPARENT.png",
+    "bytes": 125920,
+    "sha256": "82309955c8869fd3da3b24f2bdfa49cfd89efd0ce5103eab55a5c734fcedb4aa"
+  },
+  {
+    "path": "Marketing/Real_Asset_Renders/08_REAL_CAD_STUDIO_MARKETING.png",
+    "bytes": 138418,
+    "sha256": "003ae3087922815191817349db86eaaa8f59fae17aed2c052cb95a4b4848f10b"
+  },
+  {
+    "path": "Marketing/Real_Asset_Renders/05_REAL_ASSET_COMBINED.png",
+    "bytes": 98457,
+    "sha256": "f48f5d3b5bec632d828814a8a8e85b665e4d9112e47738d334a556275a070bbe"
+  },
+  {
+    "path": "Marketing/Real_Asset_Renders/07_REAL_CAD_FARM_MARKETING_COMPOSITE.png",
+    "bytes": 1103193,
+    "sha256": "3bddb4edbb92309b69e830ac9c7682da0d4b040601097f39f6bdbb275bcfafa7"
+  },
+  {
+    "path": "Marketing/Real_Asset_Renders/04_REAL_STEPPER_DRIVE.png",
+    "bytes": 246535,
+    "sha256": "188ebd5819b211b46b0f3c1ec36683f51997e6309993cddaf83f3232eec27437"
+  },
+  {
+    "path": "Images/README.md",
+    "bytes": 242,
+    "sha256": "6ff496358505757b5f25e5b483a19a0d6d2c3e50d5c0907a09dafff326f5c7d4"
+  },
+  {
+    "path": "Images/01_Product_Assembly_Overview.png",
+    "bytes": 2262121,
+    "sha256": "92ded3df6fab3bbdf7350468a6cac5d7d4d7c9c2cc6118ddcd8e9821d717bb6c"
+  },
+  {
+    "path": "Images/02_Classroom_Build_Infographic.png",
+    "bytes": 2165561,
+    "sha256": "2dfa3f0e499815b88f80950a6c98c45af50f1cf995a90e30a5128ed357211546"
+  },
+  {
+    "path": "Images/Technical/06_Overall_Dimensions.png",
+    "bytes": 42217,
+    "sha256": "d5ab8d31281568bd89b44d60ee9612e8185461ccf58b0cec5848ddd08a0261d0"
+  },
+  {
+    "path": "Images/Technical/02_Actual_Geometry_Front.png",
+    "bytes": 136334,
+    "sha256": "4eede5c26611e2cebeb70343ae5eeb60158ec4c2ca4ce2690a7a1f9c91b886d9"
+  },
+  {
+    "path": "Images/Technical/03_Actual_Geometry_Side.png",
+    "bytes": 132651,
+    "sha256": "e8a8c8548b9252767bbbec3282b34f065b38c94ad899d2570ab4bfcd2a0a3671"
+  },
+  {
+    "path": "Images/Technical/05_Actual_Geometry_Exploded.png",
+    "bytes": 41246,
+    "sha256": "dd1090ba344bd9b7ef4a775786e2eb636ed0d3363937aa2d0452292a4a2652f0"
+  },
+  {
+    "path": "Images/Technical/04_Actual_Geometry_Top.png",
+    "bytes": 68849,
+    "sha256": "c9b0217770872f356e1551ad3b957863e8a0d14f12ad9fa2c0212cecdd255d8a"
+  },
+  {
+    "path": "Images/Technical/07_Printable_Part_Dimensions.png",
+    "bytes": 74518,
+    "sha256": "701d3b036206538e480ed386e4143773e279442fefad2c24ee699d5d7c7c130f"
+  },
+  {
+    "path": "Images/Technical/01_Actual_Geometry_Isometric.png",
+    "bytes": 244976,
+    "sha256": "766b01396571c84b3954c0cfbef1cc01c3932c10f103dd90bf0f7564584a2157"
+  },
+  {
+    "path": "Firmware/TenderCells_Feeder_v3_SIX_POCKET_STEPPER.ino",
+    "bytes": 1537,
+    "sha256": "468cc5b45847a5c7f3537f96231ae65885b2190b8b80c34a7cc8fbe18c3afe39"
+  },
+  {
+    "path": "Firmware/ALTERNATE_MG996R_REFERENCE_NOT_6POCKET_INDEXER.ino",
+    "bytes": 945,
+    "sha256": "878f2cdc389081a3104f401e28445ba8bbf47a0697474c88586a1be4f6de9324"
+  },
+  {
+    "path": "Global_CAD_Standard/ELECTRONICS_ENVELOPE_STANDARD.csv",
+    "bytes": 783,
+    "sha256": "ffd4857e5bd119726e2d900f79406ca37f8f89971b203a825d9906a9b2703766"
+  },
+  {
+    "path": "Global_CAD_Standard/LEGACY_FEEDER_PART_MASTER_TABLE_V8.csv",
+    "bytes": 3286,
+    "sha256": "0e9f8729fc62b5ca28867903d1b37a7508b9c7dddb543099daaa2aa326865bcf"
+  },
+  {
+    "path": "Global_CAD_Standard/TenderCells_Global_Equations_SolidWorks.txt",
+    "bytes": 419,
+    "sha256": "1bc0a90e742bcee2b9871593006a6a302be9569f57c451535694fc0c4decbd88"
+  },
+  {
+    "path": "Global_CAD_Standard/FEEDER_MODEL_RECONCILIATION.md",
+    "bytes": 1164,
+    "sha256": "fb8e8c14572032ae2f98d8a0130c5131d0d72fd444c4363814f15b02e5abb3f1"
+  },
+  {
+    "path": "Global_CAD_Standard/TenderCells_GlobalParameters_Fusion360.py",
+    "bytes": 1721,
+    "sha256": "0a9e75b55474097ce9c2c5445c7f8168fc388718103e4786b394b419e79d224c"
+  },
+  {
+    "path": "Global_CAD_Standard/DIGITAL_TWIN_GLTF_STANDARD.md",
+    "bytes": 565,
+    "sha256": "94070692d290448f7d17d75c61e2cdd37fba41b4fe28350dacb881947a2da06f"
+  },
+  {
+    "path": "Global_CAD_Standard/FEEDER_PART_MASTER_TABLE_V9.csv",
+    "bytes": 3222,
+    "sha256": "cd7d55fab3009b03efee1137e515796eaa7071d2e3976d498ba48c5b56b3d69c"
+  },
+  {
+    "path": "Global_CAD_Standard/FUSION_360_IMPORT_WORKFLOW.md",
+    "bytes": 866,
+    "sha256": "842503dfed22f5c5c56b43a47656e2ebe49bde540333e849505659f528bf7a5b"
+  },
+  {
+    "path": "Global_CAD_Standard/GLOBAL_PARAMETERS.csv",
+    "bytes": 1027,
+    "sha256": "dc92821979b550e590eee365117398b2198c7d70f9d5add3f52b234c9ca40240"
+  },
+  {
+    "path": "Global_CAD_Standard/TENDERCELLS_GLOBAL_CAD_STANDARD.md",
+    "bytes": 1306,
+    "sha256": "c63c73f3569fcb7df58505ce965b2852c97dcfc2c2e3c7b4ed6d3429b7be650c"
+  },
+  {
+    "path": "Global_CAD_Standard/STEP_GEOMETRY_MEASUREMENT_AUDIT_V9.csv",
+    "bytes": 2893,
+    "sha256": "b720f1aff52ab32f7c2d554f6b4952cb81384b25135f02a37a15905cd27f87b8"
+  },
+  {
+    "path": "Global_CAD_Standard/MODEL_NAMING_AND_REVISION_STANDARD.md",
+    "bytes": 545,
+    "sha256": "a28a980d1caa495321b5d7d2e6eff1b70ecd27bcaa2e5c9bdd7912c986e6b9b5"
+  },
+  {
+    "path": "Global_CAD_Standard/SOLIDWORKS_IMPORT_WORKFLOW.md",
+    "bytes": 1058,
+    "sha256": "fc964508aa240e154b616f94babec0e3013e9986e3dff30fc96ab357967a92e6"
+  },
+  {
+    "path": "Global_CAD_Standard/TenderCells_Feeder_V9_Fusion360_Parameters.py",
+    "bytes": 1875,
+    "sha256": "e2df465c2270e6c3634cae901087287837c53382bfa0df90bf20b22e2fcf50e2"
+  },
+  {
+    "path": "Global_CAD_Standard/FEEDER_PART_MASTER_TABLE.csv",
+    "bytes": 3222,
+    "sha256": "cd7d55fab3009b03efee1137e515796eaa7071d2e3976d498ba48c5b56b3d69c"
+  },
+  {
+    "path": "Global_CAD_Standard/LEGACY_INTERFACE_CONTROL_V8.csv",
+    "bytes": 607,
+    "sha256": "65d60e16ad74bfed46569dab549f90e889946a067fe07664a5d4147e48af4fa8"
+  },
+  {
+    "path": "Global_CAD_Standard/FEEDER_V9_SOLIDWORKS_EQUATIONS.txt",
+    "bytes": 796,
+    "sha256": "1a5beaa2bb3fee686f332daaab1e8d52ff666b672f1301dffc0340d081fb87b9"
+  },
+  {
+    "path": "Global_CAD_Standard/GLOBAL_PARAMETERS.json",
+    "bytes": 2038,
+    "sha256": "629612ae82d3d5bc0550708308121c0784e76474f02699087b96441addcd6166"
+  },
+  {
+    "path": "Global_CAD_Standard/INTERFACE_CONTROL_V9_DETAILED.csv",
+    "bytes": 2257,
+    "sha256": "2d4b46141dbf6e85656928ce3f913ce103d9a549fd3596ec607925e1de9b579d"
+  },
+  {
+    "path": "Global_CAD_Standard/NEW_PRODUCT_TEMPLATE.md",
+    "bytes": 1163,
+    "sha256": "d7c2bd322b8b66943e38e556bd0034ca4bb3132d717be693164c447ce142a6fe"
+  },
+  {
+    "path": "Global_CAD_Standard/INTERFACE_CONTROL.csv",
+    "bytes": 757,
+    "sha256": "ee2874aebc877b8195f2af011d3f2d20d147f08344117a9b342a30445c9d618b"
+  },
+  {
+    "path": "Global_CAD_Standard/FEEDER_V9_MASTER_PARAMETERS.csv",
+    "bytes": 1011,
+    "sha256": "d9bceb8624d0a8e5d72b2d169d295b84de29f7d845c4c3b17bb6a57841f06c81"
+  },
+  {
+    "path": "Global_CAD_Standard/tendercells-hardware-product.schema.json",
+    "bytes": 1265,
+    "sha256": "e150bf9870908ef25063b1e1df51614c03a0c33084985f45763e8cccb8b0913e"
+  },
+  {
+    "path": "Global_CAD_Standard/STEP_GEOMETRY_MEASUREMENT_AUDIT.csv",
+    "bytes": 2893,
+    "sha256": "b720f1aff52ab32f7c2d554f6b4952cb81384b25135f02a37a15905cd27f87b8"
+  },
+  {
+    "path": "BOM/AMAZON_SEARCH_TERMS.md",
+    "bytes": 813,
+    "sha256": "1ae0711a551a07d94ece8b165e185d61e635f5e2f32cb9e00e4633aceff1456f"
+  },
+  {
+    "path": "BOM/TC-FDR-0001_MASTER_PROCUREMENT_BOM.csv",
+    "bytes": 10753,
+    "sha256": "eca8fa7dd8a5832378551500c488be71479fc6d2a61bd9f1e5dc4635218e3b1c"
+  },
+  {
+    "path": "BOM/PURCHASING_RECEIVING_CHECKLIST.md",
+    "bytes": 708,
+    "sha256": "10138c6f2d00029caa699a4dd9e1ad7c218a4bfb84506777034dc13ab5aeca60"
+  },
+  {
+    "path": "BOM/TC-FDR-0001_MASTER_PROCUREMENT_BOM.xlsx",
+    "bytes": 11881,
+    "sha256": "f22780bf9f5518d74b3606b6e5b2dd5cce348af26bc532660f6722604a8218aa"
+  },
+  {
+    "path": "BOM/TC-FDR-0001_BOM_LOCK.md",
+    "bytes": 619,
+    "sha256": "84999b74245a8153c6e5bd7f2f17f72d26885fabdcad59837150cf929ead90fd"
+  },
+  {
+    "path": "BOM/LEGACY_FULL_BUILD_BOM_DO_NOT_PROCURE.csv",
+    "bytes": 1797,
+    "sha256": "1e09c94caa50c524b5705cb10114b7069a1bc31486feddb4d9169c8770938552"
+  },
+  {
+    "path": "BOM/FULL_BUILD_BOM.csv",
+    "bytes": 1797,
+    "sha256": "1e09c94caa50c524b5705cb10114b7069a1bc31486feddb4d9169c8770938552"
+  },
+  {
+    "path": "Final_Engineering_Audit/MASTER_PARAMETERS_RECONCILED_V9.json",
+    "bytes": 2381,
+    "sha256": "5fce67ab03f016c34ddbcbb7b9da8732e13e25a51a6f567792c7e5c90b22e591"
+  },
+  {
+    "path": "Final_Engineering_Audit/FINAL_ENGINEERING_REVIEW_V9.md",
+    "bytes": 3160,
+    "sha256": "2e3bbad5857e043b62924d95f747bcfa50c68fdf46d7f3b3557e47eaa698a4c6"
+  },
+  {
+    "path": "Final_Engineering_Audit/PART_TO_PART_MATH_VERIFICATION.csv",
+    "bytes": 2107,
+    "sha256": "c8d293eb5786dfa43c85f4e0f1c0847a87bfed0fa63b117b9abcaf69939449ac"
+  },
+  {
+    "path": "Final_Engineering_Audit/PHYSICAL_VALIDATION_PROTOCOL.md",
+    "bytes": 1509,
+    "sha256": "d6dc3c4fa5d84ff5da6712f9f1f4fb1155528a7b973a786b363a975843a099b5"
+  },
+  {
+    "path": "Brand_Assets/SOURCE_OF_TRUTH/TenderCells_Logo_FULL_ORIGINAL.png",
+    "bytes": 47657,
+    "sha256": "712328c20103edff25b5939f55385db473dcc39a4d42f73c11645f1c66a3f894"
+  },
+  {
+    "path": "Docs/FASTENER_STACK.md",
+    "bytes": 640,
+    "sha256": "a7ba2dcb6008fac507c6f99450b0200470a7ec8f5e9aa5bf453f4f5f9c7e971f"
+  },
+  {
+    "path": "Docs/BUILD_COMPLETION_CHECKLIST.md",
+    "bytes": 1928,
+    "sha256": "9f8fe57a75e473cbbd505e769ddf679278e81c6b4c173e9015d4288b4610384f"
+  },
+  {
+    "path": "Docs/CAD_IMPORT.md",
+    "bytes": 413,
+    "sha256": "10c4bfc0fde3063bc1b6577aea40293425c8e8cb65042d81d2c834ee0bbe86ee"
+  },
+  {
+    "path": "Docs/MECHANICAL_ARCHITECTURE.md",
+    "bytes": 1066,
+    "sha256": "891d373d76f140f7a813dfb7c6be7155699284a3e08aba8c4b70035225e86af5"
+  },
+  {
+    "path": "Docs/PRINT_AND_ASSEMBLY.md",
+    "bytes": 958,
+    "sha256": "ce94dbaa4f34b7e8e23c5164fa0eb39f3bd015819af1b966cab11a6717bcdaee"
+  },
+  {
+    "path": "Docs/ELECTRONICS_AND_POWER.md",
+    "bytes": 655,
+    "sha256": "6df55f2aa76584665b3003822513bd3851c42805138e18ab4b027956b458aea5"
+  },
+  {
+    "path": "Docs/ACTUATOR_SELECTION.md",
+    "bytes": 833,
+    "sha256": "a54cd46b7282ecdb7011f5b1732f2ec85e6c8452253043d6cc92f4cd037c6bb1"
+  },
+  {
+    "path": "Docs/VENDOR_CAD_SOURCES.md",
+    "bytes": 725,
+    "sha256": "b03eae8194446e9c9edececd5de763c90fa36c3315e43c19e8e321d44d527e2f"
+  },
+  {
+    "path": "Docs/LOAD_CELL_COMPLETE.md",
+    "bytes": 665,
+    "sha256": "14b19a04e0bf61b737482ed201594c5cec3f4857fb7034d314cd998de202acbf"
+  },
+  {
+    "path": "Brand/BRAND_ASSET_MANIFEST.json",
+    "bytes": 582,
+    "sha256": "2e7982496de59a96dc59f141ba0f958b17ee099dd9b157db4626ab99996bccdf"
+  },
+  {
+    "path": "Brand/README.md",
+    "bytes": 1027,
+    "sha256": "4e43eda17025be56b932c1cf4b8e859500be3b5c2fb66a226de53f2ad1d86e70"
+  },
+  {
+    "path": "Brand/Original/LEGACY_DO_NOT_USE_tender_cells_logo.png",
+    "bytes": 47564,
+    "sha256": "695690a0d13e3eeb680104a5bd6f66c36299f99b3fa244068680258d18676c08"
+  },
+  {
+    "path": "Brand/Original/tc-mark_CANONICAL_REPO.svg",
+    "bytes": 1133,
+    "sha256": "b8638f3cb17069dd360a806e55fa0bb57fc21317b47619207f635a8982a1722e"
+  },
+  {
+    "path": "Brand/Original/LEGACY_DO_NOT_USE_tendercells.ico",
+    "bytes": 43449,
+    "sha256": "c1666b16b4b43900983d9acdeee4174bae6ae7cb4f7cfadb8d173e03f77d9ec8"
+  },
+  {
+    "path": "Brand/Original/LEGACY_DO_NOT_USE_tender-cells-logo.svg",
+    "bytes": 1598,
+    "sha256": "afc90e87c88fed72b7433d13b47457c49d5e0051b5d5676e2af16b3b3b5cab56"
+  },
+  {
+    "path": "Brand/Original/tender-cells-logo_CANONICAL_REPO.svg",
+    "bytes": 1599,
+    "sha256": "6e7310be09f6435eecde455fe9aece6e984100e9f16dacf56186ae2e605d6976"
+  },
+  {
+    "path": "Brand/Developer/icon-256.png",
+    "bytes": 12074,
+    "sha256": "8c4dab3eff8039812df021c6950d5645e9fa9d282211049b741a530cf35f606b"
+  },
+  {
+    "path": "Brand/Developer/icon-32.png",
+    "bytes": 1279,
+    "sha256": "2617f073e934b0421f4d67ad9ed3df92ab528282b24fd68bc7e390dda5033e0d"
+  },
+  {
+    "path": "Brand/Developer/favicon.ico",
+    "bytes": 24875,
+    "sha256": "69a1a9372e9d887d223f1c9d753a42bb9b1c26611a7c6f115228b6810447b908"
+  },
+  {
+    "path": "Brand/Developer/maskable-512.png",
+    "bytes": 24936,
+    "sha256": "55e85d3a3d4c4b2c839239c6c1ea337067ec49bffdd94dfb9f662e07c96b5cad"
+  },
+  {
+    "path": "Brand/Developer/icon-512.png",
+    "bytes": 24936,
+    "sha256": "55e85d3a3d4c4b2c839239c6c1ea337067ec49bffdd94dfb9f662e07c96b5cad"
+  },
+  {
+    "path": "Brand/Developer/icon-128.png",
+    "bytes": 6010,
+    "sha256": "d2ac1ace4775bfd811484923db58fef70b1d3e52a636bee0999911e65d16a171"
+  },
+  {
+    "path": "Brand/Developer/icon-192.png",
+    "bytes": 8921,
+    "sha256": "9417b321ddf774f56bf4feef8c6c225f58acb552eada2d7e009629ec19b7de0b"
+  },
+  {
+    "path": "Brand/Developer/tc-mark.svg",
+    "bytes": 1133,
+    "sha256": "b8638f3cb17069dd360a806e55fa0bb57fc21317b47619207f635a8982a1722e"
+  },
+  {
+    "path": "Brand/Developer/icon-96.png",
+    "bytes": 4479,
+    "sha256": "c8e73328dfd0a40271ae70da72c414c61bf661845bfe121f53ec8f8a25233d1d"
+  },
+  {
+    "path": "Brand/Developer/icon-48.png",
+    "bytes": 2089,
+    "sha256": "8a4b50b5ba7a690675a9fd2117050f12aafe6d6aa293ef40929367e5d53c246b"
+  },
+  {
+    "path": "Brand/Developer/apple-touch-icon.png",
+    "bytes": 8405,
+    "sha256": "695521bc5aea8bdc35b8dd513ff1f6c8027846703f16dbfe17c35067a4a94a8e"
+  },
+  {
+    "path": "Brand/Developer/icon-16.png",
+    "bytes": 531,
+    "sha256": "f7b7837daacb49699d147e10eee9fa0fb0dba34fb27f71ca4d2ea05f7700cd86"
+  },
+  {
+    "path": "Brand/Developer/tender-cells-logo-lockup.svg",
+    "bytes": 1599,
+    "sha256": "6e7310be09f6435eecde455fe9aece6e984100e9f16dacf56186ae2e605d6976"
+  },
+  {
+    "path": "Brand/Developer/icon-1024.png",
+    "bytes": 54045,
+    "sha256": "73d15e6b8ada6eebde97bd80e4a2a76f0713db1204976a28a664f30500cb092e"
+  },
+  {
+    "path": "Brand/Developer/icon-64.png",
+    "bytes": 2995,
+    "sha256": "7e324bb7b3963d18f110a424dd5e64c65ae09eb24f664bc16978a49b213724d9"
+  },
+  {
+    "path": "Brand/Developer/icon-384.png",
+    "bytes": 18324,
+    "sha256": "a473ba372e0139581e855b8af1079714dca97bcbca37331d7b3482990dd7e294"
+  },
+  {
+    "path": "App_Integration/README.md",
+    "bytes": 1895,
+    "sha256": "c24f6e833d194e6b284438cc9b06982707ade683e870e81ea246aa10b4c03687"
+  },
+  {
+    "path": "App_Integration/ReactNative/INSTALL.md",
+    "bytes": 802,
+    "sha256": "863a905d4b9906650c869547a12f6827b9534038d68662e91cd000882eb9d8f7"
+  },
+  {
+    "path": "App_Integration/ReactNative/TenderCellsFeederViewerNative.tsx",
+    "bytes": 1443,
+    "sha256": "a98d27d566338928084e798ea7f4aa0595f1de3d290b00c86daef806aa7f38c5"
+  },
+  {
+    "path": "App_Integration/ReactNative/package.additions.json",
+    "bytes": 64,
+    "sha256": "0280d9001915a23e774c9cf399cffe0d5c006ffad6aeed6584d10e925aed2d2b"
+  },
+  {
+    "path": "App_Integration/Tests/validate_glb_nodes.py",
+    "bytes": 507,
+    "sha256": "cb22ec5b8e298a3325af1660692208468aa920a95d8074ef4050a51bf739bf28"
+  },
+  {
+    "path": "App_Integration/Web/FeederViewerPanel.tsx",
+    "bytes": 1867,
+    "sha256": "ab638dc0d9b1cee4a67defed61950d1986ec2e11bcd8db77a1ea640bd5a56ef0"
+  },
+  {
+    "path": "App_Integration/Web/useFeederTelemetryBridge.ts",
+    "bytes": 910,
+    "sha256": "c511a68cccb5a885725a937c0b08fbc39d533f7300e274827ad51a9e6d1ec628"
+  },
+  {
+    "path": "App_Integration/Web/FeederFunctionalViewer.tsx",
+    "bytes": 7497,
+    "sha256": "4c22fa5ab09dfae169a5b7827c00c6c8b84bd465c73d9c1f92984b80406d1db8"
+  },
+  {
+    "path": "App_Integration/Web/INSTALL_IN_TENDERCELLS.md",
+    "bytes": 1231,
+    "sha256": "e3d5207684ea770f10b159e9ab613271e4e77e0589690eca7ddedc7079cbf37b"
+  },
+  {
+    "path": "App_Integration/Web/FeederModelUploadCard.tsx",
+    "bytes": 1398,
+    "sha256": "766ac06a3d625d4f05f215008f8997d684ebfcc66c2e51993f648d95a2b6a1d5"
+  },
+  {
+    "path": "App_Integration/Developer/manifest.webmanifest",
+    "bytes": 520,
+    "sha256": "fd8557219c9461f0e716dcbe3d715b7f2cf00ad909cfb525d5db3eec2fd28553"
+  },
+  {
+    "path": "App_Integration/Developer/QUICK_DROP_IN.md",
+    "bytes": 777,
+    "sha256": "588112d20413dc9c58c8325d9dddce231617cc387cc44297d86e719584ce7e19"
+  },
+  {
+    "path": "App_Integration/Developer/package-dependencies.json",
+    "bytes": 219,
+    "sha256": "25aa6971ea496da1b572af3b80c8baad30e155f8007698320f1b4f562c138dce"
+  },
+  {
+    "path": "App_Integration/Patches/TENDERCELLS_INTEGRATION_PLAN.md",
+    "bytes": 1025,
+    "sha256": "e0d0c490bd6bf10e9ac241f2b483abbaa24c4d77d8e1575bd091871ec0ea3600"
+  },
+  {
+    "path": "App_Integration/Schemas/feeder-telemetry.schema.json",
+    "bytes": 886,
+    "sha256": "94f2950a294b67eb32678d8193d27b51ea49778cf64d9f7a472cd46af8126984"
+  },
+  {
+    "path": "App_Integration/Examples/sample-telemetry.json",
+    "bytes": 223,
+    "sha256": "697f3540309e2ef3af3f24c8597f37402d2c9e4232454dbe63603a05b1f9630f"
+  },
+  {
+    "path": "App_Integration/Assets/TenderCells_Smart_Feeder_Exact_v9.glb",
+    "bytes": 765396,
+    "sha256": "de3027f56bffe6ec29d556ce4431b69838082aff5e9b9f744c592851ec99283c"
+  },
+  {
+    "path": "App_Integration/Assets/MODEL_AUTHORITY_MANIFEST.json",
+    "bytes": 726,
+    "sha256": "aae1186b857a2d3f625cd0f1089cac83defc7c30a5b9cee8d7489558e37f7c1e"
+  },
+  {
+    "path": "App_Integration/Assets/ASSET_INFO.json",
+    "bytes": 240,
+    "sha256": "0f8c489cec4c38f0144a485a2ec2bee8ccb62d8ab5c065ae1612c08abb50f2cf"
+  },
+  {
+    "path": "App_Integration/Assets/feeder-model-manifest.json",
+    "bytes": 2207,
+    "sha256": "65ecaa1ec3fa41d9f3413187ab46773ac2b401b830a3f1470d43ab124929c259"
+  },
+  {
+    "path": "App_Integration/Assets/TenderCells_Smart_Feeder_Interactive_v4.glb",
+    "bytes": 1083596,
+    "sha256": "40b7e1320184170e9eb23178d0cd23bda2cd6168af8d1e09ec75fd05463994d3"
+  },
+  {
+    "path": "App_Integration/Brand/icon-256.png",
+    "bytes": 12074,
+    "sha256": "8c4dab3eff8039812df021c6950d5645e9fa9d282211049b741a530cf35f606b"
+  },
+  {
+    "path": "App_Integration/Brand/icon-32.png",
+    "bytes": 1279,
+    "sha256": "2617f073e934b0421f4d67ad9ed3df92ab528282b24fd68bc7e390dda5033e0d"
+  },
+  {
+    "path": "App_Integration/Brand/favicon.ico",
+    "bytes": 24875,
+    "sha256": "69a1a9372e9d887d223f1c9d753a42bb9b1c26611a7c6f115228b6810447b908"
+  },
+  {
+    "path": "App_Integration/Brand/maskable-512.png",
+    "bytes": 24936,
+    "sha256": "55e85d3a3d4c4b2c839239c6c1ea337067ec49bffdd94dfb9f662e07c96b5cad"
+  },
+  {
+    "path": "App_Integration/Brand/icon-512.png",
+    "bytes": 24936,
+    "sha256": "55e85d3a3d4c4b2c839239c6c1ea337067ec49bffdd94dfb9f662e07c96b5cad"
+  },
+  {
+    "path": "App_Integration/Brand/icon-128.png",
+    "bytes": 6010,
+    "sha256": "d2ac1ace4775bfd811484923db58fef70b1d3e52a636bee0999911e65d16a171"
+  },
+  {
+    "path": "App_Integration/Brand/icon-192.png",
+    "bytes": 8921,
+    "sha256": "9417b321ddf774f56bf4feef8c6c225f58acb552eada2d7e009629ec19b7de0b"
+  },
+  {
+    "path": "App_Integration/Brand/tc-mark.svg",
+    "bytes": 1133,
+    "sha256": "b8638f3cb17069dd360a806e55fa0bb57fc21317b47619207f635a8982a1722e"
+  },
+  {
+    "path": "App_Integration/Brand/icon-96.png",
+    "bytes": 4479,
+    "sha256": "c8e73328dfd0a40271ae70da72c414c61bf661845bfe121f53ec8f8a25233d1d"
+  },
+  {
+    "path": "App_Integration/Brand/icon-48.png",
+    "bytes": 2089,
+    "sha256": "8a4b50b5ba7a690675a9fd2117050f12aafe6d6aa293ef40929367e5d53c246b"
+  },
+  {
+    "path": "App_Integration/Brand/apple-touch-icon.png",
+    "bytes": 8405,
+    "sha256": "695521bc5aea8bdc35b8dd513ff1f6c8027846703f16dbfe17c35067a4a94a8e"
+  },
+  {
+    "path": "App_Integration/Brand/icon-16.png",
+    "bytes": 531,
+    "sha256": "f7b7837daacb49699d147e10eee9fa0fb0dba34fb27f71ca4d2ea05f7700cd86"
+  },
+  {
+    "path": "App_Integration/Brand/tender-cells-logo-lockup.svg",
+    "bytes": 1599,
+    "sha256": "6e7310be09f6435eecde455fe9aece6e984100e9f16dacf56186ae2e605d6976"
+  },
+  {
+    "path": "App_Integration/Brand/icon-1024.png",
+    "bytes": 54045,
+    "sha256": "73d15e6b8ada6eebde97bd80e4a2a76f0713db1204976a28a664f30500cb092e"
+  },
+  {
+    "path": "App_Integration/Brand/icon-64.png",
+    "bytes": 2995,
+    "sha256": "7e324bb7b3963d18f110a424dd5e64c65ae09eb24f664bc16978a49b213724d9"
+  },
+  {
+    "path": "App_Integration/Brand/icon-384.png",
+    "bytes": 18324,
+    "sha256": "a473ba372e0139581e855b8af1079714dca97bcbca37331d7b3482990dd7e294"
+  },
+  {
+    "path": "Electronics/ELECTRONICS_BOM.csv",
+    "bytes": 859,
+    "sha256": "cfcabeb982ee4394199210a7d0ac1417d5c63f2a68b00ebe4c9d0707c8644d77"
+  },
+  {
+    "path": "Electronics/PINOUT.csv",
+    "bytes": 301,
+    "sha256": "b8fecc8eafafa7fb82b584ca409b858698b47d3923373735d422a65e8d8ed185"
+  },
+  {
+    "path": "Electronics/POWER_BUDGET.csv",
+    "bytes": 338,
+    "sha256": "00d06556ba7f81201b05dc1627b515f16e8441500c15f7c9436e8b720035bf9e"
+  },
+  {
+    "path": "Electronics/Reference_STEP/A3144_HALL_SENSOR_REFERENCE.step",
+    "bytes": 15502,
+    "sha256": "cf5b507b24f609eaea5ea55ca881533985358d4dedec57c073526af577d2a47b"
+  },
+  {
+    "path": "Electronics/Reference_STEP/HX711_GENERIC_32x21_REFERENCE.step",
+    "bytes": 15498,
+    "sha256": "261722037117e9520c92f01e8f5af6491740589b80d30746a902869d4f81126b"
+  },
+  {
+    "path": "Electronics/Reference_STEP/TAL220B_5kg_55mm_REFERENCE.step",
+    "bytes": 25079,
+    "sha256": "385ffaad5ecc92b5d95f76f3490f52c8342cede55585495d9c30c1491a168e48"
+  },
+  {
+    "path": "Electronics/Reference_STEP/28BYJ48_5V_GEARED_STEPPER_REFERENCE.step",
+    "bytes": 39261,
+    "sha256": "d973820718d2a2dd70716bfde0c2fb412805f039d21750c37a7e31d31387917f"
+  },
+  {
+    "path": "Electronics/Reference_STEP/ULN2003_DRIVER_REFERENCE.step",
+    "bytes": 15532,
+    "sha256": "d229d088b2c9dfe3b7d13642ae972451c5264cb114fcdc1f251453c3ca269697"
+  },
+  {
+    "path": "Electronics/Reference_STEP/MG996R_TowerPro_REFERENCE.step",
+    "bytes": 47031,
+    "sha256": "90416e3add7d02ce9da6dd6644164718759c516637e95a8429e865628214c00a"
+  },
+  {
+    "path": "Electronics/Reference_STEP/Seeed_XIAO_ESP32C3_REFERENCE.step",
+    "bytes": 28880,
+    "sha256": "9b1bb0510fc6e9f1e004ec7913a8f19cfa18dd2eb49c22c7a4093228803dc445"
+  },
+  {
+    "path": "Electronics/Vendor_CAD/VENDOR_FILE_INDEX.md",
+    "bytes": 1817,
+    "sha256": "03895bb3a13973ce3e0215358ffbbc1e6c32917aa96cbd0d568c9b64e3c17a8a"
+  }
+]

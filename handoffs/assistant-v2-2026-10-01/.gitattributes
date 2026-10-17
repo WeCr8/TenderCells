@@ -1,0 +1,6 @@
+# Preserve supplied archive bytes, including original whitespace.
+* -text -whitespace
+*.stl -diff
+*.step -diff
+*.STEP -diff
+*.glb -diff

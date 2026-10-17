@@ -1,0 +1,22 @@
+{
+  "schema": "TenderCells.PartGlobalNeeds.v1",
+  "part_id": "TC-FDR-HW-SHAFT",
+  "part_name": "6 mm D-Shaft",
+  "revision": "V9",
+  "status": "PURCHASED_BASELINE",
+  "requirements": {
+    "diameter_mm": 6,
+    "across_flat_mm": 5,
+    "length_mm": 100,
+    "qty": 1
+  },
+  "coordinate_rule": "Orient and mate using interface-control file, not arbitrary vendor origin.",
+  "inspection": [
+    "verify identity",
+    "measure critical envelope",
+    "record supplier/lot",
+    "compare against CAD reference before final enclosure/mount release"
+  ],
+  "substitution_rule": "Equivalent only after dimensions/electrical characteristics are verified and deviation is recorded.",
+  "notes": "Axis Y; inspect fit in both bearings and rotor D-bore."
+}

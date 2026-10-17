@@ -13,9 +13,15 @@
     "functions:deploy": "firebase deploy --only functions",
     "functions:serve": "firebase emulators:start --only functions",
     "firebase:emulate": "firebase emulators:start",
-    "test:rules": "firebase emulators:exec --only firestore \"vitest run\""
+    "test:rules": "firebase emulators:exec --only firestore \"vitest run\"",
+    "cap:sync": "npm run build && cap sync",
+    "cap:ios": "npm run build && cap sync ios && cap open ios",
+    "cap:android": "npm run build && cap sync android && cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/core": "^7.6.9",
+    "@capacitor/ios": "^7.6.9",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "firebase": "^12.0.0",
@@ -25,6 +31,8 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.6.9",
     "@eslint/js": "^9.30.1",
     "@firebase/rules-unit-testing": "^5.0.2",
     "@types/cors": "^2.8.19",

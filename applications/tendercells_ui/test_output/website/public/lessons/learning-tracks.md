@@ -42,7 +42,7 @@ Real engineering disciplines.
 | 7 | **Robot Arm Basics** | kinematics, servos | 🟡 | [gantry capstone](/lessons/gantry-bom); servo kit |
 | 8 | **Conveyor System** ("Factory Automation for Kids") | manufacturing, sensors, automation | 🔴 | relay motor + IR sensor |
 | 9 | **Vision-Guided Sorting** | computer vision + automation | 🔴 | combines #2 + #8 |
-| 10 | **AGV (Autonomous Guided Vehicle)** | navigation, sensors, robotics | ✅ | **Roaming Roost drive already shipped** — [door+rover](/lessons/door-roaming-roost) |
+| 10 | **AGV (Autonomous Guided Vehicle)** | navigation, sensors, robotics | ✅ | **Classroom servo-rover drive shipped** (Starter Node `drive`) — [door+rover](/lessons/door-roaming-roost); full rovers: [S/M/L family](https://github.com/WeCr8/TenderCells/blob/main/docs/products/rover/README.md) |
 
 ## Tier 3 — AI + coding
 Highest current interest.

@@ -154,7 +154,7 @@ tender-cells/
 │   ├── starter-node/            [CI] one binary = any product; web-flashable on-ramp
 │   ├── chicken-tender/src/main.cpp  [CI] state machine + sensors + MQTT
 │   ├── watchtower/              [CI] predator monitor (ESP32-S3) + LoRa mesh
-│   ├── roaming-roost/           channel-ring dome controller
+│   ├── roaming-roost/           mobile enclosure drive prototype (ESP32, mecanum)
 │   └── shared/tc_mesh/          shared LoRa flood-mesh library
 ├── flipper/tendercells_fieldkit/  Flipper Zero field-diagnostic app (FAP, ufbt)
 ├── functions/                   [CI] Firebase Cloud Functions (Node 18)

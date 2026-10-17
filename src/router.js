@@ -40,6 +40,7 @@ import { createPressPage, initializePressPage } from './pages/press.js';
 import { createPartnershipsPage, initializePartnershipsPage } from './pages/partnerships.js';
 import { createSalesPage, initializeSalesPage } from './pages/sales.js';
 import { resetBodyScroll } from './utils/scrollLock.js';
+import { createRoverControlPage, initializeRoverControlPage } from './pages/rover-control';
 
 class Router {
   constructor() {
@@ -81,7 +82,8 @@ class Router {
       'assets': this.renderAssets,
       'press': this.renderPress,
       'partnerships': this.renderPartnerships,
-      'sales': this.renderSales
+      'sales': this.renderSales,
+      'rover-control': this.renderRoverControl
     };
     
     this.init();
@@ -353,6 +355,12 @@ class Router {
     this.showPageContent(createTurkeyTowerPage());
     
     setTimeout(() => initializeTurkeyTowerPage(), 100);
+  }
+
+  renderRoverControl() {
+    this.hideMainContent();
+    this.showPageContent(createRoverControlPage());
+    setTimeout(() => initializeRoverControlPage(), 0);
   }
 
   renderRoamingRoost() {

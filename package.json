@@ -14,9 +14,11 @@
     "functions:serve": "firebase emulators:start --only functions",
     "firebase:emulate": "firebase emulators:start",
     "test:rules": "firebase emulators:exec --only firestore \"vitest run\"",
-    "cap:sync": "npm run build && cap sync",
-    "cap:ios": "npm run build && cap sync ios && cap open ios",
-    "cap:android": "npm run build && cap sync android && cap open android"
+    "cap:sync": "npm run build:mobile && cap sync",
+    "cap:ios": "npm run build:mobile && cap sync ios && cap open ios",
+    "cap:android": "npm run build:mobile && cap sync android && cap open android",
+    "test:unit": "vitest run -c vitest.unit.config.ts",
+    "build:mobile": "tsc -b && vite build --mode mobile"
   },
   "dependencies": {
     "@capacitor/android": "^7.6.9",
@@ -26,6 +28,7 @@
     "express": "^5.2.1",
     "firebase": "^12.0.0",
     "firebase-tools": "^15.20.0",
+    "mqtt": "^5.16.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "zustand": "^5.0.14"

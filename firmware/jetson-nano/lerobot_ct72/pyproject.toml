@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lerobot-tendercells-ct72"
+version = "0.1.0"
+description = "TenderCells CT72 (rev A1.2) LeRobot plugins: belt gantry + hanging SO-101 robot, leader+gamepad teleop"
+requires-python = ">=3.10"
+dependencies = []   # install LeRobot itself on the Pi 5 / Jetson: pip install "lerobot[feetech,smolvla]"
+
+[tool.setuptools]
+packages = ["lerobot_robot_tendercells_ct72", "lerobot_teleoperator_tendercells_ct72"]

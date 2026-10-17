@@ -1,0 +1,3507 @@
+{
+ "rev": "A1.2",
+ "units": "mm",
+ "frame": "CAD: origin front-left-bottom frame corner, +X right, +Y back, +Z up; gantry z = plate underside",
+ "travel": {
+  "x": [
+   417.0,
+   1711.8
+  ],
+  "y": [
+   175.0,
+   1653.8
+  ],
+  "z": [
+   850.0,
+   2133.5999999999995
+  ]
+ },
+ "park": [
+  1711.8,
+  1653.8,
+  2133.5999999999995
+ ],
+ "flock_size": 8,
+ "basket_tag_id": 0,
+ "grip_force_limit_n": 6.0,
+ "egg_break_n": 34.0,
+ "vacuum_limit_kpa": 20.0,
+ "roost": {
+  "A": {
+   "top_z_deployed": 1219.1999999999998,
+   "radius": 609.5999999999999,
+   "pivot_x": 1778.8,
+   "y": [
+    430.0,
+    1496.8
+   ],
+   "stow": "swing down 90 deg to the right wall"
+  },
+  "B": {
+   "top_z_deployed": 1422.3999999999999,
+   "radius": 304.79999999999995,
+   "pivot_x": 1728.8,
+   "y": [
+    430.0,
+    1496.8
+   ],
+   "stow": "swing down 90 deg to the right wall"
+  }
+ },
+ "variants": {
+  "starter": {
+   "transit_z": 1983.5999999999995,
+   "nest_boxes": [
+    {
+     "name": "NEST_BOX_01",
+     "interior": [
+      32.0,
+      432.0,
+      777.0,
+      336.8,
+      736.8,
+      1066.8
+     ],
+     "approaches": [
+      {
+       "kind": "top",
+       "target_name": "wall-front",
+       "target": [
+        77.0,
+        477.0,
+        799.0
+       ],
+       "gantry": [
+        477.0,
+        477.0,
+        1146.0
+       ],
+       "pose_deg": null,
+       "clear_mm": 15.0
+      },
+      {
+       "kind": "top",
+       "target_name": "wall-back",
+       "target": [
+        77.0,
+        691.8,
+        799.0
+       ],
+       "gantry": [
+        477.0,
+        691.8,
+        1146.0
+       ],
+       "pose_deg": null,
+       "clear_mm": 15.0
+      },
+      {
+       "kind": "top",
+       "target_name": "centre",
+       "target": [
+        184.4,
+        584.4,
+        799.0
+       ],
+       "gantry": [
+        584.4,
+        584.4,
+        1146.0
+       ],
+       "pose_deg": null,
+       "clear_mm": 58.5
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-front",
+       "target": [
+        291.8,
+        477.0,
+        799.0
+       ],
+       "gantry": [
+        691.8,
+        477.0,
+        1146.0
+       ],
+       "pose_deg": null,
+       "clear_mm": 20.0
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-back",
+       "target": [
+        291.8,
+        691.8,
+        799.0
+       ],
+       "gantry": [
+        691.8,
+        691.8,
+        1146.0
+       ],
+       "pose_deg": null,
+       "clear_mm": 20.0
+      }
+     ]
+    },
+    {
+     "name": "NEST_BOX_02",
+     "interior": [
+      32.0,
+      748.8,
+      777.0,
+      336.8,
+      1053.6,
+      1066.8
+     ],
+     "approaches": [
+      {
+       "kind": "top",
+       "target_name": "wall-front",
+       "target": [
+        77.0,
+        793.8,
+        799.0
+       ],
+       "gantry": [
+        477.0,
+        793.8,
+        1146.0
+       ],
+       "pose_deg": null,
+       "clear_mm": 15.0
+      },
+      {
+       "kind": "top",
+       "target_name": "wall-back",
+       "target": [
+        77.0,
+        1008.6,
+        799.0
+       ],
+       "gantry": [
+        477.0,
+        1008.6,
+        1146.0
+       ],
+       "pose_deg": null,
+       "clear_mm": 15.0
+      },
+      {
+       "kind": "top",
+       "target_name": "centre",
+       "target": [
+        184.4,
+        901.2,
+        799.0
+       ],
+       "gantry": [
+        584.4,
+        901.2,
+        1146.0
+       ],
+       "pose_deg": null,
+       "clear_mm": 58.5
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-front",
+       "target": [
+        291.8,
+        793.8,
+        799.0
+       ],
+       "gantry": [
+        691.8,
+        793.8,
+        1146.0
+       ],
+       "pose_deg": null,
+       "clear_mm": 20.0
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-back",
+       "target": [
+        291.8,
+        1008.6,
+        799.0
+       ],
+       "gantry": [
+        691.8,
+        1008.6,
+        1146.0
+       ],
+       "pose_deg": null,
+       "clear_mm": 20.0
+      }
+     ]
+    }
+   ],
+   "basket": {
+    "name": "BASKET",
+    "interior": [
+     32.0,
+     102.0,
+     762.0,
+     302.0,
+     332.0,
+     912.0
+    ],
+    "approaches": [
+     {
+      "kind": "top",
+      "target_name": "centre",
+      "target": [
+       167.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       567.0,
+       217.0,
+       1141.0
+      ],
+      "pose_deg": null,
+      "clear_mm": 53.5
+     },
+     {
+      "kind": "top",
+      "target_name": "wall-side",
+      "target": [
+       97.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       497.0,
+       217.0,
+       1141.0
+      ],
+      "pose_deg": null,
+      "clear_mm": 38.5
+     },
+     {
+      "kind": "top",
+      "target_name": "aisle-side",
+      "target": [
+       237.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       637.0,
+       217.0,
+       1141.0
+      ],
+      "pose_deg": null,
+      "clear_mm": 38.5
+     }
+    ]
+   },
+   "nogo": [
+    {
+     "name": "TOOLxTC_NEST_SHELF_RAIL_LEFT",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      445.0,
+      1653.8,
+      1057.0
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_SHELF",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      773.8,
+      1090.6,
+      1075.0
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_01_FLOOR",
+     "box": [
+      417.0,
+      395.0,
+      850.0,
+      773.8,
+      773.8,
+      1087.0
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_01_LINER",
+     "box": [
+      417.0,
+      407.0,
+      850.0,
+      761.8,
+      761.8,
+      1102.0
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_01_BACK",
+     "box": [
+      417.0,
+      407.0,
+      850.0,
+      457.0,
+      761.8,
+      1391.8
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      611.8,
+      850.0,
+      715.8,
+      873.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      676.8,
+      850.0,
+      465.8,
+      808.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      626.8,
+      850.0,
+      505.8,
+      678.8,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      716.8,
+      850.0,
+      429.8,
+      768.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      704.8,
+      850.0,
+      451.8,
+      724.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      729.3,
+      850.0,
+      439.8,
+      756.3,
+      2133.6
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      711.8,
+      850.0,
+      773.8,
+      773.8,
+      1391.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_LIP",
+     "box": [
+      417.0,
+      412.0,
+      850.0,
+      429.8,
+      756.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_01_LIP",
+     "box": [
+      711.8,
+      407.0,
+      850.0,
+      773.8,
+      761.8,
+      1162.0
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      453.8,
+      307.0,
+      1014.1,
+      715.8,
+      861.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      443.8,
+      372.0,
+      876.8,
+      465.8,
+      796.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      463.8,
+      322.0,
+      926.8,
+      505.8,
+      666.8,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      417.0,
+      412.0,
+      850.0,
+      429.8,
+      756.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      431.8,
+      400.0,
+      850.0,
+      451.8,
+      712.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      417.8,
+      424.5,
+      850.0,
+      439.8,
+      744.3,
+      2133.6
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      711.8,
+      407.0,
+      1026.8,
+      773.8,
+      761.8,
+      1391.8
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      295.0,
+      850.0,
+      715.8,
+      557.0,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      360.0,
+      850.0,
+      465.8,
+      492.0,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      310.0,
+      850.0,
+      505.8,
+      362.0,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      400.0,
+      850.0,
+      429.8,
+      452.0,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      388.0,
+      850.0,
+      451.8,
+      408.0,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      412.5,
+      850.0,
+      439.8,
+      439.5,
+      2133.6
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      395.0,
+      850.0,
+      773.8,
+      457.0,
+      1391.8
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_01_LID",
+     "box": [
+      417.0,
+      402.0,
+      1066.8,
+      457.0,
+      766.8,
+      1740.6
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_02_FLOOR",
+     "box": [
+      417.0,
+      723.8,
+      850.0,
+      773.8,
+      1090.6,
+      1087.0
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_02_LINER",
+     "box": [
+      417.0,
+      723.8,
+      850.0,
+      761.8,
+      1078.6,
+      1102.0
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_02_BACK",
+     "box": [
+      417.0,
+      723.8,
+      850.0,
+      457.0,
+      1078.6,
+      1391.8
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      928.6,
+      850.0,
+      715.8,
+      1190.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      993.6,
+      850.0,
+      465.8,
+      1125.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      943.6,
+      850.0,
+      505.8,
+      995.6,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      1033.6,
+      850.0,
+      429.8,
+      1085.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      1021.6,
+      850.0,
+      451.8,
+      1041.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      1046.1,
+      850.0,
+      439.8,
+      1073.1,
+      2133.6
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      1028.6,
+      850.0,
+      773.8,
+      1090.6,
+      1391.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_02_LIP",
+     "box": [
+      417.0,
+      728.8,
+      850.0,
+      429.8,
+      1073.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_02_LIP",
+     "box": [
+      711.8,
+      723.8,
+      850.0,
+      773.8,
+      1078.6,
+      1162.0
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      453.8,
+      623.8,
+      1014.1,
+      715.8,
+      1178.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      443.8,
+      688.8,
+      876.8,
+      465.8,
+      1113.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      463.8,
+      638.8,
+      926.8,
+      505.8,
+      983.6,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      417.0,
+      728.8,
+      850.0,
+      429.8,
+      1073.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      431.8,
+      716.8,
+      850.0,
+      451.8,
+      1029.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      417.8,
+      741.3,
+      850.0,
+      439.8,
+      1061.1,
+      2133.6
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      711.8,
+      723.8,
+      1026.8,
+      773.8,
+      1078.6,
+      1391.8
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_BOX_02_LID",
+     "box": [
+      417.0,
+      718.8,
+      1066.8,
+      457.0,
+      1083.6,
+      1740.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_LID_ACTUATOR",
+     "box": [
+      417.0,
+      235.0,
+      854.1,
+      427.0,
+      525.0,
+      1126.8
+     ]
+    },
+    {
+     "name": "TOOLxTC_NEST_LID_ACTUATOR",
+     "box": [
+      417.0,
+      335.0,
+      866.8,
+      485.0,
+      425.0,
+      1451.8
+     ]
+    },
+    {
+     "name": "TOOLxTC_BASKET_POCKET_FLOOR",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      739.0,
+      369.0,
+      1087.0
+     ]
+    },
+    {
+     "name": "PLATExTC_BASKET_POCKET_SIDE_FRONTY",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      681.0,
+      227.0,
+      912.0
+     ]
+    },
+    {
+     "name": "PLATExTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      207.0,
+      850.0,
+      681.0,
+      469.0,
+      912.0
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      272.0,
+      850.0,
+      431.0,
+      404.0,
+      912.0
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      222.0,
+      850.0,
+      471.0,
+      274.0,
+      852.0
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      300.0,
+      850.0,
+      417.0,
+      320.0,
+      2133.6
+     ]
+    },
+    {
+     "name": "TOOLxTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      307.0,
+      850.0,
+      739.0,
+      369.0,
+      1237.0
+     ]
+    },
+    {
+     "name": "TOOLxTC_BASKET_POCKET_LIP",
+     "box": [
+      677.0,
+      175.0,
+      850.0,
+      739.0,
+      357.0,
+      1127.0
+     ]
+    },
+    {
+     "name": "TOOLxTC_BASKET_POCKET_HATCH_DOOR",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      457.0,
+      357.0,
+      1237.0
+     ]
+    },
+    {
+     "name": "PLATExTC_BASKET_APRILTAG_TAB",
+     "box": [
+      417.0,
+      175.0,
+      899.3,
+      499.0,
+      227.0,
+      915.0
+     ]
+    },
+    {
+     "name": "TOOLxBASKET_RIM_XMIN",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      471.0,
+      342.0,
+      1207.0
+     ]
+    },
+    {
+     "name": "PLATExBASKET_RIM_XMAX",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      659.0,
+      442.0,
+      882.0
+     ]
+    },
+    {
+     "name": "TOOLxBASKET_RIM_XMAX",
+     "box": [
+      663.0,
+      175.0,
+      850.0,
+      717.0,
+      342.0,
+      1207.0
+     ]
+    },
+    {
+     "name": "PLATExBASKET_RIM_YMIN",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      659.0,
+      246.0,
+      882.0
+     ]
+    },
+    {
+     "name": "PLATExBASKET_RIM_YMAX",
+     "box": [
+      417.0,
+      188.0,
+      850.0,
+      659.0,
+      442.0,
+      882.0
+     ]
+    },
+    {
+     "name": "TOOLxBASKET_RIM_YMAX",
+     "box": [
+      417.0,
+      288.0,
+      850.0,
+      717.0,
+      342.0,
+      1207.0
+     ]
+    },
+    {
+     "name": "TOOLxBASKET_INNER_FLOOR",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      717.0,
+      342.0,
+      1092.0
+     ]
+    }
+   ],
+   "clean_route": [
+    [
+     1711.8,
+     1653.8,
+     2133.6
+    ],
+    [
+     777.0,
+     1143.9,
+     850.0
+    ],
+    [
+     777.0,
+     1143.9,
+     1983.6
+    ],
+    [
+     777.0,
+     379.0,
+     1983.6
+    ],
+    [
+     777.0,
+     379.0,
+     850.0
+    ],
+    [
+     777.0,
+     175.0,
+     850.0
+    ],
+    [
+     777.0,
+     175.0,
+     1983.6
+    ],
+    [
+     627.0,
+     1245.9,
+     1983.6
+    ],
+    [
+     627.0,
+     1245.9,
+     850.0
+    ],
+    [
+     477.0,
+     1245.9,
+     850.0
+    ],
+    [
+     477.0,
+     1245.9,
+     1983.6
+    ],
+    [
+     477.0,
+     175.0,
+     1983.6
+    ],
+    [
+     477.0,
+     175.0,
+     1159.2
+    ],
+    [
+     1711.8,
+     1653.8,
+     2133.6
+    ]
+   ],
+   "clean_nogo_spans": [
+    {
+     "from": [
+      777,
+      1144,
+      850
+     ],
+     "to": [
+      777,
+      379,
+      850
+     ],
+     "hit": "gantry OUTRIGGER vs TC_NEST_BOX_02_SIDE_BACKY",
+     "clear": -1.8
+    },
+    {
+     "from": [
+      777,
+      175,
+      850
+     ],
+     "to": [
+      627,
+      1246,
+      850
+     ],
+     "hit": "gantry PLATE vs TC_NEST_BOX_01_SIDE_FRONTY",
+     "clear": -88.8
+    },
+    {
+     "from": [
+      477,
+      1246,
+      850
+     ],
+     "to": [
+      477,
+      175,
+      1159
+     ],
+     "hit": "gantry PLATE vs TC_NEST_BOX_02_SIDE_BACKY",
+     "clear": -100.7
+    }
+   ],
+   "egg_plan": [
+    {
+     "box": "NEST_BOX_01",
+     "target": "centre",
+     "approach": "top",
+     "pick_gantry": [
+      584.4,
+      584.4,
+      1146.0
+     ],
+     "pick_pose_deg": null,
+     "approach_sweep": [
+      58.5,
+      "vacuum tool vs TC_NEST_SHELF",
+      [
+       584,
+       584,
+       1146
+      ],
+      "insert"
+     ],
+     "place_approach": "top",
+     "place_gantry": [
+      567.0,
+      217.0,
+      1141.0
+     ],
+     "place_pose_deg": null,
+     "place_sweep": [
+      53.5,
+      "vacuum tool vs TC_NEST_SHELF",
+      [
+       567,
+       217,
+       1141
+      ],
+      "insert"
+     ]
+    },
+    {
+     "box": "NEST_BOX_02",
+     "target": "centre",
+     "approach": "top",
+     "pick_gantry": [
+      584.4,
+      901.2,
+      1146.0
+     ],
+     "pick_pose_deg": null,
+     "approach_sweep": [
+      58.5,
+      "vacuum tool vs TC_NEST_SHELF",
+      [
+       584,
+       901,
+       1146
+      ],
+      "insert"
+     ],
+     "place_approach": "top",
+     "place_gantry": [
+      567.0,
+      217.0,
+      1141.0
+     ],
+     "place_pose_deg": null,
+     "place_sweep": [
+      53.5,
+      "vacuum tool vs TC_NEST_SHELF",
+      [
+       567,
+       217,
+       1141
+      ],
+      "insert"
+     ]
+    }
+   ]
+  },
+  "plus": {
+   "transit_z": 1983.5999999999995,
+   "nest_boxes": [
+    {
+     "name": "NEST_BOX_01",
+     "interior": [
+      32.0,
+      432.0,
+      777.0,
+      336.8,
+      736.8,
+      1066.8
+     ],
+     "approaches": [
+      {
+       "kind": "top",
+       "target_name": "wall-front",
+       "target": [
+        77.0,
+        477.0,
+        799.0
+       ],
+       "gantry": [
+        471.1,
+        564.8,
+        1225.5
+       ],
+       "pose_deg": [
+        210.0,
+        24.0,
+        59.0,
+        -75.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "side",
+       "target_name": "wall-front",
+       "target": [
+        77.0,
+        477.0,
+        799.0
+       ],
+       "gantry": [
+        535.1,
+        515.1,
+        1273.3
+       ],
+       "pose_deg": [
+        190.0,
+        36.0,
+        7.0,
+        -13.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "wall-back",
+       "target": [
+        77.0,
+        691.8,
+        799.0
+       ],
+       "gantry": [
+        521.8,
+        691.8,
+        1239.2
+       ],
+       "pose_deg": [
+        0.0,
+        -84.0,
+        59.0,
+        25.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "side",
+       "target_name": "wall-back",
+       "target": [
+        77.0,
+        691.8,
+        799.0
+       ],
+       "gantry": [
+        499.4,
+        660.0,
+        1291.0
+       ],
+       "pose_deg": [
+        170.0,
+        16.0,
+        27.0,
+        -13.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "centre",
+       "target": [
+        184.4,
+        584.4,
+        799.0
+       ],
+       "gantry": [
+        506.4,
+        723.0,
+        1274.1
+       ],
+       "pose_deg": [
+        240.0,
+        64.0,
+        -37.0,
+        -19.0
+       ],
+       "clear_mm": 17.0
+      },
+      {
+       "kind": "side",
+       "target_name": "centre",
+       "target": [
+        184.4,
+        584.4,
+        799.0
+       ],
+       "gantry": [
+        482.3,
+        564.1,
+        1331.6
+       ],
+       "pose_deg": [
+        160.0,
+        -12.0,
+        35.0,
+        -3.0
+       ],
+       "clear_mm": 17.0
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-front",
+       "target": [
+        291.8,
+        477.0,
+        799.0
+       ],
+       "gantry": [
+        533.8,
+        557.2,
+        1252.7
+       ],
+       "pose_deg": [
+        270.0,
+        76.0,
+        -97.0,
+        36.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-back",
+       "target": [
+        291.8,
+        691.8,
+        799.0
+       ],
+       "gantry": [
+        558.1,
+        733.8,
+        1339.5
+       ],
+       "pose_deg": [
+        60.0,
+        -8.0,
+        -13.0,
+        36.0
+       ],
+       "clear_mm": 13.0
+      }
+     ]
+    },
+    {
+     "name": "NEST_BOX_02",
+     "interior": [
+      32.0,
+      748.8,
+      777.0,
+      336.8,
+      1053.6,
+      1066.8
+     ],
+     "approaches": [
+      {
+       "kind": "top",
+       "target_name": "wall-front",
+       "target": [
+        77.0,
+        793.8,
+        799.0
+       ],
+       "gantry": [
+        521.8,
+        793.8,
+        1239.2
+       ],
+       "pose_deg": [
+        0.0,
+        -84.0,
+        59.0,
+        25.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "side",
+       "target_name": "wall-front",
+       "target": [
+        77.0,
+        793.8,
+        799.0
+       ],
+       "gantry": [
+        500.1,
+        793.8,
+        1280.4
+       ],
+       "pose_deg": [
+        180.0,
+        20.0,
+        35.0,
+        -35.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "wall-back",
+       "target": [
+        77.0,
+        1008.6,
+        799.0
+       ],
+       "gantry": [
+        504.8,
+        1008.6,
+        1237.9
+       ],
+       "pose_deg": [
+        0.0,
+        -88.0,
+        71.0,
+        17.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "side",
+       "target_name": "wall-back",
+       "target": [
+        77.0,
+        1008.6,
+        799.0
+       ],
+       "gantry": [
+        479.8,
+        980.3,
+        1223.8
+       ],
+       "pose_deg": [
+        170.0,
+        92.0,
+        -85.0,
+        13.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "centre",
+       "target": [
+        184.4,
+        901.2,
+        799.0
+       ],
+       "gantry": [
+        471.9,
+        980.0,
+        1296.8
+       ],
+       "pose_deg": [
+        240.0,
+        56.0,
+        -65.0,
+        24.0
+       ],
+       "clear_mm": 17.0
+      },
+      {
+       "kind": "side",
+       "target_name": "centre",
+       "target": [
+        184.4,
+        901.2,
+        799.0
+       ],
+       "gantry": [
+        482.3,
+        880.9,
+        1331.6
+       ],
+       "pose_deg": [
+        160.0,
+        -12.0,
+        35.0,
+        -3.0
+       ],
+       "clear_mm": 17.0
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-front",
+       "target": [
+        291.8,
+        793.8,
+        799.0
+       ],
+       "gantry": [
+        533.8,
+        1006.0,
+        1255.0
+       ],
+       "pose_deg": [
+        270.0,
+        52.0,
+        -1.0,
+        -36.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-back",
+       "target": [
+        291.8,
+        1008.6,
+        799.0
+       ],
+       "gantry": [
+        662.1,
+        1082.7,
+        1251.8
+       ],
+       "pose_deg": [
+        30.0,
+        -84.0,
+        83.0,
+        1.0
+       ],
+       "clear_mm": 13.0
+      }
+     ]
+    }
+   ],
+   "basket": {
+    "name": "BASKET",
+    "interior": [
+     32.0,
+     102.0,
+     762.0,
+     302.0,
+     332.0,
+     912.0
+    ],
+    "approaches": [
+     {
+      "kind": "top",
+      "target_name": "centre",
+      "target": [
+       167.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       688.4,
+       217.0,
+       1072.6
+      ],
+      "pose_deg": [
+       0.0,
+       -100.0,
+       7.0,
+       93.0
+      ],
+      "clear_mm": 12.0
+     },
+     {
+      "kind": "side",
+      "target_name": "centre",
+      "target": [
+       167.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       455.0,
+       200.3,
+       1264.4
+      ],
+      "pose_deg": [
+       160.0,
+       -44.0,
+       91.0,
+       -27.0
+      ],
+      "clear_mm": 12.0
+     },
+     {
+      "kind": "top",
+      "target_name": "wall-side",
+      "target": [
+       97.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       618.4,
+       217.0,
+       1072.6
+      ],
+      "pose_deg": [
+       0.0,
+       -100.0,
+       7.0,
+       93.0
+      ],
+      "clear_mm": 12.0
+     },
+     {
+      "kind": "side",
+      "target_name": "wall-side",
+      "target": [
+       97.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       535.7,
+       217.0,
+       1212.9
+      ],
+      "pose_deg": [
+       180.0,
+       80.0,
+       -81.0,
+       41.0
+      ],
+      "clear_mm": 12.0
+     },
+     {
+      "kind": "top",
+      "target_name": "aisle-side",
+      "target": [
+       237.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       758.4,
+       217.0,
+       1072.6
+      ],
+      "pose_deg": [
+       0.0,
+       -100.0,
+       7.0,
+       93.0
+      ],
+      "clear_mm": 12.0
+     }
+    ]
+   },
+   "nogo": [
+    {
+     "name": "PLATExTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      611.8,
+      850.0,
+      715.8,
+      873.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      676.8,
+      850.0,
+      465.8,
+      808.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      626.8,
+      850.0,
+      505.8,
+      678.8,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      716.8,
+      850.0,
+      429.8,
+      768.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      704.8,
+      850.0,
+      451.8,
+      724.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      729.3,
+      850.0,
+      439.8,
+      756.3,
+      2133.6
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_LIP",
+     "box": [
+      417.0,
+      412.0,
+      850.0,
+      429.8,
+      756.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      453.8,
+      307.0,
+      1014.1,
+      715.8,
+      861.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      443.8,
+      372.0,
+      876.8,
+      465.8,
+      796.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      463.8,
+      322.0,
+      926.8,
+      505.8,
+      666.8,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      417.0,
+      412.0,
+      850.0,
+      429.8,
+      756.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      431.8,
+      400.0,
+      850.0,
+      451.8,
+      712.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      417.8,
+      424.5,
+      850.0,
+      439.8,
+      744.3,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      295.0,
+      850.0,
+      715.8,
+      557.0,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      360.0,
+      850.0,
+      465.8,
+      492.0,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      310.0,
+      850.0,
+      505.8,
+      362.0,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      400.0,
+      850.0,
+      429.8,
+      452.0,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      388.0,
+      850.0,
+      451.8,
+      408.0,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      412.5,
+      850.0,
+      439.8,
+      439.5,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      928.6,
+      850.0,
+      715.8,
+      1190.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      993.6,
+      850.0,
+      465.8,
+      1125.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      943.6,
+      850.0,
+      505.8,
+      995.6,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      1033.6,
+      850.0,
+      429.8,
+      1085.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      1021.6,
+      850.0,
+      451.8,
+      1041.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      1046.1,
+      850.0,
+      439.8,
+      1073.1,
+      2133.6
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_02_LIP",
+     "box": [
+      417.0,
+      728.8,
+      850.0,
+      429.8,
+      1073.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      453.8,
+      623.8,
+      1014.1,
+      715.8,
+      1178.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      443.8,
+      688.8,
+      876.8,
+      465.8,
+      1113.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      463.8,
+      638.8,
+      926.8,
+      505.8,
+      983.6,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      417.0,
+      728.8,
+      850.0,
+      429.8,
+      1073.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      431.8,
+      716.8,
+      850.0,
+      451.8,
+      1029.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      417.8,
+      741.3,
+      850.0,
+      439.8,
+      1061.1,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_LID_ACTUATOR",
+     "box": [
+      417.0,
+      235.0,
+      854.1,
+      427.0,
+      525.0,
+      1126.8
+     ]
+    },
+    {
+     "name": "PLATExTC_BASKET_POCKET_SIDE_FRONTY",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      681.0,
+      227.0,
+      912.0
+     ]
+    },
+    {
+     "name": "PLATExTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      207.0,
+      850.0,
+      681.0,
+      469.0,
+      912.0
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      272.0,
+      850.0,
+      431.0,
+      404.0,
+      912.0
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      222.0,
+      850.0,
+      471.0,
+      274.0,
+      852.0
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      300.0,
+      850.0,
+      417.0,
+      320.0,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_BASKET_APRILTAG_TAB",
+     "box": [
+      417.0,
+      175.0,
+      899.3,
+      499.0,
+      227.0,
+      915.0
+     ]
+    },
+    {
+     "name": "PLATExBASKET_RIM_XMAX",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      659.0,
+      442.0,
+      882.0
+     ]
+    },
+    {
+     "name": "PLATExBASKET_RIM_YMIN",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      659.0,
+      246.0,
+      882.0
+     ]
+    },
+    {
+     "name": "PLATExBASKET_RIM_YMAX",
+     "box": [
+      417.0,
+      188.0,
+      850.0,
+      659.0,
+      442.0,
+      882.0
+     ]
+    }
+   ],
+   "clean_route": [
+    [
+     1711.8,
+     1653.8,
+     2133.6
+    ],
+    [
+     727.0,
+     175.0,
+     912.0
+    ],
+    [
+     727.0,
+     175.0,
+     1983.6
+    ],
+    [
+     627.0,
+     1245.9,
+     1983.6
+    ],
+    [
+     627.0,
+     1245.9,
+     912.0
+    ],
+    [
+     477.0,
+     1245.9,
+     912.0
+    ],
+    [
+     477.0,
+     1245.9,
+     1983.6
+    ],
+    [
+     477.0,
+     175.0,
+     1983.6
+    ],
+    [
+     477.0,
+     175.0,
+     1167.1
+    ],
+    [
+     1711.8,
+     1653.8,
+     2133.6
+    ]
+   ],
+   "clean_nogo_spans": [
+    {
+     "from": [
+      727,
+      175,
+      912
+     ],
+     "to": [
+      627,
+      1246,
+      912
+     ],
+     "hit": "gantry PLATE vs TC_NEST_BOX_01_SIDE_FRONTY",
+     "clear": -88.8
+    },
+    {
+     "from": [
+      477,
+      1246,
+      912
+     ],
+     "to": [
+      477,
+      175,
+      1167
+     ],
+     "hit": "gantry PLATE vs TC_NEST_BOX_01_SIDE_FRONTY",
+     "clear": -127.0
+    }
+   ],
+   "egg_plan": [
+    {
+     "box": "NEST_BOX_01",
+     "target": "centre",
+     "approach": "top",
+     "pick_gantry": [
+      506.4,
+      723.0,
+      1274.1
+     ],
+     "pick_pose_deg": [
+      240.0,
+      64.0,
+      -37.0,
+      -19.0
+     ],
+     "approach_sweep": [
+      17.0,
+      "gripper+egg vs TC_NEST_SHELF",
+      [
+       506,
+       723,
+       1274
+      ],
+      "insert"
+     ],
+     "place_approach": "top",
+     "place_gantry": [
+      688.4,
+      217.0,
+      1072.6
+     ],
+     "place_pose_deg": [
+      0.0,
+      -100.0,
+      7.0,
+      93.0
+     ],
+     "place_sweep": [
+      12.0,
+      "gripper+egg vs TC_NEST_SHELF",
+      [
+       688,
+       217,
+       1073
+      ],
+      "insert"
+     ]
+    },
+    {
+     "box": "NEST_BOX_02",
+     "target": "centre",
+     "approach": "top",
+     "pick_gantry": [
+      471.9,
+      980.0,
+      1296.8
+     ],
+     "pick_pose_deg": [
+      240.0,
+      56.0,
+      -65.0,
+      24.0
+     ],
+     "approach_sweep": [
+      17.0,
+      "gripper+egg vs TC_NEST_SHELF",
+      [
+       472,
+       980,
+       1297
+      ],
+      "insert"
+     ],
+     "place_approach": "top",
+     "place_gantry": [
+      688.4,
+      217.0,
+      1072.6
+     ],
+     "place_pose_deg": [
+      0.0,
+      -100.0,
+      7.0,
+      93.0
+     ],
+     "place_sweep": [
+      12.0,
+      "gripper+egg vs TC_NEST_SHELF",
+      [
+       688,
+       217,
+       1073
+      ],
+      "insert"
+     ]
+    }
+   ]
+  },
+  "pro": {
+   "transit_z": 1983.5999999999995,
+   "nest_boxes": [
+    {
+     "name": "NEST_BOX_01",
+     "interior": [
+      32.0,
+      432.0,
+      777.0,
+      336.8,
+      736.8,
+      1066.8
+     ],
+     "approaches": [
+      {
+       "kind": "top",
+       "target_name": "wall-front",
+       "target": [
+        77.0,
+        477.0,
+        799.0
+       ],
+       "gantry": [
+        471.1,
+        564.8,
+        1225.5
+       ],
+       "pose_deg": [
+        210.0,
+        24.0,
+        59.0,
+        -75.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "side",
+       "target_name": "wall-front",
+       "target": [
+        77.0,
+        477.0,
+        799.0
+       ],
+       "gantry": [
+        535.1,
+        515.1,
+        1273.3
+       ],
+       "pose_deg": [
+        190.0,
+        36.0,
+        7.0,
+        -13.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "wall-back",
+       "target": [
+        77.0,
+        691.8,
+        799.0
+       ],
+       "gantry": [
+        521.8,
+        691.8,
+        1239.2
+       ],
+       "pose_deg": [
+        0.0,
+        -84.0,
+        59.0,
+        25.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "side",
+       "target_name": "wall-back",
+       "target": [
+        77.0,
+        691.8,
+        799.0
+       ],
+       "gantry": [
+        499.4,
+        660.0,
+        1291.0
+       ],
+       "pose_deg": [
+        170.0,
+        16.0,
+        27.0,
+        -13.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "centre",
+       "target": [
+        184.4,
+        584.4,
+        799.0
+       ],
+       "gantry": [
+        506.4,
+        723.0,
+        1274.1
+       ],
+       "pose_deg": [
+        240.0,
+        64.0,
+        -37.0,
+        -19.0
+       ],
+       "clear_mm": 17.0
+      },
+      {
+       "kind": "side",
+       "target_name": "centre",
+       "target": [
+        184.4,
+        584.4,
+        799.0
+       ],
+       "gantry": [
+        482.3,
+        564.1,
+        1331.6
+       ],
+       "pose_deg": [
+        160.0,
+        -12.0,
+        35.0,
+        -3.0
+       ],
+       "clear_mm": 17.0
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-front",
+       "target": [
+        291.8,
+        477.0,
+        799.0
+       ],
+       "gantry": [
+        533.8,
+        557.2,
+        1252.7
+       ],
+       "pose_deg": [
+        270.0,
+        76.0,
+        -97.0,
+        36.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-back",
+       "target": [
+        291.8,
+        691.8,
+        799.0
+       ],
+       "gantry": [
+        558.1,
+        733.8,
+        1339.5
+       ],
+       "pose_deg": [
+        60.0,
+        -8.0,
+        -13.0,
+        36.0
+       ],
+       "clear_mm": 13.0
+      }
+     ]
+    },
+    {
+     "name": "NEST_BOX_02",
+     "interior": [
+      32.0,
+      748.8,
+      777.0,
+      336.8,
+      1053.6,
+      1066.8
+     ],
+     "approaches": [
+      {
+       "kind": "top",
+       "target_name": "wall-front",
+       "target": [
+        77.0,
+        793.8,
+        799.0
+       ],
+       "gantry": [
+        521.8,
+        793.8,
+        1239.2
+       ],
+       "pose_deg": [
+        0.0,
+        -84.0,
+        59.0,
+        25.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "side",
+       "target_name": "wall-front",
+       "target": [
+        77.0,
+        793.8,
+        799.0
+       ],
+       "gantry": [
+        500.1,
+        793.8,
+        1280.4
+       ],
+       "pose_deg": [
+        180.0,
+        20.0,
+        35.0,
+        -35.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "wall-back",
+       "target": [
+        77.0,
+        1008.6,
+        799.0
+       ],
+       "gantry": [
+        504.8,
+        1008.6,
+        1237.9
+       ],
+       "pose_deg": [
+        0.0,
+        -88.0,
+        71.0,
+        17.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "side",
+       "target_name": "wall-back",
+       "target": [
+        77.0,
+        1008.6,
+        799.0
+       ],
+       "gantry": [
+        479.8,
+        980.3,
+        1223.8
+       ],
+       "pose_deg": [
+        170.0,
+        92.0,
+        -85.0,
+        13.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "centre",
+       "target": [
+        184.4,
+        901.2,
+        799.0
+       ],
+       "gantry": [
+        471.9,
+        980.0,
+        1296.8
+       ],
+       "pose_deg": [
+        240.0,
+        56.0,
+        -65.0,
+        24.0
+       ],
+       "clear_mm": 17.0
+      },
+      {
+       "kind": "side",
+       "target_name": "centre",
+       "target": [
+        184.4,
+        901.2,
+        799.0
+       ],
+       "gantry": [
+        482.3,
+        880.9,
+        1331.6
+       ],
+       "pose_deg": [
+        160.0,
+        -12.0,
+        35.0,
+        -3.0
+       ],
+       "clear_mm": 17.0
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-front",
+       "target": [
+        291.8,
+        793.8,
+        799.0
+       ],
+       "gantry": [
+        533.8,
+        1006.0,
+        1255.0
+       ],
+       "pose_deg": [
+        270.0,
+        52.0,
+        -1.0,
+        -36.0
+       ],
+       "clear_mm": 13.0
+      },
+      {
+       "kind": "top",
+       "target_name": "aisle-back",
+       "target": [
+        291.8,
+        1008.6,
+        799.0
+       ],
+       "gantry": [
+        662.1,
+        1082.7,
+        1251.8
+       ],
+       "pose_deg": [
+        30.0,
+        -84.0,
+        83.0,
+        1.0
+       ],
+       "clear_mm": 13.0
+      }
+     ]
+    }
+   ],
+   "basket": {
+    "name": "BASKET",
+    "interior": [
+     32.0,
+     102.0,
+     762.0,
+     302.0,
+     332.0,
+     912.0
+    ],
+    "approaches": [
+     {
+      "kind": "top",
+      "target_name": "centre",
+      "target": [
+       167.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       688.4,
+       217.0,
+       1072.6
+      ],
+      "pose_deg": [
+       0.0,
+       -100.0,
+       7.0,
+       93.0
+      ],
+      "clear_mm": 12.0
+     },
+     {
+      "kind": "side",
+      "target_name": "centre",
+      "target": [
+       167.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       455.0,
+       200.3,
+       1264.4
+      ],
+      "pose_deg": [
+       160.0,
+       -44.0,
+       91.0,
+       -27.0
+      ],
+      "clear_mm": 12.0
+     },
+     {
+      "kind": "top",
+      "target_name": "wall-side",
+      "target": [
+       97.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       618.4,
+       217.0,
+       1072.6
+      ],
+      "pose_deg": [
+       0.0,
+       -100.0,
+       7.0,
+       93.0
+      ],
+      "clear_mm": 12.0
+     },
+     {
+      "kind": "side",
+      "target_name": "wall-side",
+      "target": [
+       97.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       535.7,
+       217.0,
+       1212.9
+      ],
+      "pose_deg": [
+       180.0,
+       80.0,
+       -81.0,
+       41.0
+      ],
+      "clear_mm": 12.0
+     },
+     {
+      "kind": "top",
+      "target_name": "aisle-side",
+      "target": [
+       237.0,
+       217.0,
+       794.0
+      ],
+      "gantry": [
+       758.4,
+       217.0,
+       1072.6
+      ],
+      "pose_deg": [
+       0.0,
+       -100.0,
+       7.0,
+       93.0
+      ],
+      "clear_mm": 12.0
+     }
+    ]
+   },
+   "nogo": [
+    {
+     "name": "PLATExTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      611.8,
+      850.0,
+      715.8,
+      873.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      676.8,
+      850.0,
+      465.8,
+      808.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      626.8,
+      850.0,
+      505.8,
+      678.8,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      716.8,
+      850.0,
+      429.8,
+      768.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      704.8,
+      850.0,
+      451.8,
+      724.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_01_SIDE_BACKY",
+     "box": [
+      417.0,
+      729.3,
+      850.0,
+      439.8,
+      756.3,
+      2133.6
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_LIP",
+     "box": [
+      417.0,
+      412.0,
+      850.0,
+      429.8,
+      756.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      453.8,
+      307.0,
+      1014.1,
+      715.8,
+      861.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      443.8,
+      372.0,
+      876.8,
+      465.8,
+      796.8,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      463.8,
+      322.0,
+      926.8,
+      505.8,
+      666.8,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      417.0,
+      412.0,
+      850.0,
+      429.8,
+      756.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      431.8,
+      400.0,
+      850.0,
+      451.8,
+      712.8,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_01_TOPRAIL",
+     "box": [
+      417.8,
+      424.5,
+      850.0,
+      439.8,
+      744.3,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      295.0,
+      850.0,
+      715.8,
+      557.0,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      360.0,
+      850.0,
+      465.8,
+      492.0,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      310.0,
+      850.0,
+      505.8,
+      362.0,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      400.0,
+      850.0,
+      429.8,
+      452.0,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      388.0,
+      850.0,
+      451.8,
+      408.0,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_01_SIDE_FRONTY",
+     "box": [
+      417.0,
+      412.5,
+      850.0,
+      439.8,
+      439.5,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      928.6,
+      850.0,
+      715.8,
+      1190.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      993.6,
+      850.0,
+      465.8,
+      1125.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      943.6,
+      850.0,
+      505.8,
+      995.6,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      1033.6,
+      850.0,
+      429.8,
+      1085.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      1021.6,
+      850.0,
+      451.8,
+      1041.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_02_SIDE_BACKY",
+     "box": [
+      417.0,
+      1046.1,
+      850.0,
+      439.8,
+      1073.1,
+      2133.6
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_02_LIP",
+     "box": [
+      417.0,
+      728.8,
+      850.0,
+      429.8,
+      1073.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      453.8,
+      623.8,
+      1014.1,
+      715.8,
+      1178.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      443.8,
+      688.8,
+      876.8,
+      465.8,
+      1113.6,
+      1066.8
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      463.8,
+      638.8,
+      926.8,
+      505.8,
+      983.6,
+      1006.8
+     ]
+    },
+    {
+     "name": "MASTxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      417.0,
+      728.8,
+      850.0,
+      429.8,
+      1073.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      431.8,
+      716.8,
+      850.0,
+      451.8,
+      1029.6,
+      2133.6
+     ]
+    },
+    {
+     "name": "Z_RAILxTC_NEST_BOX_02_TOPRAIL",
+     "box": [
+      417.8,
+      741.3,
+      850.0,
+      439.8,
+      1061.1,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_NEST_LID_ACTUATOR",
+     "box": [
+      417.0,
+      235.0,
+      854.1,
+      427.0,
+      525.0,
+      1126.8
+     ]
+    },
+    {
+     "name": "PLATExTC_BASKET_POCKET_SIDE_FRONTY",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      681.0,
+      227.0,
+      912.0
+     ]
+    },
+    {
+     "name": "PLATExTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      207.0,
+      850.0,
+      681.0,
+      469.0,
+      912.0
+     ]
+    },
+    {
+     "name": "Z_PLATExTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      272.0,
+      850.0,
+      431.0,
+      404.0,
+      912.0
+     ]
+    },
+    {
+     "name": "CAM_TOOLxTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      222.0,
+      850.0,
+      471.0,
+      274.0,
+      852.0
+     ]
+    },
+    {
+     "name": "Z_SCREWxTC_BASKET_POCKET_SIDE_BACKY",
+     "box": [
+      417.0,
+      300.0,
+      850.0,
+      417.0,
+      320.0,
+      2133.6
+     ]
+    },
+    {
+     "name": "PLATExTC_BASKET_APRILTAG_TAB",
+     "box": [
+      417.0,
+      175.0,
+      899.3,
+      499.0,
+      227.0,
+      915.0
+     ]
+    },
+    {
+     "name": "PLATExBASKET_RIM_XMAX",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      659.0,
+      442.0,
+      882.0
+     ]
+    },
+    {
+     "name": "PLATExBASKET_RIM_YMIN",
+     "box": [
+      417.0,
+      175.0,
+      850.0,
+      659.0,
+      246.0,
+      882.0
+     ]
+    },
+    {
+     "name": "PLATExBASKET_RIM_YMAX",
+     "box": [
+      417.0,
+      188.0,
+      850.0,
+      659.0,
+      442.0,
+      882.0
+     ]
+    }
+   ],
+   "clean_route": [
+    [
+     1711.8,
+     1653.8,
+     2133.6
+    ],
+    [
+     727.0,
+     175.0,
+     912.0
+    ],
+    [
+     727.0,
+     175.0,
+     1983.6
+    ],
+    [
+     627.0,
+     1245.9,
+     1983.6
+    ],
+    [
+     627.0,
+     1245.9,
+     912.0
+    ],
+    [
+     477.0,
+     1245.9,
+     912.0
+    ],
+    [
+     477.0,
+     1245.9,
+     1983.6
+    ],
+    [
+     477.0,
+     175.0,
+     1983.6
+    ],
+    [
+     477.0,
+     175.0,
+     1167.1
+    ],
+    [
+     1711.8,
+     1653.8,
+     2133.6
+    ]
+   ],
+   "clean_nogo_spans": [
+    {
+     "from": [
+      727,
+      175,
+      912
+     ],
+     "to": [
+      627,
+      1246,
+      912
+     ],
+     "hit": "gantry PLATE vs TC_NEST_BOX_01_SIDE_FRONTY",
+     "clear": -88.8
+    },
+    {
+     "from": [
+      477,
+      1246,
+      912
+     ],
+     "to": [
+      477,
+      175,
+      1167
+     ],
+     "hit": "gantry PLATE vs TC_NEST_BOX_01_SIDE_FRONTY",
+     "clear": -127.0
+    }
+   ],
+   "egg_plan": [
+    {
+     "box": "NEST_BOX_01",
+     "target": "centre",
+     "approach": "top",
+     "pick_gantry": [
+      506.4,
+      723.0,
+      1274.1
+     ],
+     "pick_pose_deg": [
+      240.0,
+      64.0,
+      -37.0,
+      -19.0
+     ],
+     "approach_sweep": [
+      17.0,
+      "gripper+egg vs TC_NEST_SHELF",
+      [
+       506,
+       723,
+       1274
+      ],
+      "insert"
+     ],
+     "place_approach": "top",
+     "place_gantry": [
+      688.4,
+      217.0,
+      1072.6
+     ],
+     "place_pose_deg": [
+      0.0,
+      -100.0,
+      7.0,
+      93.0
+     ],
+     "place_sweep": [
+      12.0,
+      "gripper+egg vs TC_NEST_SHELF",
+      [
+       688,
+       217,
+       1073
+      ],
+      "insert"
+     ]
+    },
+    {
+     "box": "NEST_BOX_02",
+     "target": "centre",
+     "approach": "top",
+     "pick_gantry": [
+      471.9,
+      980.0,
+      1296.8
+     ],
+     "pick_pose_deg": [
+      240.0,
+      56.0,
+      -65.0,
+      24.0
+     ],
+     "approach_sweep": [
+      17.0,
+      "gripper+egg vs TC_NEST_SHELF",
+      [
+       472,
+       980,
+       1297
+      ],
+      "insert"
+     ],
+     "place_approach": "top",
+     "place_gantry": [
+      688.4,
+      217.0,
+      1072.6
+     ],
+     "place_pose_deg": [
+      0.0,
+      -100.0,
+      7.0,
+      93.0
+     ],
+     "place_sweep": [
+      12.0,
+      "gripper+egg vs TC_NEST_SHELF",
+      [
+       688,
+       217,
+       1073
+      ],
+      "insert"
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -4,7 +4,7 @@
   <url><loc>https://tendercells.com/demo</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.97</priority></url>
   <url><loc>https://tendercells.com/app/demo</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.96</priority></url>
   <url><loc>https://tendercells.com/app/demo-manifest.json</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.955</priority></url>
-  <url><loc>https://tendercells.com/app/demo-description.html</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.955</priority></url>
+  <url><loc>https://tendercells.com/app/demo-description</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.955</priority></url>
   <url><loc>https://tendercells.com/demo-evaluation.json</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.95</priority></url>
   <url><loc>https://tendercells.com/llm-demo-test</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.94</priority></url>
   <url><loc>https://tendercells.com/tender-cells-overview</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.93</priority></url>
@@ -39,6 +39,7 @@
   <url><loc>https://tendercells.com/guides</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.79</priority></url>
   <url><loc>https://tendercells.com/guides/smart-chicken-coop</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.78</priority></url>
   <url><loc>https://tendercells.com/guides/predator-monitoring</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.76</priority></url>
+  <url><loc>https://tendercells.com/guides/camera-node-first-build</loc><lastmod>2026-10-22</lastmod><changefreq>monthly</changefreq><priority>0.76</priority></url>
   <url><loc>https://tendercells.com/guides/pasture-rotation</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.76</priority></url>
   <url><loc>https://tendercells.com/farm-automation</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.84</priority></url>
   <url><loc>https://tendercells.com/health</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.78</priority></url>
@@ -52,7 +53,6 @@
   <url><loc>https://tendercells.com/terms</loc><lastmod>2026-06-14</lastmod><changefreq>yearly</changefreq><priority>0.45</priority></url>
   <url><loc>https://tendercells.com/editorial-policy</loc><lastmod>2026-06-14</lastmod><changefreq>yearly</changefreq><priority>0.45</priority></url>
   <url><loc>https://tendercells.com/story</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://tendercells.com/our-story</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://tendercells.com/blog</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
   <!-- generated:docs start (scripts/sync-docs.mjs) -->
   <url><loc>https://tendercells.com/docs</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -106,6 +106,6 @@
   <url><loc>https://tendercells.com/docs/contributing</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tendercells.com/docs/ai-assistant-plugin</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tendercells.com/docs/security</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://tendercells.com/docs/index</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tendercells.com/docs/all</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <!-- generated:docs end -->
 </urlset>

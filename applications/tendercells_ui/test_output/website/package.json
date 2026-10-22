@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/sync-docs.mjs && tsc -b && vite build",
+    "build": "node scripts/sync-docs.mjs && tsc -b && vite build && node scripts/prerender-seo.mjs",
+    "check:seo": "node scripts/prerender-seo.mjs --check",
     "build:with-app": "npm run build && npm --prefix ../tendercells-ui run build:public-demo && node scripts/copy-app-build.mjs",
     "lint": "eslint .",
     "sync:docs": "node scripts/sync-docs.mjs",

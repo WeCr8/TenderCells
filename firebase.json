@@ -21,6 +21,18 @@
     {
       "target": "main",
       "public": "applications/tendercells_ui/test_output/website/dist",
+      "redirects": [
+        {
+          "source": "/our-story",
+          "destination": "/story",
+          "type": 301
+        },
+        {
+          "source": "/docs/index",
+          "destination": "/docs/all",
+          "type": 301
+        }
+      ],
       "ignore": [
         "firebase.json",
         "**/.*",

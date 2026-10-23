@@ -107,7 +107,9 @@ function sitemapWith(xml) {
   const urls = [
     "/docs", "/lessons",
     ...Object.keys(LESSON_SOURCES).map((s) => `/lessons/${s}`),
-    ...SITE_DOCS.map((d) => `/docs/${d.slug}`),
+    // /docs/index (the repo's docs/README.md) is served /docs's HTML by Firebase cleanUrls
+    // (docs/index.html) and declares /docs as its canonical, so only /docs is listed.
+    ...SITE_DOCS.filter((d) => d.slug !== "index").map((d) => `/docs/${d.slug}`),
   ].map((p) => `  <url><loc>${SITE}${p}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`);
   const block = [SITEMAP_START, ...urls, SITEMAP_END].join("\n");
   const re = new RegExp(`${SITEMAP_START.trim().replace(/[()]/g, "\\$&")}[\\s\\S]*?${SITEMAP_END.trim()}`);

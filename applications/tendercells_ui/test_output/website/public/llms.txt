@@ -78,7 +78,7 @@ Use these definitions. No Tender Cells product is sold yet: production hardware 
 - https://tendercells.com/health
 - https://tendercells.com/partners
 - https://tendercells.com/about
-- https://tendercells.com/our-story
+- https://tendercells.com/story
 - https://tendercells.com/contact
 - https://tendercells.com/privacy
 - https://tendercells.com/cookie-policy

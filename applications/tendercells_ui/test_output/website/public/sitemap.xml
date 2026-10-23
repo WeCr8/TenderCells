@@ -4,7 +4,7 @@
   <url><loc>https://tendercells.com/demo</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.97</priority></url>
   <url><loc>https://tendercells.com/app/demo</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.96</priority></url>
   <url><loc>https://tendercells.com/app/demo-manifest.json</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.955</priority></url>
-  <url><loc>https://tendercells.com/app/demo-description.html</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.955</priority></url>
+  <url><loc>https://tendercells.com/app/demo-description</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.955</priority></url>
   <url><loc>https://tendercells.com/demo-evaluation.json</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.95</priority></url>
   <url><loc>https://tendercells.com/llm-demo-test</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.94</priority></url>
   <url><loc>https://tendercells.com/tender-cells-overview</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.93</priority></url>
@@ -39,6 +39,7 @@
   <url><loc>https://tendercells.com/guides</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.79</priority></url>
   <url><loc>https://tendercells.com/guides/smart-chicken-coop</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.78</priority></url>
   <url><loc>https://tendercells.com/guides/predator-monitoring</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.76</priority></url>
+  <url><loc>https://tendercells.com/guides/camera-node-first-build</loc><lastmod>2026-10-22</lastmod><changefreq>monthly</changefreq><priority>0.76</priority></url>
   <url><loc>https://tendercells.com/guides/pasture-rotation</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.76</priority></url>
   <url><loc>https://tendercells.com/farm-automation</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.84</priority></url>
   <url><loc>https://tendercells.com/health</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.78</priority></url>
@@ -52,7 +53,7 @@
   <url><loc>https://tendercells.com/terms</loc><lastmod>2026-06-14</lastmod><changefreq>yearly</changefreq><priority>0.45</priority></url>
   <url><loc>https://tendercells.com/editorial-policy</loc><lastmod>2026-06-14</lastmod><changefreq>yearly</changefreq><priority>0.45</priority></url>
   <url><loc>https://tendercells.com/story</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://tendercells.com/our-story</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/assistants</loc><lastmod>2026-10-22</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://tendercells.com/blog</loc><lastmod>2026-06-14</lastmod><changefreq>weekly</changefreq><priority>0.65</priority></url>
   <!-- generated:docs start (scripts/sync-docs.mjs) -->
   <url><loc>https://tendercells.com/docs</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -106,6 +107,70 @@
   <url><loc>https://tendercells.com/docs/contributing</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tendercells.com/docs/ai-assistant-plugin</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tendercells.com/docs/security</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://tendercells.com/docs/index</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <!-- generated:docs end -->
+  <!-- generated:library start (scripts/seo-pages.mjs) -->
+  <url><loc>https://tendercells.com/library/animals/chicken</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/duck</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/turkey</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/goose</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/quail</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/pigeon</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/rabbit</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/guinea-pig</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/chinchilla</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/hamster</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/rat</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/mouse</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/goat</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/sheep</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/pig</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/alpaca</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/pond-fish</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/tortoise</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/turtle</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/bearded-dragon</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/leopard-gecko</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/ball-python</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/cow</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/horse</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/dog</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/animals/cat</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/raccoon</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/fox</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/coyote</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/hawk</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/owl</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/opossum</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/weasel</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/skunk</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/loose-dog</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/rat</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/mouse</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/rat-snake</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/wildlife/venomous-snake</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/tomato</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/lettuce</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/carrot</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/bean</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/squash</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/pepper</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/basil</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/strawberry</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/pigweed</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/purslane</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/nutsedge</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/crabgrass</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/dandelion</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/lambsquarters</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/bindweed</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/avocado</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/nightshade</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/yew</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/rhododendron</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/oleander</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/foxglove</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/lily</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/red-maple</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://tendercells.com/library/plants/rhubarb-leaves</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <!-- generated:library end -->
 </urlset>

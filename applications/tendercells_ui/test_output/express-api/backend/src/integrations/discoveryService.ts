@@ -1,16 +1,16 @@
 // discoveryService.ts - bounded discovery job orchestrator.
 //
-// M1 scope only: every adapter returns a fixed SIMULATED fixture set. No mDNS/SSDP, no real
-// Home Assistant/MQTT/ONVIF scanning, no network I/O of any kind happens here yet - that is
-// real work for later milestones (M2 Home Assistant, M3 MQTT, M4 camera/ONVIF), each adding
-// its own adapter behind its own feature flag per CONNECT_MY_PROPERTY_IMPLEMENTATION_SPEC.md.
-// Keeping this module simulated-only for now is deliberate: it means the public demo and any
-// not-yet-authorized caller can exercise the whole discover -> stage -> import flow with zero
-// risk of touching a real device, by construction, not by a flag someone could flip wrong.
+// M1: every adapter returned a fixed SIMULATED fixture set, zero network I/O. M2 adds one
+// real adapter - Home Assistant - used only when HA_CONFIGURED (the hub-wide HA_URL/HA_TOKEN
+// mowerBridge.ts already reads; see homeAssistantAdapter.ts for why there's no separate
+// per-connector credential store). Every other adapter (mqtt, onvif, rtsp, mjpeg) is still
+// simulated-only pending M3/M4. No gateway configured -> same simulated fixture as before,
+// so the public demo and any not-yet-authorized caller still touch zero real devices.
 
 import { randomUUID } from "node:crypto";
 import type { AdapterKind, DiscoveryCandidate, DiscoveryJob } from "./types.js";
 import { dedupeByIdentity } from "./deviceIdentity.js";
+import { HA_CONFIGURED, discoverCandidates as discoverHaCandidates } from "./homeAssistantAdapter.js";
 
 const jobs = new Map<string, DiscoveryJob>();
 
@@ -69,17 +69,35 @@ export function startDiscovery(ownerId: string, gatewayId: string, adapter: Adap
   if (activeForOwner >= MAX_ACTIVE_JOBS) return { ok: false, error: "TOO_MANY_JOBS" };
 
   const id = randomUUID();
-  const candidates = dedupeByIdentity(ownerId, simulatedFixture(adapter, ownerId, gatewayId));
-  const job: DiscoveryJob = {
-    id,
-    ownerId,
-    adapter,
-    status: "complete",
-    startedAt: new Date(now).toISOString(),
-    completedAt: new Date(now).toISOString(),
-    candidates,
-  };
+  const useRealHa = adapter === "home_assistant" && HA_CONFIGURED;
+
+  if (!useRealHa) {
+    const candidates = dedupeByIdentity(ownerId, simulatedFixture(adapter, ownerId, gatewayId));
+    const job: DiscoveryJob = {
+      id, ownerId, adapter, status: "complete",
+      startedAt: new Date(now).toISOString(), completedAt: new Date(now).toISOString(), candidates,
+    };
+    jobs.set(id, job);
+    return { ok: true, job };
+  }
+
+  // Real network call: the job starts "running" and the route polls it, same contract the
+  // simulated path already promised (DiscoveryJob.status was always running|complete|error).
+  const job: DiscoveryJob = { id, ownerId, adapter, status: "running", startedAt: new Date(now).toISOString(), candidates: [] };
   jobs.set(id, job);
+  void discoverHaCandidates(gatewayId).then((result) => {
+    const current = jobs.get(id);
+    if (!current) return; // pruned/removed while the call was in flight
+    if (!result.ok) {
+      current.status = "error";
+      current.error = result.error;
+      current.completedAt = new Date().toISOString();
+      return;
+    }
+    current.candidates = dedupeByIdentity(ownerId, result.value.candidates);
+    current.status = "complete";
+    current.completedAt = new Date().toISOString();
+  });
   return { ok: true, job };
 }
 

@@ -11,6 +11,7 @@ import type { NextFunction, Request, Response } from "express";
 import { requireAuth, requirePerson, type AuthedRequest } from "../middleware/auth.js";
 import { startDiscovery, getDiscoveryJob } from "../integrations/discoveryService.js";
 import { importCandidate, listForOwner, disable } from "../integrations/registry.js";
+import { HA_CONFIGURED, testConnection as testHaConnection } from "../integrations/homeAssistantAdapter.js";
 import type { AdapterKind } from "../integrations/types.js";
 
 const CONNECT_PROPERTY_ENABLED = /^(1|true)$/i.test(process.env.TC_CONNECT_PROPERTY_ENABLED || "");
@@ -52,6 +53,24 @@ router.post("/discover", (req, res) => {
     return;
   }
   res.json({ job: result.job });
+});
+
+router.post("/test", async (req, res) => {
+  const { adapter } = req.body as { adapter?: string };
+  if (adapter !== "home_assistant") {
+    res.status(400).json({ error: "UNSUPPORTED_ADAPTER", message: "Only home_assistant has a real test in this milestone." });
+    return;
+  }
+  if (!HA_CONFIGURED) {
+    res.status(409).json({ error: "NOT_CONFIGURED", message: "HA_URL and HA_TOKEN are not set on this hub." });
+    return;
+  }
+  const result = await testHaConnection();
+  if (!result.ok) {
+    res.status(502).json({ error: "CONNECTION_FAILED", message: result.error });
+    return;
+  }
+  res.json({ ok: true, entityCount: result.value.entityCount });
 });
 
 router.get("/discover/:jobId", (req, res) => {

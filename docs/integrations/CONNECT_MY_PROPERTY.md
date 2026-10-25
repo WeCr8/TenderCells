@@ -1,4 +1,4 @@
-# Connect My Property — M1 (read-only discovery + import)
+# Connect My Property — M1 + M2 (read-only discovery + import, real HA adapter)
 
 Status: **M1 only**, built against the full spec in the implementation package
 (`CONNECT_MY_PROPERTY_IMPLEMENTATION_SPEC.md`, not committed to this repo -
@@ -31,10 +31,28 @@ replacement for - the existing Home Assistant/MQTT mower integration in
   only). Gated behind `TC_CONNECT_PROPERTY_ENABLED=1` (404 otherwise), owner
   auth via the existing `requireAuth`/`requirePerson` middleware.
 
+**Built (M2):**
+- `backend/src/integrations/homeAssistantAdapter.ts` - a real, read-only HA
+  REST client. Reuses the hub-wide `HA_URL`/`HA_TOKEN` env vars
+  `mowerBridge.ts` already reads (see "Credentials" below for why there's no
+  separate per-connector store). `SAFE_DOMAINS` allowlist (sensor,
+  binary_sensor, switch, light, climate, cover, lock) - `lawn_mower` and
+  `vacuum` are never staged as candidates, verified by both mocked-fetch unit
+  tests and a live end-to-end run against a real local HTTP server standing
+  in for Home Assistant (see "Verified this session").
+- Basic SSRF guard (`isPrivateHaUrl`) on the configured `HA_URL` - rejects
+  non-private/non-local hosts before ever calling them. First pass only, not
+  DNS-rebinding-proof; documented as such in the code.
+- `POST /api/integrations/test` - connectivity/auth check, stages nothing.
+- `discoveryService.ts`'s `home_assistant` branch now calls the real adapter
+  when `HA_CONFIGURED`, with a proper `running` -> `complete`/`error` job
+  transition (the contract was already there in `DiscoveryJob`, M1 just
+  never needed it since fixtures were instant). Falls back to the M1
+  simulated fixture when HA isn't configured - the public demo and any
+  not-yet-configured gateway still touch zero real devices.
+
 **Not built yet (future milestones, each needs its own real-hardware
 acceptance pass before shipping):**
-- Real Home Assistant adapter (REST/WS client, entity mapping, service
-  allowlist) - M2.
 - Real MQTT generic import (beyond the mower's `tc/{id}/cmd/mower` topic) -
   M3.
 - ONVIF/RTSP/camera adapter and media hardening - M4.
@@ -68,14 +86,35 @@ acceptance pass before shipping):**
 - Added `.tendercells/` to the root `.gitignore` - this directory
   (`mowerBridge.ts`'s own `mower-links.json` lives there too) was never
   actually gitignored before.
+- M2: live-tested the real network path against a local HTTP server
+  standing in for Home Assistant (`/api/states`, bearer-token auth) - not
+  just mocked-fetch unit tests. Confirmed: `/test` connectivity check works,
+  a discovery job starts `running` and transitions to `complete` once the
+  real HTTP call resolves, and a `lawn_mower.front` entity the fake server
+  returned was correctly excluded from every response. No real Home
+  Assistant instance was available to test against - flagging that
+  explicitly rather than claiming more than this.
 
 ## Why mower integration wasn't touched or reused directly
 
 `mower.ts`/`mowerBridge.ts` already has a real, shipped, animal-safety-
 interlocked Home Assistant + MQTT adapter - but scoped specifically to the
-`lawn_mower` domain and the mower's own safety rules. Generalizing it to
-other domains/device types is a real design decision (reuse its `ha()`
-client and interlock pattern vs. a parallel adapter), not something to guess
-at silently. Left as an explicit open question for the next milestone rather
-than either duplicating control paths into the same hardware or hollowing
-out a working, tested safety system to force a premature generalization.
+`lawn_mower` domain and the mower's own safety rules. M2 resolves this by
+domain exclusion, not code reuse: the new adapter reads the exact same
+`HA_URL`/`HA_TOKEN` (same hub, same HA instance - there's only one), but its
+`SAFE_DOMAINS` allowlist structurally excludes `lawn_mower`/`vacuum`, so the
+two adapters can never both think they control the same entity. `mower.ts`
+keeps 100% of its own domain and interlocks, untouched.
+
+## Credentials: why there's no per-connector secret store
+
+Every existing vendor adapter in this hub - Husqvarna, GARDENA, Mammotion,
+and now Home Assistant - is a single hub-wide env var pair
+(`HUSQVARNA_APP_KEY`/`SECRET`, `MAMMOTION_CLIENT_ID`/`SECRET`,
+`HA_URL`/`HA_TOKEN`). There is no multi-tenant, per-owner encrypted
+credential store anywhere in this codebase, because the deployment model is
+one hub per property, not multi-tenant SaaS. Building a new secret store for
+this feature would have been a second, parallel credential architecture with
+nothing to validate it against. M2 follows the existing convention exactly
+instead: one hub, one Home Assistant instance, configured the same way the
+operator already configures mower vendor credentials.

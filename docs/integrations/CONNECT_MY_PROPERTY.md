@@ -1,4 +1,4 @@
-# Connect My Property — M1 + M2 + M3 (read-only discovery + import, real HA + MQTT adapters)
+# Connect My Property — M1-M4 (read-only discovery + import; HA, MQTT, ONVIF-discovery adapters)
 
 Status: **M1 only**, built against the full spec in the implementation package
 (`CONNECT_MY_PROPERTY_IMPLEMENTATION_SPEC.md`, not committed to this repo -
@@ -77,9 +77,36 @@ replacement for - the existing Home Assistant/MQTT mower integration in
   `DiscoveryCandidate` (topic name + value), never the connection details
   that produced it.
 
+**Built (M4, discovery/metadata only - no media):**
+- `backend/src/integrations/onvifAdapter.ts` - real ONVIF WS-Discovery (UDP
+  multicast Probe -> ProbeMatch), a standard documented wire format. Message
+  building and response parsing verified against known-good fixture XML; the
+  live UDP send/timeout path verified for real (no camera here to respond -
+  an empty result after the timeout is the correct, honest outcome, and is
+  what's tested). Always runs for real once a signed-in owner reaches this
+  router - no credentials needed, bounded by its own timeout, so unlike HA/
+  MQTT there's no "not configured yet" fallback state to simulate.
+- `backend/src/integrations/manualCamera.ts` - manually entered RTSP URL or
+  ONVIF host (spec §8.2 items 2-3). Validates URL shape and that the host is
+  private/local; never connects to, probes, or fetches anything from it.
+  `POST /api/integrations/manual`.
+- **Explicitly not built**: anything that connects to, authenticates with,
+  or pulls media from an actual camera - no `GetProfiles`/`GetStreamUri`
+  SOAP calls, no RTSP ingestion, no WebRTC/HLS conversion,
+  `express-api/tools/camera-bridge.mts` untouched. The spec's own §8.1 says
+  that bridge needs proving against real hardware *first*; there's no camera
+  in this environment to do that with, and staging an untested media path
+  would be worse than not having one. Every camera candidate - ONVIF-
+  discovered or manually entered - carries a `camera.stream` capability that
+  is observe-tier and never auto-enabled.
+- **Found live-testing this milestone**: `registry.ts`'s `importCandidate`
+  hardcoded every imported record's top-level `provenance` to `"simulated"`,
+  regardless of the actual candidate - a leftover from M1 when everything
+  genuinely was simulated. A real manual RTSP import showed up mislabeled.
+  Fixed to reflect the candidate's actual provenance; regression test added.
+
 **Not built yet (future milestones, each needs its own real-hardware
 acceptance pass before shipping):**
-- ONVIF/RTSP/camera adapter and media hardening - M4.
 - Any capability-policy engine that could ever set `controlEnabled: true` -
   out of scope until a dedicated safety review, same bar as the mower
   interlocks.
@@ -125,6 +152,16 @@ acceptance pass before shipping):**
   match it - confirmed excluded from the result. No real external broker
   (an owner's actual Mosquitto/Home-Assistant-MQTT setup) was available to
   test against.
+- M4: ONVIF message building/parsing verified against known-good fixture
+  XML (standard WS-Discovery wire format); the live UDP probe/timeout path
+  verified for real against this network (correctly finds nothing - no
+  camera present, which is the honest result). Manual RTSP/ONVIF entry
+  live-tested: a private IP is accepted, a public hostname is rejected, both
+  through the running server. No real ONVIF/RTSP camera was available to
+  test discovery-to-playback against - not attempted, not claimed.
+  Found and fixed a real bug in the process: `registry.ts` hardcoded every
+  import's `provenance` to `"simulated"`, mislabeling real/manual imports
+  too - caught live-testing the manual camera route, not by any prior test.
 
 ## Why mower integration wasn't touched or reused directly
 

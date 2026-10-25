@@ -13,6 +13,7 @@ import { startDiscovery, getDiscoveryJob } from "../integrations/discoveryServic
 import { importCandidate, listForOwner, disable } from "../integrations/registry.js";
 import { HA_CONFIGURED, testConnection as testHaConnection } from "../integrations/homeAssistantAdapter.js";
 import { testConnection as testMqttConnection, validateTopicPatterns, type MqttConnectOptions } from "../integrations/mqttImportAdapter.js";
+import { validateManualCameraUrl, manualCameraCandidate, type ManualCameraKind } from "../integrations/manualCamera.js";
 import type { AdapterKind } from "../integrations/types.js";
 
 const CONNECT_PROPERTY_ENABLED = /^(1|true)$/i.test(process.env.TC_CONNECT_PROPERTY_ENABLED || "");
@@ -135,6 +136,34 @@ router.post("/import", (req, res) => {
     res.status(404).json({ error: "CANDIDATE_NOT_FOUND" });
     return;
   }
+  const result = importCandidate(uidOf(req), propertyId, candidate);
+  if (!result.ok) {
+    res.status(409).json({ error: result.error, integration: result.record });
+    return;
+  }
+  res.status(201).json({ integration: result.record });
+});
+
+// Manual entry (spec §8.2 items 2-3): no discovery job, the owner supplies the URL directly.
+// Metadata staging only - validated and SSRF-checked, never connected to or probed.
+router.post("/manual", (req, res) => {
+  const { kind, gatewayId, url, displayName, propertyId } = req.body as {
+    kind?: string; gatewayId?: string; url?: string; displayName?: string; propertyId?: string;
+  };
+  if (kind !== "rtsp" && kind !== "onvif") {
+    res.status(400).json({ error: "INVALID_KIND", message: 'kind must be "rtsp" or "onvif"' });
+    return;
+  }
+  if (!gatewayId || typeof gatewayId !== "string") {
+    res.status(400).json({ error: "MISSING_GATEWAY_ID" });
+    return;
+  }
+  const urlError = validateManualCameraUrl(kind as ManualCameraKind, url ?? "");
+  if (urlError) {
+    res.status(400).json({ error: "INVALID_URL", message: urlError });
+    return;
+  }
+  const candidate = manualCameraCandidate(gatewayId, kind as ManualCameraKind, url as string, displayName);
   const result = importCandidate(uidOf(req), propertyId, candidate);
   if (!result.ok) {
     res.status(409).json({ error: result.error, integration: result.record });

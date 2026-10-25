@@ -69,7 +69,10 @@ export function importCandidate(ownerId: string, propertyId: string | undefined,
     displayName: candidate.displayName,
     capabilities: candidate.capabilities.map((c) => ({ ...c, enabled: false })),
     connection: { state: "unconfigured" },
-    provenance: "simulated",
+    // FIX: this was hardcoded to "simulated" regardless of the actual candidate - every real
+    // (HA/MQTT) and manual (RTSP/ONVIF) import was mislabeled. Found live-testing M4's manual
+    // camera route. Reflects the candidate's own capability provenance now.
+    provenance: candidate.capabilities[0]?.provenance ?? "simulated",
     importState: "candidate",
     controlEnabled: false,
     schemaVersion: 1,

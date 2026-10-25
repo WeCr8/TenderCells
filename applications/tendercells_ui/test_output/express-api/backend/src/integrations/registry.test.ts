@@ -24,6 +24,20 @@ function candidate(externalId: string): DiscoveryCandidate {
   };
 }
 
+test("the record's own provenance reflects the candidate's, not a hardcoded value", () => {
+  // Regression test: this was hardcoded to "simulated" for every import regardless of the
+  // actual candidate - found live-testing M4's manual camera route, where a real manual
+  // import showed up mislabeled as simulated.
+  __resetRegistryForTests();
+  const real = candidate("sensor.real_one");
+  const manual: DiscoveryCandidate = {
+    ...candidate("manual.cam_one"),
+    capabilities: [{ id: "camera.stream", mode: "read", tier: "observe", installed: true, enabled: false, provenance: "manual" }],
+  };
+  assert.equal(importCandidate("owner-a", "prop-1", real).record?.provenance, "real");
+  assert.equal(importCandidate("owner-a", "prop-1", manual).record?.provenance, "manual");
+});
+
 test("import creates a read-only record; controlEnabled is always false", () => {
   __resetRegistryForTests();
   const result = importCandidate("owner-a", "prop-1", candidate("sensor.coop_temp"));

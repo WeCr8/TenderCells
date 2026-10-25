@@ -1,17 +1,22 @@
 // discoveryService.ts - bounded discovery job orchestrator.
 //
 // M1: every adapter returned a fixed SIMULATED fixture set, zero network I/O. M2 added a real
-// Home Assistant adapter (hub-wide HA_URL/HA_TOKEN, see homeAssistantAdapter.ts). M3 adds
+// Home Assistant adapter (hub-wide HA_URL/HA_TOKEN, see homeAssistantAdapter.ts). M3 added
 // generic MQTT import - a bounded preview scan of an owner-supplied broker, see
-// mqttImportAdapter.ts. onvif/rtsp/mjpeg (camera) are still simulated-only pending M4. No
-// gateway/credentials configured -> same simulated fixture as before, so the public demo and
-// any not-yet-authorized caller still touch zero real devices.
+// mqttImportAdapter.ts. M4 adds ONVIF WS-Discovery (onvifAdapter.ts) - device discovery only,
+// no media ingestion; see that file's header for why. ONVIF discovery needs no credentials
+// and is bounded by its own timeout, so - unlike HA/MQTT - it always runs for real once a
+// signed-in owner reaches this router (the public demo never reaches this far: the whole
+// router is behind requireFeatureFlag + requireAuth). rtsp/mjpeg have no "discovery" at all -
+// those are manual-entry-only (manualCamera.ts), wired through a separate import path, not
+// this job system.
 
 import { randomUUID } from "node:crypto";
 import type { AdapterKind, DiscoveryCandidate, DiscoveryJob } from "./types.js";
 import { dedupeByIdentity } from "./deviceIdentity.js";
 import { HA_CONFIGURED, discoverCandidates as discoverHaCandidates } from "./homeAssistantAdapter.js";
 import { discoverCandidates as discoverMqttCandidates, type MqttConnectOptions } from "./mqttImportAdapter.js";
+import { discoverCandidates as discoverOnvifCandidates } from "./onvifAdapter.js";
 
 const jobs = new Map<string, DiscoveryJob>();
 
@@ -95,8 +100,9 @@ export function startDiscovery(
   const id = randomUUID();
   const useRealHa = adapter === "home_assistant" && HA_CONFIGURED;
   const useRealMqtt = adapter === "mqtt" && !!mqttOptions;
+  const useRealOnvif = adapter === "onvif";
 
-  if (!useRealHa && !useRealMqtt) {
+  if (!useRealHa && !useRealMqtt && !useRealOnvif) {
     const candidates = dedupeByIdentity(ownerId, simulatedFixture(adapter, ownerId, gatewayId));
     const job: DiscoveryJob = {
       id, ownerId, adapter, status: "complete",
@@ -111,7 +117,8 @@ export function startDiscovery(
   const job: DiscoveryJob = { id, ownerId, adapter, status: "running", startedAt: new Date(now).toISOString(), candidates: [] };
   jobs.set(id, job);
   if (useRealHa) runAsyncJob(id, ownerId, () => discoverHaCandidates(gatewayId));
-  else runAsyncJob(id, ownerId, () => discoverMqttCandidates(gatewayId, mqttOptions!));
+  else if (useRealMqtt) runAsyncJob(id, ownerId, () => discoverMqttCandidates(gatewayId, mqttOptions!));
+  else runAsyncJob(id, ownerId, () => discoverOnvifCandidates(gatewayId));
   return { ok: true, job };
 }
 

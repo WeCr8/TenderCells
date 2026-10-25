@@ -3,6 +3,7 @@ import { Divider, List, ListSubheader } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import WifiIcon from "@mui/icons-material/Wifi";
 import BoltIcon from "@mui/icons-material/Bolt";
 import ConstructionIcon from "@mui/icons-material/Construction";
 import BugReportIcon from "@mui/icons-material/BugReport";
@@ -106,6 +107,7 @@ const CORE: MenuItem[] = [
   { id: "products", label: "Products & Devices", icon: <DevicesIcon />, path: "/products" },
   { id: "layout", label: "Property Twin", icon: <GridOnIcon />, path: "/layout" },
   { id: "setup", label: "Add Device", icon: <AddCircleOutlineIcon />, path: "/products?register=1" },
+  { id: "connect-property", label: "Connect My Property", icon: <WifiIcon />, path: "/connect" },
 ];
 const OPERATIONS: MenuItem[] = [
   { id: "analytics", label: "Analytics", icon: <TrendingUpIcon />, path: "/analytics" },

@@ -12,6 +12,7 @@ import cors from 'cors';
 import os from 'node:os';
 import mqttRoutes from './routes/mqtt.routes.js';
 import productsRoutes from './routes/products.routes.js';
+import integrationsRoutes from './routes/integrations.routes.js';
 import { startScheduleRunner } from './schedule.runner.js';
 import { buildBackendXml, buildStateXml } from './describe.js';
 import { MQTTController } from './controllers/mqtt.controller.js';
@@ -62,6 +63,7 @@ console.log('Loading MQTT routes..., router:', typeof mqttRoutes);
 app.use('/api/mqtt', mqttRoutes);
 console.log('MQTT routes loaded successfully');
 app.use('/api/products', productsRoutes);
+app.use('/api/integrations', integrationsRoutes);
 
 // Fire device schedules at their cron time (no-op without Firebase admin).
 startScheduleRunner();

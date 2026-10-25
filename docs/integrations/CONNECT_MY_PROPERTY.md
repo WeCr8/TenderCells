@@ -1,6 +1,6 @@
-# Connect My Property — M1-M4 (read-only discovery + import; HA, MQTT, ONVIF-discovery adapters)
+# Connect My Property — M1-M5 (read-only discovery + import; HA, MQTT, ONVIF-discovery adapters; wizard UI)
 
-Status: **M1 only**, built against the full spec in the implementation package
+Status: **M1-M5**, built against the full spec in the implementation package
 (`CONNECT_MY_PROPERTY_IMPLEMENTATION_SPEC.md`, not committed to this repo -
 kept with the requester). This doc covers what actually shipped here.
 
@@ -105,12 +105,57 @@ replacement for - the existing Home Assistant/MQTT mower integration in
   genuinely was simulated. A real manual RTSP import showed up mislabeled.
   Fixed to reflect the candidate's actual provenance; regression test added.
 
+**Built (M5, frontend wizard - no new backend behavior):**
+- `tendercells-ui/src/services/connectPropertyService.ts` - typed client for
+  `/api/integrations`, mirroring every backend response shape exactly. Uses
+  `lib/api/hardwareApi.ts`'s `HARDWARE_API_ORIGIN`/`hardwareAuthHeaders()` -
+  not `productsService.ts`'s own fetch pattern, which (per that file's own
+  `FIX(2026-09-27)` comment) sends no Firebase token at all. This API is
+  owner-scoped (`requireAuth`/`requirePerson` on the hub), so the token has
+  to actually go. `ConnectPropertyApiError` surfaces the hub's own
+  `{error, message}` body rather than a generic failure; `awaitJob()` polls
+  a running discovery job to completion with its own timeout, so a stuck job
+  can't hang the UI forever.
+- `tendercells-ui/src/pages/ConnectPropertyPage.tsx` - 4-step wizard
+  (choose -> discovering -> review -> done) at route `/connect`. Adapter
+  picker (Home Assistant / MQTT / ONVIF), MQTT broker URL + topic inputs,
+  manual RTSP/ONVIF camera entry, candidate review grid with per-capability
+  tier chips, import button per candidate. Imported devices list shows the
+  `provenance` the backend actually returned (real/simulated/manual) and a
+  **permanently unchecked, disabled** "Control enabled (not available yet)"
+  checkbox - read-only-by-construction enforced in the UI itself, not just
+  trusted from the API response.
+- Route registered in `routes/AppRoutes.tsx` (`/connect`), nav entry added to
+  `components/navigation/SideMenu.tsx` ("Connect My Property", Workspace
+  group).
+- `tendercells-ui/src/services/connectPropertyService.test.ts` - Vitest,
+  `vi.stubGlobal('fetch', ...)` convention matching `farmbotCloud.test.ts`:
+  request-shape assertions for `discover`/`importManual` (incl. MQTT-only
+  options), hub error-code/message surfacing, `awaitJob` polling-to-
+  completion and timeout-without-hanging behavior.
+
+**Explicitly deferred out of M5 (flagging rather than attempting silently):**
+- Mirroring this page into any doc/content generator this repo has - M5 is
+  hand-written against the existing `DiagnosticsPage.tsx`/
+  `ConnectionSetupWizard.tsx` conventions, not generated.
+- A full WCAG AA / keyboard / screen-reader audit - the page uses standard
+  MUI form controls (which carry their own baseline a11y), but no dedicated
+  audit pass or automated a11y test tooling was run.
+- A child-friendly hardware tutorial/walkthrough - out of scope without
+  further product/UX scoping on what that should contain.
+- Property-twin (`/layout`) 3D-map marker placement for imported
+  integrations - the wizard imports and lists devices but does not place
+  them on the property twin; that's a separate UI surface with its own
+  coordinate/placement model not touched here.
+- Full responsive/cross-browser pass - built against the same MUI
+  breakpoints (`xs`/`sm`) every other page in this app uses, not separately
+  verified on real small-viewport or non-Chromium browsers in this session.
+
 **Not built yet (future milestones, each needs its own real-hardware
 acceptance pass before shipping):**
 - Any capability-policy engine that could ever set `controlEnabled: true` -
   out of scope until a dedicated safety review, same bar as the mower
   interlocks.
-- UI (`/app/connect` wizard) - backend-only in this pass.
 - `POST /api/integrations` (connector + credential reference),
   `POST /api/integrations/:id/test`, `POST /api/devices/:id/permissions`,
   `POST /api/devices/:id/actions`, `POST /api/cameras/:id/session` - all
@@ -162,6 +207,21 @@ acceptance pass before shipping):**
   Found and fixed a real bug in the process: `registry.ts` hardcoded every
   import's `provenance` to `"simulated"`, mislabeling real/manual imports
   too - caught live-testing the manual camera route, not by any prior test.
+- M5: frontend baseline health checked before building anything -
+  `npm install` (411 packages), `npm run build`, `npm run test -- --run`
+  all passed with zero pre-existing failures. After adding the wizard:
+  `tsc -b && vite build` clean (only pre-existing, unrelated chunk-size/
+  firebase-import warnings); `npm run test -- --run` - 28/28 test files,
+  196/196 tests pass, including the 7 new `connectPropertyService.test.ts`
+  cases, zero regressions in the other 27 files. One real bug caught during
+  the build: `ConnectPropertyPage.tsx`'s MQTT topic helper text used a
+  single-quoted JSX attribute with a backslash-escaped apostrophe, which
+  isn't valid JSX string syntax (`tsc` failed `TS1003`/`TS1382`) - fixed by
+  switching to a JS expression (`helperText={'...'}`).
+  **Not verified**: the page has not been opened in a real browser this
+  session - no browser automation was wired up for this project, so "it
+  builds and the unit tests pass" is the actual ceiling of verification
+  here, not a live click-through. Flagging rather than claiming otherwise.
 
 ## Why mower integration wasn't touched or reused directly
 

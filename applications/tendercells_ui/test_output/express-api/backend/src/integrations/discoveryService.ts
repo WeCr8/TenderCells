@@ -1,16 +1,17 @@
 // discoveryService.ts - bounded discovery job orchestrator.
 //
-// M1: every adapter returned a fixed SIMULATED fixture set, zero network I/O. M2 adds one
-// real adapter - Home Assistant - used only when HA_CONFIGURED (the hub-wide HA_URL/HA_TOKEN
-// mowerBridge.ts already reads; see homeAssistantAdapter.ts for why there's no separate
-// per-connector credential store). Every other adapter (mqtt, onvif, rtsp, mjpeg) is still
-// simulated-only pending M3/M4. No gateway configured -> same simulated fixture as before,
-// so the public demo and any not-yet-authorized caller still touch zero real devices.
+// M1: every adapter returned a fixed SIMULATED fixture set, zero network I/O. M2 added a real
+// Home Assistant adapter (hub-wide HA_URL/HA_TOKEN, see homeAssistantAdapter.ts). M3 adds
+// generic MQTT import - a bounded preview scan of an owner-supplied broker, see
+// mqttImportAdapter.ts. onvif/rtsp/mjpeg (camera) are still simulated-only pending M4. No
+// gateway/credentials configured -> same simulated fixture as before, so the public demo and
+// any not-yet-authorized caller still touch zero real devices.
 
 import { randomUUID } from "node:crypto";
 import type { AdapterKind, DiscoveryCandidate, DiscoveryJob } from "./types.js";
 import { dedupeByIdentity } from "./deviceIdentity.js";
 import { HA_CONFIGURED, discoverCandidates as discoverHaCandidates } from "./homeAssistantAdapter.js";
+import { discoverCandidates as discoverMqttCandidates, type MqttConnectOptions } from "./mqttImportAdapter.js";
 
 const jobs = new Map<string, DiscoveryJob>();
 
@@ -62,7 +63,30 @@ export interface StartDiscoveryError {
   error: "TOO_MANY_JOBS";
 }
 
-export function startDiscovery(ownerId: string, gatewayId: string, adapter: AdapterKind): StartDiscoveryResult | StartDiscoveryError {
+/** Shared tail for any adapter that makes a real, awaited network call: mark the job
+ *  "running" immediately, resolve it to complete/error once the call settles. */
+function runAsyncJob(id: string, ownerId: string, call: () => Promise<{ ok: true; value: { candidates: DiscoveryCandidate[] } } | { ok: false; error: string }>): void {
+  void call().then((result) => {
+    const current = jobs.get(id);
+    if (!current) return; // pruned/removed while the call was in flight
+    if (!result.ok) {
+      current.status = "error";
+      current.error = result.error;
+      current.completedAt = new Date().toISOString();
+      return;
+    }
+    current.candidates = dedupeByIdentity(ownerId, result.value.candidates);
+    current.status = "complete";
+    current.completedAt = new Date().toISOString();
+  });
+}
+
+export function startDiscovery(
+  ownerId: string,
+  gatewayId: string,
+  adapter: AdapterKind,
+  mqttOptions?: MqttConnectOptions,
+): StartDiscoveryResult | StartDiscoveryError {
   const now = Date.now();
   pruneExpired(now);
   const activeForOwner = [...jobs.values()].filter((j) => j.ownerId === ownerId).length;
@@ -70,8 +94,9 @@ export function startDiscovery(ownerId: string, gatewayId: string, adapter: Adap
 
   const id = randomUUID();
   const useRealHa = adapter === "home_assistant" && HA_CONFIGURED;
+  const useRealMqtt = adapter === "mqtt" && !!mqttOptions;
 
-  if (!useRealHa) {
+  if (!useRealHa && !useRealMqtt) {
     const candidates = dedupeByIdentity(ownerId, simulatedFixture(adapter, ownerId, gatewayId));
     const job: DiscoveryJob = {
       id, ownerId, adapter, status: "complete",
@@ -85,19 +110,8 @@ export function startDiscovery(ownerId: string, gatewayId: string, adapter: Adap
   // simulated path already promised (DiscoveryJob.status was always running|complete|error).
   const job: DiscoveryJob = { id, ownerId, adapter, status: "running", startedAt: new Date(now).toISOString(), candidates: [] };
   jobs.set(id, job);
-  void discoverHaCandidates(gatewayId).then((result) => {
-    const current = jobs.get(id);
-    if (!current) return; // pruned/removed while the call was in flight
-    if (!result.ok) {
-      current.status = "error";
-      current.error = result.error;
-      current.completedAt = new Date().toISOString();
-      return;
-    }
-    current.candidates = dedupeByIdentity(ownerId, result.value.candidates);
-    current.status = "complete";
-    current.completedAt = new Date().toISOString();
-  });
+  if (useRealHa) runAsyncJob(id, ownerId, () => discoverHaCandidates(gatewayId));
+  else runAsyncJob(id, ownerId, () => discoverMqttCandidates(gatewayId, mqttOptions!));
   return { ok: true, job };
 }
 

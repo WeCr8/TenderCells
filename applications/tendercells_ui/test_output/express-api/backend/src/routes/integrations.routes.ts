@@ -12,6 +12,7 @@ import { requireAuth, requirePerson, type AuthedRequest } from "../middleware/au
 import { startDiscovery, getDiscoveryJob } from "../integrations/discoveryService.js";
 import { importCandidate, listForOwner, disable } from "../integrations/registry.js";
 import { HA_CONFIGURED, testConnection as testHaConnection } from "../integrations/homeAssistantAdapter.js";
+import { testConnection as testMqttConnection, validateTopicPatterns, type MqttConnectOptions } from "../integrations/mqttImportAdapter.js";
 import type { AdapterKind } from "../integrations/types.js";
 
 const CONNECT_PROPERTY_ENABLED = /^(1|true)$/i.test(process.env.TC_CONNECT_PROPERTY_ENABLED || "");
@@ -37,6 +38,15 @@ router.get("/", (req, res) => {
   res.json({ integrations: listForOwner(uidOf(req)) });
 });
 
+// Pulls MQTT connect options out of the request body. Never logged, never returned in a
+// response, never passed to registry.ts - only the resulting candidates (topic name + value)
+// are ever staged or persisted.
+function mqttOptionsFrom(body: Record<string, unknown>): MqttConnectOptions | null {
+  const { brokerUrl, username, password, topics } = body as { brokerUrl?: string; username?: string; password?: string; topics?: string[] };
+  if (!brokerUrl || typeof brokerUrl !== "string") return null;
+  return { brokerUrl, username, password, topics: Array.isArray(topics) ? topics : [] };
+}
+
 router.post("/discover", (req, res) => {
   const { adapter, gatewayId } = req.body as { adapter?: string; gatewayId?: string };
   if (!adapter || !KNOWN_ADAPTERS.includes(adapter as AdapterKind)) {
@@ -47,7 +57,20 @@ router.post("/discover", (req, res) => {
     res.status(400).json({ error: "MISSING_GATEWAY_ID" });
     return;
   }
-  const result = startDiscovery(uidOf(req), gatewayId, adapter as AdapterKind);
+  let mqttOptions: MqttConnectOptions | undefined;
+  if (adapter === "mqtt") {
+    const opts = mqttOptionsFrom(req.body as Record<string, unknown>);
+    if (opts) {
+      const topicError = validateTopicPatterns(opts.topics);
+      if (topicError) {
+        res.status(400).json({ error: "INVALID_TOPICS", message: topicError });
+        return;
+      }
+      mqttOptions = opts;
+    }
+    // No brokerUrl supplied: falls through to the simulated fixture (no gateway configured yet).
+  }
+  const result = startDiscovery(uidOf(req), gatewayId, adapter as AdapterKind, mqttOptions);
   if (!result.ok) {
     res.status(429).json({ error: result.error });
     return;
@@ -57,20 +80,34 @@ router.post("/discover", (req, res) => {
 
 router.post("/test", async (req, res) => {
   const { adapter } = req.body as { adapter?: string };
-  if (adapter !== "home_assistant") {
-    res.status(400).json({ error: "UNSUPPORTED_ADAPTER", message: "Only home_assistant has a real test in this milestone." });
+  if (adapter === "home_assistant") {
+    if (!HA_CONFIGURED) {
+      res.status(409).json({ error: "NOT_CONFIGURED", message: "HA_URL and HA_TOKEN are not set on this hub." });
+      return;
+    }
+    const result = await testHaConnection();
+    if (!result.ok) {
+      res.status(502).json({ error: "CONNECTION_FAILED", message: result.error });
+      return;
+    }
+    res.json({ ok: true, entityCount: result.value.entityCount });
     return;
   }
-  if (!HA_CONFIGURED) {
-    res.status(409).json({ error: "NOT_CONFIGURED", message: "HA_URL and HA_TOKEN are not set on this hub." });
+  if (adapter === "mqtt") {
+    const opts = mqttOptionsFrom(req.body as Record<string, unknown>);
+    if (!opts) {
+      res.status(400).json({ error: "MISSING_BROKER_URL" });
+      return;
+    }
+    const result = await testMqttConnection(opts);
+    if (!result.ok) {
+      res.status(502).json({ error: "CONNECTION_FAILED", message: result.error });
+      return;
+    }
+    res.json({ ok: true });
     return;
   }
-  const result = await testHaConnection();
-  if (!result.ok) {
-    res.status(502).json({ error: "CONNECTION_FAILED", message: result.error });
-    return;
-  }
-  res.json({ ok: true, entityCount: result.value.entityCount });
+  res.status(400).json({ error: "UNSUPPORTED_ADAPTER", message: "Only home_assistant and mqtt have a real test in this milestone." });
 });
 
 router.get("/discover/:jobId", (req, res) => {

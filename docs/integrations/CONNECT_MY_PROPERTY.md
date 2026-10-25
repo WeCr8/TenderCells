@@ -1,4 +1,4 @@
-# Connect My Property — M1 + M2 (read-only discovery + import, real HA adapter)
+# Connect My Property — M1 + M2 + M3 (read-only discovery + import, real HA + MQTT adapters)
 
 Status: **M1 only**, built against the full spec in the implementation package
 (`CONNECT_MY_PROPERTY_IMPLEMENTATION_SPEC.md`, not committed to this repo -
@@ -51,10 +51,34 @@ replacement for - the existing Home Assistant/MQTT mower integration in
   simulated fixture when HA isn't configured - the public demo and any
   not-yet-configured gateway still touch zero real devices.
 
+**Built (M3):**
+- `backend/src/integrations/mqttImportAdapter.ts` - generic MQTT import, a
+  **bounded preview scan** (connect, subscribe read-only to owner-approved
+  topic patterns, collect for `SCAN_WINDOW_MS` [2.5s], disconnect) rather than
+  a persistent subscription manager. This is a genuinely different broker
+  than this hub's own embedded one (`broker.ts`) or its own outbound client
+  (`mqtt.controller.ts`'s singleton to `MQTT_BROKER`) - the owner points the
+  gateway at a *different* broker they already run.
+- Topics under `tc/` (this hub's own device contract,
+  `docs/CONNECT_A_DEVICE.md`) are rejected before connecting
+  (`validateTopicPatterns`) *and* filtered again inside the message handler
+  even if a broader pattern would have matched one - verified live: seeded a
+  real local broker with a `tc/ct_001/sensors` message, subscribed with a
+  wildcard (`+/#`) that matches it, confirmed it never appears in the result.
+- Bare `#` wildcard rejected; topic-pattern count capped
+  (`MAX_TOPIC_PATTERNS`); payload size capped (`MAX_PAYLOAD_BYTES`, 16KB);
+  JSON payloads parsed, non-JSON kept as text rather than dropped.
+- Never publishes anything, anywhere in this file.
+- `isPrivateBrokerUrl` - same SSRF-guard shape as `homeAssistantAdapter.ts`'s
+  `isPrivateHaUrl`.
+- `POST /api/integrations/test` now also accepts `{"adapter":"mqtt",
+  "brokerUrl":...}`. Connect options (`brokerUrl`/`username`/`password`) are
+  per-request, never persisted - `registry.ts` only ever stores the resulting
+  `DiscoveryCandidate` (topic name + value), never the connection details
+  that produced it.
+
 **Not built yet (future milestones, each needs its own real-hardware
 acceptance pass before shipping):**
-- Real MQTT generic import (beyond the mower's `tc/{id}/cmd/mower` topic) -
-  M3.
 - ONVIF/RTSP/camera adapter and media hardening - M4.
 - Any capability-policy engine that could ever set `controlEnabled: true` -
   out of scope until a dedicated safety review, same bar as the mower
@@ -94,6 +118,13 @@ acceptance pass before shipping):**
   returned was correctly excluded from every response. No real Home
   Assistant instance was available to test against - flagging that
   explicitly rather than claiming more than this.
+- M3: live-tested against a real local Aedes broker (the same library
+  `broker.ts` uses) - `/test` connectivity check, a real async discovery job
+  over real MQTT, and a `tc/ct_001/sensors` message published alongside
+  legitimate `home/*` topics, subscribed via a wildcard broad enough to
+  match it - confirmed excluded from the result. No real external broker
+  (an owner's actual Mosquitto/Home-Assistant-MQTT setup) was available to
+  test against.
 
 ## Why mower integration wasn't touched or reused directly
 

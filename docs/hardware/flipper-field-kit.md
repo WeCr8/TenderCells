@@ -1,8 +1,10 @@
 # Flipper Field Kit — Wiring & Test Harness
 
 Pinouts and bring-up harness for the **Tender Cells Field Kit** Flipper app
-(`flipper/tendercells_fieldkit`). Connection to the host is over **USB-C**; the
-Flipper acts as a USB-to-UART bridge to the ESP32.
+(`flipper/tendercells_fieldkit`). The app documents the target UART diagnostic
+path, but direct acquisition is disabled pending a wired test. It does not
+forward target UART to host USB; use the target's native USB CDC or a dedicated
+USB-UART adapter for host-side logs.
 
 ## Flipper Zero GPIO header (top edge)
 
@@ -12,7 +14,7 @@ Relevant pins for this kit:
 |-------------|------|-----------|
 | 1  | 5V  | 5 V out (USB-powered only) — power a small target if needed |
 | 9  | 3V3 | 3.3 V out — reference / power low-draw logic |
-| 13 | TX (USART1) | → ESP32 **RX** |
+| 13 | TX (USART1) | unused in the receive-only release |
 | 14 | RX (USART1) | ← ESP32 **TX** |
 | 8  | GND | common ground |
 | 11 | GND | common ground (alt) |
@@ -23,24 +25,28 @@ Relevant pins for this kit:
 ## Serial Log Reader harness
 
 ```
-   Laptop (USB serial)
-        │  USB-C
-   ┌────┴─────┐
-   │ Flipper  │  GPIO 13 (TX) ───────────────► ESP32 RX (e.g. GPIO44/RX0)
-   │  Zero    │  GPIO 14 (RX) ◄─────────────── ESP32 TX (e.g. GPIO43/TX0)
+   ┌──────────┐
+   │ Flipper  │  GPIO 14 (RX) ◄─────────────── ESP32 TX / XIAO D6
    │          │  GPIO 8  (GND) ───────────────  ESP32 GND
    └──────────┘
               115200 8N1, matches firmware monitor_speed
 ```
 
-- Flipper TX → ESP32 RX, Flipper RX → ESP32 TX (cross-over — TX talks to RX).
+- This workflow is receive-only; leave Flipper TX disconnected.
 - A **common ground is mandatory**; without it the UART floats and you get garbage.
 - Baud is **115200** to match `monitor_speed` in every `platformio.ini` in this repo.
 - If the ESP32 is already USB-powered (e.g. flashing over the browser flasher),
-  leave its power alone and only wire TX/RX/GND to the Flipper.
+  leave its power alone and wire only target TX → Flipper RX plus GND.
 
-This is the fast triage path for a "flashed but not working" board: watch the
-boot banner, WiFi join, and `MQTT connect failed rc=` lines live.
+Current XIAO Camera/Starter Node builds use native USB CDC and do not yet mirror
+logs to D6/TX. Enable a deliberate diagnostic UART mirror before expecting the
+Field Kit to receive them. Once enabled, this is the fast triage path for a
+"flashed but not working" board: watch the boot banner, WiFi join, and
+`MQTT connect failed rc=` lines live.
+
+The v1.1 FAP keeps direct UART acquisition compile-time disabled until that
+exact wired path passes hardware validation. For current field work, use the
+installed UART Terminal app at 115200 or the XIAO native USB console.
 
 ## GPIO Hardware Test — reed switch (door) check
 

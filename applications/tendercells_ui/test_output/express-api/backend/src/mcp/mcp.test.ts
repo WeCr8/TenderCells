@@ -47,7 +47,11 @@ test("read-only by default: no action tools, E-STOP always there", async () => {
   const names = (await client.listTools()).tools.map((t) => t.name).sort();
   assert.deepEqual(names, ["emergency_stop", "get_alerts", "get_device", "get_farm_overview", "get_farm_snapshot", "get_hub_status", "get_yard_events"]);
   const tools = (await client.listTools()).tools;
-  for (const t of tools.filter((t) => t.name.startsWith("get_"))) assert.equal(t.annotations?.readOnlyHint, true, t.name);
+  for (const t of tools.filter((t) => t.name.startsWith("get_"))) {
+    assert.equal(t.annotations?.readOnlyHint, true, t.name);
+    assert.equal(t.annotations?.openWorldHint, false, t.name);
+    assert.equal(t.annotations?.destructiveHint, false, t.name);
+  }
 });
 
 test("get_device combines telemetry, state and presence", async () => {

@@ -232,7 +232,7 @@ export function createTenderCellsMcp(opts: McpOptions): McpServer {
     { instructions: instructionsFor(mode) },
   );
   const deviceId = z.string().min(1).max(64).regex(/^[A-Za-z0-9_.-]+$/, "letters, digits, _ . - only").describe("Device id, e.g. ct_001 or sim_001");
-  const READ = { readOnlyHint: true, openWorldHint: false } as const;
+  const READ = { readOnlyHint: true, openWorldHint: false, destructiveHint: false } as const;
 
   server.registerTool("get_hub_status", {
     title: "Hub status",

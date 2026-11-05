@@ -1,0 +1,79 @@
+{
+  "revision": "v9 ENGINEERING RECONCILED",
+  "units": "mm",
+  "coordinate_system": {
+    "+X": "right",
+    "+Z": "up",
+    "-Y": "front/service"
+  },
+  "metering": {
+    "housing_bore_d_mm": 72.0,
+    "rotor_od_mm": 70.8,
+    "radial_clearance_per_side_mm": 0.6,
+    "sideplate_inner_spacing_mm": 52.0,
+    "rotor_width_mm": 50.8,
+    "axial_clearance_per_side_mm": 0.6,
+    "pocket_count": 6,
+    "index_angle_deg": 60,
+    "estimated_geometric_void_per_pocket_cm3": 19.938,
+    "feed_bulk_density_design_kg_m3": [
+      580,
+      680
+    ],
+    "theoretical_mass_per_full_pocket_g": [
+      11.56,
+      13.56
+    ],
+    "planning_mass_per_index_at_70_to_90pct_fill_g": [
+      8.09,
+      12.2
+    ],
+    "status": "CAD MATH PASS; physical feed-flow validation required"
+  },
+  "hopper": {
+    "estimated_inner_capacity_L": 2.608,
+    "estimated_feed_mass_range_g": [
+      1513,
+      1773
+    ],
+    "calculation": "square-frustum estimate; final usable volume must be measured physically"
+  },
+  "load_cell": {
+    "capacity_g": 5000,
+    "estimated_weighed_plastic_g": 1671,
+    "hardware_allowance_g": 300,
+    "estimated_max_static_with_feed_g": 3744,
+    "capacity_utilization_pct": 74.9,
+    "static_margin_g": 1256,
+    "status": "PASS for static prototype; overload guard and push-load test mandatory"
+  },
+  "bearing": {
+    "type": "696-2RS preferred",
+    "id_mm": 6,
+    "od_mm": 15,
+    "width_mm": 5,
+    "printed_pocket_mm": 15.08,
+    "diametral_pocket_clearance_mm": 0.08,
+    "quantity_default": 2
+  },
+  "shaft": {
+    "nominal_d_mm": 6,
+    "length_mm": 100,
+    "D_across_flat_mm": 5,
+    "axis": "Y",
+    "receiving_requirement": "measure actual shaft and bearing fit; low-load serviceable fit target"
+  },
+  "gasket": {
+    "actual_STEP_thickness_mm": 1.8,
+    "groove_depth_mm": 1.6,
+    "proud_mm": 0.2,
+    "nominal_compression_pct": 11.1,
+    "legacy_gasket_cs_2p4_status": "RETIRED because it disagreed with actual STEP gasket"
+  },
+  "printing": {
+    "moving_clearance_mm_per_side": 0.6,
+    "slide_clearance_mm_per_side": 0.35,
+    "note": "validate on actual printer/material before production"
+  },
+  "release_statement": "All CAD arithmetic and interface targets are reconciled here. Bulk-feed flow, motor jam torque, environmental sealing, food-contact suitability and actual purchased clone geometry remain physical validation gates."
+}

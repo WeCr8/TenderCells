@@ -1,0 +1,427 @@
+{
+  "01_Base_Plate_HeatSet.stl": {
+    "watertight": true,
+    "volume_mm3": 364643.2728281468,
+    "bounds_mm": [
+      [
+        -115.0,
+        -95.0,
+        0.0
+      ],
+      [
+        115.0,
+        95.0,
+        20.0
+      ]
+    ],
+    "faces": 2060
+  },
+  "02_LoadCell_Floating_Platform.stl": {
+    "watertight": true,
+    "volume_mm3": 89760.21364774102,
+    "bounds_mm": [
+      [
+        -63.0,
+        -41.0,
+        -12.0
+      ],
+      [
+        63.0,
+        41.0,
+        18.0
+      ]
+    ],
+    "faces": 5048
+  },
+  "03_Metering_Center_Housing.stl": {
+    "watertight": true,
+    "volume_mm3": 434063.8125567374,
+    "bounds_mm": [
+      [
+        -56.0,
+        -33.0,
+        0.0
+      ],
+      [
+        56.0,
+        33.0,
+        118.0
+      ]
+    ],
+    "faces": 9978
+  },
+  "04_Six_Pocket_Rotor_D_Bore.stl": {
+    "watertight": true,
+    "volume_mm3": 60526.70807222775,
+    "bounds_mm": [
+      [
+        -34.21200180053711,
+        -20.0,
+        -34.79999923706055
+      ],
+      [
+        34.21200180053711,
+        20.0,
+        34.79999923706055
+      ]
+    ],
+    "faces": 2780
+  },
+  "05_Servo_Side_Plate.stl": {
+    "watertight": true,
+    "volume_mm3": 70037.68708195728,
+    "bounds_mm": [
+      [
+        -52.0,
+        -7.0,
+        -53.0
+      ],
+      [
+        52.0,
+        0.0,
+        53.0
+      ]
+    ],
+    "faces": 4568
+  },
+  "06_Bearing_Side_Plate_696.stl": {
+    "watertight": true,
+    "volume_mm3": 75482.98829940266,
+    "bounds_mm": [
+      [
+        -52.0,
+        -7.0,
+        -53.0
+      ],
+      [
+        52.0,
+        0.0,
+        53.0
+      ]
+    ],
+    "faces": 4568
+  },
+  "07_Bearing_Retainer_Cap.stl": {
+    "watertight": true,
+    "volume_mm3": 2179.3303975434847,
+    "bounds_mm": [
+      [
+        -16.0,
+        -15.995026588439941,
+        0.0
+      ],
+      [
+        16.0,
+        15.995026588439941,
+        3.0
+      ]
+    ],
+    "faces": 2532
+  },
+  "08_25T_Hub_to_6mm_D_Shaft_Adapter.stl": {
+    "watertight": true,
+    "volume_mm3": 8376.413506636001,
+    "bounds_mm": [
+      [
+        -17.0,
+        -16.99471664428711,
+        0.0
+      ],
+      [
+        17.0,
+        16.99471664428711,
+        10.0
+      ]
+    ],
+    "faces": 3536
+  },
+  "09_MG996R_Servo_Cradle.stl": {
+    "watertight": true,
+    "volume_mm3": 35878.189396125,
+    "bounds_mm": [
+      [
+        -34.0,
+        -19.0,
+        -0.0
+      ],
+      [
+        34.0,
+        19.0,
+        54.0
+      ]
+    ],
+    "faces": 2076
+  },
+  "10_Hopper_Adapter_Gasketed.stl": {
+    "watertight": true,
+    "volume_mm3": 93881.64366628042,
+    "bounds_mm": [
+      [
+        -54.0,
+        -44.0,
+        0.0
+      ],
+      [
+        54.0,
+        44.0,
+        32.0
+      ]
+    ],
+    "faces": 1920
+  },
+  "11_Hopper_Removable.stl": {
+    "watertight": true,
+    "volume_mm3": 314336.79955233744,
+    "bounds_mm": [
+      [
+        -80.0,
+        -80.0,
+        0.0
+      ],
+      [
+        80.0,
+        80.0,
+        190.0
+      ]
+    ],
+    "faces": 1490
+  },
+  "12_Hopper_Lid.stl": {
+    "watertight": true,
+    "volume_mm3": 150548.0,
+    "bounds_mm": [
+      [
+        -83.0,
+        -83.0,
+        -7.0
+      ],
+      [
+        83.0,
+        83.0,
+        5.0
+      ]
+    ],
+    "faces": 44
+  },
+  "13_Washable_Feed_Trough_Slide.stl": {
+    "watertight": true,
+    "volume_mm3": 89256.0,
+    "bounds_mm": [
+      [
+        -69.0,
+        -40.0,
+        -9.0
+      ],
+      [
+        69.0,
+        40.0,
+        36.0
+      ]
+    ],
+    "faces": 68
+  },
+  "14_Trough_Slide_Rail.stl": {
+    "watertight": true,
+    "volume_mm3": 13082.19052555349,
+    "bounds_mm": [
+      [
+        -42.0,
+        -19.0,
+        0.0
+      ],
+      [
+        42.0,
+        19.0,
+        10.0
+      ]
+    ],
+    "faces": 840
+  },
+  "15_Electronics_Enclosure_M3.stl": {
+    "watertight": true,
+    "volume_mm3": 92900.27362968442,
+    "bounds_mm": [
+      [
+        -52.0,
+        -40.0,
+        0.0
+      ],
+      [
+        52.0,
+        77.0,
+        44.0
+      ]
+    ],
+    "faces": 3832
+  },
+  "16_Electronics_Lid.stl": {
+    "watertight": true,
+    "volume_mm3": 33134.79296738736,
+    "bounds_mm": [
+      [
+        -52.0,
+        -40.0,
+        0.0
+      ],
+      [
+        52.0,
+        40.0,
+        4.0
+      ]
+    ],
+    "faces": 2044
+  },
+  "17_Wire_Strain_Relief_Clamp.stl": {
+    "watertight": true,
+    "volume_mm3": 3954.0658471592415,
+    "bounds_mm": [
+      [
+        -16.0,
+        -9.0,
+        0.0
+      ],
+      [
+        16.0,
+        9.0,
+        8.0
+      ]
+    ],
+    "faces": 1788
+  },
+  "18_HeatSet_Insert_Test_Coupon.stl": {
+    "watertight": true,
+    "volume_mm3": 22430.727632268536,
+    "bounds_mm": [
+      [
+        -47.5,
+        -17.0,
+        0.0
+      ],
+      [
+        47.5,
+        17.0,
+        8.0
+      ]
+    ],
+    "faces": 9156
+  },
+  "19_Hopper_Gasket_TPU.stl": {
+    "watertight": true,
+    "volume_mm3": 2505.5999336242676,
+    "bounds_mm": [
+      [
+        -48.0,
+        -43.0,
+        0.0
+      ],
+      [
+        48.0,
+        43.0,
+        1.7999999523162842
+      ]
+    ],
+    "faces": 32
+  },
+  "20_LoadCell_Guard.stl": {
+    "watertight": true,
+    "volume_mm3": 22782.955014064926,
+    "bounds_mm": [
+      [
+        -41.0,
+        -19.0,
+        0.0
+      ],
+      [
+        41.0,
+        19.0,
+        34.0
+      ]
+    ],
+    "faces": 1044
+  },
+  "21_28BYJ48_Stepper_Mount.stl": {
+    "watertight": true,
+    "volume_mm3": 26683.230285630387,
+    "bounds_mm": [
+      [
+        -32.0,
+        -32.0,
+        -3.5
+      ],
+      [
+        32.0,
+        32.0,
+        3.5
+      ]
+    ],
+    "faces": 1536
+  },
+  "22_5mm_to_6mm_Shaft_Clamp_Coupler.stl": {
+    "watertight": true,
+    "volume_mm3": 6797.761701331762,
+    "bounds_mm": [
+      [
+        -9.0,
+        -8.99720287322998,
+        0.0
+      ],
+      [
+        9.0,
+        8.99720287322998,
+        32.0
+      ]
+    ],
+    "faces": 4252
+  },
+  "23_ULN2003_Driver_Carrier.stl": {
+    "watertight": true,
+    "volume_mm3": 5673.575426829957,
+    "bounds_mm": [
+      [
+        -22.0,
+        -20.5,
+        -1.5
+      ],
+      [
+        22.0,
+        20.5,
+        8.0
+      ]
+    ],
+    "faces": 4076
+  },
+  "24_Hall_Sensor_Homing_Bracket.stl": {
+    "watertight": true,
+    "volume_mm3": 2898.938835309047,
+    "bounds_mm": [
+      [
+        -14.0,
+        -7.0,
+        -2.0
+      ],
+      [
+        14.0,
+        7.0,
+        20.0
+      ]
+    ],
+    "faces": 1314
+  },
+  "25_Rotor_Homing_Magnet_Carrier.stl": {
+    "watertight": true,
+    "volume_mm3": 504.4042918548484,
+    "bounds_mm": [
+      [
+        -7.0,
+        -5.0,
+        -2.0
+      ],
+      [
+        7.0,
+        5.0,
+        2.0
+      ]
+    ],
+    "faces": 1024
+  }
+}

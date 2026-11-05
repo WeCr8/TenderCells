@@ -1,0 +1,28 @@
+item,part_name,build_status,x_mm,y_mm,z_mm,volume_mm3,recommended_material,authority
+01,01_Base_Plate_HeatSet,DEFAULT_PRINT_SET,230.0,190.0,20.0,364643.1,PETG or ASA,STEP + global-needs authoritative
+02,02_LoadCell_Floating_Platform,DEFAULT_PRINT_SET,126.0,82.0,30.0,89763.2,PETG or ASA,STEP + global-needs authoritative
+03,03_Metering_Center_Housing,DEFAULT_PRINT_SET,112.0,66.0,118.0,433998.6,PETG or ASA,STEP + global-needs authoritative
+04,04_Six_Pocket_Rotor_D_Bore,DEFAULT_PRINT_SET,69.604,50.8,70.8,78933.4,PETG or ASA,STEP + global-needs authoritative
+05,05_Drive_Side_Plate_696,DEFAULT_PRINT_SET,104.0,7.0,106.0,75482.3,PETG or ASA,STEP + global-needs authoritative
+05,05_Servo_Side_Plate,MG996R_ALTERNATE,104.0,7.0,106.0,70034.7,PETG or ASA,STEP + global-needs authoritative
+06,06_Bearing_Side_Plate_696,DEFAULT_PRINT_SET,104.0,7.0,106.0,75482.3,PETG or ASA,STEP + global-needs authoritative
+07,07_Bearing_Retainer_Cap,DEFAULT_PRINT_SET,32.0,32.0,3.0,2180.2,PETG or ASA,STEP + global-needs authoritative
+08,08_25T_Hub_to_6mm_D_Shaft_Adapter,MG996R_ALTERNATE,34.0,34.0,10.0,8379.9,PETG or ASA,STEP + global-needs authoritative
+09,09_MG996R_Servo_Cradle,MG996R_ALTERNATE,68.0,38.0,54.0,35878.1,PETG or ASA,STEP + global-needs authoritative
+10,10_Hopper_Adapter_Gasketed,DEFAULT_PRINT_SET,108.0,88.0,32.0,93882.4,PETG or ASA,STEP + global-needs authoritative
+11,11_Hopper_Removable,DEFAULT_PRINT_SET,160.0,160.0,190.0,314337.6,PETG or ASA,STEP + global-needs authoritative
+12,12_Hopper_Lid,DEFAULT_PRINT_SET,166.0,166.0,12.0,150548.0,PETG or ASA,STEP + global-needs authoritative
+13,13_Washable_Feed_Trough_Slide,DEFAULT_PRINT_SET,138.0,80.0,45.0,89256.0,PETG or ASA,STEP + global-needs authoritative
+14,14_Trough_Slide_Rail,DEFAULT_PRINT_SET,84.0,38.0,10.0,13082.2,PETG or ASA,STEP + global-needs authoritative
+15,15_Electronics_Enclosure_M3,DEFAULT_PRINT_SET,104.0,117.0,44.0,92900.9,PETG or ASA,STEP + global-needs authoritative
+16,16_Electronics_Lid,DEFAULT_PRINT_SET,104.0,80.0,4.0,33134.7,PETG or ASA,STEP + global-needs authoritative
+17,17_Wire_Strain_Relief_Clamp,DEFAULT_PRINT_SET,32.0,18.0,8.0,3953.8,PETG or ASA,STEP + global-needs authoritative
+18,18_HeatSet_Insert_Test_Coupon,TEST_COUPON,95.0,34.0,8.0,22429.3,PETG or ASA,STEP + global-needs authoritative
+19,19_Hopper_Gasket_TPU,DEFAULT_PRINT_SET,96.0,86.0,1.8,2505.6,TPU 95A,STEP + global-needs authoritative
+20,20_LoadCell_Guard,DEFAULT_PRINT_SET,82.0,38.0,34.0,22782.5,PETG or ASA,STEP + global-needs authoritative
+21,21_28BYJ48_Stepper_Mount,DEFAULT_PRINT_SET,64.0,64.0,7.0,26682.4,PETG or ASA,STEP + global-needs authoritative
+22,22_5mm_to_6mm_Shaft_Clamp_Coupler,DEFAULT_PRINT_SET,18.0,18.0,32.0,6800.3,PETG or ASA,STEP + global-needs authoritative
+23,23_ULN2003_Driver_Carrier,DEFAULT_PRINT_SET,44.0,41.0,9.5,5673.8,PETG or ASA,STEP + global-needs authoritative
+24,24_Hall_Sensor_Homing_Bracket,DEFAULT_PRINT_SET,28.0,14.0,22.0,2898.9,PETG or ASA,STEP + global-needs authoritative
+25,25_Rotor_Homing_Magnet_Carrier,DEFAULT_PRINT_SET,14.0,10.0,4.0,504.4,PETG or ASA,STEP + global-needs authoritative
+05D,05_Drive_Side_Plate_696,DEFAULT_PRINT_SET,104.0,7.0,106.0,75482.3,PETG or ASA,STEP + global-needs authoritative

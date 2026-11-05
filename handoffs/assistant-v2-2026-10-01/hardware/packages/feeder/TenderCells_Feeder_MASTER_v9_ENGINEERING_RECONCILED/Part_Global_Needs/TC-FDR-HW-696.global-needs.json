@@ -1,0 +1,22 @@
+{
+  "schema": "TenderCells.PartGlobalNeeds.v1",
+  "part_id": "TC-FDR-HW-696",
+  "part_name": "696-2RS Bearing",
+  "revision": "V9",
+  "status": "PURCHASED_BASELINE",
+  "requirements": {
+    "id_mm": 6,
+    "od_mm": 15,
+    "width_mm": 5,
+    "qty": 2
+  },
+  "coordinate_rule": "Orient and mate using interface-control file, not arbitrary vendor origin.",
+  "inspection": [
+    "verify identity",
+    "measure critical envelope",
+    "record supplier/lot",
+    "compare against CAD reference before final enclosure/mount release"
+  ],
+  "substitution_rule": "Equivalent only after dimensions/electrical characteristics are verified and deviation is recorded.",
+  "notes": "Receving inspection: OD/ID/width; sealed preferred; fit both closure plates."
+}

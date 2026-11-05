@@ -1,0 +1,153 @@
+{
+  "version": "2-agent-ready",
+  "rules": {
+    "one_batch_at_a_time": true,
+    "preserve_hosted_read_only": true,
+    "preserve_existing_tool_names": true,
+    "builder_source_of_truth": "existing Builder JSON"
+  },
+  "tasks": [
+    {
+      "id": "B01-T01",
+      "title": "Run baseline tests",
+      "depends_on": [],
+      "status": "todo",
+      "files": [],
+      "gate": "record baseline"
+    },
+    {
+      "id": "B01-T02",
+      "title": "Add Builder MCP generator",
+      "depends_on": [
+        "B01-T01"
+      ],
+      "status": "todo",
+      "files": [
+        "express-api/tools/generate-builder-mcp.mts",
+        "express-api/package.json"
+      ],
+      "gate": "generated TS deterministic"
+    },
+    {
+      "id": "B01-T03",
+      "title": "Add customer facade reads",
+      "depends_on": [
+        "B01-T01"
+      ],
+      "status": "todo",
+      "files": [
+        "backend/src/mcp/v2/customerTools.ts"
+      ],
+      "gate": "get_farm_home + list_devices tested"
+    },
+    {
+      "id": "B01-T04",
+      "title": "Add Builder/Mission reads",
+      "depends_on": [
+        "B01-T02"
+      ],
+      "status": "todo",
+      "files": [
+        "backend/src/mcp/v2/builderContent.ts",
+        "backend/src/mcp/v2/builderTools.ts"
+      ],
+      "gate": "five Builder/Mission tools tested"
+    },
+    {
+      "id": "B01-T05",
+      "title": "Register v2 reads",
+      "depends_on": [
+        "B01-T03",
+        "B01-T04"
+      ],
+      "status": "todo",
+      "files": [
+        "backend/src/mcp/v2/registerV2.ts",
+        "backend/src/mcp/server.ts"
+      ],
+      "gate": "hosted/local reads registered"
+    },
+    {
+      "id": "B01-T06",
+      "title": "Compatibility tests",
+      "depends_on": [
+        "B01-T05"
+      ],
+      "status": "todo",
+      "files": [
+        "backend/src/mcp/v2/v2.test.ts",
+        "backend/src/mcp/mcp.test.ts"
+      ],
+      "gate": "all MCP tests green"
+    },
+    {
+      "id": "B01-T07",
+      "title": "Builder regression tests",
+      "depends_on": [
+        "B01-T06"
+      ],
+      "status": "todo",
+      "files": [],
+      "gate": "Builder vitest + UI build green"
+    },
+    {
+      "id": "B01-T08",
+      "title": "Docs and handoff",
+      "depends_on": [
+        "B01-T07"
+      ],
+      "status": "todo",
+      "files": [
+        "docs/AI_ASSISTANT_PLUGIN.md"
+      ],
+      "gate": "PR-ready handoff"
+    },
+    {
+      "id": "B07-T01",
+      "title": "Complete public store release gate",
+      "depends_on": [
+        "B01-T08"
+      ],
+      "status": "todo",
+      "files": [
+        "distribution/shared/STORE_RELEASE_GATE.md"
+      ],
+      "gate": "customer connector release-ready"
+    },
+    {
+      "id": "B07-T02",
+      "title": "Submit OpenAI plugin",
+      "depends_on": [
+        "B07-T01"
+      ],
+      "status": "todo",
+      "files": [
+        "distribution/openai/"
+      ],
+      "gate": "submitted or findings documented"
+    },
+    {
+      "id": "B07-T03",
+      "title": "Submit Claude plugin",
+      "depends_on": [
+        "B07-T01"
+      ],
+      "status": "todo",
+      "files": [
+        "distribution/claude/"
+      ],
+      "gate": "submitted or findings documented"
+    },
+    {
+      "id": "B09-A",
+      "title": "Reconcile Feeder and DoorCell packages against current TenderCells contracts",
+      "depends_on": [],
+      "status": "todo",
+      "files": [
+        "hardware/integration/FEEDER_INTEGRATION.md",
+        "hardware/integration/DOORCELL_INTEGRATION.md"
+      ],
+      "gate": "written mismatch report before production imports"
+    }
+  ]
+}

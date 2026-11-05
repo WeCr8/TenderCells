@@ -1,0 +1,23 @@
+{
+  "schema": "TenderCells.PartGlobalNeeds.v1",
+  "part_id": "TC-FDR-EL-XIAO",
+  "part_name": "Seeed XIAO ESP32C3",
+  "revision": "V9",
+  "status": "PURCHASED_BASELINE",
+  "requirements": {
+    "envelope_mm": [
+      21,
+      17.8
+    ],
+    "qty": 1
+  },
+  "coordinate_rule": "Orient and mate using interface-control file, not arbitrary vendor origin.",
+  "inspection": [
+    "verify identity",
+    "measure critical envelope",
+    "record supplier/lot",
+    "compare against CAD reference before final enclosure/mount release"
+  ],
+  "substitution_rule": "Equivalent only after dimensions/electrical characteristics are verified and deviation is recorded.",
+  "notes": "Use official board identity; final pin map must avoid problematic boot/strapping usage."
+}

@@ -1,0 +1,32 @@
+{
+  "package": "TenderCells Smart Feeder MASTER v5 DROP-IN COMPLETE",
+  "file_count_before_summary_files": 168,
+  "validated_printable_stl_count": 25,
+  "all_printable_stls_watertight": true,
+  "step_files_checked": 29,
+  "all_step_files_valid": true,
+  "glb_node_count": 28,
+  "glb_envelope_mm": [
+    316.0,
+    215.0,
+    402.0
+  ],
+  "brand_source": "official TenderCells repository SVG",
+  "extension_counts": {
+    ".md": 26,
+    ".json": 13,
+    ".glb": 1,
+    ".png": 37,
+    ".ico": 4,
+    ".svg": 2,
+    ".webmanifest": 1,
+    ".tsx": 4,
+    ".py": 1,
+    ".ts": 1,
+    ".csv": 6,
+    ".step": 43,
+    ".stl": 25,
+    ".ino": 2,
+    ".txt": 2
+  }
+}

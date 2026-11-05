@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "1.0.0",
+  "productId": "tendercells-smart-feeder-v4",
+  "displayName": "Tender Cells Classroom Smart Feeder",
+  "asset": "TenderCells_Smart_Feeder_Interactive_v4.glb",
+  "units": "millimeter",
+  "upAxis": "Z",
+  "nodes": {
+    "rotor": "Rotor",
+    "feedFill": "FeedFill",
+    "loadPlatform": "LoadCellPlatform",
+    "statusLed": "StatusLED",
+    "trough": "FeedTrough",
+    "hopper": "Hopper",
+    "stepper": "Stepper28BYJ48",
+    "electronics": "ElectronicsEnclosure"
+  },
+  "motion": {
+    "rotorAxis": "y",
+    "pockets": 6,
+    "degreesPerPocket": 60,
+    "dispenseDurationMs": 900,
+    "homeAngleDeg": 0,
+    "loadCellDeflectionMaxMm": 0.7
+  },
+  "telemetry": {
+    "feedPercent": {
+      "min": 0,
+      "max": 100,
+      "unit": "%"
+    },
+    "feedWeightGrams": {
+      "min": 0,
+      "max": 5000,
+      "unit": "g"
+    },
+    "batteryPercent": {
+      "min": 0,
+      "max": 100,
+      "unit": "%"
+    },
+    "rotorPocket": {
+      "min": 0,
+      "max": 5
+    },
+    "dispenseCount": {
+      "min": 0
+    },
+    "connected": {
+      "type": "boolean"
+    },
+    "jammed": {
+      "type": "boolean"
+    },
+    "homed": {
+      "type": "boolean"
+    }
+  },
+  "safety": {
+    "cloudMotionControl": false,
+    "note": "Viewer is visualization-first. Real motion must remain on the local controller/MQTT safety layer with E-STOP, watchdog and interlocks."
+  },
+  "v5Audit": {
+    "overallEnvelopeMm": [
+      316.0,
+      215.0,
+      402.0
+    ],
+    "coordinateConvention": "Z-up; CAD numeric model values in millimeters",
+    "nodeCount": 28,
+    "nodes": [
+      "StatusLED",
+      "FeedFill",
+      "Stepper28BYJ48",
+      "ULN2003",
+      "XIAO_ESP32C3",
+      "HX711",
+      "LoadCell",
+      "WireStrainRelief",
+      "ElectronicsLid",
+      "ElectronicsEnclosure",
+      "TroughRail",
+      "FeedTrough",
+      "HopperLid",
+      "Hopper",
+      "HopperGasket",
+      "HopperAdapter",
+      "HomingMagnetCarrier",
+      "HallBracket",
+      "ShaftCoupler",
+      "StepperMount",
+      "BearingRetainer",
+      "BearingSidePlate",
+      "DriveSidePlate",
+      "Rotor",
+      "MeterHousing",
+      "LoadCellGuard",
+      "LoadCellPlatform",
+      "BasePlate"
+    ]
+  }
+}

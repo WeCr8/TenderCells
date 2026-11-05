@@ -1,0 +1,36 @@
+part_id,part_name,status,needs_file,physical_validation_required
+TC-FDR-01,01_Base_Plate_HeatSet,CANONICAL_DEFAULT,01_Base_Plate_HeatSet.global-needs.json,False
+TC-FDR-02,02_LoadCell_Floating_Platform,CANONICAL_DEFAULT,02_LoadCell_Floating_Platform.global-needs.json,False
+TC-FDR-03,03_Metering_Center_Housing,CANONICAL_DEFAULT,03_Metering_Center_Housing.global-needs.json,True
+TC-FDR-04,04_Six_Pocket_Rotor_D_Bore,CANONICAL_DEFAULT,04_Six_Pocket_Rotor_D_Bore.global-needs.json,True
+TC-FDR-05,05_Drive_Side_Plate_696,CANONICAL_DEFAULT,05_Drive_Side_Plate_696.global-needs.json,False
+TC-FDR-05,05_Servo_Side_Plate,ALTERNATE_MG996R,05_Servo_Side_Plate.global-needs.json,False
+TC-FDR-06,06_Bearing_Side_Plate_696,CANONICAL_DEFAULT,06_Bearing_Side_Plate_696.global-needs.json,False
+TC-FDR-07,07_Bearing_Retainer_Cap,CANONICAL_DEFAULT,07_Bearing_Retainer_Cap.global-needs.json,False
+TC-FDR-08,08_25T_Hub_to_6mm_D_Shaft_Adapter,ALTERNATE_MG996R,08_25T_Hub_to_6mm_D_Shaft_Adapter.global-needs.json,False
+TC-FDR-09,09_MG996R_Servo_Cradle,ALTERNATE_MG996R,09_MG996R_Servo_Cradle.global-needs.json,False
+TC-FDR-10,10_Hopper_Adapter_Gasketed,CANONICAL_DEFAULT,10_Hopper_Adapter_Gasketed.global-needs.json,True
+TC-FDR-11,11_Hopper_Removable,CANONICAL_DEFAULT,11_Hopper_Removable.global-needs.json,True
+TC-FDR-12,12_Hopper_Lid,CANONICAL_DEFAULT,12_Hopper_Lid.global-needs.json,False
+TC-FDR-13,13_Washable_Feed_Trough_Slide,CANONICAL_DEFAULT,13_Washable_Feed_Trough_Slide.global-needs.json,False
+TC-FDR-14,14_Trough_Slide_Rail,CANONICAL_DEFAULT,14_Trough_Slide_Rail.global-needs.json,False
+TC-FDR-15,15_Electronics_Enclosure_M3,CANONICAL_DEFAULT,15_Electronics_Enclosure_M3.global-needs.json,False
+TC-FDR-16,16_Electronics_Lid,CANONICAL_DEFAULT,16_Electronics_Lid.global-needs.json,False
+TC-FDR-17,17_Wire_Strain_Relief_Clamp,CANONICAL_DEFAULT,17_Wire_Strain_Relief_Clamp.global-needs.json,False
+TC-FDR-18,18_HeatSet_Insert_Test_Coupon,PROCESS_TOOL,18_HeatSet_Insert_Test_Coupon.global-needs.json,False
+TC-FDR-19,19_Hopper_Gasket_TPU,CANONICAL_DEFAULT,19_Hopper_Gasket_TPU.global-needs.json,False
+TC-FDR-20,20_LoadCell_Guard,CANONICAL_DEFAULT,20_LoadCell_Guard.global-needs.json,True
+TC-FDR-21,21_28BYJ48_Stepper_Mount,CANONICAL_DEFAULT,21_28BYJ48_Stepper_Mount.global-needs.json,True
+TC-FDR-22,22_5mm_to_6mm_Shaft_Clamp_Coupler,CANONICAL_DEFAULT,22_5mm_to_6mm_Shaft_Clamp_Coupler.global-needs.json,True
+TC-FDR-23,23_ULN2003_Driver_Carrier,CANONICAL_DEFAULT,23_ULN2003_Driver_Carrier.global-needs.json,False
+TC-FDR-24,24_Hall_Sensor_Homing_Bracket,CANONICAL_DEFAULT,24_Hall_Sensor_Homing_Bracket.global-needs.json,False
+TC-FDR-25,25_Rotor_Homing_Magnet_Carrier,CANONICAL_DEFAULT,25_Rotor_Homing_Magnet_Carrier.global-needs.json,False
+TC-FDR-ACT-28BYJ,28BYJ-48 5V Stepper,PURCHASED_BASELINE,TC-FDR-ACT-28BYJ.global-needs.json,
+TC-FDR-DRV-ULN2003,ULN2003 Driver,PURCHASED_BASELINE,TC-FDR-DRV-ULN2003.global-needs.json,
+TC-FDR-EL-HX711,HX711 ADC,PURCHASED_BASELINE,TC-FDR-EL-HX711.global-needs.json,
+TC-FDR-EL-XIAO,Seeed XIAO ESP32C3,PURCHASED_BASELINE,TC-FDR-EL-XIAO.global-needs.json,
+TC-FDR-HW-696,696-2RS Bearing,PURCHASED_BASELINE,TC-FDR-HW-696.global-needs.json,
+TC-FDR-HW-MAG,3 x 2 mm Magnet,PURCHASED_BASELINE,TC-FDR-HW-MAG.global-needs.json,
+TC-FDR-HW-SHAFT,6 mm D-Shaft,PURCHASED_BASELINE,TC-FDR-HW-SHAFT.global-needs.json,
+TC-FDR-SN-HALL,A3144-compatible Hall Sensor,PURCHASED_BASELINE,TC-FDR-SN-HALL.global-needs.json,
+TC-FDR-SN-TAL220B,TAL220B 5kg Load Cell,PURCHASED_BASELINE,TC-FDR-SN-TAL220B.global-needs.json,

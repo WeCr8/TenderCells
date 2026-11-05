@@ -1,0 +1,13 @@
+// Tender Cells global variables — link/import into a SolidWorks Equations workflow
+"TC_PRINT_CLEARANCE" = 0.30mm
+"TC_MOVING_CLEARANCE" = 0.60mm
+"TC_M3_CLEARANCE" = 3.40mm
+"TC_M4_CLEARANCE" = 4.50mm
+"TC_M5_CLEARANCE" = 5.50mm
+"TC_INSERT_M3_OD" = 4.60mm
+"TC_WALL_GENERAL" = 2.40mm
+"TC_FLOOR_GENERAL" = 3.00mm
+"TC_EDGE_FILLET" = 2.00mm
+"TC_GRID" = 25.00mm
+"TC_SERVICE_CLEARANCE" = 20.00mm
+"TC_CABLE_BEND_MIN" = 25.00mm

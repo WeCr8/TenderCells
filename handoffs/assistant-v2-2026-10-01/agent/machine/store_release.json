@@ -1,0 +1,37 @@
+{
+  "version": "2.2-store-ready",
+  "public_product": "TenderCells customer connector",
+  "exclude": [
+    "platform admin MCP",
+    "cloud hardware control",
+    "secrets"
+  ],
+  "targets": [
+    {
+      "platform": "OpenAI",
+      "directory": "Universal plugin directory (ChatGPT + Codex)",
+      "package": "portable Agent Plugins ZIP",
+      "requires": [
+        "verified publisher identity",
+        "public HTTPS MCP",
+        "domain verification",
+        "tool scan",
+        "5 positive review cases",
+        "3 negative review cases",
+        "demo recording",
+        "reviewer credentials when auth required"
+      ]
+    },
+    {
+      "platform": "Anthropic",
+      "directory": "Claude directory",
+      "package": "GitHub-hosted plugin bundle recommended",
+      "requires": [
+        "paid Claude developer access to submission portal",
+        "remote MCP",
+        "plugin validation/safety scan",
+        "review feedback resolution"
+      ]
+    }
+  ]
+}

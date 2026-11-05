@@ -1,0 +1,13 @@
+{
+  "glb_bounds_mm": [
+    248.0,
+    190.0,
+    402.70001220703125
+  ],
+  "step_bounds_mm": [
+    248.0,
+    190.0,
+    402.7
+  ],
+  "note": "GLB built from the same V9 component STEP shapes; differences only tessellation precision."
+}

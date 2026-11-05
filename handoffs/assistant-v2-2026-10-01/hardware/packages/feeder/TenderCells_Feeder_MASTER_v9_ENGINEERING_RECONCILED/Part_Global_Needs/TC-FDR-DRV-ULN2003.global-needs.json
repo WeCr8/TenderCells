@@ -1,0 +1,20 @@
+{
+  "schema": "TenderCells.PartGlobalNeeds.v1",
+  "part_id": "TC-FDR-DRV-ULN2003",
+  "part_name": "ULN2003 Driver",
+  "revision": "V9",
+  "status": "PURCHASED_BASELINE",
+  "requirements": {
+    "qty": 1,
+    "voltage_V": 5
+  },
+  "coordinate_rule": "Orient and mate using interface-control file, not arbitrary vendor origin.",
+  "inspection": [
+    "verify identity",
+    "measure critical envelope",
+    "record supplier/lot",
+    "compare against CAD reference before final enclosure/mount release"
+  ],
+  "substitution_rule": "Equivalent only after dimensions/electrical characteristics are verified and deviation is recorded.",
+  "notes": "Clone board geometry varies; inspect mounting and connector positions."
+}

@@ -1,0 +1,19 @@
+{
+  "version": "2.0-proposal",
+  "rules": [
+    "keep v0.3 tools initially",
+    "add goal-oriented facade",
+    "admin is separate"
+  ],
+  "existing": [
+    "get_farm_overview",
+    "get_hub_status",
+    "get_device",
+    "get_alerts",
+    "get_yard_events",
+    "get_farm_snapshot",
+    "emergency_stop",
+    "request_action",
+    "confirm_action"
+  ]
+}

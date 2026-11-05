@@ -1,0 +1,22 @@
+Category,Item,Qty,Key specification,Notes
+Electronics,Seeed Studio XIAO ESP32C3,1,"Wi-Fi/BLE, 21 x 17.8 mm",Official mechanical files available from Seeed
+Electronics,HX711 load-cell amplifier,1,24-bit ADC,Exact board dimensions vary; Soldered open STEP included
+Sensor,TAL220B-style load cell,1,"5 kg, 55 x 12.7 x 12.7 mm, 2-M5 40 mm centers",SparkFun reference
+Actuator,TowerPro MG996R positional servo,1,"4.8-6.6 V, metal gear",Avoid continuous-rotation variant
+Drive,25T aluminum servo hub,1,"20 mm diameter, 14 mm PCD, 4 x M3",Fits MG996R/Futaba-style 25T
+Drive,696 / 619/6 bearing,1,6 x 15 x 5 mm,Shielded bearing preferred
+Drive,6 mm D-shaft,1,~100 mm,Steel or stainless; verify actual flat
+Hardware,M3 brass heat-set inserts,20,standard short,Tune with coupon
+Hardware,M4 brass heat-set inserts,12,standard,Structural joints
+Hardware,M5 brass heat-set inserts,2,standard,Load cell
+Hardware,M3 SHCS assortment,1 kit,8-16 mm,"Servo hub, caps, enclosure"
+Hardware,M4 SHCS assortment,1 kit,12-20 mm,Structure
+Hardware,M5 SHCS,2,~20 mm,"Load cell, adjust to insert stack"
+Power,5-6 V regulated supply,1,">=2 A, 3 A preferred",Servo rail; common ground with MCU
+Power,USB power bank / protected battery pack,1,commercial protected pack,Classroom-safe approach
+Print,PETG/ASA filament,~1 kg,structural prototype,Outdoor prototype
+Print,TPU filament,small amount,gasket,Optional; commercial gasket also works
+Actuator (DEFAULT),28BYJ-48 5V geared stepper,1,5-wire geared stepper,Full 360-degree six-pocket indexing
+Driver (DEFAULT),ULN2003 stepper driver board,1,5V 4-channel Darlington board,Matches common 28BYJ-48 kits
+Sensor,A3144-compatible Hall sensor,1,digital Hall switch,Rotor home/reference
+Sensor,3 x 2 mm neodymium magnet,1,press-fit or carrier,Rotor home marker

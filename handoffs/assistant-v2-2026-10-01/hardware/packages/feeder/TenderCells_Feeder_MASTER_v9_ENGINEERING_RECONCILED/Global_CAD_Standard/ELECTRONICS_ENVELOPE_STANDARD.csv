@@ -1,0 +1,8 @@
+model,x_mm,y_mm,z_mm,classification,requirement
+28BYJ48_5V_GEARED_STEPPER_REFERENCE,42.0,28.0,29.0,REFERENCE_ENVELOPE,Verify exact purchased SKU before release
+A3144_HALL_SENSOR_REFERENCE,4.5,1.6,4.0,REFERENCE_ENVELOPE,Verify exact purchased SKU before release
+HX711_GENERIC_32x21_REFERENCE,32.0,21.0,1.6,REFERENCE_ENVELOPE,Verify exact purchased SKU before release
+MG996R_TowerPro_REFERENCE,54.0,19.7,49.9,REFERENCE_ENVELOPE,Verify exact purchased SKU before release
+Seeed_XIAO_ESP32C3_REFERENCE,21.0,17.8,4.8,REFERENCE_ENVELOPE,Verify exact purchased SKU before release
+TAL220B_5kg_55mm_REFERENCE,55.0,12.7,12.7,REFERENCE_ENVELOPE,Verify exact purchased SKU before release
+ULN2003_DRIVER_REFERENCE,35.0,32.0,1.6,REFERENCE_ENVELOPE,Verify exact purchased SKU before release

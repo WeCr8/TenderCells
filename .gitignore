@@ -82,6 +82,8 @@ dist-ssr
 .env.local
 .env.example
 .env.example.production
+# Placeholder-only template read by generate-config.sh/.ps1 (no secrets).
+!deploy/self-hosted-camera/.env.example
 
 # Editor directories and files
 .vscode/*

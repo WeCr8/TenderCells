@@ -8,8 +8,9 @@ export interface CameraFeed {
   name: string;
   location: CameraLocation;
   streamUrl?: string;
-  // Optional - no camera firmware in this codebase reports these today (checked
-  // firmware/ for a "resolution"/fps field: none exist). Omit rather than guess;
+  // Optional. firmware/camera-node now reports its target `fps` (and `frameSize`,
+  // e.g. "VGA") in the heartbeat and the Pi node reports `fps` + `resolution`
+  // ("720p"); older firmware reports neither. Omit rather than guess;
   // CameraFeedViewer shows "Not reporting" instead of a fabricated value.
   resolution?: '1080p' | '720p' | '480p';
   fps?: number;
@@ -18,6 +19,9 @@ export interface CameraFeed {
   signal?: number; // WiFi signal -100 to 0 dBm
   latitude?: number;
   longitude?: number;
+  // Timing health from the node's heartbeat (see docs/CAMERA_TIMING.md).
+  clockSynced?: boolean;
+  statusUrl?: string;
 }
 
 export interface CameraSetup {

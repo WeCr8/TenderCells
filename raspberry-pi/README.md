@@ -25,18 +25,30 @@ Streams MJPEG and advertises its `streamUrl` exactly like the ESP32 camera firmw
 so it auto-registers and renders in ChickenEye where placed.
 
 ```bash
-sudo apt install -y python3-picamera2
-pip install paho-mqtt
+sudo apt install -y python3-picamera2 chrony
+pip install paho-mqtt            # 1.x or 2.x
 # edit broker IP + id, then:
-python3 camera-node/camera_node.py --broker 192.168.1.50 --id pi_cam_01
-# stream: http://<pi-ip>:8000/stream
+python3 camera-node/camera_node.py --broker 192.168.1.50 --id pi_cam_01 --fps 30
+# stream: http://<pi-ip>:8000/stream   status: http://<pi-ip>:8000/status
+```
+
+Each MJPEG part carries capture-time stamps (`X-Frame-Seq`, `X-Capture-Mono-Us`,
+`X-Capture-Epoch-Us`, `X-Clock-Synced`); `/status` reports clock sync quality and
+`/time` is a probe for offset estimation. Before a data-collection session run the
+60 s audit (see [docs/CAMERA_TIMING.md](../docs/CAMERA_TIMING.md)):
+
+```bash
+python3 camera-node/timestamp_audit.py http://<pi-ip>:8000/stream --out audit.json \
+    --profile-out jitter_profile.json --sidecar frames.jsonl
 ```
 
 Run it on boot:
 ```bash
-sudo mkdir -p /home/pi/tendercells && sudo cp camera-node/camera_node.py /home/pi/tendercells/
+sudo mkdir -p /home/pi/tendercells && sudo cp camera-node/camera_node.py camera-node/camera_timing.py /home/pi/tendercells/
 echo 'TC_BROKER=192.168.1.50
-TC_DEVICE_ID=pi_cam_01' | sudo tee /etc/default/tc-camera-node
+TC_DEVICE_ID=pi_cam_01
+# optional: the one browser origin (relay/UI) allowed to read /stream and /status
+# TC_CORS_ORIGIN=https://relay.example:8443' | sudo tee /etc/default/tc-camera-node
 sudo cp camera-node/tc-camera-node.service /etc/systemd/system/
 sudo systemctl daemon-reload && sudo systemctl enable --now tc-camera-node
 ```
@@ -45,6 +57,11 @@ Then claim `pi_cam_01` in the app (Configure / Claim) — the live feed shows up
 camera node. Works in demo (LAN) and for logged-in accounts.
 
 ## Contracts (shared with ESP32 firmware)
-- Heartbeat: `tc/{id}/sensors` `{ "peripheral":"camera", "streamUrl":"http://<ip>:8000/stream", ... }`
+- Heartbeat: `tc/{id}/sensors` `{ "peripheral":"camera", "streamUrl":"http://<ip>:8000/stream", "statusUrl":..., "fps":30, "clockSynced":true, ... }`
+- Frame timing headers + `/status` + `/time`: [docs/CAMERA_TIMING.md](../docs/CAMERA_TIMING.md)
+- LAN-only, no token yet. CORS: `/stream`, `/status`, `/healthz` only for `--cors-origin`
+  (blank = none); `/time` is readable from any origin.
+
+Tests (no Pi needed): `cd camera-node && python3 -m pytest -q tests && ruff check --config ruff.toml .`
 - State: `tc/{id}/state` `{ "state":"idle|estop" }`
 - E-STOP: subscribes `tc/{id}/cmd/estop` `{ "active":true }`

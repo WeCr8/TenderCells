@@ -1,5 +1,4 @@
 // AppRouter.tsx
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import DashboardPage from "../pages/DashboardPage";
 import NotFoundPage from "../pages/NotFoundPage";

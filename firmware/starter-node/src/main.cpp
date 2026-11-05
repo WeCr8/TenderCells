@@ -369,7 +369,7 @@ void sendOut(const char* mqttTopic, JsonDocument& doc, bool retain) {
 
 // ── Publish current state (retained when E-STOP, like the coop controller) ───
 void publishState(const char* state) {
-  StaticJsonDocument<256> doc;
+  JsonDocument doc;  // ArduinoJson 7: sized on demand (StaticJsonDocument is deprecated)
   doc["state"]    = state;
   doc["uptime"]   = millis() / 1000;
   doc["freeHeap"] = ESP.getFreeHeap();
@@ -384,7 +384,7 @@ void publishState(const char* state) {
 
 // ── Heartbeat as a sensors payload so it renders on the dashboard ────────────
 void publishHeartbeat() {
-  StaticJsonDocument<192> doc;
+  JsonDocument doc;  // ArduinoJson 7: sized on demand (StaticJsonDocument is deprecated)
   // Starter Node has no real sensors — report a harmless, obviously-fake set so
   // it is visibly distinguishable from a real coop while still exercising the path.
   // Real readings when a sensor peripheral is attached; 0 otherwise. Average 3
@@ -428,7 +428,7 @@ void publishHeartbeat() {
 // exactly like a real predator detection. Same alert schema the platform uses.
 void publishThreat() {
   if (!meshOnly && !mqtt.connected()) return;
-  StaticJsonDocument<192> doc;
+  JsonDocument doc;  // ArduinoJson 7: sized on demand (StaticJsonDocument is deprecated)
   doc["type"]       = threatLabel.length() ? threatLabel : String("predator");
   doc["species"]    = species;
   doc["confidence"] = 1.0;        // manual trigger = certain
@@ -497,7 +497,7 @@ void applyCommand(const String& kind, JsonDocument& doc) {
 
 // A directed mesh command addressed to us (poll() already filtered dest==_addr).
 void handleMeshCommand(const uint8_t* payload, uint8_t len) {
-  StaticJsonDocument<200> doc;
+  JsonDocument doc;  // ArduinoJson 7: sized on demand (StaticJsonDocument is deprecated)
   if (deserializeJson(doc, payload, len)) return;
   String kind = doc["topic"] | "";
   if (kind.length()) applyCommand(kind, doc);
@@ -514,7 +514,7 @@ void onMeshMessage(uint16_t src, uint8_t type, const uint8_t* payload,
   switch (type) {
     case TC_MSG_HEARTBEAT: {
       if (!mqtt.connected()) break;  // nothing to bridge onto
-      StaticJsonDocument<200> doc;
+      JsonDocument doc;  // ArduinoJson 7: sized on demand (StaticJsonDocument is deprecated)
       if (deserializeJson(doc, payload, len)) break;
       const char* peerId = doc["id"] | "";
       if (!peerId[0]) break;
@@ -545,7 +545,7 @@ void onMeshMessage(uint16_t src, uint8_t type, const uint8_t* payload,
 
 // ── MQTT message handler — E-STOP parsed first ───────────────────────────────
 void onMqttMessage(char* topic, byte* payload, unsigned int len) {
-  StaticJsonDocument<256> doc;
+  JsonDocument doc;  // ArduinoJson 7: sized on demand (StaticJsonDocument is deprecated)
   if (deserializeJson(doc, payload, len)) return;  // ignore non-JSON
   String t = String(topic);
 

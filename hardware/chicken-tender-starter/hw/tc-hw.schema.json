@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tc-hw/1",
+  "title": "TenderCells / WeCr8 hardware description (product-neutral)",
+  "type": "object",
+  "required": ["schema", "id", "board", "battery", "rails", "parts"],
+  "properties": {
+    "schema": {"const": "tc-hw/1"},
+    "id": {"type": "string"}, "rev": {"type": "string"}, "title": {"type": "string"},
+    "board": {"type": "object", "required": ["ref", "part"], "properties": {"ref": {"type": "string"}, "part": {"type": "string", "description": "key in parts.yaml"}}},
+    "features": {"type": "object", "additionalProperties": {"type": "boolean"}},
+    "battery": {"type": "object", "properties": {"ref": {"type": "string"}, "part": {"type": ["string", "null"]}, "switch": {"type": "string"},
+      "fuse": {"type": "object", "properties": {"ref": {"type": "string"}, "type": {"type": "string"}, "hold_A": {"type": "number"}}}}},
+    "rails": {"type": "object", "additionalProperties": {"type": "object", "properties": {"from": {"type": "string"}, "via": {"type": "array", "items": {"type": "string"}}, "note": {"type": "string"}}}},
+    "parts": {"type": "object", "additionalProperties": {"type": ["object", "null"], "properties": {"part": {"type": "string"}, "rail": {"type": "string"}, "qty": {"type": "integer"},
+      "driver": {"type": "string"}, "channel": {"type": "string"}, "wiring": {"enum": ["parallel", "single"]}}}},
+    "pins": {"type": ["object", "null"], "additionalProperties": {"type": "object", "required": ["net"], "properties": {"net": {"type": "string"}, "to": {"type": ["string", "null"]},
+      "dir": {"enum": ["in", "out", "io"]}, "func": {"type": "string"}, "pull": {"type": "string"}}}},
+    "uart_map": {"type": "object"},
+    "dividers": {"type": ["object", "null"]},
+    "pwm": {"type": "object", "properties": {"freq_hz": {"type": "integer"}, "bits": {"type": "integer"}}},
+    "firmware": {"type": "object", "properties": {"flags": {"type": "object"}}},
+    "harness": {"type": "array", "items": {"type": "object", "required": ["id", "from", "to", "awg", "conn", "len_mm"],
+      "properties": {"id": {"type": "string"}, "from": {"type": "string"}, "to": {"type": "string"}, "awg": {"type": ["integer", "string"]}, "conn": {"type": "array"}, "len_mm": {"type": "number"}, "current": {"type": "string"}, "note": {"type": "string"}}}}
+  },
+  "description": "Overlays (hw/variants/*.overlay.yaml) deep-merge onto a base; null deletes a key; an overlay harness replaces the base harness."
+}

@@ -1,0 +1,254 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860" font-family="Helvetica,Arial,sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="20" y="30" font-size="20" font-weight="bold">Chicken Tender Starter - wiring (tc-hw/1 rev A1, generated)</text>
+<text x="20" y="52" font-size="12" fill="#555">12 V reaches ONLY F1, TB1, the DRV8874 VIN and the D36V6F5 VIN. The XIAO runs on the regulator 5 V through D1. Actuator tier: starter (act-generic-12v-300mm)</text>
+<rect x="40" y="80" width="150" height="70" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="95" font-size="12" font-weight="bold">J1 12 V jack</text>
+<text x="46" y="108" font-size="12" font-weight="bold">(Class 2 adapter PS1)</text>
+<circle cx="190" cy="128" r="3" fill="#333"/>
+<text x="184" y="131" font-size="10" text-anchor="end">TIP</text>
+<circle cx="190" cy="142" r="3" fill="#333"/>
+<text x="184" y="145" font-size="10" text-anchor="end">SLEEVE</text>
+<rect x="250" y="60" width="110" height="50" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="256" y="75" font-size="12" font-weight="bold">F1 3 A fuse</text>
+<circle cx="360" cy="95" r="3" fill="#333"/>
+<text x="354" y="98" font-size="10" text-anchor="end">1</text>
+<circle cx="360" cy="109" r="3" fill="#333"/>
+<text x="354" y="112" font-size="10" text-anchor="end">2</text>
+<rect x="420" y="70" width="120" height="70" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="426" y="85" font-size="12" font-weight="bold">TB1 12 V in</text>
+<circle cx="540" cy="105" r="3" fill="#333"/>
+<text x="534" y="108" font-size="10" text-anchor="end">1</text>
+<circle cx="540" cy="121" r="3" fill="#333"/>
+<text x="534" y="124" font-size="10" text-anchor="end">2</text>
+<rect x="420" y="230" width="160" height="90" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="426" y="245" font-size="12" font-weight="bold">U2 D36V6F5</text>
+<text x="426" y="258" font-size="12" font-weight="bold">5 V 600 mA</text>
+<circle cx="580" cy="278" r="3" fill="#333"/>
+<text x="574" y="281" font-size="10" text-anchor="end">VIN</text>
+<circle cx="580" cy="292" r="3" fill="#333"/>
+<text x="574" y="295" font-size="10" text-anchor="end">GND</text>
+<circle cx="580" cy="306" r="3" fill="#333"/>
+<text x="574" y="309" font-size="10" text-anchor="end">VOUT</text>
+<rect x="640" y="250" width="90" height="40" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="646" y="265" font-size="12" font-weight="bold">D1 1N5817</text>
+<circle cx="730" cy="285" r="3" fill="#333"/>
+<text x="724" y="288" font-size="10" text-anchor="end">A</text>
+<circle cx="730" cy="299" r="3" fill="#333"/>
+<text x="724" y="302" font-size="10" text-anchor="end">K</text>
+<rect x="620" y="420" width="190" height="330" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="626" y="435" font-size="12" font-weight="bold">U3 DRV8874</text>
+<text x="626" y="448" font-size="12" font-weight="bold">(Pololu 4035)</text>
+<circle cx="810" cy="468" r="3" fill="#333"/>
+<text x="804" y="471" font-size="10" text-anchor="end">VIN</text>
+<circle cx="810" cy="493" r="3" fill="#333"/>
+<text x="804" y="496" font-size="10" text-anchor="end">GND</text>
+<circle cx="810" cy="518" r="3" fill="#333"/>
+<text x="804" y="521" font-size="10" text-anchor="end">OUT1</text>
+<circle cx="810" cy="544" r="3" fill="#333"/>
+<text x="804" y="547" font-size="10" text-anchor="end">OUT2</text>
+<circle cx="810" cy="569" r="3" fill="#333"/>
+<text x="804" y="572" font-size="10" text-anchor="end">EN</text>
+<circle cx="810" cy="595" r="3" fill="#333"/>
+<text x="804" y="598" font-size="10" text-anchor="end">PH</text>
+<circle cx="810" cy="620" r="3" fill="#333"/>
+<text x="804" y="623" font-size="10" text-anchor="end">nFAULT</text>
+<circle cx="810" cy="646" r="3" fill="#333"/>
+<text x="804" y="649" font-size="10" text-anchor="end">CS</text>
+<circle cx="810" cy="671" r="3" fill="#333"/>
+<text x="804" y="674" font-size="10" text-anchor="end">SLEEP</text>
+<circle cx="810" cy="697" r="3" fill="#333"/>
+<text x="804" y="700" font-size="10" text-anchor="end">VREF</text>
+<circle cx="810" cy="722" r="3" fill="#333"/>
+<text x="804" y="725" font-size="10" text-anchor="end">PMODE</text>
+<rect x="640" y="780" width="90" height="36" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="646" y="795" font-size="12" font-weight="bold">R1 20k</text>
+<circle cx="730" cy="815" r="3" fill="#333"/>
+<text x="724" y="818" font-size="10" text-anchor="end">1</text>
+<circle cx="730" cy="829" r="3" fill="#333"/>
+<text x="724" y="832" font-size="10" text-anchor="end">2</text>
+<rect x="950" y="220" width="200" height="400" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="956" y="235" font-size="12" font-weight="bold">U1 XIAO ESP32-S3</text>
+<circle cx="950" cy="255" r="3" fill="#333"/>
+<text x="956" y="258" font-size="10" text-anchor="start">5V</text>
+<circle cx="950" cy="280" r="3" fill="#333"/>
+<text x="956" y="283" font-size="10" text-anchor="start">GND</text>
+<circle cx="950" cy="306" r="3" fill="#333"/>
+<text x="956" y="309" font-size="10" text-anchor="start">3V3</text>
+<circle cx="950" cy="332" r="3" fill="#333"/>
+<text x="956" y="335" font-size="10" text-anchor="start">D0</text>
+<circle cx="950" cy="358" r="3" fill="#333"/>
+<text x="956" y="361" font-size="10" text-anchor="start">D1</text>
+<circle cx="950" cy="384" r="3" fill="#333"/>
+<text x="956" y="387" font-size="10" text-anchor="start">D2</text>
+<circle cx="950" cy="410" r="3" fill="#333"/>
+<text x="956" y="413" font-size="10" text-anchor="start">D3</text>
+<circle cx="950" cy="436" r="3" fill="#333"/>
+<text x="956" y="439" font-size="10" text-anchor="start">D4</text>
+<circle cx="950" cy="462" r="3" fill="#333"/>
+<text x="956" y="465" font-size="10" text-anchor="start">D5</text>
+<circle cx="950" cy="488" r="3" fill="#333"/>
+<text x="956" y="491" font-size="10" text-anchor="start">D6</text>
+<circle cx="950" cy="514" r="3" fill="#333"/>
+<text x="956" y="517" font-size="10" text-anchor="start">D7</text>
+<circle cx="950" cy="540" r="3" fill="#333"/>
+<text x="956" y="543" font-size="10" text-anchor="start">D8</text>
+<circle cx="950" cy="566" r="3" fill="#333"/>
+<text x="956" y="569" font-size="10" text-anchor="start">D9</text>
+<circle cx="950" cy="592" r="3" fill="#333"/>
+<text x="956" y="595" font-size="10" text-anchor="start">D10</text>
+<rect x="1240" y="120" width="130" height="110" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="1246" y="135" font-size="12" font-weight="bold">S1 DHT20 (3V3)</text>
+<circle cx="1240" cy="155" r="3" fill="#333"/>
+<text x="1246" y="158" font-size="10" text-anchor="start">VIN</text>
+<circle cx="1240" cy="173" r="3" fill="#333"/>
+<text x="1246" y="176" font-size="10" text-anchor="start">GND</text>
+<circle cx="1240" cy="191" r="3" fill="#333"/>
+<text x="1246" y="194" font-size="10" text-anchor="start">SDA</text>
+<circle cx="1240" cy="209" r="3" fill="#333"/>
+<text x="1246" y="212" font-size="10" text-anchor="start">SCL</text>
+<rect x="1240" y="260" width="90" height="30" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="1246" y="275" font-size="12" font-weight="bold">R2 4k7</text>
+<circle cx="1240" cy="295" r="3" fill="#333"/>
+<text x="1246" y="298" font-size="10" text-anchor="start">1</text>
+<circle cx="1240" cy="309" r="3" fill="#333"/>
+<text x="1246" y="312" font-size="10" text-anchor="start">2</text>
+<rect x="1240" y="300" width="90" height="30" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="1246" y="315" font-size="12" font-weight="bold">R3 4k7</text>
+<circle cx="1240" cy="335" r="3" fill="#333"/>
+<text x="1246" y="338" font-size="10" text-anchor="start">1</text>
+<circle cx="1240" cy="349" r="3" fill="#333"/>
+<text x="1246" y="352" font-size="10" text-anchor="start">2</text>
+<rect x="1240" y="420" width="130" height="60" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="1246" y="435" font-size="12" font-weight="bold">SW1 E-STOP (NC)</text>
+<circle cx="1240" cy="455" r="3" fill="#333"/>
+<text x="1246" y="458" font-size="10" text-anchor="start">1</text>
+<circle cx="1240" cy="469" r="3" fill="#333"/>
+<text x="1246" y="472" font-size="10" text-anchor="start">2</text>
+<rect x="1240" y="540" width="130" height="50" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="1246" y="555" font-size="12" font-weight="bold">RS1 reed CLOSED</text>
+<circle cx="1240" cy="575" r="3" fill="#333"/>
+<text x="1246" y="578" font-size="10" text-anchor="start">1</text>
+<circle cx="1240" cy="589" r="3" fill="#333"/>
+<text x="1246" y="592" font-size="10" text-anchor="start">2</text>
+<rect x="1240" y="620" width="130" height="50" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="1246" y="635" font-size="12" font-weight="bold">RS2 reed OPEN</text>
+<circle cx="1240" cy="655" r="3" fill="#333"/>
+<text x="1246" y="658" font-size="10" text-anchor="start">1</text>
+<circle cx="1240" cy="669" r="3" fill="#333"/>
+<text x="1246" y="672" font-size="10" text-anchor="start">2</text>
+<rect x="300" y="520" width="120" height="70" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="306" y="535" font-size="12" font-weight="bold">TB2 motor out</text>
+<circle cx="420" cy="555" r="3" fill="#333"/>
+<text x="414" y="558" font-size="10" text-anchor="end">1</text>
+<circle cx="420" cy="571" r="3" fill="#333"/>
+<text x="414" y="574" font-size="10" text-anchor="end">2</text>
+<rect x="40" y="500" width="170" height="110" rx="6" fill="#f5f7fa" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="515" font-size="12" font-weight="bold">M1 12 V actuator</text>
+<text x="46" y="528" font-size="12" font-weight="bold">(limits built in)</text>
+<circle cx="210" cy="548" r="3" fill="#333"/>
+<text x="204" y="551" font-size="10" text-anchor="end">+</text>
+<circle cx="210" cy="578" r="3" fill="#333"/>
+<text x="204" y="581" font-size="10" text-anchor="end">-</text>
+<polyline points="190,128 593,128" fill="none" stroke="#d62728" stroke-width="2.5" opacity="0.85"/>
+<polyline points="360,95 593,95" fill="none" stroke="#d62728" stroke-width="2.5" opacity="0.85"/>
+<line x1="593" y1="95" x2="593" y2="128" stroke="#d62728" stroke-width="1.4" opacity="0.85"/>
+<text x="596" y="92" font-size="9" fill="#d62728">V12_RAW</text>
+<polyline points="360,109 586,109" fill="none" stroke="#d62728" stroke-width="2.5" opacity="0.85"/>
+<polyline points="540,105 586,105" fill="none" stroke="#d62728" stroke-width="2.5" opacity="0.85"/>
+<polyline points="810,468 586,468" fill="none" stroke="#d62728" stroke-width="2.5" opacity="0.85"/>
+<polyline points="580,278 586,278" fill="none" stroke="#d62728" stroke-width="2.5" opacity="0.85"/>
+<line x1="586" y1="105" x2="586" y2="468" stroke="#d62728" stroke-width="2.5" opacity="0.85"/>
+<text x="589" y="102" font-size="9" fill="#d62728">V12</text>
+<polyline points="190,142 898,142" fill="none" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<polyline points="540,121 898,121" fill="none" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<polyline points="810,493 898,493" fill="none" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<polyline points="580,292 898,292" fill="none" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<polyline points="950,280 898,280" fill="none" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<polyline points="1240,173 898,173" fill="none" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<polyline points="1240,589 898,589" fill="none" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<polyline points="1240,669 898,669" fill="none" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<polyline points="730,829 898,829" fill="none" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<polyline points="810,722 898,722" fill="none" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<line x1="898" y1="121" x2="898" y2="829" stroke="#222222" stroke-width="2.5" opacity="0.85"/>
+<text x="901" y="118" font-size="9" fill="#222222">GND</text>
+<polyline points="580,306 572,306" fill="none" stroke="#ff7f0e" stroke-width="1.4" opacity="0.85"/>
+<polyline points="730,285 572,285" fill="none" stroke="#ff7f0e" stroke-width="1.4" opacity="0.85"/>
+<line x1="572" y1="285" x2="572" y2="306" stroke="#ff7f0e" stroke-width="1.4" opacity="0.85"/>
+<text x="575" y="282" font-size="9" fill="#ff7f0e">V5</text>
+<polyline points="730,299 910,299" fill="none" stroke="#ff7f0e" stroke-width="1.4" opacity="0.85"/>
+<polyline points="950,255 910,255" fill="none" stroke="#ff7f0e" stroke-width="1.4" opacity="0.85"/>
+<line x1="910" y1="255" x2="910" y2="299" stroke="#ff7f0e" stroke-width="1.4" opacity="0.85"/>
+<text x="913" y="252" font-size="9" fill="#ff7f0e">V5_XIAO</text>
+<polyline points="950,306 916,306" fill="none" stroke="#e377c2" stroke-width="1.4" opacity="0.85"/>
+<polyline points="1240,155 916,155" fill="none" stroke="#e377c2" stroke-width="1.4" opacity="0.85"/>
+<polyline points="1240,309 916,309" fill="none" stroke="#e377c2" stroke-width="1.4" opacity="0.85"/>
+<polyline points="1240,349 916,349" fill="none" stroke="#e377c2" stroke-width="1.4" opacity="0.85"/>
+<line x1="916" y1="155" x2="916" y2="349" stroke="#e377c2" stroke-width="1.4" opacity="0.85"/>
+<text x="919" y="152" font-size="9" fill="#e377c2">V3V3</text>
+<polyline points="950,332 922,332" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<polyline points="810,569 922,569" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<line x1="922" y1="332" x2="922" y2="569" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<text x="925" y="329" font-size="9" fill="#1f77b4">MOT_EN</text>
+<polyline points="950,358 928,358" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<polyline points="810,595 928,595" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<line x1="928" y1="358" x2="928" y2="595" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<text x="931" y="355" font-size="9" fill="#1f77b4">MOT_PH</text>
+<polyline points="950,384 880,384" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<polyline points="810,620 880,620" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<line x1="880" y1="384" x2="880" y2="620" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<text x="883" y="381" font-size="9" fill="#1f77b4">DRV_nFAULT</text>
+<polyline points="950,410 886,410" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<polyline points="810,646 886,646" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<line x1="886" y1="410" x2="886" y2="646" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<text x="889" y="407" font-size="9" fill="#1f77b4">DRV_CS</text>
+<polyline points="950,436 892,436" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<polyline points="1240,191 892,191" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<polyline points="1240,295 892,295" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<line x1="892" y1="191" x2="892" y2="436" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<text x="895" y="188" font-size="9" fill="#1f77b4">I2C_SDA</text>
+<polyline points="950,462 898,462" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<polyline points="1240,209 898,209" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<polyline points="1240,335 898,335" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<line x1="898" y1="209" x2="898" y2="462" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<text x="901" y="206" font-size="9" fill="#1f77b4">I2C_SCL</text>
+<polyline points="950,514 904,514" fill="none" stroke="#9467bd" stroke-width="1.4" opacity="0.85"/>
+<polyline points="1240,455 904,455" fill="none" stroke="#9467bd" stroke-width="1.4" opacity="0.85"/>
+<line x1="904" y1="455" x2="904" y2="514" stroke="#9467bd" stroke-width="1.4" opacity="0.85"/>
+<text x="907" y="452" font-size="9" fill="#9467bd">DRV_EN_RAW</text>
+<polyline points="1240,469 910,469" fill="none" stroke="#9467bd" stroke-width="1.4" opacity="0.85"/>
+<polyline points="810,671 910,671" fill="none" stroke="#9467bd" stroke-width="1.4" opacity="0.85"/>
+<polyline points="950,592 910,592" fill="none" stroke="#9467bd" stroke-width="1.4" opacity="0.85"/>
+<line x1="910" y1="469" x2="910" y2="671" stroke="#9467bd" stroke-width="1.4" opacity="0.85"/>
+<text x="913" y="466" font-size="9" fill="#9467bd">DRV_SLEEP</text>
+<polyline points="810,697 579,697" fill="none" stroke="#7f7f7f" stroke-width="1.4" opacity="0.85"/>
+<polyline points="730,815 579,815" fill="none" stroke="#7f7f7f" stroke-width="1.4" opacity="0.85"/>
+<line x1="579" y1="697" x2="579" y2="815" stroke="#7f7f7f" stroke-width="1.4" opacity="0.85"/>
+<text x="582" y="694" font-size="9" fill="#7f7f7f">DRV_VREF</text>
+<polyline points="950,540 922,540" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<polyline points="1240,575 922,575" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<line x1="922" y1="540" x2="922" y2="575" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<text x="925" y="537" font-size="9" fill="#1f77b4">REED_CLOSED</text>
+<polyline points="950,566 928,566" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<polyline points="1240,655 928,655" fill="none" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<line x1="928" y1="566" x2="928" y2="655" stroke="#1f77b4" stroke-width="1.4" opacity="0.85"/>
+<text x="931" y="563" font-size="9" fill="#1f77b4">REED_OPEN</text>
+<polyline points="810,518 558,518" fill="none" stroke="#8c564b" stroke-width="2.5" opacity="0.85"/>
+<polyline points="420,555 558,555" fill="none" stroke="#8c564b" stroke-width="2.5" opacity="0.85"/>
+<polyline points="210,548 558,548" fill="none" stroke="#8c564b" stroke-width="2.5" opacity="0.85"/>
+<line x1="558" y1="518" x2="558" y2="555" stroke="#8c564b" stroke-width="2.5" opacity="0.85"/>
+<text x="561" y="515" font-size="9" fill="#8c564b">MOT_A</text>
+<polyline points="810,544 551,544" fill="none" stroke="#8c564b" stroke-width="2.5" opacity="0.85"/>
+<polyline points="420,571 551,571" fill="none" stroke="#8c564b" stroke-width="2.5" opacity="0.85"/>
+<polyline points="210,578 551,578" fill="none" stroke="#8c564b" stroke-width="2.5" opacity="0.85"/>
+<line x1="551" y1="544" x2="551" y2="578" stroke="#8c564b" stroke-width="2.5" opacity="0.85"/>
+<text x="554" y="541" font-size="9" fill="#8c564b">MOT_B</text>
+<line x1="800" y1="800" x2="830" y2="800" stroke="#d62728" stroke-width="3"/><text x="834" y="804" font-size="11">12 V</text>
+<line x1="885" y1="800" x2="915" y2="800" stroke="#ff7f0e" stroke-width="3"/><text x="919" y="804" font-size="11">5 V</text>
+<line x1="970" y1="800" x2="1000" y2="800" stroke="#e377c2" stroke-width="3"/><text x="1004" y="804" font-size="11">3V3</text>
+<line x1="1055" y1="800" x2="1085" y2="800" stroke="#222" stroke-width="3"/><text x="1089" y="804" font-size="11">GND</text>
+<line x1="1140" y1="800" x2="1170" y2="800" stroke="#8c564b" stroke-width="3"/><text x="1174" y="804" font-size="11">motor</text>
+<line x1="1225" y1="800" x2="1255" y2="800" stroke="#9467bd" stroke-width="3"/><text x="1259" y="804" font-size="11">E-STOP / SLEEP</text>
+<line x1="1310" y1="800" x2="1340" y2="800" stroke="#1f77b4" stroke-width="3"/><text x="1344" y="804" font-size="11">signal</text>
+<text x="800" y="830" font-size="11" fill="#555">I_lim = 3.3 V x 20k/30k / (450 uA/A x 2.49 k) = 1.96 A. PMODE to GND = PH/EN. E-STOP open -> SLEEP low -> outputs off.</text>
+</svg>

@@ -1,0 +1,7 @@
+# Pro tier: Glideforce LACT12-12V-05 (Pololu 2326) replaces the Starter tier's generic actuator.
+# Everything else (driver, ~2.0 A limit, wiring, firmware) is shared; only the travel timeout changes.
+tier: pro
+parts:
+  M1: {part: act-glideforce-lact12-12v-05, driver: U3, wiring: single, note: "Pro tier"}
+firmware:
+  flags: {CT_TIER_NAME: pro, CT_TRAVEL_TIMEOUT_MS: 14000, OVERCURRENT_MA: 1800}

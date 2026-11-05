@@ -145,3 +145,8 @@ dist-mcpb/
 *.tsbuildinfo
 applications/tendercells_ui/test_output/*/vite.config.js
 applications/tendercells_ui/test_output/*/vite.config.d.ts
+
+# Hub-local runtime data (mower links, integrations registry): never committed, no secrets
+# live here either, but it's per-machine state and was never actually gitignored before.
+.tendercells/
+**/.tendercells/

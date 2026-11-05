@@ -26,6 +26,13 @@
         "**/.*",
         "**/node_modules/**"
       ],
+      "redirects": [
+        {
+          "source": "/our-story",
+          "destination": "/story",
+          "type": 301
+        }
+      ],
       "rewrites": [
         {
           "source": "/mcp",

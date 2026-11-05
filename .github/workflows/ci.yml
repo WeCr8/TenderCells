@@ -112,6 +112,11 @@ jobs:
       - name: Type-check + build
         run: npm run build
 
+      # Search Console "Duplicate, Google chose different canonical than user" guard: every
+      # sitemap page is built with one self-referencing canonical and its own title.
+      - name: SEO - sitemap in sync, one self-referencing canonical per page
+        run: npm run check:seo
+
   express-api:
     name: "API — type-check + backend XML"
     needs: changes

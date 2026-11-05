@@ -211,5 +211,7 @@ peripheral you chose**, and reports `doorState` / `driveDir` in its 10 s heartbe
 the dashboard shows live position. The real
 [Chicken Tender](../firmware/chicken-tender/src/main.cpp) door and
 [Roaming Roost](../firmware/roaming-roost/src/main.cpp) drive use the **same MQTT
-topics** — your classroom servo and the real DC-motor rover are controlled identically.
+topics** — your classroom servo rover and the full-size drive are controlled identically.
+This 2-servo lesson rover is not the Small rover; see the
+[Rover platform family](products/rover/README.md) for the S/M/L builds.
 That's the whole point: start tiny, grow into the real thing.

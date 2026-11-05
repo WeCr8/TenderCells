@@ -28,9 +28,12 @@ Current priority product families:
 - `chicken-tendercell`
 - `watchtower-ai`
 - `roaming-roost`
+- `rover` (S/M/L platform family, see [rover](https://github.com/WeCr8/TenderCells/blob/main/docs/products/rover/README.md))
 - `coop-door-kit`
 - `water-monitor`
 - `feed-monitor`
 - `community-custom`
 
 Use `docs/PRODUCT_DOCUMENTATION_STANDARD.md` as the acceptance checklist.
+
+Products come in Starter / Plus / Pro electronics tiers; see [TIERS.md](https://github.com/WeCr8/TenderCells/blob/main/docs/products/TIERS.md).

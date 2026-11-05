@@ -99,6 +99,9 @@ A pass has a **task**. Choose it in Weed Patrol or on a scheduled "Weed pass":
 
 ## Weed patrol on a rover
 
+> Hardware: the Weed Rover is built on the [Rover platform family](products/rover/README.md)
+> (Medium or Large, Pro tier for on-board detection; see [tiers](products/TIERS.md)).
+
 A mobile robot drives the **whole property** (or the route you drew for it in Property Layout)
 with a downward camera. It works in lawn-mower lanes, one camera swath (4 ft) apart, and skips
 every no-go / keep-out zone. Each find is reported with its property position (`propFt {x, y}`,

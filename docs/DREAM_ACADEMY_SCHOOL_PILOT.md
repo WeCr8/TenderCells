@@ -16,7 +16,7 @@ Start with teacher accounts and a small number of shared, supervised devices. Do
 1. Single ESP32-S3 Sense camera node for a mini-farm enclosure.
 2. ESP32-C3/S3 watering node with water-level sensing only; add a low-voltage pump later with an adult and a properly rated driver.
 3. ESP32-C3/S3 feeding node with hopper-level sensing only; add weighing or motor control after bench validation.
-4. Optional low-voltage RC rover with student mode, default-stop motors, adult-controlled power, and a physical disconnect.
+4. Optional low-voltage Small rover ([Starter tier](products/TIERS.md); RC radio optional) with student mode, default-stop motors, adult-controlled power, and a physical disconnect.
 5. Account-level animal roster using non-sensitive animal names, optional photos, and teacher-reviewed camera observations.
 
 ## Roles

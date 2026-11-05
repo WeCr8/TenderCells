@@ -39,5 +39,5 @@
   { "slug": "contributing", "source": "CONTRIBUTING.md", "title": "Contributing" },
   { "slug": "ai-assistant-plugin", "source": "docs/AI_ASSISTANT_PLUGIN.md", "title": "Tender Cells for Claude and ChatGPT" },
   { "slug": "security", "source": "SECURITY.md", "title": "Security policy" },
-  { "slug": "index", "source": "docs/README.md", "title": "All documentation" }
+  { "slug": "all", "source": "docs/README.md", "title": "All documentation" }
 ]

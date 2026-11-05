@@ -48,7 +48,7 @@ export const DOC_GROUPS: { id: string; title: string; docs: DocLink[] }[] = [
       { title: "Chicken Tender master spec", desc: "Product requirements: sizes, zones, robot safety, cloud, manufacturing.", doc: "chicken-tender-master-spec" },
       { title: "Starter Node firmware", desc: "The general-purpose ESP32 firmware: peripherals, pins, MQTT topics, building it yourself.", doc: "starter-node-firmware" },
       { title: "CAD to web", desc: "Export SolidWorks / Fusion parts so they load in the 3D viewer and the OS.", doc: "cad-to-web" },
-      { title: "Documentation index", desc: "Where everything is: products, hardware, software, schools.", doc: "index" },
+      { title: "Documentation index", desc: "Where everything is: products, hardware, software, schools.", doc: "all" },
     ],
   },
   {

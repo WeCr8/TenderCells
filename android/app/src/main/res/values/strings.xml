@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TenderCells</string>
+    <string name="title_activity_main">TenderCells</string>
+    <string name="package_name">com.wecr8.tendercells</string>
+    <string name="custom_url_scheme">com.wecr8.tendercells</string>
+</resources>

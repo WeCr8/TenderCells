@@ -1,0 +1,69 @@
+/* Rover control pad: full-screen, landscape-first, phone + tablet. */
+html.rp-active, html.rp-active body { overflow: hidden; overscroll-behavior: none; }
+.rp-root {
+  position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column;
+  background: #10170c; color: #eef3e6; font-family: system-ui, -apple-system, sans-serif;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none;
+}
+.rp-top { display: flex; align-items: center; gap: 8px; padding: 6px 10px; font-size: 14px; flex-wrap: wrap; }
+.rp-dev { opacity: .8; }
+.rp-cmd { margin-left: auto; font-variant-numeric: tabular-nums; opacity: .85; min-width: 9ch; text-align: right; }
+.rp-pill { padding: 3px 10px; border-radius: 999px; background: #444; font-weight: 600; text-transform: uppercase; font-size: 12px; }
+.rp-pill[data-state="connected"] { background: #2f7d32; }
+.rp-pill[data-state="connecting"] { background: #a07a00; }
+.rp-pill[data-state="error"], .rp-pill[data-state="estop"] { background: #c62828; }
+.rp-btn {
+  background: #2c3a22; color: inherit; border: 1px solid #4d6340; border-radius: 10px;
+  padding: 8px 12px; font-size: 15px; min-height: 40px; min-width: 40px; cursor: pointer;
+}
+.rp-btn:active { background: #3d5030; }
+.rp-primary { background: #2f7d32; border-color: #4caf50; }
+.rp-main { flex: 1; display: grid; grid-template-columns: 1fr minmax(180px, 1fr) 1fr; align-items: center; gap: 8px; padding: 4px 12px 12px; min-height: 0; }
+.rp-stick-wrap { display: flex; justify-content: center; align-items: center; height: 100%; }
+.rp-stick {
+  --size: min(42vh, 30vw, 300px);
+  width: var(--size); height: var(--size); border-radius: 50%; position: relative;
+  background: radial-gradient(circle, #24321b 0%, #1a2414 70%); border: 3px solid #4d6340;
+  display: flex; align-items: center; justify-content: center; touch-action: none;
+}
+.rp-knob {
+  width: 42%; height: 42%; border-radius: 50%; background: #8bc34a; box-shadow: 0 4px 14px rgba(0,0,0,.5);
+  transition: transform 90ms ease-out; pointer-events: none;
+}
+.rp-stick:active .rp-knob { transition: none; }
+.rp-stick-label { position: absolute; bottom: -24px; font-size: 12px; opacity: .7; }
+.rp-center { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.rp-estop {
+  width: min(26vh, 150px); height: min(26vh, 150px); border-radius: 50%;
+  background: #d32f2f; color: #fff; font-weight: 800; font-size: 18px; letter-spacing: .5px;
+  border: 6px solid #ffd600; box-shadow: 0 0 0 3px #000 inset, 0 6px 18px rgba(0,0,0,.5); padding: 6px; touch-action: none;
+}
+.rp-estop.rp-latched { background: #7f0000; font-size: 13px; animation: rp-blink 1s steps(2) infinite; }
+@keyframes rp-blink { 50% { border-color: #000; } }
+.rp-modes { display: flex; gap: 6px; }
+.rp-toggles { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 34vw; }
+.rp-toggle[aria-pressed="true"] { background: #f9a825; color: #1a1a1a; border-color: #fdd835; }
+.rp-msg { min-height: 1.2em; font-size: 13px; opacity: .85; text-align: center; }
+.rp-portrait-hint { display: none; background: #a07a00; color: #000; text-align: center; padding: 4px; font-size: 13px; }
+@media (orientation: portrait) {
+  .rp-portrait-hint { display: block; }
+  .rp-main { grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr; }
+  .rp-center { grid-column: 1 / span 2; grid-row: 1; }
+  .rp-stick { --size: min(42vw, 280px); }
+  .rp-toggles { max-width: 90vw; }
+}
+@media (max-height: 420px) {
+  .rp-btn { padding: 4px 8px; min-height: 34px; font-size: 13px; }
+  .rp-estop { font-size: 14px; border-width: 4px; }
+}
+.rp-dialog { max-width: min(560px, 94vw); max-height: 90vh; overflow: auto; border-radius: 12px; border: 1px solid #4d6340; background: #1a2414; color: #eef3e6; }
+.rp-dialog::backdrop { background: rgba(0,0,0,.6); }
+.rp-form { display: flex; flex-direction: column; gap: 8px; }
+.rp-form h2 { margin: 0 0 4px; font-size: 18px; }
+.rp-form label { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.rp-form input, .rp-form select { font-size: 16px; padding: 6px; border-radius: 6px; border: 1px solid #4d6340; background: #0f150b; color: inherit; }
+.rp-form fieldset { border: 1px solid #4d6340; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; }
+.rp-trow { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 6px; align-items: center; }
+.rp-trow label { flex-direction: row; align-items: center; gap: 4px; }
+.rp-form-actions { display: flex; justify-content: flex-end; gap: 8px; }

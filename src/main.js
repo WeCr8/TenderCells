@@ -145,6 +145,9 @@ document.querySelector('#app').innerHTML = `
         </div>
 
         <div class="nav-item">
+          <a href="#rover-control" class="nav-link">Rover Control</a>
+        </div>
+        <div class="nav-item">
           <a href="#" class="nav-link">Open Source</a>
         </div>
 

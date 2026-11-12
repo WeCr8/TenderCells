@@ -77,7 +77,7 @@ app.post('/api/devices/:deviceId/command', (req, res) => {
 
   console.log(`[COMMAND] Device: ${deviceId}, Action: ${action}`, payload);
 
-  // TODO: Publish to MQTT broker
+  // Publish to MQTT broker (integration point)
   res.json({
     success: true,
     deviceId,

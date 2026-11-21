@@ -1,0 +1,38 @@
+{
+ "step/CT_COOP_A_assembly.step": {
+  "solids": 78,
+  "bbox_mm": [
+   -304.8,
+   -304.8,
+   -14.6,
+   1636.8,
+   3962.4,
+   2089.2
+  ],
+  "MB": 1.56
+ },
+ "step/CT_COOP_A_coop_only.step": {
+  "solids": 46,
+  "bbox_mm": [
+   -76.2,
+   1466.5,
+   -14.6,
+   1636.8,
+   3813.8,
+   2089.2
+  ],
+  "MB": 0.94
+ },
+ "step/CT_COOP_A_framing_no_mesh.step": {
+  "solids": 70,
+  "bbox_mm": [
+   -76.2,
+   -38.1,
+   -14.6,
+   1636.8,
+   3813.8,
+   2089.2
+  ],
+  "MB": 1.38
+ }
+}

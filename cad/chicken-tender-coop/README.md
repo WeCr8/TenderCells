@@ -43,3 +43,9 @@ names, mm in the file). Assumed where the guide is silent: window at 52 in, 8 in
 cleanout hole 1 in above the floor; pop door shown open; top rails inside the 72 in posts so the run
 walls are 72 in; roof is a flat envelope (ribs not modelled), so the top of the roof sheet is ~82 in,
 above the 75-1/2 in post tops the guide quotes as the tallest point. Draft: not checked against a real build.
+
+## Showcase (2026-11-21): chain-link run, gable roof, working doors, egg handling, robot options, Isaac
+See `docs/CHICKEN_TENDER_SHOWCASE.md`. Parametric source in `showcase/` (`sc_params.py`), option STEPs
+`step/CT_COOP_A_showcase_{base,starter,plus,pro}.step` (re-import these in SolidCraft), per-part STEPs in
+`step/parts/`, animated GLBs in `reports/glb/`, BOM cross-check `reports/CT_COOP_A_showcase_bom_check.csv`,
+Isaac Sim / Lab in `sim/isaac/` (`RUN_ON_WCR8.md`).

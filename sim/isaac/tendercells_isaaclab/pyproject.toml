@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tendercells_isaaclab"
+version = "0.1.0"
+description = "TenderCells Chicken Tender Isaac Lab 2.x tasks (SO-101 egg pick-and-place, pop-door cycle)"
+requires-python = ">=3.10"
+dependencies = []          # isaaclab / isaaclab_rl come from the Isaac Lab install
+
+[tool.setuptools.packages.find]
+include = ["tendercells_isaaclab*"]

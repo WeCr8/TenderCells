@@ -13,6 +13,8 @@
 // Last updated: 2026-10-16 (repair: stepper enable pin, cleaning pulses, MQ-137 divider,
 // sensor-fault tolerance, unknown chicken count, door restore, rollover-safe timers,
 // feed cap, optional NC E-STOP input, ArduinoJson 7 API)
+// 2026-11-20: MQ-137 ammonia published in ppm (ADC mV -> Rs/R0 -> ppm via lib/mq137) with an
+// NVS-stored clean-air calibration (tc/{id}/cmd/calibrate); divider 15k/12k (<= 2.45 V at the ADC).
 
 #include <WiFi.h>
 #include <WiFiManager.h>      // tzapu/WiFiManager — captive-portal provisioning
@@ -22,6 +24,7 @@
 #include <ESP32Servo.h>       // madhephaestus/ESP32Servo — door servo + ESP32PWM for the stepper STEP pin
 #include <DHT.h>
 #include "esp_task_wdt.h"
+#include <mq137.h>           // lib/mq137: ADC mV -> Rs/R0 -> NH3 ppm (host-tested)
 
 // ============================================================================
 // CONFIGURATION
@@ -68,14 +71,28 @@ const int           SENSOR_FAULT_ALERT_AFTER   = 5;       // consecutive failed 
 #ifndef CT_ESTOP_INPUT
 #define CT_ESTOP_INPUT      1
 #endif
-// MQ-137 module AOUT is 0-5 V. It MUST go through a 12k (top) / 15k (bottom) divider before
-// GPIO35: Vadc = Vsensor * 15/(12+15) = 0.556 x, so 5.0 V -> 2.78 V and even a 5.25 V module
-// rail -> 2.92 V, inside the ESP32 ADC's ~3.1 V usable span at 11 dB. Firmware scales it back.
-#define AMMONIA_R_TOP_KOHM    12.0f
-#define AMMONIA_R_BOTTOM_KOHM 15.0f
-#define AMMONIA_DIVIDER_GAIN ((AMMONIA_R_TOP_KOHM + AMMONIA_R_BOTTOM_KOHM) / AMMONIA_R_BOTTOM_KOHM)  // 1.8
-static_assert(5.25f * AMMONIA_R_BOTTOM_KOHM / (AMMONIA_R_TOP_KOHM + AMMONIA_R_BOTTOM_KOHM) <= 3.1f,
-              "MQ-137 divider must keep the ADC pin <= 3.1 V at a 5.25 V module rail");
+// MQ-137 module AOUT is 0-5 V. It MUST go through a 15k (top) / 12k (bottom) divider before
+// GPIO35: Vadc = Vsensor * 12/(15+12) = 0.444 x, so 5.0 V -> 2.22 V and even a 5.25 V module
+// rail -> 2.33 V. That stays inside Espressif's 150-2450 mV *suggested* (accurate) range for the
+// ESP32 ADC at 11 dB attenuation; the old 12k/15k divider put 5 V at 2.78 V, readable but in the
+// non-linear top of the range. Firmware scales it back (lib/mq137, docs/CHICKEN_TENDER_PINOUT.md).
+// Add 100 nF from GPIO35 to GND at the ESP32 (Espressif ADC noise note).
+#define AMMONIA_R_TOP_KOHM    15.0f
+#define AMMONIA_R_BOTTOM_KOHM 12.0f
+static_assert(5.25f * AMMONIA_R_BOTTOM_KOHM / (AMMONIA_R_TOP_KOHM + AMMONIA_R_BOTTOM_KOHM) <= 2.45f,
+              "MQ-137 divider must keep the ADC pin <= 2.45 V (ESP32 11 dB suggested range) at a 5.25 V module rail");
+// The module's own load resistor RL (the SMD resistor next to the pot on the module, between AOUT
+// and GND). Common values are 1k ("102"), 10k ("103") or 47k ("473"). Measure it with power off
+// and set it here; it only changes the reported Rs, not ppm (Rs/R0 cancels RL when R0 is
+// calibrated on the same board).
+#ifndef MQ137_RL_KOHM
+#define MQ137_RL_KOHM         10.0f
+#endif
+// Heater warm-up after every power-up before readings are published (first-ever use also needs a
+// 24-48 h burn-in before calibration; see the calibration step in docs/CHICKEN_TENDER_PINOUT.md).
+#ifndef MQ137_WARMUP_MS
+#define MQ137_WARMUP_MS       180000UL
+#endif
 
 #define DOOR_OPEN_DEG   90
 #define DOOR_CLOSE_DEG  0
@@ -144,6 +161,9 @@ SensorReading currentReading = {0, 0, 0, 0, 0, -1, "unknown", 0};
 const char* g_doorState = "closed";   // last commanded door position (persisted in NVS "door")
 bool sensorsValid = false;            // at least one good DHT read since boot
 int  dhtFailStreak = 0;               // consecutive failed reads
+float nh3R0Kohm     = 0.0f;           // MQ-137 clean-air R0 (kOhm) from NVS "nh3_r0"; 0 = not calibrated
+float nh3ModuleVolts = NAN;           // last averaged module output volts (after undoing the divider)
+float nh3RsKohm      = NAN;           // last sensor resistance
 
 // ============================================================================
 // FUNCTION DECLARATIONS
@@ -168,6 +188,8 @@ void setDoor(bool open);
 void restoreDoor();
 void pollEStopInput();
 void publishAlert(const char* type, const char* message);
+void calibrateAmmonia(JsonDocument& doc);
+bool ammoniaWarmingUp();
 void startFeed(float grams);
 void startCleaning();
 void stopCleaning();
@@ -207,6 +229,9 @@ void setup() {
   doorServo.setPeriodHertz(50);
   doorServo.attach(PIN_DOOR_SERVO, 500, 2400);
   restoreDoor();
+  nh3R0Kohm = prefs.getFloat("nh3_r0", 0.0f);
+  if (nh3R0Kohm > 0) Serial.printf("✓ MQ-137 R0 %.1f kOhm\n", nh3R0Kohm);
+  else               Serial.println("⚠ MQ-137 not calibrated: ammonia published as null until tc/{id}/cmd/calibrate");
 
   dht.begin();
   Serial.println("✓ Sensors initialized");
@@ -433,6 +458,7 @@ void subscribeCommands() {
   snprintf(t, sizeof(t), "tc/%s/cmd/feed",  MQTT_DEVICE_ID); mqttClient.subscribe(t, 1);
   snprintf(t, sizeof(t), "tc/%s/cmd/clean", MQTT_DEVICE_ID); mqttClient.subscribe(t, 1);
   snprintf(t, sizeof(t), "tc/%s/cmd/arm",   MQTT_DEVICE_ID); mqttClient.subscribe(t, 1);
+  snprintf(t, sizeof(t), "tc/%s/cmd/calibrate", MQTT_DEVICE_ID); mqttClient.subscribe(t, 1);
 }
 
 void reconnectMqttIfNeeded() {
@@ -495,6 +521,9 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
     const char* act = doc["action"] | "";
     if (strcmp(act, "start") == 0)     startCleaning();
     else if (strcmp(act, "stop") == 0) stopCleaning();
+
+  } else if (strcmp(action, "calibrate") == 0) {
+    calibrateAmmonia(doc);
 
   } else if (strcmp(action, "arm") == 0) {
     // Arm/gantry is driven by the Jetson. This board enforces the safety veto:
@@ -632,18 +661,22 @@ void clearEStop() {
 
 void readSensors() {
   // Average 3 samples (CLAUDE.md convention) for temp/humidity/ammonia.
-  float tSum = 0, hSum = 0, aSum = 0; int n = 0;
+  float tSum = 0, hSum = 0, mvSum = 0; int n = 0;
   for (int i = 0; i < 3; i++) {
     float t = dht.readTemperature(true);   // Fahrenheit
     float h = dht.readHumidity();
     if (!isnan(t) && !isnan(h)) { tSum += t; hSum += h; n++; }
-    // Sensor volts = ADC volts x divider gain; report as % of the module's 0-5 V span.
-    const float vSensor = (analogReadMilliVolts(PIN_AMMONIA_SENSOR) / 1000.0f) * AMMONIA_DIVIDER_GAIN;
-    aSum += (vSensor / 5.0f) * 100.0f;
+    mvSum += analogReadMilliVolts(PIN_AMMONIA_SENSOR);   // eFuse-calibrated mV, not raw counts
     pollEStopInput();   // never let sensor reads delay a stop
     delay(20);  // < 50ms, watchdog-safe
   }
-  currentReading.ammonia = aSum / 3.0f;
+  // ADC mV -> module volts -> Rs -> Rs/R0 -> ppm (lib/mq137). NAN (published as null) while the
+  // heater warms up, before calibration, or when the module is unplugged/saturated.
+  nh3ModuleVolts = mq137::moduleVolts(mvSum / 3.0f, AMMONIA_R_TOP_KOHM, AMMONIA_R_BOTTOM_KOHM);
+  nh3RsKohm = mq137::rsKohm(nh3ModuleVolts,
+                            mq137::effectiveRl(MQ137_RL_KOHM, AMMONIA_R_TOP_KOHM, AMMONIA_R_BOTTOM_KOHM));
+  currentReading.ammonia = (ammoniaWarmingUp() || !(nh3R0Kohm > 0.0f) || isnan(nh3RsKohm))
+                               ? NAN : mq137::ppmFromRatio(nh3RsKohm / nh3R0Kohm);
 
   // A bad DHT read must NOT stop the feeder or cleaner, and must not change state:
   // keep the last good values, count the streak, alert once it is persistent.
@@ -678,7 +711,11 @@ void publishSensorData() {
     doc["humidity"]   = nullptr;
   }
   doc["sensorFault"]  = dhtFailStreak >= SENSOR_FAULT_ALERT_AFTER;
-  doc["ammonia"]      = currentReading.ammonia;
+  if (isnan(currentReading.ammonia)) doc["ammonia"] = nullptr;      // ppm unknown (warm-up / uncalibrated / fault)
+  else                               doc["ammonia"] = currentReading.ammonia;   // NH3 ppm
+  doc["ammoniaCalibrated"] = nh3R0Kohm > 0.0f;
+  doc["ammoniaWarmingUp"]  = ammoniaWarmingUp();
+  if (!isnan(nh3ModuleVolts)) doc["ammoniaVolts"] = nh3ModuleVolts;   // diagnostic: module AOUT
   doc["feedLevel"]    = currentReading.feedLevel;
   doc["waterLevel"]   = currentReading.waterLevel;
   if (currentReading.chickenCount < 0) doc["chickenCount"] = nullptr;   // unknown
@@ -709,4 +746,41 @@ void publishState() {
   // E-STOP state is retained so a late-joining subscriber sees the active stop.
   bool retain = (currentState == SystemState::ESTOP);
   mqttClient.publish(topic, (const uint8_t*)buf, n, retain);
+}
+
+// ============================================================================
+// MQ-137 CALIBRATION  (tc/{id}/cmd/calibrate)
+// ============================================================================
+// {"sensor":"ammonia"}                 -> measure R0 now (sensor must be in CLEAN outdoor air,
+//                                         burned in 24-48 h on first use, warmed up >= 3 min)
+// {"sensor":"ammonia","r0Kohm":23.5}   -> set R0 directly (e.g. from a bench calibration)
+// {"sensor":"ammonia","reset":true}    -> forget R0 (ammonia goes back to null)
+
+bool ammoniaWarmingUp() { return millis() < MQ137_WARMUP_MS; }
+
+void calibrateAmmonia(JsonDocument& doc) {
+  const char* sensor = doc["sensor"] | "";
+  if (strcmp(sensor, "ammonia") != 0) return;
+  if (doc["reset"] | false) {
+    nh3R0Kohm = 0.0f;
+    prefs.remove("nh3_r0");
+    publishAlert("calibration", "ammonia R0 cleared - readings null until recalibrated");
+    return;
+  }
+  float r0 = doc["r0Kohm"] | 0.0f;
+  if (!(r0 > 0.0f)) {
+    if (ammoniaWarmingUp()) { publishAlert("calibration", "ammonia calibration refused: heater still warming up"); return; }
+    float mv = 0;
+    for (int i = 0; i < 20; i++) { mv += analogReadMilliVolts(PIN_AMMONIA_SENSOR); pollEStopInput(); delay(20); }
+    esp_task_wdt_reset();
+    const float v  = mq137::moduleVolts(mv / 20.0f, AMMONIA_R_TOP_KOHM, AMMONIA_R_BOTTOM_KOHM);
+    const float rs = mq137::rsKohm(v, mq137::effectiveRl(MQ137_RL_KOHM, AMMONIA_R_TOP_KOHM, AMMONIA_R_BOTTOM_KOHM));
+    if (isnan(rs)) { publishAlert("calibration", "ammonia calibration refused: module voltage out of range (check wiring)"); return; }
+    r0 = mq137::r0FromCleanAir(rs);
+  }
+  nh3R0Kohm = r0;
+  prefs.putFloat("nh3_r0", r0);
+  char msg[96];
+  snprintf(msg, sizeof(msg), "ammonia calibrated: R0 = %.1f kOhm", r0);
+  publishAlert("calibration", msg);
 }

@@ -405,14 +405,14 @@ Optional predator monitoring and threat detection system.
 
 ### Base Controller
 
-**MCU:** ESP32-S3  
+**MCU:** Seeed XIAO ESP32-S3 (door controller) + ESP32-WROOM-32 DevKit V1 (Pro coop sensor/feeder controller); see [CHICKEN_TENDER_PINOUT.md](https://github.com/WeCr8/TenderCells/blob/main/docs/CHICKEN_TENDER_PINOUT.md)  
 **Firmware:** Arduino/MicroPython  
 **Languages:** C/C++ or Python  
 **OTA Updates:** Supported
 
 ### Motion Controllers
 
-**Motor Driver:** TB6600 stepper driver (door actuators)  
+**Motor Driver:** Pololu DRV8874 (12 V door linear actuator); TB6600 stepper driver (cleaning scraper / rail)  
 **Servo Support:** PWM-based door servos  
 **Relay Modules:** 12V/5V logic outputs
 

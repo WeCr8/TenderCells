@@ -391,16 +391,23 @@ void onMeshMessage(uint16_t src, uint8_t type, const uint8_t* payload,
 }
 
 // ── ADC helpers ──────────────────────────────────────────────────────────────
+// Divider math: Vin = Vadc * (R1 + R2) / R2. Read eFuse-calibrated millivolts
+// (analogReadMilliVolts), not raw counts / 4095 * 3.3, which ignores the ADC's
+// non-linearity and per-chip reference. Both dividers stay well under 2.45 V at the pin.
+static const float BATTERY_DIVIDER_GAIN = (100.0f + 10.0f) / 10.0f;   // 100k/10k = 11.0 (was 12.1, wrong)
+static const float SOLAR_DIVIDER_GAIN   = (47.0f + 10.0f) / 10.0f;    // 47k/10k = 5.7
+// NOTE (2026-11-20, unverified hardware): this env targets an ESP32-S3, where GPIO34/35 are NOT
+// ADC pins (S3 ADC1 = GPIO1-10). BATTERY_ADC/SOLAR_ADC (and the LoRa pins 18/19/23) were copied
+// from an ESP32-WROOM map; confirm the WatchTower board before trusting these readings.
+
 float readBatteryVolts() {
-  // 11.1V 3S pack → voltage divider R1=100k R2=10k → scale factor ~12.1
-  int raw = analogRead(BATTERY_ADC);
-  return (raw / 4095.0f) * 3.3f * 12.1f;
+  // 11.1 V 3S pack (12.6 V full) -> 100k/10k divider -> 1.15 V max at the pin
+  return (analogReadMilliVolts(BATTERY_ADC) / 1000.0f) * BATTERY_DIVIDER_GAIN;
 }
 
 float readSolarVolts() {
-  // 6V solar panel → voltage divider R1=47k R2=10k → scale factor ~5.7
-  int raw = analogRead(SOLAR_ADC);
-  return (raw / 4095.0f) * 3.3f * 5.7f;
+  // 6 V solar panel (~7.5 V open circuit) -> 47k/10k divider -> 1.3 V max at the pin
+  return (analogReadMilliVolts(SOLAR_ADC) / 1000.0f) * SOLAR_DIVIDER_GAIN;
 }
 
 // ── TFLite inference stub ────────────────────────────────────────────────────

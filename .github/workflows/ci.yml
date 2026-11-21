@@ -191,6 +191,9 @@ jobs:
       - name: Build Chicken Tender firmware
         run: cd firmware/chicken-tender && pio run
 
+      - name: Chicken Tender MQ-137 ppm host tests (divider, Rs/R0, curve, battery gain)
+        run: make -C firmware/chicken-tender/test/host
+
       - name: Build Chicken Tender Starter firmware (XIAO ESP32-S3, both actuator tiers)
         run: cd firmware/chicken-tender-starter && pio run
 

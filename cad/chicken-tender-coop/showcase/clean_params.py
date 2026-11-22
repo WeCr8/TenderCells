@@ -1,12 +1,12 @@
 """Cleaning / egg ROUTINE parameters for the Plus/Pro ceiling gantry + inverted SO-101 (Zach 2026-11-22).
 
 Adds on top of sc_params (imported, never edited): the T6 slotted trowel, its dock slot, the safety-sensor
-set (PIR, extra reeds, load cells), routine timings and the bed keep-outs. Every value that is not in the
+set (PIR, extra reeds, nest load cells; roost load cells optional, default off), routine timings and the bed keep-outs. Every value that is not in the
 existing params or docs is marked  # ASSUMED.
 Frame: coop model mm (+X right, +Y toward the coop back, +Z up). Gantry joints = arm-base position.
 """
 from __future__ import annotations
-import copy
+import copy, os
 import sc_params as P
 
 # ------------------------------------------------------------------ T6 slotted trowel / scoop (tools_cad.py)
@@ -50,8 +50,15 @@ PIR = dict(part="AM312 mini PIR (3.3 V, digital out, ~2 s hold)", hold_s=2.0, z=
            pos=(P.COOP_W - 120.0, P.COOP_Y0 + 120.0))    # front-right upper corner, looking down + back  ASSUMED
 CAM_CLEAR_HOLD_S = 60.0       # camera person/bird detector must read "clear" this long
 SENSOR_STALE_S = 5.0          # any safety input older than this = fault (heartbeat)
+# Load cells (Zach 2026-11-22 "simplify"): NAU7802 I2C boards (24-bit, fixed addr 0x2A -> TCA9548A mux) on the WROOM
+# I2C bus. The 2 NEST cells stay (the EGG routine requires them). ROOST cells are OPTIONAL and OFF by default: the
+# camera (60 s clear hold) + AM312 PIR already cover presence on the roost. ROOST_LC=1 turns them back on.
+ROOST_LOADCELLS = os.environ.get("ROOST_LC", "0") not in ("0", "", "off", "no")
 LOADCELL = dict(roost_empty_kg=0.30, nest_empty_kg=0.15,   # hen ~1.8-3 kg; an egg ~0.06 (nest pad tare'd)  ASSUMED
-                hx711_sps=10, part="50 kg half-bridge load cell x4 + HX711 per roost; 5 kg bar cell + HX711 per nest box")
+                adc="NAU7802 I2C 24-bit load-cell ADC (one per cell, behind a TCA9548A I2C mux)", sps=10,
+                nest="5 kg bar cell + NAU7802, one per nest box (x2, required for EGG)",
+                roost="4 x 50 kg half-bridge cells + NAU7802 under the roost (optional, default OFF)",
+                n_adc=2 + (1 if ROOST_LOADCELLS else 0))
 REED_DEBOUNCE_S = 0.30        # reed must be stable this long to count as CLOSED
 DOOR_IDLE_MA = 80             # fw_sim Cfg.idleCurrent_mA: actuator current must be <= this (motor idle)
 

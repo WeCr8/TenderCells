@@ -41,8 +41,50 @@ def _posts():
     return S
 
 
-def fabric_rects():
-    """Chain-link fabric panels: (name, axis 'x'|'y' (plane normal), plane coord, (u0,u1), (z0,z1), node)."""
+def back_openings(cfg):
+    """(x0, x1, z0, z1) openings cut out of the under-coop BACK fabric: one per electronics-bay service hatch
+    (ebay.hatch_parts frame outline; the hatch carries its own 1/2 in hardware cloth) + the bed-cassette slot band
+    where it crosses the fabric plane. Fabric is cut and bound to the hatch frame with tension wire / hog rings."""
+    out = []
+    if cfg is None:
+        return out
+    try:
+        import ebay_params as EP, ebay as EB
+    except ImportError:
+        return out
+    if EP.EBAY:
+        for _, x0, x1 in EB.boxes(cfg):
+            out.append((x0 - EP.HATCH_PAD, x1 + EP.HATCH_PAD, EP.HATCH_Z[0], EP.HATCH_Z[1]))
+    if P.HOUSE == "gable" and P.SLOT["z0"] < back_fabric_top():      # cassette slides out above the fabric unless it dips into it
+        out.append((P.TRAY_X[0] - 20.0, P.TRAY_X[1] + 20.0, P.SLOT["z0"], P.SLOT["z1"]))
+    return out
+
+
+def back_fabric_top():
+    return P.UNDER_BACK_FABRIC_TOP if P.HOUSE == "gable" else P.FLOOR_FRAME_Z0 + 1 * P.IN
+
+
+def _cut_rect(nm, ax, c, u, z, node, holes):
+    """Split one fabric rect into solid pieces around rectangular holes (u = x along the back plane)."""
+    hs = sorted((max(h[0], u[0]), min(h[1], u[1]), max(h[2], z[0]), min(h[3], z[1])) for h in holes)
+    hs = [h for h in hs if h[1] > h[0] and h[3] > h[2]]
+    if not hs:
+        return [(nm, ax, c, u, z, node)]
+    zs = sorted({z[0], z[1], *[h[2] for h in hs], *[h[3] for h in hs]})
+    out = []
+    for za, zb in zip(zs, zs[1:]):
+        cuts = sorted((h[0], h[1]) for h in hs if h[2] <= za and h[3] >= zb)
+        ua = u[0]
+        for a, b in cuts + [(u[1], u[1])]:
+            if a - ua > 1.0:
+                out.append((f"{nm} [panel x{ua:.0f}-{a:.0f} z{za:.0f}-{zb:.0f}]", ax, c, (ua, a), (za, zb), node))
+            ua = max(ua, b)
+    return out
+
+
+def fabric_rects(cfg=None):
+    """Chain-link fabric panels: (name, axis 'x'|'y' (plane normal), plane coord, (u0,u1), (z0,z1), node).
+    With cfg the back under-coop panel is split around the bay hatch openings (back_openings)."""
     xo, xr = -P.CL_TERM_OD / 2 - 2, P.COOP_W + P.CL_TERM_OD / 2 + 2
     zt = P.CL_TOP_Z - 10
     yb = P.COOP_Y1 + P.PLY_WALL + P.CL_UNDER_OFF
@@ -52,7 +94,7 @@ def fabric_rects():
             ("right run wall", "x", xr - P.CL_PO, (P.CL_GATE_END_Y, P.CL_COOP_END_Y), (50.0, zt), "static"),
             ("under-coop left (11 in buried footer)", "x", xl_u, (P.CL_COOP_END_Y, yb), (zu0, zu1), "static"),
             ("under-coop right (11 in buried footer)", "x", xr_u, (P.CL_COOP_END_Y, yb), (zu0, zu1), "static"),
-            ("under-coop back (11 in buried footer)", "y", yb, (xl_u, xr_u), (zu0, P.UNDER_BACK_FABRIC_TOP if P.HOUSE == "gable" else zu1), "static")]
+            ] + _cut_rect("under-coop back (11 in buried footer)", "y", yb, (xl_u, xr_u), (zu0, back_fabric_top()), "static", back_openings(cfg))
 
 
 def gate_geom():
@@ -144,16 +186,17 @@ def roof_parts():
     return S
 
 
-def guard_rects():
+def guard_rects(cfg=None):
     """Predator layer over the lower chain-link (or full height for chicken wire if RUN_GUARD_H_IN=72)."""
     if P.RUN_GUARD == "none":
         return []
     h = P.RUN_GUARD_H
     out = []
-    for nm, ax, c, u, z, node in fabric_rects() + [gate_fabric_rect()]:
+    for nm, ax, c, u, z, node in fabric_rects(cfg) + [gate_fabric_rect()]:
         off = -4 if c < P.COOP_W / 2 else 4
         if nm.startswith("under-coop"):
-            out.append((f"{nm} guard", ax, c + off, u, (0.0, z[1]), node))
+            if z[1] > 0.0:
+                out.append((f"{nm} guard", ax, c + off, u, (max(0.0, z[0]), z[1]), node))
         else:
             out.append((f"{nm} guard", ax, c + (off if ax == "x" else -4), u, (z[0], min(z[0] + h, z[1])), node))
     return out
@@ -165,20 +208,20 @@ def rect_box(ax, c, u, z, t=2.0):
     return box(u[0], u[1], c - t / 2, c + t / 2, z[0], z[1])
 
 
-def fabric_parts():
+def fabric_parts(cfg=None):
     S = []
-    for nm, ax, c, u, z, node in fabric_rects() + [gate_fabric_rect()]:
+    for nm, ax, c, u, z, node in fabric_rects(cfg) + [gate_fabric_rect()]:
         S.append(SPart("CL-FAB", f"chain-link fabric 2 in mesh, {nm}", "chainlink", MESHSTEP if node == "static" else GATESTEP,
                        rect_box(ax, c, u, z, 3.0), node=node, bom="CL-FAB" if "under" not in nm else "CL-FAB36",
                        alpha=0.5, mesh_override=("chainlink", ax, c, u, z)))
     g = P.RUN_GUARD
-    for nm, ax, c, u, z, node in guard_rects():
+    for nm, ax, c, u, z, node in guard_rects(cfg):
         layer = "mesh" if g == "hardware_cloth_skirt" else "chickenwire"
         ref = "HC-SKIRT" if g == "hardware_cloth_skirt" else "CW-LAYER"
         S.append(SPart(ref, f"{'1/2 in hardware cloth skirt' if ref == 'HC-SKIRT' else '1 in chicken wire layer'}: {nm}", layer,
                        MESHSTEP if node == "static" else GATESTEP, rect_box(ax, c, u, z, 1.2), node=node, bom=ref, alpha=0.35))
     # tension bars + bands at fabric ends (drawn as bars), bottom tension wire
-    for nm, ax, c, u, z, node in fabric_rects():
+    for nm, ax, c, u, z, node in fabric_rects():          # tension bars at the real fabric ends only (uncut rects)
         for uu in u:
             p0 = (c, uu, z[0]) if ax == "x" else (uu, c, z[0]); p1 = (c, uu, z[1]) if ax == "x" else (uu, c, z[1])
             S.append(SPart("CL-TBAR", "tension bar + bands", "steel", MESHSTEP, cyl(p0, p1, 4.0), bom="CL-TBAR" if "under" not in nm else "CL-TBAR36"))
@@ -197,8 +240,8 @@ def fabric_parts():
     return S
 
 
-def run_parts():
-    return _posts() + gate_parts() + roof_parts() + fabric_parts()
+def run_parts(cfg=None):
+    return _posts() + gate_parts() + roof_parts() + fabric_parts(cfg)
 
 
 def chainlink_strips(ax, c, u, z, pitch=P.CL_MESH, wire=P.CL_WIRE):

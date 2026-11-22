@@ -77,7 +77,7 @@ def mass(W=None, BL=None):
 
 def dock_parts(cfg):
     """SParts for the scene (gantry configs only): T6 hanging in its fork + the right dock-rail extension.
-    Not wired into sc_model/gantry yet (those files are shared); append these where gantry.dock_parts() is used."""
+    Wired in by gantry.parts() (2026-11-22)."""
     from sc_model import SPart, box
     if cfg not in P.GANTRY_CFGS:
         return []

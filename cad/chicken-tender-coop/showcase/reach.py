@@ -78,19 +78,25 @@ def md(rep):
              "SO-101 reach = IK on the public URDF to the gripper frame with the approach within 35 deg of vertical; "
              "clearance = closest SO-101 mesh vertex (decimated URDF STLs) to each obstacle box. ASSUMED egg spread.")
     for cfg in ("plus", "pro"):
-        o = rep[cfg]
+        o = rep.get(cfg, {})
+        if "eggs" not in o:
+            continue
         n = sum(r["reached"] for r in o["eggs"])
         L += ["", f"## {cfg.title()} - SO-101 {'inverted under the hood' if cfg == 'plus' else 'inverted on a Y gantry'}: {n}/18 egg positions reached", "",
               "| egg | grasp err mm | tilt deg | min clearance mm (grasp) | worst obstacle | liner clearance mm | approach min clearance mm |", "|---|---:|---:|---:|---|---:|---:|"]
         for r in o["eggs"]:
             g, a = r["grasp"], r["approach"]
             L.append(f"| {r['egg']} | {g['err_mm']} | {g['tilt_deg']} | {g['min_clear_mm']} | {g['worst']} | {g['liner_clear_mm']} | {a['min_clear_mm']} |")
+        tr = o.get("traj")
+        if not tr:
+            L += ["", f"Pick-and-place sweep: not computed yet (run `python reach.py {cfg}_traj md`)."]
+            continue
         L += ["", f"Pick-and-place sweep for egg {arm.PICK} (joint-space interpolation, egg in the gripper while carried):", "",
               "| obstacle | min clearance mm | where |", "|---|---:|---|"]
-        for k, v in sorted(o["traj"]["min_clearance_mm_by_obstacle"].items(), key=lambda kv: kv[1]["mm"]):
+        for k, v in sorted(tr["min_clearance_mm_by_obstacle"].items(), key=lambda kv: kv[1]["mm"]):
             L.append(f"| {k} | {v['mm']} | {v['where']} |")
         L.append("")
-        L.append("Waypoints: " + ", ".join(f"{w['name']} err {w['err_mm']} mm / tilt {w['tilt_deg']} deg" for w in o["traj"]["waypoints"]))
+        L.append("Waypoints: " + ", ".join(f"{w['name']} err {w['err_mm']} mm / tilt {w['tilt_deg']} deg" for w in tr["waypoints"]))
     s = rep["starter"]
     L += ["", "## Starter - vacuum picker on a Y/Z rail", "",
           f"Y travel {s['y_travel_mm']} mm, Z stroke {s['z_stroke_mm']} mm. Flat pad: "
@@ -109,7 +115,7 @@ if __name__ == "__main__":
         if cfg == "starter":
             rep["starter"] = starter_option()
         elif cfg in ("plus", "pro"):
-            rep[cfg] = {"eggs": so101_option(cfg)}
+            rep.setdefault(cfg, {})["eggs"] = so101_option(cfg)      # keep an existing "traj" (was dropped -> KeyError in md)
         elif cfg in ("plus_traj", "pro_traj"):
             c = cfg.split("_")[0]
             rep.setdefault(c, {})["traj"] = so101_traj(c)

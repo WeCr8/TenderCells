@@ -309,11 +309,11 @@ PR stacked on #180). Boards: **Seeed XIAO ESP32-S3** door controller
 | Part | Where it mounts | Height / position | Why |
 |---|---|---|---|
 | **Control box** (XIAO door controller + DRV8874 + 5 V regulator; later the WROOM board in the same or a second box) | **Outside the back wall**, upper right, under the 6 in roof overhang | top of box at ~56 in above ground (back wall top is 60 in) | out of the ammonia and dust inside, dry under the eave, an adult can reach it, kids can see the lights |
-| **NC E-STOP** (22 mm mushroom, two NC contacts) | on the control box lid | same | push to stop the door motor in hardware |
+| **NC E-STOP** (22 mm mushroom, NC contacts only: 2 blocks Base/Starter, 3 Plus/Pro) | on the control box lid (under-coop bay builds: a 1-hole station on the back wall, 43 in) | same | push to stop the door motor in hardware |
 | **12 V Class 2 adapter** | outdoor GFCI outlet with an in-use cover | - | only low voltage reaches the coop |
 | **Door actuator** (12 V, 12 in stroke) | **inside, along the top of the front wall**, lying horizontally on a 2x4 mounting board screwed to the front posts, clevis pins at both ends | ~3 in below the front nailer C9 | cord from the rod end goes through a cord eye centered over the pop door, down to the door anchor; retracting lifts the door 11 in; the door falls closed by its own weight |
 | **Door reeds** (closed + open) | magnet on the pop door, one reed on the guide at the closed position, one at the open (11 in up) position | at the door | confirms the door really closed |
-| **Temp/humidity** (DHT20, and DHT22 for the Pro board) | inside, left side wall, mid-depth | 14 in above the floor (chicken height), away from the window draft | measures what the birds feel |
+| **Temp/humidity** (one DHT22, single-wire: XIAO D4 on Base/Starter, WROOM GPIO4 on Plus/Pro; the I2C DHT20 is no longer used) | inside, left side wall, mid-depth | 14 in above the floor (chicken height), away from the window draft | measures what the birds feel |
 | **MQ-137 ammonia** (Pro) | inside, left side wall, behind a small hardware-cloth cage | 12 in above the floor, at least 18 in from the roost (droppings) | ammonia builds up low, near the litter |
 | **Camera** (XIAO ESP32-S3 Sense, small box) | inside, front-left upper corner, aimed at the roost and pop door | ~6 in below the roof | headcount at night; a second camera outside the back wall can watch the run |
 | **Feeder** (gravity now, motor + load cell later) | in the run, under the coop, hung from the floor joist C3 | bottom at chicken back height (~8-10 in) | shaded, dry, out of the rain |

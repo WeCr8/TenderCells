@@ -305,7 +305,7 @@ def export(cfg, out_dir):
         if o["layer"] not in VISUAL_ONLY and o["layer"] != "chainlink":
             collider(msh.GetPrim(), "none")
     # chain-link colliders as thin boxes (visual strips above carry no collision)
-    for i, (nm, ax, c, u, z, node) in enumerate(RC.fabric_rects()):
+    for i, (nm, ax, c, u, z, node) in enumerate(RC.fabric_rects(cfg)):
         cube = UsdGeom.Cube.Define(stage, f"/World/Coop/Colliders/chainlink_{i}")
         sx, sy = (0.003, (u[1] - u[0]) * MM) if ax == "x" else ((u[1] - u[0]) * MM, 0.003)
         cx, cy = (c * MM, (u[0] + u[1]) / 2 * MM) if ax == "x" else ((u[0] + u[1]) / 2 * MM, c * MM)

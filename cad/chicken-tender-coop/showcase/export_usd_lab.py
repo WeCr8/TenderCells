@@ -104,7 +104,7 @@ def coop_lab_usd(cfg, out):
         msh = add_mesh(st, f"/Coop/s{o['step']:02d}_{o['layer']}_{k:03d}", V, o["F"], o["color"], o["alpha"], mats[key]); k += 1
         if o["layer"] not in VISUAL_ONLY and o["layer"] != "chainlink":
             collider(msh.GetPrim(), "none")
-    for i, (nm, ax, c, u, z, node) in enumerate(RC.fabric_rects()):
+    for i, (nm, ax, c, u, z, node) in enumerate(RC.fabric_rects(cfg)):
         cube = UsdGeom.Cube.Define(st, f"/Coop/Colliders/chainlink_{i}"); cube.CreateSizeAttr(1.0)
         sx, sy = (0.003, (u[1] - u[0]) * MM) if ax == "x" else ((u[1] - u[0]) * MM, 0.003)
         cx, cy = (c * MM, (u[0] + u[1]) / 2 * MM) if ax == "x" else ((u[0] + u[1]) / 2 * MM, c * MM)

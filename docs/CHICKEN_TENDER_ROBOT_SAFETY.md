@@ -10,7 +10,7 @@
 
 Before the robot moves, **all** of these must be true:
 
-1. **No hens inside.** The camera has seen no bird or person for a full minute. The motion sensor (PIR) is quiet. The scales under the roost and the nest boxes read empty.
+1. **No hens inside.** The camera has seen no bird or person for a full minute. The motion sensor (PIR) is quiet. The scales under the nest boxes read empty (a roost scale is optional and off by default).
 2. **The hens' pop door is shut.** The door sensor says closed, and the door motor is not running.
 3. **The red E-STOP button is out.** Push it and everything stops right away.
 4. **Every people door is shut.** That means the side service door, the back cleanout door and the egg-bay door.
@@ -45,7 +45,7 @@ If anything changes while it's working, it stops at once:
 |---|---|---|---|
 | a1 | Camera clear | XIAO Sense person/bird detector (CAM_Z), MQTT | Clear continuously for **≥ 60 s** (`CAM_CLEAR_HOLD_S`) |
 | a2 | PIR quiet | AM312 (new) | Not active. **Camera clear + PIR active = `sensor_disagree`, abort** |
-| a3 | Load cells (optional for CLEAN) | Roost ×1, nest ×2 | Roost < 0.30 kg, nest < 0.15 kg (**ASSUMED**; one egg is about 0.06 kg) |
+| a3 | Load cells | Nest ×2 (roost ×1 optional, **default OFF**: `clean_params.ROOST_LOADCELLS`, env `ROOST_LC=1`) | Nest < 0.15 kg; roost < 0.30 kg only when fitted (**ASSUMED**; one egg is about 0.06 kg). Camera + PIR already cover the roost |
 | a4 | Nest load cells (required for EGG) | Nest ×2 | Fitted **and** empty. If they are missing, the egg routine never starts |
 | b | Pop door closed | XIAO D8 REED_CLOSED, D9 REED_OPEN, DRV8874 current | Closed reed stable ≥ 0.3 s, open reed off, current ≤ 80 mA |
 | c | E-STOP | ESTOP_SENSE (XIAO D10, WROOM GPIO32) | High |
@@ -97,16 +97,16 @@ Any presence during the retreat switches it to Freeze. A retreat ends in STOPPED
 | RS-EGGBAY | Surface alarm reed contact, NC-when-home | 1 | Series relay-coil chain + MCP23017 | 3 **ASSUMED** |
 | RS-CLEANOUT | Same | 0–1 | Only if the service doors (SD2) are not built | 3 **ASSUMED** |
 | RS1B | Second pop-door closed reed | 1 | FluidNC `safety_door_pin` (local stop, independent of Wi-Fi) | 3 **ASSUMED** |
-| LC-ROOST | 4 × 50 kg half-bridge cells + amplifier | 1 set | See the load-cell ADC note below | 8 **ASSUMED** |
+| LC-ROOST | 4 × 50 kg half-bridge cells + NAU7802 (**optional, default OFF**) | 0 (1 set if fitted) | See the load-cell ADC note below | 0 (8 if fitted) **ASSUMED** |
 | LC-NEST | 5 kg bar cell + amplifier, one per box | 2 | Same | 12 **ASSUMED** |
-| LC-ADC | NAU7802 ×3 + TCA9548A I2C mux (preferred over HX711) | 1 | WROOM I2C GPIO21/22 | 15 **ASSUMED** |
+| LC-ADC | NAU7802 ×2 (nests; ×3 with the roost option) + TCA9548A I2C mux (all NAU7802 share address 0x2A) | 1 | WROOM I2C GPIO21/22 | 11 (15 with roost) **ASSUMED** |
 | RAIN1 | Rain plate (YL-83 class) on the run roof | 1 | MCP23017 (or use a weather API) | 3 **ASSUMED** |
 | WD1 | Retriggerable hardware watchdog (TPL5010 / 555 class) + coil-chain contact | 1 | Host GPIO pulse; drops the EB2 relay if the pulses stop | 4 **ASSUMED** |
 | T6 | Slotted trowel 150 × 80, PETG-CF print (~58 g), fork + rail extension | 1 | Dock x 824 | 4 **ASSUMED** |
 
-Safety additions total about **$57–60** (**ASSUMED**).
+Safety additions total about **$46–49** with the roost cells off (about $57–60 with them) (**ASSUMED**).
 
-**Load-cell ADC:** the WROOM has no safe free GPIOs left after the electronics-bay pin plan. HX711s would need 3 DOUT + SCK lines, so the I2C NAU7802 is used. If HX711 is preferred, put the three on a separate small MCU.
+**Load-cell ADC:** the WROOM has no safe free GPIOs left after the electronics-bay pin plan. HX711s would need 3 DOUT + SCK lines, so the I2C NAU7802 is used. If HX711 is preferred, put them on a separate small MCU.
 
 **Service-door reeds** RS-SD1 and RS-SD2 are in `service_params.py` (another workstream) and are not repeated here.
 

@@ -26,16 +26,16 @@ Hand-calcs only, nothing has been tested on hardware. **ASSUMED** marks any valu
 | EB2 → chase | 1 in PVC raceway under the pan, in front of the gearmotor (y 3458) | |
 | Cables inside the coop | Split loom up the front face of the back-left post (x 105), then forward under the left top plate at x 70 | Stays clear of the SD1 latch jack (x 0..38), the left Y motor (x 34..76), the SD1 window stud and the V1 fan (x 10..48); drops to the sensors just behind the actuator board |
 | E-STOP | 1-hole IP65 22 mm station on the back wall, left of SD2 (x 76, 43 in) | 41 mm clear of the SD2 skin. Its cable runs down the outside of the siding in 3/8 in liquid-tight flex (the corner cavity is full of SD1/SD2 kings), in under the siding's bottom edge, then behind the back-left post into EB1 |
-| In-coop sensors | DHT20, DHT22 and the MQ-137 cage moved to the back face of the front-left post (from `service_params.SENSOR_RELOCATE`) because SD1 took the left wall | |
+| In-coop sensors | The DHT22 (one per coop; the I2C DHT20 is dropped) and the MQ-137 cage moved to the back face of the front-left post (from `service_params.SENSOR_RELOCATE`) because SD1 took the left wall | |
 
 `python ebay.py` re-checks all of this for base/starter/plus/pro. It intersects the stowed **and** open bay with the gearmotor, pinion, pit pan and walls, slides, rack, cassette and slot flap. The result is **0 hits** in all four configs. A full-model sweep also found nothing hitting the service doors, studs, fan, gantry or posts; the only overlaps left are the intended bores (chase and cables through the floor ledge, cable sleeves through the skirt and hatch).
 
 ### What goes where (DIN rails, 2 per box)
 **EB1** (all tiers)
-- Upper rail: the printed PETG DIN carrier with the door controller (XIAO ESP32-S3, DRV8874 #4035 at a ~2.0 A limit, D36V6F5 5 V buck, 1N5817, 20 k VREF, 4.7 k pull-ups, TB1/TB2), the F1 3 A fuse holder, and terminal blocks (12 V / GND / 5 V buses, E-STOP loop, field terminals).
+- Upper rail: the printed PETG DIN carrier with the door controller (XIAO ESP32-S3, DRV8874 #4035 at a ~2.0 A limit, D36V6F5 5 V buck, 1N5817, 20 k VREF, 10 k DHT22 pull-up, TB1/TB2), the F1 3 A fuse holder, and terminal blocks (12 V / GND / 5 V buses, E-STOP loop, field terminals).
 - Lower rail, Plus/Pro: a carrier with the ESP32-WROOM-32 DevKit, the 15 k/12 k + 100 nF MQ-137 divider, the 5 V buck and the feeder DRV8874.
 - Lower rail, Starter: the picker's 2 x TMC2209 drivers and the pump MOSFET.
-- Bottom face: 3 x PG7 (actuator, reeds, DHT20 + camera), 1 x PG7 (E-STOP loop), an IP67 DC jack (PS1), and on Plus/Pro 2 x PG9 (MQ-137/DHT22/feeder, plus the EB1↔EB2 link). M12 breather at the lowest point.
+- Bottom face: 3 x PG7 (actuator, reeds, DHT22 + camera), 1 x PG7 (E-STOP loop), an IP67 DC jack (PS1), and on Plus/Pro 2 x PG9 (MQ-137/feeder/nest load cells, plus the EB1↔EB2 link). M12 breather at the lowest point.
 
 **EB2** (Plus/Pro)
 - Upper rail: 6-way blade fuse block (motor rail), motor-rail relay (30 A, coil wired through E-STOP NC block 3 and the service-door reeds in series), terminal blocks.
@@ -44,11 +44,10 @@ Hand-calcs only, nothing has been tested on hardware. **ASSUMED** marks any valu
 - The arm host (Pi 5 or Jetson) does **not** go in the bay (too much heat). It stays in the egg bay or indoors.
 
 ### Power (no mains in the bay)
-- PS1 is the 12 V 3 A Class 2 adapter (PR #188). It runs the door and sensors on all tiers.
+- PS1 is the 12 V 3 A Class 2 adapter (PR #188). It runs the door and sensors on Base and Plus/Pro. **Starter uses a 12 V 5 A Class 2 PS1** because the picker runs from the same rail.
 - PS2 is a **12 V 8 A (96 W) Class 2** adapter for the motor rail on Plus/Pro (**ASSUMED**). The Class 2 limit is 100 VA at 12 V.
 - Both bricks sit in the outlet's in-use cover. Their leads run along the ground and through a sleeve in the hatch frame, with a drip loop up into the box bottom.
 - 12 V peak if every load ran at once is about 10.6 A. The firmware never runs the gantry and the cassette together, which brings it to about 8 A.
-- Starter with the picker should upsize PS1 to 12 V 5 A Class 2.
 
 ## Service: swap a board in under 5 minutes, no tools
 1. In the app, send the gantry to `SERVICE_POSE`. Then **press the E-STOP** at the back station: the motor rail drops in hardware. (0:30)
@@ -106,9 +105,9 @@ Bay total, estimated: about **$245 for Base/Starter** and **$560 for Plus/Pro** 
 | Bed temperature DS18B20 (1-wire, 4.7 k) | GPIO16 |
 | Gantry controller UART | GPIO17 TX / GPIO39 RX (or a second I2C/UART pair) |
 
-Before wiring any of this, merge PR #188's fix 818cf10 (stepper ENABLE moved off GPIO12 to GPIO33, NC E-STOP sense on GPIO32). This branch's `firmware/chicken-tender/src/main.cpp` still has `PIN_STEPPER_ENABLE 12` and no E-STOP input.
+Firmware fix 818cf10 is now cherry-picked onto this branch (2026-11-22): stepper ENABLE is on GPIO33 (off the GPIO12 strapping pin) and the NC E-STOP sense is on GPIO32 (`CT_ESTOP_INPUT=1`). The TB6600 cleaning stepper is not fitted on gantry coops, so GPIO14/27 are free for bay I/O.
 
 ## Open items
-- `run_chainlink.py` still draws the back under-coop fabric solid across the two hatch openings. It needs a cut-out there, with the fabric bound to the hatch frame.
-- Harness lengths grow with the bay: reeds about 4.5-4.8 m, actuator 3.3 m, DHT20 and MQ-137 about 3.8 m (the sensors moved to the front-left post for SD1), camera 2.9 m. Update `len_mm` for W13/W14/W18/W19/W20 in the hw.yaml. The DHT20 I2C run is over 3 m: drop the bus to 50 kHz or add a P82B715 extender.
+- Done 2026-11-22: `run_chainlink.py` cuts the back under-coop fabric at each hatch opening (fabric bound to the hatch frame); `python ebay.py` now also reports any fabric drawn over an opening (0 in all tiers). The cassette slot (z 475-772) is above the back fabric top (z 430), so no cut is needed there.
+- Harness `len_mm` (routed, rounded up): W13/W14 3200, W18 4800, W19 4500, W20 3900 (DHT22), MQ-137 3800, camera ~2.9 m (`ebay_params.HARNESS_LEN_MM`). The PR #188 hw.yaml still has the old 1500/1200/100 values: copy these there. The DHT20 is dropped, so there is no long I2C run.
 - Pick and verify the real enclosure, motion controller and PS2 listings, then re-run `python ebay.py`.

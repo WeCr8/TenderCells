@@ -359,7 +359,7 @@ def _legacy_ctrl_box(cfg):
              ("U2", "Pololu D36V6F5 5 V buck (#3792)", (13, 10, 3), (xb - 30, zt - 80)),
              ("D1", "1N5817 Schottky", (5, 3, 3), (xb - 5, zt - 80)),
              ("R1", "20 k VREF resistor", (6, 2.5, 2.5), (xb + 12, zt - 80)),
-             ("R2 R3", "4.7 k I2C pull-ups", (6, 5, 2.5), (xb + 28, zt - 80)),
+             ("R2", "10 k DHT22 data pull-up", (6, 5, 2.5), (xb + 28, zt - 80)),
              ("TB1 TB2", "5.08 mm terminals (12 V in, motor out)", (20, 8, 10), (xb + 20, zt - 120)),
              ("F1", "inline 3 A blade fuse", (12, 30, 8), (xb - 30, zt - 125))]
     for ref, nm, (a, b, c), (x, z) in comps:
@@ -401,16 +401,20 @@ def _field_parts(cfg):
     S.append(SPart("OUTLET", "outdoor GFCI outlet + in-use cover on a post (ASSUMED location)", "hood", 9,
                    box(ox - 60, ox + 60, oy - 40, oy + 40, oz - 80, oz + 80), bom="OUTLET"))
     S.append(SPart("POST", "outlet post", "pt_lumber", 9, box(ox - 44, ox + 44, oy + 40, oy + 128, 0, oz + 150), bom="OUTLET"))
-    S.append(SPart("PS1", "12 V 3 A Class 2 wall adapter", "dark", 9, box(ox - 30, ox + 30, oy - 75, oy - 40, oz - 40, oz + 40), bom="PS1"))
-    # inside sensors (guide section 7)
+    import ebay_params as EP
+    S.append(SPart("PS1", EP.PS1_BY_CFG.get(cfg, "12 V 3 A Class 2 wall adapter"), "dark", 9, box(ox - 30, ox + 30, oy - 75, oy - 40, oz - 40, oz + 40),
+                   configs=(cfg,), bom="PS1"))
+    # inside sensors (guide section 7). ONE DHT22 (single-wire, fine on the ~3.8 m run) per coop: on the XIAO D4 (Base/Starter)
+    # or the WROOM GPIO4 (Plus/Pro). The I2C DHT20 is dropped (2026-11-22): I2C does not like a 3.8 m cable.
+    board = "WROOM GPIO4" if cfg in ("plus", "pro") else "XIAO D4"
     SR = sensor_spots()
     if SR:   # service door SD1 took the left wall: sensors move to the back face of the front-left post (service_params)
-        a = SR["S1 DHT20"]
-        S.append(SPart("S1", "DHT20 temp/humidity (Adafruit 5183), back face of the front-left post, 14 in above floor", "pcb", 9,
-                       box(*a["x"], *a["y"], a["z"] - 12, a["z"] + 12), bom="S1"))
+        a = SR["S1 DHT22"]
+        S.append(SPart("S1", f"DHT22 / AM2302 temp/humidity ({board}), back face of the front-left post, 14 in above floor", "pcb", 9,
+                       box(*a["x"], *a["y"], a["z"] - 15, a["z"] + 15), configs=(cfg,), bom="S1"))
     else:
-        S.append(SPart("S1", "DHT20 temp/humidity (Adafruit 5183), left wall, 14 in above floor", "pcb", 9,
-                       box(0, 6, (P.COOP_Y0 + P.COOP_Y1) / 2 - 12, (P.COOP_Y0 + P.COOP_Y1) / 2 + 12, P.DHT_Z - 12, P.DHT_Z + 12), bom="S1"))
+        S.append(SPart("S1", f"DHT22 / AM2302 temp/humidity ({board}), left wall, 14 in above floor", "pcb", 9,
+                       box(0, 8, (P.COOP_Y0 + P.COOP_Y1) / 2 - 12, (P.COOP_Y0 + P.COOP_Y1) / 2 + 13, P.DHT_Z - 15, P.DHT_Z + 15), configs=(cfg,), bom="S1"))
     cam_y = P.COOP_Y0 + 230
     S.append(SPart("CAM", "XIAO ESP32-S3 Sense camera node (small box), front-left upper corner", "box", 9,
                    box(0, 40, cam_y - 25, cam_y + 25, P.CAM_Z - 25, P.CAM_Z + 25), bom="CAM"))
@@ -419,16 +423,12 @@ def _field_parts(cfg):
         # Pro-board sensors: shown on the robot configs (the doc calls them the Pro add-on); WROOM board itself sits
         # in the under-coop bay EB1 (ebay.py) or, with EBAY=0, in the legacy second box (_legacy_ctrl_box)
         if SR:
-            a, b = SR["MQ137 cage"], SR["DHT22"]
+            a = SR["MQ137 cage"]
             S.append(SPart("MQ137", "MQ-137 ammonia module in a hardware-cloth cage, front-left post, 12 in above floor", "metal", 9,
                            box(*a["x"], *a["y"], a["z"] - 30, a["z"] + 30), configs=(cfg,), bom="MQ137", alpha=0.6))
-            S.append(SPart("DHT22", "DHT22 (Pro board), next to the DHT20 on the front-left post", "pcb", 9,
-                           box(*b["x"], *b["y"], b["z"] - 15, b["z"] + 15), configs=(cfg,), bom="DHT22"))
         else:
             S.append(SPart("MQ137", "MQ-137 ammonia module in a hardware-cloth cage, left wall 12 in above floor", "metal", 9,
                            box(0, 35, P.MQ_Y - 30, P.MQ_Y + 30, P.MQ_Z - 30, P.MQ_Z + 30), configs=(cfg,), bom="MQ137", alpha=0.6))
-            S.append(SPart("DHT22", "DHT22 (Pro board), next to the DHT20", "pcb", 9,
-                           box(0, 8, (P.COOP_Y0 + P.COOP_Y1) / 2 + 30, (P.COOP_Y0 + P.COOP_Y1) / 2 + 55, P.DHT_Z - 15, P.DHT_Z + 15), configs=(cfg,), bom="DHT22"))
     # gravity feeder hung from joist C3 (guide: under the coop, bottom ~8-10 in)
     if P.HOUSE == "gable":    # the bed pit replaced joist C3: feeder re-hung in the run in front of the coop, from the run roof truss
         fx, fy = P.FEEDER_MOVED
@@ -484,9 +484,9 @@ def cable_routes(cfg):
         yb_ = P.MOUNT_BOARD_Y0 + P.T2 + 8.0    # drop just behind the actuator mounting board, jog onto the post face at sensor height
         return [(xr, yf, zC10(yf)), (xr, yb_, zC10(yf)), (xr, yb_, a["z"] + dz), (xs, yb_, a["z"] + dz), (xs, ys, a["z"] + dz)]
     if SR:
-        R["W20 DHT20 sensor cable"] = trunk(xb + 35)[:nh] + post_drop("S1 DHT20", 12)
+        R["W20 DHT22 sensor cable"] = trunk(xb + 35)[:nh] + post_drop("S1 DHT22", 12)
     else:
-        R["W20 DHT20 sensor cable"] = trunk(xb + 35)[:nh] + [(xr, ym, zC10(ym)), (xr, ym, P.DHT_Z + 12)]
+        R["W20 DHT22 sensor cable"] = trunk(xb + 35)[:nh] + [(xr, ym, zC10(ym)), (xr, ym, P.DHT_Z + 12)]
     cam_y = P.COOP_Y0 + 230
     R["camera power (gland 3)"] = trunk(xb + 35)[:nh] + [(xr, cam_y + 30, zC10(cam_y + 30)), (xr, cam_y + 30, P.CAM_Z + 25)]
     ox, oy, oz = P.OUTLET_POS
@@ -499,7 +499,7 @@ def cable_routes(cfg):
         # out of the station bottom, down the OUTSIDE of the back siding in 3/8 in liquid-tight flex (the corner cavity is full of
         # SD1/SD2 kings + jacks), in under the siding's bottom edge (z 437), behind the back-left post, drip loop, up into the EB1 PG7
         zin = P.PIT_BOTTOM - 12
-        R["E-STOP loop (3 NC blocks)"] = [(es["x"], yb + 8, es["z"] - 40), (es["x"], yb + 8, zin), (es["x"], P.COOP_Y1 - 18, zin),
+        R[f"E-STOP loop ({EP.ESTOP_NC_BLOCKS_BY_CFG.get(cfg, 2)} NC blocks)"] = [(es["x"], yb + 8, es["z"] - 40), (es["x"], yb + 8, zin), (es["x"], P.COOP_Y1 - 18, zin),
                                          (es["x"], P.COOP_Y1 - 18, EP.DRIP_LOOP_LOW_Z),
                                          (EB.gland_xy("EB1", cfg, 3)[0], EB.gland_xy("EB1", cfg, 3)[1], EP.DRIP_LOOP_LOW_Z),
                                          (EB.gland_xy("EB1", cfg, 3)[0], EB.gland_xy("EB1", cfg, 3)[1], EP.EB_Z0 - 18)]
@@ -556,7 +556,7 @@ def hen_parts():
 # ------------------------------------------------------------------------------ assemble
 def parts(cfg):
     import run_chainlink as RC
-    out = (coop_structure() + RC.run_parts() + door_parts() + door_mechanism() + cord_parts() + nest_parts() + egg_parts()
+    out = (coop_structure() + RC.run_parts(cfg) + door_parts() + door_mechanism() + cord_parts() + nest_parts() + egg_parts()
            + basket_parts(cfg) + hood_parts(cfg) + electronics_parts(cfg) + cable_parts(cfg) + hen_parts())
     if P.HOUSE == "gable":
         import house as Hs

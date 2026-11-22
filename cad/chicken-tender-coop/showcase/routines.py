@@ -6,7 +6,8 @@ machine and a time-stepped simulator (no hardware). Zach 2026-11-22.
 
 Hard rule: NO gantry / arm motion starts or continues unless EVERY permissive is true:
   (a) no chicken: camera person/bird detector (coop XIAO Sense cam at CAM_Z) "clear" continuously >= 60 s
-      AND PIR (AM312) quiet AND (optional) roost/nest load cells under threshold. Camera clear but PIR active
+      AND PIR (AM312) quiet AND nest load cells under threshold (roost load cells optional, default OFF:
+      C.ROOST_LOADCELLS; when fitted they must also read empty). Camera clear but PIR active
       = SENSOR DISAGREE = abort (never trust the camera alone).
   (b) pop door CLOSED: REED_CLOSED stable >= debounce, REED_OPEN off, door actuator current idle.
   (c) E-STOP loop closed (ESTOP_SENSE high).
@@ -87,7 +88,7 @@ class Inputs:
     t: float = 0.0
     cam_clear: bool = True;  cam_ts: float = 0.0        # XIAO Sense person/bird detector (MQTT)
     pir_active: bool = False; pir_ts: float = 0.0       # AM312 (MCP23017 + FluidNC feed-hold)
-    roost_kg: float | None = 0.0; nest_kg: tuple | None = (0.0, 0.0); lc_ts: float = 0.0   # HX711 load cells (None = not fitted)
+    roost_kg: float | None = None; nest_kg: tuple | None = (0.0, 0.0); lc_ts: float = 0.0   # NAU7802 load cells (None = not fitted; roost default OFF)
     reed_closed: bool = True; reed_open: bool = False; door_mA: int = 0; door_ts: float = 0.0   # XIAO door controller
     estop_ok: bool = True                               # ESTOP_SENSE high (NC loop closed)
     doors: dict = field(default_factory=dict)           # person-door reed id -> closed? (missing id = OPEN)
@@ -160,7 +161,10 @@ class Interlocks:
         # (a) presence
         fresh_cam = now - i.cam_ts <= C.SENSOR_STALE_S
         fresh_pir = now - i.pir_ts <= C.SENSOR_STALE_S
-        lc_fitted = i.roost_kg is not None or i.nest_kg is not None
+        roost_kg = i.roost_kg if C.ROOST_LOADCELLS else None   # roost cells optional (default OFF): reading ignored when not fitted
+        if C.ROOST_LOADCELLS and i.roost_kg is None:
+            v.add("presence_stale")              # configured as fitted but no reading = sensor fault
+        lc_fitted = roost_kg is not None or i.nest_kg is not None
         fresh_lc = (not lc_fitted) or now - i.lc_ts <= C.SENSOR_STALE_S
         if not (fresh_cam and fresh_pir and fresh_lc):
             v.add("presence_stale")
@@ -177,7 +181,7 @@ class Interlocks:
             v.add("sensor_disagree")
         if self.cam_clear_since is None or now - self.cam_clear_since < C.CAM_CLEAR_HOLD_S:
             v.add("cam_hold")                    # permissive only (not a mid-routine fault by itself)
-        if i.roost_kg is not None and i.roost_kg > C.LOADCELL["roost_empty_kg"]:
+        if roost_kg is not None and roost_kg > C.LOADCELL["roost_empty_kg"]:
             v.add("presence_roost_load")
         if routine == "egg":
             if i.nest_kg is None:

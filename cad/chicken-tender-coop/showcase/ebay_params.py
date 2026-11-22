@@ -72,10 +72,18 @@ DRIP_LOOP_LOW_Z = 110.0                            # lowest cable point between 
 ESTOP_STATION = dict(x=76.0, z=43 * IN, size=(72.0, 72.0, 85.0))   # 1-hole IP65 22 mm station on the back wall strip
                                                                    # left of SD2 (skin starts x 153), 43 in, ASSUMED;
                                                                    # cable drops outside the siding in 3/8 in liquid-tight flex
-ESTOP_NC_BLOCKS = 3                                # 1: XIAO DRV8874 SLEEP, 2: WROOM GPIO32, 3: EB2 motor-rail relay coil
+# NC contact blocks behind the one 22 mm head (Zach 2026-11-22): every block is NC (fail-safe; a cut wire = stop).
+# Plus/Pro 3: 1 XIAO DRV8874 SLEEP, 2 WROOM GPIO32 sense, 3 EB2 motor-rail relay coil (hardware cut of every motor).
+# Base/Starter 2: 1 XIAO DRV8874 SLEEP, 2 Starter picker TMC2209 EN (Base: spare, pre-wired for the upgrade).
+ESTOP_NC_BLOCKS_BY_CFG = {"base": 2, "starter": 2, "plus": 3, "pro": 3}
+ESTOP_NC_BLOCKS = max(ESTOP_NC_BLOCKS_BY_CFG.values())   # max over tiers (kept for older callers)
 
 # ---------------------------------------------------------------- power (no mains in the bay)
-PS_LOGIC = "12 V 3 A Class 2 adapter (PS1, PR #188) - door + sensors, all tiers"
+PS_LOGIC = "12 V 3 A Class 2 adapter (PS1, PR #188) - door + sensors, all tiers"   # Base; Starter upsizes to 5 A (picker)
+PS1_BY_CFG = {"base": "12 V 3 A (36 W) Class 2 adapter (PS1): door + sensors",
+              "starter": "12 V 5 A (60 W) Class 2 adapter (PS1, upsized): door + sensors + picker motors/vacuum pump",
+              "plus": "12 V 3 A (36 W) Class 2 adapter (PS1): door + sensors (logic rail)",
+              "pro": "12 V 3 A (36 W) Class 2 adapter (PS1): door + sensors (logic rail)"}   # ASSUMED sizes
 PS_MOTOR = "12 V 8 A (96 W) Class 2 adapter (PS2) - motor rail, Plus/Pro"   # ASSUMED; Class 2 caps 100 VA at 12 V
 POWER_BUDGET_A = {   # 12 V peak per load, ASSUMED/listing values; firmware never runs gantry + cassette together
     "door actuator (DRV8874 limit)": 2.0, "XIAO + WROOM + MQ-137 heater (via bucks)": 0.45,
@@ -87,3 +95,15 @@ HEAT_W = {"bucks + drivers idle": 1.5, "TMC2209 x4 moving": 4.0, "G2 18v17 at 1.
           "XIAO + WROOM Wi-Fi": 1.2}   # W, ASSUMED
 
 # colours: ebay.py uses the existing COLORS / COLORS_SC layer keys only (box, hood, metal, rail, pcb, dark, estop, mesh, pt_lumber)
+
+# ---------------------------------------------------------------- harness buy lengths (Zach 2026-11-22)
+# len_mm = routed length from EB1's bottom glands (sc_model.route_lengths, worst tier) rounded UP to the next 100 mm.
+# These replace the PR #188 hw.yaml values (W13/W14 1500, W18/W19 1200, W20 100), which assumed a box on the back wall.
+HARNESS_LEN_MM = {
+    "W13": (3200, "W13/W14 actuator cable", "actuator +, 20 AWG (~0.4 V drop at 2 A)"),
+    "W14": (3200, "W13/W14 actuator cable", "actuator -, 20 AWG"),
+    "W18": (4800, "W18 door-closed reed", "reed RS1, 26 AWG (buy 5 m-lead reeds or splice in the LB)"),
+    "W19": (4500, "W19 door-open reed", "reed RS2, 26 AWG"),
+    "W20": (3900, "W20 DHT22 sensor cable", "DHT22 3-core (3V3/GND/data), XIAO D4 (Base/Starter) or WROOM GPIO4 (Plus/Pro)"),
+    "W-MQ137": (3800, "MQ-137 cable (WROOM)", "MQ-137 4-core, Plus/Pro"),
+}

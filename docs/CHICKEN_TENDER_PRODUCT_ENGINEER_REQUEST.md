@@ -30,7 +30,7 @@ and a hobby 3D printer.
 | D1 | MOT_PH | DRV8874 PH/IN2 (HIGH = retract = open) |
 | D2 | DRV_nFAULT | DRV8874 nFAULT (pull-up) |
 | D3 | DRV_CS | DRV8874 CS (~1.1 V/A) |
-| D4 / D5 | I2C SDA / SCL | DHT20 (4.7 k pull-ups to 3V3) |
+| D4 | DHT_DATA | DHT22 / AM2302 single-wire (10 k pull-up to 3V3); D5 spare. The I2C DHT20 was dropped 2026-11-22 (I2C is unreliable on the ~3.8 m run) |
 | D6 | spare | (toggles at boot - not a motor input) |
 | D7 | DRV_EN_RAW | NC E-STOP contact 1 -> DRV8874 SLEEP |
 | D8 | REED_CLOSED | door-closed reed to GND |
@@ -75,7 +75,7 @@ top 60 in, walls 15/32 in plywood on 2x4 corner posts (1.5 x 3.5 in), 2x2 top na
   openings on top; rain lip on the lid; drip loop clearance.
 - Rated IP54 or better; PETG/ASA (UV) for printing; M3 heat-set inserts (BOM uses CNC Kitchen /
   Ruthex M3 standard, L 5.7, OD 4.6).
-- Separate small sensor housings for inside the coop: DHT20/DHT22 and MQ-137 (vented, with a
+- Separate small sensor housings for inside the coop: DHT22 and MQ-137 (vented, with a
   1/2 in hardware-cloth guard; the MQ-137 heater makes the sensor cap hot - keep plastic clear of it),
   mounted on the left side wall 12-14 in above the coop floor.
 

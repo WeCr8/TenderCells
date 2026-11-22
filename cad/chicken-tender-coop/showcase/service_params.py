@@ -96,7 +96,6 @@ SERVICE_POSE = (CW / 2, Y1 - 2 * T2 - 120.0, P.GZ_TOP)   # mast at the back, bas
 # which is now the SD1 opening. New home: the inner (back) face of the FRONT-LEFT post, same heights
 # (already applied in sc_model.electronics_parts by the 2026-11-22 e-bay change; kept here as the reference).
 SENSOR_RELOCATE = {
-    "S1 DHT20": dict(x=(48.0, 72.0), y=(Y0 + 2 * T2, Y0 + 2 * T2 + 6.0), z=P.DHT_Z),
-    "DHT22": dict(x=(80.0, 105.0), y=(Y0 + 2 * T2, Y0 + 2 * T2 + 8.0), z=P.DHT_Z),
+    "S1 DHT22": dict(x=(80.0, 105.0), y=(Y0 + 2 * T2, Y0 + 2 * T2 + 8.0), z=P.DHT_Z),   # one DHT22 per coop (DHT20 dropped 2026-11-22)
     "MQ137 cage": dict(x=(45.0, 105.0), y=(Y0 + 2 * T2, Y0 + 2 * T2 + 35.0), z=P.MQ_Z),
 }

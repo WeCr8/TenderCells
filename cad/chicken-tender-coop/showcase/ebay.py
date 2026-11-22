@@ -97,7 +97,7 @@ def _contents(bid, x0, x1, cfg, c, yp):
                                            ("U2", "Pololu D36V6F5 5 V buck (#3792)", (13, 10, 3), -38, 12),
                                            ("D1", "1N5817 Schottky", (5, 3, 3), -22, 12),
                                            ("R1", "20 k VREF resistor", (6, 2.5, 2.5), -95, -14),
-                                           ("R2 R3", "4.7 k I2C pull-ups", (6, 5, 2.5), -80, -14),
+                                           ("R2", "10 k DHT22 data pull-up (Base/Starter; omit if the breakout has one)", (6, 5, 2.5), -80, -14),
                                            ("TB1 TB2", "5.08 mm terminals (12 V in, motor out)", (20, 8, 10), -55, -14)):
             S.append(SPart(ref, nm, "pcb", STEP, box(xm + dx - a / 2, xm + dx + a / 2, yc - t, yc, r2 + dz - b / 2, r2 + dz + b / 2), configs=c, bom=ref))
         m("F1", "3 A blade fuse in a DIN fuse holder (logic rail)", "F1", c, xm + 40, r2, (18, 60, 55), layer="dark")
@@ -130,10 +130,10 @@ def _bottom(bid, x0, x1, cfg, c):
     S = []
     if bid == "EB1":
         ent = [("GLAND", "PG7 gland: actuator W13/W14", 7.5), ("GLAND", "PG7 gland: door reeds W18/W19", 7.5),
-               ("GLAND", "PG7 gland: DHT20 W20 + camera 5 V", 7.5), ("EB-GLAND", "PG7 gland: E-STOP loop (4-core)", 7.5),
+               ("GLAND", "PG7 gland: DHT22 W20 + camera 5 V", 7.5), ("EB-GLAND", "PG7 gland: E-STOP loop (4-core)", 7.5),
                ("J1", "IP67 panel DC jack: PS1 12 V logic lead", 8.0)]
         if cfg in ("plus", "pro"):
-            ent += [("EB-GLAND", "PG9 multi-hole gland: MQ-137 + DHT22 + feeder", 9.0), ("EB-GLAND", "PG9 gland: EB1 <-> EB2 link (5 V, I2C/UART, E-STOP sense)", 9.0)]
+            ent += [("EB-GLAND", "PG9 multi-hole gland: MQ-137 + feeder + nest load cells", 9.0), ("EB-GLAND", "PG9 gland: EB1 <-> EB2 link (5 V, I2C/UART, E-STOP sense)", 9.0)]
     else:
         ent = [("EB-GLAND", "PG13.5 gland: PS2 12 V 8 A motor-rail lead", 11.0), ("EB-GLAND", "PG9 multi-hole: gantry motor + home-switch bundle", 9.0),
                ("EB-GLAND", "PG9 gland: cassette gearmotor + encoder", 9.0), ("EB-GLAND", "PG9 gland: cassette limits x3 + slot-flap switch", 9.0),
@@ -205,7 +205,7 @@ def estop_parts(cfg):
     yb = P.COOP_Y1 + P.PLY_WALL
     return [SPart("EB-ESTOP", "E-STOP station: 1-hole IP65 22 mm box on the back wall (left of the cleanout), 43 in high", "box", STEP,
                   box(x - w / 2, x + w / 2, yb, yb + d, z - h / 2, z + h / 2), bom="EB-ESTOP", alpha=0.6),
-            SPart("SW1", "22 mm mushroom E-STOP head (twist release) + 3 NC contact blocks", "estop", STEP,
+            SPart("SW1", f"22 mm mushroom E-STOP head (twist release) + {EP.ESTOP_NC_BLOCKS_BY_CFG.get(cfg, 2)} NC contact blocks", "estop", STEP,
                   cyl((x, yb + d, z), (x, yb + d + 35, z), 20), bom="SW1"),
             SPart("EB-ESTOP", "E-STOP cable in 3/8 in liquid-tight flex down the outside of the back siding (in under its bottom edge)", "dark", STEP,
                   cyl((x, yb + 8, z - h / 2), (x, yb + 8, P.UNDER_BACK_FABRIC_TOP + 10), 7.0), bom="EB-ESTOP")]
@@ -300,6 +300,17 @@ def check(cfg):
         out["x_gap_to_gearmotor_mm"] = round(min(abs(mb[0] - EP.EB1_X[1]), abs(EP.EB2_X[0] - mb[1]) if cfg in EP.EB2_CFGS else 9e9), 1)
     out["chase_to_drop_board_y_mm"] = round(EP.CHASE_Y - EP.CHASE_OD / 2 - P.DROP_BOARD["y1"], 1)
     out["chase_to_post_y_mm"] = round((P.COOP_Y1 - 2 * P.T2) - (EP.CHASE_Y + EP.CHASE_OD / 2), 1)
+    # chain-link fabric must be cut at every hatch / cassette-slot opening (run_chainlink.back_openings)
+    import run_chainlink as RC
+    ops = RC.back_openings(cfg)
+    for nm, ax, c, u, z, node in RC.fabric_rects(cfg):
+        if ax != "y" or abs(c - EP.HATCH_Y) > 1.0:
+            continue
+        for o in ops:
+            du, dz = min(u[1], o[1]) - max(u[0], o[0]), min(z[1], o[3]) - max(z[0], o[2])
+            if du > 1.0 and dz > 1.0:
+                hits.append(f"fabric: {nm} drawn solid over opening x{o[0]:.0f}-{o[1]:.0f} z{o[2]:.0f}-{o[3]:.0f}")
+    out["back_fabric_openings"] = [[round(v) for v in o] for o in ops]
     out["hits"] = hits
     return out
 

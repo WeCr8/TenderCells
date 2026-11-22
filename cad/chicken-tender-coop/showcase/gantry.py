@@ -78,6 +78,8 @@ def parts(cfg):
         S.append(SPart("M1", "tiller spiral tine (stainless, 90 mm)", "metal", STEP, cyl(p0 + [10, 0, 0], p1, 4), node="tiller", configs=c, bom="TILLER"))
     S.append(SPart("M1", "tiller shaft", "metal", STEP, cyl((hx + 90, my, PZ), (hx + 270, my, PZ), 6), node="tiller", configs=c, bom="TILLER"))
     S += dock_parts(cfg)
+    import tools_cad                       # T6 slotted trowel + its fork + the right dock-rail extension (2026-11-22)
+    S += tools_cad.dock_parts(cfg)
     return S
 
 

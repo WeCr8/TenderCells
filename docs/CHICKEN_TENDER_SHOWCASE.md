@@ -131,28 +131,30 @@ Egg grid: 3 x 3 per box at -80/0/+80 mm (18 slots, **ASSUMED**). The SO-101 is c
 - Every part is placed and labelled in the model with its enclosure and cable runs. Full list in `bom_check.csv`.
 - Control box (XIAO ESP32-S3, DRV8874, D36V6F5, 1N5817, R1-R3, TB1/TB2, F1): outside the back wall, with NC E-STOP on the lid, J1 underneath, and 3 x PG7 glands below.
 - Cable route: up the back-left post, under C10, then along C9.
-- Sensors on the left wall:
-  - DHT20 at 14 in.
-  - MQ-137 caged at 12 in, ≥ 18 in from the roost.
-  - DHT22 alongside, for the Pro board.
+- Sensors (back face of the front-left post since SD1 took the left wall):
+  - One DHT22 at 14 in (XIAO D4 on Base/Starter, WROOM GPIO4 on Plus/Pro). The I2C DHT20 is dropped.
+  - MQ-137 caged at 12 in, ≥ 18 in from the roost (Plus/Pro).
 - XIAO Sense camera node in the front-left upper corner.
 - WROOM box with the 15 k/12 k + 100 nF divider and the 5 V buck (Plus/Pro models).
-- 12 V Class 2 adapter at a GFCI outlet (location **ASSUMED**).
+- 12 V Class 2 adapters at a GFCI outlet (location **ASSUMED**): PS1 12 V 3 A (Base, Plus/Pro logic) or 12 V 5 A (Starter, with the picker); PS2 12 V 8 A motor rail on Plus/Pro.
 - Feeder hung from C3.
 
-## BOM cross-check: findings (full table: `reports/CT_COOP_A_showcase_bom_check.csv`, 76 rows)
-**MISMATCH (7)**
-1. SW1: 1 NC contact in the BOM vs 2 NC contacts in the guide.
-2. Cord: 1 m in the BOM vs 1.47 m needed.
-3. Harness lengths: reeds need about 3.0-3.3 m (doc says 1.2 m), the actuator 1.8 m (doc 1.5 m), the DHT 1.6 m (doc 1.2 m).
-4. The control box with its top at 56 in collides with the cleanout door's height band. It only fits in the 6 in strip beside the door, 130 mm wide max.
-5. Pop-door guides: inside per the guide, outside in the CAD.
-6. Clear opening is 10.5 in.
-7. P6 nest box is modified for the robot options.
+## BOM cross-check: findings (full table: `reports/CT_COOP_A_showcase_bom_check.csv`, 140 rows, regenerated 2026-11-22)
+**MISMATCH (6)**
+1. J1: the plain 5.5x2.1 jack is not weather-rated in the under-coop bay; use an IP67 panel jack.
+2. Cord: 1 m in the BOM vs 1.47 m needed (buy 2 m).
+3. Control box (guide s7) clashed with the cleanout door: resolved by the under-coop bay; guide s7 still needs the rewrite.
+4. Pop-door guides: inside per the guide, outside in the CAD.
+5. Clear opening is 10.5 in.
+6. P6 nest box is modified for the robot options.
 
-**MISSING-IN-DOC:** the turnaround pulley, every chain-link and run-roof item, and the robot-option parts. All are priced as estimates.
+Resolved 2026-11-22 (see Decisions): SW1 NC blocks, harness lengths, PS1/PS2 sizing, DHT20 -> DHT22, bed-probe catalog line, TB6600 (DROPPED).
 
-**NOT-MODELLED:** fasteners, and the later-phase TB6600, feeder driver and HX711.
+**MISSING-IN-DOC:** the turnaround pulley, every chain-link and run-roof item, the robot-option parts, the bay and the safety sensors. All are priced as estimates.
+
+**NOT-MODELLED:** fasteners, and the later-phase feeder driver and feeder load cell.
+
+**NO-BOM-ROW (25, unchanged):** modelled structure/gantry keys with no priced row yet (CASSETTE, G-* gantry parts, TILLER, VENT, ...).
 
 ## BOM delta per option (rough street prices, **ASSUMED**, ±30 %, no tax or shipping)
 | Option | Adds over the door kit + chain-link coop | ≈ $ |
@@ -202,10 +204,38 @@ the hood door (Plus/Pro).
 1. Which actual Starter actuator (listing still not chosen)? Its force, speed, current and hole size must be verified.
 2. Should the closed door stop at the sill (full 11 in clear) or keep the ½ in overlap (10.5 in)? Firmware limit and reed placement follow from that choice.
 3. Who supplies the turnaround sheave, and is the cord-eye radius printable or does it need a second sheave?
-4. Update the harness lengths (W13, W14, W18, W19, W20) and buy 2 m of cord.
-5. Control-box location versus the cleanout door: a narrow box in the 6 in strip, above 57.25 in, or on the side wall?
+4. Buy 2 m of cord. (Harness lengths are set: see Decisions; PR #188's hw.yaml still needs the new `len_mm`.)
+5. ~~Control-box location~~ resolved by the under-coop electronics bay (see Decisions).
 6. Plus: is a 14/18 reach with a centering pad acceptable, or should Plus get the gantry?
 7. Hen safety in the egg bay: the arm must never move with a hen in the nest. Plan is the bay camera plus a hood-door interlock. Is a light curtain needed?
 8. Do hens accept a 6 in rim, and does a dished pad reduce laying? Needs a field test.
 9. Local permits and setbacks, and whether chain-link and post footings need any approval in Lakeside / unincorporated San Diego County.
 10. Isaac: verify door and arm drive gains and egg contact behaviour on WCR8 (smoke test first).
+
+## Decisions (2026-11-22)
+Zach: "Correct simplify or improve". One line each, with the reason. Prices are **ASSUMED** street estimates; nothing was bought.
+
+| # | Decision | Why |
+|---|---|---|
+| 1 | **T6 trowel stays 150 x 80 mm**, no servo change; T6, its fork and the dock-rail extension are now in the Plus/Pro scene (`tools_cad.dock_parts()` via `gantry.parts()`) | 100 mm is over the SO-101 wrist working limit; 80 mm passes and still covers ~95 % of the open bed |
+| 2 | **Load cells = NAU7802 I2C.** 2 nest cells stay (required for EGG); **roost cells optional, default OFF** (`clean_params.ROOST_LOADCELLS`, `ROOST_LC=1` to fit them) | Camera (60 s clear hold) + PIR already cover the roost; one fewer cell, ADC and cable |
+| 3 | **E-STOP: NC contacts only.** 1 head + 3 NC blocks on Plus/Pro (block 3 cuts the motor rail in hardware), 1 head + 2 NC on Base/Starter; catalog fixed (it said normally-open) | NC is fail-safe: a cut wire stops the machine |
+| 4 | **Power:** PS2 12 V 8 A Class 2 on the Plus/Pro motor rail; Starter PS1 upsized to 12 V 5 A (picker on the same rail); Base keeps 12 V 3 A | Class 2 keeps the coop low-voltage; the Starter picker would brown out a 3 A brick |
+| 5 | **Firmware:** 818cf10 cherry-picked (not merged to main): stepper ENABLE on GPIO33 (off strapping pin 12), NC E-STOP sense on GPIO32, MQ-137 ppm; `docs/CHICKEN_TENDER_PINOUT.md` restored | Fixes a boot-strap hazard and adds the hardware E-STOP input the bay design needs |
+| 6 | **Harness `len_mm`:** W13/W14 3200, W18 4800, W19 4500, W20 3900, MQ-137 3800 (routed from bay EB1, rounded up). **DHT20 dropped**; one DHT22 single-wire per coop | I2C is unreliable on a 3.8 m run; DHT22 is not |
+| 6b | **Bed temperature probe = stainless DS18B20** (1-wire, GPIO16); catalog's BME280 bedding line fixed | A BME280 can't be buried in wet litter |
+| 7 | **Back chain-link cut at the bay hatches** (`run_chainlink.back_openings`); `ebay.py` now flags any fabric drawn over an opening (0 hits) | The hatch carries its own 1/2 in hardware cloth; fabric is bound to its frame. The cassette slot (z 475-772 mm) is above the back fabric (top z 430), so it needs no cut |
+| 8a | **Egg handling (Plus/Pro): exterior egg drawer fed by the padded 12 deg chute**, as modelled | Eggs are collected from outside without opening the coop |
+| 8b | **Under-coop headroom 17.2 in** (was 24 in), back chain-link stops under the pit | The deep-bed pit needs the depth; the bay still clears grade (6.7 in) and the 4 in floor rule |
+| 8c | **Poop bin = 33.5 in inside width** as modelled (35 in tray, 3/4 in walls) | Set by the pit walls; nothing gains from 36 in |
+| 8d | **Predator note:** 2 in chain-link (and chicken wire) is not predator-proof; every door and hatch keeps a two-step latch | Raccoons reach through 2 in mesh and open single latches |
+| 8e | **Hardware cloth default: 1/2 in galvanized welded hardware cloth** on the 36 in skirt and the 12 in buried apron (`RUN_GUARD=hardware_cloth_skirt`, `RUN_APRON=buried`, already the repo default) | Predator-safe; chicken wire stays a non-default option |
+| 8f | **DS18B20 vs BME280:** DS18B20 for anything buried or wet (bed, water); DHT22 for coop air | Waterproof probe where it is wet; one air sensor |
+| 8g | **Service doors as built:** SD1 38 x 18.3 in (left), SD2 35.5 x 35.1 in (back, replaces the cleanout) | Built with 0 clashes; both on the reed interlock |
+| 8h | **Electronics bay under the coop:** EB1 back-left (all tiers), EB2 back-right (Plus/Pro), under the pit pan, box bottom 6.7 in above grade | Out of the weather and off the cleanout wall; tool-free drop-down tray |
+| 8i | Bedding fill 9 in default (max ~10 in); the gantry passes ~4 in over the roost **only with hens out** | Kept as modelled; the presence interlocks enforce "hens out" |
+| - | **TB6600 cleaning stepper dropped** on the gantry configs | Duplicate: the gantry tools (T1 scraper, T6 trowel) do the cleaning |
+
+**BOM deltas vs the previous commit (ASSUMED):** Base +$8 (2nd NC block $3, DHT22 for DHT20 +$5); Starter +$16 (2nd NC block $3, DHT22 +$5, PS1 5 A +$8); Plus/Pro -$20.5 (+$6 two more NC blocks, -$4.5 DHT20, -$10 TB6600, -$12 roost cells $8 + one NAU7802 $4). PS2 ($30) was already in the bay estimate.
+
+**Still with Zach / PR #188:** copy the new `len_mm` and the DHT22 (D4) / 2-3 NC-block changes into PR #188's `hw.yaml`, `BOM.md` and the XIAO door firmware (`firmware/chicken-tender-starter`, still DHT20 on I2C); none of those files are on this branch.

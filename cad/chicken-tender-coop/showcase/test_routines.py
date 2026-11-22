@@ -248,6 +248,23 @@ def test_egg_routine_needs_empty_nests():
     assert ctl.state == "DONE"
 
 
+def test_roost_load_cells_default_off_reading_ignored():
+    assert C.ROOST_LOADCELLS is False                                             # 2026-11-22: roost cells optional, default OFF
+    assert R.Inputs().roost_kg is None
+    ctl = run_scenario(EGG, "egg", lambda t: base_inputs(t, roost_kg=2.5), 200)   # a stray reading is ignored when not fitted
+    assert ctl.state == "DONE"
+
+
+def test_roost_load_cells_when_fitted_block_and_require_a_reading(monkeypatch):
+    monkeypatch.setattr(C, "ROOST_LOADCELLS", True)
+    ctl = run_scenario(EGG, "egg", lambda t: base_inputs(t, roost_kg=2.5), 120)   # hen on the roost
+    assert ctl.state == "PRECHECK" and not ctl.sim.motion_log
+    ctl = run_scenario(EGG, "egg", lambda t: base_inputs(t), 120)                 # fitted but silent = stale -> never starts
+    assert ctl.state == "PRECHECK" and not ctl.sim.motion_log
+    ctl = run_scenario(EGG, "egg", lambda t: base_inputs(t, roost_kg=0.1), 200)   # empty roost -> runs
+    assert ctl.state == "DONE"
+
+
 def test_hen_steps_into_nest_mid_egg_freezes():
     ctl = RoutineController()
     trig = Trigger(ctl, tool_in_bed, lambda t, t0: base_inputs(t, nest_kg=(2.4, 0.0)))   # arm in the box, hen arrives

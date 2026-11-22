@@ -27,14 +27,14 @@
 #endif
 
 // — Pin assignments —
-#define LORA_SCK    18
-#define LORA_MISO   19
-#define LORA_MOSI   23
-#define LORA_SS      5
+#define LORA_SCK    12
+#define LORA_MISO   13
+#define LORA_MOSI   11
+#define LORA_SS      10
 #define LORA_RST    14
-#define LORA_DIO0    2
-#define SOLAR_ADC   34   // ADC1_CH6 — solar panel voltage divider
-#define BATTERY_ADC 35   // ADC1_CH7 — battery voltage divider
+#define LORA_DIO0    21
+#define SOLAR_ADC    2   // ADC1_CH1 — solar panel voltage divider
+#define BATTERY_ADC  1   // ADC1_CH0 — battery voltage divider
 
 // — Constants —
 static const unsigned long SENSOR_INTERVAL_MS   = 10000;

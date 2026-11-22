@@ -21,29 +21,11 @@ Give each board its own MQTT device id (for example `ct_door_001`, `ct_coop_001`
 When the XIAO door controller is fitted, the WROOM's door-servo output (GPIO13) is left
 unconnected and the app sends door commands to the door controller's id only.
 
-## Door controller - Seeed XIAO ESP32-S3
+### WatchTower
 
-Source of truth: `hardware/chicken-tender-starter/hw/chicken-tender-starter.hw.yaml`
-(`firmware/chicken-tender-starter/include/pins.h` is generated to match).
+LORA_SCK 12, LORA_MISO 13, LORA_MOSI 11, LORA_SS 10, LORA_RST 14, LORA_DIO0 21, BATTERY_ADC 1 (ADC1_CH0), SOLAR_ADC 2 (ADC1_CH1)
 
-| XIAO pin | GPIO | Net | Connects to | Notes |
-|---|---|---|---|---|
-| D0 | 1 | MOT_EN | DRV8874 EN/IN1 | 20 kHz PWM (speed) |
-| D1 | 2 | MOT_PH | DRV8874 PH/IN2 | direction, HIGH = retract = door opens |
-| D2 | 3 | DRV_nFAULT | DRV8874 nFAULT | open drain, internal pull-up |
-| D3 | 4 | DRV_CS | DRV8874 CS | ~1.1 V/A current sense (ADC1), jam trip 1.8 A |
-| D4 | 5 | I2C_SDA | DHT20 SDA | 4.7 k pull-up to 3V3 |
-| D5 | 6 | I2C_SCL | DHT20 SCL | 4.7 k pull-up to 3V3 |
-| D6 | 43 | spare | - | UART0 TX toggles at boot: never a motor input |
-| D7 | 44 | DRV_EN_RAW | NC E-STOP contact -> DRV8874 SLEEP | E-STOP breaks this line in hardware |
-| D8 | 7 | REED_CLOSED | door-closed reed -> GND | internal pull-up |
-| D9 | 8 | REED_OPEN | door-open reed -> GND | internal pull-up |
-| D10 | 9 | ESTOP_SENSE | SLEEP node after the E-STOP | LOW = loop open / stopped |
-| 5V | - | V5_XIAO | D36V6F5 5 V out via 1N5817 | never 12 V |
-| GND | - | GND | common ground | |
-
-Power: 12 V 3 A Class 2 adapter -> panel jack -> 3 A fuse -> DRV8874 VIN and D36V6F5 VIN only.
-Driver current limit ~2.0 A (20 k VREF to GND).
+Avoid GPIO 19/20, 22-32, 35-37, 0/3/45/46.
 
 ## Coop sensor / feeder controller - ESP32-WROOM-32 DevKit V1
 

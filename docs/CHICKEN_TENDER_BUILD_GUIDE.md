@@ -360,7 +360,13 @@ All electronics prices are estimates except where the Starter BOM says "checked"
 ## 9. Open items before building
 
 - Choose the actual Starter actuator listing (>= 290 mm stroke, >= 150 N, built-in limits, IP54+).
-- Confirm local rules: Lakeside / unincorporated San Diego County limits on hens and coop setbacks.
+- Local rules (check before you build)
+
+- Number of hens: Typically 5 on a residential lot (per San Diego County Zoning Ordinance Section 3112).
+- Roosters: Prohibited (per San Diego County Zoning Ordinance Section 3112).
+- Coop setbacks: 10 feet from dwelling and property lines for a 4x4 ft coop and 4x12 ft run (per San Diego County Zoning Ordinance Section 3112).
+- Permits: No permit required for under 10x10 ft; recommended for larger structures (per San Diego County Zoning Ordinance Section 3112).
+- HOA rules may be stricter.  Official source: https://sandiegocounty.gov/content/dam/sdc/pds/zoning/z3000.pdf (accessed 2026-11-21).
 - Verify the "estimate" prices above in the store app on the day you buy.
 - No CAD of this coop exists yet; the dimensions here are the design. Ask Product Engineering
   for the model (see `docs/CHICKEN_TENDER_PRODUCT_ENGINEER_REQUEST.md`).

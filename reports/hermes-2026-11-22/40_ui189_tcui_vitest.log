@@ -1,0 +1,37 @@
+
+ RUN  v3.2.7 /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui
+
+ ✓ src/__tests__/os/TenderCellsOsContracts.test.ts (26 tests) 11ms
+ ✓ src/__tests__/farmbot/farmbotCloud.test.ts (6 tests) 16ms
+ ✓ src/__tests__/yard/boundary.test.ts (9 tests) 18ms
+ ✓ src/__tests__/yard/zonesAndUsd.test.ts (7 tests) 7ms
+ ✓ src/__tests__/yard/weedPatrol.test.ts (6 tests) 30ms
+ ✓ src/__tests__/models/modelUrls.test.ts (10 tests) 50ms
+ ✓ src/__tests__/yard/rover.test.ts (12 tests) 79ms
+ ✓ src/__tests__/property/terrain.test.ts (6 tests) 5ms
+ ✓ src/__tests__/library/links.test.ts (6 tests) 19ms
+ ✓ src/__tests__/property/watershed.test.ts (8 tests) 250ms
+ ✓ src/lib/products/cameraPackage.test.ts (6 tests) 5ms
+ ✓ src/lib/yard/patrolSim.test.ts (7 tests) 6ms
+ ✓ src/__tests__/demo/eventSimulator.test.ts (6 tests) 12ms
+ ✓ src/__tests__/demo/mowerSim.test.ts (15 tests) 18ms
+ ✓ src/__tests__/demo/trafficJam.test.ts (5 tests) 12ms
+ ✓ src/__tests__/demo/farmAutopilot.test.ts (4 tests) 107ms
+ ✓ src/services/demo/demoEnvironment.test.ts (7 tests) 132ms
+ ✓ src/__tests__/models/ModelLoader.test.ts (8 tests) 4ms
+ ✓ src/__tests__/yard/geo.test.ts (3 tests) 4ms
+ ✓ src/__tests__/builder/builder.test.ts (12 tests) 23ms
+ ✓ src/components/property/propertyLayoutStore.test.ts (4 tests) 6ms
+ ✓ src/lib/camera/cameraStream.test.ts (2 tests) 5ms
+ ✓ src/__tests__/demo/twin.test.ts (3 tests) 5ms
+ ✓ src/__tests__/settings/apiKeysAndSchedules.test.ts (4 tests) 20ms
+ ✓ src/__tests__/demo/demoNext.test.ts (2 tests) 3ms
+ ✓ src/__tests__/library/library.test.ts (4 tests) 6ms
+ ✓ src/__tests__/farmbot/mqttCompat.test.ts (1 test) 192ms
+
+ Test Files  27 passed (27)
+      Tests  189 passed (189)
+   Start at  12:23:55
+   Duration  1.32s (transform 2.27s, setup 0ms, collect 6.44s, tests 1.04s, environment 6ms, prepare 2.32s)
+
+exit=0

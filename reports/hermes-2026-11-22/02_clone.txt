@@ -1,0 +1,2 @@
+091952c coop: apply 2026-11-22 decisions - T6 in scene, NAU7802 nest cells (roost optional/off), NC E-STOP 3/2 blocks, PS2 + Starter 5 A, 818cf10 firmware, DHT22 only, harness len_mm, back chain-link hatch cuts [skip ci]
+818cf10 fix(chicken-tender): MQ-137 published in ppm (mV -> Rs/R0 -> ppm, NVS clean-air calibration), divider 15k/12k inside ESP32 11 dB suggested range, WatchTower battery gain 11 (was 12.1), single pinout sheet, catalog matched to firmware boards [skip ci]

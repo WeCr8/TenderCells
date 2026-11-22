@@ -1,0 +1,1 @@
+091952c coop: apply 2026-11-22 decisions - T6 in scene, NAU7802 nest cells (roost optional/off), NC E-STOP 3/2 blocks, PS2 + Starter 5 A, 818cf10 firmware, DHT22 only, harness len_mm, back chain-link hatch cuts [skip ci]

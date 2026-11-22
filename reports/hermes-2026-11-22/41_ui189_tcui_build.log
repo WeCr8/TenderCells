@@ -1,0 +1,32 @@
+
+> tendercells-ui@0.0.1 build
+> tsc -b && vite build
+
+vite v7.3.5 building client environment for production...
+transforming...
+✓ 12213 modules transformed.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/node_modules/firebase/firestore/dist/esm/index.esm.js is dynamically imported by /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/services/birdsService.ts, /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/services/birdsService.ts, /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/services/eggService.ts, /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/services/schedulesService.ts but also statically imported by /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/lib/firebase/firebaseApp.ts, /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/pages/AccountPage.tsx, /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/services/deviceService.ts, /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/services/productsService.ts, /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/services/settingsService.ts, /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/services/workspaceReset.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/node_modules/firebase/functions/dist/esm/index.esm.js is dynamically imported by /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/pages/TenderAIPage.tsx, /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/services/apiKeysService.ts but also statically imported by /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/lib/camera/cameraRelay.ts, /root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/tendercells-ui/src/pages/AccountPage.tsx, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist/index.html                                 6.47 kB │ gzip:   1.80 kB
+dist/assets/draco_wasm_wrapper-fZCQGLGb.js     58.46 kB
+dist/assets/draco_wasm_wrapper-DxJM36Ib.js     58.76 kB
+dist/assets/draco_decoder-Z1_iN-Ht.wasm       192.42 kB │ gzip:  63.46 kB
+dist/assets/draco_decoder-C32yEggz.wasm       285.75 kB │ gzip:  88.64 kB
+dist/assets/draco_decoder-fzg4nYZr.js         719.41 kB
+dist/assets/index-C0Y0v0_H.css                  0.37 kB │ gzip:   0.23 kB
+dist/assets/index-zQ1rQUVj.js                 375.14 kB │ gzip: 110.56 kB
+dist/assets/index-7rX6vjWr.js                 380.50 kB │ gzip: 115.48 kB
+dist/assets/index-BBzdO7Jf.js               2,707.06 kB │ gzip: 794.79 kB
+
+(!) Some chunks are larger than 900 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 12.64s
+exit=0

@@ -1,0 +1,7 @@
+ref,item,modelled_qty,configs,code_refs,est_usd,status
+G-PRINT,"belt guard Y {side} (printed, hens can't peck the belt); belt guard X (printed)",3,"plus, pro",gantry.py:45 gantry.py:57,ASSUMED - not priced,PROPOSED
+G-XBEAM,X bridge: 2060 extrusion + MGN12 rail (front face); X MGN12 rail; X carriage plate (MGN12H),3,"plus, pro",gantry.py:53 gantry.py:54 gantry.py:62,ASSUMED - not priced,PROPOSED
+G-YRAIL,Y rail {side}: 2040 extrusion + MGN12 rail; MGN12 rail {side}; Y carriage {side} (MGN12H + plate),6,"plus, pro",gantry.py:40 gantry.py:41 gantry.py:47,ASSUMED - not priced,PROPOSED
+G-ZAX,Z block: MGN12H carriages + GT2 omega drive + NEMA17 5:1 planetary + constant-force spring; Z mast: 2040 x {P.GZ_MAST_L:.0f} mm + 2 x MGN12 rails (moving mast),2,"plus, pro",gantry.py:64 gantry.py:68,ASSUMED - not priced,PROPOSED
+TOOLS,(description on another line),4,"plus, pro",gantry.py:123,ASSUMED - not priced,PROPOSED
+TOOL-T5,NOT FOUND in this commit,1,"plus, pro",none,ASSUMED - not priced,PROPOSED

@@ -1,0 +1,13 @@
+| add-claude-to-path.ps1 | 2026-06-11 | Build complete Tender Cells web app with core screens using local Ollama |
+| final_fix.py | 2026-06-11 | Build complete Tender Cells web app with core screens using local Ollama |
+| fix-claude-cli.ps1 | 2026-06-11 | Build complete Tender Cells web app with core screens using local Ollama |
+| fix_all_remaining.py | 2025-12-07 | Add all new and changed files - complete update to main branch |
+| fix_now.py | 2025-12-07 | Add all new and changed files - complete update to main branch |
+| fix_tender.py | 2025-12-07 | Add all new and changed files - complete update to main branch |
+| fix_tender_direct.py | 2026-06-11 | Build complete Tender Cells web app with core screens using local Ollama |
+| fix_tender_final.py | 2025-12-07 | Add all new and changed files - complete update to main branch |
+| fix_tender_syntax.py | 2025-12-07 | Add all new and changed files - complete update to main branch |
+| fix_tender_targeted.py | 2026-06-11 | Build complete Tender Cells web app with core screens using local Ollama |
+| run-claude-test.ps1 | 2026-06-11 | Build complete Tender Cells web app with core screens using local Ollama |
+| tender_cli.py | 2025-12-07 | Add all new and changed files - complete update to main branch |
+| test-claude.ps1 | 2026-06-11 | Build complete Tender Cells web app with core screens using local Ollama |

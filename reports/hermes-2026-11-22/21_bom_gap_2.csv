@@ -1,0 +1,7 @@
+ref,item,modelled_qty,configs,code_refs,est_usd,status
+G-AMNT,SO-101 base mount plate (inverted),1,"plus, pro",gantry.py:70,ASSUMED - not priced,PROPOSED
+G-BELT,GT2 9 mm belt Y {side} + guard; GT2 9 mm belt X + guard,3,"plus, pro",gantry.py:44 gantry.py:56,ASSUMED - not priced,PROPOSED
+G-CHAIN,Y cable chain tray (left wall); Y cable chain loop; X cable chain tray (on the bridge),3,"plus, pro",gantry.py:48 gantry.py:49 gantry.py:59,ASSUMED - not priced,PROPOSED
+G-DOCK,"tool dock rail ({nm} of the pop door), printed forks; dock fork {tid} + tool-present reed; dock rail extension x 806..830 (T6 fork); dock fork T6 + tool-present reed",7,"plus, pro",gantry.py:118 gantry.py:121 tools_cad.py:86 tools_cad.py:88,ASSUMED - not priced,PROPOSED
+G-LS,Y home switch {side} (front); X home switch (left); Z home switch (top) + hard stop,4,"plus, pro",gantry.py:46 gantry.py:58 gantry.py:69,ASSUMED - not priced,PROPOSED
+G-MOT,"Y motor NEMA17 {side} (dual Y, auto-squared); X motor NEMA17 (left end); Z motor NEMA17 + 5:1 planetary",4,"plus, pro",gantry.py:43 gantry.py:55 gantry.py:65,ASSUMED - not priced,PROPOSED

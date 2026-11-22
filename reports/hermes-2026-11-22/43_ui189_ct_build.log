@@ -1,0 +1,7 @@
+
+> chicken-tender@0.0.0 build
+> tsc -b && vite build
+
+error TS5083: Cannot read file '/root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/chicken-tender/tsconfig.node.json'.
+tsconfig.json(20,18): error TS6053: File '/root/hermes-work/tc-2026-11-22/TenderCells/applications/tendercells_ui/test_output/chicken-tender/tsconfig.node.json' not found.
+exit=1

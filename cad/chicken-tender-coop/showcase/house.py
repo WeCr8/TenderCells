@@ -12,12 +12,13 @@ from __future__ import annotations
 import math
 from build123d import Box, Pos, Rot, Polyline, make_face, extrude, Plane
 import sc_params as P
+import service_params as SP
 from sc_model import SPart, box, cyl, ALL
 
 ROBOT = ("starter", "plus", "pro")
 GANTRY = P.GANTRY_CFGS
 DROPPED_PIDS = ("P1", "C3", "C4", "C5", "P2", "P3", "P4", "C6", "C7", "C8", "ROOF", "C9")
-T, W2, T2 = P.PLY_WALL, P.W2, P.T2
+T, W2, T2, S2 = P.PLY_WALL, P.W2, P.T2, P.S2
 Y0, Y1, CW = P.COOP_Y0, P.COOP_Y1, P.COOP_W
 EAVE = P.HOUSE_EAVE_Z
 PITCH = P.HOUSE_PITCH
@@ -31,6 +32,13 @@ def xz_prism(pts_xz, y0, y1):
     pl = Plane(origin=(0, y1, 0), x_dir=(1, 0, 0), z_dir=(0, -1, 0))   # local (u, v) = (X, Z), normal -Y
     face = make_face(Polyline(*[(x, z, 0) for x, z in pts_xz], close=True))
     return extrude(pl * face, amount=y1 - y0)
+
+
+def yz_prism(pts_yz, x0, x1):
+    """Extrude a YZ polygon from x0 to x1."""
+    pl = Plane(origin=(x0, 0, 0), x_dir=(0, 1, 0), z_dir=(1, 0, 0))   # local (u, v) = (Y, Z), normal +X
+    face = make_face(Polyline(*[(y, z, 0) for y, z in pts_yz], close=True))
+    return extrude(pl * face, amount=x1 - x0)
 
 
 def underside(x):
@@ -62,16 +70,26 @@ def walls(cfg):
     front -= box(u0, u1, Y0 - T, Y0, z0, z1)
     S.append(SPart("P2", "front wall siding (pop-door hole 10x11, low intake V3)", "siding", 3, front))
     back = box(0, CW, Y1, Y1 + T, P.PIT_BOTTOM, EAVE)
-    cx = CW / 2 - P.CLEANOUT[0] / 2
-    back -= box(cx, cx + P.CLEANOUT[0], Y1, Y1 + T, P.CLEANOUT_Z0_NEW, P.CLEANOUT_Z0_NEW + P.CLEANOUT[1])
+    if SP.SERVICE_DOORS:        # SD2: the cleanout grown to a 35.5 x 35.1 in service door (siding cut laps the frame)
+        back -= box(SP.SD2_X0 - SP.SD2_LAP_LATCH, SP.SD2_X1 + SP.LAP, Y1, Y1 + T, SP.SD2_Z0 - SP.SD2_LAP_BOTTOM, SP.SD2_Z1 + SP.LAP)
+        bnm = "back wall siding (service door SD2 35.5x35.1 in, bed-cassette slot)"
+    else:
+        cx = CW / 2 - P.CLEANOUT[0] / 2
+        back -= box(cx, cx + P.CLEANOUT[0], Y1, Y1 + T, P.CLEANOUT_Z0_NEW, P.CLEANOUT_Z0_NEW + P.CLEANOUT[1])
+        bnm = "back wall siding (cleanout 36x28 raised to 32 in, bed-cassette slot)"
     back -= box(P.TRAY_X[0] - 8, P.TRAY_X[1] + 8, Y1, Y1 + T, P.SLOT["z0"], P.SLOT["z1"])
-    S.append(SPart("P3", "back wall siding (cleanout 36x28 raised to 32 in, bed-cassette slot)", "siding", 3, back))
+    S.append(SPart("P3", bnm, "siding", 3, back))
     left = box(-T, 0, Y0, Y1, zb, EAVE)
     wy = Y0 + P.WINDOW_Y_FROM_FRONT
     left -= box(-T, 0, wy, wy + P.WINDOW[0], P.WINDOW_Z0, P.WINDOW_Z0 + P.WINDOW[1])
     _, u0, u1, z0, z1, _ = P.VENTS["V1"]
     left -= box(-T, 0, u0, u1, z0, z1)
-    S.append(SPart("P4", "left side wall siding (window 18x12, high vent V1 + fan)", "siding", 3, left))
+    lnm = "left side wall siding (window 18x12, high vent V1 + fan)"
+    if SP.SERVICE_DOORS:        # SD1: full bay below the gantry rail line
+        d = SP.SD1
+        left -= box(-T, 0, d["y0"] - SP.LAP, d["y1"] + SP.LAP, d["z0"] - SP.LAP, d["z1"] + SP.LAP)
+        lnm = "left side wall siding (service door SD1 38x18.3 in, window 18x12, high vent V1 + fan)"
+    S.append(SPart("P4", lnm, "siding", 3, left))
     right = box(CW, CW + T, Y0, Y1, zb, EAVE)
     ny = (Y0 + Y1) / 2 - P.NEST_HOLE[0] / 2
     right -= box(CW, CW + T, ny, ny + P.NEST_HOLE[0], P.NEST_FLOOR_Z, P.NEST_FLOOR_Z + P.NEST_HOLE[1])
@@ -102,7 +120,9 @@ def framing(cfg):
           SPart("HTP", "top plate left (2x4 flat)", "lumber", 3, box(0, W2, Y0 + W2, Y1 - W2, zt0, zt1)),
           SPart("HTP", "top plate right (2x4 flat)", "lumber", 3, box(CW - W2, CW, Y0 + W2, Y1 - W2, zt0, zt1))]
     zb = P.FLOOR_FRAME_Z1
-    studs = [("front", x, "x") for x in (250.0, 970.0)] + [("back", x, "x") for x in (CW / 2 - P.CLEANOUT[0] / 2 - T2, CW / 2 + P.CLEANOUT[0] / 2)]
+    studs = [("front", x, "x") for x in (250.0, 970.0)]
+    if not SP.SERVICE_DOORS:
+        studs += [("back", x, "x") for x in (CW / 2 - P.CLEANOUT[0] / 2 - T2, CW / 2 + P.CLEANOUT[0] / 2)]
     wy = Y0 + P.WINDOW_Y_FROM_FRONT
     studs += [("left", y, "y") for y in (wy - T2, wy + P.WINDOW[0])]
     ny = (Y0 + Y1) / 2 - P.NEST_HOLE[0] / 2
@@ -113,13 +133,17 @@ def framing(cfg):
         elif wall == "back":
             S.append(SPart("HS", "king stud (back wall, beside the cleanout)", "lumber", 3, box(c, c + T2, Y1 - T2, Y1, P.SLOT["z1"] + T2, zt0)))
         elif wall == "left":
-            S.append(SPart("HS", "stud (left wall, beside the window)", "lumber", 3, box(0, T2, c, c + T2, zb, zt0)))
+            if SP.SERVICE_DOORS:    # now cripple/window studs standing on the SD1 header
+                S.append(SPart("HS", "window stud (left wall, on the SD1 header)", "lumber", 3, box(0, T2, c, c + T2, SP.SD1_HEADER[1], zt0)))
+            else:
+                S.append(SPart("HS", "stud (left wall, beside the window)", "lumber", 3, box(0, T2, c, c + T2, zb, zt0)))
         else:
             S.append(SPart("HS", "stud (right wall, beside the nest hole)", "lumber", 3, box(CW - T2, CW, c, c + T2, zb, zt0)))
     px = CW / 2 - P.POP_DOOR[0] / 2
     S.append(SPart("HH", "pop-door header (2x4 flat)", "lumber", 3, box(px - T2, px + P.POP_DOOR[0] + T2, Y0, Y0 + T2, P.POP_SILL_Z + P.POP_DOOR[1], P.POP_SILL_Z + P.POP_DOOR[1] + T2)))
-    cx = CW / 2 - P.CLEANOUT[0] / 2
-    S.append(SPart("HH", "cleanout header (2x4 on edge)", "lumber", 3, box(cx, cx + P.CLEANOUT[0], Y1 - T2, Y1, P.CLEANOUT_Z0_NEW + P.CLEANOUT[1], P.CLEANOUT_Z0_NEW + P.CLEANOUT[1] + W2)))
+    if not SP.SERVICE_DOORS:
+        cx = CW / 2 - P.CLEANOUT[0] / 2
+        S.append(SPart("HH", "cleanout header (2x4 on edge)", "lumber", 3, box(cx, cx + P.CLEANOUT[0], Y1 - T2, Y1, P.CLEANOUT_Z0_NEW + P.CLEANOUT[1], P.CLEANOUT_Z0_NEW + P.CLEANOUT[1] + W2)))
     S.append(SPart("HH", "bed-slot header / back bottom plate (2x4 flat, replaces the cut back rim)", "pt_lumber", 2,
                    box(P.PIT_WALL_X[0], P.PIT_WALL_X[1], Y1 - W2, Y1, P.SLOT["z1"], P.SLOT["z1"] + T2)))
     for x0, x1, side in ((0, P.PIT_WALL_X[0], "left"), (P.PIT_WALL_X[1], CW, "right")):
@@ -230,9 +254,10 @@ def weatherstrip(cfg):
     cx0 = CW / 2 - cw / 2
     yb = Y1 + T
     z0 = P.CLEANOUT_Z0_NEW
-    for b in (box(cx0 - 8, cx0 + cw + 8, yb, yb + 6, z0 - 8, z0), box(cx0 - 8, cx0 + cw + 8, yb, yb + 6, z0 + ch, z0 + ch + 8),
-              box(cx0 - 8, cx0, yb, yb + 6, z0, z0 + ch), box(cx0 + cw, cx0 + cw + 8, yb, yb + 6, z0, z0 + ch)):
-        S.append(SPart("WS", "EPDM weatherstrip, cleanout door", "dark", 6, b, bom="WS"))
+    if not SP.SERVICE_DOORS:    # service doors carry their own frame-face EPDM (service_door_parts)
+        for b in (box(cx0 - 8, cx0 + cw + 8, yb, yb + 6, z0 - 8, z0), box(cx0 - 8, cx0 + cw + 8, yb, yb + 6, z0 + ch, z0 + ch + 8),
+                  box(cx0 - 8, cx0, yb, yb + 6, z0, z0 + ch), box(cx0 + cw, cx0 + cw + 8, yb, yb + 6, z0, z0 + ch)):
+            S.append(SPart("WS", "EPDM weatherstrip, cleanout door", "dark", 6, b, bom="WS"))
     x0, x1 = P.TRAY_X[0] - 8, P.TRAY_X[1] + 8
     for b in (box(x0 - 10, x1 + 10, yb, yb + 6, P.SLOT["z1"], P.SLOT["z1"] + 10), box(x0 - 10, x0, yb, yb + 6, P.SLOT["z0"], P.SLOT["z1"]),
               box(x1, x1 + 10, yb, yb + 6, P.SLOT["z0"], P.SLOT["z1"])):
@@ -297,8 +322,13 @@ def bed_parts(cfg):
     # droppings board + cleats (scraper pushes off the back edge into the poop bin)
     d = P.DROP_BOARD
     S.append(SPart("DROP", "droppings board 1/2 ply + HDPE top (scraped to the back edge)", "drop", 8, box(d["x0"], d["x1"], d["y0"], d["y1"], d["z_top"] - d["t"], d["z_top"]), bom="DROP"))
-    for x0c, x1c in ((0, d["x0"] + 10), (d["x1"] - 10, CW)):
-        S.append(SPart("DROP", "droppings-board cleat 2x2", "lumber", 8, box(x0c, x1c, d["y0"] + 40, d["y1"] - 40, d["z_top"] - d["t"] - P.S2, d["z_top"] - d["t"])))
+    zc0 = d["z_top"] - d["t"] - P.S2
+    for x0c, x1c in ((T2 if SP.SERVICE_DOORS else 0, d["x0"] + 10), (d["x1"] - 10, CW)):
+        S.append(SPart("DROP", "droppings-board cleat 2x2", "lumber", 8, box(x0c, x1c, d["y0"] + 40, d["y1"] - 40, zc0, d["z_top"] - d["t"])))
+    if SP.SERVICE_DOORS:        # the left wall behind the cleat is now the SD1 opening: two 2x2 legs to the floor ledge
+        for yl in (d["y0"] + 45, d["y1"] - 45 - P.S2):
+            S.append(SPart("DROP", "droppings-board left cleat leg 2x2 (on the floor ledge, SD1 opening behind)", "lumber", 8,
+                           box(d["x0"] + 10 - P.S2, d["x0"] + 10, yl, yl + P.S2, P.FLOOR_TOP_Z, zc0)))
     return S
 
 
@@ -316,8 +346,137 @@ def egg_chute_parts(cfg):
     return S
 
 
+# ------------------------------------------------------------------------------------------ human service doors
+SVC_STEP = 6
+
+
+def svc_pivot(door):
+    """(x, y) of the hinge pin (vertical axis) and the opening sign (+1 = counter-clockwise seen from above)."""
+    h = SP.HINGE
+    if door == "SD1":
+        d = SP.SD1
+        return (-T - SP.PROUD - h["pin_out"], d["y0"] - SP.LAP + SP.GAP / 2), +1
+    return (SP.SD2_X1 + SP.LAP - SP.GAP / 2, Y1 + T + SP.PROUD + h["pin_out"]), -1
+
+
+def _brace_diag_dw(span, rise):
+    return SP.BRACE_W / math.sin(math.atan2(rise, span))
+
+
+def service_door_parts(cfg):
+    """SD1 (left, under the gantry rail) + SD2 (back, the bigger cleanout): 2x4 frames, Z-braced siding skins on
+    strap T-hinges (180 deg), two-step latches, frame-face EPDM, drip caps, door reeds RS-SD1 / RS-SD2."""
+    if not SP.SERVICE_DOORS:
+        return []
+    S = []
+    h, e, dr = SP.HINGE, SP.EPDM, SP.DRIP
+    L, G, PR, BT, BW, BI = SP.LAP, SP.GAP, SP.PROUD, SP.BRACE_T, SP.BRACE_W, SP.BRACE_INSET
+    gantry = tuple(c for c in ROBOT if c in GANTRY)
+    # ---------------------------------------------------------------- SD1 left wall
+    d = SP.SD1
+    y0, y1, z0, z1 = d["y0"], d["y1"], d["z0"], d["z1"]
+    jf, jb, hz = SP.SD1_JACK_F, SP.SD1_JACK_B, SP.SD1_HEADER
+    S += [SPart("SD-FR", "SD1 hinge-side jack 2x4 flat (sistered to the front-left post)", "lumber", 3, box(0, T2, jf[0], jf[1], P.FLOOR_TOP_Z, hz[0])),
+          SPart("SD-FR", "SD1 latch-side jack 2x4 flat (sistered to the back-left post)", "lumber", 3, box(0, T2, jb[0], jb[1], P.FLOOR_TOP_Z, hz[0])),
+          SPart("SD-FR", "SD1 king 2x2 (front-left corner, floor to top plate)", "lumber", 3, box(0, S2, Y0, jf[0], P.FLOOR_TOP_Z, P.POST_TOP_Z)),
+          SPart("SD-FR", "SD1 king 2x2 (back-left corner, rim to top plate)", "lumber", 3, box(0, S2, jb[1], Y1, P.FLOOR_FRAME_Z1, P.POST_TOP_Z)),
+          SPart("SD-FR", "SD1 header 2x4 on edge (left Y rail bolts to it, full length)", "lumber", 3, box(0, T2, jf[0], jb[1], hz[0], hz[1]),
+                length_in_hint=(jb[1] - jf[0]) / P.IN),
+          SPart("SD-FR", "SD1 sill 2x2 on the floor ledge (litter dam, clears the roost studs)", "lumber", 3, box(0, S2, y0, y1, SP.SD1_SILL[0], SP.SD1_SILL[1]),
+                length_in_hint=(y1 - y0) / P.IN)]
+    for yb in SP.SD1_RAIL_BOLTS_Y:
+        S.append(SPart("SD-RAILMT", "left Y rail standoff 7 mm HDPE + lag into the SD1 header", "dark", 11,
+                       box(T2, P.GY_RAIL_X[0], yb - 20, yb + 20, P.GY_RAIL_Z[0], P.GY_RAIL_Z[1]), configs=gantry, bom="SD-HW"))
+    n1 = "svc_sd1"
+    xs0, xs1 = -T - PR, -PR                       # skin (in the siding plane, 3 mm proud)
+    ya, yb_, za, zb = y0 - L + G, y1 + L - G, z0 - L + G, z1 + L - G
+    S.append(SPart("SD1", "SD1 left service door skin 15/32 siding (38 x 18.3 in opening)", "door", SVC_STEP, box(xs0, xs1, ya, yb_, za, zb), node=n1))
+    for zr in (z0 + BI, z1 - BI - BW):
+        S.append(SPart("SD1", "SD1 Z-brace rail 1x4", "lumber", SVC_STEP, box(xs1, xs1 + BT, y0 + BI, y1 - BI, zr, zr + BW), node=n1))
+    zlo, zhi = z0 + BI + BW, z1 - BI - BW
+    dw = _brace_diag_dw(y1 - y0 - 2 * BI, zhi - zlo)
+    S.append(SPart("SD1", "SD1 Z-brace diagonal 1x4 (low on the hinge side)", "lumber", SVC_STEP,
+                   yz_prism([(y0 + BI, zlo), (y0 + BI + dw, zlo), (y1 - BI, zhi), (y1 - BI - dw, zhi)], xs1, xs1 + BT), node=n1))
+    hz_list = (za + 40, zb - 40 - h["strap_w"])
+    for zh in hz_list:
+        S.append(SPart("SD-HINGE", "SD1 strap T-hinge, strap on the door (12 in)", "metal", SVC_STEP,
+                       box(xs0 - h["strap_t"], xs0, ya, ya + 12 * P.IN, zh, zh + h["strap_w"]), node=n1, bom="SD-HW"))
+    (px, py), _ = svc_pivot("SD1")
+    for zh in hz_list:
+        S.append(SPart("SD-HINGE", "SD1 T-hinge leaf on a 3/8 in spacer block (on the siding, over the jack)", "metal", SVC_STEP,
+                       box(px + h["pin_r"], -T, py - G / 2 - h["leaf_l"], py - G / 2 - 2, zh, zh + h["strap_w"]), bom="SD-HW"))
+        S.append(SPart("SD-HINGE", "SD1 hinge pin knuckle", "metal", SVC_STEP, cyl((px, py, zh), (px, py, zh + h["strap_w"]), h["pin_r"]), bom="SD-HW"))
+    for zl in (za + 60, zb - 60):
+        S.append(SPart("SD-LATCH", "SD1 4 in barrel bolt + carabiner (two-step latch)", "metal", SVC_STEP,
+                       box(xs0 - 12, xs0, yb_ - 110, yb_ - 6, zl - 12, zl + 12), node=n1, bom="SD-HW"))
+        S.append(SPart("SD-LATCH", "SD1 bolt keeper + carabiner staple (on the siding)", "metal", SVC_STEP,
+                       box(xs0 - 12, -T, yb_ + G + 2, yb_ + G + 40, zl - 12, zl + 12), bom="SD-HW"))
+    # frame-face EPDM in the lap band (skin inner face lands on it)
+    for b in (box(-e["t"], 0, y0 - L + 3.5, y0 - L + 3.5 + e["w"], z0 - L + 3.5, z1 + L - 3.5),
+              box(-e["t"], 0, y1 + L - 3.5 - e["w"], y1 + L - 3.5, z0 - L + 3.5, z1 + L - 3.5),
+              box(-e["t"], 0, y0 - L + 3.5, y1 + L - 3.5, z0 - L + 3.5, z0 - L + 3.5 + e["w"]),
+              box(-e["t"], 0, y0 - L + 3.5, y1 + L - 3.5, z1 + L - 3.5 - e["w"], z1 + L - 3.5)):
+        S.append(SPart("WS", "EPDM bulb on the SD1 frame face", "dark", SVC_STEP, b, bom="WS"))
+    S.append(SPart("SD-DRIP", "SD1 drip cap (galv. Z-flashing over the door head)", "metal", SVC_STEP,
+                   box(-T - dr["out"], -T, y0 - L - 12, y1 + L + 12, z1 + L, z1 + L + dr["t"]), bom="SD-HW"))
+    S.append(SPart("SD-DRIP", "SD1 drip cap flange (under the siding above)", "metal", SVC_STEP,
+                   box(-T - dr["t"], -T, y0 - L - 12, y1 + L + 12, z1 + L, z1 + L + dr["flange"]), bom="SD-HW"))
+    r = SP.DOOR_REEDS["RS-SD1"]
+    S.append(SPart("RS-SD1", "RS-SD1 door-closed reed (SD1, robot interlock)", "reed", 9, box(6, 30, y1 - 10, y1, r["pos"][2] - 15, r["pos"][2] + 15), bom="SD-REED"))
+    S.append(SPart("RS-SD1", "RS-SD1 magnet on the SD1 skin", "dark", 9, box(xs1, xs1 + 8, y1 - 31, y1 - 15, r["pos"][2] - 15, r["pos"][2] + 15), node=n1, bom="SD-REED"))
+    # ---------------------------------------------------------------- SD2 back wall
+    x0, x1, z0, z1 = SP.SD2_X0, SP.SD2_X1, SP.SD2_Z0, SP.SD2_Z1
+    LL, LB = SP.SD2_LAP_LATCH, SP.SD2_LAP_BOTTOM
+    yf = Y1 - T2
+    S += [SPart("SD-FR", "SD2 latch-side jack 2x4 flat", "lumber", 3, box(*SP.SD2_JACK_L, yf, Y1, z0, z1)),
+          SPart("SD-FR", "SD2 hinge-side jack 2x4 flat", "lumber", 3, box(*SP.SD2_JACK_R, yf, Y1, z0, z1)),
+          SPart("SD-FR", "SD2 king 2x2 (rim to top plate)", "lumber", 3, box(*SP.SD2_KING_L, yf, Y1, P.FLOOR_FRAME_Z1, P.POST_TOP_Z)),
+          SPart("SD-FR", "SD2 king 2x2 (rim to top plate)", "lumber", 3, box(*SP.SD2_KING_R, yf, Y1, P.FLOOR_FRAME_Z1, P.POST_TOP_Z)),
+          SPart("SD-FR", "SD2 header 2x4 on edge (under the back top plate)", "lumber", 3, box(SP.SD2_JACK_L[0], SP.SD2_JACK_R[1], yf, Y1, z1, z1 + W2),
+                length_in_hint=(SP.SD2_JACK_R[1] - SP.SD2_JACK_L[0]) / P.IN)]
+    n2 = "svc_sd2"
+    ys0, ys1 = Y1 + PR, Y1 + T + PR
+    xa, xb, za, zb = x0 - LL + G, x1 + L - G, z0 - LB + G, z1 + L - G
+    S.append(SPart("SD2", "SD2 back service door skin 15/32 siding (35.5 x 35.1 in opening, replaces the 36x28 cleanout)", "door", SVC_STEP,
+                   box(xa, xb, ys0, ys1, za, zb), node=n2))
+    for zr in (z0 + BI, z1 - BI - BW):
+        S.append(SPart("SD2", "SD2 Z-brace rail 1x4", "lumber", SVC_STEP, box(x0 + BI, x1 - BI, ys0 - BT, ys0, zr, zr + BW), node=n2))
+    zlo, zhi = z0 + BI + BW, z1 - BI - BW
+    dw = _brace_diag_dw(x1 - x0 - 2 * BI, zhi - zlo)
+    S.append(SPart("SD2", "SD2 Z-brace diagonal 1x4 (low on the hinge side)", "lumber", SVC_STEP,
+                   xz_prism([(x1 - BI, zlo), (x1 - BI - dw, zlo), (x0 + BI, zhi), (x0 + BI + dw, zhi)], ys0 - BT, ys0), node=n2))
+    hz_list = (za + 50, zb - 50 - h["strap_w"])
+    for zh in hz_list:
+        S.append(SPart("SD-HINGE", "SD2 strap T-hinge, strap on the door (16 in)", "metal", SVC_STEP,
+                       box(xb - 16 * P.IN, xb, ys1, ys1 + h["strap_t"], zh, zh + h["strap_w"]), node=n2, bom="SD-HW"))
+    (px, py), _ = svc_pivot("SD2")
+    for zh in hz_list:
+        S.append(SPart("SD-HINGE", "SD2 T-hinge leaf on a 3/8 in spacer block (on the siding, over the jack)", "metal", SVC_STEP,
+                       box(px + G / 2 + 2, px + G / 2 + h["leaf_l"], Y1 + T, py - h["pin_r"], zh, zh + h["strap_w"]), bom="SD-HW"))
+        S.append(SPart("SD-HINGE", "SD2 hinge pin knuckle", "metal", SVC_STEP, cyl((px, py, zh), (px, py, zh + h["strap_w"]), h["pin_r"]), bom="SD-HW"))
+    for zl in (900.0, zb - 100):
+        S.append(SPart("SD-LATCH", "SD2 4 in barrel bolt + carabiner (two-step latch)", "metal", SVC_STEP,
+                       box(xa + 6, xa + 110, ys1, ys1 + 12, zl - 12, zl + 12), node=n2, bom="SD-HW"))
+        S.append(SPart("SD-LATCH", "SD2 bolt keeper + carabiner staple (on the siding)", "metal", SVC_STEP,
+                       box(xa - G - 30, xa - G - 2, Y1 + T, ys1 + 12, zl - 12, zl + 12), bom="SD-HW"))
+    for b in (box(x0 - LL + 2, x0 - LL + 2 + 8, Y1, Y1 + e["t"], z0 - LB + 2, z1 + L - 3.5),
+              box(x1 + L - 3.5 - e["w"], x1 + L - 3.5, Y1, Y1 + e["t"], z0 - LB + 2, z1 + L - 3.5),
+              box(x0 - LL + 2, x1 + L - 3.5, Y1, Y1 + e["t"], z0 - LB + 2, z0 - LB + 2 + 8),
+              box(x0 - LL + 2, x1 + L - 3.5, Y1, Y1 + e["t"], z1 + L - 3.5 - e["w"], z1 + L - 3.5)):
+        S.append(SPart("WS", "EPDM bulb on the SD2 frame face", "dark", SVC_STEP, b, bom="WS"))
+    S.append(SPart("SD-DRIP", "SD2 drip cap (galv. Z-flashing over the door head)", "metal", SVC_STEP,
+                   box(x0 - LL - 12, x1 + L + 12, Y1 + T, Y1 + T + dr["out"], z1 + L, z1 + L + dr["t"]), bom="SD-HW"))
+    S.append(SPart("SD-DRIP", "SD2 drip cap flange", "metal", SVC_STEP,
+                   box(x0 - LL - 12, x1 + L + 12, Y1 + T, Y1 + T + dr["t"], z1 + L, z1 + L + dr["flange"]), bom="SD-HW"))
+    r = SP.DOOR_REEDS["RS-SD2"]
+    S.append(SPart("RS-SD2", "RS-SD2 door-closed reed (SD2, robot interlock)", "reed", 9, box(x0, x0 + 10, Y1 - 28, Y1 - 3, r["pos"][2] - 15, r["pos"][2] + 15), bom="SD-REED"))
+    S.append(SPart("RS-SD2", "RS-SD2 magnet on the SD2 skin", "dark", 9, box(x0 + 13, x0 + 33, ys0 - 12, ys0, r["pos"][2] - 15, r["pos"][2] + 15), node=n2, bom="SD-REED"))
+    return S
+
+
 def house_parts(cfg):
-    return walls(cfg) + framing(cfg) + roof(cfg) + vent_parts(cfg) + weatherstrip(cfg) + bed_parts(cfg) + egg_chute_parts(cfg)
+    return (walls(cfg) + framing(cfg) + roof(cfg) + vent_parts(cfg) + weatherstrip(cfg) + bed_parts(cfg) + egg_chute_parts(cfg)
+            + service_door_parts(cfg))
 
 
 def roof_clearance():

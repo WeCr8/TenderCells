@@ -36,6 +36,13 @@ ART = {  # node -> (prim name, joint type, axis, limits, pivot mm, drive)
     "nest_lid": ("NestLid", "revolute", "Y", (-P.LID_OPEN_DEG, 0.0), (P.NB_X0, 0, P.LID_HINGE_Z)),
     "hood_door": ("HoodDoor", "revolute", "Y", (0.0, 105.0), (P.HOOD_X1 + 9, 0, P.HOOD_ROOF_Z)),
 }
+try:   # human service doors (service_params / house.svc_pivot), 180 deg strap hinges
+    import house as _H, service_params as _SVP
+    for _n, _d, _nm in (("svc_sd1", "SD1", "ServiceDoorLeft"), ("svc_sd2", "SD2", "ServiceDoorBack")):
+        (_px, _py), _sg = _H.svc_pivot(_d)
+        ART[_n] = (_nm, "revolute", "Z", (0.0, _SVP.OPEN_DEG) if _sg > 0 else (-_SVP.OPEN_DEG, 0.0), (_px, _py, 0))
+except Exception:
+    pass
 
 
 def gf_mat(Mx):
@@ -309,7 +316,7 @@ def export(cfg, out_dir):
         UsdPhysics.CollisionAPI.Apply(cube.GetPrim())
         cube.GetPrim().SetCustomDataByKey("tc:what", f"chain-link fabric collider: {nm}")
     # articulated doors
-    for node in ("pop_door", "act_rod", "cleanout", "run_door", "nest_lid", "hood_door"):
+    for node in ("pop_door", "act_rod", "cleanout", "run_door", "nest_lid", "hood_door", "svc_sd1", "svc_sd2"):
         fixed_base_articulation(stage, "/World/Coop/Articulations", node, objs, mats, cfg)
     # robot
     if cfg in ("plus", "pro"):

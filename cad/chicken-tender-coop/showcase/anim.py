@@ -284,6 +284,12 @@ def node_tf(cfg, node, t):
         s = seg(t, 22.3, 23.3) * (1 - seg(t, 24.0, 24.9))
         cw = P.CLEANOUT[0]
         return R_axis((0, 0, 1), -P.CLEANOUT_OPEN_DEG * s, (P.COOP_W / 2 - cw / 2, P.COOP_Y1 + P.PLY_WALL, 0))
+    if node in ("svc_sd1", "svc_sd2"):     # human service doors swing 180 deg (house.svc_pivot)
+        import house as H
+        s = seg(t, 22.3, 23.3) * (1 - seg(t, 24.0, 24.9))
+        (px, py), sg = H.svc_pivot("SD1" if node == "svc_sd1" else "SD2")
+        import service_params as SVP
+        return R_axis((0, 0, 1), sg * SVP.OPEN_DEG * s, (px, py, 0))
     if node == "run_door":
         s = seg(t, 9.6, 10.4) * (1 - seg(t, 11.2, 12.0))
         import run_chainlink as RC

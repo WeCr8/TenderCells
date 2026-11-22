@@ -39,7 +39,8 @@ def parts(cfg):
     for x0, side in ((P.GY_RAIL_X[0], "left"), (P.GY_RAIL_X[1], "right")):
         S.append(SPart("G-YRAIL", f"Y rail {side}: 2040 extrusion + MGN12 rail", "rail", STEP, box(x0, x0 + 20, ya, yb, za, zb), configs=c, bom="G-YRAIL"))
         S.append(SPart("G-YRAIL", f"MGN12 rail {side}", "metal", STEP, box(x0 + 4, x0 + 16, ya, yb, zb, zb + 8), configs=c, bom="G-YRAIL"))
-        S.append(SPart("G-YMOT", f"Y motor NEMA17 {side} (dual Y, auto-squared)", "dark", STEP, box(x0 - 11, x0 + 31, yb - 50, yb - 8, za - 48, za), configs=c, bom="G-MOT"))
+        xm = max(x0 - 11, P.T2 + 0.5)    # left motor clears the SD1 service-door frame plane (x 0..38, service_params)
+        S.append(SPart("G-YMOT", f"Y motor NEMA17 {side} (dual Y, auto-squared)", "dark", STEP, box(xm, xm + 42, yb - 50, yb - 8, za - 48, za), configs=c, bom="G-MOT"))
         S.append(SPart("G-BELT", f"GT2 9 mm belt Y {side} + guard", "belt", STEP, box(x0 + 2, x0 + 18, ya + 20, yb - 20, za - 6, za), configs=c, bom="G-BELT"))
         S.append(SPart("G-BG", f"belt guard Y {side} (printed, hens can't peck the belt)", "box", STEP, box(x0 - 2, x0 + 22, ya + 15, yb - 15, za - 14, za - 6), configs=c, bom="G-PRINT", alpha=0.6))
         S.append(SPart("G-LS", f"Y home switch {side} (front)", "estop", STEP, box(x0 + 20, x0 + 30, ya, ya + 12, za + 10, za + 30), configs=c, bom="G-LS"))

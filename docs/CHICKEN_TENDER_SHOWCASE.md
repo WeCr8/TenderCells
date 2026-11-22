@@ -168,6 +168,36 @@ Egg grid: 3 x 3 per box at -80/0/+80 mm (18 slots, **ASSUMED**). The SO-101 is c
 - **Plus (~$710 more).** Adds an open-source LeRobot SO-101 arm. Families teach it by hand with the leader arm, and it learns in NVIDIA Isaac Sim. It reaches 14 of 18 nest spots directly, and all of them with the centering pad. The same data pipeline feeds better policies over time, which is the AI and education story.
 - **Pro (~$1,010 more).** The SO-101 on a short gantry reaches all 18 nest spots with margin. The gantry and Jetson leave room for more tasks (feed checks, a cleaning pass, more boxes), and it adds an interlocked door and a second E-STOP. It is the premium and classroom/demo unit. A UR3e-class industrial arm is deliberately out of scope for a 4 x 4 ft coop.
 
+## Service doors (Zach 2026-11-22; `showcase/service_params.py`, `house.service_door_parts`)
+
+Two human doors let you service the house without taking anything apart. Both close like a shed door: the
+door skin is the wall siding, set in an over-size cut so it laps a 2x4 door frame by 3/4 in and presses on an
+EPDM bulb, with a 1x4 Z-brace inside, galvanized T-strap hinges and a Z-flashing drip cap over the head.
+
+| Door | Where | Clear opening | Use it for |
+|---|---|---|---|
+| **SD1** | Left wall, the whole bay between the corner posts, below the gantry rail | 38 x 18.3 in, sill 29.8 in above grade | Topping up and raking bedding, the floor ledge, roost, waterer, wiping the droppings-board front edge |
+| **SD2** | Back wall (the old 36 x 28 cleanout, made bigger) | 35.5 x 35.1 in, sill 31.9 in above grade, top 67 in | Deep clean (walls, pit pan, droppings board), gantry/arm and tool-dock service, checking the bed-cassette slot |
+
+**Opening a door:** unclip the carabiner from each barrel bolt, slide both bolts back, swing the door out. Both
+swing a full 180 deg and lie flat: SD1 forward along the run's left chain-link, SD2 flat against the back wall
+toward the right. **Closing:** push the door onto its seal, slide both bolts home and clip both carabiners back on
+(the carabiner is the second step a raccoon can't undo).
+
+**Bedding change** is still done by pulling the bed cassette out the back slot (motorized on Plus/Pro); SD1 and
+SD2 are for topping up, raking and the jobs the cassette can't reach.
+
+**The robot will not run while any service door is open.** Each door has a door-closed reed: **RS-SD1** (SD1,
+on the back jamb) and **RS-SD2** (SD2, on the left jamb). The reeds are wired in series with the motor-power
+relay (after the E-STOP), and each also goes to its own controller input. If either door opens, the gantry, arm,
+litter tiller and cassette drive stop and won't start. When both doors are shut again, the robot still waits for
+you to re-arm it in the app. It never restarts on its own. Before you open a door on Plus/Pro, send the gantry to
+its service pose at the back. The pop door is the hens' door and is not on this interlock.
+
+There is no service door on the right wall: the nest box/egg-bay hood, egg chute, vent V2 and right rail fill
+it, and the nest floor is only 4 in above the coop floor. For the nest and eggs, use the nest lid (Starter) or
+the hood door (Plus/Pro).
+
 ## Open engineering questions
 1. Which actual Starter actuator (listing still not chosen)? Its force, speed, current and hole size must be verified.
 2. Should the closed door stop at the sill (full 11 in clear) or keep the ½ in overlap (10.5 in)? Firmware limit and reed placement follow from that choice.

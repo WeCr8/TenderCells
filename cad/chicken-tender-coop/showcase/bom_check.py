@@ -7,12 +7,15 @@ but no document lists it (showcase adds it, priced as an estimate); NOT-MODELLED
 import csv, json, math, os
 from collections import Counter
 import sc_params as P, sc_model as M, engineering as E
+import ebay_params as EP
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 BOMD = "hardware/chicken-tender-starter/out/BOM.md (PR #188)"
 HW = "hardware/chicken-tender-starter/hw/chicken-tender-starter.hw.yaml (PR #188)"
 PIN = "docs/CHICKEN_TENDER_PINOUT.md (PR #188)"
 GUIDE = "docs/CHICKEN_TENDER_BUILD_GUIDE.md s7 (PR #189)"
+EBD = "docs/CHICKEN_TENDER_ELECTRONICS_BAY.md + ebay.py (showcase 2026-11-22)"
+SVC = "service doors (Zach 2026-11-22; house.py walls/framing + service_params.py, other agent)"
 
 
 def rows():
@@ -33,10 +36,14 @@ def rows():
     add("M1", "12 V linear actuator, 300 mm stroke, built-in limits", BOMD, 1, 1, "OK",
         "Starter listing still 'verify listing'; model uses the parts.yaml minimums (420/720 mm hole-hole). Pro = Glideforce LACT12-12V-05")
     add("S1", "DHT20 temp/humidity (Adafruit 5183)", BOMD + "; " + GUIDE, 1, q("S1"), "OK", "left wall, mid-depth, 14 in above the floor")
-    add("SW1", "22 mm mushroom NC E-STOP", BOMD + "; " + GUIDE + "; " + PIN, "1 NC (BOM) / 2 NC (guide, pinout with WROOM)", q("SW1"),
-        "MISMATCH", "BOM lists 1 NC contact; guide s7 table says two NC contacts. Consistent only if the 2nd block is the Pro add-on (guide phase 2 '2nd NC contact block'). Say so in the BOM.")
+    add("SW1", "22 mm mushroom NC E-STOP + NC contact blocks", BOMD + "; " + GUIDE + "; " + PIN, "1 NC (BOM) / 2 NC (guide, pinout with WROOM)",
+        f"1 head + {EP.ESTOP_NC_BLOCKS} NC blocks" if EP.EBAY else q("SW1"), "MISMATCH",
+        "BOM lists 1 NC contact; guide/pinout say 2 (XIAO SLEEP + WROOM GPIO32). Plus/Pro need a 3rd NC block for the EB2 motor-rail relay coil "
+        "(hardware cut of gantry/cassette/SO-101; the XIAO/WROOM blocks only stop their own boards). Fix: BOM = 1 head + 3 NC blocks (Base/Starter 2). "
+        "Catalog s14 still says 'normally-open pushbutton': wrong, must be NC (fail-safe). Head moves to a back-wall station (EB-ESTOP).", est_usd="3 per extra block")
     add("RS1 RS2", "door reeds (closed + open) + magnet", BOMD + "; " + GUIDE, 2, 2, "OK", f"closed reed at the guide bottom, open reed {P.DOOR_LIFT:.0f} mm up")
-    add("J1", "5.5x2.1 panel DC jack", BOMD, 1, q("J1"), "OK", "box bottom")
+    add("J1", "5.5x2.1 panel DC jack", BOMD, 1, q("J1"), "OK" if not EP.EBAY else "MISMATCH",
+        "box bottom" if not EP.EBAY else "under-coop bay: use an IP67 panel jack (or PG9 gland + strain relief) on the EB1 bottom; the plain 5.5x2.1 jack is not weather-rated")
     add("F1", "inline 3 A blade fuse", BOMD, 1, q("F1"), "OK")
     add("PS1", "12 V 3 A Class 2 adapter", BOMD + "; " + GUIDE, 1, q("PS1"), "ASSUMED", "GFCI outlet location not given; modelled on a post ~0.9 m behind the coop")
     add("TB1 TB2", "5.08 mm terminals", BOMD, 2, 2 if q("TB1 TB2") else 0, "OK", "drawn as one block")
@@ -48,22 +55,35 @@ def rows():
         f"routed path {cl['path_closed_mm']} mm + 2 x 80 mm knots/tails; the 1 m in the BOM is too short -> buy 2 m")
     add("PULLEY", "180 deg turnaround sheave (25 mm) + printed bracket", "-", 0, q("PULLEY"), "MISSING-IN-DOC",
         f"a direct rod -> cord-eye pull needs {d['direct_pull_fits']['needed_eye_to_fixed_clevis_mm']} mm from the eye to the wall clevis; the coop has {d['direct_pull_fits']['available_mm']} mm. Add a sheave by the right front post.", est_usd="4")
-    add("GLAND", "PG7 cable glands", BOMD + "; " + GUIDE, 3, q("GLAND"), "OK", "BOM purpose (actuator + reeds) differs from the guide (actuator / sensors / camera-spare); count matches")
+    add("GLAND", "PG7 cable glands", BOMD + "; " + GUIDE, 3, q("GLAND"), "OK", "BOM purpose (actuator + reeds) differs from the guide (actuator / sensors / camera-spare); count matches"
+        + ("; now on the EB1 bottom (extra bay glands = EB-GLAND)" if EP.EBAY else ""))
     add("WIRE", "harness W13-W20", HW + "; " + GUIDE, "actuator 1.5 m, reeds 1.2 m, sensors 1.2 m, camera 1.5 m", "; ".join(f"{k} {v / 1000:.2f} m" for k, v in rl.items()),
-        "MISMATCH", "routed along the guide's path (glands -> back-left post -> under C10 -> front nailer C9): reeds need ~3.0-3.3 m, actuator ~1.8 m, DHT ~1.6 m. Update W13/W14/W18/W19/W20 len_mm.")
-    add("CTRL-BOX", "control box outside the back wall, top at 56 in", GUIDE, 1, 1, "MISMATCH",
-        "the 36 x 28 in cleanout door spans x 6..42 in and z 29.25..57.25 in, so a box with its top at 56 in only fits in the 6 in strip left of the door (as seen from behind). Modelled 130 mm wide there; a wider box needs to go above 57.25 in or on the side wall.")
+        "MISMATCH", ("routed from the EB1 bottom glands: drip loop -> sealed chase on the back-left post -> under the left top plate -> front nailer: "
+                     "reeds ~4.4-4.7 m, actuator ~3.2 m (20 AWG: ~0.4 V drop at 2 A, OK), DHT20 ~3.8 m and MQ-137 ~3.8 m (sensors moved to the front-left post for SD1; I2C over 3 m: drop to 50 kHz or add a P82B715 extender), camera ~2.9 m. "
+                     "Update W13/W14/W18/W19/W20 len_mm (buy reeds with 5 m leads or splice in the LB). Old back-wall box route was 3.0-3.3 m reeds vs the 1.2 m in the docs.")
+        if EP.EBAY else "routed along the guide's path (glands -> back-left post -> under C10 -> front nailer C9): reeds need ~3.0-3.3 m, actuator ~1.8 m, DHT ~1.6 m. Update W13/W14/W18/W19/W20 len_mm.")
+    if EP.EBAY:
+        add("CTRL-BOX", "control box outside the back wall, top at 56 in", GUIDE, 1, 0, "MISMATCH",
+            "RESOLVED by the under-coop bay: the guide-s7 box clashed with the cleanout door (only a 6 in strip left); its boards move to EB1, the E-STOP to a back-wall station. Update guide s7.")
+    else:
+        add("CTRL-BOX", "control box outside the back wall, top at 56 in", GUIDE, 1, 1, "MISMATCH",
+            "the 36 x 28 in cleanout door spans x 6..42 in and z 29.25..57.25 in, so a box with its top at 56 in only fits in the 6 in strip left of the door (as seen from behind). Modelled 130 mm wide there; a wider box needs to go above 57.25 in or on the side wall.")
     add("CAM", "XIAO ESP32-S3 Sense camera node", GUIDE + "; " + PIN, 1, q("CAM"), "OK", "front-left upper corner, ~6 in below the roof; not in the Starter BOM (guide phase 3, ~$20)")
-    add("WROOM", "ESP32-WROOM-32 DevKit V1 (coop sensor / feeder controller)", PIN + "; " + GUIDE, 1, q("WROOM", ("plus", "pro")), "OK", "Pro add-on, second box below the control box (Plus/Pro models)", configs="plus, pro")
+    add("WROOM", "ESP32-WROOM-32 DevKit V1 (coop sensor / feeder controller)", PIN + "; " + GUIDE, 1, q("WROOM", ("plus", "pro")), "OK",
+        "Pro add-on; in bay EB1 lower DIN rail (Plus/Pro models). Branch firmware still has PIN_STEPPER_ENABLE 12 (strapping pin) and no GPIO32 E-STOP input: the PR #188 fix (818cf10, GPIO33 + GPIO32) is not on this branch - merge it"
+        if EP.EBAY else "Pro add-on, second box below the control box (Plus/Pro models)", configs="plus, pro")
     add("MQ137", "MQ-137 ammonia module in a hardware-cloth cage", PIN + "; " + GUIDE, 1, q("MQ137", ("plus", "pro")), "OK",
         f"left wall, 12 in above floor, at y {P.MQ_Y / P.IN:.0f} in so it stays >= 18 in from the roost (guide gives no depth: ASSUMED)", configs="plus, pro")
     add("DIV", "MQ-137 divider 15 k top / 12 k bottom + 100 nF", PIN, 1, q("DIV", ("plus", "pro")), "OK", "x12/27 = 0.444; 5.25 V -> 2.33 V", configs="plus, pro")
     add("BUCK5", "5 V buck for WROOM + MQ-137 heater", PIN + "; " + GUIDE, 1, q("BUCK5", ("plus", "pro")), "OK", configs="plus, pro")
     add("DHT22", "DHT22 on the WROOM board", PIN + "; " + GUIDE, 1, q("DHT22", ("plus", "pro")), "OK", configs="plus, pro")
     add("FEEDER", "gravity feeder hung from joist C3", GUIDE, 1, 1, "OK", "motor + HX711 load cell (phase 4) not modelled")
-    for ref, item in (("TB6600", "cleaning stepper driver (WROOM GPIO33/14/27)"), ("FEED-DRV", "feeder DC motor driver (2nd DRV8874, GPIO26/25)"),
-                      ("HX711", "HX711 + load cell (feeder)")):
-        add(ref, item, PIN + "; " + GUIDE, 1, 0, "NOT-MODELLED", "later phase; no mounting position in the guide")
+    add("TB6600", "cleaning stepper driver (WROOM GPIO33/14/27)", PIN + "; " + GUIDE, 1, 0, "MISMATCH",
+        "DUPLICATE on gantry configs: the gantry + scraper tool T1 does the cleaning, so the standalone scraper stepper + TB6600 (96 x 56 mm, 4 A) is not needed on Plus/Pro. "
+        "Keep only for a no-gantry scraper build; free GPIO33/14/27 for bay I/O otherwise.")
+    add("FEED-DRV", "feeder DC motor driver (2nd DRV8874, GPIO26/25)", PIN + "; " + GUIDE, 1, q("FEED-DRV", ("plus", "pro")) if EP.EBAY else 0,
+        "OK" if EP.EBAY else "NOT-MODELLED", "on the WROOM carrier in EB1" if EP.EBAY else "later phase; no mounting position in the guide", configs="plus, pro")
+    add("HX711", "HX711 + load cell (feeder)", PIN + "; " + GUIDE, 1, 0, "NOT-MODELLED", "later phase; mounts at the feeder (in the run), not in the bay")
     for ref in ("INS-M3", "SCR-M3x8", "SCR-M3x6", "SCR-WOOD"):
         add(ref, "fasteners", BOMD, "-", 0, "NOT-MODELLED", "fasteners are not drawn")
     add("C14/C15", "pop-door guides + lips", GUIDE + " step 8", 2, 2, "MISMATCH", "guide: INSIDE the front wall; the PR #189 CAD has them outside. Showcase follows the guide.")
@@ -123,7 +143,73 @@ def rows():
                                  ("PRO-RAIL", "Pro Y gantry (2040 + MGN12) + carriage", "pro", "60"),
                                  ("PRO-MOT", "Pro NEMA17 + GT2 + driver", "pro", "30")):
         add(ref, item, "showcase (not in any doc)", 0, 1, "MISSING-IN-DOC", "robot option part, rough price", configs=cfgs, est_usd=usd)
+    if EP.EBAY:
+        ebay_rows(add, q)
+    service_door_rows(add)
+    app_gap_rows(add)
+    covered = {r["ref"] for r in R} | {"PLA/PETG", "R2 R3", "TB1 TB2", "WIRE", "OUTLET"}
+    allkeys = set().union(*[set(cnt[c]) for c in M.ALL])
+    for k in sorted(allkeys - covered):
+        cf = ", ".join(c for c in M.ALL if cnt[c][k])
+        add(k, "modelled part with no BOM row (auto audit)", "sc_model parts (bom key)", "-", max(cnt[c][k] for c in M.ALL), "NO-BOM-ROW",
+            "drawn in the CAD but nothing in the BOM tables prices it: add a row", configs=cf)
     return R
+
+
+def ebay_rows(add, q):
+    """Under-coop electronics bay (est prices ASSUMED, no purchases)."""
+    E2 = ", ".join(EP.EB2_CFGS)
+    for ref, item, qty, cfgs, usd, note in (
+        ("EB-ENCL", EP.ENCL_NAME, "1 (Base/Starter) / 2 (Plus/Pro)", "all", "45 each", "EB1 door + sensor box; EB2 motion box. ASSUMED size class (300 x 200 x 130 swings under the pan; 250 tall does not)"),
+        ("EB-TRAY", "drop-down tray: 6 mm HDPE plate, 2 stainless lift-off hinges, 2 stay arms + chain, spring plunger pin, pull handle", "1 per box", "all", "28 each", "no tools: pull the pin, tray tips back 90 deg, lid faces up"),
+        ("EB-HANGER", "hanger frame: 1-1/2 in aluminium angle (2 legs + crossbar), M6 through-bolts + fender washers into the pit pan", "1 per box", "all", "18 each", ""),
+        ("EB-DRIP", "drip roof 18 ga aluminium, 40 mm overhang, front drip edge, nylon spacers (5 mm air gap)", "1 per box", "all", "12 each", ""),
+        ("EB-DIN", "35 mm DIN rail 260 mm", "2 per box", "all", "3 each", ""),
+        ("EB-TB", "DIN terminal blocks (12 V / GND / 5 V buses, E-STOP loop, field terminals) + end stops + jumpers", "1 set per box", "all", "20 each", "Wago 221 DIN carriers are a fine alternative"),
+        ("EB-GLAND", "extra cable glands (PG7 E-STOP, PG9 multi-hole, PG13.5 motor rail) - all on the box BOTTOM", "1-2 (EB1) + 6 (EB2)", "all", "1.5 each", "unused holes get blanking plugs"),
+        ("EB-VENT", "M12 IP67 membrane breather vent (ePTFE), box bottom", "1 per box", "all", "4 each", "stops pumping condensation on day/night swings"),
+        ("EB-CHASE", "sealed chase: 1-1/2 in Sch40 grey PVC (~0.9 m), bell end down, LB body + gasketed cover, duct seal, 3 straps, 1/2 in HC peck sleeve", "1", "all", "25", "one chase for both boxes, front face of the back-left post"),
+        ("EB-RACE", "EB2 raceway: 1 in Sch40 PVC (~1.0 m), 2 sweep elbows, sweep tee into the chase", "1", E2, "12", "runs in front of the cassette gearmotor"),
+        ("EB-HATCH", "service hatch in the back under-coop skirt: 1x2 PT frame, 1/2 in HC, 2 T-hinges (bottom), barrel bolt + locking carabiner, padlock hasp", "1 per box", "all", "22 each", "chain-link fabric cut + bound to the frame with tension wire / hog rings (run_chainlink.py still draws the fabric solid there)"),
+        ("EB-ESTOP", "1-hole IP65 22 mm E-STOP station box (back wall, left of the cleanout, 43 in)", "1", "all", "12", "contact blocks counted in SW1"),
+        ("EB-FUSE", "DIN 6-way ATC blade fuse block + fuses (motor rail)", "1", E2, "18", ""),
+        ("EB-RLY", "motor-rail relay 12 V coil 30 A + DIN socket (coil via E-STOP NC block 3) + flyback diode", "1", E2, "15", "hardware motor cut on Plus/Pro"),
+        ("EB-GCTL", "4-axis ESP32 motion controller with 4 x TMC2209 (FluidNC-class), UART to the WROOM", "1", E2, "45", "ASSUMED part; no gantry controller in any doc yet"),
+        ("CAS-DRIVE", "bed cassette drive: 12 V worm gearmotor + encoder, M1.5 rack 3 x 400, 20T pinion, Pololu G2 18v17-class driver", "1 set", E2, "95", "drawn in house.py; driver now in EB2"),
+        ("CAS-LS", "cassette limit switches (home / 24 in service / full) + slot-flap switch, IP67 roller micro", "4", E2, "4 x 6", "drawn in house.py; terminals in EB2"),
+        ("EB-BUS", "SO-101 bus-servo adapter (Feetech URT-1 class)", "1", E2, "12", "arm host (Pi 5 / Jetson) stays indoors or in the egg bay, NOT in the bay (heat)"),
+        ("EB-DCDC", "12 -> 6 V 5 A buck (damper servos x3 + tiller fold servo)", "1", E2, "10", ""),
+        ("PS2", EP.PS_MOTOR, "1", E2, "30", "motor-rail budget ~10.6 A peak if everything ran at once; firmware interlock keeps gantry and cassette apart -> ~8 A. Starter picker: upsize PS1 to 12 V 5 A Class 2 instead"),
+        ("EB-COAT", "conformal coating (acrylic, MG 419D class) for all bay PCBs except connectors / XIAO antenna", "1 can", "all", "20", ""),
+        ("EB-DESIC", "rechargeable silica-gel desiccant pack 40 g (tie-wrapped inside the lid)", "1 per box", "all", "4 each", "swap each winter"),
+        ("EB-LOOM", "split loom + UV zip ties for the drip loops / chase run", "3 m", "all", "8", ""),
+    ):
+        add(ref, item, EBD, qty, q(ref) if ref not in ("EB-COAT", "EB-DESIC", "EB-LOOM") else "not drawn", "MISSING-IN-DOC", note, configs=cfgs, est_usd=usd + " ASSUMED")
+
+
+def service_door_rows(add):
+    """Service-door hardware (doors drawn by the service-door agent). Prices ASSUMED, no purchases."""
+    for ref, item, qty, usd, note in (
+        ("SD-HINGE", "6 in galvanised/black strap hinges (large left side door, back service door) + 3 in T-hinges (right lower bedding panel)", "6 strap + 2 T", "6 x 6 + 2 x 4", "exterior screws, through-bolt the strap hinge leaf into the post"),
+        ("SD-LATCH", "two-step latches: barrel bolt + spring snap / locking carabiner on each door (raccoon-proof)", "3 sets", "3 x 9", "guide rule: two latching actions per door"),
+        ("SD-EPDM", "EPDM D-profile weatherstrip, self-adhesive", "~10 m", "18", "door stops + bedding panel"),
+        ("SD-DRIP", "Z-flashing drip cap over each door head (aluminium)", "3 x ~1.2 m", "3 x 8", "tuck under the siding above"),
+        ("SD-REED", "door-closed reed switches (NC/NO surface, wired to WROOM spare inputs, e.g. GPIO16/17/39)", "3", "3 x 5", "app can alert 'service door open at dusk'; inputs ASSUMED, not in firmware"),
+    ):
+        add(ref, item, SVC, qty, "drawn by service-door agent", "MISSING-IN-DOC", note, est_usd=usd + " ASSUMED")
+
+
+def app_gap_rows(add):
+    """Hardware the CAD/app expects with no controller pin / firmware yet (found in the 2026-11-22 review)."""
+    for ref, item, cfgs, note in (
+        ("IO-FAN", "exhaust fan PWM (25 kHz) + tach, damper servos x3, cassette PWM/DIR/CS + 4 limits", "plus, pro",
+         "no pin in PINOUT / firmware. Proposal: WROOM GPIO23 fan PWM (LEDC 25 kHz), GPIO34 tach, PCA9685 on I2C 21/22 for 3 dampers + tiller fold, G2 PWM/DIR on 18/19, CS on GPIO36, limits on MCP23017 (same I2C). ASSUMED"),
+        ("BED-SENS", "bed temperature: DS18B20 stainless probe (house.py) vs catalog s9 'BME280' for composting heat", "plus, pro",
+         "keep DS18B20 (waterproof, to 125 C, 1-wire on GPIO16 + 4.7 k); a BME280 cannot be buried in wet litter. Fix the catalog line"),
+        ("PULLEY-NOTE", "door actuator 760 mm direct pull vs 483 mm available", "all",
+         "keep the turnaround sheave (PULLEY row) - or switch the Starter to a 200 mm stroke actuator with a 2:1 cord block (ASSUMED alternative)"),
+    ):
+        add(ref, item, "2026-11-22 app/firmware review", "-", 0, "MISSING-IN-DOC", note, configs=cfgs)
 
 
 if __name__ == "__main__":

@@ -55,22 +55,28 @@ def ellipsoid(c, r):
 
 
 # ------------------------------------------------------------------------------ steps (kid build order)
-STEPS = ["Floor frame", "Posts", "Floor", "Walls", "Roof", "Run frame", "Doors", "Hardware cloth + apron",
-         "Nest box, roost, ramp", "Door electronics", "Robot egg bay"]
+STEPS = ["Floor frame", "Posts", "Floor + bed cassette", "Walls", "Roof", "Run frame", "Doors", "Hardware cloth + apron",
+         "Nest box, roost, ramp", "Door electronics + vents", "Robot egg bay", "Gantry + tool dock"]
 STEP_OF = {"C1": 0, "C2": 0, "C3": 0, "C4": 1, "C5": 1, "P1": 2, "P2": 3, "P3": 3, "P4": 3, "C9": 3,
            "C6": 4, "C7": 4, "C8": 4, "ROOF": 4, "R1": 5, "R2": 5, "R3": 5, "R4": 5, "R5": 5, "R6": 5, "R7": 5,
            "HC": 7, "C11": 8, "C12": 8, "P7": 8, "1x2": 8}
 
 
 def coop_structure():
+    import house as H
     """PR #189 parts minus the ones the showcase rebuilds (doors, nest box, outside pop-door guides)."""
     drop_names = ("pop door (shown open)", "pop-door guide", "cleanout door (the cut-out)")
     out = []
+    gable = P.HOUSE == "gable"
     for p in CM.all_parts():
         if p.name in drop_names or p.pid in ("P6",) or p.group in ("RUN", "MESH"):
             continue                      # run frame + hardware-cloth run/apron replaced by run_chainlink.py
+        if gable and (p.pid in H.DROPPED_PIDS or (p.pid == "C1" and "back" in p.name)):
+            continue                      # framed gable house + bed cassette replace these (house.py)
         out.append(SPart(p.pid, p.name, p.layer, STEP_OF.get(p.pid, 3), p.shape,
                          alpha=0.28 if p.layer == "mesh" else 1.0))
+    if gable:
+        return out
     # side top nailers C10 (cut list, not in the PR #189 CAD): along the top of each side wall, inside
     ang = math.atan((P.FRONT_WALL_TOP - P.BACK_WALL_TOP) / P.COOP_D)
     for x0, side in ((0, "left"), (P.COOP_W - P.S2, "right")):
@@ -83,6 +89,10 @@ def coop_structure():
 
 
 # ------------------------------------------------------------------------------ doors
+def cleanout_z0():
+    return P.CLEANOUT_Z0_NEW if P.HOUSE == "gable" else P.CLEANOUT_Z0
+
+
 def door_parts():
     S = []
     dw, dh = P.DOOR_PANEL
@@ -114,12 +124,13 @@ def door_parts():
     cw, ch = P.CLEANOUT
     cx0 = P.COOP_W / 2 - cw / 2
     yb = P.COOP_Y1 + P.PLY_WALL
+    cz = cleanout_z0()
     S.append(SPart("P3", "cleanout / access door 36x28 (hinged)", "door", 6,
-                   box(cx0, cx0 + cw, yb, yb + P.PLY_WALL, P.CLEANOUT_Z0, P.CLEANOUT_Z0 + ch), node="cleanout"))
+                   box(cx0, cx0 + cw, yb, yb + P.PLY_WALL, cz, cz + ch), node="cleanout"))
     S.append(SPart("C16", "cleanout door frame (2x2)", "lumber", 6,
-                   box(cx0 + 20, cx0 + cw - 20, yb + P.PLY_WALL, yb + P.PLY_WALL + P.S2, P.CLEANOUT_Z0 + 20, P.CLEANOUT_Z0 + 20 + P.S2), node="cleanout"))
+                   box(cx0 + 20, cx0 + cw - 20, yb + P.PLY_WALL, yb + P.PLY_WALL + P.S2, cz + 20, cz + 20 + P.S2), node="cleanout"))
     S.append(SPart("LATCH", "barrel bolt + carabiner (two-step latch)", "metal", 6,
-                   box(cx0 + cw - 80, cx0 + cw - 10, yb + P.PLY_WALL, yb + P.PLY_WALL + 15, P.CLEANOUT_Z0 + ch / 2 - 12, P.CLEANOUT_Z0 + ch / 2 + 12), node="cleanout"))
+                   box(cx0 + cw - 80, cx0 + cw - 10, yb + P.PLY_WALL, yb + P.PLY_WALL + 15, cz + ch / 2 - 12, cz + ch / 2 + 12), node="cleanout"))
     return S
 
 
@@ -230,8 +241,8 @@ def egg_parts():
 
 
 def basket_parts(cfg):
-    if cfg == "base":
-        return []
+    if cfg == "base" or cfg in P.GANTRY_CFGS:
+        return []                          # gantry configs: the egg tray sits in the exterior egg drawer (house.py)
     cx, cy = P.BASKET_PLUS if cfg in ("plus", "pro") else P.BASKET_RAIL
     L, W, H = P.BASKET_IN
 
@@ -312,6 +323,8 @@ def plus_parts():
 
 # ------------------------------------------------------------------------------ electronics (PR #188 + guide section 7)
 def left_wall_top(y):
+    if P.HOUSE == "gable":
+        return P.HOUSE_EAVE_Z              # level top plates now (cables run under the left top plate)
     return P.FRONT_WALL_TOP - (y - P.COOP_Y0) / P.COOP_D * (P.FRONT_WALL_TOP - P.BACK_WALL_TOP)
 
 
@@ -371,10 +384,17 @@ def electronics_parts(cfg):
         S.append(SPart("DHT22", "DHT22 (Pro board), next to the DHT20", "pcb", 9,
                        box(0, 8, (P.COOP_Y0 + P.COOP_Y1) / 2 + 30, (P.COOP_Y0 + P.COOP_Y1) / 2 + 55, P.DHT_Z - 15, P.DHT_Z + 15), configs=(cfg,), bom="DHT22"))
     # gravity feeder hung from joist C3 (guide: under the coop, bottom ~8-10 in)
-    S.append(SPart("FEEDER", "gravity feeder hung from joist C3 (motor + load cell later)", "metal", 8,
-                   cyl((P.XC, (P.COOP_Y0 + P.COOP_Y1) / 2, 9 * P.IN), (P.XC, (P.COOP_Y0 + P.COOP_Y1) / 2, 9 * P.IN + 300), 100), bom="FEEDER"))
-    S.append(SPart("FEEDER", "feeder hanger", "metal", 8,
-                   cyl((P.XC, (P.COOP_Y0 + P.COOP_Y1) / 2, 9 * P.IN + 300), (P.XC, (P.COOP_Y0 + P.COOP_Y1) / 2, P.FLOOR_FRAME_Z0), 3), bom="FEEDER"))
+    if P.HOUSE == "gable":    # the bed pit replaced joist C3: feeder re-hung in the run in front of the coop, from the run roof truss
+        fx, fy = P.FEEDER_MOVED
+        S.append(SPart("FEEDER", "gravity feeder (moved: hung in the run in front of the coop; motor + load cell later)", "metal", 8,
+                       cyl((fx, fy, 9 * P.IN), (fx, fy, 9 * P.IN + 300), 100), bom="FEEDER"))
+        S.append(SPart("FEEDER", "feeder hanger chain (from the coop-end cross rail)", "metal", 8,
+                       cyl((fx, fy, 9 * P.IN + 300), (fx, fy, P.CL_TOP_Z - 30), 3), bom="FEEDER"))
+    else:
+        S.append(SPart("FEEDER", "gravity feeder hung from joist C3 (motor + load cell later)", "metal", 8,
+                       cyl((P.XC, (P.COOP_Y0 + P.COOP_Y1) / 2, 9 * P.IN), (P.XC, (P.COOP_Y0 + P.COOP_Y1) / 2, 9 * P.IN + 300), 100), bom="FEEDER"))
+        S.append(SPart("FEEDER", "feeder hanger", "metal", 8,
+                       cyl((P.XC, (P.COOP_Y0 + P.COOP_Y1) / 2, 9 * P.IN + 300), (P.XC, (P.COOP_Y0 + P.COOP_Y1) / 2, P.FLOOR_FRAME_Z0), 3), bom="FEEDER"))
     return S
 
 
@@ -404,8 +424,13 @@ def cable_routes(cfg):
     cam_y = P.COOP_Y0 + 230
     R["camera power (gland 3)"] = trunk(xb + 35)[:4] + [(xr, cam_y + 30, zC10(cam_y + 30)), (xr, cam_y + 30, P.CAM_Z + 25)]
     ox, oy, oz = P.OUTLET_POS
-    R["12 V Class 2 lead -> J1"] = [(ox, oy - 75, oz - 40), (ox, oy - 75, 20), (xb + 35, oy - 75, 20),
-                                    (xb + 35, yb + P.CTRL_BOX[2] / 2, 20), (xb + 35, yb + P.CTRL_BOX[2] / 2, P.CTRL_BOX_TOP_Z - P.CTRL_BOX[1] - 15)]
+    if P.HOUSE == "gable":   # rerouted: up the outside of the back-left corner so it never crosses the bed-cassette slot path
+        zj = P.CTRL_BOX_TOP_Z - P.CTRL_BOX[1] - 15
+        R["12 V Class 2 lead -> J1"] = [(ox, oy - 75, oz - 40), (ox, oy - 75, 20), (-40, oy - 75, 20), (-40, yb + P.CTRL_BOX[2] / 2, 20),
+                                        (-40, yb + P.CTRL_BOX[2] / 2, zj), (xb + 35, yb + P.CTRL_BOX[2] / 2, zj)]
+    else:
+        R["12 V Class 2 lead -> J1"] = [(ox, oy - 75, oz - 40), (ox, oy - 75, 20), (xb + 35, oy - 75, 20),
+                                        (xb + 35, yb + P.CTRL_BOX[2] / 2, 20), (xb + 35, yb + P.CTRL_BOX[2] / 2, P.CTRL_BOX_TOP_Z - P.CTRL_BOX[1] - 15)]
     if cfg in ("plus", "pro"):
         R["MQ-137 cable (WROOM)"] = trunk(xb + 35)[:4] + [(xr, P.MQ_Y, zC10(P.MQ_Y)), (xr, P.MQ_Y, P.MQ_Z + 30)]
     return R
@@ -451,10 +476,16 @@ def parts(cfg):
     import run_chainlink as RC
     out = (coop_structure() + RC.run_parts() + door_parts() + door_mechanism() + cord_parts() + nest_parts() + egg_parts()
            + basket_parts(cfg) + hood_parts(cfg) + electronics_parts(cfg) + cable_parts(cfg) + hen_parts())
+    if P.HOUSE == "gable":
+        import house as Hs
+        out += Hs.house_parts(cfg)
     if cfg == "starter":
         out += starter_parts()
-    if cfg == "plus":
+    if cfg in P.GANTRY_CFGS:
+        import gantry
+        out += gantry.parts(cfg)
+    elif cfg == "plus":
         out += plus_parts()
-    if cfg == "pro":
+    elif cfg == "pro":
         out += pro_parts()
     return [p for p in out if cfg in p.configs]

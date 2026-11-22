@@ -178,3 +178,118 @@ RUN_GUARD = os.environ.get("RUN_GUARD", "hardware_cloth_skirt")   # none | chick
 RUN_GUARD_H = float(os.environ.get("RUN_GUARD_H_IN", "36")) * IN   # lower 36 in; chicken wire may be 72 (full)
 RUN_APRON = os.environ.get("RUN_APRON", "buried")                  # buried (recommended) | surface (guide) | none
 APRON_DEPTH = 3 * IN                  # buried L-footer: 12 in outward, 2-4 in below grade
+
+# =====================================================================================================
+# 2026-11-21 08:36-08:41 design changes (Zach): gable "house" roof on a framed coop house, controlled
+# vents (dampers + fan), deep-bed cassette floor with a motorized slot drive, and a ceiling gantry that
+# carries the SO-101 with a tool dock. The 08:37 insulation brief was withdrawn by Zach at 08:39 ("no
+# insulation just the wood and posts"): no wall/floor foam, no liner, no R-value work. Only the optional
+# foam under the corrugated roof stays (ROOF_FOAM toggle).
+# =====================================================================================================
+HOUSE = os.environ.get("HOUSE", "gable")          # gable (new default) | shed (PR #189 single-slope roof)
+# ---- coop house frame: posts + studs + top plates + rafters + ridge board, wood siding
+HOUSE_EAVE_Z = FRONT_WALL_TOP                     # all four walls now 72 in (back wall was 60 in)
+HOUSE_PITCH = RUN_ROOF_PITCH                      # 3:12 gable to MATCH the run roof (Zach 2026-11-22 08:24: "both need
+                                                  # to match"); ridge along Y so the eaves shed left/right. 3:12 is below
+                                                  # the usual 4:12 corrugated minimum, so every side + end lap gets butyl
+                                                  # tape (HLAP) and the house stays sealed like a shed: closed gables,
+                                                  # eave blocking, foam closures, sealed ridge cap; only the screened,
+                                                  # damper-controlled vents V1-V3 open (warmth stays in)
+HOUSE_EAVE_OH = 6 * IN                            # eave overhang (left/right)
+HOUSE_RAKE_OH = 3 * IN                            # gable (rake) overhang front/back: keeps the run roof gap
+POST_TOP_Z = HOUSE_EAVE_Z - T2                    # all 4 corner posts stop under the top plate
+TOP_PLATE = (T2, W2)                              # 2x4 flat, 38 x 89
+RAFTER_Y = None                                   # computed: 4 rafter pairs, ~16 in o.c. (house.py)
+RIDGE_BOARD = (T2, 5.5 * IN)                      # 2x6
+SIDING_NOTE = "wood siding panels (T1-11 style); modelled at the PR #189 15/32 wall thickness"
+ROOF_FOAM = os.environ.get("ROOF_FOAM", "board")  # board (1/2 in foil-faced foam board on the purlins, under the
+                                                  # panels: stops condensation dripping on hens) | none
+ROOF_FOAM_T = 0.5 * IN
+HOUSE_HALF = COOP_W / 2 + PLY_WALL                # half span to the outer wall face
+RIDGE_X = COOP_W / 2
+
+# ---- controlled ventilation (the only openings at the top): 1 sq ft per 10 sq ft of floor
+VENT_TARGET_SQIN = COOP_W_IN * COOP_D_IN / 10.0  # 230 sq in for the 4 x 4 ft coop
+VENTS = {   # id: (wall, u0, u1 (along wall), z0, z1, role)  wall coords: left/right -> u = y, front -> u = x
+    "V1": ("left", COOP_Y0 + 292.0, COOP_Y0 + 292.0 + 16 * IN, HOUSE_EAVE_Z - T2 - 5 * IN, HOUSE_EAVE_Z - T2, "high exhaust + fan"),
+    "V2": ("right", COOP_Y0 + 292.0, COOP_Y0 + 292.0 + 16 * IN, HOUSE_EAVE_Z - T2 - 5 * IN, HOUSE_EAVE_Z - T2, "high exhaust"),
+    "V3": ("front", 150.0, 150.0 + 10 * IN, 860.0, 860.0 + 8 * IN, "low intake (baffled)"),
+}
+FAN = dict(size=120.0, depth=38.0, cfm_free=110.0, cfm_installed=80.0, i_max_A=0.9,   # 120x38 12 V 4-wire PWM, ASSUMED
+           pwm_hz=25000, winter_pct=30, trickle_pct=20)
+DAMPER_SERVO = "MG90S-class metal-gear servo on a sliding HDPE plate"                   # ASSUMED
+
+# ---- NH3 / climate control (coop_air logic; MQ-137 ppm per PR #188 mq137.h)
+AIR = dict(nh3_ok=10.0, nh3_fan_on=15.0, nh3_fan_full=20.0, nh3_alarm=25.0, nh3_alarm_clear=20.0, nh3_hyst=5.0,
+           t_hot_C=29.4, t_hot_clear_C=27.0, t_cold_C=1.7, t_winter_C=7.0, rh_high=75.0, rh_clear=68.0,
+           winter_burst_s=60, winter_burst_every_s=900, night_fan_max_pct=30, intake_max_winter_pct=25,
+           mix_trend_ppm_per_h=2.0, mix_cooldown_h=12.0)
+MQ137 = dict(r_top_k=15.0, r_bottom_k=12.0, rl_k=10.0, m=-0.263, b=0.42, clean_ratio=3.6, vc=5.0, ppm_max=500.0)
+
+# ---- deep-bed cassette (MASTER_SPEC s6-8, HARDWARE_CATALOG s6-7): the coop floor is a bedding tray that a
+# gearmotor drives out through a gasketed slot in the back wall. The coop floor drops into a pit so the
+# bedding surface sits at the old floor level (pop door, ramp, roost, nest heights unchanged).
+PIT_PAN_TOP = 450.0                               # 1/2 in pan (predator floor) top, mm above grade
+PIT_PAN_T = 12.7
+PIT_BOTTOM = PIT_PAN_TOP - PIT_PAN_T              # 437 mm = 17.2 in under-coop headroom (was 24 in)
+PIT_WALL_X = (T2 + W2, COOP_W - T2 - W2)          # pit walls line up with the corner-post inner faces
+PIT_WALL_T = 0.75 * IN
+SLIDE_T = 0.75 * IN                               # 500 lb 44 in locking full-extension slide (VEVOR-class), ASSUMED
+SLIDE_H = 53.0
+SLIDE_L = 44 * IN
+TRAY_X = (PIT_WALL_X[0] + PIT_WALL_T + SLIDE_T, PIT_WALL_X[1] - PIT_WALL_T - SLIDE_T)
+TRAY_Y = (COOP_Y0 + 2 * T2 + PIT_WALL_T, COOP_Y1 + PLY_WALL)   # front wall behind the front posts .. flush with the back siding
+TRAY_Z0 = 490.0                                    # tray bottom (rack underneath rides 15 mm above the pan)
+TRAY_FLOOR_T = 0.5 * IN + 3.0                      # 1/2 ext ply + 1/8 HDPE liner
+TRAY_WALL_T = 0.75 * IN
+TRAY_DEPTH_IN = 10.0                               # inner wall height: 8-10 in fill per MASTER_SPEC s7
+TRAY_FLOOR_TOP = TRAY_Z0 + TRAY_FLOOR_T
+TRAY_RIM_Z = TRAY_FLOOR_TOP + TRAY_DEPTH_IN * IN
+BED_FILL_IN = float(os.environ.get("BED_FILL_IN", "9"))
+BED_TOP_Z = TRAY_FLOOR_TOP + BED_FILL_IN * IN
+BED_TOP_MAX_Z = TRAY_FLOOR_TOP + TRAY_DEPTH_IN * IN
+BED_DENSITY = dict(dry_pine=120.0, wet_composting=350.0)       # kg/m3, ASSUMED (loose dry shavings / wet deep litter)
+POOP_BIN_Y0 = 3380.0                               # rear compartment of the tray (under the droppings board)
+CASSETTE_TRAVEL = dict(service=24 * IN, full=SLIDE_L - 10.0)   # 24 in = catalog s6 travel (poop bin), full = bed change
+CASSETTE_DRIVE = dict(kind="12 V worm gearmotor + M1.5 steel rack + 20T pinion", rpm=40.0, stall_Nm=6.9, pinion_pd=30.0,
+                      i_rated_A=1.6, i_stall_A=3.5, driver="Pololu G2 18v17-class (current-sense out)")   # ASSUMED listing values
+CASSETTE_CONFIGS = ("plus", "pro")                 # motorized; base/starter keep the same tray on slides, hand-pulled
+SLOT = dict(z0=TRAY_Z0 - 15.0, z1=TRAY_RIM_Z + 12.0, flap_hinge_z=TRAY_RIM_Z + 30.0)
+CLEANOUT_Z0_NEW = 32 * IN                          # cleanout door raised above the slot header (was 29.25 in)
+UNDER_BACK_FABRIC_TOP = PIT_BOTTOM - 7.0           # under-coop back chain-link now stops under the pit (was 25 in)
+FEEDER_MOVED = (COOP_W / 2, COOP_Y0 - 350.0)       # feeder re-hung in the run in front of the coop (the pit took C3)
+DROP_BOARD = dict(x0=80.0, x1=COOP_W - 80.0, y0=3120.0, y1=3520.0, z_top=ROOST_TOP_Z - T2 - 217.0, t=12.7)
+
+# ---- ceiling gantry (Plus/Pro): Y rails on the side walls, X bridge, moving Z mast, SO-101 inverted on the mast
+GANTRY_CFGS = tuple(c for c in os.environ.get("GANTRY_CFGS", "plus,pro").split(",") if c)
+GY_RAIL_X = (45.0, COOP_W - 65.0)                 # 2040 rails stand off the side walls (cables run behind them)
+GY_RAIL_Y = (COOP_Y0 + 2 * T2 + 6.0, COOP_Y1 - 2 * T2 - 6.0)   # between the front and back corner posts
+GY_RAIL_Z = (1265.0, 1305.0)                      # 2040 on edge; MGN12 on top
+GX_BEAM_Z = (1326.0, 1386.0)                      # 2060 bridge on the Y carriages
+GZ_TOP = 1380.0                                   # arm base face (inverted) at the top of the Z stroke (park)
+GZ_BOTTOM = 900.0                                 # lowest base face (litter work)
+GZ_TRAVEL_MAX = 1280.0                            # base must be <= this to move X/Y (mast top under the rafters); was 1300
+                                                  # at 4:12, lowered 20 mm for the 3:12 roof: mast top 1840 vs rafter
+                                                  # underside ~1864 at the X travel ends (x 130 / 1090) -> ~24 mm clear
+GZ_MAST_L = 560.0
+G_PARK = (1000.0, 2650.0, GZ_TOP)                 # arm base at park: front-right, in the rafter bay y 2476-2845
+G_SPEED = dict(xy_max=100.0, xy_near_wall=50.0, z_max=20.0, accel=500.0)   # mm/s, mm/s2 soft limits
+G_MASS = dict(so101=0.632, wrist_qc=0.02, z_mast=1.35, x_carriage=0.45, bridge_per_m=1.6, y_carriage=0.35,
+              tiller=0.45, cable_chain=0.25)       # kg, ASSUMED except the SO-101 (URDF sum)
+TOOLS = {   # id: (name, mass kg, length mm from the gripper frame to the working tip, mount)
+    "T0": ("soft egg gripper (native SO-101 jaws + silicone pads)", 0.02, 0.0, "jaws"),
+    "T1": ("droppings-board scraper, 200 mm HDPE blade", 0.09, 120.0, "wrist QC"),
+    "T2": ("litter rake / fork, 3 tines x 120 mm", 0.08, 150.0, "wrist QC"),
+    "T3": ("nest-box brush, 100 mm", 0.06, 120.0, "wrist QC"),
+    "T4": ("wet-spot scoop, 80 ml", 0.07, 130.0, "wrist QC"),
+    "T5": ("OPTIONAL water/feeder check probe or spray nozzle", 0.05, 120.0, "wrist QC"),
+    "M1": ("litter tiller: 12 V gearmotor + 90 mm spiral tines (on the Z mast)", 0.45, 260.0, "mast"),
+}
+DOCK = dict(y=COOP_Y0 + 2 * T2 + 2.0, z_hook=1340.0,   # plate on the front studs/posts, tools hang in forks
+            slots={"T2": 180.0, "T3": 275.0, "T4": 365.0, "T1": 945.0, "T5": 1062.0})   # x of each fork (left + right of the pop door)
+GX_RANGE = (130.0, 1090.0)                        # arm-base x (mast) travel
+GY_OFF = 60.0                                     # mast/arm base sits this far in front (-Y) of the bridge centre
+EGG_CHUTE = dict(mouth=(1170.0, 2620.0, 1110.0), drawer=(1330.0, 2615.0, 905.0))   # inside mouth top, exterior drawer centre
+COLORS_SC.update({"foam": (0.78, 0.80, 0.62), "bedding": (0.86, 0.74, 0.50), "siding": (0.74, 0.58, 0.40),
+                  "hdpe": (0.92, 0.93, 0.90), "belt": (0.08, 0.08, 0.08), "chain": (0.25, 0.25, 0.27),
+                  "fan": (0.20, 0.22, 0.25), "drop": (0.80, 0.82, 0.84)})

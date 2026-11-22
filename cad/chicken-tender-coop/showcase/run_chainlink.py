@@ -52,7 +52,7 @@ def fabric_rects():
             ("right run wall", "x", xr - P.CL_PO, (P.CL_GATE_END_Y, P.CL_COOP_END_Y), (50.0, zt), "static"),
             ("under-coop left (11 in buried footer)", "x", xl_u, (P.CL_COOP_END_Y, yb), (zu0, zu1), "static"),
             ("under-coop right (11 in buried footer)", "x", xr_u, (P.CL_COOP_END_Y, yb), (zu0, zu1), "static"),
-            ("under-coop back (11 in buried footer)", "y", yb, (xl_u, xr_u), (zu0, zu1), "static")]
+            ("under-coop back (11 in buried footer)", "y", yb, (xl_u, xr_u), (zu0, P.UNDER_BACK_FABRIC_TOP if P.HOUSE == "gable" else zu1), "static")]
 
 
 def gate_geom():

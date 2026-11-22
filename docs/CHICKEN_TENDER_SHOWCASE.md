@@ -51,6 +51,9 @@ Predator layer toggle (environment variables): `RUN_GUARD=none|chicken_wire|hard
    - Framing: 5 trusses at ≤ 24 in centres (2x2 chords and king post) clamped to the top rails, 3 purlins per slope, 4 in overhangs.
    - Covering: panels with ribs running down-slope, a ridge cap, foam closures.
    - Hardware cloth closes the two gable triangles and the strip from the run roof to the coop front wall.
+   - **Coop house roof matches it (Zach, 2026-11-22):** the house gable is now 3:12 too (was 4:12), ridge front-to-back, ridge top ~81.7 in. Because 3:12 is under the usual 4:12 corrugated minimum, every side lap gets butyl tape.
+   - The house stays sealed at the roof like a shed so warmth stays in: closed gable triangles, eave blocking, foam eave and rake closures, a sealed ridge cap and foam board under the panels. The only openings are the screened, damper-controlled vents V1-V3.
+   - Gantry: the Z travel limit for X/Y moves drops 20 mm (1300 to 1280 mm) so the mast top clears the lower rafters by ~24 mm at the ends of X travel.
 3. **Predator note (kept, not dropped).**
    - 2 in chain-link alone lets raccoons reach through, and snakes, weasels and rats get in.
    - Chicken wire (the `chicken_wire` toggle) keeps chicks and small birds in or out, but raccoons tear it and reach through it.

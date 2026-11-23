@@ -1,0 +1,145 @@
+{
+ "solids": 78,
+ "bbox_in": [
+  -12.0,
+  -12.0,
+  -0.58,
+  64.44,
+  156.0,
+  82.25
+ ],
+ "files_MB": {
+  "CT_COOP_A_assembly.step": 1.56,
+  "CT_COOP_A_coop_only.step": 0.94,
+  "CT_COOP_A_framing_no_mesh.step": 1.38
+ },
+ "cut_list_modelled": {
+  "C1": {
+   "qty": 2,
+   "lengths_in": [
+    48
+   ]
+  },
+  "C12": {
+   "qty": 1,
+   "lengths_in": [
+    45
+   ]
+  },
+  "C14": {
+   "qty": 2,
+   "lengths_in": [
+    26
+   ]
+  },
+  "C2": {
+   "qty": 2,
+   "lengths_in": [
+    45
+   ]
+  },
+  "C3": {
+   "qty": 1,
+   "lengths_in": [
+    45
+   ]
+  },
+  "C4": {
+   "qty": 2,
+   "lengths_in": [
+    75.5
+   ]
+  },
+  "C5": {
+   "qty": 2,
+   "lengths_in": [
+    63.5
+   ]
+  },
+  "C6": {
+   "qty": 2,
+   "lengths_in": [
+    41
+   ]
+  },
+  "C7": {
+   "qty": 3,
+   "lengths_in": [
+    60
+   ]
+  },
+  "C8": {
+   "qty": 3,
+   "lengths_in": [
+    54
+   ]
+  },
+  "C9": {
+   "qty": 2,
+   "lengths_in": [
+    41
+   ]
+  },
+  "R1": {
+   "qty": 2,
+   "lengths_in": [
+    96
+   ]
+  },
+  "R10": {
+   "qty": 1,
+   "lengths_in": [
+    40
+   ]
+  },
+  "R2": {
+   "qty": 1,
+   "lengths_in": [
+    45
+   ]
+  },
+  "R3": {
+   "qty": 3,
+   "lengths_in": [
+    41,
+    45
+   ]
+  },
+  "R4": {
+   "qty": 4,
+   "lengths_in": [
+    72
+   ]
+  },
+  "R5": {
+   "qty": 2,
+   "lengths_in": [
+    96
+   ]
+  },
+  "R6": {
+   "qty": 2,
+   "lengths_in": [
+    45
+   ]
+  },
+  "R7": {
+   "qty": 4,
+   "lengths_in": [
+    18
+   ]
+  },
+  "R8": {
+   "qty": 2,
+   "lengths_in": [
+    66
+   ]
+  },
+  "R9": {
+   "qty": 3,
+   "lengths_in": [
+    34
+   ]
+  }
+ }
+}

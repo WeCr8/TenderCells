@@ -5,7 +5,7 @@
 **Document ID:** TC-CHKN-HW-001  
 **Product Family:** Chicken Tender™  
 **Platform:** TenderCells™  
-**Revision:** A
+**Revision:** B (2026-11-20)
 
 ---
 
@@ -107,6 +107,7 @@ This document serves as the master hardware catalog for Chicken Tender™ and re
 **Purpose:** Chicken entry/exit to outdoor run or coop
 
 **Automation Options:**
+- 12 V linear actuator lifting a cord-hung door (Starter/Pro standard: door falls closed under its own weight; `hardware/chicken-tender-starter`)
 - Servo-driven (9-12kg torque)
 - Linear actuator (100-150N)
 - Lead screw mechanism (manual or motorized)
@@ -215,7 +216,7 @@ This document serves as the master hardware catalog for Chicken Tender™ and re
 | Sensor | Purpose | Typical | Notes |
 |--------|---------|---------|-------|
 | Moisture | Detect wet bedding | DHT22 + analog | Capacitive soil probe alternative |
-| Temperature | Monitor composting heat | BME280 | Peak 140-160°F during active decomposition |
+| Temperature | Monitor composting heat | DS18B20 stainless probe (waterproof, 1-wire, to 125°C) | Peak 140-160°F during active decomposition. Do not use a BME280 here: it cannot be buried in wet litter |
 | Ammonia (NH₃) | Odor & health monitor | MQ-137 | Alert threshold: 10 ppm (warning), 25 ppm (critical) |
 
 ---
@@ -366,13 +367,13 @@ This document serves as the master hardware catalog for Chicken Tender™ and re
 | SHT31 | -40 to 125°C | ±0.2°C, ±2%RH | $$ | High precision |
 | AM2302 | -40 to 80°C | ±0.5°C | $ | Wired version of DHT22 |
 
-**Recommended:** DHT22 (cost-effective, adequate for poultry)
+**Recommended:** one DHT22 / AM2302 (single-wire) per coop: on the XIAO door controller (D4) for Base/Starter, on the WROOM coop controller (GPIO4) for Plus/Pro. The I2C DHT20 is no longer used: the sensor sits ~3.8 m of cable from the under-coop electronics bay, and I2C is unreliable at that length (decision 2026-11-22).
 
 ### Ammonia (NH₃) Monitoring
 
 | Sensor | Range | Output | Cost | Notes |
 |--------|-------|--------|------|-------|
-| MQ-137 | 5-100 ppm | Analog (0-5V) | $ | Most available, slow response |
+| MQ-137 | 5-500 ppm (datasheet) | Analog (0-5V) | $ | Most available, slow response. 0-5 V output needs a 15 k / 12 k divider to the ESP32 ADC (<= 2.33 V) and a clean-air calibration; see [pinout](https://github.com/WeCr8/TenderCells/blob/main/docs/CHICKEN_TENDER_PINOUT.md#ammonia-sensor-mq-137---divider-adc-and-ppm) |
 | DGS-NDIR | 0-400 ppm | UART/analog | $$$ | Accurate, fast (NDIR) |
 | Alphasense OXD-F10 | 0-50 ppm | 0-5V | $$ | Industrial grade |
 
@@ -451,25 +452,29 @@ This document serves as the master hardware catalog for Chicken Tender™ and re
 
 ## 14. Motion Electronics & Controllers
 
-### Main Controller
+### Controllers (match the firmware in this repo)
 
-**Current Standard:** ESP32-S3
-- 32-bit processor @ 240 MHz
-- 512 KB RAM, 16 MB Flash
-- WiFi + Bluetooth
-- 38 GPIO pins
-- ADC, PWM, I2C, SPI, UART
-- OTA firmware updates supported
+Pin-by-pin wiring for every board: [CHICKEN_TENDER_PINOUT.md](https://github.com/WeCr8/TenderCells/blob/main/docs/CHICKEN_TENDER_PINOUT.md).
+
+| Job | Board | PlatformIO board | Firmware |
+|-----|-------|------------------|----------|
+| Door controller (Starter and up) | Seeed XIAO ESP32-S3 (8 MB flash, 11 header GPIO) | `seeed_xiao_esp32s3` | `firmware/chicken-tender-starter` |
+| Coop sensor / feeder controller (Pro add-on) | ESP32-WROOM-32 DevKit V1 (DOIT, 4 MB flash, 520 KB SRAM) | `esp32doit-devkit-v1` | `firmware/chicken-tender` |
+| Camera node (Plus and up) | Seeed XIAO ESP32-S3 Sense | `seeed_xiao_esp32s3` | `firmware/camera-node` |
+
+All three: Wi-Fi + Bluetooth, MQTT (`tc/{id}/...`), Arduino-ESP32 core 2.0.x (espressif32 6.9.0).
+The earlier "ESP32-S3, 512 KB RAM, 16 MB flash, 38 GPIO" main controller matched no firmware
+and has been replaced by the table above (2026-11-20).
 
 **Future Option:** Industrial PLC or NVIDIA Jetson (for AI inference)
 
 ### Motor Drivers
 
-**Current Standard:** TB6600 Stepper Driver
-- 2-5A current (adjustable)
-- Microstepping: 1-32
-- Support: NEMA 17, NEMA 23 steppers
-- Cost: $20-40 per unit
+| Use | Driver | Notes |
+|-----|--------|-------|
+| Pop door (12 V linear actuator) | Pololu DRV8874 carrier (#4035) | ~2.0 A limit (20 k VREF), current sense ~1.1 V/A, NC E-STOP in the SLEEP line |
+| Feeder DC gearmotor (Pro) | Pololu DRV8874 or similar H-bridge | WROOM GPIO26 on/off + GPIO25 direction |
+| Cleaning scraper / rail steppers (Pro) | TB6600 (2-5 A, 1-32 microstep, NEMA 17/23, $20-40) | WROOM GPIO33 enable (active LOW), GPIO14 step, GPIO27 dir |
 
 **Future Options:**
 - DM542 (closed-loop, higher current)
@@ -479,7 +484,7 @@ This document serves as the master hardware catalog for Chicken Tender™ and re
 
 | Component | Function | Type |
 |-----------|----------|------|
-| E-STOP Button | Emergency motion cut | Normally-open pushbutton |
+| E-STOP Button | Emergency motion cut | 22 mm mushroom head, twist release, **normally-closed (NC) contact blocks only** (fail-safe: a cut wire stops the machine). 3 NC blocks on Plus/Pro (door SLEEP, WROOM GPIO32, motor-rail relay coil), 2 on Base/Starter |
 | Limit Switches | End-of-travel safety | Reed or mechanical |
 | Homing Switches | Position reference | Mechanical or optical |
 | Relay Module | 12V/5V logic control | Electromagnetic or solid-state |
@@ -761,4 +766,4 @@ Supports **quick-disconnect end effectors** for multi-function operation.
 
 ---
 
-**Document ID:** TC-CHKN-HW-001 | **Revision:** A | **Last Updated:** 2026-06-12
+**Document ID:** TC-CHKN-HW-001 | **Revision:** B | **Last Updated:** 2026-11-20 (controllers and motor drivers matched to firmware; MQ-137 divider)

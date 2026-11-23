@@ -188,6 +188,9 @@ jobs:
       - name: Build Chicken Tender firmware
         run: cd firmware/chicken-tender && pio run
 
+      - name: Chicken Tender MQ-137 ppm host tests (divider, Rs/R0, curve, battery gain)
+        run: make -C firmware/chicken-tender/test/host
+
       - name: Build WatchTower firmware
         run: cd firmware/watchtower && pio run
         continue-on-error: true

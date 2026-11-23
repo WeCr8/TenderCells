@@ -16,4 +16,4 @@ Imported: docs, BOM, electronics tables, audit and parameter tables, global CAD 
 Left out on purpose: STEP/STL/GLB files (about 16 MB), vendor reference CAD, brand assets, marketing images, and the web/React Native app integration. They stay with the owner's original package (`TenderCells_Feeder_MASTER_v9_ENGINEERING_RECONCILED.zip`, received 2026-11-22).
 
 ## Known mismatches to resolve
-See `docs/feeder/v9-untested/` comparison notes once the Hermes comparison card finishes. Open question already visible: the schedule UI offers feed amounts up to 5000 g while the backend clamps at 1000 g; the v9 hopper holds roughly 1.5-1.8 kg, and one pocket holds roughly 12-14 g if completely filled (planning density band only).
+See `COMPARISON_NOTES.md` in this folder. Headline items: the schedule UI offers feed amounts up to 5000 g while the backend clamps at 1000 g; the v9 hopper holds roughly 1.5-1.8 kg, and one pocket holds roughly 12-14 g if completely filled (planning density band only).

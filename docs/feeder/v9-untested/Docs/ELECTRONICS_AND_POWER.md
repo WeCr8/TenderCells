@@ -1,3 +1,5 @@
+> **SUPERSEDED TEXT (added 2026-11-22):** the default actuator is the 28BYJ-48 geared stepper with a ULN2003, not an MG996R servo. The MG996R text below is kept as received. Use `Electronics/POWER_BUDGET.csv` (5 V, 2 A or better) and `ENGINEERING_REVIEW_INDEPENDENT.md` for the current electrical notes.
+
 # Electronics and power
 
 Controller: Seeed Studio XIAO ESP32C3. Load-cell ADC: HX711. Actuator: genuine or dimensionally verified MG996R-class positional servo.

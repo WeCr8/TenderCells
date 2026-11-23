@@ -100,6 +100,7 @@ const CORE: MenuItem[] = [
   { id: "simulator", label: "Trigger an Event", icon: <BoltIcon />, path: "/simulator" },
   { id: "builder", label: "Builder", icon: <ConstructionIcon />, path: "/builder" },
   { id: "missions", label: "Missions", icon: <FlagIcon />, path: "/missions" },
+  { id: "coop-3d", label: "Coop 3D Demo", icon: <PetsIcon />, path: "/demo/coop" },
   { id: "resources", label: "Resources", icon: <MenuBookIcon />, path: "/resources" },
   { id: "library", label: "Animal & Plant Library", icon: <LocalLibraryIcon />, path: "/library" },
   { id: "projects", label: "DIY Projects", icon: <HandymanIcon />, path: "/projects" },

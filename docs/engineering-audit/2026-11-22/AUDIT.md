@@ -37,6 +37,17 @@
 - STEP files of the Base and Starter showcase variants were measured (222 and 237 solids) and interference-tested (299 / 301 overlaps), not triaged by name.
 - Anything that needs the hardware: timing, motor torque, thermal, EMC, power-on behaviour.
 
+## Update 2 (v0.2 tools, same day): gantry, variants, fasteners, scorecard
+Run with `eng_guardian` v0.2 (private repo `hark-local-tools`, branch `hermes/eng-guardian-2026-11-22`).
+| # | Finding | Severity | Evidence |
+|---|---|---|---|
+| 12 | **The committed Plus and Pro showcase STEP files are stale.** `step/CT_COOP_A_showcase_plus.step` has 249 solids and no ceiling-gantry parts (it still has the old under-hood SO-101 mount `PLUS-PLATE`); Pro has the old short Y gantry (`PRO-RAIL/CAR/MOT`). A fresh export from the same branch's CAD code (`python export_step.py options plus`) has 562 solids: 38 gantry (`G-*`) parts, electronics bays, service doors, the deep-bed cassette and cable runs. 289 parts exist only in the fresh export, 52 only in the committed file, 38 changed. The video and the code show the ceiling gantry; the STEP files do not. | High (model does not match what is built) | `raw/variant_diff_plus_committed_vs_regenerated.json` |
+| 13 | **Draft gantry spec built from the CAD parameters** (`gantry_spec_coop_plus_pro.json`): X/Y/Z are GT2 9 mm belts with printed belt guards, NEMA17 steppers, MGN12 rails; Z has a constant-force spring counterbalance and the E-STOP cuts axis power. The review reports 2 HIGH (no jam/stall detection for the gantry or the motorized bedding), a counterbalance check for Z (residual imbalance with each tool mass; spring failure mode), and MISSING_INPUT for the mounting fasteners, deep-bedding drive and egg-bed alignment numbers. It does NOT flag belt overload or motor torque with the CAD's own assumed values. | High / needs data | `raw/gantry_review_coop_plus_pro_draft.json` |
+| 14 | **Feeder housing hole edge distance:** the four vertical Ø4.5 holes are 3 mm from the housing end face (0.75 mm wall, 0.67 x D); they stay flagged on the V9b proposal. | High | `raw/scorecard_feeder-v9b.json` |
+
+Scorecards (same checks on both): feeder v9 original **0/100, 28 high, ~21.5 days**; V9b proposal **53/100, 4 high (the vertical-hole edge distance), ~6 days**. Gantry draft **66/100, 2 high**, 3 required checks not yet run.
+Method limits: the gantry spec uses the CAD source's own ASSUMED values; no fasteners, drive torque margins or alignment budget are confirmed; the STEP comparison is by part name and volume.
+
 ## Recommended next steps
 1. WatchTower: decide the ADC pins from the schematic (finding 1) and fix the divider constant (2). Highest value, small change.
 2. Gantry: review `proposals/gantry_controller.diff`, set real `mm_per_step` and travel limits, then test on the bench with the motors unloaded before any load.

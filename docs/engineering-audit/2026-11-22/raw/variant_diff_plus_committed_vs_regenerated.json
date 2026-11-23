@@ -1,0 +1,244 @@
+{
+ "committed_solids": 249,
+ "regenerated_solids": 562,
+ "only_in_committed": 52,
+ "only_in_regenerated": 289,
+ "changed": 38,
+ "new_part_names_sample": [
+  "basket_egg_tray_padded_apriltag_tag36h11_id0_in_the_drawer",
+  "bed_moist_bedding_moisture_probe_capacitive_i2c",
+  "bed_temp_bedding_temperature_probe_ds18b20_stainless",
+  "c1_floor_rim_back_stub_left_rim_cut_for_the_bed_slot",
+  "c1_floor_rim_back_stub_right_rim_cut_for_the_bed_slot",
+  "c4_front_post_left_to_the_top_plate",
+  "c4_front_post_right_to_the_top_plate",
+  "c5_back_post_left_to_the_top_plate_was_63_5_in",
+  "c5_back_post_right_to_the_top_plate_was_63_5_in",
+  "cable_12_v_class_2_lead_j1_seg_5",
+  "cable_12_v_class_2_lead_j1_seg_6",
+  "cable_camera_power_gland_3_seg_6",
+  "cable_camera_power_gland_3_seg_7",
+  "cable_camera_power_gland_3_seg_8",
+  "cable_e_stop_loop_3_nc_blocks_seg_1",
+  "cable_e_stop_loop_3_nc_blocks_seg_2",
+  "cable_e_stop_loop_3_nc_blocks_seg_3",
+  "cable_e_stop_loop_3_nc_blocks_seg_4",
+  "cable_e_stop_loop_3_nc_blocks_seg_5",
+  "cable_mq_137_cable_wroom_seg_10",
+  "cable_mq_137_cable_wroom_seg_11",
+  "cable_mq_137_cable_wroom_seg_6",
+  "cable_mq_137_cable_wroom_seg_7",
+  "cable_mq_137_cable_wroom_seg_8",
+  "cable_mq_137_cable_wroom_seg_9",
+  "cable_ps2_motor_rail_lead_seg_1",
+  "cable_ps2_motor_rail_lead_seg_2",
+  "cable_ps2_motor_rail_lead_seg_3",
+  "cable_ps2_motor_rail_lead_seg_4",
+  "cable_ps2_motor_rail_lead_seg_5",
+  "cable_ps2_motor_rail_lead_seg_6",
+  "cable_w13_w14_actuator_cable_seg_7",
+  "cable_w13_w14_actuator_cable_seg_8",
+  "cable_w13_w14_actuator_cable_seg_9",
+  "cable_w18_door_closed_reed_seg_10",
+  "cable_w18_door_closed_reed_seg_8",
+  "cable_w18_door_closed_reed_seg_9",
+  "cable_w19_door_open_reed_seg_10",
+  "cable_w19_door_open_reed_seg_8",
+  "cable_w19_door_open_reed_seg_9",
+  "cable_w20_dht22_sensor_cable_seg_1",
+  "cable_w20_dht22_sensor_cable_seg_10",
+  "cable_w20_dht22_sensor_cable_seg_11",
+  "cable_w20_dht22_sensor_cable_seg_2",
+  "cable_w20_dht22_sensor_cable_seg_3",
+  "cable_w20_dht22_sensor_cable_seg_4",
+  "cable_w20_dht22_sensor_cable_seg_5",
+  "cable_w20_dht22_sensor_cable_seg_6",
+  "cable_w20_dht22_sensor_cable_seg_7",
+  "cable_w20_dht22_sensor_cable_seg_8",
+  "cable_w20_dht22_sensor_cable_seg_9",
+  "carrier_printed_petg_din_carrier_door_controller",
+  "carrier_printed_petg_din_carrier_wroom_sensor_feeder_board",
+  "cas_drv_pololu_g2_18v17_class_gearmotor_driver_current_sense",
+  "cas_ls_limit_switch_24_in_service_poop_bin",
+  "cas_ls_limit_switch_full_out",
+  "cas_ls_limit_switch_home_bin_seated",
+  "cas_mot_12_v_worm_gearmotor_40_rpm_7_n_m_stall_with_hall_enc",
+  "cas_pin_20t_m1_5_pinion_30_mm_pd_through_the_pan",
+  "cas_rack_m1_5_steel_gear_rack_under_the_tray_3_x_400_mm"
+ ],
+ "removed_part_names_sample": [
+  "basket_egg_basket_registered_pocket",
+  "c10_wall_top_nailer_left",
+  "c10_wall_top_nailer_right",
+  "c16_cleanout_door_frame_2x2",
+  "c1_floor_rim_back",
+  "c3_floor_joist_center",
+  "c4_front_post_left",
+  "c4_front_post_right",
+  "c5_back_post_left",
+  "c5_back_post_right",
+  "c6_roof_header_back",
+  "c6_roof_header_front",
+  "c7_rafter_1",
+  "c7_rafter_2",
+  "c7_rafter_3",
+  "c8_roof_purlin_1",
+  "c8_roof_purlin_2",
+  "c8_roof_purlin_3",
+  "c9_wall_top_nailer_back",
+  "c9_wall_top_nailer_front",
+  "cable_w20_dht20_sensor_cable_seg_1",
+  "cable_w20_dht20_sensor_cable_seg_2",
+  "cable_w20_dht20_sensor_cable_seg_3",
+  "cable_w20_dht20_sensor_cable_seg_4",
+  "cable_w20_dht20_sensor_cable_seg_5",
+  "ctrl_box_control_box_printed_petg_xiao_drv8874_d36v6f5",
+  "dht22_dht22_pro_board_next_to_the_dht20",
+  "f1_inline_3_a_blade_fuse",
+  "feeder_feeder_hanger",
+  "feeder_gravity_feeder_hung_from_joist_c3_motor_load_cell_lat"
+ ],
+ "changed_sample": [
+  {
+   "name": "buck5_5_v_buck_for_the_wroom_mq_137_heater",
+   "volume_a_cm3": 1.6,
+   "volume_b_cm3": 1.8,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_12_v_class_2_lead_j1_seg_2",
+   "volume_a_cm3": 11.73,
+   "volume_b_cm3": 17.89,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_12_v_class_2_lead_j1_seg_3",
+   "volume_a_cm3": 21.93,
+   "volume_b_cm3": 20.9,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_12_v_class_2_lead_j1_seg_4",
+   "volume_a_cm3": 34.7,
+   "volume_b_cm3": 2.83,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_camera_power_gland_3_seg_1",
+   "volume_a_cm3": 1.38,
+   "volume_b_cm3": 1.22,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_camera_power_gland_3_seg_2",
+   "volume_a_cm3": 2.69,
+   "volume_b_cm3": 5.1,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_camera_power_gland_3_seg_3",
+   "volume_a_cm3": 7.25,
+   "volume_b_cm3": 26.51,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_camera_power_gland_3_seg_4",
+   "volume_a_cm3": 27.4,
+   "volume_b_cm3": 0.98,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_camera_power_gland_3_seg_5",
+   "volume_a_cm3": 0.35,
+   "volume_b_cm3": 20.67,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_mq_137_cable_wroom_seg_1",
+   "volume_a_cm3": 1.38,
+   "volume_b_cm3": 1.22,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_mq_137_cable_wroom_seg_2",
+   "volume_a_cm3": 2.69,
+   "volume_b_cm3": 5.1,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_mq_137_cable_wroom_seg_3",
+   "volume_a_cm3": 7.25,
+   "volume_b_cm3": 26.51,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_mq_137_cable_wroom_seg_4",
+   "volume_a_cm3": 27.58,
+   "volume_b_cm3": 0.98,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_mq_137_cable_wroom_seg_5",
+   "volume_a_cm3": 18.74,
+   "volume_b_cm3": 20.67,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_w13_w14_actuator_cable_seg_1",
+   "volume_a_cm3": 1.38,
+   "volume_b_cm3": 1.22,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_w13_w14_actuator_cable_seg_2",
+   "volume_a_cm3": 0.71,
+   "volume_b_cm3": 3.1,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_w13_w14_actuator_cable_seg_3",
+   "volume_a_cm3": 7.25,
+   "volume_b_cm3": 26.51,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_w13_w14_actuator_cable_seg_4",
+   "volume_a_cm3": 32.18,
+   "volume_b_cm3": 0.98,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_w13_w14_actuator_cable_seg_5",
+   "volume_a_cm3": 5.05,
+   "volume_b_cm3": 20.67,
+   "count_a": 1,
+   "count_b": 1
+  },
+  {
+   "name": "cable_w13_w14_actuator_cable_seg_6",
+   "volume_a_cm3": 3.72,
+   "volume_b_cm3": 0.99,
+   "count_a": 1,
+   "count_b": 1
+  }
+ ],
+ "note": "committed = step/CT_COOP_A_showcase_plus.step on PR 189 branch 091952c7; regenerated = python export_step.py options plus from the same branch's CAD code"
+}

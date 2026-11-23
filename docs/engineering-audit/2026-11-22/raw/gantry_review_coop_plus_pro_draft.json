@@ -1,0 +1,75 @@
+{
+ "name": "TenderCells coop Plus/Pro ceiling gantry (DRAFT spec from cad/chicken-tender-coop/showcase/sc_params.py and gantry.py, PR 189 branch 091952c7)",
+ "variant": "plus",
+ "findings": [
+  {
+   "severity": "high",
+   "code": "NO_JAM_DETECTION",
+   "area": "protection",
+   "message": "no jam or stall detection stated (motor current, encoder, torque limiter or shear coupling): a jammed belt, screw or ball joint is not noticed",
+   "fix": "add stall detection on the driver or an encoder, plus a torque limiter or shear pin where a jam can cause damage"
+  },
+  {
+   "severity": "high",
+   "code": "BEDDING_NO_JAM_DETECTION",
+   "area": "bedding",
+   "message": "motorized bedding has no jam detection: shavings, eggs or a hen can stall it and overheat the motor",
+   "fix": "stall detection plus reverse-and-retry, and an E-STOP on the drive"
+  },
+  {
+   "severity": "medium",
+   "code": "COUNTERBALANCE_CHECK",
+   "area": "drive",
+   "message": "axis Z: vertical axis is held by a counterbalance (spring/counterweight), no brake. Check the residual imbalance for every tool mass (gripper vs tiller vs brush), the spring end-of-life/breakage failure mode, and add a mechanical catch or stop if the load can still fall or rise unexpectedly"
+  },
+  {
+   "severity": "medium",
+   "code": "MISSING_INPUT",
+   "area": "mounting",
+   "message": "mounting fastener size and count not given: rail/beam mounting capacity is unchecked"
+  },
+  {
+   "severity": "medium",
+   "code": "MISSING_INPUT",
+   "area": "bedding",
+   "message": "motorized deep-bedding drive needs bed mass, drive radius and drive torque"
+  },
+  {
+   "severity": "medium",
+   "code": "MISSING_INPUT",
+   "area": "egg_alignment",
+   "message": "egg-bed alignment needs the pocket width and the error terms (repeatability, backlash, sag, thermal, mounting tolerance)"
+  },
+  {
+   "severity": "info",
+   "code": "BELT_JAM_MODE",
+   "area": "protection",
+   "message": "axis X: belts jump teeth or shred when bedding or a foreign object enters the mesh: needs a cover, a jam/stall detector and a hard stop"
+  },
+  {
+   "severity": "info",
+   "code": "BEAM_OK",
+   "area": "structure",
+   "message": "axis X: beam deflection 0.06 mm, within 1.10 mm"
+  },
+  {
+   "severity": "info",
+   "code": "BELT_JAM_MODE",
+   "area": "protection",
+   "message": "axis Y: belts jump teeth or shred when bedding or a foreign object enters the mesh: needs a cover, a jam/stall detector and a hard stop"
+  },
+  {
+   "severity": "info",
+   "code": "BELT_JAM_MODE",
+   "area": "protection",
+   "message": "axis Z: belts jump teeth or shred when bedding or a foreign object enters the mesh: needs a cover, a jam/stall detector and a hard stop"
+  }
+ ],
+ "counts": {
+  "high": 2,
+  "medium": 4,
+  "info": 4
+ },
+ "result": "FAIL",
+ "note": "defaults are ASSUMED where stated; MISSING_INPUT findings mean the check could not run, not that the design is fine"
+}

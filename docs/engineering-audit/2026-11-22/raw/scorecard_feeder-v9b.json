@@ -1,0 +1,100 @@
+{
+ "project": "feeder-v9b",
+ "generated": "2026-11-22 19:46:15",
+ "readiness_score": 53,
+ "gate": "NOT READY",
+ "counts": {
+  "high": 4,
+  "medium": 2,
+  "info": 2
+ },
+ "weighted_points": 47.0,
+ "estimated_fix_effort_days": 6.0,
+ "hot_spots": [
+  {
+   "where": "solid_0 hole D4.5 at [-46.0, -30.0]",
+   "points": 10
+  },
+  {
+   "where": "solid_0 hole D4.5 at [46.0, -30.0]",
+   "points": 10
+  },
+  {
+   "where": "solid_0 hole D4.5 at [-46.0, 30.0]",
+   "points": 10
+  },
+  {
+   "where": "solid_0 hole D4.5 at [46.0, 30.0]",
+   "points": 10
+  },
+  {
+   "where": "solid_5 x solid_7",
+   "points": 3
+  },
+  {
+   "where": "solid_7 x solid_8",
+   "points": 3
+  }
+ ],
+ "fix_first": [
+  {
+   "severity": "high",
+   "code": "EDGE_DISTANCE",
+   "where": "solid_0 hole D4.5 at [-46.0, -30.0]",
+   "target": "housing_V9b.step",
+   "effort": "M",
+   "message": "hole centre only 3.0 mm from the edge (< 1 x D)"
+  },
+  {
+   "severity": "high",
+   "code": "EDGE_DISTANCE",
+   "where": "solid_0 hole D4.5 at [46.0, -30.0]",
+   "target": "housing_V9b.step",
+   "effort": "M",
+   "message": "hole centre only 3.0 mm from the edge (< 1 x D)"
+  },
+  {
+   "severity": "high",
+   "code": "EDGE_DISTANCE",
+   "where": "solid_0 hole D4.5 at [-46.0, 30.0]",
+   "target": "housing_V9b.step",
+   "effort": "M",
+   "message": "hole centre only 3.0 mm from the edge (< 1 x D)"
+  },
+  {
+   "severity": "high",
+   "code": "EDGE_DISTANCE",
+   "where": "solid_0 hole D4.5 at [46.0, 30.0]",
+   "target": "housing_V9b.step",
+   "effort": "M",
+   "message": "hole centre only 3.0 mm from the edge (< 1 x D)"
+  },
+  {
+   "severity": "medium",
+   "code": "CAD_OVERLAP",
+   "where": "solid_5 x solid_7",
+   "target": "TC-FDR-ASM-2000_FEED_PATH_CORE_V9b.step",
+   "effort": "M",
+   "message": "2.747 cm3 shared volume"
+  },
+  {
+   "severity": "medium",
+   "code": "CAD_OVERLAP",
+   "where": "solid_7 x solid_8",
+   "target": "TC-FDR-ASM-2000_FEED_PATH_CORE_V9b.step",
+   "effort": "M",
+   "message": "1.38 cm3 shared volume"
+  }
+ ],
+ "checks_run": [
+  "budget",
+  "cad_hole_alignment",
+  "cad_hole_audit",
+  "cad_hole_collision",
+  "cad_interference",
+  "fw_lint",
+  "pin_audit"
+ ],
+ "checks_missing": [],
+ "note": "gate: any HIGH finding means NOT READY; missing required checks mean REVIEW. Effort is a rough planning figure (S 0.1 d, M 1 d, L 4 d). A clear gate means the tools found nothing, not that the design is proven."
+}

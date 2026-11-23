@@ -1,0 +1,32 @@
+{
+  "name": "TenderCells coop Plus/Pro ceiling gantry (DRAFT spec from cad/chicken-tender-coop/showcase/sc_params.py and gantry.py, PR 189 branch 091952c7)",
+  "variant": "plus",
+  "sources": {
+    "masses": "sc_params.G_MASS (kg, ASSUMED except SO-101 from the URDF)",
+    "speeds": "sc_params.G_SPEED soft limits: xy_max 100 mm/s, z_max 20 mm/s, accel 500 mm/s2",
+    "belts": "gantry.py: GT2 9 mm glass belts, 20T pulleys, 300 N working tension class ASSUMED, pretension 30 N ASSUMED",
+    "motors": "gantry.py: NEMA17 48 mm, 0.45 N*m holding torque class ASSUMED; Z has a 5:1 planetary and a constant-force spring counterbalance",
+    "beam": "gantry.py assumptions: 6063 aluminium E=69 GPa, 2060 bridge I=21 cm4",
+    "unknown_on_purpose": "mounting fasteners, jam detection, hard stops, wipers, bedding drive mass/torque and egg-pocket size are NOT in the CAD source: fill them from the real build"
+  },
+  "axes": {
+    "X": {"drive": "belt", "orientation": "horizontal", "travel_mm": 960, "speed_mm_s": 100, "accel_mm_s2": 500, "moving_mass_kg": 3.15, "friction_coeff": 0.05,
+          "motor": {"type": "stepper", "holding_torque_nm": 0.45, "brake": false},
+          "belt": {"pitch_mm": 2, "width_mm": 9, "rated_tension_n": 300, "pulley_teeth": 20, "teeth_in_mesh": null},
+          "beam": {"span_mm": 1100, "E_mpa": 69000, "I_mm4": 210000, "load_n": 31}},
+    "Y": {"drive": "belt", "orientation": "horizontal", "travel_mm": 2000, "speed_mm_s": 100, "accel_mm_s2": 500, "moving_mass_kg": 5.6, "friction_coeff": 0.05,
+          "motor": {"type": "stepper", "holding_torque_nm": 0.45, "brake": false},
+          "belt": {"pitch_mm": 2, "width_mm": 9, "rated_tension_n": 300, "pulley_teeth": 20, "teeth_in_mesh": null}},
+    "Z": {"drive": "belt", "orientation": "vertical", "travel_mm": 480, "speed_mm_s": 20, "accel_mm_s2": 500, "moving_mass_kg": 2.45, "counterbalance": true,
+          "motor": {"type": "stepper", "holding_torque_nm": 0.45, "brake": false},
+          "belt": {"pitch_mm": 2, "width_mm": 9, "rated_tension_n": 300, "pulley_teeth": 20, "teeth_in_mesh": null}}
+  },
+  "mounting": {"fastener": null, "grade": null, "count": null, "into": "wood", "engagement_mm": null, "edge_mm": null, "spacing_mm": null,
+               "load_tension_n": null, "load_shear_n": null, "locking": null, "aerospace": false},
+  "protection": {"bedding_present": true, "belts_covered": true, "screws_covered": null, "wipers": null, "bedding_particle_mm": null, "cover_gap_mm": null,
+                 "limit_switches_sealed": null, "jam_detection": null, "hard_stops": null, "soft_limits": true, "estop_drops_axis_power": true,
+                 "rod_ends": {"max_misalignment_deg": null, "rated_deg": null, "boots": null}},
+  "bedding": {"motorized": true, "bed_mass_kg": null, "friction_coeff": null, "drive_torque_nm": null, "drive_radius_mm": null, "jam_detection": null, "pinch_guard": null},
+  "egg_bed": {"pocket_width_mm": null, "egg_width_mm": 44.0, "repeatability_mm": null, "backlash_mm": null, "sag_mm": null, "thermal_mm": null, "mount_tol_mm": null},
+  "variants": {"built_parts": [], "expected_parts": []}
+}

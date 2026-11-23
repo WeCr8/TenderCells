@@ -1,0 +1,180 @@
+{
+ "project": "feeder-v9-original",
+ "generated": "2026-11-22 19:46:15",
+ "readiness_score": 0,
+ "gate": "NOT READY",
+ "counts": {
+  "high": 28,
+  "medium": 5,
+  "info": 2
+ },
+ "weighted_points": 296.0,
+ "estimated_fix_effort_days": 21.5,
+ "hot_spots": [
+  {
+   "where": "feeder_v3_ORIGINAL.ino",
+   "points": 109
+  },
+  {
+   "where": "Open_CASCADE_STEP_translator_7_9_2_3 x Open_CASCADE_STEP_translator_7_9_2_4",
+   "points": 10
+  },
+  {
+   "where": "Open_CASCADE_STEP_translator_7_9_2_3 x Open_CASCADE_STEP_translator_7_9_2_11",
+   "points": 10
+  },
+  {
+   "where": "[[2.8, [0, 1, 0], [-42.0, -33.0, 13.66]], [2.25, [0, 0, 1], [-46.0, -30.0, 0.0]]]",
+   "points": 10
+  },
+  {
+   "where": "[[2.8, [0, 1, 0], [-42.0, -33.0, 13.66]], [2.25, [0, 0, 1], [-46.0, 30.0, 0.0]]]",
+   "points": 10
+  },
+  {
+   "where": "[[2.8, [0, 1, 0], [-42.0, -33.0, 101.66]], [2.25, [0, 0, 1], [-46.0, -30.0, 0.0]]]",
+   "points": 10
+  },
+  {
+   "where": "[[2.8, [0, 1, 0], [-42.0, -33.0, 101.66]], [2.25, [0, 0, 1], [-46.0, 30.0, 0.0]]]",
+   "points": 10
+  },
+  {
+   "where": "[[2.8, [0, 1, 0], [42.0, -33.0, 13.66]], [2.25, [0, 0, 1], [46.0, -30.0, 0.0]]]",
+   "points": 10
+  }
+ ],
+ "fix_first": [
+  {
+   "severity": "high",
+   "code": "ITERATION_GUARD",
+   "where": "",
+   "target": "feeder_v3_ORIGINAL.ino",
+   "effort": "S",
+   "message": "loop that moves a stepper is bounded by an iteration counter, not time. A fast loop exhausts the counter before the motor can step far enough (runSpeed only steps at its set rate). Use millis() with a"
+  },
+  {
+   "severity": "high",
+   "code": "PIN_MISMATCH",
+   "where": "",
+   "target": "feeder_v3_ORIGINAL.ino",
+   "effort": "S",
+   "message": "IN1=2 (GPIO2) but the pinout puts STEP_IN1 on D4 (GPIO6). Align firmware to the pinout, or change both on purpose."
+  },
+  {
+   "severity": "high",
+   "code": "CAD_OVERLAP",
+   "where": "Open_CASCADE_STEP_translator_7_9_2_3 x Open_CASCADE_STEP_translator_7_9_2_4",
+   "target": "TC-FDR-ASM-2000_FEED_PATH_CORE_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "44.233 cm3 shared volume"
+  },
+  {
+   "severity": "high",
+   "code": "CAD_OVERLAP",
+   "where": "Open_CASCADE_STEP_translator_7_9_2_3 x Open_CASCADE_STEP_translator_7_9_2_11",
+   "target": "TC-FDR-ASM-2000_FEED_PATH_CORE_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "44.233 cm3 shared volume"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_COLLISION",
+   "where": "[[2.8, [0, 1, 0], [-42.0, -33.0, 13.66]], [2.25, [0, 0, 1], [-46.0, -30.0, 0.0]]]",
+   "target": "housing_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "holes break into each other, wall -1.05 mm"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_COLLISION",
+   "where": "[[2.8, [0, 1, 0], [-42.0, -33.0, 13.66]], [2.25, [0, 0, 1], [-46.0, 30.0, 0.0]]]",
+   "target": "housing_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "holes break into each other, wall -1.05 mm"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_COLLISION",
+   "where": "[[2.8, [0, 1, 0], [-42.0, -33.0, 101.66]], [2.25, [0, 0, 1], [-46.0, -30.0, 0.0]]]",
+   "target": "housing_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "holes break into each other, wall -1.05 mm"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_COLLISION",
+   "where": "[[2.8, [0, 1, 0], [-42.0, -33.0, 101.66]], [2.25, [0, 0, 1], [-46.0, 30.0, 0.0]]]",
+   "target": "housing_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "holes break into each other, wall -1.05 mm"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_COLLISION",
+   "where": "[[2.8, [0, 1, 0], [42.0, -33.0, 13.66]], [2.25, [0, 0, 1], [46.0, -30.0, 0.0]]]",
+   "target": "housing_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "holes break into each other, wall -1.05 mm"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_COLLISION",
+   "where": "[[2.8, [0, 1, 0], [42.0, -33.0, 13.66]], [2.25, [0, 0, 1], [46.0, 30.0, 0.0]]]",
+   "target": "housing_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "holes break into each other, wall -1.05 mm"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_COLLISION",
+   "where": "[[2.8, [0, 1, 0], [42.0, -33.0, 101.66]], [2.25, [0, 0, 1], [46.0, -30.0, 0.0]]]",
+   "target": "housing_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "holes break into each other, wall -1.05 mm"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_COLLISION",
+   "where": "[[2.8, [0, 1, 0], [42.0, -33.0, 101.66]], [2.25, [0, 0, 1], [46.0, 30.0, 0.0]]]",
+   "target": "housing_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "holes break into each other, wall -1.05 mm"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_MISALIGNED",
+   "where": "[-92.0, 68.36]",
+   "target": "TC-FDR-ASM-2000_FEED_PATH_CORE_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "hole offset 4.34 mm from the mating pattern"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_MISALIGNED",
+   "where": "[-92.0, 156.36]",
+   "target": "TC-FDR-ASM-2000_FEED_PATH_CORE_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "hole offset 4.34 mm from the mating pattern"
+  },
+  {
+   "severity": "high",
+   "code": "HOLE_MISALIGNED",
+   "where": "[-8.0, 68.36]",
+   "target": "TC-FDR-ASM-2000_FEED_PATH_CORE_V9_ORIGINAL.step",
+   "effort": "M",
+   "message": "hole offset 4.34 mm from the mating pattern"
+  }
+ ],
+ "checks_run": [
+  "budget",
+  "cad_hole_alignment",
+  "cad_hole_audit",
+  "cad_hole_collision",
+  "cad_interference",
+  "fw_lint",
+  "pin_audit"
+ ],
+ "checks_missing": [],
+ "note": "gate: any HIGH finding means NOT READY; missing required checks mean REVIEW. Effort is a rough planning figure (S 0.1 d, M 1 d, L 4 d). A clear gate means the tools found nothing, not that the design is proven."
+}

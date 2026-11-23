@@ -1,0 +1,12 @@
+routine_id,label,trigger_mode,solar_event,offset_minutes,description,output_type,capability,enabled
+R01,Dawn readiness,solar,sunrise,-20,Check overnight faults and weather,notification,monitoring,FALSE
+R02,Door opening review,solar,sunrise,20,"Review path, latch, run and predator safety",notification,door,FALSE
+R03,Feed availability,solar,sunrise,30,Check complete feed accessible; record refill,notification,feed,FALSE
+R04,Water availability,solar,sunrise,30,Verify clean water continuous and flow,notification,water,FALSE
+R05,Egg inspection,solar,sunrise,90,Human nest-box check; no arm motion,notification,eggs,FALSE
+R06,Midday heat/water,fixed,,,"Review coop temp, shade, water and ventilation",notification,weather,FALSE
+R07,Afternoon feed/water,solar,sunset,-75,Verify feed and water before local roost,notification,feed_water,FALSE
+R08,Early return monitoring,solar,sunset,-35,Look for birds returning as site shades,notification,roost,FALSE
+R09,Pre-close headcount,solar,sunset,-10,"Count all birds, inspect mechanism, manual review",notification,door,FALSE
+R10,Evening secure review,solar,civil_dusk,0,Verify position feedback or alert keeper,notification,security,FALSE
+R11,Weekly checks,fixed,,,"Clean feeders, inspect mounts and backup power",notification,maintenance,FALSE

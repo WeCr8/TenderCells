@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TenderCellsCareConfig schemaVersion="1" mode="advisory">
+  <Property id="demo-site-approx" timeZone="America/Los_Angeles" latitude="32.8573" longitude="-116.9222" />
+  <CareRoutines>
+    <Routine id="R01" label="Dawn readiness" mode="solar" actionKind="notification" enabled="false" solarEvent="sunrise" offsetMinutes="-20">
+      <Description>Check overnight faults and weather</Description>
+    </Routine>
+    <Routine id="R02" label="Door opening review" mode="solar" actionKind="notification" enabled="false" solarEvent="sunrise" offsetMinutes="20">
+      <Description>Review path, latch, run and predator safety</Description>
+    </Routine>
+    <Routine id="R03" label="Feed availability" mode="solar" actionKind="notification" enabled="false" solarEvent="sunrise" offsetMinutes="30">
+      <Description>Check complete feed accessible; record refill</Description>
+    </Routine>
+    <Routine id="R04" label="Water availability" mode="solar" actionKind="notification" enabled="false" solarEvent="sunrise" offsetMinutes="30">
+      <Description>Verify clean water continuous and flow</Description>
+    </Routine>
+    <Routine id="R05" label="Egg inspection" mode="solar" actionKind="notification" enabled="false" solarEvent="sunrise" offsetMinutes="90">
+      <Description>Human nest-box check; no arm motion</Description>
+    </Routine>
+    <Routine id="R06" label="Midday heat/water" mode="fixed" actionKind="notification" enabled="false">
+      <Description>Review coop temp, shade, water and ventilation</Description>
+    </Routine>
+    <Routine id="R07" label="Afternoon feed/water" mode="solar" actionKind="notification" enabled="false" solarEvent="sunset" offsetMinutes="-75">
+      <Description>Verify feed and water before local roost</Description>
+    </Routine>
+    <Routine id="R08" label="Early return monitoring" mode="solar" actionKind="notification" enabled="false" solarEvent="sunset" offsetMinutes="-35">
+      <Description>Look for birds returning as site shades</Description>
+    </Routine>
+    <Routine id="R09" label="Pre-close headcount" mode="solar" actionKind="notification" enabled="false" solarEvent="sunset" offsetMinutes="-10">
+      <Description>Count all birds, inspect mechanism, manual review</Description>
+    </Routine>
+    <Routine id="R10" label="Evening secure review" mode="solar" actionKind="notification" enabled="false" solarEvent="civil_dusk" offsetMinutes="0">
+      <Description>Verify position feedback or alert keeper</Description>
+    </Routine>
+    <Routine id="R11" label="Weekly checks" mode="fixed" actionKind="notification" enabled="false">
+      <Description>Clean feeders, inspect mounts and backup power</Description>
+    </Routine>
+  </CareRoutines>
+  <Notes>Advisory templates only. Import must not enable physical action. Roosting already seen by 4:18 PM on 2026-11-22; first/last unknown.</Notes>
+</TenderCellsCareConfig>

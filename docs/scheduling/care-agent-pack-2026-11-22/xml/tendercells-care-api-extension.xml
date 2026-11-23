@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Proposed API description fragment only; do not replace generated tendercells-backend.xml -->
+<proposedEndpoints schemaVersion="1" status="UNIMPLEMENTED">
+  <endpoint method="GET" path="/api/properties/{propertyId}/care/calendar" access="owner" description="Read-only solar, events, provenance"/>
+  <endpoint method="POST" path="/api/properties/{propertyId}/care/observations" access="owner" description="Save human observation; no device action"/>
+  <endpoint method="GET" path="/api/properties/{propertyId}/care/weather" access="owner" description="Weather snapshot with freshness"/>
+  <endpoint method="POST" path="/api/properties/{propertyId}/care/import/dry-run" access="owner" description="Schema validate + diff, never execute"/>
+  <endpoint method="GET" path="/api/properties/{propertyId}/care/export" access="owner" description="CSV/XML/XLSX sanitized report"/>
+</proposedEndpoints>

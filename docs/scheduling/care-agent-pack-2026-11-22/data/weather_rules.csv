@@ -1,0 +1,8 @@
+rule_id,condition,threshold,unit,evidence_required,response,output_type,auto_actuate
+W01,warm_day,80,F,external_forecast_or_sensor,Inspect water and shade; no autonomous actuation,advisory,FALSE
+W02,coop_heat_review,85,F,sensed_coop,Human welfare inspection and ventilation review,alert,FALSE
+W03,extreme_heat,95,F,external_forecast,Increase keeper checks and verify water availability,alert,FALSE
+W04,low_water_level,20,pct,sensed_calibrated,Notify keeper; do not energize uncalibrated pump,alert,FALSE
+W05,low_feed_level,20,pct,sensed_calibrated,Notify keeper to refill,alert,FALSE
+W06,stale_weather,6,hours,external_forecast,Show stale and revert to local checks,advisory,FALSE
+W07,early_shade,0,lux_delta,sensed_local,"Begin manual headcount, not lockup",advisory,FALSE

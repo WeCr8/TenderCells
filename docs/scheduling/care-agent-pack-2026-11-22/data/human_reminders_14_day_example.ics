@@ -1,0 +1,202 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//TenderCells//CARE-REMINDERS-EXAMPLE//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:TenderCells human care reminders (example)
+BEGIN:VEVENT
+UID:tc-care-20261122-dawn@tendercells.local
+DTSTART:20261122T145407Z
+DTEND:20261122T150407Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261122-evening@tendercells.local
+DTSTART:20261123T003407Z
+DTEND:20261123T004407Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261123-dawn@tendercells.local
+DTSTART:20261123T145502Z
+DTEND:20261123T150502Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261123-evening@tendercells.local
+DTSTART:20261124T003345Z
+DTEND:20261124T004345Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261124-dawn@tendercells.local
+DTSTART:20261124T145556Z
+DTEND:20261124T150556Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261124-evening@tendercells.local
+DTSTART:20261125T003325Z
+DTEND:20261125T004325Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261125-dawn@tendercells.local
+DTSTART:20261125T145651Z
+DTEND:20261125T150651Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261125-evening@tendercells.local
+DTSTART:20261126T003306Z
+DTEND:20261126T004306Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261126-dawn@tendercells.local
+DTSTART:20261126T145745Z
+DTEND:20261126T150745Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261126-evening@tendercells.local
+DTSTART:20261127T003249Z
+DTEND:20261127T004249Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261127-dawn@tendercells.local
+DTSTART:20261127T145838Z
+DTEND:20261127T150838Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261127-evening@tendercells.local
+DTSTART:20261128T003234Z
+DTEND:20261128T004234Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261128-dawn@tendercells.local
+DTSTART:20261128T145931Z
+DTEND:20261128T150931Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261128-evening@tendercells.local
+DTSTART:20261129T003220Z
+DTEND:20261129T004220Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261129-dawn@tendercells.local
+DTSTART:20261129T150024Z
+DTEND:20261129T151024Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261129-evening@tendercells.local
+DTSTART:20261130T003208Z
+DTEND:20261130T004208Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261130-dawn@tendercells.local
+DTSTART:20261130T150115Z
+DTEND:20261130T151115Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261130-evening@tendercells.local
+DTSTART:20261201T003158Z
+DTEND:20261201T004158Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261201-dawn@tendercells.local
+DTSTART:20261201T150207Z
+DTEND:20261201T151207Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261201-evening@tendercells.local
+DTSTART:20261202T003150Z
+DTEND:20261202T004150Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261202-dawn@tendercells.local
+DTSTART:20261202T150257Z
+DTEND:20261202T151257Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261202-evening@tendercells.local
+DTSTART:20261203T003143Z
+DTEND:20261203T004143Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261203-dawn@tendercells.local
+DTSTART:20261203T150347Z
+DTEND:20261203T151347Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261203-evening@tendercells.local
+DTSTART:20261204T003138Z
+DTEND:20261204T004138Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261204-dawn@tendercells.local
+DTSTART:20261204T150437Z
+DTEND:20261204T151437Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261204-evening@tendercells.local
+DTSTART:20261205T003135Z
+DTEND:20261205T004135Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261205-dawn@tendercells.local
+DTSTART:20261205T150525Z
+DTEND:20261205T151525Z
+SUMMARY:Check coop feed and water
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+BEGIN:VEVENT
+UID:tc-care-20261205-evening@tendercells.local
+DTSTART:20261206T003133Z
+DTEND:20261206T004133Z
+SUMMARY:Check flock is inside (do NOT auto-close)
+DESCRIPTION:Human reminder only. Simulated schedule preview. No hardware command.
+END:VEVENT
+END:VCALENDAR

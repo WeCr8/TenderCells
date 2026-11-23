@@ -19,8 +19,13 @@ class GantryController(ArmController):
     def __init__(self):
         super().__init__(GANTRY_CONFIG)
         self.motors = {}
-        self.mm_per_step = 1.0
+        self.mm_per_step = 1.0                       # ASSUMED placeholder: set from the real screw/belt and microstepping
         self.position = [0.0, 0.0, 0.0]
+        self.estop_active = False
+        # ASSUMED travel per axis in mm: set from the real machine before use. Moves outside this range are refused.
+        self.limits_mm = [(0.0, float(GANTRY_CONFIG.workspace_radius_mm))] * 3
+        self.speed_range = (0.05, 1.0)              # fraction of max; 0 would divide by zero, huge values fall under the driver's minimum pulse width
+        self.max_move_seconds = 120.0
 
     def connect(self) -> bool:
         try:
@@ -43,31 +48,49 @@ class GantryController(ArmController):
             return False
 
     def move_joints(self, mm_offsets, speed=0.5) -> bool:
-        """Move X, Y, Z by offset in mm"""
+        """Move X, Y, Z by offset in mm. Refuses while E-STOP is active, refuses moves outside the travel limits (no partial moves),
+        clamps speed, polls E-STOP before every step and updates the position by the steps actually taken."""
         if not self.is_connected:
             return False
+        if self.estop_active:
+            raise RuntimeError("E-STOP is active - clear it before moving the gantry")
+        if not speed or speed <= 0:
+            raise ValueError("speed must be > 0")
+        speed = min(max(float(speed), self.speed_range[0]), self.speed_range[1])
+        offsets = [float(v) for v in list(mm_offsets)[:3]] + [0.0] * (3 - len(list(mm_offsets)[:3]))
+        for idx, mm in enumerate(offsets):
+            lo, hi = self.limits_mm[idx]
+            if not (lo <= self.position[idx] + mm <= hi):
+                raise ValueError(f"move on axis {idx} to {self.position[idx] + mm:.1f} mm is outside the travel limits {lo}..{hi}")
 
         step_delay = 0.01 / speed
+        deadline = time.monotonic() + self.max_move_seconds
         axes = ['X', 'Y', 'Z']
-
-        for idx, (axis, mm) in enumerate(zip(axes, mm_offsets)):
+        for idx, (axis, mm) in enumerate(zip(axes, offsets)):
             if mm == 0:
                 continue
-
             steps = int(abs(mm) / self.mm_per_step)
             motor = self.motors[axis]
             direction = GPIO.HIGH if mm > 0 else GPIO.LOW
-
             GPIO.output(motor['dir'], direction)
-
+            done = 0
             for _ in range(steps):
+                if self.estop_active or time.monotonic() > deadline:
+                    break
                 GPIO.output(motor['pul'], GPIO.HIGH)
                 time.sleep(step_delay)
                 GPIO.output(motor['pul'], GPIO.LOW)
                 time.sleep(step_delay)
-
-            self.position[idx] += mm
-            motor['position'] += steps
+                done += 1
+            sign = 1 if mm > 0 else -1
+            self.position[idx] += sign * done * self.mm_per_step      # what actually moved, not what was asked
+            motor['position'] += sign * done
+            if self.estop_active:
+                self.joint_angles = self.position[:]
+                raise RuntimeError("E-STOP during move: position is the point where motion stopped")
+            if done < steps:
+                self.joint_angles = self.position[:]
+                raise TimeoutError("gantry move exceeded max_move_seconds")
 
         self.joint_angles = self.position[:]
         return True
@@ -90,10 +113,18 @@ class GantryController(ArmController):
         return tuple(self.position)
 
     def estop(self) -> bool:
-        """Disable all motors"""
+        """Disable all motors. The flag is set first so a move in another thread stops at its next step."""
+        self.estop_active = True
         for motor in self.motors.values():
             GPIO.output(motor['ena'], GPIO.LOW)
         print("⚠️  Gantry E-STOP activated")
+        return True
+
+    def clear_estop(self) -> bool:
+        """Explicit re-enable after the cause is fixed. Position must be re-homed afterwards."""
+        for motor in self.motors.values():
+            GPIO.output(motor['ena'], GPIO.HIGH)
+        self.estop_active = False
         return True
 
     # ArmController hooks. The gantry overrides the public methods above

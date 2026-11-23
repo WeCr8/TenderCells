@@ -1,0 +1,87 @@
+{
+  "TC_UNITS": {
+    "value": "mm",
+    "unit": "millimeter",
+    "description": "All mechanical CAD"
+  },
+  "TC_AXIS_UP": {
+    "value": "Z",
+    "unit": "",
+    "description": "Z is up in product/world assemblies"
+  },
+  "TC_AXIS_FRONT": {
+    "value": "-Y",
+    "unit": "",
+    "description": "Front/service side convention"
+  },
+  "TC_AXIS_RIGHT": {
+    "value": "X",
+    "unit": "",
+    "description": "Right-hand coordinate system"
+  },
+  "TC_PRINT_CLEARANCE": {
+    "value": 0.3,
+    "unit": "mm",
+    "description": "per side, typical FDM sliding fit"
+  },
+  "TC_MOVING_CLEARANCE": {
+    "value": 0.6,
+    "unit": "mm",
+    "description": "nominal moving/feed metering clearance"
+  },
+  "TC_M3_CLEARANCE": {
+    "value": 3.4,
+    "unit": "mm",
+    "description": "printed clearance hole target"
+  },
+  "TC_M4_CLEARANCE": {
+    "value": 4.5,
+    "unit": "mm",
+    "description": "printed clearance hole target"
+  },
+  "TC_M5_CLEARANCE": {
+    "value": 5.5,
+    "unit": "mm",
+    "description": "printed clearance hole target"
+  },
+  "TC_INSERT_M3_OD": {
+    "value": 4.6,
+    "unit": "mm",
+    "description": "heat-set pilot nominal; tune per insert vendor"
+  },
+  "TC_WALL_GENERAL": {
+    "value": 2.4,
+    "unit": "mm",
+    "description": "minimum general printed wall target"
+  },
+  "TC_FLOOR_GENERAL": {
+    "value": 3.0,
+    "unit": "mm",
+    "description": "minimum structural printed floor target"
+  },
+  "TC_EDGE_FILLET": {
+    "value": 2.0,
+    "unit": "mm",
+    "description": "default non-interface edge softening"
+  },
+  "TC_GRID": {
+    "value": 25.0,
+    "unit": "mm",
+    "description": "preferred modular mounting grid"
+  },
+  "TC_SERVICE_CLEARANCE": {
+    "value": 20.0,
+    "unit": "mm",
+    "description": "default around removable electronics modules"
+  },
+  "TC_CABLE_BEND_MIN": {
+    "value": 25.0,
+    "unit": "mm",
+    "description": "default low-voltage cable planning radius"
+  },
+  "TC_MODEL_SCALE": {
+    "value": 1.0,
+    "unit": "",
+    "description": "STEP/STL/GLB authored at 1 mm = 1 CAD mm"
+  }
+}

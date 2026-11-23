@@ -1,0 +1,15 @@
+check_id,check,formula,result,status,engineering_note
+MTR-001,Rotor radial fit,(72.0 - 70.8)/2,0.60 mm per side,PASS,Corrected from 1.20 mm per side in v8; reduces fines bypass while retaining FDM motion clearance.
+MTR-002,Rotor axial fit,(52.0 - 50.8)/2,0.60 mm per side,PASS,Corrected from 6.0 mm per side in v8; major feed-containment correction.
+MTR-003,Rotor indexing,360/6,60 deg,PASS,Six equal pockets.
+MTR-004,Pocket geometric volume,(cylinder - bore - solid)/6,19.94 cm3,PASS-CALC,Approximation includes all non-solid rotor void; verify gravimetrically with actual feed.
+MTR-005,Planning dispense mass,pocket volume × bulk density × fill factor,8.1-12.2 g/index,PASS-PLANNING,Not a guaranteed dose; calibration required by feed type.
+HOP-001,Hopper capacity,square frustum inner estimate,2.61 L,PASS-ESTIMATE,Usable fill line and bridging reduce effective capacity.
+HOP-002,Feed load,capacity × 580-680 kg/m3,1513-1773 g,PASS-ESTIMATE,Density range chosen to encompass published pellet/crumble examples around ~0.58-0.68 kg/L.
+LC-001,Load-cell static capacity,weighed structure + max feed + allowance,3744/5000 g = 74.9%,PASS-PROTOTYPE,Dynamic push/impact overload still requires guard/test.
+BRG-001,Bearing pocket,15.08 - 15.00,0.08 mm diametral,PASS-PROTOTYPE,Printer-dependent; coupon/receiving fit required.
+GSK-001,Gasket compression,(1.8 - 1.6)/1.8,11.1%,PASS-TARGET,Actual TPU hardness and groove geometry must be leak-tested.
+DRV-001,Drive-axis consistency,rotor/shaft/bearing/coupler/motor axes,Y axis,PASS-CAD-V9,v8 stepper subassembly mixed Y and Z axes; v9 aligned reference module corrects this.
+PLT-001,Drive-side feed closure,bearing plate at y=-33..-26,closure present,PASS-CAD-V9,Servo plate large aperture removed from default feed path.
+PWR-001,Fuse/PTC rating,measured jam current required,TBD,PHYSICAL-GATE,Cannot be legitimately calculated from generic clone motor listings alone.
+FLOW-001,Pellet/crumble capture,physical bulk-material test,TBD,PHYSICAL-GATE,"CAD clearance is now coherent, but bridging/crushing/flow must be bench-tested with actual feed."

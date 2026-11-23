@@ -1,0 +1,58 @@
+Item ID,Category,Description,Qty,Specification,STL File,STEP/CAD File,Manufacturer Part No.,Preferred Source,Lock Status,Notes
+TC-FDR-PRT-001,Printed,01 Base Plate HeatSet,1,Print per manufacturing docs,CAD/STL/01_Base_Plate_HeatSet.stl,CAD/STEP/01_Base_Plate_HeatSet.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-002,Printed,02 LoadCell Floating Platform,1,Print per manufacturing docs,CAD/STL/02_LoadCell_Floating_Platform.stl,CAD/STEP/02_LoadCell_Floating_Platform.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-003,Printed,03 Metering Center Housing,1,Print per manufacturing docs,CAD/STL/03_Metering_Center_Housing.stl,CAD/STEP/03_Metering_Center_Housing.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-004,Printed,04 Six Pocket Rotor D Bore,1,Print per manufacturing docs,CAD/STL/04_Six_Pocket_Rotor_D_Bore.stl,CAD/STEP/04_Six_Pocket_Rotor_D_Bore.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-005,Printed,05 Servo Side Plate,1,Print per manufacturing docs,CAD/STL/05_Servo_Side_Plate.stl,CAD/STEP/05_Servo_Side_Plate.step,,Print in-house,ALTERNATE,MG996R alternate only; not part of V9 default stepper build.
+TC-FDR-PRT-006,Printed,06 Bearing Side Plate 696,1,Print per manufacturing docs,CAD/STL/06_Bearing_Side_Plate_696.stl,CAD/STEP/06_Bearing_Side_Plate_696.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-007,Printed,07 Bearing Retainer Cap,2,Print per manufacturing docs,CAD/STL/07_Bearing_Retainer_Cap.stl,CAD/STEP/07_Bearing_Retainer_Cap.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-008,Printed,08 25T Hub to 6mm D Shaft Adapter,1,Print per manufacturing docs,CAD/STL/08_25T_Hub_to_6mm_D_Shaft_Adapter.stl,CAD/STEP/08_25T_Hub_to_6mm_D_Shaft_Adapter.step,,Print in-house,ALTERNATE,MG996R alternate only; not part of V9 default stepper build.
+TC-FDR-PRT-009,Printed,09 MG996R Servo Cradle,1,Print per manufacturing docs,CAD/STL/09_MG996R_Servo_Cradle.stl,CAD/STEP/09_MG996R_Servo_Cradle.step,,Print in-house,ALTERNATE,MG996R alternate only; not part of V9 default stepper build.
+TC-FDR-PRT-010,Printed,10 Hopper Adapter Gasketed,1,Print per manufacturing docs,CAD/STL/10_Hopper_Adapter_Gasketed.stl,CAD/STEP/10_Hopper_Adapter_Gasketed.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-011,Printed,11 Hopper Removable,1,Print per manufacturing docs,CAD/STL/11_Hopper_Removable.stl,CAD/STEP/11_Hopper_Removable.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-012,Printed,12 Hopper Lid,1,Print per manufacturing docs,CAD/STL/12_Hopper_Lid.stl,CAD/STEP/12_Hopper_Lid.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-013,Printed,13 Washable Feed Trough Slide,1,Print per manufacturing docs,CAD/STL/13_Washable_Feed_Trough_Slide.stl,CAD/STEP/13_Washable_Feed_Trough_Slide.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-014,Printed,14 Trough Slide Rail,1,Print per manufacturing docs,CAD/STL/14_Trough_Slide_Rail.stl,CAD/STEP/14_Trough_Slide_Rail.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-015,Printed,15 Electronics Enclosure M3,1,Print per manufacturing docs,CAD/STL/15_Electronics_Enclosure_M3.stl,CAD/STEP/15_Electronics_Enclosure_M3.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-016,Printed,16 Electronics Lid,1,Print per manufacturing docs,CAD/STL/16_Electronics_Lid.stl,CAD/STEP/16_Electronics_Lid.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-017,Printed,17 Wire Strain Relief Clamp,1,Print per manufacturing docs,CAD/STL/17_Wire_Strain_Relief_Clamp.stl,CAD/STEP/17_Wire_Strain_Relief_Clamp.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-018,Printed,18 HeatSet Insert Test Coupon,1,Print per manufacturing docs,CAD/STL/18_HeatSet_Insert_Test_Coupon.stl,CAD/STEP/18_HeatSet_Insert_Test_Coupon.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-019,Printed,19 Hopper Gasket TPU,1,Print per manufacturing docs,CAD/STL/19_Hopper_Gasket_TPU.stl,CAD/STEP/19_Hopper_Gasket_TPU.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-020,Printed,20 LoadCell Guard,1,Print per manufacturing docs,CAD/STL/20_LoadCell_Guard.stl,CAD/STEP/20_LoadCell_Guard.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-021,Printed,21 28BYJ48 Stepper Mount,1,Print per manufacturing docs,CAD/STL/21_28BYJ48_Stepper_Mount.stl,CAD/STEP/21_28BYJ48_Stepper_Mount.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-022,Printed,22 5mm to 6mm Shaft Clamp Coupler,1,Print per manufacturing docs,CAD/STL/22_5mm_to_6mm_Shaft_Clamp_Coupler.stl,CAD/STEP/22_5mm_to_6mm_Shaft_Clamp_Coupler.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-023,Printed,23 ULN2003 Driver Carrier,1,Print per manufacturing docs,CAD/STL/23_ULN2003_Driver_Carrier.stl,CAD/STEP/23_ULN2003_Driver_Carrier.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-024,Printed,24 Hall Sensor Homing Bracket,1,Print per manufacturing docs,CAD/STL/24_Hall_Sensor_Homing_Bracket.stl,CAD/STEP/24_Hall_Sensor_Homing_Bracket.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-PRT-025,Printed,25 Rotor Homing Magnet Carrier,1,Print per manufacturing docs,CAD/STL/25_Rotor_Homing_Magnet_Carrier.stl,CAD/STEP/25_Rotor_Homing_Magnet_Carrier.step,,Print in-house,LOCKED,Canonical printable component
+TC-FDR-ELC-001,Electronics,Seeed Studio XIAO ESP32C3,1,21 x 17.8 mm; Wi-Fi/BLE; 5V VIN,,Electronics/Reference_STEP/Seeed_XIAO_ESP32C3_REFERENCE.step,XIAO ESP32C3,Seeed Studio,LOCKED,Official controller baseline
+TC-FDR-ELC-002,Electronics,Adafruit HX711 24-bit ADC,1,PID 5974; 2.6-5.5V; 25.5 x 23.0 x 12.1 mm,,Electronics/Reference_STEP/HX711_GENERIC_32x21_REFERENCE.step,5974,Adafruit,LOCKED-SKU / CAD-REFERENCE,Procurement SKU locked; packaged CAD remains generic envelope
+TC-FDR-SNS-001,Sensor,TAL220B 5 kg Straight Bar Load Cell,1,55 x 12.7 x 12.7 mm; IP65; 2-M5; 40 mm centers,,Electronics/Reference_STEP/TAL220B_5kg_55mm_REFERENCE.step,SEN-14729,SparkFun,LOCKED,
+TC-FDR-ACT-001,Actuator,28BYJ-48 5V Geared Stepper,1,5-wire; 5V; geared,,Electronics/Reference_STEP/28BYJ48_5V_GEARED_STEPPER_REFERENCE.step,28BYJ-48 5V,Approved equivalent,LOCKED-SPEC,Firmware pocket calibration required because clone ratios vary
+TC-FDR-DRV-001,Electronics,ULN2003 28BYJ-48 Driver Board,1,5V; 4-channel; matching 5-pin motor connector,,Electronics/Reference_STEP/ULN2003_DRIVER_REFERENCE.step,ULN2003 28BYJ board,Approved equivalent,LOCKED-SPEC,Receiving-inspect PCB dimensions
+TC-FDR-SNS-002,Sensor,A3144-compatible Hall Switch,1,Digital unipolar Hall switch,,Electronics/Reference_STEP/A3144_HALL_SENSOR_REFERENCE.step,A3144 compatible,Approved equivalent,LOCKED-SPEC,
+TC-FDR-MAG-001,Hardware,Neodymium Disc Magnet,1,3 mm dia x 2 mm thick,,,3x2 mm,Approved equivalent,LOCKED-SPEC,Rotor home target
+TC-FDR-BRG-001,Hardware,696-2RS Sealed Bearing,2,6 x 15 x 5 mm,,CAD/HARDWARE_STEP/696_Bearing_6x15x5_REFERENCE.step,696-2RS,Approved bearing supplier,LOCKED-SPEC,
+TC-FDR-SHA-001,Hardware,6 mm D-Shaft,1,6 mm OD x 100 mm nominal; steel/stainless,,CAD/HARDWARE_STEP/6mm_D_Shaft_100mm_REFERENCE.step,6mm D shaft 100mm,Approved equivalent,LOCKED-SPEC,Trim after dry assembly
+TC-FDR-INS-003,Hardware,M3 Brass Heat-set Inserts,20,Short knurled; tune printed hole with coupon,,,M3 heat-set insert,Approved equivalent,LOCKED-SPEC,Buy minimum 25
+TC-FDR-INS-004,Hardware,M4 Brass Heat-set Inserts,12,Knurled heat-set insert,,,M4 heat-set insert,Approved equivalent,LOCKED-SPEC,Buy minimum 15
+TC-FDR-INS-005,Hardware,M5 Brass Heat-set Inserts,2,Knurled heat-set insert,,,M5 heat-set insert,Approved equivalent,LOCKED-SPEC,Buy minimum 4
+TC-FDR-FST-001,Fastener,M3 x 8 SHCS,8,ISO 4762,,,M3x8 SHCS,Approved equivalent,LOCKED-SPEC,
+TC-FDR-FST-002,Fastener,M3 x 10 SHCS,10,ISO 4762,,CAD/HARDWARE_STEP/M3x10_SHCS_REFERENCE.step,M3x10 SHCS,Approved equivalent,LOCKED-SPEC,
+TC-FDR-FST-003,Fastener,M3 x 16 SHCS,6,ISO 4762,,CAD/HARDWARE_STEP/M3x16_SHCS_REFERENCE.step,M3x16 SHCS,Approved equivalent,LOCKED-SPEC,
+TC-FDR-FST-004,Fastener,M4 x 16 SHCS,12,ISO 4762,,CAD/HARDWARE_STEP/M4x16_SHCS_REFERENCE.step,M4x16 SHCS,Approved equivalent,LOCKED-SPEC,
+TC-FDR-FST-005,Fastener,M5 x 20 SHCS,2,ISO 4762,,CAD/HARDWARE_STEP/M5x20_SHCS_REFERENCE.step,M5x20 SHCS,Approved equivalent,LOCKED-SPEC,Verify load-cell thread engagement
+TC-FDR-FST-006,Fastener,M3 Flat Washer,12,ISO 7089 / DIN 125,,,M3 washer,Approved equivalent,LOCKED-SPEC,
+TC-FDR-FST-007,Fastener,M4 Flat Washer,12,ISO 7089 / DIN 125,,,M4 washer,Approved equivalent,LOCKED-SPEC,
+TC-FDR-FST-008,Fastener,M5 Flat Washer,2,ISO 7089 / DIN 125,,,M5 washer,Approved equivalent,LOCKED-SPEC,
+TC-FDR-PWR-001,Power,5V Regulated Supply,1,5V DC; 3A minimum; safety-certified preferred,,,5V 3A supply,Approved supplier,LOCKED-SPEC,Classroom/bench baseline
+TC-FDR-PWR-002,Power,Inline Power Switch,1,Rated >=5V 3A,,,Inline switch,Approved equivalent,LOCKED-SPEC,
+TC-FDR-PWR-003,Protection,Fuse / Resettable PTC,1,Final rating after measured jam/stall current,,,TBD after test,Approved supplier,VERIFY-AFTER-TEST,Do not production-release until closed
+TC-FDR-CAP-001,Electronics,Electrolytic Capacitor,1,1000 uF; >=10V; low ESR preferred,,,1000uF 10V+,Approved equivalent,LOCKED-SPEC,Motor rail transient support
+TC-FDR-WIR-001,Wiring,22 AWG Stranded Wire,2,2 m total; power wiring,,,22AWG stranded,Approved equivalent,LOCKED-SPEC,
+TC-FDR-WIR-002,Wiring,26 AWG Stranded Wire,2,2 m total; signal wiring,,,26AWG stranded,Approved equivalent,LOCKED-SPEC,
+TC-FDR-CON-001,Connector,JST-PH 2.0 2-pin Pigtail Pair,2,Polarized power/service connector,,,JST-PH 2-pin,Approved equivalent,LOCKED-SPEC,
+TC-FDR-CON-002,Connector,2.54 mm Prototype Signal Lead Set,1,Female/female + female/male,,,2.54mm lead set,Approved equivalent,PROTOTYPE,Replace with locking harness for production
+TC-FDR-SLV-001,Wiring,Heat-shrink Tubing,0.5,m; 2:1 or 3:1; suitable for 22-26 AWG,,,Heat shrink,Approved equivalent,LOCKED-SPEC,
+TC-FDR-TIE-001,Hardware,100 mm Cable Ties,10,Small nylon cable ties,,,100mm tie,Approved equivalent,LOCKED-SPEC,
+TC-FDR-GSK-001,Consumable,Food-zone appropriate gasket/seal material,1,Select for actual feed-contact/cleaning environment,,,Selected after material review,Approved supplier,VERIFY-FOR-USE,TPU printed gasket remains prototype option
+TC-FDR-PRT-005D,Printed,05 Drive Side Plate 696,1,Same sealed-bearing closure geometry as bearing side,CAD/STL/05_Drive_Side_Plate_696.stl,CAD/STEP/05_Drive_Side_Plate_696.step,,Print in-house,LOCKED,V9 default drive-side feed closure; replaces servo aperture plate in default build.

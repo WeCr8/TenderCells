@@ -1,0 +1,15 @@
+# Purchasing / Receiving Checklist
+- [ ] Verify all 25 printed parts against the package.
+- [ ] Test M3/M4/M5 heat-set insert coupon first.
+- [ ] Verify XIAO ESP32C3 identity/dimensions.
+- [ ] Verify SparkFun TAL220B SEN-14729.
+- [ ] Verify Adafruit HX711 PID 5974.
+- [ ] Measure received 28BYJ-48 and ULN2003 against CAD envelopes.
+- [ ] Verify 696-2RS = 6 x 15 x 5 mm.
+- [ ] Verify 6 mm D-shaft and flat.
+- [ ] Count fasteners, washers and inserts.
+- [ ] Verify 5V supply output/current rating.
+- [ ] Measure idle/step/jam current; close fuse/PTC selection.
+- [ ] Calibrate load cell with known weights.
+- [ ] Calibrate Hall home and six 60-degree rotor positions.
+- [ ] Record every deviation by Item ID.

@@ -1,6 +1,6 @@
-# Chicken Tender: animated showcase, robot options and engineering check (draft, 2026-11-21)
+# Chicken Tender: animated showcase, robot options and engineering check (draft, updated 2026-11-22)
 
-**Status:** draft for review. The numbers are hand-calcs from the parametric model, not tests on hardware.
+**Status:** draft for review. **Plus and Pro now share the ceiling XYZ gantry** (see "Ceiling gantry, tool dock and routines" below and `docs/CHICKEN_TENDER_ROBOT_SAFETY.md`); the older "under the hood" and "short Y gantry" mounts in the reach table are kept as history only. Video-to-source map: `docs/CHICKEN_TENDER_VIDEO_ALIGNMENT.md`. The numbers are hand-calcs from the parametric model, not tests on hardware.
 Every assumption is marked **ASSUMED** here or in `cad/chicken-tender-coop/showcase/sc_params.py`.
 
 **Sources:**
@@ -123,9 +123,17 @@ Egg grid: 3 x 3 per box at -80/0/+80 mm (18 slots, **ASSUMED**). The SO-101 is c
 | Option | Mount | Egg slots reached | Pick-and-place sweep (egg B1_CM), minimum clearances |
 |---|---|---|---|
 | **Starter**: vacuum cup on a Y/Z rail | Rail at the box centre line, under the hood | **6/18 on a flat pad** (centre line only). **18/18 with a centering (dished) nest pad**; the box floor stays flat | Plunger 140 mm to the coop wall and outer rim. Held egg 23.5 mm over the 6 in rims. Roost is behind the wall (202 mm). Y travel 963 mm, Z stroke 189 mm |
-| **Plus**: SO-101 inverted under the hood | Base face at z 1240 mm over the divider, yaw 0 | **14/18.** Misses: B1_LB, B1_CB, B2_LF, B2_CF, the 4 slots right under the base next to the divider (approach blocked or < 3 mm). The centering pad keeps eggs out of these | Pad 8.0, tray rim 12.0, divider 29.2, outer rim 37.5, hood roof 76.1, coop wall 110, roost 256 |
-| **Pro**: SO-101 inverted on a short Y gantry | Carriage parks 157 mm along Y from the egg | **18/18** (tightest grasp clearance 3.2 mm) | Same sweep as Plus for B1_CM |
+| **Plus (LEGACY layout, superseded 2026-11-22; not re-run for the ceiling gantry)**: SO-101 inverted under the hood | Base face at z 1240 mm over the divider, yaw 0 | **14/18.** Misses: B1_LB, B1_CB, B2_LF, B2_CF, the 4 slots right under the base next to the divider (approach blocked or < 3 mm). The centering pad keeps eggs out of these | Pad 8.0, tray rim 12.0, divider 29.2, outer rim 37.5, hood roof 76.1, coop wall 110, roost 256 |
+| **Pro (LEGACY layout, superseded 2026-11-22; not re-run for the ceiling gantry)**: SO-101 inverted on a short Y gantry | Carriage parks 157 mm along Y from the egg | **18/18** (tightest grasp clearance 3.2 mm) | Same sweep as Plus for B1_CM |
 | UR3e "pro_heavy" | n/a | **Does not fit.** It weighs 11.2 kg, has a 500 mm reach and needs a 128 mm base on a stiff mount. Its working envelope is about 3x the 480 mm of free space beside the 4 ft coop, and it would need a ~1 m³ guarded bay | |
+
+## Ceiling gantry, tool dock and routines (Plus / Pro, added 2026-11-22)
+Source of truth is code, not this table: `showcase/gantry.py`, `tools_cad.py`, `clean_params.py`, `clean_reach.py`, `routines.py`, `service_params.py`, `house.py`.
+- **Gantry:** a 3D-printer-style XYZ gantry under the rafters (Y rails on the side walls, X bridge, moving Z mast). The SO-101 hangs inverted on the mast. Plus and Pro use the same gantry (`GANTRY_CFGS`).
+- **Tool dock:** wall dock with a jaw-clamped passive quick-change, plus a mast-mounted litter tiller. The **T6 slotted trowel** (blade 150 x 80 mm, 4 mm PETG-CF or HDPE, slightly dished) is the bed-turning tool: plunge, scoop, wrist roll, dump (`step/CT_T6_trowel.step`).
+- **Eggs:** the egg falls through a padded chute (12 degrees, through the right wall) into an **exterior egg drawer**, so collection is from outside.
+- **Safety chain:** nest-box NAU7802 load cells (roost cell optional, default off); NC E-STOP; reeds on RS-SD1, RS-SD2 and RS-EGGBAY in series with the motor-rail relay; opening a service door causes a maintenance lockout that needs a re-arm. Full permissive list: `docs/CHICKEN_TENDER_ROBOT_SAFETY.md` section 2.2.
+- **Reach on the ceiling gantry:** see `reports/CT_COOP_A_showcase_reach.md` after re-running `reach.py` and `clean_reach.py`. No numbers are quoted here until that is done.
 
 ## Electronics placement (guide section 7 + PR #188)
 - Every part is placed and labelled in the model with its enclosure and cable runs. Full list in `bom_check.csv`.

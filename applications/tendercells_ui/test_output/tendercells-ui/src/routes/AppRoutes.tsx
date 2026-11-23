@@ -1,5 +1,5 @@
 // AppRoutes.tsx
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { trackPageView } from "../analytics";
 import {
@@ -46,6 +46,9 @@ import { markVisited } from "../lib/demo/missions";
 import ProductDashboardPage from "../pages/ProductDashboardPage";
 import CameraNodeFirstBuildPage from "../pages/guides/CameraNodeFirstBuildPage";
 
+// Lazy: the coop 3D demo is only needed on /demo/coop, keep it out of the main chunk.
+const CoopDemoPage = lazy(() => import("../pages/CoopDemoPage"));
+
 // Fires a page_view on every route change. No-op when analytics is disabled.
 function RouteAnalytics() {
   const location = useLocation();
@@ -66,6 +69,8 @@ export default function AppRoutes() {
       {/* Public, no-signup demo front door — auto-seeds then lands on dashboard */}
       <Route path="/demo" element={<DemoLandingPage />} />
       <Route path="/try" element={<DemoLandingPage />} />
+      {/* Chicken Tender coop in 3D + DoorCell V1.4 slide door (simulated controls) */}
+      <Route path="/demo/coop" element={<Suspense fallback={null}><CoopDemoPage /></Suspense>} />
 
       {/* Product dashboards */}
       <Route path="/chicken-tender" element={<ChickenTenderDashboard />} />

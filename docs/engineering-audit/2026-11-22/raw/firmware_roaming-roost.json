@@ -1,0 +1,30 @@
+{
+ "project": "<repo>/firmware/roaming-roost",
+ "board": "esp32doit-devkit-v1",
+ "board_known": true,
+ "files_scanned": 1,
+ "pins_used": [
+  13,
+  15,
+  23,
+  27,
+  34
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "code": "STRAP_PIN",
+   "gpio": 15,
+   "where": "src/main.cpp:126",
+   "message": "['RL_ENA'] on GPIO15: boot-log strapping. Anything wired here can change boot behaviour."
+  },
+  {
+   "severity": "medium",
+   "code": "LONG_DELAY",
+   "where": "src/main.cpp:232",
+   "message": "blocking delay of one second or more: E-STOP and watchdog are not serviced during it."
+  }
+ ],
+ "result": "PASS",
+ "note": "heuristic: confirm each finding in the source. Board pin tables are from public vendor documentation as I know it; verify for the exact board revision."
+}

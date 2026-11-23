@@ -1,0 +1,10 @@
+{
+ "project": "<repo>/firmware/camera-node",
+ "board": "seeed_xiao_esp32s3",
+ "board_known": true,
+ "files_scanned": 1,
+ "pins_used": [],
+ "findings": [],
+ "result": "PASS",
+ "note": "heuristic: confirm each finding in the source. Board pin tables are from public vendor documentation as I know it; verify for the exact board revision."
+}

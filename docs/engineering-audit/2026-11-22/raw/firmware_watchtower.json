@@ -1,0 +1,41 @@
+{
+ "project": "<repo>/firmware/watchtower",
+ "board": "esp32-s3-devkitc-1",
+ "board_known": true,
+ "files_scanned": 1,
+ "pins_used": [
+  34,
+  35
+ ],
+ "findings": [
+  {
+   "severity": "high",
+   "code": "NO_ADC_ON_PIN",
+   "gpio": 34,
+   "where": "src/main.cpp:402",
+   "message": "analogRead on GPIO34: this chip has no ADC channel on that pin (pin numbers copied from another ESP32 variant?)."
+  },
+  {
+   "severity": "high",
+   "code": "RESERVED_PIN",
+   "gpio": 35,
+   "where": "src/main.cpp:396",
+   "message": "['BATTERY_ADC'] on GPIO35, which this board uses for octal PSRAM."
+  },
+  {
+   "severity": "high",
+   "code": "NO_ADC_ON_PIN",
+   "gpio": 35,
+   "where": "src/main.cpp:396",
+   "message": "analogRead on GPIO35: this chip has no ADC channel on that pin (pin numbers copied from another ESP32 variant?)."
+  },
+  {
+   "severity": "medium",
+   "code": "LONG_DELAY",
+   "where": "src/main.cpp:244",
+   "message": "blocking delay of one second or more: E-STOP and watchdog are not serviced during it."
+  }
+ ],
+ "result": "FAIL",
+ "note": "heuristic: confirm each finding in the source. Board pin tables are from public vendor documentation as I know it; verify for the exact board revision."
+}

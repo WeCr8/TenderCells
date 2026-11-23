@@ -1,0 +1,55 @@
+{
+ "files_scanned": 18,
+ "findings": [
+  {
+   "severity": "medium",
+   "code": "MOTION_NO_GUARD",
+   "where": "coordinated_motion_controller.py:92",
+   "message": "move: no limit/clamp/E-STOP/timeout/interlock check visible in the first 40 lines of this motion function."
+  },
+  {
+   "severity": "medium",
+   "code": "MOTION_NO_GUARD",
+   "where": "coordinated_motion_controller.py:98",
+   "message": "move: no limit/clamp/E-STOP/timeout/interlock check visible in the first 40 lines of this motion function."
+  },
+  {
+   "severity": "medium",
+   "code": "MOTION_NO_GUARD",
+   "where": "gantry_controller.py:45",
+   "message": "move: no limit/clamp/E-STOP/timeout/interlock check visible in the first 40 lines of this motion function."
+  },
+  {
+   "severity": "medium",
+   "code": "LOOP_NO_EXIT",
+   "where": "habitat_listener.py:80",
+   "message": "while True with no visible stop condition (E-STOP, stop event, shutdown) in the next 25 lines."
+  },
+  {
+   "severity": "medium",
+   "code": "LOOP_NO_EXIT",
+   "where": "weed_patrol_service.py:194",
+   "message": "while True with no visible stop condition (E-STOP, stop event, shutdown) in the next 25 lines."
+  },
+  {
+   "severity": "info",
+   "code": "HARDCODED_ADDRESS",
+   "where": "arm_service.py:6",
+   "message": "hard-coded network address; prefer configuration."
+  },
+  {
+   "severity": "info",
+   "code": "HARDCODED_ADDRESS",
+   "where": "habitat_listener.py:4",
+   "message": "hard-coded network address; prefer configuration."
+  },
+  {
+   "severity": "info",
+   "code": "HARDCODED_ADDRESS",
+   "where": "weed_patrol_service.py:4",
+   "message": "hard-coded network address; prefer configuration."
+  }
+ ],
+ "result": "PASS",
+ "note": "heuristic: confirm each finding; MOTION_NO_GUARD means no guard keyword was seen, not that the code is unsafe"
+}

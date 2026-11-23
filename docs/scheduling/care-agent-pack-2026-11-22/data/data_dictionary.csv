@@ -1,0 +1,17 @@
+table,field,type,unit,required,allowed_or_default,description
+schedule,schema_version,integer,,required,1,model version
+schedule,trigger_mode,enum,,required,fixed|solar|site_shade|sensor|combined,non-authorizing cue
+schedule,action_kind,enum,,required,human_reminder|device_action,device action default disabled
+schedule,time_zone,iana_timezone,,required,,property timezone
+weather,provider,string,,required,,source of forecast
+weather,issued_at,date-time,ISO8601,optional,,forecast issue timestamp
+weather,fetched_at,date-time,ISO8601,required,,collection timestamp
+weather,valid_until,date-time,ISO8601,required,,stale computation
+observation,roosting_seen_by_iso,date-time,ISO8601,optional,,"upper-bound observation, not first roost"
+observation,confirmed_first_roost_iso,date-time,ISO8601,optional,,must be explicitly confirmed
+observation,last_bird_inside_iso,date-time,ISO8601,optional,,not inferred from first-roost
+observation,source_type,enum,,required,human_report|sensed|inferred|simulated,provenance
+feed,feed_added_g,number,g,optional,,not equal to consumption
+feed,estimated_consumed_g,number,g,optional,,label estimate
+water,water_level_pct,number,%,optional,,only installed sensor
+execution,physical_confirmed_at,date-time,ISO8601,optional,,physical feedback only

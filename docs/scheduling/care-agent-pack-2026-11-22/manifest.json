@@ -1,0 +1,154 @@
+{
+  "package": "TenderCells Solar Shade Weather Care Agent Handoff",
+  "prepared": "2026-11-22",
+  "status": "SPECIFICATION_ONLY",
+  "drives_updated": true,
+  "github_changed": false,
+  "files": [
+    {
+      "path": "AGENT_PROMPT.md",
+      "bytes": 3742,
+      "sha256": "129fea89bbce7dccb0ade977a03e261f008fa81910d81c6dfe0cfb18c1d074da"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5965,
+      "sha256": "5d5321e611fc2877fefa2290d51efb12ca21e8f801029d58bb924d4b86c0044a"
+    },
+    {
+      "path": "data/care_routines.csv",
+      "bytes": 1300,
+      "sha256": "c23129cd8e9ecad81d4e6fe7c9b2455e154f7948ef24492ef04fa5a85485824c"
+    },
+    {
+      "path": "data/data_dictionary.csv",
+      "bytes": 1297,
+      "sha256": "f0fb2055be93cd493b90ebd008b9ee515341d63b70e6e91e9dd0237bddd6d858"
+    },
+    {
+      "path": "data/feed_log_template.csv",
+      "bytes": 1251,
+      "sha256": "385c90d8425069063fef2136315ff13ff28f358ae9946df2ddd00e27d9fb898e"
+    },
+    {
+      "path": "data/gui_backlog.csv",
+      "bytes": 1500,
+      "sha256": "4fc6695340baea032585bc543875a8531da72640355528b2ecd668f482e47b2b"
+    },
+    {
+      "path": "data/human_reminders_14_day_example.ics",
+      "bytes": 7131,
+      "sha256": "d27883ef10e311d0ac6cd7bbac8892676e8714063904507890b3060b8d997194"
+    },
+    {
+      "path": "data/observation_template.csv",
+      "bytes": 356,
+      "sha256": "e7a8bad69c064eb46db45721b156ca09c3240cbd8111f820a708f604267e0f83"
+    },
+    {
+      "path": "data/solar_calendar_365.csv",
+      "bytes": 131621,
+      "sha256": "488487a35320072dd01e862ed6156c5ecfe0ed5ec34defef0321701e47128cb5"
+    },
+    {
+      "path": "data/weather_rules.csv",
+      "bytes": 782,
+      "sha256": "d5e5ef68b7c90662b46c7c4ed157a8f0c67f2ea936e905a52e6c0178894ddbc8"
+    },
+    {
+      "path": "docs/DATA_AND_EXPORTS.md",
+      "bytes": 4220,
+      "sha256": "736df2cf2008f1cdb3d43fc72fd72add38b8dd178fca2f95e00c339983978d53"
+    },
+    {
+      "path": "docs/DRIVE_HANDOFF.md",
+      "bytes": 1769,
+      "sha256": "e48a63f2c0d1685ca7846bfb0ab6d14f812b7305de14adc01725fd6f19974b36"
+    },
+    {
+      "path": "docs/FEED_WATER_WEATHER.md",
+      "bytes": 4254,
+      "sha256": "63481f83e40aa88051ddd8782194f11915c22e6b3ec5a974b5f184818baab9e6"
+    },
+    {
+      "path": "docs/GUI_GAP_AUDIT.md",
+      "bytes": 3954,
+      "sha256": "30b5d06a08631792066319847d3a41337d024390114cbbe861d00c4bb1450f59"
+    },
+    {
+      "path": "docs/GUI_UX_SPEC.md",
+      "bytes": 4614,
+      "sha256": "a3cc6505fdcd9daf34d5462e6f3bc5ee9c87d1f2c1d27107eb59528851d9b07f"
+    },
+    {
+      "path": "docs/IMPLEMENTATION_BACKLOG.md",
+      "bytes": 2793,
+      "sha256": "3fd340842f9b3fed752fafe008fb7b2a53cbe5f922ee34d9e5df9555713fcf95"
+    },
+    {
+      "path": "docs/REPO_MAP_AND_SOURCE_EVIDENCE.md",
+      "bytes": 4363,
+      "sha256": "e2f86dc5b25d99dfab72814fa729274f049a831f0189c94bfd4d1a4534ca7652"
+    },
+    {
+      "path": "docs/SCHEDULER_ENGINE.md",
+      "bytes": 4904,
+      "sha256": "d0e1bc4192665ad780beee300c820bc545dc3f6c88402dfe8e61a90c8c6a2ed2"
+    },
+    {
+      "path": "docs/SECURITY_SAFETY_TESTS.md",
+      "bytes": 3865,
+      "sha256": "4098bdf090e08d45ff82a96553fd3ecf79b1322a24bd26d9046bcff7f65557e0"
+    },
+    {
+      "path": "gui/care-calendar-prototype.html",
+      "bytes": 15144,
+      "sha256": "71a35818b401792d6b03565bad718741707e1f315040ae1919d461f9aa94048d"
+    },
+    {
+      "path": "schema/care-schedule.schema.json",
+      "bytes": 1270,
+      "sha256": "528aa4f8971d74a5d2001992b4b3a67f01f5be557bea2966eb1d5d08e034724a"
+    },
+    {
+      "path": "schema/roost-observation.schema.json",
+      "bytes": 1435,
+      "sha256": "9321fccebb83d5b2c1a0b3880b1e693943d945c71ef44b697ea7b873533dd8b3"
+    },
+    {
+      "path": "schema/weather-snapshot.schema.json",
+      "bytes": 1212,
+      "sha256": "44c4a8eb351e5a9110ebffddbb3f42a6cec696769e9429e1bd7ac5f175d7e8e0"
+    },
+    {
+      "path": "scripts/generate_fixtures.py",
+      "bytes": 17111,
+      "sha256": "2031f408bc435e8e76de727c5b181e9a5d0fa98d4ff069c30a639302f239e90f"
+    },
+    {
+      "path": "spreadsheets/TenderCells_Care_Scheduling_Expanded_v2.xlsx",
+      "bytes": 69170,
+      "sha256": "d2cc6ff43c95dea444aaaf9b67f68be9b71ed1814f0c26b6f5b270ed66847fec"
+    },
+    {
+      "path": "tests/validate_package.py",
+      "bytes": 2536,
+      "sha256": "246b7f9b6a6d2b5a9593942004181732e74088cec5844bdf1356ec5099c3127d"
+    },
+    {
+      "path": "xml/tendercells-care-api-extension.xml",
+      "bytes": 935,
+      "sha256": "1d03688dd4ebeb6d005023ff2b1369c21d96816eacfd29bf66d8f30e1f20623f"
+    },
+    {
+      "path": "xml/tendercells-care-config.xml",
+      "bytes": 2928,
+      "sha256": "f0addd2e812b103e3b111bed359c5c6b250bb958162e0f8b6a4fc9e8d24923b3"
+    },
+    {
+      "path": "xml/tendercells-care-config.xsd",
+      "bytes": 2099,
+      "sha256": "3fc99275ac6ad618d3867b1ab459b50d0e9839ff70e70204085b794e28a6b8cf"
+    }
+  ]
+}

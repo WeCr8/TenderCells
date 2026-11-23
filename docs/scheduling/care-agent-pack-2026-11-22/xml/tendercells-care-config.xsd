@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="TenderCellsCareConfig">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Property">
+          <xs:complexType><xs:attribute name="id" type="xs:string" use="required"/><xs:attribute name="timeZone" type="xs:string" use="required"/><xs:attribute name="latitude" type="xs:decimal" use="required"/><xs:attribute name="longitude" type="xs:decimal" use="required"/></xs:complexType>
+        </xs:element>
+        <xs:element name="CareRoutines">
+          <xs:complexType><xs:sequence><xs:element name="Routine" minOccurs="1" maxOccurs="unbounded">
+            <xs:complexType><xs:sequence><xs:element name="Description" type="xs:string"/></xs:sequence>
+            <xs:attribute name="id" type="xs:string" use="required"/><xs:attribute name="label" type="xs:string" use="required"/><xs:attribute name="mode" use="required"><xs:simpleType><xs:restriction base="xs:string"><xs:enumeration value="fixed"/><xs:enumeration value="solar"/></xs:restriction></xs:simpleType></xs:attribute>
+            <xs:attribute name="actionKind" use="required"><xs:simpleType><xs:restriction base="xs:string"><xs:enumeration value="notification"/></xs:restriction></xs:simpleType></xs:attribute>
+            <xs:attribute name="enabled" type="xs:boolean" use="required"/><xs:attribute name="solarEvent" type="xs:string" use="optional"/><xs:attribute name="offsetMinutes" type="xs:int" use="optional"/>
+            </xs:complexType>
+          </xs:element></xs:sequence></xs:complexType>
+        </xs:element>
+        <xs:element name="Notes" type="xs:string"/>
+      </xs:sequence>
+      <xs:attribute name="schemaVersion" use="required"><xs:simpleType><xs:restriction base="xs:string"><xs:enumeration value="1"/></xs:restriction></xs:simpleType></xs:attribute>
+      <xs:attribute name="mode" use="required"><xs:simpleType><xs:restriction base="xs:string"><xs:enumeration value="advisory"/></xs:restriction></xs:simpleType></xs:attribute>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

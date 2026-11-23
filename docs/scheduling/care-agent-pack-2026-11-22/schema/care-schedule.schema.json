@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tendercells.com/schema/care-schedule-v1.json",
+  "title": "TenderCells Care Schedule Draft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "propertyId",
+    "timeZone",
+    "triggerMode",
+    "actionKind",
+    "enabled"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "propertyId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timeZone": {
+      "type": "string",
+      "minLength": 1
+    },
+    "triggerMode": {
+      "enum": [
+        "fixed",
+        "solar",
+        "site_shade",
+        "sensor",
+        "combined"
+      ]
+    },
+    "solarEvent": {
+      "enum": [
+        "sunrise",
+        "sunset",
+        "civil_dusk"
+      ]
+    },
+    "offsetMinutes": {
+      "type": "integer",
+      "minimum": -1440,
+      "maximum": 1440
+    },
+    "actionKind": {
+      "enum": [
+        "human_reminder",
+        "device_action"
+      ]
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "sensorMetric": {
+      "type": "string"
+    },
+    "humanLabel": {
+      "type": "string"
+    }
+  }
+}

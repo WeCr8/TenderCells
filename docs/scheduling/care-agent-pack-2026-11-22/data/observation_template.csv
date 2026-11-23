@@ -1,0 +1,2 @@
+observation_id,property_id,local_date,roosting_seen_by_iso,confirmed_first_roost_iso,last_bird_inside_iso,shade_onset_iso,lux,source_type,confidence,notes,confirmed_count_complete
+OBS-20261122-DEMO,demo-site-approx,2026-11-22,2026-11-22T16:18:00-08:00,,,,,human_report,low,Roosting already underway by ~4:18 PM; first bird and last bird unknown,FALSE

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tendercells.com/schema/weather-snapshot-v1.json",
+  "title": "TenderCells Weather Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "provider",
+    "fetchedAt",
+    "validUntil",
+    "stale",
+    "sourceType"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "provider": {
+      "type": "string"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fetchedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validUntil": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stale": {
+      "type": "boolean"
+    },
+    "sourceType": {
+      "const": "EXTERNAL"
+    },
+    "temperatureC": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "windSpeedMps": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "precipitationProbabilityPct": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 100
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

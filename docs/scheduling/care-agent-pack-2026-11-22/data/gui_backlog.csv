@@ -1,0 +1,13 @@
+task_id,priority,screen_or_issue,source_touchpoint,acceptance,status
+GUI-01,P0,Care Calendar Today/Week/Month,SchedulesPage.tsx,"Provide daylight, care plan, provenance; old CRUD remains",Planned
+GUI-02,P0,Schedule wizard mode picker,SchedulesPage.tsx,Fixed/solar/shade/sensor/combined; read-only preview,Planned
+GUI-03,P0,Explicit Door Open/Close field,SchedulesPage.tsx,save payload contains selected state; safety checks,Planned
+GUI-04,P0,Water action labels by hardware capability,SchedulesPage.tsx; schedules.ts,ml never mapped silently to light relay,Planned
+GUI-05,P0,Feed amount limit validation,SchedulesPage.tsx; schedules.ts,no hidden 5000g to 1000g clamping,Planned
+GUI-06,P1,Shade & roost observation drawer,new component,seen-by vs confirmed-first separate; timestamps/provenance,Planned
+GUI-07,P1,Weather source + stale badge,new service/component,issuedAt/fetchedAt/validUntil + stale,Planned
+GUI-08,P1,Command vs physical feedback,schedule execution panel,requested/ack/confirmed distinct and dated,Planned
+GUI-09,P1,"Feed, water and eggs care summary",new dashboard cards,reporting only without installed sensors,Planned
+GUI-10,P2,XLSX/CSV/XML import/export dialog,new component,"read-only preview, schema version, diff, disabled import",Planned
+GUI-11,P2,Demo learning mission,demoEnvironment.ts,simulated reminder only; no real commands,Planned
+GUI-12,P0,Queue claim failure safety,schedule.runner.ts,fail closed for device actions and test duplicate runners,Planned

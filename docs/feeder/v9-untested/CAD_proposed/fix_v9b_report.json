@@ -1,0 +1,14 @@
+{
+ "status": "PROPOSAL, not printed or fit-tested",
+ "bolt_x_offset_mm": 38.7,
+ "bolt_z_part_local_mm": [
+  18.0,
+  106.0
+ ],
+ "plate_position_y_mm": [
+  33,
+  40
+ ],
+ "spigot_radius_mm": 35.7,
+ "inner_face_spacing_mm": 52
+}

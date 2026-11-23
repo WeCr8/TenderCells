@@ -1,7 +1,7 @@
 signal,xiao_pin,destination,notes
-HX711_DT,D1,HX711 DT,logic
-HX711_SCK,D2,HX711 SCK,logic
-HALL_HOME,D3,Hall output,pull-up as required
+HX711_DT,D1,HX711 DT,logic; power the HX711 from 3.3 V (its DOUT swings to its supply voltage; ESP32-C3 pins are not 5 V tolerant)
+HX711_SCK,D2,HX711 SCK,logic; power the HX711 from 3.3 V (its DOUT swings to its supply voltage; ESP32-C3 pins are not 5 V tolerant)
+HALL_HOME,D3,Hall output,A3144 needs about 4.5-24 V supply: power it from 5 V and pull its open-collector output up to 3.3 V (10k); never to 5 V
 STEP_IN1,D4,ULN2003 IN1,phase
 STEP_IN2,D5,ULN2003 IN2,phase
 STEP_IN3,D6,ULN2003 IN3,phase

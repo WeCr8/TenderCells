@@ -8,7 +8,7 @@
 // are the assembled coop, and the door is driven here from doorKinematics.ts.
 //
 // Query params (handy for screenshots/tests): ?tier=base|starter|plus|pro&door=<mm>&view=overview|door|flock
-// set the tier, an instant initial door travel and the camera preset. The years simulator takes
+// set the tier (default Plus, or Starter on phones / data saver), an instant initial door travel and the camera preset. The years simulator takes
 // &years=1..5&week=<0-based>&loc=socal|midwest|north&light=1.
 //
 // Flock: the GLBs carry 4 hens (hen1 Leghorn white, hen2 Australorp black, hen3 barred Rock grey,
@@ -25,6 +25,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Alert, Box, Button, Chip, LinearProgress, Paper, Slider, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { createGltfLoader, describeModelLoadError } from '../lib/three/gltfLoader';
+import { COOP_TIERS, FULL_COOP_TIER, LIGHT_COOP_TIER, prefersLightCoop, showcaseCoopUrl, type CoopTier } from '../lib/coop/showcaseModel';
 import CoopYearsPanel, { type LocationId } from '../components/demo/CoopYearsPanel';
 import { BREEDS, BREED_IDS, DEFAULT_CONFIG, LOCATIONS, SEASON_TINT, simulateYears, type BreedId } from '../lib/coop/yearsSim';
 import {
@@ -48,14 +49,12 @@ const C = {
   white: '#F0EDE4',
 };
 
-export const COOP_TIERS = ['base', 'starter', 'plus', 'pro'] as const;
-export type CoopTier = (typeof COOP_TIERS)[number];
 const TIER_LABEL: Record<CoopTier, string> = { base: 'Base', starter: 'Starter', plus: 'Plus', pro: 'Pro' };
 
 /** Simulated DoorCell speed: full 280 mm stroke in 4 s. */
 const DOOR_SPEED_MM_PER_S = 70;
 
-const tierUrl = (tier: CoopTier) => `${import.meta.env.BASE_URL}models/chicken-tender/CT_COOP_A_showcase_${tier}.glb`;
+const tierUrl = showcaseCoopUrl;
 
 const isTier = (v: string | null): v is CoopTier => !!v && (COOP_TIERS as readonly string[]).includes(v);
 
@@ -143,7 +142,9 @@ function applyRig(rig: DoorRig, travelMm: number) {
 export default function CoopDemoPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const initialTier: CoopTier = isTier(params.get('tier')) ? (params.get('tier') as CoopTier) : 'plus';
+  const initialTier: CoopTier = isTier(params.get('tier')) ? (params.get('tier') as CoopTier)
+    // Phones / data saver start on the ~3.4 MB Starter file instead of the ~6.3 MB Plus file.
+    : prefersLightCoop() ? LIGHT_COOP_TIER : FULL_COOP_TIER;
   const initialDoor = clampTravel(Number(params.get('door') ?? 0) || 0);
   const qView = params.get('view');
   const initialView: CameraView = qView === 'door' || qView === 'flock' ? qView : 'overview';

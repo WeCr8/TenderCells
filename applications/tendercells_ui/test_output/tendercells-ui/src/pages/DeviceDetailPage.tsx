@@ -127,7 +127,7 @@ export default function DeviceDetailPage({
                       Model File
                     </Typography>
                     <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                      coop-4x4x6.glb
+                      CT_COOP_A_showcase_starter.glb
                     </Typography>
                   </Box>
                 </Stack>

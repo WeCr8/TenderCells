@@ -49,7 +49,8 @@ const DEMO_TIMEOUT_MS = 12000;
 const useCases = [
   { label: "Command Center", detail: "All registered demo systems, alerts, and quick actions", path: "/dashboard", icon: <DashboardIcon /> },
   { label: "Chicken Tender", detail: "Coop automation, cameras, doors, feed, cleaning, and egg map", path: "/chicken-tender", icon: <PetsIcon /> },
-  { label: "Coop in 3D", detail: "The Chicken Tender coop by tier, with the DoorCell V1.4 slide door you can open, close and E-STOP (simulated)", path: "/demo/coop", icon: <PetsIcon /> },
+  { label: "Coop in 3D", detail: "The Chicken Tender coop by tier: 3 open nest boxes, a mixed flock of 4 hens and the DoorCell V1.4 slide door you can open, close and E-STOP (simulated)", path: "/demo/coop", icon: <PetsIcon /> },
+  { label: "Coop through the years", detail: "Play 1-5 years of seasons: day length, eggs per breed as hens age, feed, chores and DoorCell upkeep (an estimate)", path: "/demo/coop?view=flock", icon: <ScheduleIcon /> },
   { label: "ChickenEye AI", detail: "Vision simulation, identity, health, and nest-box egg detection", path: "/chicken-eye", icon: <VisibilityIcon /> },
   { label: "Property Twin", detail: "Full yard layout with every product family placed on the grid", path: "/layout", icon: <YardIcon /> },
   { label: "Schedules", detail: "Automated doors, feed, cleaning, water, and routines", path: "/schedules", icon: <ScheduleIcon /> },

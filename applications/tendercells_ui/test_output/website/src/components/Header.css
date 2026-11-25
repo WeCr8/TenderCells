@@ -135,6 +135,24 @@
 }
 .shipping-icon { font-size: 1.2rem; }
 
+/* Try the demo: always in the top row (desktop and phones) */
+.header-demo {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+  background: #2a9d8f;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border-radius: 6px;
+  padding: 0.5rem 0.9rem;
+  transition: background 0.2s;
+}
+.header-demo:hover { background: #1f8076; }
+.header-demo:focus-visible { outline: 3px solid #4a90d9; outline-offset: 2px; }
+
 /* Login / cart */
 .header-login {
   display: flex;
@@ -328,6 +346,8 @@
 
 @media (max-width: 480px) {
   .header-top { gap: 0.5rem; padding: 0.6rem 0.75rem; }
+  .header-demo { font-size: 0.82rem; padding: 0.45rem 0.6rem; }
+  .header-cart { display: none; } /* concepts are in the menu (Shop) */
   .logo-text   { display: none; }
   .header-login span:first-child { display: none; }
 }

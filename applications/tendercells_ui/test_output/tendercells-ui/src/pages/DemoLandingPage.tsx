@@ -24,6 +24,7 @@ import PetsIcon from "@mui/icons-material/Pets";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import { seedDemoEnvironment, type DemoReport } from "../services/demo/demoEnvironment";
 import { safeDemoNext } from "../lib/demo/demoNext";
 import { trackDemo } from "../lib/demo/track";
@@ -49,7 +50,8 @@ const DEMO_TIMEOUT_MS = 12000;
 const useCases = [
   { label: "Command Center", detail: "All registered demo systems, alerts, and quick actions", path: "/dashboard", icon: <DashboardIcon /> },
   { label: "Chicken Tender", detail: "Coop automation, cameras, doors, feed, cleaning, and egg map", path: "/chicken-tender", icon: <PetsIcon /> },
-  { label: "Coop in 3D", detail: "The Chicken Tender coop by tier, with the DoorCell V1.4 slide door you can open, close and E-STOP (simulated)", path: "/demo/coop", icon: <PetsIcon /> },
+  { label: "Coop in 3D", detail: "The Chicken Tender coop by tier: 3 open nest boxes, a mixed flock of 4 hens and the DoorCell V1.4 slide door you can open, close and E-STOP (simulated)", path: "/demo/coop", icon: <PetsIcon /> },
+  { label: "Coop through the years", detail: "Play 1-5 years of seasons: day length, eggs per breed as hens age, feed, chores and DoorCell upkeep (an estimate)", path: "/demo/coop?view=flock", icon: <ScheduleIcon /> },
   { label: "ChickenEye AI", detail: "Vision simulation, identity, health, and nest-box egg detection", path: "/chicken-eye", icon: <VisibilityIcon /> },
   { label: "Property Twin", detail: "Full yard layout with every product family placed on the grid", path: "/layout", icon: <YardIcon /> },
   { label: "Schedules", detail: "Automated doors, feed, cleaning, water, and routines", path: "/schedules", icon: <ScheduleIcon /> },
@@ -57,6 +59,21 @@ const useCases = [
 ];
 
 const track = trackDemo;
+
+/**
+ * FIX(2026-11-24): the quickest way into the demo. The coop 3D view needs no seeded data,
+ * so this big button shows while the farm is still seeding and sits above the fold at 390 px.
+ */
+function OpenCoopButton({ onOpen }: { onOpen: () => void }) {
+  return (
+    <Button variant="contained" size="large" fullWidth data-testid="demo-open-coop" onClick={onOpen}
+      startIcon={<ViewInArIcon />}
+      sx={{ bgcolor: C.gold, color: C.bg, fontWeight: 800, fontSize: { xs: 17, md: 16 }, py: 1.4, borderRadius: 2, whiteSpace: "nowrap",
+        "&:hover": { bgcolor: C.white } }}>
+      See the coop in 3D
+    </Button>
+  );
+}
 
 // What the 3D Property Twin connects to. Status is honest: "sim" means the demo shows it running
 // in simulation; the page it opens explains how the real connection works.
@@ -105,6 +122,10 @@ export default function DemoLandingPage() {
   const [latest, setLatest] = useState<EventLogEntry | null>(null);
   const [activeEvents, setActiveEvents] = useState(0);
   const started = useRef(false);
+  const openCoop = (via: string) => {
+    trackDemo("demo_started", { via });
+    navigate("/demo/coop");
+  };
 
   useEffect(() => {
     if (started.current) return; // guard StrictMode double-invoke
@@ -174,6 +195,9 @@ export default function DemoLandingPage() {
             <Typography variant="caption" sx={{ color: C.goldMuted }}>
               Private &amp; local-first. Nothing leaves your machine. No account needed.
             </Typography>
+            <Box sx={{ width: "100%", maxWidth: 360 }}>
+              <OpenCoopButton onOpen={() => openCoop("open-coop-while-seeding")} />
+            </Box>
           </>
         )}
 
@@ -200,7 +224,10 @@ export default function DemoLandingPage() {
                     ))}
                   </Stack>
                 </Box>
-                <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ flexShrink: 0 }}>
+                  <Box sx={{ width: { xs: "100%", md: "auto" } }}>
+                    <OpenCoopButton onOpen={() => openCoop("open-coop")} />
+                  </Box>
                   <Button variant="contained" data-testid="enter-the-farm"
                     onClick={() => { trackDemo("demo_started", { via: "enter-the-farm" }); trackDemo("property_viewed", { from: "demo" }); navigate("/layout"); }}
                     sx={{ bgcolor: C.accent, color: C.white, fontWeight: 800, whiteSpace: "nowrap" }}>

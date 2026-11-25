@@ -25,6 +25,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "What Tender Cells OS is", to: "/os" },
       { label: "Farm Digital Twin",       to: "/digital-twin" },
       { label: "Try the digital farm (demo)", href: "/app/demo" },
+      { label: "See the coop in 3D (demo)", href: "/app/demo/coop" },
       { label: "Trigger an event (demo)", href: "/app/demo?next=/simulator" },
       { label: "Systems and their status", to: "/os#systems" },
       { label: "Build a device for the OS", to: "/os#build" },
@@ -258,6 +259,13 @@ export default function Header() {
               kits coming soon
             </span>
           </div>
+
+          {/* FIX(2026-11-24): the demo was only reachable inside the Tender Cells OS dropdown
+              (hidden behind the hamburger on phones). Keep one plain button in the top row
+              at every width. */}
+          <a href="/app/demo" className="header-demo" data-testid="header-try-demo">
+            Try the demo
+          </a>
 
           {/* FIX(2026-09-27): Login goes to the website's own account page; it no
               longer launches the Tender Cells OS (that is an explicit button there). */}

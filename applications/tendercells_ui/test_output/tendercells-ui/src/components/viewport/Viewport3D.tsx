@@ -38,6 +38,7 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import { useCoopModel } from '../../hooks/useCoopModel';
+import { LIGHT_COOP_TIER, afterFirstPaint, saveDataOn, showcaseCoopUrl } from '../../lib/coop/showcaseModel';
 import CoopModelSelector from './CoopModelSelector';
 import { getPresetModel } from '../../models/presets/coopPresets';
 import { auth } from '../../lib/firebase/firebaseApp';
@@ -118,6 +119,35 @@ const DEFAULT_SIZE_BY_TYPE: Record<string, { width: number; depth: number }> = {
 };
 
 type EnrichedItem = PropertyItem & { product?: Product };
+
+/** glbCache key of the Chicken Tender showcase coop (lib/coop/showcaseModel.ts). */
+const SHOWCASE_COOP_KEY = 'showcase:chicken-tender';
+const FT_PER_M = 3.28084;
+
+/** A Chicken Tender with no model of its own falls back to the showcase coop GLB. */
+const usesShowcaseCoop = (item: EnrichedItem): boolean =>
+  item.type === 'chicken-tender' && !item.modelUrl && !item.product?.metadata?.custom_device_asset_url;
+
+/**
+ * Clone the showcase coop and fit it into a width x depth x height box (feet) standing on y=0.
+ *
+ * @param glb - Loaded showcase scene (metres, Y up)
+ * @param w - Footprint width (ft)
+ * @param d - Footprint depth (ft)
+ * @param h - Max height (ft)
+ * @returns A positioned clone
+ */
+const fitShowcaseCoop = (glb: THREE.Group, w: number, d: number, h: number): THREE.Group => {
+  const clone = glb.clone();
+  const size = new THREE.Box3().setFromObject(clone).getSize(new THREE.Vector3());
+  clone.scale.setScalar(Math.min(FT_PER_M, w / Math.max(size.x, 0.01), d / Math.max(size.z, 0.01), h / Math.max(size.y, 0.01)));
+  const box = new THREE.Box3().setFromObject(clone);
+  const c = box.getCenter(new THREE.Vector3());
+  clone.position.set(-c.x, -box.min.y, -c.z);
+  clone.traverse((m) => { if (m instanceof THREE.Mesh) { m.castShadow = true; m.receiveShadow = true; } });
+  clone.name = 'showcase-coop';
+  return clone;
+};
 
 // ─── Product-specific 3D geometry ────────────────────────────────────────────
 
@@ -945,11 +975,16 @@ const createYardItem = (
     const clone = loadedGlb.clone();
     const box = new THREE.Box3().setFromObject(clone);
     const size = box.getSize(new THREE.Vector3());
-    const scale = Math.min(
-      item.width / Math.max(size.x, 0.01),
-      item.depth / Math.max(size.z, 0.01),
-      2.5 / Math.max(size.y, 0.01)
-    );
+    // The showcase coop is a real-size model in metres (house + run, ~4 x 8 ft): show it at
+    // true size, letting the run spill past the 4 x 4 ft house marker into its mulch zone
+    // (capped at 2.5x the marker), instead of squashing it to the 2.5 ft marker height.
+    const scale = loadedGlb.userData.realSizeMetres
+      ? Math.min(FT_PER_M, (2.5 * Math.max(item.width, item.depth)) / Math.max(size.x, size.z, 0.01))
+      : Math.min(
+        item.width / Math.max(size.x, 0.01),
+        item.depth / Math.max(size.z, 0.01),
+        2.5 / Math.max(size.y, 0.01)
+      );
     clone.scale.setScalar(scale);
     const min = new THREE.Box3().setFromObject(clone).min;
     clone.position.set(x, -min.y, z);
@@ -1146,7 +1181,9 @@ const createYardItems = (
     // then a product's custom asset GLB. Both fit into the item footprint.
     const loadedGlb =
       (item.modelUrl ? glbCache.get(item.modelUrl) : undefined) ||
-      (item.product?.id ? glbCache.get(item.product.id) : undefined);
+      (item.product?.id ? glbCache.get(item.product.id) : undefined) ||
+      // FIX(2026-11-24): coops without their own model showed as a box + cone roof.
+      (usesShowcaseCoop(item) ? glbCache.get(SHOWCASE_COOP_KEY) : undefined);
     group.add(createYardItem(item, layout, activeProduct, loadedGlb));
   });
   return group;
@@ -1433,6 +1470,29 @@ export default function Viewport3D({
     return () => { cancelled = true; };
   }, [products]);
 
+  // FIX(2026-11-24): load the Chicken Tender showcase coop for coops without their own model.
+  // Deferred until after first paint so the yard shows at once (drawn placeholder first);
+  // skipped on Save-Data. Starter tier (~3.4 MB) - the smallest file with the DoorCell.
+  const needsShowcaseCoop =
+    enrichedItems.some(usesShowcaseCoop) || (workspaceMode === 'property' && product === 'chicken-tender' && !model.modelUrl);
+  useEffect(() => {
+    if (!needsShowcaseCoop || saveDataOn()) return;
+    if (glbCacheRef.current.has(SHOWCASE_COOP_KEY) || failedModelsRef.current.has(SHOWCASE_COOP_KEY)) return;
+    let cancelled = false;
+    const cancelIdle = afterFirstPaint(() => {
+      createGltfLoader()
+        .loadAsync(showcaseCoopUrl(LIGHT_COOP_TIER))
+        .then((gltf) => {
+          if (cancelled) return;
+          gltf.scene.userData.realSizeMetres = true;
+          glbCacheRef.current.set(SHOWCASE_COOP_KEY, gltf.scene);
+          setGlbCacheVersion((v) => v + 1);
+        })
+        .catch((err) => { if (!cancelled) recordModelError(SHOWCASE_COOP_KEY, 'Chicken Tender coop model', err); });
+    });
+    return () => { cancelled = true; cancelIdle(); };
+  }, [needsShowcaseCoop]);
+
   // Load full-scene GLBs imported onto layout items (item.modelUrl) — e.g. a user
   // imports a complete "Genesis" garden world. Cached by URL so each loads once.
   useEffect(() => {
@@ -1630,8 +1690,12 @@ export default function Viewport3D({
           loadedScene.position.y = groundH(0, 0);
           scene.add(loadedScene);
         } else {
-          const coop = createPlaceholderCoop(model);
-          coop.position.y = groundH(0, 0);
+          // The showcase coop (once loaded) instead of the drawn placeholder.
+          const showcase = glbCache.get(SHOWCASE_COOP_KEY);
+          const coop = showcase
+            ? fitShowcaseCoop(showcase, model.dimensions.width, model.dimensions.depth, model.dimensions.height)
+            : createPlaceholderCoop(model);
+          coop.position.y += groundH(0, 0);
           scene.add(coop);
         }
       } else {

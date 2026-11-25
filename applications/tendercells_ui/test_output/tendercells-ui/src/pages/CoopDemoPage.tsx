@@ -7,8 +7,15 @@
 // The embedded "day_in_the_coop_and_build" animation is NOT played: node rest poses
 // are the assembled coop, and the door is driven here from doorKinematics.ts.
 //
-// Query params (handy for screenshots/tests): ?tier=base|starter|plus|pro&door=<mm>&view=overview|door
-// set the tier, an instant initial door travel and the camera preset.
+// Query params (handy for screenshots/tests): ?tier=base|starter|plus|pro&door=<mm>&view=overview|door|flock
+// set the tier (default Plus, or Starter on phones / data saver), an instant initial door travel and the camera preset. The years simulator takes
+// &years=1..5&week=<0-based>&loc=socal|midwest|north&light=1.
+//
+// Flock: the GLBs carry 4 hens (hen1 Leghorn white, hen2 Australorp black, hen3 barred Rock grey,
+// hen4 buff Orpington; sc_params HEN_BREEDS). At rest they stand on the bedding inside the closed
+// house where nobody can see them, so the viewer moves them out into the run (HEN_RUN_SPOTS).
+// The "Coop through the years" panel (lib/coop/yearsSim.ts) drives season lighting and which
+// hens are shown.
 // The pop door sits on the house wall that faces the run (CAD y ~2.4 m), so the
 // "Door close-up" view looks at it from inside the run.
 
@@ -18,6 +25,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Alert, Box, Button, Chip, LinearProgress, Paper, Slider, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { createGltfLoader, describeModelLoadError } from '../lib/three/gltfLoader';
+import { COOP_TIERS, FULL_COOP_TIER, LIGHT_COOP_TIER, prefersLightCoop, showcaseCoopUrl, type CoopTier } from '../lib/coop/showcaseModel';
+import CoopYearsPanel, { type LocationId } from '../components/demo/CoopYearsPanel';
+import { BREEDS, BREED_IDS, DEFAULT_CONFIG, LOCATIONS, SEASON_TINT, simulateYears, type BreedId } from '../lib/coop/yearsSim';
 import {
   DOOR_TRAVEL_MAX_MM,
   DOOR_TRAVEL_MIN_MM,
@@ -39,18 +49,51 @@ const C = {
   white: '#F0EDE4',
 };
 
-export const COOP_TIERS = ['base', 'starter', 'plus', 'pro'] as const;
-export type CoopTier = (typeof COOP_TIERS)[number];
 const TIER_LABEL: Record<CoopTier, string> = { base: 'Base', starter: 'Starter', plus: 'Plus', pro: 'Pro' };
 
 /** Simulated DoorCell speed: full 280 mm stroke in 4 s. */
 const DOOR_SPEED_MM_PER_S = 70;
 
-const tierUrl = (tier: CoopTier) => `${import.meta.env.BASE_URL}models/chicken-tender/CT_COOP_A_showcase_${tier}.glb`;
+const tierUrl = showcaseCoopUrl;
 
 const isTier = (v: string | null): v is CoopTier => !!v && (COOP_TIERS as readonly string[]).includes(v);
 
-type CameraView = 'overview' | 'door';
+type CameraView = 'overview' | 'door' | 'flock';
+
+/** Where each hen stands in the run (CAD mm, z = run floor) and which way she faces (rad about CAD Z).
+ * Clear of the ramp (x ~460-760, y > 1700), the feeder (x 230, y 581) and the gate. */
+const HEN_RUN_SPOTS: Record<string, { x: number; y: number; yaw: number }> = {
+  hen1: { x: 900, y: 1300, yaw: 0.6 },
+  hen2: { x: 380, y: 1100, yaw: -1.2 },
+  hen3: { x: 780, y: 800, yaw: 2.4 },
+  hen4: { x: 330, y: 1650, yaw: -0.3 },
+};
+
+/** Hen part nodes by hen id (hen1..hen4); each hen is 3 meshes sharing one origin. */
+function findHens(root: THREE.Object3D): Map<string, THREE.Object3D[]> {
+  const out = new Map<string, THREE.Object3D[]>();
+  root.traverse((o) => {
+    const m = /^(hen\d)\|/.exec(o.name);
+    if (m) out.set(m[1], [...(out.get(m[1]) ?? []), o]);
+  });
+  return out;
+}
+
+/** Move the hens from inside the house out into the run (once per loaded model). */
+function placeHensInRun(root: THREE.Object3D, hens: Map<string, THREE.Object3D[]>) {
+  if (root.userData.hensPlaced) return;
+  root.userData.hensPlaced = true;
+  hens.forEach((parts, id) => {
+    const spot = HEN_RUN_SPOTS[id];
+    if (!spot) return;
+    parts.forEach((o) => {
+      o.position.set(spot.x, spot.y, 0);
+      o.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), spot.yaw);
+    });
+  });
+}
+
+const isLocation = (v: string | null): v is LocationId => !!v && LOCATIONS.some((l) => l.id === v);
 
 type DoorRig = {
   doors: THREE.Object3D[];
@@ -99,9 +142,16 @@ function applyRig(rig: DoorRig, travelMm: number) {
 export default function CoopDemoPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const initialTier: CoopTier = isTier(params.get('tier')) ? (params.get('tier') as CoopTier) : 'plus';
+  const initialTier: CoopTier = isTier(params.get('tier')) ? (params.get('tier') as CoopTier)
+    // Phones / data saver start on the ~3.4 MB Starter file instead of the ~6.3 MB Plus file.
+    : prefersLightCoop() ? LIGHT_COOP_TIER : FULL_COOP_TIER;
   const initialDoor = clampTravel(Number(params.get('door') ?? 0) || 0);
-  const initialView: CameraView = params.get('view') === 'door' ? 'door' : 'overview';
+  const qView = params.get('view');
+  const initialView: CameraView = qView === 'door' || qView === 'flock' ? qView : 'overview';
+  const qYears = Math.round(Number(params.get('years')));
+  const initialYears = qYears >= 1 && qYears <= 5 ? qYears : DEFAULT_CONFIG.years;
+  const initialWeek = Math.max(0, Math.min(initialYears * 52 - 1, Math.round(Number(params.get('week')) || 0)));
+  const initialLoc: LocationId = isLocation(params.get('loc')) ? (params.get('loc') as LocationId) : 'socal';
 
   const [tier, setTier] = useState<CoopTier>(initialTier);
   const [target, setTarget] = useState(initialDoor);
@@ -112,6 +162,19 @@ export default function CoopDemoPage() {
   const [error, setError] = useState<string | null>(null);
   const [loadedTier, setLoadedTier] = useState<CoopTier | null>(null);
   const [view, setView] = useState<CameraView>(initialView);
+  // Coop through the years (estimate).
+  const [years, setYears] = useState(initialYears);
+  const [loc, setLoc] = useState<LocationId>(initialLoc);
+  const [coopLight, setCoopLight] = useState(params.get('light') === '1');
+  const [flock, setFlock] = useState<BreedId[]>([...BREED_IDS]);
+  const [weekIdx, setWeekIdx] = useState(initialWeek);
+  const [playing, setPlaying] = useState(false);
+  const latitude = LOCATIONS.find((l) => l.id === loc)?.latitude ?? DEFAULT_CONFIG.latitude;
+  const simWeeks = useMemo(
+    () => simulateYears({ ...DEFAULT_CONFIG, years, latitude, coopLight, flock, tier }),
+    [years, latitude, coopLight, flock, tier],
+  );
+  const simWeek = simWeeks[Math.min(weekIdx, simWeeks.length - 1)];
   const viewRef = useRef<CameraView>(initialView);
   const framedRef = useRef(false);
 
@@ -120,6 +183,8 @@ export default function CoopDemoPage() {
   const targetRef = useRef(initialDoor);
   const estopRef = useRef(false);
   const rigRef = useRef<DoorRig | null>(null);
+  const hensRef = useRef<Map<string, THREE.Object3D[]>>(new Map());
+  const lightsRef = useRef<{ scene: THREE.Scene; hemi: THREE.HemisphereLight; sun: THREE.DirectionalLight; ground: THREE.MeshStandardMaterial } | null>(null);
   const holderRef = useRef<THREE.Group | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
@@ -152,14 +217,17 @@ export default function CoopDemoPage() {
     controls.target.set(0.6, 1.1, -1.2);
     controlsRef.current = controls;
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x2a3a2a, 1.4));
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x2a3a2a, 1.4);
+    scene.add(hemi);
     const sun = new THREE.DirectionalLight(0xffffff, 1.6);
     sun.position.set(4, 8, -6);
     scene.add(sun);
     const fill = new THREE.DirectionalLight(0xffffff, 0.5);
     fill.position.set(-5, 3, 5);
     scene.add(fill);
-    const ground = new THREE.Mesh(new THREE.CircleGeometry(8, 48), new THREE.MeshStandardMaterial({ color: 0x24402f, roughness: 1 }));
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x24402f, roughness: 1 });
+    const ground = new THREE.Mesh(new THREE.CircleGeometry(8, 48), groundMat);
+    lightsRef.current = { scene, hemi, sun, ground: groundMat };
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -0.002;
     scene.add(ground);
@@ -204,6 +272,7 @@ export default function CoopDemoPage() {
       renderer.dispose();
       mount.removeChild(renderer.domElement);
       holderRef.current = null;
+      lightsRef.current = null;
     };
   }, []);
 
@@ -228,6 +297,11 @@ export default function CoopDemoPage() {
       ctl.target.copy(c);
       // +Z (glTF) is the run side of the house wall; sit ~1 m out, a little high and to the side.
       cam.position.set(c.x + 0.3, c.y + 0.25, c.z + 1.05);
+    } else if (v === 'flock') {
+      // The run: CAD x 0-1219, y 0-2438 mm, floor z 0 -> world (x, 0, -y) in metres.
+      const c = new THREE.Vector3(0.62, 0.25, -1.25);
+      ctl.target.copy(c);
+      cam.position.set(c.x + 2.3, c.y + 1.5, c.z + 1.4);
     } else {
       const c = box.getCenter(new THREE.Vector3());
       ctl.target.copy(c);
@@ -252,6 +326,8 @@ export default function CoopDemoPage() {
       holder.clear();
       holder.add(model);
       rigRef.current = buildRig(model);
+      hensRef.current = findHens(model);
+      placeHensInRun(model, hensRef.current);
       if (rigRef.current) applyRig(rigRef.current, travelRef.current);
       if (!framedRef.current) {
         framedRef.current = true;
@@ -310,6 +386,34 @@ export default function CoopDemoPage() {
     };
   }, [tier, loader, frameCamera]);
 
+  // Years simulator -> 3D: season tint, sun height/strength from day length, which hens show.
+  useEffect(() => {
+    const l = lightsRef.current;
+    if (!l || !simWeek) return;
+    const tint = SEASON_TINT[simWeek.season];
+    const alt = THREE.MathUtils.degToRad(Math.max(15, simWeek.sunAltitudeDeg));
+    l.sun.position.set(Math.cos(alt) * 5.5, Math.sin(alt) * 10, -Math.cos(alt) * 8.3);
+    l.sun.color.set(tint.sun);
+    l.sun.intensity = 1.1 + Math.max(0, Math.min(1, (simWeek.dayLengthH - 9.5) / 5.5)) * 0.9;
+    l.hemi.intensity = 1.15 + Math.max(0, Math.min(1, (simWeek.dayLengthH - 9.5) / 5.5)) * 0.35;
+    l.ground.color.set(tint.ground);
+    (l.scene.background as THREE.Color).set(tint.sky);
+    const shown = new Set(flock.map((id) => BREEDS[id].henNode));
+    hensRef.current.forEach((parts, id) => parts.forEach((o) => { o.visible = shown.has(id); }));
+  }, [simWeek, flock, loadedTier]);
+
+  // Playback: one week every 150 ms (a year in ~8 s); stops at the end.
+  useEffect(() => {
+    if (!playing) return;
+    const id = window.setInterval(() => {
+      setWeekIdx((i) => {
+        if (i >= simWeeks.length - 1) { setPlaying(false); return i; }
+        return i + 1;
+      });
+    }, 150);
+    return () => window.clearInterval(id);
+  }, [playing, simWeeks.length]);
+
   const status = doorStatus(travel, target, estop);
   const statusColor = status === 'E-STOP' ? C.danger : status === 'Open' ? C.accent : status === 'Closed' ? C.gold : C.warning;
 
@@ -332,7 +436,8 @@ export default function CoopDemoPage() {
           <Box>
             <Typography variant="h5" sx={{ color: C.gold, fontWeight: 700 }}>Chicken Tender coop · DoorCell V1.4</Typography>
             <Typography sx={{ color: C.goldMuted, fontSize: 14 }}>
-              CT_COOP_A in 3D with the rack-and-pinion slide door (m1.25 z18 pinion, 0–280 mm stroke). Drag to orbit, scroll to zoom.
+              CT_COOP_A in 3D: 3 nest boxes kept open for the gantry arm, the feeder beside the ramp, a mixed flock of 4 hens and the
+              rack-and-pinion slide door (m1.25 z18 pinion, 0–280 mm stroke). Drag to orbit, scroll to zoom.
             </Typography>
           </Box>
           <Button variant="outlined" onClick={() => navigate('/demo')} sx={{ borderColor: C.accent, color: C.accent, alignSelf: { xs: 'flex-start', sm: 'center' } }}>
@@ -390,6 +495,7 @@ export default function CoopDemoPage() {
                 >
                   <ToggleButton value="overview" data-testid="view-overview">Overview</ToggleButton>
                   <ToggleButton value="door" data-testid="view-door">Door close-up</ToggleButton>
+                  <ToggleButton value="flock" data-testid="view-flock">Hens</ToggleButton>
                 </ToggleButtonGroup>
               </Box>
 
@@ -461,6 +567,26 @@ export default function CoopDemoPage() {
             </Stack>
           </Paper>
         </Stack>
+
+        <CoopYearsPanel
+          weeks={simWeeks}
+          index={weekIdx}
+          onIndex={setWeekIdx}
+          playing={playing}
+          onPlaying={(v) => {
+            if (v && weekIdx >= simWeeks.length - 1) setWeekIdx(0);
+            setPlaying(v);
+          }}
+          years={years}
+          onYears={(y) => { setYears(y); setWeekIdx((i) => Math.min(i, y * 52 - 1)); }}
+          location={loc}
+          onLocation={setLoc}
+          coopLight={coopLight}
+          onCoopLight={setCoopLight}
+          flock={flock}
+          onFlock={setFlock}
+          tier={tier}
+        />
       </Stack>
     </Box>
   );

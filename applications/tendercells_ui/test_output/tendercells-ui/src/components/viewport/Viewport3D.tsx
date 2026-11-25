@@ -1165,6 +1165,7 @@ const createYardItem = (
 
   group.name = item.product?.device_id || item.product?.id || item.id;
   group.userData.sceneCenter = { x, z }; // settleOnTerrain() lifts the item onto the ground
+  group.userData.footprint = { w: item.width, d: item.depth }; // settleOnTerrain() sits wide items on the highest ground under them
   group.userData.itemId = item.id; // stable lookup key, independent of the label above
   return group;
 };
@@ -1214,10 +1215,21 @@ const placeMobileRobot = (group: THREE.Object3D, sx: number, sz: number, h: Scen
   if (pivot && rotY != null) pivot.rotation.y = rotY;
 };
 
+/**
+ * Highest ground under an item's footprint (centre, edge midpoints, corners). Sitting a wide item (coop, pylons) on the centre
+ * height alone lets a mound bury its posts on one side while the other side floats.
+ */
+const footprintGround = (h: SceneHeightFn, cx: number, cz: number, fp?: { w: number; d: number }): number => {
+  if (!fp) return h(cx, cz);
+  let top = h(cx, cz);
+  for (const sx of [-0.5, 0, 0.5]) for (const sz of [-0.5, 0, 0.5]) top = Math.max(top, h(cx + sx * fp.w, cz + sz * fp.d));
+  return top;
+};
+
 const settleOnTerrain = (root: THREE.Object3D, h: SceneHeightFn): THREE.Object3D => {
   const settle = (o: THREE.Object3D) => {
     const c = o.userData.sceneCenter as { x: number; z: number } | undefined;
-    if (c) o.position.y = h(c.x, c.z);
+    if (c) o.position.y = footprintGround(h, c.x, c.z, (o.userData.footprint as { w: number; d: number } | undefined));
   };
   settle(root);
   root.children.forEach(settle);
@@ -1687,7 +1699,7 @@ export default function Viewport3D({
       if (product === 'chicken-tender') {
         if (loadedScene) {
           loadedScene.traverse((c) => { if (c instanceof THREE.Mesh) { c.castShadow = true; c.receiveShadow = true; } });
-          loadedScene.position.y = groundH(0, 0);
+          loadedScene.position.y = footprintGround(groundH, 0, 0, { w: model.dimensions.width, d: model.dimensions.depth });
           scene.add(loadedScene);
         } else {
           // The showcase coop (once loaded) instead of the drawn placeholder.
@@ -1695,7 +1707,7 @@ export default function Viewport3D({
           const coop = showcase
             ? fitShowcaseCoop(showcase, model.dimensions.width, model.dimensions.depth, model.dimensions.height)
             : createPlaceholderCoop(model);
-          coop.position.y += groundH(0, 0);
+          coop.position.y += footprintGround(groundH, 0, 0, { w: model.dimensions.width, d: model.dimensions.depth });
           scene.add(coop);
         }
       } else {
